@@ -1,0 +1,39 @@
+{
+    "name": "vircadia-web-sdk",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "watch": "webpack --watch --mode development",
+        "build": "webpack --mode production",
+        "lint": "eslint ."
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@babel/cli": "^7.13.16",
+        "@babel/core": "^7.14.0",
+        "@babel/preset-env": "^7.14.1",
+        "babel-loader": "^8.2.2",
+        "eslint": "^7.25.0",
+        "eslint-webpack-plugin": "^2.5.4",
+        "webpack": "^5.36.2",
+        "webpack-cli": "^4.7.0"
+    },
+    "eslintConfig": {
+        "root": true,
+        "env": {
+            "browser": true
+        },
+        "extends": [
+            "eslint:recommended"
+        ],
+        "parserOptions": {
+            "parser": "babel-eslint",
+            "ecmaVersion": 2021
+        }
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not dead"
+    ]
+}
