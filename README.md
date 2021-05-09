@@ -1,5 +1,4 @@
-
-# vircadia-web-sdk
+# Vircadia Web SDK (Codename Ananke)
 
 ## Project setup
 ```
