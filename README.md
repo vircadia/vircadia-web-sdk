@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-**Node.js** version > 10.13 ; LTS version > 14.16 recommended  
-**npm** version > 6.4.1 ; LTS version > 6.14 recommended 
+**Node.js** version &ge; 10.13 ; LTS version &ge; 14.16 recommended  
+**npm** version &ge; 6.4.1 ; LTS version &ge; 6.14 recommended 
 
 https://nodejs.org/en/download/
 
