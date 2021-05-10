@@ -18,7 +18,7 @@ const Vircadia = (function () {
 
     /**
      * Says hello to the world.
-     * @function Vircadia.helloWorld()
+     * @function Vircadia.helloWorld
      */
     function helloWorld() {
         console.log("Hello world!");
