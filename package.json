@@ -1,6 +1,15 @@
 {
     "name": "vircadia-web-sdk",
-    "version": "0.1.0",
+    "version": "0.0.1",
+    "productName": "Vircadia Web SDK",
+    "description": "Vircadia Web SDK for virtual worlds.",
+    "author": "David Rowe <david@ctrlaltstudio.com>",
+    "homepage": "https://github.com/vircadia/vircadia-web-sdk#readme",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/vircadia/vircadia-web-sdk.git"
+    },
+    "license": "Apache-2.0",
     "private": true,
     "scripts": {
         "watch": "webpack --watch --mode development",
@@ -21,14 +30,16 @@
     "eslintConfig": {
         "root": true,
         "env": {
-            "browser": true
+            "browser": true,
+            "worker": true
         },
         "extends": [
             "eslint:recommended"
         ],
         "parserOptions": {
             "parser": "babel-eslint",
-            "ecmaVersion": 2021
+            "sourceType": "module",
+            "ecmaVersion": 2020
         }
     },
     "browserslist": [
