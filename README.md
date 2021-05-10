@@ -1,4 +1,12 @@
-# Vircadia Web SDK (Codename Ananke)
+# Vircadia Web SDK
+
+## Prerequisites
+
+**Node.js** version > 10.13 ; LTS version > 14.16 recommended  
+**npm** version > 6.4.1 ; LTS version > 6.14 recommended 
+
+https://nodejs.org/en/download/
+
 
 ## Project setup
 ```
@@ -19,3 +27,5 @@ npm run build
 ```
 npm run lint
 ```
+
+## Codename: Ananke
