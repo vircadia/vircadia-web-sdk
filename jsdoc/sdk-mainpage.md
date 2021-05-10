@@ -9,6 +9,6 @@ This SDK provides interfaces to:
 
 <hr />
 
-For the Vircadia user API documentation, see the [Vircadia API Reference](https://apidocs.vircadia.dev).
+For scripting API documentation, see the [Vircadia API Reference](https://apidocs.vircadia.dev).
 
-To learn more about using Vircadia and exploring the metaverse, see the [Vircadia Documentation](https://docs.vircadia.dev).
+To learn more about using Vircadia and exploring the metaverse, see the [User Documentation](https://docs.vircadia.dev).
