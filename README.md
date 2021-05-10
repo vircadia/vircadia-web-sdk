@@ -28,4 +28,10 @@ npm run build
 npm run lint
 ```
 
+### Generate user docs
+
+```
+npm run docs
+```
+
 ## Codename: Ananke

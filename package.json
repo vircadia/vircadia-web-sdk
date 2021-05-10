@@ -14,7 +14,8 @@
     "scripts": {
         "watch": "webpack --watch --mode development",
         "build": "webpack --mode production",
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "docs": "jsdoc ./src --recurse --configure ./jsdoc/jsdoc-config.json --destination docs"
     },
     "dependencies": {},
     "devDependencies": {
@@ -24,6 +25,7 @@
         "babel-loader": "^8.2.2",
         "eslint": "^7.25.0",
         "eslint-webpack-plugin": "^2.5.4",
+        "jsdoc": "^3.6.6",
         "webpack": "^5.36.2",
         "webpack-cli": "^4.7.0"
     },
