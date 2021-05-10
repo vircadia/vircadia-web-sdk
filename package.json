@@ -30,14 +30,16 @@
     "eslintConfig": {
         "root": true,
         "env": {
-            "browser": true
+            "browser": true,
+            "worker": true
         },
         "extends": [
             "eslint:recommended"
         ],
         "parserOptions": {
             "parser": "babel-eslint",
-            "ecmaVersion": 2021
+            "sourceType": "module",
+            "ecmaVersion": 2020
         }
     },
     "browserslist": [
