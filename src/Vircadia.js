@@ -10,8 +10,16 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+/**
+ * This is the Vircadia SDK.
+ * @namespace Vircadia
+ */
 const Vircadia = (function () {
 
+    /**
+     * Says hello to the world.
+     * @function Vircadia.helloWorld
+     */
     function helloWorld() {
         console.log("Hello world!");
     }
