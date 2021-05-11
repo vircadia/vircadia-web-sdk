@@ -20,7 +20,7 @@ exports.handlers = {
 
         // directories to scan for jsdoc comments
         var dirList = [
-            '../../src'
+            '../src'
         ];
 
         // only files with this extension will be searched for jsdoc comments.
