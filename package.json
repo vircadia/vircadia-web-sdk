@@ -12,7 +12,7 @@
     "license": "Apache-2.0",
     "private": true,
     "scripts": {
-        "watch": "webpack --watch --mode development",
+        "watch": "webpack --watch --mode production",
         "build": "webpack --mode production",
         "lint": "eslint .",
         "docs": "rimraf ./docs && jsdoc ./jsdoc/sdk-mainpage.md ./src --recurse --configure ./jsdoc/config.json --destination docs"
