@@ -19,8 +19,9 @@ module.exports = {
         module: true,
         clean: true
     },
-    plugins: [new ESLintPlugin({
-    })],
+    plugins: [
+        new ESLintPlugin({})
+    ],
     module: {
         rules: [
             {
