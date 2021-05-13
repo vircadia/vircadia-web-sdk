@@ -34,21 +34,6 @@
         "webpack": "^5.36.2",
         "webpack-cli": "^4.7.0"
     },
-    "eslintConfig": {
-        "root": true,
-        "env": {
-            "browser": true,
-            "worker": true
-        },
-        "extends": [
-            "eslint:recommended"
-        ],
-        "parserOptions": {
-            "parser": "babel-eslint",
-            "sourceType": "module",
-            "ecmaVersion": 2020
-        }
-    },
     "browserslist": [
         "> 1%",
         "last 2 versions",

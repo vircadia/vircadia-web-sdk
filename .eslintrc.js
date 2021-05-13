@@ -8,13 +8,25 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* globals module */
-
 module.exports = {
+
+    root: true,
 
     extends: "eslint:recommended",
 
+    "env": {
+        "browser": true,
+        "worker": true
+    },
+
+    "parserOptions": {
+        "parser": "babel-eslint",
+        "sourceType": "module",
+        "ecmaVersion": 2020
+    },
+
     globals: {
+        "module": "readonly"
     },
 
     rules: {
