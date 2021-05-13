@@ -42,6 +42,15 @@ npm run build
 npm run lint
 ```
 
+### Run unit tests
+```
+npm run test
+```
+Hot retest
+```
+npm run test-watch
+```
+
 ### Generate user docs
 
 ```
