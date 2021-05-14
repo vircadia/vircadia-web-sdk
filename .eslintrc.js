@@ -15,14 +15,17 @@ module.exports = {
     extends: "eslint:recommended",
 
     "env": {
+        "es2020": true,
         "browser": true,
-        "worker": true
+        "worker": true,
+        "node": true
     },
 
+    "parser": "@babel/eslint-parser",
+
     "parserOptions": {
-        "parser": "babel-eslint",
-        "sourceType": "module",
-        "ecmaVersion": 2020
+        "ecmaVersion": 2020,
+        "sourceType": "module"
     },
 
     globals: {
