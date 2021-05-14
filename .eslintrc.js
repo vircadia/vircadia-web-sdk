@@ -21,7 +21,9 @@ module.exports = {
         "node": true
     },
 
-    "parser": "@babel/eslint-parser",
+    // FIXME: Use the @babel/eslint-parser instead of the outdated babel-eslint parser.
+    // Though VS Code works with the @babel/eslint-parser, Visual Studio 2019 doesn't, so the old parser is being used for now.
+    "parser": "babel-eslint",
 
     "parserOptions": {
         "ecmaVersion": 2020,
