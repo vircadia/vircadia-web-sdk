@@ -1,40 +1,38 @@
-/* globals require module __dirname */
-
-const path = require('path');
-const ESLintPlugin = require('eslint-webpack-plugin');
+const path = require("path");
+const ESLintPlugin = require("eslint-webpack-plugin");
 
 module.exports = {
     experiments: {
         outputModule: true
     },
     entry: {
-        Vircadia: './src/Vircadia.js'
+        Vircadia: "./src/Vircadia.js"
     },
     output: {
-        filename: '[name].js',
-        path: path.resolve(__dirname, 'dist'),
+        filename: "[name].js",
+        path: path.resolve(__dirname, "dist"),
         library: {
-            type: 'module'
+            type: "module"
         },
         module: true,
         clean: true
     },
-    plugins: [new ESLintPlugin({
-    })],
+    plugins: [new ESLintPlugin({})],
     module: {
         rules: [
             {
-                test: /\.m?js$/,
-                exclude: /node_modules/,
+                test: /\.m?js$/u,
+                exclude: /node_modules/u,
                 use: [
                     {
-                        loader: 'babel-loader',
+                        loader: "babel-loader",
                         options: {
-                            presets: ['@babel/preset-env']
+                            presets: ["@babel/preset-env"]
                         }
                     }
                 ]
             }
         ]
-    }
+    },
+    devtool: "source-map"
 };

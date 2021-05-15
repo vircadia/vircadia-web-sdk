@@ -8,13 +8,30 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* globals module */
-
 module.exports = {
+
+    root: true,
 
     extends: "eslint:recommended",
 
+    "env": {
+        "es2020": true,
+        "browser": true,
+        "worker": true,
+        "node": true
+    },
+
+    // FIXME: Use the @babel/eslint-parser instead of the outdated babel-eslint parser.
+    // Though VS Code works with the @babel/eslint-parser, Visual Studio 2019 doesn't, so the old parser is being used for now.
+    "parser": "babel-eslint",
+
+    "parserOptions": {
+        "ecmaVersion": 2020,
+        "sourceType": "module"
+    },
+
     globals: {
+        "module": "readonly"
     },
 
     rules: {

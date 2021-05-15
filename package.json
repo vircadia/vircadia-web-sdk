@@ -12,38 +12,28 @@
     "license": "Apache-2.0",
     "private": true,
     "scripts": {
-        "watch": "webpack --watch --mode development",
+        "watch": "webpack --watch --mode production",
         "build": "webpack --mode production",
         "lint": "eslint .",
+        "test": "jest",
+        "test-watch": "jest --watch",
         "docs": "rimraf ./docs && jsdoc ./jsdoc/sdk-mainpage.md ./src --recurse --configure ./jsdoc/config.json --destination docs"
     },
     "dependencies": {},
     "devDependencies": {
         "@babel/cli": "^7.13.16",
-        "@babel/core": "^7.14.0",
-        "@babel/preset-env": "^7.14.1",
+        "@babel/core": "^7.14.2",
+        "@babel/preset-env": "^7.14.2",
+        "babel-eslint": "^10.1.0",
+        "babel-jest": "^26.6.3",
         "babel-loader": "^8.2.2",
-        "eslint": "^7.25.0",
+        "eslint": "^7.26.0",
         "eslint-webpack-plugin": "^2.5.4",
+        "jest": "^26.6.3",
         "jsdoc": "^3.6.6",
         "rimraf": "^3.0.2",
-        "webpack": "^5.36.2",
+        "webpack": "^5.37.0",
         "webpack-cli": "^4.7.0"
-    },
-    "eslintConfig": {
-        "root": true,
-        "env": {
-            "browser": true,
-            "worker": true
-        },
-        "extends": [
-            "eslint:recommended"
-        ],
-        "parserOptions": {
-            "parser": "babel-eslint",
-            "sourceType": "module",
-            "ecmaVersion": 2020
-        }
     },
     "browserslist": [
         "> 1%",
