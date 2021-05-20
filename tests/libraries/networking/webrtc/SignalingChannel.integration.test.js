@@ -85,6 +85,36 @@ describe("SignalingChannel - integration tests", () => {
         };
     });
 
+    test("Signaling channels are kept separate", (done) => {
+        expect.assertions(2);
+        let signalingChannel1 = new SignalingChannel(LOCALHOST_WEBSOCKET);
+        signalingChannel1.onopen = function () {
+            const echoMessage = { to: NodeType.DomainServer, echo: "Hello" };
+            signalingChannel1.send(echoMessage);
+        };
+        let signalingChannel2 = new SignalingChannel(LOCALHOST_WEBSOCKET);
+        signalingChannel2.onopen = function () {
+            const echoMessage = { to: NodeType.DomainServer, echo: "Goodbye" };
+            signalingChannel2.send(echoMessage);
+        };
+        signalingChannel1.onmessage = function (message) {
+            expect(message.echo).toBe("Hello");
+            signalingChannel1.close();
+            signalingChannel1 = null;
+            if (signalingChannel2 === null) {
+                done();
+            }
+        };
+        signalingChannel2.onmessage = function (message) {
+            expect(message.echo).toBe("Goodbye");
+            signalingChannel2.close();
+            signalingChannel2 = null;
+            if (signalingChannel1 === null) {
+                done();
+            }
+        };
+    });
+
     // WEBRTC TODO: "Can echo test message off messages mixer"
 
     // Testing that WebRTC signaling messages are able to be used is done through testing higher level function.
