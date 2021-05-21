@@ -1,5 +1,5 @@
 //
-//  SignalingChannel.js
+//  WebRTCSignalingChannel.js
 //
 //  Created by David Rowe on 17 May 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -11,7 +11,7 @@
 // WebRTC signaling channel for establishing WebRTC data channels with the domain server and assignment clients - one signaling
 // channel for all of them. All signaling messages are sent to the domain server which relays assignment client signaling
 // messages as required.
-class SignalingChannel {
+class WebRTCSignalingChannel {
 
     /* eslint-disable no-magic-numbers */
 
@@ -26,7 +26,7 @@ class SignalingChannel {
 
     constructor(websocketURL) {
         if (typeof websocketURL !== "string" || websocketURL === "") {
-            console.error("SignalingChannel: Invalid WebSocket URL!");
+            console.error("WebRTCSignalingChannel: Invalid WebSocket URL!");
         }
         this.#websocket = new WebSocket(websocketURL);
     }
@@ -55,7 +55,7 @@ class SignalingChannel {
                 const json = JSON.parse(message.data);
                 callback(json);
             } catch (e) {
-                console.error("SignalingChannel: Invalid reply received!");
+                console.error("WbRTCSignalingChannel: Invalid reply received!");
                 if (this.#websocket.onerror) {
                     this.#websocket.onerror("Invalid reply received!");
                 }
@@ -66,10 +66,10 @@ class SignalingChannel {
     /* eslint-enable accessor-pairs */
 
     send(message) {
-        if (this.#websocket.readyState === SignalingChannel.OPEN) {
+        if (this.#websocket.readyState === WebRTCSignalingChannel.OPEN) {
             this.#websocket.send(JSON.stringify(message));
         } else {
-            console.error("SignalingChannel: Channel not open for sending!");
+            console.error("WebRTCSignalingChannel: Channel not open for sending!");
             if (this.#websocket.onerror) {
                 this.#websocket.onerror("Channel not open for sending!");
             }
@@ -82,4 +82,4 @@ class SignalingChannel {
 
 }
 
-export default SignalingChannel;
+export default WebRTCSignalingChannel;
