@@ -23,64 +23,68 @@ describe("WebRTCSignalingChannel - integration tests", () => {
     // Suppress console.error messages from being displayed.
     const error = jest.spyOn(console, "error").mockImplementation(() => { });  // eslint-disable-line no-empty-function
 
+    /* eslint-disable no-magic-numbers */
+
     test("Can open and close", (done) => {
-        expect.assertions(2);
-        let webRTCSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
-        webRTCSignalingChannel.onopen = function () {
-            expect(webRTCSignalingChannel.readyState).toBe(WebRTCSignalingChannel.OPEN);
-            webRTCSignalingChannel.close();
+        expect.assertions(4);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        expect(webrtcSignalingChannel.readyState).toBe(WebRTCSignalingChannel.CONNECTING);
+        webrtcSignalingChannel.onopen = function () {
+            expect(webrtcSignalingChannel.readyState).toBe(WebRTCSignalingChannel.OPEN);
+            webrtcSignalingChannel.close();
+            expect(webrtcSignalingChannel.readyState).toBe(WebRTCSignalingChannel.CLOSING);
         };
-        webRTCSignalingChannel.onclose = function () {
-            expect(webRTCSignalingChannel.readyState).toBe(WebRTCSignalingChannel.CLOSED);
-            webRTCSignalingChannel = null;
+        webrtcSignalingChannel.onclose = function () {
+            expect(webrtcSignalingChannel.readyState).toBe(WebRTCSignalingChannel.CLOSED);
+            webrtcSignalingChannel = null;
             done();
         };
     });
 
     test("Open invalid address fails with an error", (done) => {
         expect.assertions(1);
-        let webRTCSignalingChannel = new WebRTCSignalingChannel(INVALID_WEBSOCKET);
-        webRTCSignalingChannel.onerror = function () {
-            expect(webRTCSignalingChannel.readyState).toBe(WebRTCSignalingChannel.CLOSED);
-            webRTCSignalingChannel.close();
-            webRTCSignalingChannel = null;
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(INVALID_WEBSOCKET);
+        webrtcSignalingChannel.onerror = function () {
+            expect(webrtcSignalingChannel.readyState).toBe(WebRTCSignalingChannel.CLOSED);
+            webrtcSignalingChannel.close();
+            webrtcSignalingChannel = null;
             done();
         };
     });
 
     test("Sending when closed fails with an error", (done) => {
         expect.assertions(2);
-        let webRTCSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
         function sendMessage() {
             const echoMessage = { to: NodeType.DomainServer, echo: "Hello" };
-            webRTCSignalingChannel.send(echoMessage);
+            webrtcSignalingChannel.send(echoMessage);
         }
-        webRTCSignalingChannel.onopen = function () {
-            webRTCSignalingChannel.close();
+        webrtcSignalingChannel.onopen = function () {
+            webrtcSignalingChannel.close();
         };
-        webRTCSignalingChannel.onclose = function () {
-            expect(webRTCSignalingChannel.readyState).toBe(WebRTCSignalingChannel.CLOSED);
+        webrtcSignalingChannel.onclose = function () {
+            expect(webrtcSignalingChannel.readyState).toBe(WebRTCSignalingChannel.CLOSED);
             sendMessage();
         };
-        webRTCSignalingChannel.onerror = function () {
-            expect(webRTCSignalingChannel.readyState).toBe(WebRTCSignalingChannel.CLOSED);
-            webRTCSignalingChannel = null;
+        webrtcSignalingChannel.onerror = function () {
+            expect(webrtcSignalingChannel.readyState).toBe(WebRTCSignalingChannel.CLOSED);
+            webrtcSignalingChannel = null;
             done();
         };
     });
 
     test("Can echo test message off domain server", (done) => {
         expect.assertions(2);
-        let webRTCSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
-        webRTCSignalingChannel.onopen = function () {
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        webrtcSignalingChannel.onopen = function () {
             const echoMessage = { to: NodeType.DomainServer, echo: "Hello" };
-            webRTCSignalingChannel.send(echoMessage);
+            webrtcSignalingChannel.send(echoMessage);
         };
-        webRTCSignalingChannel.onmessage = function (message) {
+        webrtcSignalingChannel.onmessage = function (message) {
             expect(message.from).toBe(NodeType.DomainServer);
             expect(message.echo).toBe("Hello");
-            webRTCSignalingChannel.close();
-            webRTCSignalingChannel = null;
+            webrtcSignalingChannel.close();
+            webrtcSignalingChannel = null;
             done();
         };
     });
@@ -97,22 +101,22 @@ describe("WebRTCSignalingChannel - integration tests", () => {
             const echoMessage = { to: NodeType.DomainServer, echo: "Goodbye" };
             webrtcSignalingChannel2.send(echoMessage);
         };
-        webrtcSignalingChannel1.onmessage = function (message) {
+        webrtcSignalingChannel1.addEventListener("message", function (message) {
             expect(message.echo).toBe("Hello");
             webrtcSignalingChannel1.close();
             webrtcSignalingChannel1 = null;
             if (webrtcSignalingChannel2 === null) {
                 done();
             }
-        };
-        webrtcSignalingChannel2.onmessage = function (message) {
+        });
+        webrtcSignalingChannel2.addEventListener("message", function (message) {
             expect(message.echo).toBe("Goodbye");
             webrtcSignalingChannel2.close();
             webrtcSignalingChannel2 = null;
             if (webrtcSignalingChannel1 === null) {
                 done();
             }
-        };
+        });
     });
 
     // WEBRTC TODO: "Can echo test message off messages mixer"

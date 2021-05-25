@@ -11,10 +11,12 @@
 // WebRTC signaling channel for establishing WebRTC data channels with the domain server and assignment clients - one signaling
 // channel for all of them. All signaling messages are sent to the domain server which relays assignment client signaling
 // messages as required.
+// The API is similar to the WebSocket API.
 class WebRTCSignalingChannel {
 
     /* eslint-disable no-magic-numbers */
 
+    // ReadyState values.
     static CONNECTING = 0;
     static OPEN = 1;
     static CLOSING = 2;
@@ -22,7 +24,7 @@ class WebRTCSignalingChannel {
 
     /* eslint-enable no-magic-numbers */
 
-    #websocket;
+    #websocket = null;
 
     constructor(websocketURL) {
         if (typeof websocketURL !== "string" || websocketURL === "") {
@@ -34,39 +36,60 @@ class WebRTCSignalingChannel {
     /* eslint-disable accessor-pairs */
 
     get readyState() {
-        return this.#websocket.readyState;
+        return this.#websocket ? this.#websocket.readyState : WebRTCSignalingChannel.CLOSED;
     }
 
+    // Connect a single listener to the open event.
     set onopen(callback) {
         this.#websocket.onopen = callback;
     }
 
+    static #handleMessage(message, callback) {
+        try {
+            const json = JSON.parse(message);
+            callback(json);
+        } catch (e) {
+            console.error("WbRTCSignalingChannel: Invalid message received!");
+        }
+    }
+
+    // Connect a single listener to the message event.
+    set onmessage(callback) {
+        this.#websocket.onmessage = function (event) {
+            WebRTCSignalingChannel.#handleMessage(event.data, callback);
+        };
+    }
+
+    // Connect a single listener to the close event.
     set onclose(callback) {
         this.#websocket.onclose = callback;
     }
 
+    // Connect a single listener to the error event.
     set onerror(callback) {
         this.#websocket.onerror = callback;
     }
 
-    set onmessage(callback) {
-        this.#websocket.onmessage = function (message) {
-            try {
-                const json = JSON.parse(message.data);
-                callback(json);
-            } catch (e) {
-                console.error("WbRTCSignalingChannel: Invalid reply received!");
-                if (this.#websocket.onerror) {
-                    this.#websocket.onerror("Invalid reply received!");
-                }
-            }
-        };
-    }
-
     /* eslint-enable accessor-pairs */
 
+    addEventListener(eventName, callback) {
+        this.#websocket.addEventListener(eventName, function (event) {
+            switch (event.type) {
+                case "message":
+                    WebRTCSignalingChannel.#handleMessage(event.data, callback);
+                    break;
+                case "open":
+                case "error":
+                case "close":
+                default:
+                    callback();
+                    break;
+            }
+        });
+    }
+
     send(message) {
-        if (this.#websocket.readyState === WebRTCSignalingChannel.OPEN) {
+        if (this.readyState === WebRTCSignalingChannel.OPEN) {
             this.#websocket.send(JSON.stringify(message));
         } else {
             console.error("WebRTCSignalingChannel: Channel not open for sending!");
@@ -78,6 +101,7 @@ class WebRTCSignalingChannel {
 
     close() {
         this.#websocket.close();
+        // WEBRTC FIXME: Set #websocket = null once the WebSocket has closed.
     }
 
 }
