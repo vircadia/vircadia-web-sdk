@@ -26,6 +26,31 @@ const NodeType = (function () {
     const DownstreamAvatarMixer = "w";
     const Unassigned = 1;
 
+    const NODE_TYPE_NAMES = {
+        [DomainServer]: "Domain Server",
+        [EntityServer]: "Entity Server",
+        [Agent]: "Agent",
+        [AudioMixer]: "Audio Mixer",
+        [AvatarMixer]: "Avatar Mixer",
+        [MessagesMixer]: "Messages Mixer",
+        [AssetServer]: "Asset Server",
+        [EntityScriptServer]: "Entity Script Server",
+        [UpstreamAudioMixer]: "Upstream Audio Mixer",
+        [UpstreamAvatarMixer]: "Upstream Avatar Mixer",
+        [DownstreamAudioMixer]: "Downstream Audio Mixer",
+        [DownstreamAvatarMixer]: "Downstream Avatar Mixer",
+        [Unassigned]: "Unassigned"
+    };
+
+    function getNodeTypeName(nodeType) {
+        // C++  QString & NodeType::getNodeTypeName(NodeType_t nodeType)
+        let name = NODE_TYPE_NAMES[nodeType];
+        if (name === undefined) {
+            name = "Unknown";
+        }
+        return name;
+    }
+
     return {
         DomainServer,
         EntityServer,
@@ -39,7 +64,9 @@ const NodeType = (function () {
         UpstreamAvatarMixer,
         DownstreamAudioMixer,
         DownstreamAvatarMixer,
-        Unassigned
+        Unassigned,
+
+        getNodeTypeName
     };
 
 }());
