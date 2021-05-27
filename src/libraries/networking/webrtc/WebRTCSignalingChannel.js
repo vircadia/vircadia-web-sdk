@@ -91,12 +91,14 @@ class WebRTCSignalingChannel {
     send(message) {
         if (this.readyState === WebRTCSignalingChannel.OPEN) {
             this.#websocket.send(JSON.stringify(message));
-        } else {
-            console.error("WebRTCSignalingChannel: Channel not open for sending!");
-            if (this.#websocket.onerror) {
-                this.#websocket.onerror("Channel not open for sending!");
-            }
+            return true;
         }
+
+        console.error("WebRTCSignalingChannel: Channel not open for sending!");
+        if (this.#websocket.onerror) {
+            this.#websocket.onerror("Channel not open for sending!");
+        }
+        return false;
     }
 
     close() {

@@ -53,11 +53,12 @@ describe("WebRTCSignalingChannel - integration tests", () => {
     });
 
     test("Sending when closed fails with an error", (done) => {
-        expect.assertions(2);
+        expect.assertions(3);
         let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
         function sendMessage() {
             const echoMessage = { to: NodeType.DomainServer, echo: "Hello" };
-            webrtcSignalingChannel.send(echoMessage);
+            const sent = webrtcSignalingChannel.send(echoMessage);
+            expect(sent).toBe(false);
         }
         webrtcSignalingChannel.onopen = function () {
             webrtcSignalingChannel.close();
@@ -74,11 +75,12 @@ describe("WebRTCSignalingChannel - integration tests", () => {
     });
 
     test("Can echo test message off domain server", (done) => {
-        expect.assertions(2);
+        expect.assertions(3);
         let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
         webrtcSignalingChannel.onopen = function () {
             const echoMessage = { to: NodeType.DomainServer, echo: "Hello" };
-            webrtcSignalingChannel.send(echoMessage);
+            const sent = webrtcSignalingChannel.send(echoMessage);
+            expect(sent).toBe(true);
         };
         webrtcSignalingChannel.onmessage = function (message) {
             expect(message.from).toBe(NodeType.DomainServer);
