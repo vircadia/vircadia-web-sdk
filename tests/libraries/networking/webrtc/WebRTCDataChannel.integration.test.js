@@ -37,25 +37,79 @@ describe("WebRTCDataChannel - integration tests", () => {
     // Increase the Jest timeout from the default 5s.
     jest.setTimeout(10000);
 
-    test("Can open and close", (done) => {
-        expect.assertions(4);
+    // Collect test data for subsequent tests.
+    let initialChannelReadyState = null;
+    let openChannelReadyState = null;
+    let closingChannelReadyState = null;
+    let closedChannelReadyState = null;
+    let initialChannelID = null;
+    let callbackChannelID = null;
+    let openChannelID = null;
+    let openNodeType = null;
+
+    test("Can echo test message off domain server", (done) => {
+        expect.assertions(2);
         let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
         webrtcSignalingChannel.onopen = function () {
             let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
-            expect(webrtcDataChannel.readyState).toBe(WebRTCDataChannel.CONNECTING);
-            webrtcDataChannel.onopen = function () {
-                expect(webrtcDataChannel.readyState).toBe(WebRTCDataChannel.OPEN);
+
+            // Collect extra test data.
+            initialChannelID = webrtcDataChannel.channelID;
+            initialChannelReadyState = webrtcDataChannel.readyState;
+
+            webrtcDataChannel.onopen = function (channelID) {
+
+                // Collect extra test data.
+                callbackChannelID = channelID;
+                openChannelID = webrtcDataChannel.channelID;
+                openChannelReadyState = webrtcDataChannel.readyState;
+                openNodeType = webrtcDataChannel.nodeType;
+
+                const echoMessage = "echo:Hello";
+                const sent = webrtcDataChannel.send(echoMessage);
+                expect(sent).toBe(true);
+            };
+            webrtcDataChannel.onmessage = function (data) {
+                expect(new StringDecoder("utf8").write(new Uint8Array(data))).toBe("echo:Hello");
                 webrtcDataChannel.close();
-                expect(webrtcDataChannel.readyState).toBe(WebRTCDataChannel.CLOSING);
+
+                // Collect extra test data.
+                closingChannelReadyState = webrtcDataChannel.readyState;
             };
             webrtcDataChannel.onclose = function () {
-                expect(webrtcDataChannel.readyState).toBe(WebRTCDataChannel.CLOSED);
+
+                // Collect extra test data.
+                closedChannelReadyState = webrtcDataChannel.readyState;
+
                 webrtcDataChannel = null;
                 webrtcSignalingChannel.close();
                 webrtcSignalingChannel = null;
                 done();
             };
         };
+    });
+
+    test("Data channel ready states reflect connection status", () => {
+        expect.assertions(4);
+        expect(initialChannelReadyState).toBe(WebRTCDataChannel.CONNECTING);
+        expect(openChannelReadyState).toBe(WebRTCDataChannel.OPEN);
+        expect(closingChannelReadyState).toBe(WebRTCDataChannel.CLOSING);
+        expect(closedChannelReadyState).toBe(WebRTCDataChannel.CLOSED);
+    });
+
+    test("Data channel ID is 0 when data channel isn't open", () => {
+        expect(initialChannelID).toBe(0);
+    });
+
+    test("Data channel reports correct node type", () => {
+        expect(openNodeType).toBe(NodeType.DomainServer);
+    });
+
+    test("Data channel ID is provided in method and open callback", () => {
+        expect.assertions(3);
+        expect(typeof callbackChannelID).toBe("number");
+        expect(callbackChannelID).toBeGreaterThan(0);
+        expect(callbackChannelID).toBe(openChannelID);
     });
 
     test("Open with invalid address fails with an error", (done) => {
@@ -109,119 +163,9 @@ describe("WebRTCDataChannel - integration tests", () => {
         };
     });
 
-    test("Data channel ID is 0 when data channel isn't open", (done) => {
-        expect.assertions(2);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
-        webrtcSignalingChannel.onopen = function () {
-            let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
-            expect(webrtcDataChannel.readyState).toBe(WebRTCDataChannel.CONNECTING);
-            expect(webrtcDataChannel.channelID).toBe(0);
-            webrtcDataChannel.onopen = function () {
-                webrtcDataChannel.close();
-            };
-            webrtcDataChannel.onclose = function () {
-                webrtcDataChannel = null;
-                webrtcSignalingChannel.close();
-                webrtcSignalingChannel = null;
-                done();
-            };
-        };
-    });
-
-    test("Data channel reports correct node type", (done) => {
-        expect.assertions(1);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
-        webrtcSignalingChannel.onopen = function () {
-            let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
-            webrtcDataChannel.onopen = function () {
-                expect(webrtcDataChannel.nodeType).toBe(NodeType.DomainServer);
-                webrtcDataChannel.close();
-            };
-            webrtcDataChannel.onclose = function () {
-                webrtcDataChannel = null;
-                webrtcSignalingChannel.close();
-                webrtcSignalingChannel = null;
-                done();
-            };
-        };
-    });
-
-    test("Can echo test message off domain server", (done) => {
-        expect.assertions(2);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
-        webrtcSignalingChannel.onopen = function () {
-            let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
-            webrtcDataChannel.onopen = function () {
-                const echoMessage = "echo:Hello";
-                const sent = webrtcDataChannel.send(echoMessage);
-                expect(sent).toBe(true);
-            };
-            webrtcDataChannel.onmessage = function (data) {
-                expect(new StringDecoder("utf8").write(new Uint8Array(data))).toBe("echo:Hello");
-                webrtcDataChannel.close();
-            };
-            webrtcDataChannel.onclose = function () {
-                webrtcDataChannel = null;
-                webrtcSignalingChannel.close();
-                webrtcSignalingChannel = null;
-                done();
-            };
-        };
-    });
-
-    test("Data channel ID is provided in method and open callback", (done) => {
-        expect.assertions(3);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
-        webrtcSignalingChannel.onopen = function () {
-            let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
-            webrtcDataChannel.onopen = function (channelID) {
-                expect(typeof channelID).toBe("number");
-                expect(channelID).toBeGreaterThan(0);
-                expect(channelID).toBe(webrtcDataChannel.channelID);
-                webrtcDataChannel.close();
-            };
-            webrtcDataChannel.onclose = function () {
-                webrtcDataChannel = null;
-                webrtcSignalingChannel.close();
-                webrtcSignalingChannel = null;
-                done();
-            };
-        };
-    });
-
-    test("Data channels have unique channel IDs", (done) => {
-        expect.assertions(3);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
-        webrtcSignalingChannel.onopen = function () {
-            let webrtcDataChannel1 = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
-            let webrtcDataChannel2 = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
-            webrtcDataChannel1.onopen = function (channelID) {
-                expect(channelID).toBeGreaterThan(0);
-                if (webrtcDataChannel2.readyState === WebRTCDataChannel.OPEN) {
-                    expect(webrtcDataChannel1.channelID === webrtcDataChannel2.channelID).toBe(false);
-                    webrtcDataChannel1.close();
-                    webrtcDataChannel2.close();
-                }
-            };
-            webrtcDataChannel2.onopen = function (channelID) {
-                expect(channelID).toBeGreaterThan(0);
-                if (webrtcDataChannel1.readyState === WebRTCDataChannel.OPEN) {
-                    expect(webrtcDataChannel1.channelID === webrtcDataChannel2.channelID).toBe(false);
-                    webrtcDataChannel1.close();
-                    webrtcDataChannel2.close();
-                }
-            };
-            webrtcDataChannel1.onclose = function () {
-                webrtcDataChannel1 = null;
-            };
-            webrtcDataChannel2.onclose = function () {
-                webrtcDataChannel2 = null;
-                webrtcSignalingChannel.close();
-                webrtcSignalingChannel = null;
-                done();
-            };
-        };
-    });
+    // Collect test data for subsequent tests.
+    let webrtcDataChannel1ID = null;
+    let webrtcDataChannel2ID = null;
 
     test("Data channels are kept separate", (done) => {
         expect.assertions(4);
@@ -230,11 +174,19 @@ describe("WebRTCDataChannel - integration tests", () => {
         webrtcSignalingChannel.onopen = function () {
             let webrtcDataChannel1 = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
             let webrtcDataChannel2 = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
-            webrtcDataChannel1.onopen = function () {
+            webrtcDataChannel1.onopen = function (channelID) {
+
+                // Collect extra test data.
+                webrtcDataChannel1ID = channelID;
+
                 const sent = webrtcDataChannel1.send("Hello");
                 expect(sent).toBe(true);
             };
-            webrtcDataChannel2.onopen = function () {
+            webrtcDataChannel2.onopen = function (channelID) {
+
+                // Collect extra test data.
+                webrtcDataChannel2ID = channelID;
+
                 const sent = webrtcDataChannel2.send("Goodbye");
                 expect(sent).toBe(true);
             };
@@ -264,6 +216,13 @@ describe("WebRTCDataChannel - integration tests", () => {
                 done();
             };
         };
+    });
+
+    test("Data channels have unique channel IDs", () => {
+        expect.assertions(3);
+        expect(webrtcDataChannel1ID).toBeGreaterThan(0);
+        expect(webrtcDataChannel2ID).toBeGreaterThan(0);
+        expect(webrtcDataChannel1ID === webrtcDataChannel2ID).toBe(false);
     });
 
     // WEBRTC TODO: "Can echo test message off messages mixer"
