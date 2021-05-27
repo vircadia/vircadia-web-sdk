@@ -50,7 +50,8 @@ class WebRTCDataChannel {
     constructor(nodeType, signalingChannel) {
         this.#_nodeType = nodeType;
         this.#_signalingChannel = signalingChannel;
-        this.#connect();
+        this.#_readyState = WebRTCDataChannel.CONNECTING;
+        setTimeout(this.#connect.bind(this), 1);  // Delay connecting so that event handlers can be hooked up.
     }
 
     /* eslint-disable accessor-pairs */
@@ -110,13 +111,17 @@ class WebRTCDataChannel {
 
         // Send ICE candidates to the domain server.
         this.#_peerConnection.onicecandidate = ({ candidate }) => {
-            if (candidate) {  // The candidate is sometimes null for unknown reasons; don't send this.
+            if (candidate  // The candidate is sometimes null for unknown reasons; don't send this.
+                    && this.#_signalingChannel.readyState === WebRTCSignalingChannel.OPEN) {
                 this.#_signalingChannel.send({ to: this.#_nodeType, data: candidate });
             }
         };
 
         // Generate an offer.
         this.#_peerConnection.onnegotiationneeded = async () => {
+            if (this.#_signalingChannel.readyState !== WebRTCSignalingChannel.OPEN) {
+                return;
+            }
             try {
                 // Create offer.
                 const offer = await this.#_peerConnection.createOffer();
@@ -142,8 +147,8 @@ class WebRTCDataChannel {
             switch (this.#_peerConnection.connectionState) {
                 case "new":
                 case "connecting":
-                    this.#_readyState = WebRTCDataChannel.CONNECTING;
                     // The connection is being established.
+                    this.#_readyState = WebRTCDataChannel.CONNECTING;
                     break;
                 case "connected":
                     // The connection has become fully connected.
@@ -202,7 +207,17 @@ class WebRTCDataChannel {
 
     // Instigates the WebRTC connection process.
     #connect() {
-        this.#_readyState = WebRTCDataChannel.CONNECTING;
+
+        // Signaling channel must be open.
+        if (this.#_signalingChannel.readyState !== WebRTCSignalingChannel.OPEN) {
+            this.#_readyState = WebRTCDataChannel.CLOSED;
+            const errorMessage = "WebRTCDataChannel: Signaling channel not open!";
+            console.error(errorMessage);
+            if (this.#_onerrorCallback) {
+                this.#_onerrorCallback(errorMessage);
+            }
+            return;
+        }
 
         // Respond to signaling channel messages.
         this.#_signalingChannel.addEventListener("message", async ({ from, data, echo }) => {
@@ -261,12 +276,12 @@ class WebRTCDataChannel {
 
     // Sends a message on the data channel.
     send(message) {
-        if (this.#_dataChannel) {
+        if (this.#_readyState === WebRTCDataChannel.OPEN) {
             this.#_dataChannel.send(message);
             return true;
         }
 
-        const errorMessage = "WebRTCDataChannel: Cannot send before channel set up!";
+        const errorMessage = "WebRTCDataChannel: Data channel not open for sending!";
         console.error(errorMessage);
         if (this.#_onerrorCallback) {
             this.#_onerrorCallback(errorMessage);
