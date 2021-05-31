@@ -92,16 +92,18 @@ describe("WebRTCSignalingChannel - integration tests", () => {
     });
 
     test("Signaling channels are kept separate", (done) => {
-        expect.assertions(2);
+        expect.assertions(4);
         let webrtcSignalingChannel1 = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
         webrtcSignalingChannel1.onopen = function () {
             const echoMessage = { to: NodeType.DomainServer, echo: "Hello" };
-            webrtcSignalingChannel1.send(echoMessage);
+            const sent = webrtcSignalingChannel1.send(echoMessage);
+            expect(sent).toBe(true);
         };
         let webrtcSignalingChannel2 = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
         webrtcSignalingChannel2.onopen = function () {
             const echoMessage = { to: NodeType.DomainServer, echo: "Goodbye" };
-            webrtcSignalingChannel2.send(echoMessage);
+            const sent = webrtcSignalingChannel2.send(echoMessage);
+            expect(sent).toBe(true);
         };
         webrtcSignalingChannel1.addEventListener("message", function (message) {
             expect(message.echo).toBe("Hello");
