@@ -66,11 +66,6 @@ class WebRTCDataChannel {
         return this.#_readyState;
     }
 
-    // Gets the data channel ID.
-    get channelID() {
-        return this.#_dataChannel ? this.#_dataChannel.id : 0;
-    }
-
     // Connect a single listener to the open event.
     set onopen(callback) {
         this.#_onopenCallback = callback;
@@ -186,7 +181,7 @@ class WebRTCDataChannel {
         this.#_dataChannel.onopen = () => {
             this.#_readyState = WebRTCDataChannel.OPEN;
             if (this.#_onopenCallback) {
-                this.#_onopenCallback(this.#_dataChannel.id);
+                this.#_onopenCallback();
             }
         };
         this.#_dataChannel.onmessage = ({ data }) => {

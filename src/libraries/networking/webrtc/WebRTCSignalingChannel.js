@@ -24,24 +24,24 @@ class WebRTCSignalingChannel {
 
     /* eslint-enable no-magic-numbers */
 
-    #websocket = null;
+    #_websocket = null;
 
     constructor(websocketURL) {
         if (typeof websocketURL !== "string" || websocketURL === "") {
             console.error("WebRTCSignalingChannel: Invalid WebSocket URL!");
         }
-        this.#websocket = new WebSocket(websocketURL);
+        this.#_websocket = new WebSocket(websocketURL);
     }
 
     /* eslint-disable accessor-pairs */
 
     get readyState() {
-        return this.#websocket ? this.#websocket.readyState : WebRTCSignalingChannel.CLOSED;
+        return this.#_websocket ? this.#_websocket.readyState : WebRTCSignalingChannel.CLOSED;
     }
 
     // Connect a single listener to the open event.
     set onopen(callback) {
-        this.#websocket.onopen = callback;
+        this.#_websocket.onopen = callback;
     }
 
     static #handleMessage(message, callback) {
@@ -55,25 +55,25 @@ class WebRTCSignalingChannel {
 
     // Connect a single listener to the message event.
     set onmessage(callback) {
-        this.#websocket.onmessage = function (event) {
+        this.#_websocket.onmessage = function (event) {
             WebRTCSignalingChannel.#handleMessage(event.data, callback);
         };
     }
 
     // Connect a single listener to the close event.
     set onclose(callback) {
-        this.#websocket.onclose = callback;
+        this.#_websocket.onclose = callback;
     }
 
     // Connect a single listener to the error event.
     set onerror(callback) {
-        this.#websocket.onerror = callback;
+        this.#_websocket.onerror = callback;
     }
 
     /* eslint-enable accessor-pairs */
 
     addEventListener(eventName, callback) {
-        this.#websocket.addEventListener(eventName, function (event) {
+        this.#_websocket.addEventListener(eventName, function (event) {
             switch (event.type) {
                 case "message":
                     WebRTCSignalingChannel.#handleMessage(event.data, callback);
@@ -90,20 +90,20 @@ class WebRTCSignalingChannel {
 
     send(message) {
         if (this.readyState === WebRTCSignalingChannel.OPEN) {
-            this.#websocket.send(JSON.stringify(message));
+            this.#_websocket.send(JSON.stringify(message));
             return true;
         }
 
         console.error("WebRTCSignalingChannel: Channel not open for sending!");
-        if (this.#websocket.onerror) {
-            this.#websocket.onerror("Channel not open for sending!");
+        if (this.#_websocket.onerror) {
+            this.#_websocket.onerror("Channel not open for sending!");
         }
         return false;
     }
 
     close() {
-        this.#websocket.close();
-        // WEBRTC FIXME: Set #websocket = null once the WebSocket has closed.
+        this.#_websocket.close();
+        // WEBRTC FIXME: Set #_websocket = null once the WebSocket has closed.
     }
 
 }
