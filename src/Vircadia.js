@@ -13,7 +13,6 @@
 /*@sdkdoc
  * This is the Vircadia SDK.
  * @namespace Vircadia
- * @sdk
  */
 const Vircadia = (function () {
 
