@@ -9,21 +9,21 @@
 //
 
 /* globals jest */
+/* eslint-disable no-magic-numbers */
 
 import WebRTCSignalingChannel from "../../../../src/libraries/networking/webrtc/WebRTCSignalingChannel.js";
 import NodeType from "../../../../src/libraries/networking/NodeType.js";
 
+
 describe("WebRTCSignalingChannel - integration tests", () => {
 
     //  Test environment expected: Domain server running on localhost.
-
     const LOCALHOST_WEBSOCKET = "ws://127.0.0.1:40102";
     const INVALID_WEBSOCKET = "ws://0.0.0.0:0";
 
     // Suppress console.error messages from being displayed.
     const error = jest.spyOn(console, "error").mockImplementation(() => { });  // eslint-disable-line no-empty-function
 
-    /* eslint-disable no-magic-numbers */
 
     test("Can open and close", (done) => {
         expect.assertions(4);

@@ -14,8 +14,6 @@
  * @namespace NodeType
  *
  * @property {string} DomainServer - <code>"D"</code>
- 
- * @property {string} DomainServer - <code>"D"</code>
  * @property {string} EntityServer - <code>"o"</code>
  * @property {string} Agent - <code>"I"</code>
  * @property {string} AudioMixer - <code>"M"</code>
@@ -45,7 +43,7 @@ const NodeType = (function () {
     const UpstreamAvatarMixer = "C";
     const DownstreamAudioMixer = "a";
     const DownstreamAvatarMixer = "w";
-    const Unassigned = 1;
+    const Unassigned = String.fromCharCode(1);
 
     const NODE_TYPE_NAMES = {
         [DomainServer]: "Domain Server",

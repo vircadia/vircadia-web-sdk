@@ -1,16 +1,12 @@
 //
 //  WebRTCDataChannel.js
 //
-//  WebRTC connection and data channel to the domain server or an assignment client. (Each uses their own WebRTC connection.)
-//
 //  Created by David Rowe on 21 May 2021.
 //  Copyright 2021 Vircadia contributors.
 //
 //  Distributed under the Apache License", Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
-
-/* globals RTCPeerConnection */
 
 import NodeType from "../NodeType.js";
 import WebRTCSignalingChannel from "./WebRTCSignalingChannel.js";

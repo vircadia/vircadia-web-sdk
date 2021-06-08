@@ -184,7 +184,7 @@ module.exports = {
                 "nonwords": false
             }
         ],
-        "spaced-comment": "error",
+        "spaced-comment": ["error", "always", { "exceptions": ["@devdoc", "@sdkdoc"] }],
         "switch-colon-spacing": "error",
         "template-tag-spacing": "error",
         "unicode-bom": "error",

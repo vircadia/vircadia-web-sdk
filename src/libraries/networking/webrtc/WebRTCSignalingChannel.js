@@ -21,7 +21,8 @@
  * @property {WebRTCSignalingChannel.ReadyState} OPEN - The connection is open. <em>Static.</em> <em>Read-only.</em>
  * @property {WebRTCSignalingChannel.ReadyState} CLOSING - The connection is closing. <em>Static.</em> <em>Read-only.</em>
  * @property {WebRTCSignalingChannel.ReadyState} CLOSED - The connection is closed. <em>Static.</em> <em>Read-only.</em>
- * @property {WebRTCSignalingChannel.ReadyState} readyState - The current state of the signaling channel connection. <em>Read-only.</em>
+ * @property {WebRTCSignalingChannel.ReadyState} readyState - The current state of the signaling channel connection.
+ *      <em>Read-only.</em>
  *
  * @property {WebRTCSignalingChannel~onOpenCallback} onopen - Sets a single function to be called when the signaling channel
  *      opens. <em>Write-only.</em>
