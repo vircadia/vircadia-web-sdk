@@ -17,7 +17,8 @@
         "lint": "eslint .",
         "test": "jest",
         "test-watch": "jest --watch",
-        "docs": "rimraf ./docs && jsdoc ./jsdoc/sdk-mainpage.md ./src --recurse --configure ./jsdoc/config.json --destination docs"
+        "sdkdoc": "rimraf ./docs/sdk && jsdoc ./jsdoc/sdk-mainpage.md ./src --recurse --configure ./jsdoc/config-sdk.json --destination docs/sdk",
+        "devdoc": "rimraf ./docs/dev && jsdoc ./jsdoc/dev-mainpage.md ./src --recurse --configure ./jsdoc/config-dev.json --destination docs/dev"
     },
     "dependencies": {},
     "devDependencies": {

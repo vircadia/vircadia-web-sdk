@@ -1,7 +1,13 @@
 exports.handlers = {
-    processingComplete: function(e) {
+
+    // This event is triggered for each file.
+    beforeParse: function (e) {
+        e.source = e.source.replace(/\/\*@sdkdoc/g, "/**");
+    },
+
+    processingComplete: function (e) {
         const pathTools = require('path');
-        var outputFolder = pathTools.join(__dirname, '../../docs');
+        var outputFolder = pathTools.join(__dirname, '../../docs/sdk');
         var doclets = e.doclets.map(doclet => Object.assign({}, doclet));
         const fs = require('fs');
         if (!fs.existsSync(outputFolder)) {

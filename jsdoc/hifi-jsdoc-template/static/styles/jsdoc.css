@@ -76,6 +76,12 @@ h2
     margin-bottom: 12px;
 }
 
+    h2.subheading {
+        margin-top: 0;
+        margin-bottom: 50px;
+        text-align: center;
+    }
+
 h3
 {
     font-size: 28px;

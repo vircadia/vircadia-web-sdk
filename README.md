@@ -51,8 +51,14 @@ Hot retest
 npm run test-watch
 ```
 
-### Generate user docs
+### Generate docs
 
+SDK documentation:
 ```
-npm run docs
+npm run sdkdoc
+```
+
+Developer documentation (includes SDK documentation):
+```
+npm run devdoc
 ```

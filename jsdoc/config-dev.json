@@ -18,7 +18,7 @@
         }
     },
     "plugins": [
-        "plugins/hifi",
-        "plugins/hifiJSONExport"
+        "plugins/vircadia",
+        "plugins/vircadia-dev"
     ]
 }
