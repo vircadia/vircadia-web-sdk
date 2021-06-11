@@ -9,91 +9,79 @@
 //
 
 /*@devdoc
- * The <code>NodeType</code> API provides information on networking node types.
+ *  The <code>NodeType</code> API provides information on networking node types. Node types are represented by a single 8-bit
+ *  character in the protocol packets.
  *
- * @namespace NodeType
+ *  @namespace NodeType
  *
- * @property {string} DomainServer - <code>"D"</code>
- * @property {string} EntityServer - <code>"o"</code>
- * @property {string} Agent - <code>"I"</code>
- * @property {string} AudioMixer - <code>"M"</code>
- * @property {string} AvatarMixer - <code>"W"</code>
- * @property {string} AssetServer - <code>"A"</code>
- * @property {string} MessagesMixer - <code>"m"</code>
- * @property {string} EntityScriptServer - <code>"S"</code>
- * @property {string} UpstreamAudioMixer - <code>"B"</code>
- * @property {string} UpstreamAvatarMixer - <code>"C"</code>
- * @property {string} DownstreamAudioMixer - <code>"a"</code>
- * @property {string} DownstreamAvatarMixer - <code>"w"</code>
- * @property {string} Unassigned - <code>String.fromCharCode(1)</code>
+ *  @property {string} DomainServer - <code>"D"</code>
+ *  @property {string} EntityServer - <code>"o"</code>
+ *  @property {string} Agent - <code>"I"</code>
+ *  @property {string} AudioMixer - <code>"M"</code>
+ *  @property {string} AvatarMixer - <code>"W"</code>
+ *  @property {string} AssetServer - <code>"A"</code>
+ *  @property {string} MessagesMixer - <code>"m"</code>
+ *  @property {string} EntityScriptServer - <code>"S"</code>
+ *  @property {string} UpstreamAudioMixer - <code>"B"</code>
+ *  @property {string} UpstreamAvatarMixer - <code>"C"</code>
+ *  @property {string} DownstreamAudioMixer - <code>"a"</code>
+ *  @property {string} DownstreamAvatarMixer - <code>"w"</code>
+ *  @property {string} Unassigned - <code>String.fromCharCode(1)</code>
  */
-const NodeType = (function () {
+
+const NodeType = new (class {
     // C++  NodeType
 
     // C++  NodeType_t
-    const DomainServer = "D";
-    const EntityServer = "o";
-    const Agent = "I";
-    const AudioMixer = "M";
-    const AvatarMixer = "W";
-    const AssetServer = "A";
-    const MessagesMixer = "m";
-    const EntityScriptServer = "S";
-    const UpstreamAudioMixer = "B";
-    const UpstreamAvatarMixer = "C";
-    const DownstreamAudioMixer = "a";
-    const DownstreamAvatarMixer = "w";
-    const Unassigned = String.fromCharCode(1);
+    DomainServer = "D";
+    EntityServer = "o";
+    Agent = "I";
+    AudioMixer = "M";
+    AvatarMixer = "W";
+    AssetServer = "A";
+    MessagesMixer = "m";
+    EntityScriptServer = "S";
+    UpstreamAudioMixer = "B";
+    UpstreamAvatarMixer = "C";
+    DownstreamAudioMixer = "a";
+    DownstreamAvatarMixer = "w";
+    Unassigned = String.fromCharCode(1);
 
-    const NODE_TYPE_NAMES = {
-        [DomainServer]: "Domain Server",
-        [EntityServer]: "Entity Server",
-        [Agent]: "Agent",
-        [AudioMixer]: "Audio Mixer",
-        [AvatarMixer]: "Avatar Mixer",
-        [MessagesMixer]: "Messages Mixer",
-        [AssetServer]: "Asset Server",
-        [EntityScriptServer]: "Entity Script Server",
-        [UpstreamAudioMixer]: "Upstream Audio Mixer",
-        [UpstreamAvatarMixer]: "Upstream Avatar Mixer",
-        [DownstreamAudioMixer]: "Downstream Audio Mixer",
-        [DownstreamAvatarMixer]: "Downstream Avatar Mixer",
-        [Unassigned]: "Unassigned"
-    };
+    #_NODE_TYPE_NAMES = { };
+
+    constructor() {
+        this.#_NODE_TYPE_NAMES = {
+            [this.DomainServer]: "Domain Server",
+            [this.EntityServer]: "Entity Server",
+            [this.Agent]: "Agent",
+            [this.AudioMixer]: "Audio Mixer",
+            [this.AvatarMixer]: "Avatar Mixer",
+            [this.MessagesMixer]: "Messages Mixer",
+            [this.AssetServer]: "Asset Server",
+            [this.EntityScriptServer]: "Entity Script Server",
+            [this.UpstreamAudioMixer]: "Upstream Audio Mixer",
+            [this.UpstreamAvatarMixer]: "Upstream Avatar Mixer",
+            [this.DownstreamAudioMixer]: "Downstream Audio Mixer",
+            [this.DownstreamAvatarMixer]: "Downstream Avatar Mixer",
+            [this.Unassigned]: "Unassigned"
+        };
+    }
 
     /*@devdoc
-     * Gets a user-friendly name for a node type, e.g., <code>"Domain Server"</code>.
-     * @function NodeType.getNodeTypeName
-     * @param {NodeType} nodeType - The node type.
-     * @returns {string} A user-friendly name for the node type.
+     *  Gets a user-friendly name for a node type, e.g., <code>"Domain Server"</code>.
+     *  @function NodeType.getNodeTypeName
+     *  @param {NodeType} nodeType - The node type.
+     *  @returns {string} A user-friendly name for the node type. <code>"Unknown"</code> if the <code>nodeType</code> is invalid.
      */
-    function getNodeTypeName(nodeType) {
+    getNodeTypeName(nodeType) {
         // C++  QString & NodeType::getNodeTypeName(NodeType_t nodeType)
-        let name = NODE_TYPE_NAMES[nodeType];
+        let name = this.#_NODE_TYPE_NAMES[nodeType];
         if (name === undefined) {
             name = "Unknown";
         }
         return name;
     }
 
-    return {
-        DomainServer,
-        EntityServer,
-        Agent,
-        AudioMixer,
-        AvatarMixer,
-        AssetServer,
-        MessagesMixer,
-        EntityScriptServer,
-        UpstreamAudioMixer,
-        UpstreamAvatarMixer,
-        DownstreamAudioMixer,
-        DownstreamAvatarMixer,
-        Unassigned,
-
-        getNodeTypeName
-    };
-
-}());
+})();
 
 export default NodeType;
