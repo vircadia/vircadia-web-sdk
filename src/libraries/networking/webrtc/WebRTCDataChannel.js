@@ -21,10 +21,18 @@ import WebRTCSignalingChannel from "./WebRTCSignalingChannel.js";
  * @param {WebRTCSignalingChannel} signalingChannel - The WebRTCSignalingChannel to use in establishing the WebRTC connection
  *      and data channel.
  *
- * @property {WebRTCDataChannel.ReadyState} CONNECTING - The connection is opening. <em>Static.</em> <em>Read-only.</em>
- * @property {WebRTCDataChannel.ReadyState} OPEN - The connection is open. <em>Static.</em> <em>Read-only.</em>
- * @property {WebRTCDataChannel.ReadyState} CLOSING - The connection is closing. <em>Static.</em> <em>Read-only.</em>
- * @property {WebRTCDataChannel.ReadyState} CLOSED - The connection is closed. <em>Static.</em> <em>Read-only.</em>
+ * @property {WebRTCDataChannel.ReadyState} CONNECTING=0 - The connection is opening. <em>Static.</em> <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
+ * @property {WebRTCDataChannel.ReadyState} OPEN=1 - The connection is open. <em>Static.</em> <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
+ * @property {WebRTCDataChannel.ReadyState} CLOSING=2 - The connection is closing. <em>Static.</em> <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
+ * @property {WebRTCDataChannel.ReadyState} CLOSED=3 - The connection is closed. <em>Static.</em> <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
  * @property {WebRTCDataChannel.ReadyState} readyState - The current state of the data channel connection. <em>Read-only.</em>
  *
  * @property {WebRTCSignalingChannel~onOpenCallback} onopen - Sets a single function to be called when the signaling channel
@@ -44,13 +52,13 @@ class WebRTCDataChannel {
      * The state of a WebRTCDataChannel connection.
      * <table>
      *   <thead>
-     *     <tr><th>Value</th><th>Name</th><th>Value</th><th>Description</th></tr>
+     *     <tr><th>Name</th><th>Value</th><th>Description</th></tr>
      *   </thead>
      *   <tbody>
-     *     <tr><td><code>0</code></td><td>CONNECTING</td><td>0</td><td>The connection is opening.</td></tr>
-     *     <tr><td><code>1</code></td><td>OPEN</td><td>1</td><td>The connection is open.</td></tr>
-     *     <tr><td><code>2</code></td><td>CLOSING</td><td>2</td><td>The connection is closing.</td></tr>
-     *     <tr><td><code>3</code></td><td>CLOSED</td><td>3</td><td>The connection is closed.</td></tr>
+     *     <tr><td>CONNECTING</td><td>0</td><td>The connection is opening.</td></tr>
+     *     <tr><td>OPEN</td><td>1</td><td>The connection is open.</td></tr>
+     *     <tr><td>CLOSING</td><td>2</td><td>The connection is closing.</td></tr>
+     *     <tr><td>CLOSED</td><td>3</td><td>The connection is closed.</td></tr>
      *   </tbody>
      * </table>
      * @typedef {number} WebRTCDataChannel.ReadyState
@@ -83,7 +91,10 @@ class WebRTCDataChannel {
         this.#_nodeType = nodeType;
         this.#_signalingChannel = signalingChannel;
         this.#_readyState = WebRTCDataChannel.CONNECTING;
-        setTimeout(this.#connect.bind(this), 1);  // Delay connecting so that event handlers can be hooked up.
+        setTimeout(() => {
+            // Delay connecting so that event handlers can be hooked up.
+            this.#connect();
+        }, 1);
     }
 
     /* eslint-disable accessor-pairs */

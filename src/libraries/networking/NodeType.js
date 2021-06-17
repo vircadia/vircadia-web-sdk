@@ -9,8 +9,8 @@
 //
 
 /*@devdoc
- *  The <code>NodeType</code> API provides information on networking node types. Node types are represented by a single 8-bit
- *  character in the protocol packets.
+ *  The <code>NodeType</code> API provides information on networking node types. Node types are represented as single 8-bit
+ *  characters in the protocol packets.
  *
  *  @namespace NodeType
  *

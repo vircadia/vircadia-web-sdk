@@ -9,22 +9,31 @@
 //
 
 /*@devdoc
- *  UUIDs (Universally Unique IDentifiers) are used to uniquely identify entities, avatars, and the like. They are represented
- *  internally in the SDK as BigInt values.
- *  <p>Note: In the user scripting API, UUIDs are represented as formatted strings.</p>
- *  @typedef {BigInt} UUID
+ *  UUIDs (Universally Unique IDentifiers) are used to uniquely identify items such as entities and avatars. They are
+ *  represented as {@link Uuid(1)|Uuid} objects encapsulating BigInt values in the SDK, and 16-byte (128-bit) numbers in the
+ *  protocol packets.
+ *  <p>Note: In the user scripting API, UUIDs are represented as formatted hexadecimal strings.</p>
+ *  @typedef {BigInt} Uuid
  */
 
 /*@devdoc
- *  The <code>Uuid</code> API provides facilities for working with UUIDs.
+ *  A UUID (Universally Unique IDentifier) used to uniquely identify an item such as an entity or avatar. Internally, a
+ *  {@link Uuid} value is a BigInt value.
  *  <p>Note: In the user scripting API, UUIDs are represented as formatted strings.</p>
- *  <p>C++: UUID.h, <code>QUuid/code></p>
+ *  <p>C++: UUID.h, <code>QUuid</code></p>
  *
  *  @class Uuid
- *  @param {BigInt} value=0 - The UUID value. If not specified, a UUID with value of <code>Uuid.NULL</code> is created.
+ *  @variation 1
+ *  @param {BigInt} [value=0] - The UUID value. If not specified, a UUID with value of <code>Uuid.NULL</code> is created.
  *
  *  @property {number} NUM_BYTES_RFC4122_UUID=16 - The number of bytes in a UUID when represented in RFC4122 format.
- *  @property {UUID} NULL=0 - The null UUID, <code>{00000000-0000-0000-0000-000000000000}</code>.
+ *      <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
+ *  @property {Uuid} NULL=0 - The null UUID, <code>{00000000-0000-0000-0000-000000000000}</code>.
+ *      <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
  */
 class Uuid extends BigInt {
 

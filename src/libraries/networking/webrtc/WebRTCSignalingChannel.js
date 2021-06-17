@@ -17,10 +17,18 @@
  * @class WebRTCSignalingChannel
  * @param {string} websocketURL - The URL of the domain server's WebRTC signaling channel WebSocket.
  *
- * @property {WebRTCSignalingChannel.ReadyState} CONNECTING - The connection is opening. <em>Static.</em> <em>Read-only.</em>
- * @property {WebRTCSignalingChannel.ReadyState} OPEN - The connection is open. <em>Static.</em> <em>Read-only.</em>
- * @property {WebRTCSignalingChannel.ReadyState} CLOSING - The connection is closing. <em>Static.</em> <em>Read-only.</em>
- * @property {WebRTCSignalingChannel.ReadyState} CLOSED - The connection is closed. <em>Static.</em> <em>Read-only.</em>
+ * @property {WebRTCSignalingChannel.ReadyState} CONNECTING=0 - The connection is opening. <em>Static.</em> <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
+ * @property {WebRTCSignalingChannel.ReadyState} OPEN=1 - The connection is open. <em>Static.</em> <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
+ * @property {WebRTCSignalingChannel.ReadyState} CLOSING=2 - The connection is closing. <em>Static.</em> <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
+ * @property {WebRTCSignalingChannel.ReadyState} CLOSED=3 - The connection is closed. <em>Static.</em> <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
  * @property {WebRTCSignalingChannel.ReadyState} readyState - The current state of the signaling channel connection.
  *      <em>Read-only.</em>
  *
@@ -41,13 +49,13 @@ class WebRTCSignalingChannel {
      * The state of a WebRTCSignalingChannel connection.
      * <table>
      *   <thead>
-     *     <tr><th>Value</th><th>Name</th><th>Value</th><th>Description</th></tr>
+     *     <tr><th>Name</th><th>Value</th><th>Description</th></tr>
      *   </thead>
      *   <tbody>
-     *     <tr><td><code>0</code></td><td>CONNECTING</td><td>0</td><td>The connection is opening.</td></tr>
-     *     <tr><td><code>1</code></td><td>OPEN</td><td>1</td><td>The connection is open.</td></tr>
-     *     <tr><td><code>2</code></td><td>CLOSING</td><td>2</td><td>The connection is closing.</td></tr>
-     *     <tr><td><code>3</code></td><td>CLOSED</td><td>3</td><td>The connection is closed.</td></tr>
+     *     <tr><td>CONNECTING</td><td>0</td><td>The connection is opening.</td></tr>
+     *     <tr><td>OPEN</td><td>1</td><td>The connection is open.</td></tr>
+     *     <tr><td>CLOSING</td><td>2</td><td>The connection is closing.</td></tr>
+     *     <tr><td>CLOSED</td><td>3</td><td>The connection is closed.</td></tr>
      *   </tbody>
      * </table>
      * @typedef {number} WebRTCSignalingChannel.ReadyState

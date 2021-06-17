@@ -1,5 +1,5 @@
 //
-//  PacketType.unit.test.js
+//  PacketHeaders.unit.test.js
 //
 //  Created by David Rowe on 7 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -10,26 +10,32 @@
 
 /* eslint-disable no-magic-numbers */
 
-import PacketType from "../../../../src/libraries/networking/udt/PacketType.js";
+import PacketType, { protocolVersionsSignature } from "../../../../src/libraries/networking/udt/PacketHeaders.js";
 
 
 describe("PacketType - unit tests", () => {
 
-    test("PacketType numbers appear to be correct", () => {
+    test("PacketType values can be accessed", () => {
         expect(PacketType.Unknown).toBe(0);
         expect(PacketType.StunResponse).toBe(1);
         expect(PacketType.DomainListRequest).toBe(13);
         expect(PacketType.AvatarZonePresence).toBe(104);
     });
 
-    test("Packet version numbers appear to be correct", () => {
+    test("Packet version values can be accessed", () => {
         expect(PacketType.versionForPacketType(PacketType.DomainConnectRequest)).toBe(26);
     });
 
-    test("Nonsourced packets appear to be correct", () => {
+    test("Nonsourced packets values can be accessed", () => {
         const nonSourcedPackets = PacketType.getNonSourcedPackets();
         expect(nonSourcedPackets.has(PacketType.DomainListRequest)).toBe(false);
         expect(nonSourcedPackets.has(PacketType.DomainList)).toBe(true);
+    });
+
+    test("The protocol version is a 16-byte value", () => {
+        const protocolVersion = protocolVersionsSignature();
+        expect(protocolVersion instanceof Uint8Array).toBe(true);
+        expect(protocolVersion.byteLength).toBe(16);
     });
 
 });
