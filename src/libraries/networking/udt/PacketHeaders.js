@@ -16,7 +16,9 @@
  *  @variation 1
  *  @property {PacketType} Unknown - <code>0</code>
  *  @property {PacketType} StunResponse - <code>1</code>
- *  @property {PacketType} DomainList - <code>2</code>
+ *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to Interface in response to a
+ *      DomainConnectRequest packet.<br />
+ *      {@link PacketData.DomainListData}.
  *  @property {PacketType} Ping - <code>3</code>
  *  @property {PacketType} PingReply - <code>4</code>
  *  @property {PacketType} KillAvatar - <code>5</code>
@@ -45,7 +47,9 @@
  *  @property {PacketType} NoisyMute - <code>28</code>
  *  @property {PacketType} AvatarIdentity - <code>29</code>
  *  @property {PacketType} NodeIgnoreRequest - <code>30</code>
- *  @property {PacketType} DomainConnectRequest - <code>31</code>
+ *  @property {PacketType} DomainConnectRequest - <code>31</code> - Interface periodically sends this to the Domain Server to
+ *      initiate and maintain connection to the domain. The Domain Server responds with a DomainList packet.<br />
+ *      {@link PacketData.DomainConnectRequestData}.
  *  @property {PacketType} DomainServerRequireDTLS - <code>32</code>
  *  @property {PacketType} NodeJsonStats - <code>33</code>
  *  @property {PacketType} OctreeDataNack - <code>34</code>
