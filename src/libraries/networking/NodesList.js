@@ -23,12 +23,12 @@ import Uuid from "../shared/Uuid.js";
 
 
 /*@devdoc
- * Manages the domain server plus all the nodes (assignment clients) that the client is connected to. This includes their
- * presence and communications with them via the Vircadia protocol.
- * <p>C++: <code>NodeList : LimitedNodeList</code></p>
- * <p>Note: This JavaScript object has a different name because <code>NodeList</code> is a JavaScript browser object.</p>
- * @namespace NodesList
- * @extends LimitedNodeList
+ *  Manages the domain server plus all the nodes (assignment clients) that the client is connected to. This includes their
+ *  presence and communications with them via the Vircadia protocol.
+ *  <p>C++: <code>NodeList : LimitedNodeList</code></p>
+ *  <p>Note: This JavaScript object has a different name because <code>NodeList</code> is a JavaScript browser object.</p>
+ *  @namespace NodesList
+ *  @extends LimitedNodeList
  */
 const NodesList = new (class extends LimitedNodeList {
     // C++  NodeList : public LimitedNodeList
@@ -105,10 +105,10 @@ const NodesList = new (class extends LimitedNodeList {
     }
 
     /*@devdoc
-     * Performs a check-in with the domain server to connect with a {@link PacketType(1)|DomainConnectRequest} packet or keep a
-     * connection alive with a {@link PacketType(1)|DomainListRequest} packet. This method should be called by the client once
-     * every second.
-     * @function NodesList.sendDomainServerCheckIn
+     *  Performs a check-in with the domain server to connect with a {@link PacketType(1)|DomainConnectRequest} packet or keep a
+     *  connection alive with a {@link PacketType(1)|DomainListRequest} packet. This method should be called by the client once
+     *  every second.
+     *  @function NodesList.sendDomainServerCheckIn
      */
     sendDomainServerCheckIn() {
         // C++  void sendDomainServerCheckIn()
@@ -256,8 +256,6 @@ const NodesList = new (class extends LimitedNodeList {
         // C++  processDomainList(ReceivedMessage* message)
 
         // WEBRTC TODO: This should involve a NLPacketList, not just a single NLPacket.
-
-        // C++  NodeList::processDomainList()
 
         const info = PacketData.DomainList.read(message.getMessage());
 

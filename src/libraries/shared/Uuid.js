@@ -17,6 +17,14 @@
  */
 
 /*@devdoc
+ *  A local ID is an integer ID assigned to the domain server, an assignment client, or an Interface client by the domain
+ *  server.
+ *  @typedef {number} LocalID
+ */
+// C++  using LocalID = NetworkLocalID
+//      using NetworkLocalID = quint16
+
+/*@devdoc
  *  A UUID (Universally Unique IDentifier) used to uniquely identify an item such as an entity or avatar. Internally, a
  *  {@link Uuid} value is a BigInt value.
  *  <p>Note: In the user scripting API, UUIDs are represented as formatted strings.</p>

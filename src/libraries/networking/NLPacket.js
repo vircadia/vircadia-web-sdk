@@ -66,7 +66,7 @@ class NLPacket extends Packet {
      *  @param {Packet} packet - The base packet to create the NLPacket from.
      */
     static fromBase(packet) {
-        // C++  static NLPacket* fromBase(Packet* packet)
+        // C++  NLPacket* fromBase(Packet* packet)
         return new NLPacket(packet);
     }
 

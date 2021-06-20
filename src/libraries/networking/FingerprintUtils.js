@@ -30,7 +30,7 @@ const FingerprintUtils = new (class {
      *  @returns {Uuid} Machine fingerprint.
      */
     getMachineFingerprint() {
-        // C++  QUuid FingerprintUtils::getMachineFingerprint()
+        // C++  QUuid getMachineFingerprint()
 
         // WEBRTC TODO: Address further C++ code.
 

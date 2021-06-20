@@ -11,6 +11,7 @@
 
 /*@devdoc
  *  The Vircadia protocol packets.
+ *  <p>C++: <code>PacketHeaders.h</code>
  *
  *  @namespace PacketType
  *  @variation 1

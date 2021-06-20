@@ -18,6 +18,8 @@ class HifiSockAddr {
 
     // WEBRTC TODO: Add address type (UDP | WebRTC | unknown)?
 
+    // WEBRTC TODO: Rename to SockAddr?
+
     #_address = 0;
     #_port = 0;
 
@@ -31,7 +33,7 @@ class HifiSockAddr {
 
     /*@devdoc
      *  Gets the IP address.
-     *  @returns {number} The IPv4 network address as a 4-byte number.
+     *  @returns {number} The IPv4 network address as a 4-byte number. <strong>Default Value:</strong> <code>0</code>
      */
     getAddress() {
         return this.#_address;
@@ -47,7 +49,7 @@ class HifiSockAddr {
 
     /*@devdoc
      *  Gets the port number.
-     *  @returns {number} The port number.
+     *  @returns {number} The port number. <strong>Default Value:</strong> <code>0</code>
      */
     getPort() {
         return this.#_port;

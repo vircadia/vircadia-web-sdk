@@ -13,9 +13,9 @@ import Uuid from "../shared/Uuid.js";
 
 
 /*@devdoc
- * Manages your current location in the metaverse.
- * <p>C++: <code>AddressManager : public QObject, public Dependency</code></p>
- * @namespace AddressManager
+ *  Manages your current location in the metaverse.
+ *  <p>C++: <code>AddressManager : public QObject, public Dependency</code></p>
+ *  @namespace AddressManager
  */
 const AddressManager = new (class {
     // C++  AddressManager : public QObject, public Dependency
@@ -37,10 +37,10 @@ const AddressManager = new (class {
     }
 
     /*@devdoc
-     * Takes you to a specified metaverse address.
-     * @func AddressManager.handleLookupString
-     * @param {string} address - The address to go to.
-     * @param {boolean} [from=false] - Set to <code>true</code> if the address is obtained from the "Explore" app. Helps ensure
+     *  Takes you to a specified metaverse address.
+     *  @func AddressManager.handleLookupString
+     *  @param {string} address - The address to go to.
+     *  @param {boolean} [from=false] - Set to <code>true</code> if the address is obtained from the "Explore" app. Helps ensure
      *      that the user's location history is correctly maintained.
      */
     handleLookupString(address) {
@@ -70,11 +70,11 @@ const AddressManager = new (class {
     }
 
     /*@devdoc
-     * Triggered when a request is made to go to a URL or IP address.
-     * @func AddressManager.possibleDomainChangeRequired
-     * @param {string} url - The domain address.
-     * @param {Uuid} id - The domain ID. May be {@link Uuid(1)|Uuid.NULL} if not yet known.
-     * @returns {Signal}
+     *  Triggered when a request is made to go to a URL or IP address.
+     *  @func AddressManager.possibleDomainChangeRequired
+     *  @param {string} url - The domain address.
+     *  @param {Uuid} id - The domain ID. May be {@link Uuid(1)|Uuid.NULL} if not yet known.
+     *  @returns {Signal}
      */
     get possibleDomainChangeRequired() {
         // C++  void possibleDomainChangeRequired(QUrl domainURL, QUuid domainID);

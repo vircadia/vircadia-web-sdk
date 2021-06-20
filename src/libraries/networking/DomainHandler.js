@@ -39,7 +39,7 @@ class DomainHandler {
      *  @returns {Slot}
      */
     #setURLAndID(url, id) {
-        // C++  void DomainHandler::setURLAndID(QUrl domainURL, QUuid domainID)
+        // C++  void setURLAndID(QUrl domainURL, QUuid domainID)
 
         // WEBRTC TODO: Address further C++ code.
 

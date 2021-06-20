@@ -11,14 +11,16 @@
 //
 
 /*@sdkdoc
- * This is the Vircadia SDK.
- * @namespace Vircadia
+ *  This is the Vircadia SDK.
+ *  <p>C++: This abstracts out key components of the native Vircadia Interface app.</p>
+ *  
+ *  @namespace Vircadia
  */
 const Vircadia = (function () {
 
     /**
-     * Says hello to the world.
-     * @function Vircadia.helloWorld
+     *  Says hello to the world.
+     *  @function Vircadia.helloWorld
      */
     function helloWorld() {
         console.log("Hello world!");

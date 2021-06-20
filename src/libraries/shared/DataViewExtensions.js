@@ -13,6 +13,7 @@
  *  {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView|DataView} object, for
  *  handling reading and writing large BigInt values. These methods are added only if they aren't already present in the
  *  browser's DataView implementation.
+ *  <p>C++: N/A</p>
  *  @namespace DataView
  */
 

@@ -30,7 +30,7 @@ class ReceivedMessage {
         this.#_messageData.isComplete = this.#_messageData.packetPosition === NLPacket.ONLY;
         this.#_messageData.firstPacketReceiveTime = this.#_messageData.receiveTime;
 
-        // WEBRTC TODO: May need to add equivalent of C++ ReceivedMewssage::_data that contains just the payload.
+        // WEBRTC TODO: May need to add equivalent of C++ ReceivedMessage::_data that contains just the payload.
         //              And as part of this, implement the payload start etc. members and calculations.
     }
 

@@ -31,6 +31,7 @@ describe("NLPacket - unit tests", () => {
     const sockAddr = new HifiSockAddr();
     sockAddr.setPort(7);
     const testPacket = new Packet(dataView, dataView.byteLength, sockAddr);
+
     const error = jest.spyOn(console, "error").mockImplementation((a) => {
         console.log(a);
     });

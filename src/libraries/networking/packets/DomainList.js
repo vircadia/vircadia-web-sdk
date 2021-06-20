@@ -25,9 +25,9 @@ const DomainList = new (class {
      *  Information returned by {@link Packets|reading} a {@link PacketType(1)|DomainList} packet.
      *  @typedef {object} PacketData.DomainListData
      *  @property {Uuid} domainUUID - The UUID of the domain server.
-     *  @property {number} domainLocalID - The local ID of the domain server.
+     *  @property {LocalID} domainLocalID - The local ID of the domain server.
      *  @property {Uuid} newUUID - The UUID assigned to the Interface client by the domain server.
-     *  @property {number} newLocalID - The local ID assigned to the Interface client by the domain server.
+     *  @property {LocalID} newLocalID - The local ID assigned to the Interface client by the domain server.
      *  @property {NodePermissions} newPermissions
      *  @property {boolean} isAuthenticated
      *  @property {BigInt} connectRequestTimestamp

@@ -53,9 +53,10 @@ Hot retest of all tests:
 npm run test-watch
 ```
 
-Specific test (e.g., NodeType.unit.test.js):
+Specific tests (e.g., Packet.unit.test.js, all unit tests):
 ```
-npm run test NodeType
+npm run test /packet.unit
+npm run test unit.test
 ```
 
 

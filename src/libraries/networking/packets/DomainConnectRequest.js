@@ -15,7 +15,6 @@ import "../../../../src/libraries/shared/DataViewExtensions.js";
 
 
 const DomainConnectRequest = new (class {
-    // C++  NodeList::sendDomainServerCheckIn()
 
     /*@devdoc
      *  Writes a {@link PacketType(1)|DomainConnectRequest} packet, ready for sending.
@@ -39,10 +38,10 @@ const DomainConnectRequest = new (class {
      *  @property {BigInt} currentTime - The current Unix time, in usec.
      *  @property {NodeType} ownerType - The type of this node, i.e., <code>NodeType.Agent</code> for Interface.
      *  @property {HifiSockAddr} publicSockAddr - The Interface client's public address.
-     *  @property {HifiSockAddr} localSockAddr: The Interface client's local address.
+     *  @property {HifiSockAddr} localSockAddr - The Interface client's local address.
      *  @property {Set<NodeType>} nodeTypesOfInterest - The types of domain server nodes that the Interface client wants to
      *      use.
-     *  @property {string} placeName - The domain's place name from {@link AddressManager}.
+     *  @property {string} placeName - The domain's place name from {@link AddressManager} if known, otherwise an empty string.
      *  @property {boolean} isDomainConnected - <code>true</code> if currently connected to the domain, <code>false</code> if
      *      not connected.
      *  @property {string} [username] - If not connected, the user's metaverse user name.
@@ -53,6 +52,8 @@ const DomainConnectRequest = new (class {
      *      as <code>&lt;access-token&gt;:&lt;refresh-toklen&gt;</code>.
      */
     write(info) {  /* eslint-disable-line class-methods-use-this */
+        // C++  NodeList::sendDomainServerCheckIn()
+
         const packet = NLPacket.create(PacketType.DomainConnectRequest);
         const messageData = packet.getMessageData();
         const data = messageData.data;
