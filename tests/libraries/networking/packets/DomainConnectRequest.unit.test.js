@@ -15,7 +15,6 @@ import NodeType from "../../../../src/libraries/networking/NodeType.js";
 import DomainConnectRequest from "../../../../src/libraries/networking/packets/DomainConnectRequest.js";
 import PacketType, { protocolVersionsSignature } from "../../../../src/libraries/networking/udt/PacketHeaders.js";
 import Uuid from "../../../../src/libraries/shared/Uuid.js";
-import "../../../../src/libraries/shared/DataViewExtensions.js";
 
 
 describe("DomainConnectRequest - unit tests", () => {

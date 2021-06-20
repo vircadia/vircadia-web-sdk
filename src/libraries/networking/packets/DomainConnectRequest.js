@@ -11,6 +11,7 @@
 import PacketType from "../udt/PacketHeaders.js";
 import UDT from "../udt/UDT.js";
 import NLPacket from "../NLPacket.js";
+import "../../../../src/libraries/shared/DataViewExtensions.js";
 
 
 const DomainConnectRequest = new (class {

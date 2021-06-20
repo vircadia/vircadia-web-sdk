@@ -10,7 +10,6 @@
 
 import DomainListRequest from "../../../../src/libraries/networking/packets/DomainList.js";
 import Uuid from "../../../../src/libraries/shared/Uuid.js";
-import "../../../../src/libraries/shared/DataViewExtensions.js";
 
 describe("DomainList - unit tests", () => {
 

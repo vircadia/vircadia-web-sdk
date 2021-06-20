@@ -10,6 +10,7 @@
 
 import UDT from "../udt/UDT.js";
 import Uuid from "../../shared/Uuid.js";
+import "../../../../src/libraries/shared/DataViewExtensions.js";
 
 
 const DomainList = new (class {
