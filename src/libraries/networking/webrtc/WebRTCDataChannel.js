@@ -18,7 +18,7 @@ import WebRTCSignalingChannel from "./WebRTCSignalingChannel.js";
  *  <p>C++: This is significantly different from the C++ <code>WebRTCDataChannels</code>.
  *
  *  @class WebRTCDataChannel
- *  @param {NodeType} nodeType - The node type to connected to.
+ *  @param {NodeType} nodeType - The node type to connect to.
  *  @param {WebRTCSignalingChannel} signalingChannel - The WebRTCSignalingChannel to use in establishing the WebRTC connection
  *      and data channel.
  *
