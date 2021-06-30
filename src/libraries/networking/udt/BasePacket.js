@@ -36,7 +36,7 @@ class BasePacket {
 
     /*@devdoc
      *  Gets the maximum size of a BasePacket's Vircadia protocol payload.
-     *  @function BasePacket.maxPayloadSize();
+     *  @function BasePacket.maxPayloadSize
      *  @returns {number} The maximum Vircadia protocol payload size, in bytes.
      */
     static maxPayloadSize() {

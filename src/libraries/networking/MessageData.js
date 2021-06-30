@@ -24,7 +24,7 @@
  *      JavaScript instead of using <code>payloadStart</code>, <code>payloadCapacity</code>, and <code>payloadSize</code>.
  *  @property {number} packetSize - The size of the received packet.
  *  @property {HifiSockAddr} senderSockAddr - The IP address and port of the sender.
- *  @property {Date} receivedTime - The time that the packet or message was first received.
+ *  @property {Date} receiveTime - The time that the packet or start of message was received.
  *
  *  @property <strong>Packet</strong>
  *  @property {boolean} isReliable <code>true</code> if the packet is sent reliably, <code>false</code> if it isn't.

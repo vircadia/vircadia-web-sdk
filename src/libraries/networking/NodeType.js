@@ -57,7 +57,6 @@
  *  @property {NodeType} DownstreamAvatarMixer - <code>"w"</code> - Downstream avatar mixer.
  *  @property {NodeType} Unassigned - <code>String.fromCharCode(1)</code> - Unassigned.
  */
-
 const NodeType = new (class {
     // C++  NodeType
 
@@ -97,11 +96,10 @@ const NodeType = new (class {
     }
 
     /*@devdoc
-     *  Gets a user-friendly name for a node type, e.g., <code>"Domain Server"</code>.
+     *  Gets the name of a NodeType value, e.g., <code>"Domain Server"</code>.
      *  @function NodeType(1).getNodeTypeName
-     *  @param {NodeType} nodeType - The node type.
-     *  @returns {string} A user-friendly name for the node type. <code>"Unknown"</code> if the <code>nodeType</code> is
-     *      invalid.
+     *  @param {NodeType} nodeType - The node type value.
+     *  @returns {string} The name of the node type. <code>"Unknown"</code> if the <code>nodeType</code> is invalid.
      */
     getNodeTypeName(nodeType) {
         // C++  QString& getNodeTypeName(NodeType_t nodeType)

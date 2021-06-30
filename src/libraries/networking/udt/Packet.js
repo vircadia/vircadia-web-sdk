@@ -24,12 +24,12 @@ import assert from "../../shared/assert.js";
  *      <p>The raw byte data for a new packet.</p>
  *      <p>Another packet to reuse the packet data from. In this case, the packet's internal {@link MessageData} is reused by
  *      reference; it is not copied.</p>
- *  @param {boolean|number|unused} isReliable|size|unused - <code>true</code> if the packet is to be sent reliably,
- *      <code>false</code> if it isn't. <strong>Default Value:</strong> <code>false</code>
+ *  @param {boolean|number|unused} isReliable|size|unused - <code>true</code> if the packet is sent reliably, <code>false</code>
+ *      if it isn't. <strong>Default Value:</strong> <code>false</code>
  *      <p>The size of the data in bytes.</p>
  *      <p>Unused.</p>
  *  @param {boolean|HifiSockAddr|unused} isPartOfMessage|senderSockAddr|unused - <code>true</code> if the packet is part of a
- *      message, <code>false</code> if it isn't. <strong>Default Value:</strong> <code>false</code>
+ *      multi-packet message, <code>false</code> if it isn't. <strong>Default Value:</strong> <code>false</code>
  *      <p>The sender's IP address and port.</p>
  *      <p>Unused.</p>
  *
@@ -129,7 +129,8 @@ class Packet extends BasePacket {
     }
 
 
-    #_messageData = null;  // MessageData
+    // BasePacket member variables.
+    #_messageData;
 
     constructor(param0, param1, param2) {
         if (typeof param0 === "number") {
@@ -139,7 +140,7 @@ class Packet extends BasePacket {
             const isPartOfMessage = param2 ? param2 : false;
 
             super((size === -1) ? -1 : (Packet.totalHeaderSize(isPartOfMessage) + size));
-            this.#_messageData = super.getMessageData();  // Get own reference to shared collection of private fields.
+            this.#_messageData = super.getMessageData();
             this.#_messageData.isReliable = isReliable;
             this.#_messageData.isPartOfMessage = isPartOfMessage;
             // adjustPayloadStartAndCapacity();  N/A
@@ -152,7 +153,7 @@ class Packet extends BasePacket {
             const senderSockAddr = param2;
 
             super(data, size, senderSockAddr);
-            this.#_messageData = super.getMessageData();  // Get own reference to shared collection of private fields.
+            this.#_messageData = super.getMessageData();
             this.#readHeader();
             // adjustPayloadStartAndCapacity();  N/A
             if (this.#_messageData.obfuscationLevel !== Packet.ObfuscationLevel.NoObfuscation) {

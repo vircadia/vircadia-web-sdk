@@ -78,6 +78,7 @@ describe("Packet - unit tests", () => {
     test("Can create a packet from received data using new Packet()", () => {
         const packet = new Packet(dataView, dataView.byteLength, sockAddr);
         const messageData = packet.getMessageData();
+        expect(messageData.packetSize).toBe(dataView.byteLength);
         expect(messageData.isReliable).toBe(false);
         expect(messageData.isPartOfMessage).toBe(false);
         expect(messageData.obfuscationLevel).toBe(Packet.ObfuscationLevel.NoObfuscation);
@@ -103,6 +104,7 @@ describe("Packet - unit tests", () => {
         const packet = Packet.fromReceivedPacket(dataView, dataView.byteLength, sockAddr);
         expect(packet instanceof Packet).toBe(true);
         const messageData = packet.getMessageData();
+        expect(messageData.packetSize).toBe(dataView.byteLength);
         expect(typeof messageData.sequenceNumber).toBe("number");
         expect(messageData.sequenceNumber).toBeGreaterThan(0);
         expect(messageData.senderSockAddr.getPort()).toBe(7);

@@ -8,6 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import assert from "./assert.js";
+
+
 /*@devdoc
  *  Emulates Qt's signals and slots mechanism. In particular, a <code>Signal</code> object is implemented which can be connected
  *  to one or more "slot" functions, "emitted" to asynchronously call those functions, and disconnected.
@@ -26,6 +29,7 @@ class Signal {
      *  @param {function} slot Function to be called when <code>emit</code> is called.
      */
     connect(slot) {
+        assert(slot);
         this.#_slots.add(slot);
     }
 
@@ -34,6 +38,7 @@ class Signal {
      *  @param {function} slot Function to no longer be called when <code>emit</code> is called.
      */
     disconnect(slot) {
+        assert(slot);
         this.#_slots.delete(slot);  // eslint-disable-line dot-notation
     }
 

@@ -31,28 +31,10 @@ class DomainHandler {
     #_disconnectedFromDomain = new Signal();
 
 
-    /*@devdoc
-     *  Set the current domain's URL and ID.
-     *  @function DomainHandler.setURLAndID
-     *  @param {string} url - The domain's URL.
-     *  @param {Uuid} id - The domain's ID.
-     *  @returns {Slot}
-     */
-    #setURLAndID(url, id) {
-        // C++  void setURLAndID(QUrl domainURL, QUuid domainID)
-
-        // WEBRTC TODO: Address further C++ code.
-
-        this.#_domainURL = url;
-
-        // WEBRTC TODO: Address further C++ code.
-    }
-
-
     constructor() {
 
         // Set up slots.
-        this.setURLAndID = this.#setURLAndID.bind(this);
+        this.setURLAndID = this.setURLAndID.bind(this);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -181,6 +163,24 @@ class DomainHandler {
         // WEBRTC TODO: Address further C++ code. And add an integration test.
 
         return false;
+    }
+
+
+    /*@devdoc
+     *  Sets the current domain's URL and pending ID.
+     *  @function DomainHandler.setURLAndID
+     *  @param {string} url - The domain's URL.
+     *  @param {Uuid} id - The domain's pending ID.
+     *  @returns {Slot}
+     */
+    setURLAndID(url, id) {
+        // C++  void setURLAndID(QUrl domainURL, QUuid domainID)
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_domainURL = url;
+
+        // WEBRTC TODO: Address further C++ code.
     }
 
 

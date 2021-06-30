@@ -96,7 +96,7 @@ class WebRTCSignalingChannel {
             const json = JSON.parse(message);
             callback(json);
         } catch (e) {
-            console.error("WbRTCSignalingChannel: Invalid message received!");
+            console.error("WebRTCSignalingChannel: Invalid message received!");
         }
     }
 

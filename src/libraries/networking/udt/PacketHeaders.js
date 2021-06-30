@@ -323,7 +323,7 @@ const PacketType = new (class {
 
     /*@devdoc
      *  Gets the Set of non-sourced packets, i.e., packets which don't include the local node ID of the sending node.
-     *  @function PacketType.getNonSourcedPackets
+     *  @function PacketType(1).getNonSourcedPackets
      *  @returns {Set<PacketType>} The Set of non-sourced packets.
      */
     getNonSourcedPackets() {

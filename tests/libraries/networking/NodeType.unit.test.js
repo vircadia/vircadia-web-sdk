@@ -8,8 +8,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* eslint-disable no-magic-numbers */
-
 import NodeType from "../../../src/libraries/networking/NodeType.js";
 
 
@@ -21,7 +19,7 @@ describe("NodeType - unit tests", () => {
         expect(NodeType.Unassigned).toBe(String.fromCharCode(1));
     });
 
-    test("NodeType string appear to be correct", () => {
+    test("NodeType strings appear to be correct", () => {
         expect(NodeType.getNodeTypeName(NodeType.DomainServer)).toBe("Domain Server");
         expect(NodeType.getNodeTypeName(NodeType.MessagesMixer)).toBe("Messages Mixer");
         expect(NodeType.getNodeTypeName(NodeType.Unassigned)).toBe("Unassigned");

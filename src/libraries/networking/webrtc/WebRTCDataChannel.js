@@ -36,14 +36,14 @@ import WebRTCSignalingChannel from "./WebRTCSignalingChannel.js";
  *      @static
  *  @property {WebRTCDataChannel.ReadyState} readyState - The current state of the data channel connection. <em>Read-only.</em>
  *
- *  @property {WebRTCSignalingChannel~onOpenCallback} onopen - Sets a single function to be called when the signaling channel
- *      opens. <em>Write-only.</em>
- *  @property {WebRTCSignalingChannel~onMessageCallback} onmessage - Sets a single function to be called when a message is
- *      received. <em>Write-only.</em>
- *  @property {WebRTCSignalingChannel~onErrorCallback} onerror - Sets a single function to be called when an error occurs.
+ *  @property {WebRTCDataChannel~onOpenCallback} onopen - Sets a single function to be called when the data channel opens.
  *      <em>Write-only.</em>
- *  @property {WebRTCSignalingChannel~onCloseCallback} onclose - Set s a single function to be called when the signaling channel
- *      closes. <em>Write-only.</em>
+ *  @property {WebRTCDataChannel~onMessageCallback} onmessage - Sets a single function to be called when a message is
+ *      received. <em>Write-only.</em>
+ *  @property {WebRTCDataChannel~onErrorCallback} onerror - Sets a single function to be called when an error occurs.
+ *      <em>Write-only.</em>
+ *  @property {WebRTCDataChannel~onCloseCallback} onclose - Set s a single function to be called when the data channel closes.
+ *      <em>Write-only.</em>
  */
 class WebRTCDataChannel {
 
