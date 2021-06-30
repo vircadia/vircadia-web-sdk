@@ -34,6 +34,11 @@ class PacketReceiver {
      *      be delivered to the listener when complete.
      */
 
+    constructor() {
+        // Set up function called as packet handler.
+        this.handleVerifiedPacket = this.handleVerifiedPacket.bind(this);
+    }
+
     /*@devdoc
      *  Creates a reference to a listener method, marking the method as being for unsourced packets.
      *  <p>Note: If the listener uses <code>this</code> then the correct <code>this</code> must be bound to it, e.g., by

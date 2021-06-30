@@ -19,6 +19,10 @@ describe("LimitedNodeList - integration tests", () => {
         expect(LimitedNodeList.ConnectReason.Awake).toBe(2);
     });
 
+    test("Can access INVALID_PORT", () => {
+        expect(LimitedNodeList.INVALID_PORT).toBe(-1);
+    });
+
     test("Can get the local and public network addresses", () => {
         const limitedNodeList = new LimitedNodeList();
         const localSockAddr = limitedNodeList.getLocalSockAddr();
@@ -34,5 +38,9 @@ describe("LimitedNodeList - integration tests", () => {
         const packetReceiver = limitedNodeList.getPacketReceiver();
         expect(packetReceiver instanceof PacketReceiver).toBe(true);
     });
+
+    // WEBRTC TODO: Unit tests for:
+    // - sendPacket() - Currently tested implicitly by NodesList integration test.
+    // - sendUnreliablePacket() - Currently tested implicitly by NodesList integration test.
 
 });

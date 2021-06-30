@@ -48,6 +48,7 @@ describe("BasePacket - unit tests", () => {
 
     test("Can create an empty packet", () => {
         const packet = createPacketOfSize();
+        expect(packet.getDataSize()).toBe(14);
         const messageData = packet.getMessageData();
         expect(messageData.packetSize).toBe(14);
         expect(messageData.data.byteLength).toBe(14);
@@ -59,6 +60,7 @@ describe("BasePacket - unit tests", () => {
 
     test("Can create a packet based on a DataView", () => {
         const packet = createPacketFromDataView();
+        expect(packet.getDataSize()).toBe(10);
         const messageData = packet.getMessageData();
         expect(messageData.data).toBe(dataView);
         expect(messageData.dataPosition).toBe(0);

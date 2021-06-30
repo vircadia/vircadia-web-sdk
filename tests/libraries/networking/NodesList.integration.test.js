@@ -29,6 +29,9 @@ describe("NodesList - integration tests", () => {
     // Increase the Jest timeout from the default 5s.
     jest.setTimeout(10000);
 
+    // Suppress console.log messages from being displayed.
+    const log = jest.spyOn(console, "log").mockImplementation(() => { });  // eslint-disable-line no-empty-function
+
     const LOCALHOST_WEBSOCKET = "ws://127.0.0.1:40102";
 
 
@@ -70,7 +73,6 @@ describe("NodesList - integration tests", () => {
         let backupTimeout = null;
         domainHandler.connectedToDomain.connect(function () {
             clearTimeout(backupTimeout);
-            NodesList.reset();
             expect(true).toBe(true);
             done();
         });
@@ -78,10 +80,11 @@ describe("NodesList - integration tests", () => {
         // Back-up exit test
         backupTimeout = setTimeout(function () {
             console.error("Force terminated test");
-            NodesList.reset();
             done();
         }, 10000);
 
     });
 
+
+    log.mockReset();
 });

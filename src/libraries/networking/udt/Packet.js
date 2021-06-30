@@ -177,6 +177,24 @@ class Packet extends BasePacket {
         }
     }
 
+    /*@devdoc
+     *  Gets whether the packet is part of a multi-packet message.
+     *  @returns {boolean} <code>true</code> if the packet is part of a multi-packet message, <code>false</code> if it isn't.
+     */
+    isPartOfMessage() {
+        // C++  bool isPartOfMessage()
+        return this.#_messageData.isPartOfMessage;
+    }
+
+    /*@devdoc
+     *  Gets whether the packet is sent reliably.
+     *  @returns {boolean} <code>true</code> if the packet is to sent reliably, <code>false</code> if it isn't.
+     */
+    isReliable() {
+        // C++  bool isPartOfMessage()
+        return this.#_messageData.isReliable;
+    }
+
 
     // Copies the MessageData from another Packet.
     #copyMembers(other, shallow = true) {

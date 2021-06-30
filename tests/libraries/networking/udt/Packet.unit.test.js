@@ -49,6 +49,7 @@ describe("Packet - unit tests", () => {
 
     test("Can create an empty packet", () => {
         let packet = new Packet(8, false, false);
+        expect(packet.getDataSize()).toBe(4 + 8);
         let messageData = packet.getMessageData();
         expect(messageData.packetSize).toBe(4 + 8);
         expect(messageData.data.byteLength).toBe(4 + 8);
@@ -77,6 +78,9 @@ describe("Packet - unit tests", () => {
 
     test("Can create a packet from received data using new Packet()", () => {
         const packet = new Packet(dataView, dataView.byteLength, sockAddr);
+        expect(packet.getDataSize()).toBe(dataView.byteLength);
+        expect(packet.isPartOfMessage()).toBe(false);
+        expect(packet.isReliable()).toBe(false);
         const messageData = packet.getMessageData();
         expect(messageData.packetSize).toBe(dataView.byteLength);
         expect(messageData.isReliable).toBe(false);
@@ -103,6 +107,9 @@ describe("Packet - unit tests", () => {
     test("Can create a packet from received data using fromReceivedPacket()", () => {
         const packet = Packet.fromReceivedPacket(dataView, dataView.byteLength, sockAddr);
         expect(packet instanceof Packet).toBe(true);
+        expect(packet.getDataSize()).toBe(dataView.byteLength);
+        expect(packet.isPartOfMessage()).toBe(false);
+        expect(packet.isReliable()).toBe(false);
         const messageData = packet.getMessageData();
         expect(messageData.packetSize).toBe(dataView.byteLength);
         expect(typeof messageData.sequenceNumber).toBe("number");

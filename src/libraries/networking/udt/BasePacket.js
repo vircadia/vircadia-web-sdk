@@ -108,6 +108,15 @@ class BasePacket {
     }
 
     /*@devdoc
+     *  Gets the size of the packet including the header.
+     *  @returns {number} The size of the packet including the header, in bytes.
+     */
+    getDataSize() {
+        // C++  qint64 getDataSize()
+        return this.#_messageData.packetSize;
+    }
+
+    /*@devdoc
      *  Sets the time that the packet was received.
      *  @param {Date} time - The time that the packet was received.
      */
