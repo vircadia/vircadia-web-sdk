@@ -13,7 +13,7 @@ import NLPacket from "./NLPacket.js";
 
 /*@devdoc
  *  A Vircadia protocol message received via one or more Vircadia protocol packets.
- *  <p>C++: <code>class ReceivedMessage : public QObject </code>
+ *  <p>C++: <code>ReceivedMessage : public QObject </code>
  *  @class ReceivedMessage
  *  @param {NLPacket} packet - The first (and possibly only) packet that forms the message.
  */

@@ -118,6 +118,8 @@ describe("Packet - unit tests", () => {
         expect(error).toHaveBeenCalledTimes(0);
     });
 
+    // WEBRTC TODO: Test isPartOfMessage() and isReliable() for packets where their values are true.
+
 
     error.mockReset();
 });

@@ -38,7 +38,7 @@ const AddressManager = new (class {
 
     /*@devdoc
      *  Takes you to a specified metaverse address.
-     *  @func AddressManager.handleLookupString
+     *  @function AddressManager.handleLookupString
      *  @param {string} address - The address to go to.
      *  @param {boolean} [from=false] - Set to <code>true</code> if the address is obtained from the "Explore" app. Helps ensure
      *      that the user's location history is correctly maintained.
@@ -71,7 +71,7 @@ const AddressManager = new (class {
 
     /*@devdoc
      *  Triggered when a request is made to go to a URL or IP address.
-     *  @func AddressManager.possibleDomainChangeRequired
+     *  @function AddressManager.possibleDomainChangeRequired
      *  @param {string} url - The domain address.
      *  @param {Uuid} id - The domain ID. May be {@link Uuid(1)|Uuid.NULL} if not yet known.
      *  @returns {Signal}

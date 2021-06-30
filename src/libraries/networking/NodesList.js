@@ -108,6 +108,7 @@ const NodesList = new (class extends LimitedNodeList {
      *  connection alive with a {@link PacketType(1)|DomainListRequest} packet. This method should be called by the client once
      *  every second.
      *  @function NodesList.sendDomainServerCheckIn
+     *  @returns {Slot}
      */
     sendDomainServerCheckIn() {
         // C++  void sendDomainServerCheckIn()

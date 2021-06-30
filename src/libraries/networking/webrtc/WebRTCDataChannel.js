@@ -15,7 +15,7 @@ import WebRTCSignalingChannel from "./WebRTCSignalingChannel.js";
  *  A WebRTC data channel used for Vircadia protocol communications with a domain server or assignment client. Uses a
  *  {@link WebRTCSignalingChannel} in the process of establishing the WebRTC connection.
  *  <p>The API is similar to the WebRTCSignalingChannel and WebSocket APIs.</p>
- *  <p>C++: This is significantly different from the C++ <code>WebRTCDataChannels</code>.
+ *  <p>C++: Akin to <code>WebRTCDataChannels</code> though significantly different.
  *
  *  @class WebRTCDataChannel
  *  @param {NodeType} nodeType - The node type to connect to.

@@ -14,7 +14,7 @@ import DomainList from "./DomainList.js";
 
 /*@devdoc
  *  Packet reading and writing functions.
- *  <p>C++: There is no C++ equivalent of this namespace.</p>
+ *  <p>C++: N/A</p>
  *  @namespace PacketData
  *  @property {function} DomainConnectRequest.write -
  *      {@link PacketData.DomainConnectRequest&period;write|DomainConnectRequest&period;write}

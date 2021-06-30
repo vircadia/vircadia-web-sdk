@@ -13,7 +13,7 @@
  *  A single signaling channel is used for establishing all the individual WebRTC data channels between the web client and
  *  each of the domain server and its assignment clients.
  *  <p>A WebSocket is used for the connection and the API is similar to the WebSocket API.</p>
- *  <p>C++: This is significantly different from the C++ <code>WebRTCSignalingServer</code>.
+ *  <p>C++: Akin to <code>WebRTCSignalingServer</code> though significantly different.
  *
  *  @class WebRTCSignalingChannel
  *  @param {string} websocketURL - The URL of the domain server's WebRTC signaling channel WebSocket.

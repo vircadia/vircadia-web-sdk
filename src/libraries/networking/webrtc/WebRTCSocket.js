@@ -16,8 +16,8 @@ import Signal from "../../shared/Signal.js";
 
 /*@devdoc
  *  A one-to-many UDP-style socket wrapper for {@link WebRTCDataChannel}.
- *  <p>C++: <code>WebRTCSocket : public QObject</code><br />
- *  The JavaScript differs from the C++ because the JavaScript client explicitly connects to different domains rather than
+ *  <p>C++: <code>WebRTCSocket : public QObject</code></p>
+ *  <p>The JavaScript differs from the C++ because the JavaScript client explicitly connects to different domains rather than
  *  accepting incoming connections.</p>
  *  
  *  @class WebRTCSocket

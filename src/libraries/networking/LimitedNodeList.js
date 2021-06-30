@@ -19,7 +19,7 @@ import assert from "../shared/assert.js";
 /*@devdoc
  *  All the network nodes (assignment clients) that Interface is connected to. This includes their presence and communications
  *  with them via the Vircadia protocol.
- *  <p>Used by {@link NodesList}.</p>
+ *  <p>See also: {@link NodesList}.</p>
  *  <p>C++: <code>LimitedNodeList : public QObject, public Dependency</code>
  *  @class LimitedNodeList
  *  @param {string} ownerType - Not used.
