@@ -288,8 +288,9 @@ class WebRTCDataChannel {
     close() {
         this.#_readyState = WebRTCDataChannel.CLOSING;
         if (this.#_dataChannel) {
-            this.#_dataChannel.close();  // Closes the peer connection.
-        } else if (this.#_peerConnection) {
+            this.#_dataChannel.close();
+        }
+        if (this.#_peerConnection) {
             this.#_peerConnection.close();
         } else {
             this.#_readyState = WebRTCDataChannel.CLOSED;
