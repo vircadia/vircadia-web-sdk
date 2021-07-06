@@ -93,9 +93,10 @@ class WebRTCDataChannel {
         this.#_signalingChannel = signalingChannel;
         this.#_readyState = WebRTCDataChannel.CONNECTING;
         setTimeout(() => {
-            // Delay connecting so that event handlers can be hooked up.
+            // Defer connecting by scheduling it in the event queue, so that WebRTCDataChannel event handlers can be hooked up
+            // immediately after the object is created.
             this.#connect();
-        }, 1);
+        }, 0);
     }
 
     /* eslint-disable accessor-pairs */

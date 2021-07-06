@@ -13,7 +13,7 @@ import PacketData from "../../../../src/libraries/networking/packets/PacketData.
 
 describe("Packets - unit tests", () => {
 
-    test("the Packets namespace provides packet reading/writing", () => {
+    test("The Packets namespace provides packet reading/writing", () => {
         expect(typeof PacketData.DomainConnectRequest).toBe("object");
         expect(typeof PacketData.DomainConnectRequest.write).toBe("function");
         expect(typeof PacketData.DomainList).toBe("object");

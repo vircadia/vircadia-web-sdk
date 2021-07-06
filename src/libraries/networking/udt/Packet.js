@@ -56,7 +56,7 @@ class Packet extends BasePacket {
      *      <tbody>
      *          <tr><td>ONLY</td><td>0</td><td><code>00</code> - The only packet in the message.</td></tr>
      *          <tr><td>FIRST</td><td>2</td><td><code>10</code> - The first packet in the message.</td></tr>
-     *          <tr><td>Middle</td><td>3</td><td><code>11</code> - A middle packet in the message.</td></tr>
+     *          <tr><td>MIDDLE</td><td>3</td><td><code>11</code> - A middle packet in the message.</td></tr>
      *          <tr><td>LAST</td><td>1</td><td><code>01</code> - The last packet in the message.</td></tr>
      *      </tbody>
      *  </table>

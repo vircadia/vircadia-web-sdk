@@ -23,7 +23,7 @@ const DomainConnectRequest = new (class {
      *  @returns {NLPacket}
      */
     /*@devdoc
-     *  Information needed for {@link Packets|writing} a  {@link PacketType(1)|DomainConnectRequest} packet.
+     *  Information needed for {@link Packets|writing} a {@link PacketType(1)|DomainConnectRequest} packet.
      *  @typedef {object} PacketData.DomainConnectRequestData
      *  @property {Uuid} connectUUID - If ICE was used to discover the domain server, the ICE client's UUID, otherwise
      *      <code>Uuid.NULL</code>. (For Web Interface, use <code>Uuid.NULL</code>.)
