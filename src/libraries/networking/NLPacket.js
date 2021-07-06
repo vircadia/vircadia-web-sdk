@@ -47,6 +47,8 @@ class NLPacket extends Packet {
      *  @param {PacketType} type - The type of packet to create.
      *  @param {number} [size=-1] - The size of the packet to create, in bytes. If <code>-1</code> the packet isn't created at a
      *      fixed size.
+     *  @param {boolean} [isReliable=false] - <code>true</code> if the packet is to be sent reliably, <code>false</code> if it
+     *      isn't.
      *  @param {boolean} [isPartOfMessage=false] - <code>true</code> if the packet is part of a multi-packet message,
      *      <code>false</code> if it isn't.
      *  @param {PacketVersion} [version=0] - The version of the packet type.
