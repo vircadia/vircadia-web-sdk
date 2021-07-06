@@ -16,10 +16,12 @@ import AddressManager from "../../../src/libraries/networking/AddressManager.js"
 import NodesList from "../../../src/libraries/networking/NodesList.js";
 import NodeType from "../../../src/libraries/networking/NodeType.js";
 
+import TestConfig from "../../test.config.json";
+
 
 describe("NodesList - integration tests", () => {
 
-    //  Test environment expected: Domain server running on localhost that allows anonymous logins.
+    //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
     // Add WebRTC to Node.js environment.
     global.RTCPeerConnection = require("wrtc").RTCPeerConnection;
@@ -32,8 +34,6 @@ describe("NodesList - integration tests", () => {
     // Suppress console.log messages from being displayed.
     const log = jest.spyOn(console, "log").mockImplementation(() => { });  // eslint-disable-line no-empty-function
 
-    const LOCALHOST_WEBSOCKET = "ws://127.0.0.1:40102";
-
 
     test("Can perform an initial domain server check-in", (done) => {
         // Sends a DomainConnectRequest to the domain server and handles the resulting DomainList packet, resulting in the
@@ -41,7 +41,7 @@ describe("NodesList - integration tests", () => {
         expect.assertions(1);
 
         // Set up DomainHandler.
-        AddressManager.handleLookupString(LOCALHOST_WEBSOCKET);
+        AddressManager.handleLookupString(TestConfig.SERVER_SIGNALING_SOCKET_URL);
 
         // Set up NodesList.
         NodesList.addSetOfNodeTypesToNodeInterestSet(new Set([

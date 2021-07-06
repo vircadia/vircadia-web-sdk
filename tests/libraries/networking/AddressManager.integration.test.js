@@ -10,28 +10,31 @@
 
 import AddressManager from "../../../src/libraries/networking/AddressManager.js";
 
+import TestConfig from "../../test.config.json";
+
 
 describe("AddressManager - integration tests", () => {
+
+    //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
     /* eslint-disable no-magic-numbers */
 
     test("Possible domain change signal emitted when URL set", (done) => {
         expect.assertions(2);
         let signalsHandled = 0;
-        const LOCALHOST = "localhost";
 
         AddressManager.possibleDomainChangeRequired.connect(function (url) {
-            expect(url).toBe(LOCALHOST);
+            expect(url).toBe(TestConfig.SERVER_DOMAIN_URL);
             signalsHandled += 1;
             if (signalsHandled < 2) {
                 // Signal should be emitted even when no change in URL.
-                AddressManager.handleLookupString(LOCALHOST);
+                AddressManager.handleLookupString(TestConfig.SERVER_DOMAIN_URL);
             } else {
                 done();
             }
         });
 
-        AddressManager.handleLookupString(LOCALHOST);
+        AddressManager.handleLookupString(TestConfig.SERVER_DOMAIN_URL);
     });
 
     test("The domain's place name can be retrieved", () => {

@@ -15,12 +15,12 @@ import HifiSockAddr from "../../../src/libraries/networking/HifiSockAddr.js";
 import Signal from "../../../src/libraries/shared/Signal.js";
 import Uuid from "../../../src/libraries/shared/Uuid.js";
 
+import TestConfig from "../../test.config.json";
+
 
 describe("DomainHandler - integration tests", () => {
 
-    //  Test environment expected: Domain server running on localhost that allows anonymous logins.
-
-    const LOCALHOST_WEBSOCKET = "ws://127.0.0.1:40102";
+    //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
     /* eslint-disable no-magic-numbers */
 
@@ -36,9 +36,9 @@ describe("DomainHandler - integration tests", () => {
 
         const signal = new Signal();
         signal.connect(domainHandler.setURLAndID);
-        signal.emit(LOCALHOST_WEBSOCKET, null);
+        signal.emit(TestConfig.SERVER_SIGNALING_SOCKET_URL, null);
         setTimeout(function () {
-            expect(domainHandler.getURL()).toBe(LOCALHOST_WEBSOCKET);
+            expect(domainHandler.getURL()).toBe(TestConfig.SERVER_SIGNALING_SOCKET_URL);
             done();
         }, 10);
     });
@@ -76,10 +76,10 @@ describe("DomainHandler - integration tests", () => {
 
         const signal = new Signal();
         signal.connect(domainHandler.setURLAndID);
-        signal.emit(LOCALHOST_WEBSOCKET, null);
+        signal.emit(TestConfig.SERVER_SIGNALING_SOCKET_URL, null);
 
         domainHandler.connectedToDomain.connect((domainURL) => {
-            expect(domainURL).toBe(LOCALHOST_WEBSOCKET);
+            expect(domainURL).toBe(TestConfig.SERVER_SIGNALING_SOCKET_URL);
             expect(domainHandler.isConnected()).toBe(true);
         });
         domainHandler.disconnectedFromDomain.connect(() => {
