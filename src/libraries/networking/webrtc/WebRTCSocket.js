@@ -19,7 +19,7 @@ import Signal from "../../shared/Signal.js";
  *  <p>C++: <code>WebRTCSocket : public QObject</code></p>
  *  <p>The JavaScript differs from the C++ because the JavaScript client explicitly connects to different domains rather than
  *  accepting incoming connections.</p>
- *  
+ *
  *  @class WebRTCSocket
  */
 class WebRTCSocket {
@@ -43,7 +43,7 @@ class WebRTCSocket {
     #_readyRead = new Signal();
 
 
-    constructor() {
+    constructor() {  // eslint-disable-line no-useless-constructor
         // C++  WebRTCSocket(QObject* parent, NodeType_t nodeType)
 
         // WEBRTC TODO: Address further C++ code.
@@ -180,7 +180,7 @@ class WebRTCSocket {
             this.#_lastDataChannelID += 1;
             const channelID = this.#_lastDataChannelID;
             webrtcDataChannel.id = channelID;
-            this.#_webrtcDataChannelsByNodeType.set(nodeType, { channelID , webrtcDataChannel });
+            this.#_webrtcDataChannelsByNodeType.set(nodeType, { channelID, webrtcDataChannel });
             this.#_webrtcDataChannelsByChannelID.set(channelID, { nodeType, webrtcDataChannel });
             if (callback) {
                 callback(channelID);
@@ -201,7 +201,7 @@ class WebRTCSocket {
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    closeWebRTCdataChannels() {
+    closeWebRTCdataChannels() {  // eslint-disable-line class-methods-use-this
         // C++  WebRTC-specific method
         console.error("Not implemented!");
     }

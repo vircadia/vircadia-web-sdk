@@ -15,7 +15,6 @@ import LimitedNodeList from "./LimitedNodeList.js";
 import NodeType from "./NodeType.js";
 import PacketReceiver from "./PacketReceiver.js";
 import PacketData from "./packets/PacketData.js";
-import Packet from "./udt/Packet.js";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders.js";
 import Uuid from "../shared/Uuid.js";
 

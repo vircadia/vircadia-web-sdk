@@ -26,7 +26,7 @@ import assert from "../shared/assert.js";
  *  @param {number} socketListenPort - Not used.
  *  @param {number} dtlsListenPort - Not used.
  *  @param {Object} _privateFields - Provides access for derived classes to select private fields.
- *  
+ *
  *  @property {LimitedNodeList.ConnectReason} ConnectReason - Connect reason values.
  *  @property {number} INVALID_PORT=-1 - Invalid port.
  */
@@ -65,17 +65,17 @@ class LimitedNodeList {
     #_packetReceiver;  // PacketReceiver
 
 
-    constructor(ownerType = NodeType.DomainServer, socketListenPort = LimitedNodeList.INVALID_PORT,
-        dtlsListenPort = LimitedNodeList.INVALID_PORT, _privateFields = { }) {
-        // C++  LimitedNodeList(char ownerType = NodeType::DomainServer, int socketListenPort = INVALID_PORT, 
+    constructor(ownerType = NodeType.DomainServer, socketListenPort = LimitedNodeList.INVALID_PORT,  // eslint-disable-line
+        dtlsListenPort = LimitedNodeList.INVALID_PORT, _privateFields = {}) {  // eslint-disable-line
+        // C++  LimitedNodeList(char ownerType = NodeType::DomainServer, int socketListenPort = INVALID_PORT,
         //                      int dtlsListenPort = INVALID_PORT);
 
-        this.#_nodeSocket = new Socket(this, true, ownerType),
+        this.#_nodeSocket = new Socket(this, true, ownerType);
         this.#_packetReceiver = new PacketReceiver();
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.#_nodeSocket.setPacketHandler(this.#_packetReceiver.handleVerifiedPacket); 
+        this.#_nodeSocket.setPacketHandler(this.#_packetReceiver.handleVerifiedPacket);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -125,13 +125,13 @@ class LimitedNodeList {
 
             return 0;
 
-        } else {
-            const size = this.sendUnreliablePacket(packet, sockAddr, hmacAuth);
-
-            // WEBRTC TODO: Address further C++ code.
-
-            return size;
         }
+
+        const size = this.sendUnreliablePacket(packet, sockAddr, hmacAuth);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        return size;
     }
 
 
@@ -170,7 +170,7 @@ class LimitedNodeList {
     }
 
 
-    #fillPacketHeader(packet, hmacAuth) {
+    #fillPacketHeader(packet, hmacAuth) {  // eslint-disable-line
         // C++  void fillPacketHeader(const NLPacket& packet, HMACAuth* hmacAuth = nullptr) {
         if (!PacketType.getNonSourcedPackets().has(packet.getType())) {
 

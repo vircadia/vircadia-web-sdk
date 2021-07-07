@@ -11,7 +11,6 @@
 /* globals jest */
 
 import DomainHandler from "../../../src/libraries/networking/DomainHandler.js";
-import HifiSockAddr from "../../../src/libraries/networking/HifiSockAddr.js";
 import Signal from "../../../src/libraries/shared/Signal.js";
 import Uuid from "../../../src/libraries/shared/Uuid.js";
 

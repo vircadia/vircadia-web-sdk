@@ -117,7 +117,7 @@ class Socket {
             const datagram = { buffer: null, sender: null };
             const sizeRead = this.#_webrtcSocket.readDatagram(datagram);
             if (sizeRead <= 0) {
-                continue;
+                continue;  // eslint-disable-line no-continue
             }
 
             const dataView = new DataView(datagram.buffer);
@@ -194,7 +194,7 @@ class Socket {
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    closeWebRTCDataChannels(nodeType) {
+    closeWebRTCDataChannels(nodeType) {  // eslint-disable-line
         this.#_webrtcSocket.closeWebRTCDataChannels();
     }
 

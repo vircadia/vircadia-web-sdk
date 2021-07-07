@@ -93,7 +93,7 @@ class PacketReceiver {
     }
 
 
-    #handleVerifiedMessage(message, justReceived) {
+    #handleVerifiedMessage(message, justReceived) {  // eslint-disable-line
         // C++  void handleVerifiedMessage(ReceivedMessage* receivedMessage, bool justReceived)
 
         // WEBRTC TODO: This method is incorrectly named - it handles both verified and unverified packets?

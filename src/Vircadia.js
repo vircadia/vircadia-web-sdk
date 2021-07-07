@@ -13,7 +13,7 @@
 /*@sdkdoc
  *  This is the Vircadia SDK.
  *  <p>C++: This abstracts out key components of the native Vircadia Interface app.</p>
- *  
+ *
  *  @namespace Vircadia
  */
 const Vircadia = (function () {

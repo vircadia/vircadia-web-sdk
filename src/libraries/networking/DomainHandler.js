@@ -173,7 +173,7 @@ class DomainHandler {
      *  @param {Uuid} id - The domain's pending ID.
      *  @returns {Slot}
      */
-    setURLAndID(url, id) {
+    setURLAndID(url, id) {  // eslint-disable-line
         // C++  void setURLAndID(QUrl domainURL, QUuid domainID)
 
         // WEBRTC TODO: Address further C++ code.

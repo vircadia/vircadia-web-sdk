@@ -311,7 +311,7 @@ const PacketType = new (class {
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.HasCompressedSystemInfo;
 
-            // WebRTC TODO: Add other packets.
+                // WebRTC TODO: Add other packets.
 
             // C++ default for remainder of packets is 22 but we want to report packets we haven't implemented, so explicitly
             // list those packets we know about.
