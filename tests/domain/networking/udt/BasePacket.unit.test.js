@@ -11,7 +11,7 @@
 /* globals jest */
 /* eslint-disable no-magic-numbers */
 
-import HifiSockAddr from "../../../../src/domain/networking/HifiSockAddr.js";
+import SockAddr from "../../../../src/domain/networking/SockAddr.js";
 import BasePacket from "../../../../src/domain/networking/udt/BasePacket.js";
 import UDT from "../../../../src/domain/networking/udt/UDT.js";
 
@@ -35,7 +35,7 @@ describe("BasePacket - unit tests", () => {
         buffer = new ArrayBuffer(10);
         dataView = new DataView(buffer);
         dataView.setUint8(0, 12);
-        sockAddr = new HifiSockAddr();
+        sockAddr = new SockAddr();
         sockAddr.setAddress(IP_127_0_0_1);
         sockAddr.setPort(7);
         return new BasePacket(dataView, dataView.byteLength, sockAddr);

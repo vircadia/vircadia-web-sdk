@@ -37,8 +37,8 @@ const DomainConnectRequest = new (class {
      *      <code>0</code> if not previously connected.
      *  @property {BigInt} currentTime - The current Unix time, in usec.
      *  @property {NodeType} ownerType - The type of this node, i.e., <code>NodeType.Agent</code> for Interface.
-     *  @property {HifiSockAddr} publicSockAddr - The Interface client's public address.
-     *  @property {HifiSockAddr} localSockAddr - The Interface client's local address.
+     *  @property {SockAddr} publicSockAddr - The Interface client's public address.
+     *  @property {SockAddr} localSockAddr - The Interface client's local address.
      *  @property {Set<NodeType>} nodeTypesOfInterest - The types of domain server nodes that the Interface client wants to
      *      use.
      *  @property {string} placeName - The domain's place name from {@link AddressManager} if known, otherwise an empty string.

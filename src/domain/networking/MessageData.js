@@ -23,7 +23,7 @@
  *  @property {number} dataPosition - The current read/write position in processing the raw data. This is used to simplify the
  *      JavaScript instead of using <code>payloadStart</code>, <code>payloadCapacity</code>, and <code>payloadSize</code>.
  *  @property {number} packetSize - The size of the received packet.
- *  @property {HifiSockAddr} senderSockAddr - The IP address and port of the sender.
+ *  @property {SockAddr} senderSockAddr - The IP address and port of the sender.
  *  @property {Date} receiveTime - The time that the packet or start of message was received.
  *
  *  @property <strong>Packet</strong>

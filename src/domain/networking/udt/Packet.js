@@ -28,7 +28,7 @@ import assert from "../../shared/assert.js";
  *      if it isn't. <strong>Default Value:</strong> <code>false</code>
  *      <p>The size of the data in bytes.</p>
  *      <p>Unused.</p>
- *  @param {boolean|HifiSockAddr|unused} isPartOfMessage|senderSockAddr|unused - <code>true</code> if the packet is part of a
+ *  @param {boolean|SockAddr|unused} isPartOfMessage|senderSockAddr|unused - <code>true</code> if the packet is part of a
  *      multi-packet message, <code>false</code> if it isn't. <strong>Default Value:</strong> <code>false</code>
  *      <p>The sender's IP address and port.</p>
  *      <p>Unused.</p>
@@ -101,12 +101,12 @@ class Packet extends BasePacket {
      *  @function Packet.fromReceivedPacket
      *  @param {DataView} data - The raw byte data of a new packet.
      *  @param {number} size - The size of that data in bytes.
-     *  @param {HifiSockAddr} senderSockAddr - The sender's IP address and port.
+     *  @param {SockAddr} senderSockAddr - The sender's IP address and port.
      *  @returns {Packet} A Packet created from the received data.
      *  @static
      */
     static fromReceivedPacket(data, size, senderSockAddr) {
-        // C++  Packet fromReceivedPacket(char[]* data, qint64 size, const HifiSockAddr& senderSockAddr);
+        // C++  Packet fromReceivedPacket(char[]* data, qint64 size, const SockAddr& senderSockAddr);
         return new Packet(data, size, senderSockAddr);
     }
 
@@ -147,7 +147,7 @@ class Packet extends BasePacket {
             this.#writeHeader();
 
         } else if (param0 instanceof DataView) {
-            // C++  Packet(std::unique_ptr<char[]> data, qint64 size, const HifiSockAddr& senderSockAddr)
+            // C++  Packet(std::unique_ptr<char[]> data, qint64 size, const SockAddr& senderSockAddr)
             const data = param0;
             const size = param1;
             const senderSockAddr = param2;

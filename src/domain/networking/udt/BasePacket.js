@@ -9,8 +9,8 @@
 //
 
 import UDT from "./UDT.js";
-import HifiSockAddr from "../HifiSockAddr.js";
 import MessageData from "../MessageData.js";
+import SockAddr from "../SockAddr.js";
 import assert from "../../shared/assert.js";
 
 
@@ -27,7 +27,7 @@ import assert from "../../shared/assert.js";
  *  @param {unused|number|unused} unused|size|unused - Unused.
  *      <p>The size of the DataView in bytes.</p>
  *      <p>Unused.</p>
- *  @param {unused|HifiSockAddr|unused} unused|senderSockAddr|unused - Unused.
+ *  @param {unused|SockAddr|unused} unused|senderSockAddr|unused - Unused.
  *      <p>The sender's IP address and port.</p>
  *      <p>Unused.</p>
  */
@@ -63,11 +63,11 @@ class BasePacket {
             this.#_messageData.data = new DataView(buffer);
             this.#_messageData.dataPosition = 0;
             this.#_messageData.packetSize = size;
-            this.#_messageData.senderSockAddr = new HifiSockAddr();
+            this.#_messageData.senderSockAddr = new SockAddr();
             this.#_messageData.receiveTime = null;
 
         } else if (param0 instanceof DataView) {
-            // C++  BasePacket(char[]* data, qint64 size, const HifiSockAddr& senderSockAddr)
+            // C++  BasePacket(char[]* data, qint64 size, const SockAddr& senderSockAddr)
             const data = param0;
             const size = param1;
             const senderSockAddr = param2;

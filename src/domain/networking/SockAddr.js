@@ -1,5 +1,5 @@
 //
-//  HifiSockAddr.js
+//  SockAddr.js
 //
 //  Created by David Rowe on 7 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -11,10 +11,10 @@
 /*@devdoc
  *  IPv4 network address and port number. The port number may be a UDP port number or an internally-assigned WebRTC data channel
  *  ID. Internally, the IP address is handled as a 4-byte number value and the port as a 2-byte number value.
- *  <p>C++: <code>HifiSockAddr : public QObject</code></p>
- *  @class HifiSockAddr
+ *  <p>C++: <code>SockAddr : public QObject</code></p>
+ *  @class SockAddr
  */
-class HifiSockAddr {
+class SockAddr {
 
     // WEBRTC TODO: Add address type (UDP | WebRTC | unknown)?
 
@@ -57,4 +57,4 @@ class HifiSockAddr {
 
 }
 
-export default HifiSockAddr;
+export default SockAddr;
