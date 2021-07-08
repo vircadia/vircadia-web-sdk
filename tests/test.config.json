@@ -1,0 +1,4 @@
+{
+    "SERVER_DOMAIN_URL": "localhost",
+    "SERVER_SIGNALING_SOCKET_URL": "ws://127.0.0.1:40102"
+}

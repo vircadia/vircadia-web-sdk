@@ -4,26 +4,26 @@
 //  Created by David Rowe on 17 May 2021.
 //  Copyright 2021 Vircadia contributors.
 //
-//  Distributed under the Apache License", Version 2.0.
+//  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
 /* globals jest */
+/* eslint-disable no-magic-numbers */
 
 import WebRTCSignalingChannel from "../../../../src/libraries/networking/webrtc/WebRTCSignalingChannel.js";
 import NodeType from "../../../../src/libraries/networking/NodeType.js";
 
+
 describe("WebRTCSignalingChannel - integration tests", () => {
 
     //  Test environment expected: Domain server running on localhost.
-
     const LOCALHOST_WEBSOCKET = "ws://127.0.0.1:40102";
     const INVALID_WEBSOCKET = "ws://0.0.0.0:0";
 
     // Suppress console.error messages from being displayed.
     const error = jest.spyOn(console, "error").mockImplementation(() => { });  // eslint-disable-line no-empty-function
 
-    /* eslint-disable no-magic-numbers */
 
     test("Can open and close", (done) => {
         expect.assertions(4);

@@ -1,63 +1,68 @@
 //
 //  WebRTCDataChannel.js
 //
-//  WebRTC connection and data channel to the domain server or an assignment client. (Each uses their own WebRTC connection.)
-//
 //  Created by David Rowe on 21 May 2021.
 //  Copyright 2021 Vircadia contributors.
 //
-//  Distributed under the Apache License", Version 2.0.
+//  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
-
-/* globals RTCPeerConnection */
 
 import NodeType from "../NodeType.js";
 import WebRTCSignalingChannel from "./WebRTCSignalingChannel.js";
 
 /*@devdoc
- * A WebRTC data channel used for Vircadia protocol communications with a domain server or assignment client. Uses a
- * {@link WebRTCSignalingChannel} in the process of establishing the WebRTC connection.
- * <p>The API is similar to the WebRTCSignalingChannel and WebSocket APIs.</p>
+ *  A WebRTC data channel used for Vircadia protocol communications with a domain server or assignment client. Uses a
+ *  {@link WebRTCSignalingChannel} in the process of establishing the WebRTC connection.
+ *  <p>The API is similar to the WebRTCSignalingChannel and WebSocket APIs.</p>
+ *  <p>C++: Akin to <code>WebRTCDataChannels</code> though significantly different.
  *
- * @class WebRTCDataChannel
- * @param {NodeType} nodeType - The node type to connected to.
- * @param {WebRTCSignalingChannel} signalingChannel - The WebRTCSignalingChannel to use in establishing the WebRTC connection
+ *  @class WebRTCDataChannel
+ *  @param {NodeType} nodeType - The node type to connect to.
+ *  @param {WebRTCSignalingChannel} signalingChannel - The WebRTCSignalingChannel to use in establishing the WebRTC connection
  *      and data channel.
  *
- * @property {WebRTCDataChannel.ReadyState} CONNECTING - The connection is opening. <em>Static.</em> <em>Read-only.</em>
- * @property {WebRTCDataChannel.ReadyState} OPEN - The connection is open. <em>Static.</em> <em>Read-only.</em>
- * @property {WebRTCDataChannel.ReadyState} CLOSING - The connection is closing. <em>Static.</em> <em>Read-only.</em>
- * @property {WebRTCDataChannel.ReadyState} CLOSED - The connection is closed. <em>Static.</em> <em>Read-only.</em>
- * @property {WebRTCDataChannel.ReadyState} readyState - The current state of the data channel connection. <em>Read-only.</em>
+ *  @property {WebRTCDataChannel.ReadyState} CONNECTING=0 - The connection is opening. <em>Static.</em> <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
+ *  @property {WebRTCDataChannel.ReadyState} OPEN=1 - The connection is open. <em>Static.</em> <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
+ *  @property {WebRTCDataChannel.ReadyState} CLOSING=2 - The connection is closing. <em>Static.</em> <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
+ *  @property {WebRTCDataChannel.ReadyState} CLOSED=3 - The connection is closed. <em>Static.</em> <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
+ *  @property {WebRTCDataChannel.ReadyState} readyState - The current state of the data channel connection. <em>Read-only.</em>
  *
- * @property {WebRTCSignalingChannel~onOpenCallback} onopen - Sets a single function to be called when the signaling channel
- *      opens. <em>Write-only.</em>
- * @property {WebRTCSignalingChannel~onMessageCallback} onmessage - Sets a single function to be called when a message is
- *      received. <em>Write-only.</em>
- * @property {WebRTCSignalingChannel~onErrorCallback} onerror - Sets a single function to be called when an error occurs.
+ *  @property {WebRTCDataChannel~onOpenCallback} onopen - Sets a single function to be called when the data channel opens.
  *      <em>Write-only.</em>
- * @property {WebRTCSignalingChannel~onCloseCallback} onclose - Set s a single function to be called when the signaling channel
- *      closes. <em>Write-only.</em>
+ *  @property {WebRTCDataChannel~onMessageCallback} onmessage - Sets a single function to be called when a message is
+ *      received. <em>Write-only.</em>
+ *  @property {WebRTCDataChannel~onErrorCallback} onerror - Sets a single function to be called when an error occurs.
+ *      <em>Write-only.</em>
+ *  @property {WebRTCDataChannel~onCloseCallback} onclose - Set s a single function to be called when the data channel closes.
+ *      <em>Write-only.</em>
  */
 class WebRTCDataChannel {
 
     /* eslint-disable no-magic-numbers */
 
     /*@devdoc
-     * The state of a WebRTCDataChannel connection.
-     * <table>
-     *   <thead>
-     *     <tr><th>Value</th><th>Name</th><th>Value</th><th>Description</th></tr>
-     *   </thead>
-     *   <tbody>
-     *     <tr><td><code>0</code></td><td>CONNECTING</td><td>0</td><td>The connection is opening.</td></tr>
-     *     <tr><td><code>1</code></td><td>OPEN</td><td>1</td><td>The connection is open.</td></tr>
-     *     <tr><td><code>2</code></td><td>CLOSING</td><td>2</td><td>The connection is closing.</td></tr>
-     *     <tr><td><code>3</code></td><td>CLOSED</td><td>3</td><td>The connection is closed.</td></tr>
-     *   </tbody>
-     * </table>
-     * @typedef {number} WebRTCDataChannel.ReadyState
+     *  The state of a WebRTCDataChannel connection.
+     *  <table>
+     *      <thead>
+     *          <tr><th>Name</th><th>Value</th><th>Description</th></tr>
+     *      </thead>
+     *      <tbody>
+     *          <tr><td>CONNECTING</td><td>0</td><td>The connection is opening.</td></tr>
+     *          <tr><td>OPEN</td><td>1</td><td>The connection is open.</td></tr>
+     *          <tr><td>CLOSING</td><td>2</td><td>The connection is closing.</td></tr>
+     *          <tr><td>CLOSED</td><td>3</td><td>The connection is closed.</td></tr>
+     *      </tbody>
+     *  </table>
+     *  @typedef {number} WebRTCDataChannel.ReadyState
      */
     static CONNECTING = 0;
     static OPEN = 1;
@@ -87,7 +92,11 @@ class WebRTCDataChannel {
         this.#_nodeType = nodeType;
         this.#_signalingChannel = signalingChannel;
         this.#_readyState = WebRTCDataChannel.CONNECTING;
-        setTimeout(this.#connect.bind(this), 1);  // Delay connecting so that event handlers can be hooked up.
+        setTimeout(() => {
+            // Defer connecting by scheduling it in the event queue, so that WebRTCDataChannel event handlers can be hooked up
+            // immediately after the object is created.
+            this.#connect();
+        }, 0);
     }
 
     /* eslint-disable accessor-pairs */
@@ -103,33 +112,33 @@ class WebRTCDataChannel {
     }
 
     /*@devdoc
-     * Called when the data channel opens.
-     * @callback WebRTCDataChannel~onOpenCallback
+     *  Called when the data channel opens.
+     *  @callback WebRTCDataChannel~onOpenCallback
      */
     set onopen(callback) {
         this.#_onopenCallback = callback;
     }
 
     /*@devdoc
-     * Called when a message is received.
-     * @callback WebRTCDataChannel~onMessageCallback
-     * @param {ArrayBuffer|ArrayBufferView|Blob|USVString} message - The message received.
+     *  Called when a message is received.
+     *  @callback WebRTCDataChannel~onMessageCallback
+     *  @param {ArrayBuffer|ArrayBufferView|Blob|USVString} message - The message received.
      */
     set onmessage(callback) {
         this.#_onmessageCallback = callback;
     }
 
     /*@devdoc
-     * Called when the data channel closes.
-     * @callback WebRTCDataChannel~onCloseCallback
+     *  Called when the data channel closes.
+     *  @callback WebRTCDataChannel~onCloseCallback
      */
     set onclose(callback) {
         this.#_oncloseCallback = callback;
     }
 
     /*@devdoc
-     * Called when there's an error in the data channel.
-     * @callback WebRTCDataChannel~onErrorCallback
+     *  Called when there's an error in the data channel.
+     *  @callback WebRTCDataChannel~onErrorCallback
      */
     set onerror(callback) {
         this.#_onerrorCallback = callback;
@@ -138,9 +147,9 @@ class WebRTCDataChannel {
     /* eslint-enable accessor-pairs */
 
     /*@devdoc
-     * <strong class="important">Not implemented.</strong>
-     * @param {string} eventName
-     * @param {function} callback
+     *  <strong class="important">Not implemented.</strong>
+     *  @param {string} eventName
+     *  @param {function} callback
      */
     /* eslint-disable no-unused-vars, class-methods-use-this */
     addEventListener(event, handler) {
@@ -324,11 +333,11 @@ class WebRTCDataChannel {
     }  // #connect
 
     /*@devdoc
-     * Sends a message to the domain server or an assignment client on the data channel.
-     * <p>Note: The domain server or assignment client bounces echo requests &mdash; a message starting with
-     * <code>"echo:"</code> &mdash; back for testing purposes.</p>
-     * @param {ArrayBuffer|ArrayBufferView|Blob|USVString} message - The message to send.
-     * @returns {boolean} <code>true</code> if the message was sent, <code>false</code) if the message wasn't sent (e.g.,
+     *  Sends a message to the domain server or an assignment client on the data channel.
+     *  <p>Note: The domain server or assignment client bounces echo requests &mdash; a message starting with
+     *  <code>"echo:"</code> &mdash; back for testing purposes.</p>
+     *  @param {ArrayBuffer|ArrayBufferView|Blob|USVString} message - The message to send.
+     *  @returns {boolean} <code>true</code> if the message was sent, <code>false</code) if the message wasn't sent (e.g.,
      *      because the signaling channel isn't open).
      */
     send(message) {
@@ -346,7 +355,7 @@ class WebRTCDataChannel {
     }
 
     /*@devdoc
-     * Closes the data channel.
+     *  Closes the data channel.
      */
     close() {
         this.#_readyState = WebRTCDataChannel.CLOSING;

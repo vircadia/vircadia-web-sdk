@@ -4,11 +4,12 @@
 //  Created by David Rowe on 21 May 2021.
 //  Copyright 2021 Vircadia contributors.
 //
-//  Distributed under the Apache License", Version 2.0.
+//  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
 /* globals jest */
+/* eslint-disable no-magic-numbers */
 
 import WebRTCDataChannel from "../../../../src/libraries/networking/webrtc/WebRTCDataChannel.js";
 import WebRTCSignalingChannel from "../../../../src/libraries/networking/webrtc/WebRTCSignalingChannel.js";
@@ -16,23 +17,21 @@ import NodeType from "../../../../src/libraries/networking/NodeType.js";
 
 import "wrtc";  // WebRTC Node.js package.
 
+
 describe("WebRTCDataChannel - integration tests", () => {
 
     //  Test environment expected: Domain server running on localhost that allows anonymous logins.
-
     const LOCALHOST_WEBSOCKET = "ws://127.0.0.1:40102";
     const INVALID_WEBSOCKET = "ws://0.0.0.0:0";
 
     // Add WebRTC to Node.js environment.
     global.RTCPeerConnection = require("wrtc").RTCPeerConnection;
 
-    // Set up Node.js StringDecoder.
+    // Add StringDecoder to Node.js environment.
     const { StringDecoder } = require("string_decoder");
 
     // Suppress console.error messages from being displayed.
     const error = jest.spyOn(console, "error").mockImplementation(() => { });  // eslint-disable-line no-empty-function
-
-    /* eslint-disable no-magic-numbers */
 
     // Increase the Jest timeout from the default 5s.
     jest.setTimeout(10000);
@@ -155,9 +154,7 @@ describe("WebRTCDataChannel - integration tests", () => {
         let webrtcDataChannel2 = null;
         let repliesReceived = 0;
         webrtcSignalingChannel1.onopen = function () {
-            webrtcSignalingChannel1.send({ to: NodeType.DomainServer, hello: "Channel 1..." });
             webrtcDataChannel1 = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel1);
-            webrtcSignalingChannel1.send({ to: NodeType.DomainServer, hello: "... Channel 1" });
             webrtcDataChannel1.onopen = function () {
                 const sent = webrtcDataChannel1.send("echo:Hello");
                 expect(sent).toBe(true);
@@ -177,9 +174,7 @@ describe("WebRTCDataChannel - integration tests", () => {
             };
         };
         webrtcSignalingChannel2.onopen = function () {
-            webrtcSignalingChannel2.send({ to: NodeType.DomainServer, hello: "Channel 2..." });
             webrtcDataChannel2 = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel2);
-            webrtcSignalingChannel2.send({ to: NodeType.DomainServer, hello: "... Channel 2" });
             webrtcDataChannel2.onopen = function () {
                 const sent = webrtcDataChannel2.send("echo:Goodbye");
                 expect(sent).toBe(true);
@@ -200,7 +195,6 @@ describe("WebRTCDataChannel - integration tests", () => {
             };
         };
     });
-
 
     // WEBRTC TODO: "Can echo test message off messages mixer"
 

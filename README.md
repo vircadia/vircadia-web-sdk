@@ -42,14 +42,23 @@ npm run build
 npm run lint
 ```
 
-### Run unit tests
+### Run tests
+
+All tests:
 ```
 npm run test
 ```
-Hot retest
+Hot retest of all tests:
 ```
 npm run test-watch
 ```
+
+Specific tests (e.g., Packet.unit.test.js, all unit tests):
+```
+npm run test /packet.unit
+npm run test unit.test
+```
+
 
 ### Generate docs
 
