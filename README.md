@@ -21,6 +21,9 @@ To learn more about using Vircadia and exploring the metaverse, see the [User Do
 
 https://nodejs.org/en/download/
 
+Jest is used for unit testing. It is included as an NPM dev dependency, however, you may also install it globally if you want
+to. https://jestjs.io/. 
+
 
 ## Project setup
 ```
