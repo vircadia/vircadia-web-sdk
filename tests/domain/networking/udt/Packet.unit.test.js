@@ -11,9 +11,9 @@
 /* globals jest */
 /* eslint-disable no-magic-numbers */
 
+import SockAddr from "../../../../src/domain/networking/SockAddr.js";
 import BasePacket from "../../../../src/domain/networking/udt/BasePacket.js";
 import Packet from "../../../../src/domain/networking/udt/Packet.js";
-import HifiSockAddr from "../../../../src/domain/networking/HifiSockAddr.js";
 
 
 describe("Packet - unit tests", () => {
@@ -29,7 +29,7 @@ describe("Packet - unit tests", () => {
     const dataView = new DataView(arrayBuffer);
 
     // Other test data.
-    const sockAddr = new HifiSockAddr();
+    const sockAddr = new SockAddr();
     sockAddr.setPort(7);
 
     const error = jest.spyOn(console, "error").mockImplementation((a) => {

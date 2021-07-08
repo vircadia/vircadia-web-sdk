@@ -11,8 +11,8 @@
 /* globals jest */
 /* eslint-disable no-magic-numbers */
 
-import HifiSockAddr from "../../../src/domain/networking/HifiSockAddr.js";
 import NLPacket from "../../../src/domain/networking/NLPacket.js";
+import SockAddr from "../../../src/domain/networking/SockAddr.js";
 import Packet from "../../../src/domain/networking/udt/Packet.js";
 import PacketType from "../../../src/domain/networking/udt/PacketHeaders.js";
 
@@ -28,7 +28,7 @@ describe("NLPacket - unit tests", () => {
         uint8Array[i] = Number.parseInt(domainListText.substr(i * 2, 2), 16);
     }
     const dataView = new DataView(arrayBuffer);
-    const sockAddr = new HifiSockAddr();
+    const sockAddr = new SockAddr();
     sockAddr.setPort(7);
     const testPacket = new Packet(dataView, dataView.byteLength, sockAddr);
 

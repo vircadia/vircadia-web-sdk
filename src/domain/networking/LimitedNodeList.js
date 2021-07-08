@@ -8,9 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import HifiSockAddr from "./HifiSockAddr.js";
 import NodeType from "./NodeType.js";
 import PacketReceiver from "./PacketReceiver.js";
+import SockAddr from "./SockAddr.js";
 import PacketType from "./udt/PacketHeaders.js";
 import Socket from "./udt/Socket.js";
 import assert from "../shared/assert.js";
@@ -59,8 +59,8 @@ class LimitedNodeList {
 
     #_nodeSocket;  // Socket
 
-    #_localSockAddr = new HifiSockAddr();
-    #_publicSockAddr = new HifiSockAddr();
+    #_localSockAddr = new SockAddr();
+    #_publicSockAddr = new SockAddr();
 
     #_packetReceiver;  // PacketReceiver
 
@@ -88,12 +88,12 @@ class LimitedNodeList {
     /*@devdoc
      *  Sends a a solitary packet to an address, unreliably. The packet cannot be part of a multi-packet message.
      *  @param {Packet} packet - The packet to send.
-     *  @param {HifiSockAddr} sockAddr - The address to send it to.
+     *  @param {SockAddr} sockAddr - The address to send it to.
      *  @param {HMACAuth} [hmacAuth=null] - Not currently used.
      *  @returns {number} The number of bytes sent.
      */
     sendUnreliablePacket(packet, sockAddr, hmacAuth = null) {
-        // C++  qint64 sendUnreliablePacket(const NLPacket& packet, const HifiSockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
+        // C++  qint64 sendUnreliablePacket(const NLPacket& packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
 
         assert(!packet.isPartOfMessage());
         assert(!packet.isReliable());
@@ -109,12 +109,12 @@ class LimitedNodeList {
      *  Sends a solitary packet to an address, reliably or unreliably depending on the packet. The packet cannot be part of a
      *  multi-packet message.
      *  @param {Packet} packet - The packet to send.
-     *  @param {HifiSockAddr} sockAddr - The address to send it to.
+     *  @param {SockAddr} sockAddr - The address to send it to.
      *  @param {HMACAuth} [hmacAuth=null] - Not currently used.
      *  @returns {number} The number of bytes sent.
      */
     sendPacket(packet, sockAddr, hmacAuth = null) {
-        // C++  qint64 sendPacket(NLPacket* packet, const HifiSockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
+        // C++  qint64 sendPacket(NLPacket* packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
         assert(!packet.isPartOfMessage());
 
         if (packet.isReliable()) {
@@ -137,10 +137,10 @@ class LimitedNodeList {
 
     /*@devdoc
      *  Gets the client's local socket network address.
-     *  @returns {HifiSockAddr} The local socket network address.
+     *  @returns {SockAddr} The local socket network address.
      */
     getLocalSockAddr() {
-        // C++  HifiSockAddr& getLocalSockAddr()
+        // C++  SockAddr& getLocalSockAddr()
 
         // WEBRTC TODO: Set correct value.
 
@@ -149,10 +149,10 @@ class LimitedNodeList {
 
     /*@devdoc
      *  Gets the client's public socket network address.
-     *  @returns {HifiSockAddr} The local socket network address.
+     *  @returns {SockAddr} The local socket network address.
      */
     getPublicSockAddr() {
-        // C++  HifiSockAddr& getPublicSockAddr()
+        // C++  SockAddr& getPublicSockAddr()
 
         // WEBRTC TODO: Set correct value.
 

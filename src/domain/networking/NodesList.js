@@ -214,8 +214,8 @@ const NodesList = new (class extends LimitedNodeList {
                 previousConnectionUptime,   // integer(64)
                 currentTime,                // integer(64)
                 ownerType,                  // char
-                publicSockAddr,             // HifiSockAddr
-                localSockAddr,              // HifiSockAddr
+                publicSockAddr,             // SockAddr
+                localSockAddr,              // SockAddr
                 nodeTypesOfInterest,        // Set<NodeType>
                 placeName,                  // String
                 isDomainConnected,          // boolean(8)
