@@ -8,10 +8,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import HifiSockAddr from "../../../../src/domain/networking/HifiSockAddr.js";
 import LimitedNodeList from "../../../../src/domain/networking/LimitedNodeList.js";
 import NLPacket from "../../../../src/domain/networking/NLPacket.js";
 import NodeType from "../../../../src/domain/networking/NodeType.js";
+import SockAddr from "../../../../src/domain/networking/SockAddr.js";
 import DomainConnectRequest from "../../../../src/domain/networking/packets/DomainConnectRequest.js";
 import PacketType, { protocolVersionsSignature } from "../../../../src/domain/networking/udt/PacketHeaders.js";
 import Uuid from "../../../../src/domain/shared/Uuid.js";
@@ -33,8 +33,8 @@ describe("DomainConnectRequest - unit tests", () => {
             previousConnectionUptime: BigInt(0),
             currentTime: BigInt(Date.now().valueOf()),
             ownerType: NodeType.Agent,
-            publicSockAddr: new HifiSockAddr(),
-            localSockAddr: new HifiSockAddr(),
+            publicSockAddr: new SockAddr(),
+            localSockAddr: new SockAddr(),
             nodeTypesOfInterest: new Set([
                 NodeType.AudioMixer,
                 NodeType.AvatarMixer,
@@ -63,8 +63,8 @@ describe("DomainConnectRequest - unit tests", () => {
             previousConnectionUptime: BigInt(0),
             currentTime: BigInt(Date.now().valueOf()),
             ownerType: NodeType.Agent,
-            publicSockAddr: new HifiSockAddr(),
-            localSockAddr: new HifiSockAddr(),
+            publicSockAddr: new SockAddr(),
+            localSockAddr: new SockAddr(),
             nodeTypesOfInterest: new Set([
                 NodeType.AudioMixer,
                 NodeType.AvatarMixer,

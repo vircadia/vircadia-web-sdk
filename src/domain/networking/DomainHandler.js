@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import HifiSockAddr from "./HifiSockAddr.js";
+import SockAddr from "./SockAddr.js";
 import Signal from "../shared/Signal.js";
 import Uuid from "../shared/Uuid.js";
 
@@ -22,7 +22,7 @@ class DomainHandler {
     // C++  DomainHandler
 
     #_domainURL = null;
-    #_sockAddr = new HifiSockAddr();  // For WebRTC, the port is the critical part.
+    #_sockAddr = new SockAddr();  // For WebRTC, the port is the critical part.
     #_isConnected = false;
     #_localID = 0;
     #_uuid = Uuid.NULL;
@@ -93,10 +93,10 @@ class DomainHandler {
 
     /*@devdoc
      *  Gets the domain's address.
-     *  @returns {HifiSockAddr} The domain's address.
+     *  @returns {SockAddr} The domain's address.
      */
     getSockAddr() {
-        // C++  HifiSockAddr& getSockAddr()
+        // C++  SockAddr& getSockAddr()
         return this.#_sockAddr;
     }
 

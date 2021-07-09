@@ -46,11 +46,11 @@ class Socket {
     /*@devdoc
      *  Sends a packet to a destination.
      *  @param {Packet} packet - The packet to send.
-     *  @param {HifiSockAddr} sockAddr - The destination to send the packet to.
+     *  @param {SockAddr} sockAddr - The destination to send the packet to.
      *  @returns {number} The number of bytes if successfully sent, otherwise <code>-1</code>.
      */
     writePacket(packet, sockAddr) {
-        // C++  qint64 writePacket(const Packet& packet, const HifiSockAddr& sockAddr)
+        // C++  qint64 writePacket(const Packet& packet, const SockAddr& sockAddr)
         assert(!packet.isReliable());
 
         // WEBRTC TODO: Address further C++ code.
@@ -62,18 +62,18 @@ class Socket {
      *  Sends a datagram to a destination.
      *  @param {ArrayBuffer} data - The datagram to send.
      *  @param {number} size - The maximum number of bytes to send.
-     *  @param {HifiSockAddr} sockAddr - The destination to send the datagram to.
+     *  @param {SockAddr} sockAddr - The destination to send the datagram to.
      *  @returns {number} The number of bytes if successfully sent, otherwise <code>-1</code>.
      */
     writeDatagram(data, size, sockAddr) {
-        // C++  qint64 writeDatagram(const char* data, qint64 size, const HifiSockAddr& sockAddr);
+        // C++  qint64 writeDatagram(const char* data, qint64 size, const SockAddr& sockAddr);
 
         let datagram = data.getMessageData().data.buffer;
         if (datagram.byteLength > size) {
             datagram = datagram.slice(0, size);
         }
 
-        // C++  qint64 writeDatagram(const QByteArray& datagram, const HifiSockAddr& sockAddr);
+        // C++  qint64 writeDatagram(const QByteArray& datagram, const SockAddr& sockAddr);
         // In-line this method because it's only called by the parent.
 
         // WEBRTC TODO: Address further C++ code.

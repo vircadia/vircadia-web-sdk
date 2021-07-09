@@ -10,7 +10,7 @@
 
 import WebRTCDataChannel from "./WebRTCDataChannel.js";
 import WebRTCSignalingChannel from "./WebRTCSignalingChannel.js";
-import HifiSockAddr from "../HifiSockAddr.js";
+import SockAddr from "../SockAddr.js";
 import Signal from "../../shared/Signal.js";
 
 
@@ -63,7 +63,7 @@ class WebRTCSocket {
      *  Received datagram data and information.
      *  @typedef {object} WebRTCSocket.Datagram
      *  @property {ArrayBuffer} buffer - The datagram data.
-     *  @property {HifiSockAddr} sender - The sender that the datagram was received from.
+     *  @property {SockAddr} sender - The sender that the datagram was received from.
      */
     /*@devdoc
      *  Reads the next datagram, up to a maximum number of bytes.
@@ -87,7 +87,7 @@ class WebRTCSocket {
                 datagram.buffer = data.message.slice(0, length);
             }
 
-            datagram.sender = new HifiSockAddr();
+            datagram.sender = new SockAddr();
             datagram.sender.setPort(data.channelID);
 
             return length;
