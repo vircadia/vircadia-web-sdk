@@ -16,7 +16,9 @@
  *  @namespace DomainServer
  */
 const DomainServer = new (class {
-
+    HelloWorld (message) {
+        console.info('Hello', message);
+    }
 })();
 
 export default DomainServer;
