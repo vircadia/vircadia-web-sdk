@@ -6,7 +6,7 @@ module.exports = {
         outputModule: true
     },
     entry: {
-        Vircadia: "./src/Vircadia.js"
+        Vircadia: "./src/Vircadia.ts"
     },
     output: {
         filename: "[name].js",
@@ -16,6 +16,9 @@ module.exports = {
         },
         module: true,
         clean: true
+    },
+    resolve: {
+        extensions: [".tsx", ".ts", ".js"]
     },
     plugins: [new ESLintPlugin({})],
     module: {
@@ -31,6 +34,11 @@ module.exports = {
                         }
                     }
                 ]
+            },
+            {
+                test: /\.tsx?$/u,
+                use: "ts-loader",
+                exclude: /node_modules/u
             }
         ]
     },

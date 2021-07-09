@@ -7,7 +7,7 @@
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
-
+/* eslint-disable */
 import DomainServer from "../src/DomainServer.js";
 
 import TestConfig from "./test.config.json";
