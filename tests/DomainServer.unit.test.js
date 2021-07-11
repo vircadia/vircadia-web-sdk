@@ -13,8 +13,8 @@ import DomainServer from "../src/DomainServer.js";
 
 describe("DomainServer - unit tests", () => {
 
-    test("Empty test", () => {
-        //
+    test("Is connected", () => {
+        expect(DomainServer.isConnected).toBe(false);
     });
 
 });
