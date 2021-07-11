@@ -11,12 +11,7 @@
 //
 
 /*@sdkdoc
- *  This is the Vircadia SDK.
- *
- *  <p>To use the API namespaces, import those that you want to use, for example:</p>
- *  <pre>
- *  import { Vircadia, DomainServer } from "Vircadia.js";
- *  </pre>
+ *  The <code>Vircadia</code> API provides information on the Vircadia SDK.
  *
  *  @namespace Vircadia
  *  @property {string} version - The version number of the SDK.

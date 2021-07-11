@@ -1,5 +1,5 @@
 {
-    "name": "vircadia-web-sdk",
+    "name": "@vircadia/web-sdk",
     "version": "0.0.1",
     "productName": "Vircadia Web SDK",
     "description": "Vircadia Web SDK for virtual worlds.",
@@ -10,7 +10,11 @@
         "url": "https://github.com/vircadia/vircadia-web-sdk.git"
     },
     "license": "Apache-2.0",
-    "private": true,
+    "exports": {
+        ".": "./src",
+        "./Vircadia": "./src/Vircadia.js",
+        "./DomainServer": "./src/DomainServer.js"
+    },
     "scripts": {
         "watch": "webpack --watch --mode production",
         "build": "webpack --mode production",

@@ -9,6 +9,22 @@ This SDK provides interfaces to:
 
 <hr />
 
+To use the API namespaces, import those that you want to use &mdash; either from the SDK package installed in your project or
+from the SDK JavaScript.
+
+- Install the SDK package in your project and import, for example:
+    ```
+    install --save-prod <path-to-vircadia-web-sdk-folder>
+
+    import { Vircadia, DomainServer } from "Vircadia, for example";
+    ```
+- Import directly from the SDK JavaScript:
+    ```
+    import { Vircadia, DomainServer } from "<path>/Vircadia.js";
+    ```
+
+<hr />
+
 For scripting API documentation, see the [Vircadia API Reference](https://apidocs.vircadia.dev).
 
 To learn more about using Vircadia and exploring the metaverse, see the [User Documentation](https://docs.vircadia.dev).
