@@ -12,24 +12,21 @@
 
 /*@sdkdoc
  *  This is the Vircadia SDK.
- *  <p>C++: This abstracts out key components of the native Vircadia Interface app.</p>
+ *
+ *  <p>To use the API namespaces, import those that you want to use, for example:</p>
+ *  <pre>
+ *  import { Vircadia, DomainServer } from "Vircadia.js";
+ *  </pre>
  *
  *  @namespace Vircadia
+ *  @property {string} version - The version number of the SDK.
  */
-const Vircadia = (function () {
+const Vircadia = new (class {
 
-    /**
-     *  Says hello to the world.
-     *  @function Vircadia.helloWorld
-     */
-    function helloWorld() {
-        console.log("Hello world!");
-    }
+    version = "0.0.1";
 
-    return {
-        helloWorld
-    };
-
-}());
+})();
 
 export default Vircadia;
+export { Vircadia };
+export { default as DomainServer } from "./DomainServer.js";
