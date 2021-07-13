@@ -19,7 +19,7 @@ from the SDK JavaScript.
     import { Vircadia, DomainServer } from "@vircadia/web-sdk";
     ```
 
-- You can also import only specific modules if you wish:
+- You can also only import specific modules if you wish:
     ```
     import { Vircadia, DomainServer } from "@vircadia/web-sdk/modules/Vircadia.js";
     ```
