@@ -11,7 +11,8 @@
     },
     "license": "Apache-2.0",
     "exports": {
-        ".": "./src",
+        ".": "./src/Vircadia.js",
+        "./modules/": "./src/",
         "./Vircadia": "./src/Vircadia.js",
         "./DomainServer": "./src/DomainServer.js"
     },
