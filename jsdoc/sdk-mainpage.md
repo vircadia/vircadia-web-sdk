@@ -14,9 +14,9 @@ from the SDK JavaScript.
 
 - Install the SDK package in your project and import, for example:
     ```
-    install --save-prod <path-to-vircadia-web-sdk-folder>
+    npm install --save-prod <path-to-vircadia-web-sdk-folder>
 
-    import { Vircadia, DomainServer } from "Vircadia, for example";
+    import { Vircadia, DomainServer } from "@vircadia/web-sdk/Vircadia";
     ```
 - Import directly from the SDK JavaScript:
     ```
