@@ -1,5 +1,5 @@
 //
-//  LimitedNodeList.js
+//  LimitedNodeList.ts
 //
 //  Created by David Rowe on 7 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -8,12 +8,12 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import NodeType from "./NodeType.js";
-import PacketReceiver from "./PacketReceiver.js";
-import SockAddr from "./SockAddr.js";
-import PacketType from "./udt/PacketHeaders.js";
-import Socket from "./udt/Socket.js";
-import assert from "../shared/assert.js";
+import NodeType from "./NodeType";
+import PacketReceiver from "./PacketReceiver";
+import SockAddr from "./SockAddr";
+import PacketType from "./udt/PacketHeaders";
+import Socket from "./udt/Socket";
+import assert from "../shared/assert";
 
 
 /*@devdoc

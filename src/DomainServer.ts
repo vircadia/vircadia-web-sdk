@@ -1,5 +1,5 @@
 //
-//  DomainServer.js
+//  DomainServer.ts
 //
 //  Vircadia Web SDK's Domain Server API.
 //

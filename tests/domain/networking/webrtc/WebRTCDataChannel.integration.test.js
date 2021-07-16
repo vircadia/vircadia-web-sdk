@@ -11,9 +11,9 @@
 /* globals jest */
 /* eslint-disable no-magic-numbers */
 
-import WebRTCDataChannel from "../../../../src/domain/networking/webrtc/WebRTCDataChannel.js";
-import WebRTCSignalingChannel from "../../../../src/domain/networking/webrtc/WebRTCSignalingChannel.js";
-import NodeType from "../../../../src/domain/networking/NodeType.js";
+import WebRTCDataChannel from "../../../../src/domain/networking/webrtc/WebRTCDataChannel";
+import WebRTCSignalingChannel from "../../../../src/domain/networking/webrtc/WebRTCSignalingChannel";
+import NodeType from "../../../../src/domain/networking/NodeType";
 
 import "wrtc";  // WebRTC Node.js package.
 

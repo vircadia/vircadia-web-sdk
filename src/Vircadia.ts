@@ -1,5 +1,5 @@
 //
-//  Vircadia.js
+//  Vircadia.ts
 //
 //  Vircadia Web SDK.
 //
@@ -24,4 +24,4 @@ const Vircadia = new (class {
 
 export default Vircadia;
 export { Vircadia };
-export { default as DomainServer } from "./DomainServer.js";
+export { default as DomainServer } from "./DomainServer";

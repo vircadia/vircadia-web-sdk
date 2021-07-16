@@ -1,5 +1,5 @@
 //
-//  WebRTCDataChannel.js
+//  WebRTCDataChannel.ts
 //
 //  Created by David Rowe on 21 May 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -8,8 +8,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import NodeType from "../NodeType.js";
-import WebRTCSignalingChannel from "./WebRTCSignalingChannel.js";
+import NodeType from "../NodeType";
+import WebRTCSignalingChannel from "./WebRTCSignalingChannel";
 
 /*@devdoc
  *  A WebRTC data channel used for Vircadia protocol communications with a domain server or assignment client. Uses a

@@ -1,5 +1,5 @@
 //
-//  DomainConnectRequest.js
+//  DomainConnectRequest.ts
 //
 //  Created by David Rowe on 7 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -8,10 +8,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import PacketType from "../udt/PacketHeaders.js";
-import UDT from "../udt/UDT.js";
-import NLPacket from "../NLPacket.js";
-import "../../shared/DataViewExtensions.js";
+import PacketType from "../udt/PacketHeaders";
+import UDT from "../udt/UDT";
+import NLPacket from "../NLPacket";
+import "../../shared/DataViewExtensions";
 
 
 const DomainConnectRequest = new (class {

@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import AddressManager from "../../../src/domain/networking/AddressManager.js";
+import AddressManager from "../../../src/domain/networking/AddressManager";
 
 import TestConfig from "../../test.config.json";
 

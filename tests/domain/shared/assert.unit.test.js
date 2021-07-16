@@ -10,7 +10,7 @@
 
 /* globals jest */
 
-import assert from "../../../src/domain/shared/assert.js";
+import assert from "../../../src/domain/shared/assert";
 
 
 describe("assert - unit tests", () => {

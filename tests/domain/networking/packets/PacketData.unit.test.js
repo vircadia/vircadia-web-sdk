@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import PacketData from "../../../../src/domain/networking/packets/PacketData.js";
+import PacketData from "../../../../src/domain/networking/packets/PacketData";
 
 
 describe("Packets - unit tests", () => {

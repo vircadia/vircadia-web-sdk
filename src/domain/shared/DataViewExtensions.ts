@@ -1,5 +1,5 @@
 //
-//  DataViewExtensions.js
+//  DataViewExtensions.ts
 //
 //  Created by David Rowe on 16 Jun 2021.
 //  Copyright 2021 Vircadia contributors.

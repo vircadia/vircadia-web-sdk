@@ -1,5 +1,5 @@
 //
-//  BasePacket.js
+//  BasePacket.ts
 //
 //  Created by David Rowe on 9 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -8,10 +8,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import UDT from "./UDT.js";
-import MessageData from "../MessageData.js";
-import SockAddr from "../SockAddr.js";
-import assert from "../../shared/assert.js";
+import UDT from "./UDT";
+import MessageData from "../MessageData";
+import SockAddr from "../SockAddr";
+import assert from "../../shared/assert";
 
 
 /*@devdoc

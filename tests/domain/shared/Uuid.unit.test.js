@@ -10,7 +10,7 @@
 
 /* eslint-disable no-magic-numbers */
 
-import Uuid from "../../../src/domain/shared/Uuid.js";
+import Uuid from "../../../src/domain/shared/Uuid";
 
 
 describe("Uuid - unit tests", () => {

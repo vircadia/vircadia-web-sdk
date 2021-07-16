@@ -1,5 +1,5 @@
 //
-//  MessageData.js
+//  MessageData.ts
 //
 //  Created by David Rowe on 11 Jun 2021.
 //  Copyright 2021 Vircadia contributors.

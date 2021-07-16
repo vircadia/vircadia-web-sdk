@@ -10,11 +10,11 @@
 
 /* eslint-disable no-magic-numbers */
 
-import NLPacket from "../../../src/domain/networking//NLPacket.js";
+import NLPacket from "../../../src/domain/networking//NLPacket";
 import ReceivedMessage from "../../../src/domain/networking/ReceivedMessage";
-import SockAddr from "../../../src/domain/networking/SockAddr.js";
-import Packet from "../../../src/domain/networking/udt/Packet.js";
-import PacketType from "../../../src/domain/networking/udt/PacketHeaders.js";
+import SockAddr from "../../../src/domain/networking/SockAddr";
+import Packet from "../../../src/domain/networking/udt/Packet";
+import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
 
 
 describe("ReceivedMessage - unit tests", () => {

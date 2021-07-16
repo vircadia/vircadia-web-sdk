@@ -1,5 +1,5 @@
 //
-//  Signal.js
+//  Signal.ts
 //
 //  Created by David Rowe on 6 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import assert from "./assert.js";
+import assert from "./assert";
 
 
 /*@devdoc

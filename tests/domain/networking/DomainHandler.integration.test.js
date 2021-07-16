@@ -10,9 +10,9 @@
 
 /* globals jest */
 
-import DomainHandler from "../../../src/domain/networking/DomainHandler.js";
-import Signal from "../../../src/domain/shared/Signal.js";
-import Uuid from "../../../src/domain/shared/Uuid.js";
+import DomainHandler from "../../../src/domain/networking/DomainHandler";
+import Signal from "../../../src/domain/shared/Signal";
+import Uuid from "../../../src/domain/shared/Uuid";
 
 import TestConfig from "../../test.config.json";
 

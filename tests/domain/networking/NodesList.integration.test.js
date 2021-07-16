@@ -12,9 +12,9 @@
 
 import "wrtc";  // WebRTC Node.js package.
 
-import AddressManager from "../../../src/domain/networking/AddressManager.js";
-import NodesList from "../../../src/domain/networking/NodesList.js";
-import NodeType from "../../../src/domain/networking/NodeType.js";
+import AddressManager from "../../../src/domain/networking/AddressManager";
+import NodesList from "../../../src/domain/networking/NodesList";
+import NodeType from "../../../src/domain/networking/NodeType";
 
 import TestConfig from "../../test.config.json";
 

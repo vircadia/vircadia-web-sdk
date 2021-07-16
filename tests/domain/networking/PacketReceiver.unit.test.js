@@ -11,10 +11,10 @@
 /* globals jest */
 /* eslint-disable no-magic-numbers */
 
-import PacketReceiver from "../../../src/domain/networking/PacketReceiver.js";
-import SockAddr from "../../../src/domain/networking/SockAddr.js";
-import Packet from "../../../src/domain/networking/udt/Packet.js";
-import PacketType from "../../../src/domain/networking/udt/PacketHeaders.js";
+import PacketReceiver from "../../../src/domain/networking/PacketReceiver";
+import SockAddr from "../../../src/domain/networking/SockAddr";
+import Packet from "../../../src/domain/networking/udt/Packet";
+import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
 
 
 describe("PacketReceicer - unit tests", () => {

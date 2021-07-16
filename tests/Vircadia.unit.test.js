@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import Vircadia from "../src/Vircadia.js";
+import Vircadia from "../src/Vircadia";
 
 
 describe("Vircadia - unit tests", () => {

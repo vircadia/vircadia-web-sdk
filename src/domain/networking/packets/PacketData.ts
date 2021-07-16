@@ -1,5 +1,5 @@
 //
-//  PacketData.js
+//  PacketData.ts
 //
 //  Created by David Rowe on 13 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -8,8 +8,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import DomainConnectRequest from "./DomainConnectRequest.js";
-import DomainList from "./DomainList.js";
+import DomainConnectRequest from "./DomainConnectRequest";
+import DomainList from "./DomainList";
 
 
 /*@devdoc

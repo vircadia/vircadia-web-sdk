@@ -11,8 +11,8 @@
 /* globals jest */
 /* eslint-disable no-magic-numbers */
 
-import WebRTCSignalingChannel from "../../../../src/domain/networking/webrtc/WebRTCSignalingChannel.js";
-import NodeType from "../../../../src/domain/networking/NodeType.js";
+import WebRTCSignalingChannel from "../../../../src/domain/networking/webrtc/WebRTCSignalingChannel";
+import NodeType from "../../../../src/domain/networking/NodeType";
 
 
 describe("WebRTCSignalingChannel - integration tests", () => {

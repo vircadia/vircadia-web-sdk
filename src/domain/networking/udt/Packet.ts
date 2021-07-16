@@ -1,5 +1,5 @@
 //
-//  Packet.js
+//  Packet.ts
 //
 //  Created by David Rowe on 9 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -8,9 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import BasePacket from "./BasePacket.js";
-import UDT from "./UDT.js";
-import assert from "../../shared/assert.js";
+import BasePacket from "./BasePacket";
+import UDT from "./UDT";
+import assert from "../../shared/assert";
 
 
 /*@devdoc

@@ -10,7 +10,7 @@
 
 /* eslint-disable no-magic-numbers */
 
-import MessageData from "../../../src/domain/networking/MessageData.js";
+import MessageData from "../../../src/domain/networking/MessageData";
 
 
 describe("MessageData - unit tests", () => {

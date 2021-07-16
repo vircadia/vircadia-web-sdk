@@ -1,5 +1,5 @@
 //
-//  SockAddr.js
+//  SockAddr.ts
 //
 //  Created by David Rowe on 7 Jun 2021.
 //  Copyright 2021 Vircadia contributors.

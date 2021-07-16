@@ -1,5 +1,5 @@
 //
-//  Uuid.js
+//  Uuid.ts
 //
 //  Created by David Rowe on 6 Jun 2021.
 //  Copyright 2021 Vircadia contributors.

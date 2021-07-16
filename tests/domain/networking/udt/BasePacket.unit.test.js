@@ -11,9 +11,9 @@
 /* globals jest */
 /* eslint-disable no-magic-numbers */
 
-import SockAddr from "../../../../src/domain/networking/SockAddr.js";
-import BasePacket from "../../../../src/domain/networking/udt/BasePacket.js";
-import UDT from "../../../../src/domain/networking/udt/UDT.js";
+import SockAddr from "../../../../src/domain/networking/SockAddr";
+import BasePacket from "../../../../src/domain/networking/udt/BasePacket";
+import UDT from "../../../../src/domain/networking/udt/UDT";
 
 
 describe("BasePacket - unit tests", () => {

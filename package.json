@@ -11,12 +11,12 @@
     },
     "license": "Apache-2.0",
     "exports": {
-        ".": "./src/Vircadia.js",
+        ".": "./src/Vircadia.ts",
         "./modules/": "./src/",
-        "./Vircadia": "./src/Vircadia.js",
-        "./DomainServer": "./src/DomainServer.js"
+        "./Vircadia": "./src/Vircadia.ts",
+        "./DomainServer": "./src/DomainServer.ts"
     },
-    "main": "Vircadia.js",
+    "main": "Vircadia.ts",
     "scripts": {
         "build": "webpack --mode production",
         "watch": "webpack --watch --mode development",

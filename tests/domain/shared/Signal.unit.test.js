@@ -10,7 +10,7 @@
 
 /* eslint-disable no-magic-numbers */
 
-import Signal from "../../../src/domain/shared/Signal.js";
+import Signal from "../../../src/domain/shared/Signal";
 
 
 describe("Signal - unit tests", () => {

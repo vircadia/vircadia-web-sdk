@@ -1,5 +1,5 @@
 //
-//  NodesList.js
+//  NodesList.ts
 //
 //  Created by David Rowe on 5 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -8,15 +8,15 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import AddressManager from "./AddressManager.js";
-import DomainHandler from "./DomainHandler.js";
-import FingerprintUtils from "./FingerprintUtils.js";
-import LimitedNodeList from "./LimitedNodeList.js";
-import NodeType from "./NodeType.js";
-import PacketReceiver from "./PacketReceiver.js";
-import PacketData from "./packets/PacketData.js";
-import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders.js";
-import Uuid from "../shared/Uuid.js";
+import AddressManager from "./AddressManager";
+import DomainHandler from "./DomainHandler";
+import FingerprintUtils from "./FingerprintUtils";
+import LimitedNodeList from "./LimitedNodeList";
+import NodeType from "./NodeType";
+import PacketReceiver from "./PacketReceiver";
+import PacketData from "./packets/PacketData";
+import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
+import Uuid from "../shared/Uuid";
 
 
 /*@devdoc

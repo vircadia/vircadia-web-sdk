@@ -1,5 +1,5 @@
 //
-//  WebRTCSocket.js
+//  WebRTCSocket.ts
 //
 //  Created by David Rowe on 28 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -8,10 +8,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import WebRTCDataChannel from "./WebRTCDataChannel.js";
-import WebRTCSignalingChannel from "./WebRTCSignalingChannel.js";
-import SockAddr from "../SockAddr.js";
-import Signal from "../../shared/Signal.js";
+import WebRTCDataChannel from "./WebRTCDataChannel";
+import WebRTCSignalingChannel from "./WebRTCSignalingChannel";
+import SockAddr from "../SockAddr";
+import Signal from "../../shared/Signal";
 
 
 /*@devdoc

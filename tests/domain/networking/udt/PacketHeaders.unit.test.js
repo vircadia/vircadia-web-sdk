@@ -10,7 +10,7 @@
 
 /* eslint-disable no-magic-numbers */
 
-import PacketType, { protocolVersionsSignature } from "../../../../src/domain/networking/udt/PacketHeaders.js";
+import PacketType, { protocolVersionsSignature } from "../../../../src/domain/networking/udt/PacketHeaders";
 
 
 describe("PacketType - unit tests", () => {

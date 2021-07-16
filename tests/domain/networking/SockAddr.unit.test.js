@@ -10,7 +10,7 @@
 
 /* eslint-disable no-magic-numbers */
 
-import SockAddr from "../../../src/domain/networking/SockAddr.js";
+import SockAddr from "../../../src/domain/networking/SockAddr";
 
 
 describe("SockAddr - unit tests", () => {

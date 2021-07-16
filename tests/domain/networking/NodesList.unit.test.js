@@ -8,8 +8,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import DomainHandler from "../../../src/domain/networking/DomainHandler.js";
-import NodesList from "../../../src/domain/networking/NodesList.js";
+import DomainHandler from "../../../src/domain/networking/DomainHandler";
+import NodesList from "../../../src/domain/networking/NodesList";
 import NodeType from "../../../src/domain/networking/NodeType";
 
 

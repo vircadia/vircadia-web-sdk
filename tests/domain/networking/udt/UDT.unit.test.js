@@ -10,7 +10,7 @@
 
 /* eslint-disable no-magic-numbers */
 
-import UDT from "../../../../src/domain/networking/udt/UDT.js";
+import UDT from "../../../../src/domain/networking/udt/UDT";
 
 
 describe("UDT - unit tests", () => {

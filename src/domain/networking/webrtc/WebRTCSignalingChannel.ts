@@ -1,5 +1,5 @@
 //
-//  WebRTCSignalingChannel.js
+//  WebRTCSignalingChannel.ts
 //
 //  Created by David Rowe on 17 May 2021.
 //  Copyright 2021 Vircadia contributors.

@@ -10,7 +10,7 @@
 
 /* eslint-disable no-magic-numbers */
 
-import "../../../src/domain/shared/DataViewExtensions.js";
+import "../../../src/domain/shared/DataViewExtensions";
 
 
 describe("DataView - unit tests", () => {

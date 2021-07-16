@@ -11,10 +11,10 @@
 /* globals jest */
 /* eslint-disable no-magic-numbers */
 
-import NLPacket from "../../../src/domain/networking/NLPacket.js";
-import SockAddr from "../../../src/domain/networking/SockAddr.js";
-import Packet from "../../../src/domain/networking/udt/Packet.js";
-import PacketType from "../../../src/domain/networking/udt/PacketHeaders.js";
+import NLPacket from "../../../src/domain/networking/NLPacket";
+import SockAddr from "../../../src/domain/networking/SockAddr";
+import Packet from "../../../src/domain/networking/udt/Packet";
+import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
 
 
 describe("NLPacket - unit tests", () => {

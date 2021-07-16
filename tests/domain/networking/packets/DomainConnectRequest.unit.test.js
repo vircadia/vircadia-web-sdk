@@ -8,13 +8,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import LimitedNodeList from "../../../../src/domain/networking/LimitedNodeList.js";
-import NLPacket from "../../../../src/domain/networking/NLPacket.js";
-import NodeType from "../../../../src/domain/networking/NodeType.js";
-import SockAddr from "../../../../src/domain/networking/SockAddr.js";
-import DomainConnectRequest from "../../../../src/domain/networking/packets/DomainConnectRequest.js";
-import PacketType, { protocolVersionsSignature } from "../../../../src/domain/networking/udt/PacketHeaders.js";
-import Uuid from "../../../../src/domain/shared/Uuid.js";
+import LimitedNodeList from "../../../../src/domain/networking/LimitedNodeList";
+import NLPacket from "../../../../src/domain/networking/NLPacket";
+import NodeType from "../../../../src/domain/networking/NodeType";
+import SockAddr from "../../../../src/domain/networking/SockAddr";
+import DomainConnectRequest from "../../../../src/domain/networking/packets/DomainConnectRequest";
+import PacketType, { protocolVersionsSignature } from "../../../../src/domain/networking/udt/PacketHeaders";
+import Uuid from "../../../../src/domain/shared/Uuid";
 
 
 describe("DomainConnectRequest - unit tests", () => {

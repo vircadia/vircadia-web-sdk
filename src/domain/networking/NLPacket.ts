@@ -1,5 +1,5 @@
 //
-//  NLPacket.js
+//  NLPacket.ts
 //
 //  Created by David Rowe on 8 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -8,9 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import Packet from "./udt/Packet.js";
-import PacketType from "./udt/PacketHeaders.js";
-import UDT from "./udt/UDT.js";
+import Packet from "./udt/Packet";
+import PacketType from "./udt/PacketHeaders";
+import UDT from "./udt/UDT";
 
 
 /*@devdoc

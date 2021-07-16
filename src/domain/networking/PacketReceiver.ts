@@ -1,5 +1,5 @@
 //
-//  PacketReceiver.js
+//  PacketReceiver.ts
 //
 //  Created by David Rowe on 8 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -8,8 +8,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import NLPacket from "./NLPacket.js";
-import ReceivedMessage from "./ReceivedMessage.js";
+import NLPacket from "./NLPacket";
+import ReceivedMessage from "./ReceivedMessage";
 
 /*@devdoc
  *  Maps received packets 1 : 1 with "listener" methods, and invokes the appropriate listener when called upon to do so for a

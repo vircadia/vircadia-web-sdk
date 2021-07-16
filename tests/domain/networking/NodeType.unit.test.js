@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import NodeType from "../../../src/domain/networking/NodeType.js";
+import NodeType from "../../../src/domain/networking/NodeType";
 
 
 describe("NodeType - unit tests", () => {

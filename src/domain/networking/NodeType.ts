@@ -1,5 +1,5 @@
 //
-//  NodeType.js
+//  NodeType.ts
 //
 //  Created by David Rowe on 18 May 2021.
 //  Copyright 2021 Vircadia contributors.

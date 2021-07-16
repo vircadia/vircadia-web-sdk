@@ -2,7 +2,7 @@ const path = require("path");  // eslint-disable-line @typescript-eslint/no-var-
 
 module.exports = {
     entry: {
-        Vircadia: "./src/Vircadia.js"
+        Vircadia: "./src/Vircadia.ts"
     },
 
     resolve: {
