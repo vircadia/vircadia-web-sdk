@@ -30,19 +30,31 @@ to. https://jestjs.io/.
 npm install
 ```
 
-### Hot-recompile for development
-```
-npm run watch
-```
-
 ### Compile and minify for production
 ```
 npm run build
 ```
 
+### Hot-recompile for development
+```
+npm run watch
+```
+
+### Clean the build directory
+```
+npm run clean
+```
+
 ### Lint files
+
+All files:
 ```
 npm run lint
+```
+
+A specific directory or file:
+```
+npm run lint-path <path>
 ```
 
 ### Run tests
@@ -58,6 +70,8 @@ npm run test-watch
 
 Specific tests (e.g., Packet.unit.test.js, all unit tests):
 ```
+npm run test <partial-path>
+
 npm run test /packet.unit
 npm run test unit.test
 ```

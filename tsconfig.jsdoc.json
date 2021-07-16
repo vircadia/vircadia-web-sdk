@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "outDir": "./docs/build",
+        "allowJs": true,
+        "target": "ES2015",
+        "lib": [ "ES2020" ],
+        "sourceMap": false,
+        "esModuleInterop": true,
+        "moduleResolution": "Node"
+    },
+    "include": [
+        "./src/**/*"
+    ],
+    "exclude": [
+        "./node_modules/**/*"
+    ]
+}

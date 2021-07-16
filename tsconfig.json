@@ -1,0 +1,41 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "allowJs": true,
+        "checkJs": true,
+        "target": "ES2015",
+        "lib": [ "ES2020" ],
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "moduleResolution": "Node",
+
+        // TypeScript 4.3
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "alwaysStrict": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        // "noImplicitOverride": true,  // Option not available in TypeScript 4.2.
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUncheckedIndexedAccess": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strict": true,
+        "strictBindCallApply": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": true
+    },
+    "include": [
+        "./src/**/*",
+        "./tests/**/*",
+        "./.*.js",
+        "./*.js",
+        "./*.json"
+    ],
+    "exclude": [
+        "./node_modules/**/*"
+    ]
+}

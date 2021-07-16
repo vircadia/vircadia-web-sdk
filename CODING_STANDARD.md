@@ -1,6 +1,7 @@
 
 # Vircadia Web SDK Coding Standard
 
+
 ## File Locations
 
 The source code is kept in the `/src` directory.
@@ -10,16 +11,19 @@ Unit and integration tests are kept in the `/tests` directory.
 - Unit tests have file extensions `.unit.test.js`.
 - Integration tests have file extensions `.integration.test.js`.
 
+
 ## General Rules
 
 The [Vircadia Coding Standard](https://github.com/vircadia/vircadia/blob/master/CODING_STANDARD.md) should be followed, where
 applicable.
 
 
-## ESLint Rules
+## Linting Rules
 
-A quite strict set of rules is configured in `.eslintrc.js` to help avoid common pitfalls and ensure a consistent style to aid
-maintenance.
+A quite strict set of TypeScript and ESLint rules is configured to help avoid common pitfalls and ensure a consistent style to
+aid maintenance:
+- `tsconfig.json`
+- `.eslintrc.js`
 
 
 ## Implementation Patterns
