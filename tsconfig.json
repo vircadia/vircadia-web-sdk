@@ -8,6 +8,7 @@
         "sourceMap": true,
         "esModuleInterop": true,
         "moduleResolution": "Node",
+        "skipLibCheck": true,
 
         // TypeScript 4.3
         "allowUnreachableCode": false,

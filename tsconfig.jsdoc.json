@@ -6,7 +6,8 @@
         "lib": [ "ES2020" ],
         "sourceMap": false,
         "esModuleInterop": true,
-        "moduleResolution": "Node"
+        "moduleResolution": "Node",
+        "skipLibCheck": true
     },
     "include": [
         "./src/**/*"
