@@ -2,15 +2,16 @@
     "compilerOptions": {
         "outDir": "./dist",
         "allowJs": true,
-        "checkJs": true,
-        "target": "ES2015",
-        "lib": [ "ES2020" ],
+        "checkJs": false,  // Temporarily disable while unit and integration tests are JavaScript.
+        "target": "ES2020",  // Required for BigInt literals.
+        "lib": [ "ES2020", "DOM" ],
         "sourceMap": true,
         "esModuleInterop": true,
         "moduleResolution": "Node",
         "skipLibCheck": true,
+        "isolatedModules": true,
 
-        // TypeScript 4.3
+        // TypeScript 4.2
         "allowUnreachableCode": false,
         "allowUnusedLabels": false,
         "alwaysStrict": true,
@@ -23,7 +24,6 @@
         "noUncheckedIndexedAccess": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "strict": true,
         "strictBindCallApply": true,
         "strictFunctionTypes": true,
         "strictNullChecks": true,

@@ -152,6 +152,7 @@ module.exports = {
         ],
         "space-infix-ops": "off",
         "@typescript-eslint/space-infix-ops": ["error", { "int32Hint": false }],
+        "@typescript-eslint/no-floating-promises": ["error", { "ignoreIIFE": true }],
 
 
         // eslint 6.8

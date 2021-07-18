@@ -56,13 +56,16 @@ References:
 ## Jest
 
 - `npm install --save-dev jest ts-jest @types/jest`
-- `npx ts-jest config:init` creates default `test.config.js` and edit
+- `npx ts-jest config:init` creates default `test.config.js`
 - `tsconfig.json`
+- `tests/tsconfig.json`
 - `package.json`
 
 `test.config.js` is configured to process both TypeScript and JavaScript file types, in ESM without requiring Babel.
 
 `tsconfig.json` is configured to enable `esModuleInterop` in order to quiet warnings.
+
+`tests/tsconfig.json` customizes TypeScript processing of test files.
 
 "test" and test-watch" commands are configured in `package.json`.
 
