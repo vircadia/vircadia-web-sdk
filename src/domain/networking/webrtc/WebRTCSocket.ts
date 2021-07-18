@@ -10,8 +10,22 @@
 
 import WebRTCDataChannel from "./WebRTCDataChannel";
 import WebRTCSignalingChannel from "./WebRTCSignalingChannel";
+import { NodeTypeValue } from "../NodeType";
 import SockAddr from "../SockAddr";
 import Signal from "../../shared/Signal";
+
+
+/*@devdoc
+ *  Received datagram data and information.
+ *  @typedef {object} WebRTCSocket.Datagram
+ *  @property {ArrayBuffer} buffer - The datagram data.
+ *  @property {SockAddr} sender - The sender that the datagram was received from.
+ */
+type WebRTCSocketDatagram = { buffer: ArrayBuffer, sender: SockAddr };
+
+type WebRTCDataChannelsByNodeType = Map<NodeTypeValue, { channelID: number, webrtcDataChannel: WebRTCDataChannel }>;
+type WebRTCDataChannelsByChannelID = Map<number, { nodeType: NodeTypeValue, webrtcDataChannel: WebRTCDataChannel }>;
+type OpenWebRTCDataChannelCallback = (channelID: number) => void;
 
 
 /*@devdoc
@@ -28,22 +42,23 @@ class WebRTCSocket {
 
     // A single WebRTC signaling channel connected to the domain server for use in establishing WebRTC connections with both the
     // domain server and each assignment client.
-    #_webrtcSignalingChannel = null;
-    #_webrtcSignalingChannelAddress = "";
+    private _webrtcSignalingChannel: WebRTCSignalingChannel | null = null;
+    private _webrtcSignalingChannelAddress = "";
 
     // A WebRTC data channel per domain server and assignment client node.
-    #_webrtcDataChannelsByNodeType = new Map();     // Map(NodeType, { channelID, webrtcDataChannel })
-    #_webrtcDataChannelsByChannelID = new Map();    // Map(ChannelID, { nodeType, webrtcDataChannel })
+    private _webrtcDataChannelsByNodeType: WebRTCDataChannelsByNodeType = new Map();
+    private _webrtcDataChannelsByChannelID: WebRTCDataChannelsByChannelID = new Map();
 
     // WebRTC data channel IDs are assigned by us and are the equivalent of UDP ports.
-    #_lastDataChannelID = 0;  // First data channel ID is 1.
+    // WEBRTC TODO: Move into WebRTCDataChannel and make read-only.
+    private _lastDataChannelID = 0;  // First data channel ID is 1.
 
-    #_receivedQueue = [];  // <{ channelID<number>, message<ArrayBuffer> }>
+    private _receivedQueue: Array<{ channelID: number, message: ArrayBuffer }> = [];
 
-    #_readyRead = new Signal();
+    private _readyRead = new Signal();
 
 
-    constructor() {  // eslint-disable-line no-useless-constructor
+    constructor() {  // eslint-disable-line @typescript-eslint/no-useless-constructor
         // C++  WebRTCSocket(QObject* parent, NodeType_t nodeType)
 
         // WEBRTC TODO: Address further C++ code.
@@ -54,17 +69,12 @@ class WebRTCSocket {
      *  Gets whether there are any datagrams waiting to be read.
      *  @returns {boolean} <code>true</code> if there is a datagram waiting to be read, <code>false</code> if there isn't.
      */
-    hasPendingDatagrams() {
+    hasPendingDatagrams(): boolean {
         // C++  bool hasPendingDatagrams()
-        return this.#_receivedQueue.length > 0;
+        return this._receivedQueue.length > 0;
     }
 
-    /*@devdoc
-     *  Received datagram data and information.
-     *  @typedef {object} WebRTCSocket.Datagram
-     *  @property {ArrayBuffer} buffer - The datagram data.
-     *  @property {SockAddr} sender - The sender that the datagram was received from.
-     */
+
     /*@devdoc
      *  Reads the next datagram, up to a maximum number of bytes.
      *  Any remaining data in the datagram is lost.
@@ -72,13 +82,13 @@ class WebRTCSocket {
      *  @param {number} maxSize The maximum number of bytes to read.
      *  @returns {number} The number of bytes read on success; <code>-1</code> if reading unsuccessful.
      */
-    readDatagram(datagram, maxSize = null) {
+    readDatagram(datagram: WebRTCSocketDatagram, maxSize: number | null = null): number {
         // C++  qint64 readDatagram(char* data, qint64 maxSize, QHostAddress* address = nullptr, quint16* port = nullptr);
 
         // WEBRTC TODO: Address further C++.
 
-        if (this.#_receivedQueue.length > 0) {
-            const data = this.#_receivedQueue.shift();
+        const data = this._receivedQueue.shift();
+        if (data) {
             const length = maxSize ? Math.min(data.message.byteLength, maxSize) : data.message.byteLength;
 
             if (length === data.message.byteLength) {
@@ -104,12 +114,12 @@ class WebRTCSocket {
      *  @param {number} port The data channel ID.
      *  @returns {number} The number of bytes if successfully sent, otherwise <code>-1</code>.
      */
-    writeDatagram(datagram, port) {
+    writeDatagram(datagram: ArrayBuffer, port: number): number {
         // C++  qint64 writeDatagram(const QByteArray& datagram, quint16 port);
 
         // WEBRTC TODO: Address further code.
 
-        const dataChannel = this.#_webrtcDataChannelsByChannelID.get(port);
+        const dataChannel = this._webrtcDataChannelsByChannelID.get(port);
         if (dataChannel && dataChannel.webrtcDataChannel.send(datagram)) {
             return datagram.byteLength;
         }
@@ -125,83 +135,86 @@ class WebRTCSocket {
      *  @function WebRTCSocket.readyRead
      *  @returns {Signal}
      */
-    get readyRead() {
+    get readyRead(): Signal {
         // C++  void readyRead()
-        return this.#_readyRead;
+        return this._readyRead;
     }
 
 
     // WEBRTC TODO: Replace this temporary method.
-    hasWebRTCSignalingChannel(url) {
+    hasWebRTCSignalingChannel(url: string): boolean {
         // C++  WebRTC-specific method
-        return url.length > 0 && this.#_webrtcSignalingChannel && this.#_webrtcSignalingChannelAddress === url;
+        return url.length > 0 && this._webrtcSignalingChannel !== null && this._webrtcSignalingChannelAddress === url;
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    openWebRTCSignalingChannel(url) {
+    openWebRTCSignalingChannel(url: string): void {
         // C++  WebRTC-specific method
-        if (url !== this.#_webrtcSignalingChannelAddress
-            && this.#_webrtcSignalingChannel && this.#_webrtcSignalingChannel.readyState === WebRTCSignalingChannel.OPEN) {
-            this.#_webrtcSignalingChannel.close();
-            this.#_webrtcSignalingChannel = null;
+        if (url !== this._webrtcSignalingChannelAddress
+            && this._webrtcSignalingChannel && this._webrtcSignalingChannel.readyState === WebRTCSignalingChannel.OPEN) {
+            this._webrtcSignalingChannel.close();
+            this._webrtcSignalingChannel = null;
         }
-        this.#_webrtcSignalingChannelAddress = url;
-        if (this.#_webrtcSignalingChannelAddress.length > 0) {
-            this.#_webrtcSignalingChannel = new WebRTCSignalingChannel(this.#_webrtcSignalingChannelAddress);
-        }
-    }
-
-    // WEBRTC TODO: Replace this temporary method.
-    isWebRTCSignalingChannelOpen() {
-        // C++  WebRTC-specific method
-        return this.#_webrtcSignalingChannel && this.#_webrtcSignalingChannel.readyState === WebRTCSignalingChannel.OPEN;
-    }
-
-    // WEBRTC TODO: Replace this temporary method.
-    closeWebRTCSignalingChannel() {
-        // C++  WebRTC-specific method
-        if (this.#_webrtcSignalingChannel) {
-            this.#_webrtcSignalingChannel.close();
-            this.#_webrtcSignalingChannel = null;
+        this._webrtcSignalingChannelAddress = url;
+        if (this._webrtcSignalingChannelAddress.length > 0) {
+            this._webrtcSignalingChannel = new WebRTCSignalingChannel(this._webrtcSignalingChannelAddress);
         }
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    hasWebRTCDataChannel(nodeType) {
+    isWebRTCSignalingChannelOpen(): boolean {
         // C++  WebRTC-specific method
-        return this.#_webrtcDataChannelsByNodeType.has(nodeType);
+        return this._webrtcSignalingChannel !== null && this._webrtcSignalingChannel.readyState === WebRTCSignalingChannel.OPEN;
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    openWebRTCDataChannel(nodeType, callback) {
+    closeWebRTCSignalingChannel(): void {
         // C++  WebRTC-specific method
-        const webrtcDataChannel = new WebRTCDataChannel(nodeType, this.#_webrtcSignalingChannel);
+        if (this._webrtcSignalingChannel) {
+            this._webrtcSignalingChannel.close();
+            this._webrtcSignalingChannel = null;
+        }
+    }
+
+    // WEBRTC TODO: Replace this temporary method.
+    hasWebRTCDataChannel(nodeType: NodeTypeValue): boolean {
+        // C++  WebRTC-specific method
+        return this._webrtcDataChannelsByNodeType.has(nodeType);
+    }
+
+    // WEBRTC TODO: Replace this temporary method.
+    openWebRTCDataChannel(nodeType: NodeTypeValue, callback: OpenWebRTCDataChannelCallback): void {
+        // C++  WebRTC-specific method
+        if (this._webrtcSignalingChannel === null) {
+            return;
+        }
+        const webrtcDataChannel = new WebRTCDataChannel(nodeType, this._webrtcSignalingChannel);
         webrtcDataChannel.onopen = () => {
-            this.#_lastDataChannelID += 1;
-            const channelID = this.#_lastDataChannelID;
+            this._lastDataChannelID += 1;
+            const channelID = this._lastDataChannelID;
             webrtcDataChannel.id = channelID;
-            this.#_webrtcDataChannelsByNodeType.set(nodeType, { channelID, webrtcDataChannel });
-            this.#_webrtcDataChannelsByChannelID.set(channelID, { nodeType, webrtcDataChannel });
+            this._webrtcDataChannelsByNodeType.set(nodeType, { channelID, webrtcDataChannel });
+            this._webrtcDataChannelsByChannelID.set(channelID, { nodeType, webrtcDataChannel });
             if (callback) {
                 callback(channelID);
             }
         };
         webrtcDataChannel.onmessage = (message) => {
-            const id = webrtcDataChannel.id;
-            this.#_receivedQueue.push({ message, id });
-            this.#_readyRead.emit();
+            const channelID = webrtcDataChannel.id;
+            this._receivedQueue.push({ channelID, message });
+            this._readyRead.emit();
         };
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    isWebRTCDataChannelOpen(nodeType) {
+    isWebRTCDataChannelOpen(nodeType: NodeTypeValue): boolean {
         // C++  WebRTC-specific method
-        const webrtcDataChannel = this.#_webrtcDataChannelsByNodeType.get(nodeType);
+        const webrtcDataChannel = this._webrtcDataChannelsByNodeType.get(nodeType);
         return webrtcDataChannel ? webrtcDataChannel.webrtcDataChannel.readyState === WebRTCDataChannel.OPEN : false;
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    closeWebRTCdataChannels() {  // eslint-disable-line class-methods-use-this
+    closeWebRTCdataChannels(): void {  // eslint-disable-line class-methods-use-this
         // C++  WebRTC-specific method
         console.error("Not implemented!");
     }
@@ -209,3 +222,4 @@ class WebRTCSocket {
 }
 
 export default WebRTCSocket;
+export type { WebRTCSocketDatagram };

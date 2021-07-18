@@ -9,10 +9,12 @@
 //
 
 /* globals jest */
-/* eslint-disable no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 
 import WebRTCSignalingChannel from "../../../../src/domain/networking/webrtc/WebRTCSignalingChannel";
 import NodeType from "../../../../src/domain/networking/NodeType";
+
+import "wrtc";  // WebRTC Node.js package.
 
 
 describe("WebRTCSignalingChannel - integration tests", () => {
@@ -21,8 +23,11 @@ describe("WebRTCSignalingChannel - integration tests", () => {
     const LOCALHOST_WEBSOCKET = "ws://127.0.0.1:40102";
     const INVALID_WEBSOCKET = "ws://0.0.0.0:0";
 
+    // Add WebSocket to Node.js environment.
+    global.WebSocket = require("ws");  // eslint-disable-line
+
     // Suppress console.error messages from being displayed.
-    const error = jest.spyOn(console, "error").mockImplementation(() => { });  // eslint-disable-line no-empty-function
+    const error = jest.spyOn(console, "error").mockImplementation(() => { });  // eslint-disable-line
 
 
     test("Can open and close", (done) => {
@@ -45,7 +50,7 @@ describe("WebRTCSignalingChannel - integration tests", () => {
         expect.assertions(1);
         let webrtcSignalingChannel = new WebRTCSignalingChannel(INVALID_WEBSOCKET);
         webrtcSignalingChannel.onerror = function () {
-            expect(webrtcSignalingChannel.readyState).toBe(WebRTCSignalingChannel.CLOSED);
+            expect(webrtcSignalingChannel.readyState).toBeGreaterThanOrEqual(WebRTCSignalingChannel.CLOSING);
             webrtcSignalingChannel.close();
             webrtcSignalingChannel = null;
             done();
@@ -106,7 +111,7 @@ describe("WebRTCSignalingChannel - integration tests", () => {
             expect(sent).toBe(true);
         };
         webrtcSignalingChannel1.addEventListener("message", function (message) {
-            expect(message.echo).toBe("Hello");
+            expect(message.echo).toBe("Hello");  // eslint-disable-line
             webrtcSignalingChannel1.close();
             webrtcSignalingChannel1 = null;
             if (webrtcSignalingChannel2 === null) {
@@ -114,7 +119,7 @@ describe("WebRTCSignalingChannel - integration tests", () => {
             }
         });
         webrtcSignalingChannel2.addEventListener("message", function (message) {
-            expect(message.echo).toBe("Goodbye");
+            expect(message.echo).toBe("Goodbye");  // eslint-disable-line
             webrtcSignalingChannel2.close();
             webrtcSignalingChannel2 = null;
             if (webrtcSignalingChannel1 === null) {

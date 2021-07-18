@@ -8,6 +8,11 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+// FIXME: There may be a better way to implement Uuid in TypeScript.
+// eslint-disable-next-line
+// @ts-nocheck
+
+
 /*@devdoc
  *  UUIDs (Universally Unique IDentifiers) are used to uniquely identify items such as entities and avatars. They are
  *  represented as {@link Uuid(1)|Uuid} objects encapsulating BigInt values in the SDK, and 16-byte (128-bit) numbers in the
@@ -45,13 +50,13 @@
  */
 class Uuid extends BigInt {
 
-    static NUM_BYTES_RFC4122_UUID = 16;  // eslint-disable-line no-magic-numbers
+    static NUM_BYTES_RFC4122_UUID = 16;  // eslint-disable-line @typescript-eslint/no-magic-numbers
     static NULL = BigInt(0);
 
-    constructor(value = 0) {
+    constructor(value: bigint = 0) {
         // C++  QUuid()
         // Work around BigInt not working with the "new" operator.
-        const obj = Object(BigInt(value));
+        const obj = <BigInt>Object(BigInt(value));
         Object.setPrototypeOf(obj, new.target.prototype);
         return obj;  // eslint-disable-line no-constructor-return
     }

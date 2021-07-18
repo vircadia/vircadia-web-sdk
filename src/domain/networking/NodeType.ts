@@ -8,6 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+
 /*@devdoc
  *  The types of network nodes operating in a domain. Node types are represented as single 8-bit characters in the protocol
  *  packets.
@@ -34,6 +35,23 @@
  *  </table>
  *  @typedef {string} NodeType
  */
+const enum NodeTypeValue {
+    // C++  NodeType_t
+    DomainServer = "D",
+    EntityServer = "o",
+    Agent = "I",
+    AudioMixer = "M",
+    AvatarMixer = "W",
+    AssetServer = "A",
+    MessagesMixer = "m",
+    EntityScriptServer = "S",
+    UpstreamAudioMixer = "B",
+    UpstreamAvatarMixer = "C",
+    DownstreamAudioMixer = "a",
+    DownstreamAvatarMixer = "w",
+    Unassigned = "\x01"
+}
+
 
 /*@devdoc
  *  Information on the network node types operating in a domain. Node types are represented as single 8-bit characters in the
@@ -57,43 +75,38 @@
  *  @property {NodeType} DownstreamAvatarMixer - <code>"w"</code> - Downstream avatar mixer.
  *  @property {NodeType} Unassigned - <code>String.fromCharCode(1)</code> - Unassigned.
  */
-const NodeType = new (class {
+const NodeType = new class {
     // C++  NodeType
 
-    // C++  NodeType_t
-    DomainServer = "D";
-    EntityServer = "o";
-    Agent = "I";
-    AudioMixer = "M";
-    AvatarMixer = "W";
-    AssetServer = "A";
-    MessagesMixer = "m";
-    EntityScriptServer = "S";
-    UpstreamAudioMixer = "B";
-    UpstreamAvatarMixer = "C";
-    DownstreamAudioMixer = "a";
-    DownstreamAvatarMixer = "w";
-    Unassigned = String.fromCharCode(1);
+    DomainServer = NodeTypeValue.DomainServer;
+    EntityServer = NodeTypeValue.EntityServer;
+    Agent = NodeTypeValue.Agent;
+    AudioMixer = NodeTypeValue.AudioMixer;
+    AvatarMixer = NodeTypeValue.AvatarMixer;
+    AssetServer = NodeTypeValue.AssetServer;
+    MessagesMixer = NodeTypeValue.MessagesMixer;
+    EntityScriptServer = NodeTypeValue.EntityScriptServer;
+    UpstreamAudioMixer = NodeTypeValue.UpstreamAudioMixer;
+    UpstreamAvatarMixer = NodeTypeValue.UpstreamAvatarMixer;
+    DownstreamAudioMixer = NodeTypeValue.DownstreamAudioMixer;
+    DownstreamAvatarMixer = NodeTypeValue.DownstreamAvatarMixer;
+    Unassigned = NodeTypeValue.Unassigned;
 
-    #_NODE_TYPE_NAMES = { };
-
-    constructor() {
-        this.#_NODE_TYPE_NAMES = {
-            [this.DomainServer]: "Domain Server",
-            [this.EntityServer]: "Entity Server",
-            [this.Agent]: "Agent",
-            [this.AudioMixer]: "Audio Mixer",
-            [this.AvatarMixer]: "Avatar Mixer",
-            [this.MessagesMixer]: "Messages Mixer",
-            [this.AssetServer]: "Asset Server",
-            [this.EntityScriptServer]: "Entity Script Server",
-            [this.UpstreamAudioMixer]: "Upstream Audio Mixer",
-            [this.UpstreamAvatarMixer]: "Upstream Avatar Mixer",
-            [this.DownstreamAudioMixer]: "Downstream Audio Mixer",
-            [this.DownstreamAvatarMixer]: "Downstream Avatar Mixer",
-            [this.Unassigned]: "Unassigned"
-        };
-    }
+    private _NODE_TYPE_NAMES = {
+        [NodeTypeValue.DomainServer]: "Domain Server",
+        [NodeTypeValue.EntityServer]: "Entity Server",
+        [NodeTypeValue.Agent]: "Agent",
+        [NodeTypeValue.AudioMixer]: "Audio Mixer",
+        [NodeTypeValue.AvatarMixer]: "Avatar Mixer",
+        [NodeTypeValue.MessagesMixer]: "Messages Mixer",
+        [NodeTypeValue.AssetServer]: "Asset Server",
+        [NodeTypeValue.EntityScriptServer]: "Entity Script Server",
+        [NodeTypeValue.UpstreamAudioMixer]: "Upstream Audio Mixer",
+        [NodeTypeValue.UpstreamAvatarMixer]: "Upstream Avatar Mixer",
+        [NodeTypeValue.DownstreamAudioMixer]: "Downstream Audio Mixer",
+        [NodeTypeValue.DownstreamAvatarMixer]: "Downstream Avatar Mixer",
+        [NodeTypeValue.Unassigned]: "Unassigned"
+    };
 
     /*@devdoc
      *  Gets the name of a NodeType value, e.g., <code>"Domain Server"</code>.
@@ -101,15 +114,15 @@ const NodeType = new (class {
      *  @param {NodeType} nodeType - The node type value.
      *  @returns {string} The name of the node type. <code>"Unknown"</code> if the <code>nodeType</code> is invalid.
      */
-    getNodeTypeName(nodeType) {
+    getNodeTypeName(nodeType: NodeTypeValue): string {
         // C++  QString& getNodeTypeName(NodeType_t nodeType)
-        let name = this.#_NODE_TYPE_NAMES[nodeType];
+        let name = this._NODE_TYPE_NAMES[nodeType];
         if (name === undefined) {
             name = "Unknown";
         }
         return name;
     }
 
-})();
+}();
 
-export default NodeType;
+export { NodeType as default, NodeTypeValue };

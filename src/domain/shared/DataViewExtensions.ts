@@ -20,7 +20,7 @@
 // WEBRTC TODO: May need to implement Uint64 methods for some browsers (e.g., Safari) if Babel doesn't handle this.
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView#64-bit_integer_values
 
-/* eslint-disable no-magic-numbers, no-invalid-this  */
+/* eslint-disable @typescript-eslint/no-magic-numbers, @typescript-eslint/no-invalid-this  */
 
 const MAX_U128_VALUE = 2n ** 128n - 1n;
 const SHIFT_64_BITS = 64n;
@@ -35,7 +35,7 @@ const MASK_64_BITS = 0xffffffffffffffffn;
  *  @param {boolean} littleEndian=false - <code>true</code> to write the data in little-endian format, <code>false</codE> to
  *      write in big-endian format.
  */
-function setBigUint128(byteOffset, value, littleEndian = false) {
+function setBigUint128(this: DataView, byteOffset: number, value: bigint, littleEndian = false) {
     const sanitizedValue = value > MAX_U128_VALUE ? 0n : value;
     if (littleEndian) {
         this.setBigUint64(byteOffset + 8, sanitizedValue >> SHIFT_64_BITS, littleEndian);
@@ -54,8 +54,8 @@ function setBigUint128(byteOffset, value, littleEndian = false) {
  *      read in big-endian format.
  *  @returns {BigInt} The value read.
  */
-function getBigUint128(byteOffset, littleEndian = false) {
-    let result = null;
+function getBigUint128(this: DataView, byteOffset: number, littleEndian = false): bigint {
+    let result = 0n;
     if (littleEndian) {
         result = (this.getBigUint64(byteOffset + 8, littleEndian) << SHIFT_64_BITS)
             + this.getBigUint64(byteOffset, littleEndian);
@@ -66,14 +66,23 @@ function getBigUint128(byteOffset, littleEndian = false) {
     return result;
 }
 
-/* eslint-enable no-magic-numbers, no-invalid-this  */
+/* eslint-enable @typescript-eslint/no-magic-numbers, no-invalid-this  */
 
 /* eslint-disable no-extend-native */
 
-if (!DataView.prototype.setBigUint128) {
+export { };  // Provide a module context for the declaration.
+
+declare global {
+    interface DataView {
+        setBigUint128: (this: DataView, byteOffset: number, value: bigint, littleEndian: boolean) => void;
+        getBigUint128: (this: DataView, byteOffset: number, littleEndian: boolean) => bigint;
+    }
+}
+
+if (!Object.prototype.hasOwnProperty.call(DataView, "setBigUint128")) {
     DataView.prototype.setBigUint128 = setBigUint128;
 }
-if (!DataView.prototype.getBigUint128) {
+if (!Object.prototype.hasOwnProperty.call(DataView, "getBigUint128")) {
     DataView.prototype.getBigUint128 = getBigUint128;
 }
 

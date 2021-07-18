@@ -14,13 +14,17 @@
  *  The <code>Vircadia</code> API provides information on the Vircadia SDK.
  *
  *  @namespace Vircadia
- *  @property {string} version - The version number of the SDK.
+ *  @property {string} version - The version number of the SDK. <em>Read-only.</em>
  */
-const Vircadia = new (class {
+const Vircadia = new class {
 
-    version = "0.0.1";
+    #_version = "0.0.1";
 
-})();
+    get version() {
+        return this.#_version;
+    }
+
+}();
 
 export default Vircadia;
 export { Vircadia };

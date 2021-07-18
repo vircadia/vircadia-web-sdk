@@ -15,6 +15,14 @@ describe("DomainServer - unit tests", () => {
 
     test("Is connected", () => {
         expect(DomainServer.isConnected).toBe(false);
+        try {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            DomainServer.isConnected = true;  // Shouldn't succeed.
+        } catch (e) {
+            //
+        }
+        expect(DomainServer.isConnected).toBe(false);
     });
 
 });

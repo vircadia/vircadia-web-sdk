@@ -16,11 +16,12 @@ import Uuid from "../shared/Uuid";
  *  <p>C++: <code>FingerprintUtils</code>
  *  @namespace FingerprintUtils
  */
-const FingerprintUtils = new (class {
+const FingerprintUtils = new class {
     // C++  FingerprintUtils
 
     // Dummy value for now.
-    #_machineFingerprint = new Uuid(213897485297723222451865858523432009088n); /* eslint-disable-line no-magic-numbers */
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+    private _machineFingerprint = new Uuid(213897485297723222451865858523432009088n);
 
     // WEBRTC TODO: Address further C++ code.
 
@@ -34,9 +35,9 @@ const FingerprintUtils = new (class {
 
         // WEBRTC TODO: Address further C++ code.
 
-        return this.#_machineFingerprint;
+        return this._machineFingerprint;
     }
 
-})();
+}();
 
 export default FingerprintUtils;

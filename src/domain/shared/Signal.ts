@@ -10,6 +10,8 @@
 
 import assert from "./assert";
 
+type callback = (...args: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+
 
 /*@devdoc
  *  Emulates Qt's signals and slots mechanism. In particular, a <code>Signal</code> object is implemented which can be connected
@@ -20,34 +22,34 @@ import assert from "./assert";
  */
 class Signal {
 
-    #_slots = new Set();
+    private _slots: Set<callback> = new Set();
 
     /*@devdoc
      *  Connects the signal to a "slot" function.
      *  <p>Note: If the slot function uses <code>this</code> then the correct <code>this</code> must be bound to it, e.g., by
      *  applying <code>.bind(this)</code> on the slot function when it is created.</p>
-     *  @param {function} slot Function to be called when <code>emit</code> is called.
+     *  @param {function} slot - Function to be called when <code>emit</code> is called.
      */
-    connect(slot) {
-        assert(slot);
-        this.#_slots.add(slot);
+    connect(slot: callback): void {
+        assert(typeof slot === "function");
+        this._slots.add(slot);
     }
 
     /*@devdoc
      *  Disconnects the signal from a "slot" function.
-     *  @param {function} slot Function to no longer be called when <code>emit</code> is called.
+     *  @param {function} slot - Function to no longer be called when <code>emit</code> is called.
      */
-    disconnect(slot) {
-        assert(slot);
-        this.#_slots.delete(slot);  // eslint-disable-line dot-notation
+    disconnect(slot: callback): void {
+        assert(typeof slot === "function");
+        this._slots.delete(slot);  // eslint-disable-line @typescript-eslint/dot-notation
     }
 
     /*@devdoc
      *  "Emits the signal": asynchronously calls all connected "slot" functions.
-     *  @param {any} [params] Parameter values to call connected "slot" functions with.
+     *  @param {any} [params] - Parameter values to call connected "slot" functions with.
      */
-    emit(...params) {
-        this.#_slots.forEach((slot) => {
+    emit(...params: any[]): void {  // eslint-disable-line @typescript-eslint/no-explicit-any
+        this._slots.forEach((slot) => {
             setTimeout(slot, 0, ...params);
         });
     }

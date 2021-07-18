@@ -8,7 +8,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* eslint-disable no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import Signal from "../../../src/domain/shared/Signal";
 
@@ -54,8 +55,8 @@ describe("Signal - unit tests", () => {
             expect(aParam1).toBe("a");
             expect(aParam2).toBe("b");
             expect(bCalled).toBe(0);
-            expect(bParam1).toBe(null);
-            expect(bParam2).toBe(null);
+            expect(bParam1).toBeNull();
+            expect(bParam2).toBeNull();
             signal = null;
             done();
         }, 100);

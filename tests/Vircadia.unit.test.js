@@ -16,6 +16,15 @@ describe("Vircadia - unit tests", () => {
     test("Version number", () => {
         expect(typeof Vircadia.version).toBe("string");
         expect(Vircadia.version.length).toBeGreaterThan(0);
+        const version = Vircadia.version;
+        try {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            Vircadia.version = "0.0.0";  // Shouldn't succeed.
+        } catch (e) {
+            //
+        }
+        expect(Vircadia.version).toBe(version);
     });
 
 });

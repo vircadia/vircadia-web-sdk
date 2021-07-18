@@ -15,11 +15,16 @@
  *
  *  @namespace DomainServer
  *  @property {boolean} isConnected - <code>true</code> if connected to the domain, <code>false</code> if not connected.
+ *      <em>Read-only.</em>
  */
-const DomainServer = new (class {
+const DomainServer = new class {
 
-    isConnected = false;
+    #_isConnected = false;
 
-})();
+    get isConnected() {
+        return this.#_isConnected;
+    }
+
+}();
 
 export default DomainServer;

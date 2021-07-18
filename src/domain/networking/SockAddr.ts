@@ -20,39 +20,39 @@ class SockAddr {
 
     // WEBRTC TODO: Rename to SockAddr?
 
-    #_address = 0;
-    #_port = 0;
+    private _address = 0;
+    private _port = 0;
 
     /*@devdoc
      *  Sets the IP address.
      *  @param {number} address - The IPv4 network address as a 4-byte number.
      */
-    setAddress(address) {
-        this.#_address = address;
+    setAddress(address: number): void {
+        this._address = address;
     }
 
     /*@devdoc
      *  Gets the IP address.
      *  @returns {number} The IPv4 network address as a 4-byte number. <strong>Default Value:</strong> <code>0</code>
      */
-    getAddress() {
-        return this.#_address;
+    getAddress(): number {
+        return this._address;
     }
 
     /*@devdoc
      *  Sets the port number.
      *  @param {number} port The port number.
      */
-    setPort(port) {
-        this.#_port = port;
+    setPort(port: number): void {
+        this._port = port;
     }
 
     /*@devdoc
      *  Gets the port number.
      *  @returns {number} The port number. <strong>Default Value:</strong> <code>0</code>
      */
-    getPort() {
-        return this.#_port;
+    getPort(): number {
+        return this._port;
     }
 
 }
