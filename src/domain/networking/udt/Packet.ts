@@ -10,6 +10,7 @@
 
 import BasePacket from "./BasePacket";
 import UDT from "./UDT";
+import SockAddr from "../SockAddr";
 import assert from "../../shared/assert";
 
 
@@ -45,7 +46,7 @@ import assert from "../../shared/assert";
 class Packet extends BasePacket {
     // C++  Packet : public BasePacket
 
-    /* eslint-disable no-magic-numbers */
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     /*@devdoc
      *  The position of the packet in a multi-packet message. Two-bit values suitable for use in bitwise packet operations.
@@ -93,7 +94,7 @@ class Packet extends BasePacket {
         ObfuscationL3: 0x3  // 11
     };
 
-    /* eslint-enable no-magic-numbers */
+    /* eslint-enable @typescript-eslint/no-magic-numbers */
 
     /*@devdoc
      *  Creates a new Packet &mdash; an alternative to using <code>new Packet(...)</code>.
@@ -105,7 +106,7 @@ class Packet extends BasePacket {
      *  @returns {Packet} A Packet created from the received data.
      *  @static
      */
-    static fromReceivedPacket(data, size, senderSockAddr) {
+    static fromReceivedPacket(data: DataView, size: number, senderSockAddr: SockAddr): Packet {
         // C++  Packet fromReceivedPacket(char[]* data, qint64 size, const SockAddr& senderSockAddr);
         return new Packet(data, size, senderSockAddr);
     }
@@ -119,7 +120,7 @@ class Packet extends BasePacket {
      *  @returns {number} The calculated total header size, in bytes.
      *  @static
      */
-    static totalHeaderSize(isPartOfMessage = false) {
+    static totalHeaderSize(isPartOfMessage = false): number {
         // C++  int totalHeaderSize(bool isPartOfMessage = false)
         // The BasePacket header size is 0 so no need to calculate that. Thus we can just directly include the localHeaderSize()
         // calculation.
@@ -129,34 +130,33 @@ class Packet extends BasePacket {
     }
 
 
-    // BasePacket member variables.
-    #_messageData;
+    constructor(
+        param0: number | DataView | Packet,
+        param1: boolean | number | undefined = undefined,
+        param2: boolean | SockAddr | undefined = undefined) {
 
-    constructor(param0, param1, param2) {
-        if (typeof param0 === "number") {
+        if (typeof param0 === "number" && typeof param1 === "boolean" && typeof param2 === "boolean") {
             // C++  Packet(qint64 size, bool isReliable = false, bool isPartOfMessage = false)
             const size = param0;
-            const isReliable = param1 ? param1 : false;
-            const isPartOfMessage = param2 ? param2 : false;
+            const isReliable = param1;
+            const isPartOfMessage = param2;
 
-            super((size === -1) ? -1 : (Packet.totalHeaderSize(isPartOfMessage) + size));
-            this.#_messageData = super.getMessageData();
-            this.#_messageData.isReliable = isReliable;
-            this.#_messageData.isPartOfMessage = isPartOfMessage;
+            super(size === -1 ? -1 : Packet.totalHeaderSize(isPartOfMessage) + size);
+            this._messageData.isReliable = isReliable;
+            this._messageData.isPartOfMessage = isPartOfMessage;
             // adjustPayloadStartAndCapacity();  N/A
-            this.#writeHeader();
+            this.writeHeader();
 
-        } else if (param0 instanceof DataView) {
+        } else if (param0 instanceof DataView && typeof param1 === "number" && param2 instanceof SockAddr) {
             // C++  Packet(std::unique_ptr<char[]> data, qint64 size, const SockAddr& senderSockAddr)
             const data = param0;
             const size = param1;
             const senderSockAddr = param2;
 
             super(data, size, senderSockAddr);
-            this.#_messageData = super.getMessageData();
-            this.#readHeader();
+            this.readHeader();
             // adjustPayloadStartAndCapacity();  N/A
-            if (this.#_messageData.obfuscationLevel !== Packet.ObfuscationLevel.NoObfuscation) {
+            if (this._messageData.obfuscationLevel !== Packet.ObfuscationLevel.NoObfuscation) {
                 console.error("ERROR: Undoing obfuscation not implemented!");
 
                 // WEBRTC TODO: Address further C++ code.
@@ -168,12 +168,11 @@ class Packet extends BasePacket {
             const packet = param0;
 
             super(packet);
-            this.#copyMembers(packet);
-            this.#_messageData.dataPosition = Packet.totalHeaderSize(this.#_messageData.isPartOfMessage);
+            this._messageData.dataPosition = Packet.totalHeaderSize(this._messageData.isPartOfMessage);
 
         } else {
-            super();
-            console.error("Unexpected data in Packet constructor!", typeof param0);
+            console.error("Invalid parameters in Packet constructor!", typeof param0, typeof param1, typeof param2);
+            super(0);
         }
     }
 
@@ -181,83 +180,71 @@ class Packet extends BasePacket {
      *  Gets whether the packet is part of a multi-packet message.
      *  @returns {boolean} <code>true</code> if the packet is part of a multi-packet message, <code>false</code> if it isn't.
      */
-    isPartOfMessage() {
+    isPartOfMessage(): boolean {
         // C++  bool isPartOfMessage()
-        return this.#_messageData.isPartOfMessage;
+        return this._messageData.isPartOfMessage;
     }
 
     /*@devdoc
      *  Gets whether the packet is sent reliably.
      *  @returns {boolean} <code>true</code> if the packet is to sent reliably, <code>false</code> if it isn't.
      */
-    isReliable() {
+    isReliable(): boolean {
         // C++  bool isPartOfMessage()
-        return this.#_messageData.isReliable;
+        return this._messageData.isReliable;
     }
 
-
-    // Copies the MessageData from another Packet.
-    #copyMembers(other, shallow = true) {
-        // C++  copyMembers(const Packet& other)
-        if (shallow) {
-            this.#_messageData = other.getMessageData();
-        } else {
-            console.error("Not implemented!");
-        }
-    }
 
     // Reads the packet header information from the data.
-    #readHeader() {
+    private readHeader() {
         // C++  void readHeader()
-        const messageData = this.#_messageData;
-        const seqNumBitField = messageData.data.getUint32(messageData.dataPosition, UDT.LITTLE_ENDIAN);
-        assert((seqNumBitField & UDT.CONTROL_BIT_MASK) === 0, "Packet.readHeader()", "This should be a data packet");
-        messageData.isReliable = (seqNumBitField & UDT.RELIABILITY_BIT_MASK) > 0;
-        messageData.isPartOfMessage = (seqNumBitField & UDT.MESSAGE_BIT_MASK) > 0;
-        messageData.obfuscationLevel
+        const seqNumBitField = this._messageData.data.getUint32(this._messageData.dataPosition, UDT.LITTLE_ENDIAN);
+        assert((seqNumBitField & UDT.CONTROL_BIT_MASK) === 0, "Packet.readHeader()", "This should be a data packet!");
+        this._messageData.isReliable = (seqNumBitField & UDT.RELIABILITY_BIT_MASK) > 0;
+        this._messageData.isPartOfMessage = (seqNumBitField & UDT.MESSAGE_BIT_MASK) > 0;
+        this._messageData.obfuscationLevel
             = (seqNumBitField & UDT.OBFUSCATION_LEVEL_BIT_MASK) >> UDT.OBFUSCATION_LEVEL_OFFSET;
-        messageData.sequenceNumber = (seqNumBitField & UDT.SEQUENCE_NUMBER_BIT_MASK);
-        messageData.dataPosition += 4;
+        this._messageData.sequenceNumber = seqNumBitField & UDT.SEQUENCE_NUMBER_BIT_MASK;
+        this._messageData.dataPosition += 4;
 
-        if (messageData.isPartOfMessage) {
+        if (this._messageData.isPartOfMessage) {
             console.error("ERROR: Multi-packet messages not yet implemented!");
 
             // WEBRTC TODO: Address further C++ code.
 
-            messageData.dataPosition += 8;
+            this._messageData.dataPosition += 8;
         } else {
-            messageData.messageNumber = 0;
-            messageData.packetPosition = Packet.PacketPosition.ONLY;
-            messageData.messagePartNumber = 0;
+            this._messageData.messageNumber = 0;
+            this._messageData.packetPosition = Packet.PacketPosition.ONLY;
+            this._messageData.messagePartNumber = 0;
         }
     }
 
     // Writes the packet header information to the data.
-    #writeHeader() {
+    private writeHeader() {
         // C++  void writeHeader()
-        const messageData = this.#_messageData;
-
-        let seqNumBitField = messageData.sequenceNumber;
-        if (messageData.isReliable) {
+        let seqNumBitField = this._messageData.sequenceNumber;
+        if (this._messageData.isReliable) {
             seqNumBitField |= UDT.RELIABILITY_BIT_MASK;
         }
-        if (messageData.isPartOfMessage) {
+        if (this._messageData.isPartOfMessage) {
             seqNumBitField |= UDT.MESSAGE_BIT_MASK;
         }
-        if (messageData.obfuscationLevel !== Packet.NoObfuscation) {
-            seqNumBitField |= (messageData.obfuscationLevel << UDT.OBFUSCATION_LEVEL_OFFSET);
+        if (this._messageData.obfuscationLevel !== Packet.ObfuscationLevel.NoObfuscation) {
+            seqNumBitField |= this._messageData.obfuscationLevel << UDT.OBFUSCATION_LEVEL_OFFSET;
         }
-        messageData.data.setUint32(messageData.dataPosition, seqNumBitField, UDT.LITTLE_ENDIAN);
-        messageData.dataPosition += 4;
+        this._messageData.data.setUint32(this._messageData.dataPosition, seqNumBitField, UDT.LITTLE_ENDIAN);
+        this._messageData.dataPosition += 4;
 
-        if (messageData.isPartOfMessage) {
-            let messageNumberAndBitField = messageData.messageNumber;
-            messageNumberAndBitField |= messageData.packetPosition << UDT.PACKET_POSITION_OFFSET;
-            messageData.data.setUint32(messageData.dataPosition, messageNumberAndBitField, UDT.LITTLE_ENDIAN);
-            messageData.dataPosition += 4;
+        if (this._messageData.isPartOfMessage) {
+            let messageNumberAndBitField = this._messageData.messageNumber;
+            messageNumberAndBitField |= this._messageData.packetPosition << UDT.PACKET_POSITION_OFFSET;
+            this._messageData.data.setUint32(this._messageData.dataPosition, messageNumberAndBitField, UDT.LITTLE_ENDIAN);
+            this._messageData.dataPosition += 4;
 
-            messageData.data.setUint32(messageData.dataPosition, messageData.messagePartNumber, UDT.LITTLE_ENDIAN);
-            messageData.dataPosition += 4;
+            this._messageData.data.setUint32(this._messageData.dataPosition, this._messageData.messagePartNumber,
+                UDT.LITTLE_ENDIAN);
+            this._messageData.dataPosition += 4;
         }
     }
 

@@ -16,13 +16,20 @@ import Uuid from "../../../src/domain/shared/Uuid";
 describe("Uuid - unit tests", () => {
 
     test("The default UUID value is Uuid.NULL", () => {
-        expect((new Uuid()).valueOf()).toBe(Uuid.NULL);
+        expect(new Uuid().valueOf()).toBe(Uuid.NULL);
     });
 
     test("Can initialize with a specified value", () => {
         // eslint-disable-next-line newline-per-chained-call
         expect(new Uuid(217897985291723272451165858623432009288n).valueOf().toString(16))
             .toBe("a3eda01ec4de456dbf07858a26c5a648");
+    });
+
+    test("Can get the underlying bigint primitive value", () => {
+        const uuid = new Uuid(1234n);
+        const value = uuid.value();
+        expect(typeof value).toBe("bigint");
+        expect(value).toBe(1234n);
     });
 
 });

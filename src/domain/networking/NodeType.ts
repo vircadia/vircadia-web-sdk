@@ -10,29 +10,8 @@
 
 
 /*@devdoc
- *  The types of network nodes operating in a domain. Node types are represented as single 8-bit characters in the protocol
- *  packets.
- *  <table>
- *      <thead>
- *          <tr><th>Name</th><th>Value</th><th>Description</th></tr>
- *      </thead>
- *      <tbody>
- *          <tr><td>DomainServer</td><td><code>"D"</code></td><td>Domain server.</td></tr>
- *          <tr><td>EntityServer</td><td><code>"o"</code></td><td>Entity server.</td></tr>
- *          <tr><td>Agent</td><td><code>"I"</code></td><td>Agent: An Interface client or an assignment client emulating an
- *              avatar.</td></tr>
- *          <tr><td>AudioMixer</td><td><code>"M"</code></td><td>Audio mixer.</td></tr>
- *          <tr><td>AvatarMixer</td><td><code>"W"</code></td><td>Avatar mixer.</td></tr>
- *          <tr><td>AssetServer</td><td><code>"A"</code></td><td>Asset server.</td></tr>
- *          <tr><td>MessagesMixer</td><td><code>"m"</code></td><td>Message mixer.</td></tr>
- *          <tr><td>EntityScriptServer</td><td><code>"S"</code></td><td>Entity script server.</td></tr>
- *          <tr><td>UpstreamAudioMixer</td><td><code>"B"</code></td><td>Upstream audio mixer.</td></tr>
- *          <tr><td>UpstreamAvatarMixer</td><td><code>"C"</code></td><td>Upstream avatar mixer.</td></tr>
- *          <tr><td>DownstreamAudioMixer</td><td><code>"a"</code></td><td>Downstream audio mixer.</td></tr>
- *          <tr><td>DownstreamAvatarMixer</td><td><code>"w"</code></td><td>Downstream avatar mixer.</td></tr>
- *          <tr><td>Unassigned</td><td><code>String.fromCharCode(1)</code></td><td>Unassigned.</td></tr>
- *      </tbody>
- *  </table>
+ *  {@link Node types}, <code>DomainServer</code> &ndash; <code>Unassigned</code>, are the types of network nodes operating in a
+ *  domain. They are represented as single 8-bit characters in the protocol packets.
  *  @typedef {string} NodeType
  */
 const enum NodeTypeValue {
@@ -93,19 +72,19 @@ const NodeType = new class {
     Unassigned = NodeTypeValue.Unassigned;
 
     private _NODE_TYPE_NAMES = {
-        [NodeTypeValue.DomainServer]: "Domain Server",
-        [NodeTypeValue.EntityServer]: "Entity Server",
-        [NodeTypeValue.Agent]: "Agent",
-        [NodeTypeValue.AudioMixer]: "Audio Mixer",
-        [NodeTypeValue.AvatarMixer]: "Avatar Mixer",
-        [NodeTypeValue.MessagesMixer]: "Messages Mixer",
-        [NodeTypeValue.AssetServer]: "Asset Server",
-        [NodeTypeValue.EntityScriptServer]: "Entity Script Server",
-        [NodeTypeValue.UpstreamAudioMixer]: "Upstream Audio Mixer",
-        [NodeTypeValue.UpstreamAvatarMixer]: "Upstream Avatar Mixer",
-        [NodeTypeValue.DownstreamAudioMixer]: "Downstream Audio Mixer",
-        [NodeTypeValue.DownstreamAvatarMixer]: "Downstream Avatar Mixer",
-        [NodeTypeValue.Unassigned]: "Unassigned"
+        [this.DomainServer]: "Domain Server",
+        [this.EntityServer]: "Entity Server",
+        [this.Agent]: "Agent",
+        [this.AudioMixer]: "Audio Mixer",
+        [this.AvatarMixer]: "Avatar Mixer",
+        [this.MessagesMixer]: "Messages Mixer",
+        [this.AssetServer]: "Asset Server",
+        [this.EntityScriptServer]: "Entity Script Server",
+        [this.UpstreamAudioMixer]: "Upstream Audio Mixer",
+        [this.UpstreamAvatarMixer]: "Upstream Avatar Mixer",
+        [this.DownstreamAudioMixer]: "Downstream Audio Mixer",
+        [this.DownstreamAvatarMixer]: "Downstream Avatar Mixer",
+        [this.Unassigned]: "Unassigned"
     };
 
     /*@devdoc

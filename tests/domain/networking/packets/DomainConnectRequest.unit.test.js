@@ -8,7 +8,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import LimitedNodeList from "../../../../src/domain/networking/LimitedNodeList";
 import NLPacket from "../../../../src/domain/networking/NLPacket";
 import NodeType from "../../../../src/domain/networking/NodeType";
 import SockAddr from "../../../../src/domain/networking/SockAddr";
@@ -29,7 +28,7 @@ describe("DomainConnectRequest - unit tests", () => {
             hardwareAddress: "",
             machineFingerprint: new Uuid(),
             compressedSystemInfo: new Uint8Array(new ArrayBuffer(0)),
-            connectReason: LimitedNodeList.ConnectReason.Connect,
+            connectReason: 0,
             previousConnectionUptime: BigInt(0),
             currentTime: BigInt(Date.now().valueOf()),
             ownerType: NodeType.Agent,
@@ -59,7 +58,7 @@ describe("DomainConnectRequest - unit tests", () => {
             hardwareAddress: "",
             machineFingerprint: new Uuid(),
             compressedSystemInfo: new Uint8Array(new ArrayBuffer(0)),
-            connectReason: LimitedNodeList.ConnectReason.Connect,
+            connectReason: 0,
             previousConnectionUptime: BigInt(0),
             currentTime: BigInt(Date.now().valueOf()),
             ownerType: NodeType.Agent,
@@ -76,7 +75,7 @@ describe("DomainConnectRequest - unit tests", () => {
             placeName: "",
             isDomainConnected: false,
             username: "user",
-            usernameSignature: new ArrayBuffer(0),
+            usernameSignature: new Uint8Array(new ArrayBuffer(0)),
             domainUsername: "domainuser",
             domainTokens: "domaintokens"
         });
@@ -85,6 +84,7 @@ describe("DomainConnectRequest - unit tests", () => {
         disconnectedPacketSize = packet.getMessageData().dataPosition;
         expect(disconnectedPacketSize).toBeGreaterThan(0);
         expect(disconnectedPacketSize).toBeGreaterThan(connectedPacketSize);
+
     });
 
 });

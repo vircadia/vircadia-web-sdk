@@ -9,7 +9,7 @@
 //
 
 /* globals jest */
-/* eslint-disable no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 
 import SockAddr from "../../../../src/domain/networking/SockAddr";
 import BasePacket from "../../../../src/domain/networking/udt/BasePacket";
@@ -65,7 +65,7 @@ describe("Packet - unit tests", () => {
             expect(messageData.data.getUint8(i)).toBe(0);
         }
 
-        packet = new Packet(-1);
+        packet = new Packet(-1, false, false);
         messageData = packet.getMessageData();
         expect(messageData.packetSize).toBe(BasePacket.maxPayloadSize());
         expect(messageData.data.byteLength).toBe(BasePacket.maxPayloadSize());
@@ -100,7 +100,7 @@ describe("Packet - unit tests", () => {
         const messageDataA = packetA.getMessageData();
         const packetB = new Packet(packetA);
         const messageDataB = packetB.getMessageData();
-        expect(messageDataB).toBe(messageDataA);
+        expect(messageDataB).not.toBe(messageDataA);
         expect(error).toHaveBeenCalledTimes(0);
     });
 

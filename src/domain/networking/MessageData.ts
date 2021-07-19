@@ -8,15 +8,21 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+//import Packet from "./udt/Packet";
+import SockAddr from "./../networking/SockAddr";
+import { PacketTypeValue } from "./udt/PacketHeaders";
+
+
 /*@devdoc
- *  Collects together what would otherwise be private class fields used in {@link BasePacket}, {@link Packet}, {@link NLPacket},
+ *  Collects together what would otherwise be private members used in {@link BasePacket}, {@link Packet}, {@link NLPacket},
  *  {@link Packets}, and {@link ReceivedMessage} classes.
- *  <p>JavaScript doesn't allow private member fields of base classes to be
- *  accessed by derived classes. The solution adopted is to share the "private" data among these classes in a MessageData object
- *  so that the data can be used without making copies in each class. Additionally, this object is shared with the Packets and
- *  ReceivedMessage classes so that the data can be used without copying.</p>
+ *  <p>TypeScript doesn't enable private members of a class to be accessed by "friend" classes. In particular, ReceivedMessage
+ *  cannot access members of the packet classes. The solution adopted is to collect and exposed the relevant private members
+ *  in a MessageData object, which can be used without copying the data.</p>
  *  <p>C++  N/A</p>
+ *
  *  @class MessageData
+ *  @param {MessageData} [other] - Another MessageData object to copy property values from.
  *
  *  @property <strong>BasePacket</strong>
  *  @property {DataView} data - The raw packet or message data.
@@ -24,10 +30,10 @@
  *      JavaScript instead of using <code>payloadStart</code>, <code>payloadCapacity</code>, and <code>payloadSize</code>.
  *  @property {number} packetSize - The size of the received packet.
  *  @property {SockAddr} senderSockAddr - The IP address and port of the sender.
- *  @property {Date} receiveTime - The time that the packet or start of message was received.
+ *  @property {number} receiveTime - The time stamp at which the packet or start of message was received.
  *
  *  @property <strong>Packet</strong>
- *  @property {boolean} isReliable <code>true</code> if the packet is sent reliably, <code>false</code> if it isn't.
+ *  @property {boolean} isReliable - <code>true</code> if the packet is sent reliably, <code>false</code> if it isn't.
  *  @property {boolean} isPartOfMessage - <code>true</code> if the packet is part of a multi-packet message, <code>false</code>
  *      if it isn't.
  *  @property {Packet.ObfuscationLevel} obfuscationLevel=NoObfuscation - The level of obfuscation used in encoding the packet
@@ -47,10 +53,53 @@
  *  @property {PacketType} packetType - The type of packet. This is a copy of the <code>type</code> value.
  *  @property {number} numPackets=1 -  The number of packets used to form the message.
  *  @property {boolean} isComplete - <code>true</code> if the message is complete, <code>false</code> if it isn't.
- *  @property {Date} firstPacketReceiveTime - The time that the first packet was received.
+ *  @property {number} firstPacketReceiveTime - The time stamp at which the first packet was received.
  */
 class MessageData {
     // Property values are added by BasePacket, Packet, NLPacket, and ReceivedMessage.
+
+    // C++  BasePacket
+    data = new DataView(new ArrayBuffer(0));
+    dataPosition = 0;
+    packetSize = 0;
+    senderSockAddr: SockAddr | undefined = undefined;  // We can avoid creating this object now.
+    receiveTime = 0;
+
+    // C++  Packet
+    isReliable = false;
+    isPartOfMessage = false;
+    obfuscationLevel = 0;  // Packet.ObfuscationLevel.NoObfuscation;
+    sequenceNumber = 0;
+    messageNumber = 0;
+    packetPosition = 0;  // Packet.PacketPosition.ONLY;
+    messagePartNumber = 0;
+
+    // C++  NLPacket
+    type = PacketTypeValue.Unknown;
+    version = 0;
+    sourceID = 0;
+
+    // C++  ReceivedMessage
+    headData = this.data;
+    packetType: PacketTypeValue = 0;
+    numPackets = 1;
+    isComplete = false;
+    firstPacketReceiveTime = 0;
+
+
+    constructor(other: MessageData | undefined = undefined) {
+        if (other) {
+            const properties = Object.keys(this);
+            properties.forEach((property) => {
+                // eslint-disable-next-line
+                // @ts-ignore
+                this[property] = other[property];  // eslint-disable-line
+            });
+        }
+
+        // WEBRTC TODO: Seal other objects.
+        Object.seal(this);  // Prevent unintended use of invalid properties.
+    }
 }
 
 export default MessageData;

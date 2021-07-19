@@ -8,9 +8,19 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import WebRTCSocket from "../webrtc/WebRTCSocket";
+import { default as WebRTCSocket, WebRTCSocketDatagram, OpenWebRTCDataChannelCallback } from "../webrtc/WebRTCSocket";
 import Packet from "../udt/Packet";
 import assert from "../../shared/assert";
+import { NodeTypeValue } from "../NodeType";
+import SockAddr from "../SockAddr";
+
+
+/*@devdoc
+ *  Called to handle a received packet.
+ *  @callback Socket~handlePacketCallback
+ *  @param {Packet} packet - The received packet to handle.
+ */
+type PacketHandlerCallback = (packet: Packet) => void;
 
 
 /*@devdoc
@@ -21,23 +31,25 @@ import assert from "../../shared/assert";
 class Socket {
     // C++  Socket : public QObject
 
-    #_webrtcSocket = null;  // Use WebRTCSocket directly without going through an intermediary NetworkSocket.
+    // Use WebRTCSocket directly without going through an intermediary NetworkSocket as is done in C++.
+    private _webrtcSocket: WebRTCSocket;
 
     // WEBRTC TODO: Address further C++ code.
 
-    #_packetHandler = null;
+    _packetHandler: PacketHandlerCallback | null = null;
 
 
     constructor() {
         // C++  Socket(QObject* object = 0, bool shouldChangeSocketOptions = true, NodeType_t nodeType = NodeType::Unassigned)
 
-        this.#_webrtcSocket = new WebRTCSocket();
+        this._webrtcSocket = new WebRTCSocket();
 
         // Set up slots.
         this.readPendingDatagrams = this.readPendingDatagrams.bind(this);
 
         // Connect signals.
-        this.#_webrtcSocket.readyRead.connect(this.readPendingDatagrams);
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        this._webrtcSocket.readyRead.connect(this.readPendingDatagrams);  // Method has been bound above.
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -49,13 +61,13 @@ class Socket {
      *  @param {SockAddr} sockAddr - The destination to send the packet to.
      *  @returns {number} The number of bytes if successfully sent, otherwise <code>-1</code>.
      */
-    writePacket(packet, sockAddr) {
+    writePacket(packet: Packet, sockAddr: SockAddr): number {
         // C++  qint64 writePacket(const Packet& packet, const SockAddr& sockAddr)
         assert(!packet.isReliable());
 
         // WEBRTC TODO: Address further C++ code.
 
-        return this.writeDatagram(packet, packet.getDataSize(), sockAddr);
+        return this.writeDatagram(packet.getMessageData().data.buffer, packet.getDataSize(), sockAddr);
     }
 
     /*@devdoc
@@ -65,20 +77,17 @@ class Socket {
      *  @param {SockAddr} sockAddr - The destination to send the datagram to.
      *  @returns {number} The number of bytes if successfully sent, otherwise <code>-1</code>.
      */
-    writeDatagram(data, size, sockAddr) {
+    writeDatagram(data: ArrayBuffer, size: number, sockAddr: SockAddr): number {
         // C++  qint64 writeDatagram(const char* data, qint64 size, const SockAddr& sockAddr);
 
-        let datagram = data.getMessageData().data.buffer;
-        if (datagram.byteLength > size) {
-            datagram = datagram.slice(0, size);
-        }
+        const datagram = data.byteLength <= size ? data : data.slice(0, size);
 
         // C++  qint64 writeDatagram(const QByteArray& datagram, const SockAddr& sockAddr);
         // In-line this method because it's only called by the parent.
 
         // WEBRTC TODO: Address further C++ code.
 
-        const bytesWritten = this.#_webrtcSocket.writeDatagram(datagram, sockAddr.getPort());
+        const bytesWritten = this._webrtcSocket.writeDatagram(datagram, sockAddr.getPort());
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -86,17 +95,12 @@ class Socket {
     }
 
     /*@devdoc
-     *  Called to handle a received packet.
-     *  @callback Socket~handlePacketCallback
-     *  @param {Packet} packet - The received packet to handle.
-     */
-    /*@devdoc
      *  Sets the function called to handle a received packet.
      *  @param {Socket~handlePacketCallback} handler - The function to call to handle the received packet.
      */
-    setPacketHandler(handler) {
+    setPacketHandler(handler: PacketHandlerCallback): void {
         // C++  void setPacketHandler(PacketHandler handler)
-        this.#_packetHandler = (packet) => {
+        this._packetHandler = (packet: Packet) => {
             handler(packet);
         };
     }
@@ -105,22 +109,22 @@ class Socket {
      *  Reads datagrams from the {@link WebRTCSocket} and forwards them to the packet handler to process.
      *  @returns {Slot}
      */
-    readPendingDatagrams() {
+    readPendingDatagrams(): void {
         // C++  void readPendingDatagrams();
 
         // WEBRTC TODO: Address further C++ code.
 
-        while (this.#_webrtcSocket.hasPendingDatagrams()) {  // WEBRTC TODO: Further C++ code in condition.
+        while (this._webrtcSocket.hasPendingDatagrams()) {  // WEBRTC TODO: Further C++ code in condition.
 
             // WEBRRTC TODO: Address further C++ code.
 
-            const datagram = { buffer: null, sender: null };
-            const sizeRead = this.#_webrtcSocket.readDatagram(datagram);
+            const datagram: WebRTCSocketDatagram = { buffer: undefined, sender: undefined };
+            const sizeRead = this._webrtcSocket.readDatagram(datagram);
             if (sizeRead <= 0) {
                 continue;  // eslint-disable-line no-continue
             }
 
-            const dataView = new DataView(datagram.buffer);
+            const dataView = new DataView(<ArrayBuffer>datagram.buffer);
 
             // WEBRTC TODO: Address further C++ code.
 
@@ -136,7 +140,7 @@ class Socket {
 
             } else {
 
-                const packet = Packet.fromReceivedPacket(dataView, dataView.byteLength, datagram.sender);
+                const packet = Packet.fromReceivedPacket(dataView, dataView.byteLength, <SockAddr>datagram.sender);
                 const messageData = packet.getMessageData();
                 messageData.receiveTime = receiveTime;
 
@@ -148,8 +152,8 @@ class Socket {
 
                     console.error("Multi-packet messages not yet implemented!");
 
-                } else if (this.#_packetHandler) {
-                    this.#_packetHandler(packet);
+                } else if (this._packetHandler) {
+                    this._packetHandler(packet);
                 }
 
             }
@@ -158,44 +162,44 @@ class Socket {
 
 
     // WEBRTC TODO: Replace this temporary method.
-    hasWebRTCSignalingChannel(url) {
-        return this.#_webrtcSocket.hasWebRTCSignalingChannel(url);
+    hasWebRTCSignalingChannel(url: string): boolean {
+        return this._webrtcSocket.hasWebRTCSignalingChannel(url);
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    openWebRTCSignalingChannel(url) {
-        this.#_webrtcSocket.openWebRTCSignalingChannel(url);
+    openWebRTCSignalingChannel(url: string): void {
+        this._webrtcSocket.openWebRTCSignalingChannel(url);
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    isWebRTCSignalingChannelOpen() {
-        return this.#_webrtcSocket.isWebRTCSignalingChannelOpen();
+    isWebRTCSignalingChannelOpen(): boolean {
+        return this._webrtcSocket.isWebRTCSignalingChannelOpen();
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    closeWebRTCSignalingChannel() {
-        this.#_webrtcSocket.closeWebRTCSignalingChannel();
+    closeWebRTCSignalingChannel(): void {
+        this._webrtcSocket.closeWebRTCSignalingChannel();
     }
 
 
     // WEBRTC TODO: Replace this temporary method.
-    hasWebRTCDataChannel(nodeType) {
-        return this.#_webrtcSocket.hasWebRTCDataChannel(nodeType);
+    hasWebRTCDataChannel(nodeType: NodeTypeValue): boolean {
+        return this._webrtcSocket.hasWebRTCDataChannel(nodeType);
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    openWebRTCDataChannel(nodeType, callback) {
-        this.#_webrtcSocket.openWebRTCDataChannel(nodeType, callback);
+    openWebRTCDataChannel(nodeType: NodeTypeValue, callback: OpenWebRTCDataChannelCallback): void {
+        this._webrtcSocket.openWebRTCDataChannel(nodeType, callback);
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    isWebRTCDataChannelOpen(nodeType) {
-        return this.#_webrtcSocket.isWebRTCDataChannelOpen(nodeType);
+    isWebRTCDataChannelOpen(nodeType: NodeTypeValue): boolean {
+        return this._webrtcSocket.isWebRTCDataChannelOpen(nodeType);
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    closeWebRTCDataChannels(nodeType) {  // eslint-disable-line
-        this.#_webrtcSocket.closeWebRTCDataChannels();
+    closeWebRTCDataChannel(nodeType: NodeTypeValue): void {  // eslint-disable-line
+        this._webrtcSocket.closeWebRTCDataChannel(nodeType);
     }
 
 }

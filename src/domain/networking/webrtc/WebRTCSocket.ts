@@ -21,11 +21,13 @@ import Signal from "../../shared/Signal";
  *  @property {ArrayBuffer} buffer - The datagram data.
  *  @property {SockAddr} sender - The sender that the datagram was received from.
  */
-type WebRTCSocketDatagram = { buffer: ArrayBuffer, sender: SockAddr };
+type WebRTCSocketDatagram = { buffer: ArrayBuffer | undefined, sender: SockAddr | undefined };
+
+// WEBRTC TODO: Replace this temporary type.
+type OpenWebRTCDataChannelCallback = (channelID: number) => void;
 
 type WebRTCDataChannelsByNodeType = Map<NodeTypeValue, { channelID: number, webrtcDataChannel: WebRTCDataChannel }>;
 type WebRTCDataChannelsByChannelID = Map<number, { nodeType: NodeTypeValue, webrtcDataChannel: WebRTCDataChannel }>;
-type OpenWebRTCDataChannelCallback = (channelID: number) => void;
 
 
 /*@devdoc
@@ -214,7 +216,9 @@ class WebRTCSocket {
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    closeWebRTCdataChannels(): void {  // eslint-disable-line class-methods-use-this
+    // eslint-disable-next-line
+    // @ts-ignore
+    closeWebRTCDataChannel(nodeType: NodeTypeValue): void {  // eslint-disable-line
         // C++  WebRTC-specific method
         console.error("Not implemented!");
     }
@@ -222,4 +226,4 @@ class WebRTCSocket {
 }
 
 export default WebRTCSocket;
-export type { WebRTCSocketDatagram };
+export type { WebRTCSocketDatagram, OpenWebRTCDataChannelCallback };

@@ -39,15 +39,18 @@ class BasePacket {
      *  @function BasePacket.maxPayloadSize
      *  @returns {number} The maximum Vircadia protocol payload size, in bytes.
      */
-    static maxPayloadSize() {
+    static maxPayloadSize(): number {
         // C++  int maxPayloadSize()
         return UDT.MAX_PACKET_SIZE;
     }
 
 
-    #_messageData = null;  // MessageData
+    protected _messageData: MessageData;
 
-    constructor(param0, param1, param2) {
+    constructor(param0: number | DataView | BasePacket,
+        param1: undefined | number | undefined = undefined,
+        param2: undefined | SockAddr | undefined = undefined) {
+
         if (typeof param0 === "number") {
             // C++  BasePacket(qint64 size)
             let size = param0;
@@ -56,85 +59,83 @@ class BasePacket {
             if (size === -1) {
                 size = maxPayload;
             }
-            assert(size >= 0 && size <= maxPayload, "Invalid packet size!");
+            assert(size >= 0 && size <= maxPayload, "Invalid packet size!", size);
 
-            this.#_messageData = new MessageData();
+            this._messageData = new MessageData();
             const buffer = new ArrayBuffer(size);
-            this.#_messageData.data = new DataView(buffer);
-            this.#_messageData.dataPosition = 0;
-            this.#_messageData.packetSize = size;
-            this.#_messageData.senderSockAddr = new SockAddr();
-            this.#_messageData.receiveTime = null;
+            this._messageData.data = new DataView(buffer);
+            this._messageData.dataPosition = 0;
+            this._messageData.packetSize = size;
 
-        } else if (param0 instanceof DataView) {
+        } else if (param0 instanceof DataView && typeof param1 === "number" && param2 instanceof SockAddr) {
             // C++  BasePacket(char[]* data, qint64 size, const SockAddr& senderSockAddr)
             const data = param0;
             const size = param1;
             const senderSockAddr = param2;
 
-            this.#_messageData = new MessageData();
-            this.#_messageData.data = data;
-            this.#_messageData.dataPosition = 0;
-            this.#_messageData.packetSize = size;
-            this.#_messageData.senderSockAddr = senderSockAddr;
-            this.#_messageData.receiveTime = null;
+            this._messageData = new MessageData();
+            this._messageData.data = data;
+            this._messageData.dataPosition = 0;
+            this._messageData.packetSize = size;
+            this._messageData.senderSockAddr = senderSockAddr;
             if (data.byteLength !== size) {
-                console.error("Invalid size parameter in BasePacket constructor!");
+                console.error("Invalid size parameter in BasePacket constructor!", size);
             }
 
         } else if (param0 instanceof BasePacket) {
             // C++  BasePacket(BasePacket&& other)
             const other = param0;
 
-            this.#_messageData = other.getMessageData();
-            this.#_messageData.dataPosition = 0;
+            this._messageData = new MessageData(other.getMessageData());
+            this._messageData.dataPosition = 0;
 
         } else {
-            console.error("Unexpected data in BasePacket constructor!", typeof param0, param0);
+            // Invalid call.
+            this._messageData = new MessageData();
+            console.error("Invalid parameters in BasePacket constructor!", typeof param0, typeof param1, typeof param2);
         }
 
     }
 
     /*@devdoc
      *  Gets a reference to the {@link MessageData} object used to accumulate and share private packet- and message-related data
-     *  among {@link BasePacket}, {@link Packet}, {@link NLPacket}, and {@link ReceivedMessage} class instances plus the packet
-     *  writing and reading classes provided in {@link Packets}.
-     *  <p><strong>Warning:</strong> Do not use except in these derived and friend classes.</p>
+     *  between the {@link BasePacket}, {@link Packet}, and {@link NLPacket} classes and the "friend" {@link ReceivedMessage}
+     *  class plus the packet writing and reading classes provided in {@link Packets}.
+     *  <p><strong>Warning:</strong> Do not use except in these friend classes.</p>
      *  @returns {MessageData} Private packet- and message-related data.
      */
-    getMessageData() {
+    getMessageData(): MessageData {
         // C++  N/A
-        return this.#_messageData;
+        return this._messageData;
     }
 
     /*@devdoc
      *  Gets the size of the packet including the header.
      *  @returns {number} The size of the packet including the header, in bytes.
      */
-    getDataSize() {
+    getDataSize(): number {
         // C++  qint64 getDataSize()
-        return this.#_messageData.packetSize;
+        return this._messageData.packetSize;
     }
 
     /*@devdoc
      *  Sets the time that the packet was received.
-     *  @param {Date} time - The time that the packet was received.
+     *  @param {number} time - The time stamp at which the packet was received.
      */
-    setReceiveTime(time) {
+    setReceiveTime(time: number): void {
         // C++  void setReceiveTime(p_high_resolution_clock::time_point receiveTime)
-        this.#_messageData.receiveTime = time;
+        this._messageData.receiveTime = time;
     }
 
     /*@devdoc
      *  Gets the time that the packet was received.
-     *  @returns {Date} The time that the packet was received.
+     *  @returns {number} The time stamp at which the packet was received.
      */
-    getReceiveTime() {
+    getReceiveTime(): number {
         // C++  time_point getReceiveTime()
-        return this.#_messageData.receiveTime;
+        return this._messageData.receiveTime;
     }
 
 }
-
 
 export default BasePacket;

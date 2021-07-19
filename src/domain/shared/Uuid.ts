@@ -28,10 +28,11 @@
  */
 // C++  using LocalID = NetworkLocalID
 //      using NetworkLocalID = quint16
+type LocalID = number;
 
 /*@devdoc
  *  A UUID (Universally Unique IDentifier) used to uniquely identify an item such as an entity or avatar. Internally, a
- *  {@link Uuid} value is a BigInt value.
+ *  {@link Uuid} value is a <code>bigint</code> value.
  *  <p>Note: In the user scripting API, UUIDs are represented as formatted strings.</p>
  *  <p>C++: UUID.h, <code>QUuid</code></p>
  *
@@ -49,18 +50,31 @@
  *      @static
  */
 class Uuid extends BigInt {
+    // C++  Uuid.h
+
+    // WEBRTC TODO: It may be cleaner to wrap a BigInt value rather than extend BigInt.
 
     static NUM_BYTES_RFC4122_UUID = 16;  // eslint-disable-line @typescript-eslint/no-magic-numbers
     static NULL = BigInt(0);
 
     constructor(value: bigint = 0) {
         // C++  QUuid()
+
         // Work around BigInt not working with the "new" operator.
         const obj = <BigInt>Object(BigInt(value));
         Object.setPrototypeOf(obj, new.target.prototype);
         return obj;  // eslint-disable-line no-constructor-return
     }
 
+    /*@devdoc
+     *  Gets the UUID's underlying <code>bigint</code> primitive value.
+     *  @returns {BigInt} The underlying <code>bigint</code> primitive value
+     */
+    value(): bigint {
+        return this.valueOf().valueOf();
+    }
+
 }
 
 export default Uuid;
+export type { LocalID };

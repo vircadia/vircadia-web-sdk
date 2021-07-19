@@ -9,85 +9,107 @@
 //
 
 import UDT from "../udt/UDT";
-import Uuid from "../../shared/Uuid";
+import Uuid, { LocalID } from "../../shared/Uuid";
+
 import "../../shared/DataViewExtensions";
 
 
-const DomainList = new (class {
+/*@devdoc
+ *  Information returned by {@link Packets|reading} a {@link PacketType(1)|DomainList} packet.
+ *  @typedef {object} PacketData.DomainListDetails
+ *  @property {Uuid} domainUUID - The UUID of the domain server.
+ *  @property {LocalID} domainLocalID - The local ID of the domain server.
+ *  @property {Uuid} newUUID - The UUID assigned to the Interface client by the domain server.
+ *  @property {LocalID} newLocalID - The local ID assigned to the Interface client by the domain server.
+ *  @property {NodePermissions} newPermissions
+ *  @property {boolean} isAuthenticated
+ *  @property {BigInt} connectRequestTimestamp
+ *  @property {BigInt} domainServerPingSendTime - The Unix time that the packet was sent, in usec.
+ *  @property {BigInt} domainServerCheckinProcessingTime - The duration from the time domain server received the packet
+ *      requesting this response and the time that the response was sent, in usec.
+ *  @property {boolean} newConnection - <code>true</code> if the Interface client has just connected to the domain,
+ *      <code>false</code> if was already connected.
+ *  @property {PacketData.DomainListDetails-NodeInfo[]} nodes
+ */
+type DomainListDetails = {
+    domainUUID: Uuid,
+    domainLocalID: LocalID,
+    newUUID: Uuid,
+    newLocalID: LocalID,
+    newPermissions: number,
+    isAuthenticated: boolean,
+    connectRequestTimestamp: BigInt,
+    domainServerPingSendTime: BigInt,
+    domainServerCheckinProcessingTime: BigInt,
+    newConnection: boolean
+    // WEBRTC TODO: Address further C++ code.
+};
+
+/*@devdoc
+ *  Node information included in {@link PacketData.DomainListDetails} packet data.
+ *  @typedef {object} PacketData.DomainListDetails-NodeInfo
+ */
+// WEBRTC TODO: Address further C++ code.
+
+const DomainList = new class A {
 
     /*@devdoc
      *  Reads a {@link Packets|DomainList} packet.
      *  @function PacketData.DomainList&period;read
      *  @param {DataView} data - The {@link Packets|DomainList} message data to read.
-     *  @returns {PacketData.DomainListData} The domain list information.
+     *  @returns {PacketData.DomainListDetails} The domain list information.
      */
-    /*@devdoc
-     *  Information returned by {@link Packets|reading} a {@link PacketType(1)|DomainList} packet.
-     *  @typedef {object} PacketData.DomainListData
-     *  @property {Uuid} domainUUID - The UUID of the domain server.
-     *  @property {LocalID} domainLocalID - The local ID of the domain server.
-     *  @property {Uuid} newUUID - The UUID assigned to the Interface client by the domain server.
-     *  @property {LocalID} newLocalID - The local ID assigned to the Interface client by the domain server.
-     *  @property {NodePermissions} newPermissions
-     *  @property {boolean} isAuthenticated
-     *  @property {BigInt} connectRequestTimestamp
-     *  @property {BigInt} domainServerPingSendTime - The Unix time that the packet was sent, in usec.
-     *  @property {BigInt} domainServerCheckinProcessingTime - The duration from the time domain server received the packet
-     *      requesting this response and the time that the response was sent, in usec.
-     *  @property {boolean} newConnection - <code>true</code> if the Interface client has just connected to the domain,
-     *      <code>false</code> if was already connected.
-     *  @property {PacketData.DomainListData-NodeInfo[]} nodes
-     */
-    /*@devdoc
-     *  Node information included in {@link PacketData.DomainListData} packet data.
-     *  @typedef {object} PacketData.DomainListData-NodeInfo
-     */
-    read(data) {  /* eslint-disable-line class-methods-use-this */
+    read(data: DataView): DomainListDetails {  /* eslint-disable-line class-methods-use-this */
         // C++  NodeList::processDomainList(QSharedPointer<ReceivedMessage> message)
 
-        const info = {};
-
-        /* eslint-disable no-magic-numbers */
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
 
         let dataPosition = 0;
 
-        info.domainUUID = new Uuid(data.getBigUint128(dataPosition, UDT.LITTLE_ENDIAN));
+        // info["domainUUID"] = new Uuid(data.getBigUint128(dataPosition, UDT.LITTLE_ENDIAN));
+        // dataPosition += 16;
+
+        const domainUUID = new Uuid(data.getBigUint128(dataPosition, UDT.LITTLE_ENDIAN));
         dataPosition += 16;
 
-        info.domainLocalID = data.getUint16(dataPosition, UDT.BIG_ENDIAN);
+        const domainLocalID = data.getUint16(dataPosition, UDT.BIG_ENDIAN);
         dataPosition += 2;
 
-        info.newUUID = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
+        const newUUID = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
         dataPosition += 16;
 
-        info.newLocalID = data.getUint16(dataPosition, UDT.BIG_ENDIAN);
+        const newLocalID = data.getUint16(dataPosition, UDT.BIG_ENDIAN);
         dataPosition += 2;
 
-        info.newPermissions = data.getUint32(dataPosition, UDT.BIG_ENDIAN);
+        const newPermissions = data.getUint32(dataPosition, UDT.BIG_ENDIAN);
         dataPosition += 4;
 
-        info.isAuthenticated = data.getUint8(dataPosition) > 0;
+        const isAuthenticated = data.getUint8(dataPosition) > 0;
         dataPosition += 1;
 
-        info.connectRequestTimestamp = data.getBigUint64(dataPosition, UDT.BIG_ENDIAN);
+        const connectRequestTimestamp = data.getBigUint64(dataPosition, UDT.BIG_ENDIAN);
         dataPosition += 8;
 
-        info.domainServerPingSendTime = data.getBigUint64(dataPosition, UDT.BIG_ENDIAN);
+        const domainServerPingSendTime = data.getBigUint64(dataPosition, UDT.BIG_ENDIAN);
         dataPosition += 8;
 
-        info.domainServerCheckinProcessingTime = data.getBigUint64(dataPosition, UDT.BIG_ENDIAN);
+        const domainServerCheckinProcessingTime = data.getBigUint64(dataPosition, UDT.BIG_ENDIAN);
         dataPosition += 8;
 
-        info.newConnection = data.getUint8(dataPosition) > 0;
+        const newConnection = data.getUint8(dataPosition) > 0;
         dataPosition += 1;
 
         // WEBRTC TODO: Address further C++ code.
 
-        /* eslint-enable no-magic-numbers */
+        /* eslint-enable @typescript-eslint/no-magic-numbers */
 
-        return info;
+        return {
+            domainUUID, domainLocalID, newUUID, newLocalID, newPermissions, isAuthenticated, connectRequestTimestamp,
+            domainServerPingSendTime, domainServerCheckinProcessingTime, newConnection
+        };
     }
 
-})();
+}();
 
 export default DomainList;
+export type { DomainListDetails };

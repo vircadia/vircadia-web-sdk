@@ -46,10 +46,10 @@
  *      <em>Read-only.</em>
  *      <p><em>Static</em></p>
  */
-const UDT = new (class {
+const UDT = new class {
     // C++: udt
 
-    /* eslint-disable no-magic-numbers */
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     MAX_PACKET_SIZE = 1464;
 
@@ -65,8 +65,8 @@ const UDT = new (class {
     LITTLE_ENDIAN = true;
     BIG_ENDIAN = false;
 
-    /* eslint-enable no-magic-numbers */
+    /* eslint-enable @typescript-eslint/no-magic-numbers */
 
-})();
+}();
 
 export default UDT;

@@ -9,7 +9,7 @@
 //
 
 /* globals jest */
-/* eslint-disable no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 
 import NLPacket from "../../../src/domain/networking/NLPacket";
 import SockAddr from "../../../src/domain/networking/SockAddr";
@@ -53,8 +53,8 @@ describe("NLPacket - unit tests", () => {
         expect(nlPacket instanceof NLPacket).toBe(true);
         const messageData = nlPacket.getMessageData();
         expect(messageData.type).toBe(PacketType.DomainList);
+        expect(messageData.version).toBe(24);
         expect(messageData.senderSockAddr.getPort()).toBe(7);
-        expect(messageData).toBe(testPacket.getMessageData());
         expect(error).toHaveBeenCalledTimes(0);
     });
 
@@ -63,8 +63,8 @@ describe("NLPacket - unit tests", () => {
         expect(nlPacket instanceof NLPacket).toBe(true);
         const messageData = nlPacket.getMessageData();
         expect(messageData.type).toBe(PacketType.DomainList);
+        expect(messageData.version).toBe(24);
         expect(messageData.senderSockAddr.getPort()).toBe(7);
-        expect(messageData).toBe(testPacket.getMessageData());
         expect(error).toHaveBeenCalledTimes(0);
     });
 

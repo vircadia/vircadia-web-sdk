@@ -8,6 +8,125 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import assert from "../../shared/assert";
+
+
+/*@devdoc
+ *  {@link PacketType(1)|Packet types}, <code>Unknown</code>, <code>StunResponse</code>, <code>...</code>, are represented as
+ *  unsigned 8-bit numbers in the protocol packets.
+ *  @typedef {number} PacketType
+ */
+// Could just define `type PacketTypeValue = number` however using an object improves type safety.
+enum PacketTypeValue {
+    Unknown,                            // 0
+    StunResponse,
+    DomainList,
+    Ping,
+    PingReply,
+    KillAvatar,
+    AvatarData,
+    InjectAudio,
+    MixedAudio,
+    MicrophoneAudioNoEcho,
+    MicrophoneAudioWithEcho,            // 10
+    BulkAvatarData,
+    SilentAudioFrame,
+    DomainListRequest,
+    RequestAssignment,
+    CreateAssignment,
+    DomainConnectionDenied,
+    MuteEnvironment,
+    AudioStreamStats,
+    DomainServerPathQuery,
+    DomainServerPathResponse,           // 20
+    DomainServerAddedNode,
+    ICEServerPeerInformation,
+    ICEServerQuery,
+    OctreeStats,
+    SetAvatarTraits,
+    InjectorGainSet,
+    AssignmentClientStatus,
+    NoisyMute,
+    AvatarIdentity,
+    NodeIgnoreRequest,                  // 30
+    DomainConnectRequest,
+    DomainServerRequireDTLS,
+    NodeJsonStats,
+    OctreeDataNack,
+    StopNode,
+    AudioEnvironment,
+    EntityEditNack,
+    ICEServerHeartbeat,
+    ICEPing,
+    ICEPingReply,                       // 40
+    EntityData,
+    EntityQuery,
+    EntityAdd,
+    EntityErase,
+    EntityEdit,
+    DomainServerConnectionToken,
+    DomainSettingsRequest,
+    DomainSettings,
+    AssetGet,
+    AssetGetReply,                      // 50
+    AssetUpload,
+    AssetUploadReply,
+    AssetGetInfo,
+    AssetGetInfoReply,
+    DomainDisconnectRequest,
+    DomainServerRemovedNode,
+    MessagesData,
+    MessagesSubscribe,
+    MessagesUnsubscribe,
+    ICEServerHeartbeatDenied,           // 60
+    AssetMappingOperation,
+    AssetMappingOperationReply,
+    ICEServerHeartbeatACK,
+    NegotiateAudioFormat,
+    SelectedAudioFormat,
+    MoreEntityShapes,
+    NodeKickRequest,
+    NodeMuteRequest,
+    RadiusIgnoreRequest,
+    UsernameFromIDRequest,              // 70
+    UsernameFromIDReply,
+    AvatarQuery,
+    RequestsDomainListData,
+    PerAvatarGainSet,
+    EntityScriptGetStatus,
+    EntityScriptGetStatusReply,
+    ReloadEntityServerScript,
+    EntityPhysics,
+    EntityServerScriptLog,
+    AdjustAvatarSorting,                // 80
+    OctreeFileReplacement,
+    CollisionEventChanges,
+    ReplicatedMicrophoneAudioNoEcho,
+    ReplicatedMicrophoneAudioWithEcho,
+    ReplicatedInjectAudio,
+    ReplicatedSilentAudioFrame,
+    ReplicatedAvatarIdentity,
+    ReplicatedKillAvatar,
+    ReplicatedBulkAvatarData,
+    DomainContentReplacementFromUrl,    // 90
+    ChallengeOwnership,
+    EntityScriptCallMethod,
+    ChallengeOwnershipRequest,
+    ChallengeOwnershipReply,
+    OctreeDataFileRequest,
+    OctreeDataFileReply,
+    OctreeDataPersist,
+    EntityClone,
+    EntityQueryInitialResultsComplete,
+    BulkAvatarTraits,                   // 100
+    AudioSoloRequest,
+    BulkAvatarTraitsAck,
+    StopInjector,
+    AvatarZonePresence,
+
+    NUM_PACKETS
+}
+
 
 /*@devdoc
  *  The Vircadia protocol packets.
@@ -19,7 +138,7 @@
  *  @property {PacketType} StunResponse - <code>1</code>
  *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to Interface in response to a
  *      DomainConnectRequest packet.<br />
- *      {@link PacketData.DomainListData}.
+ *      {@link PacketData.DomainListDetails}.
  *  @property {PacketType} Ping - <code>3</code>
  *  @property {PacketType} PingReply - <code>4</code>
  *  @property {PacketType} KillAvatar - <code>5</code>
@@ -50,7 +169,7 @@
  *  @property {PacketType} NodeIgnoreRequest - <code>30</code>
  *  @property {PacketType} DomainConnectRequest - <code>31</code> - Interface periodically sends this to the Domain Server to
  *      initiate and maintain connection to the domain. The Domain Server responds with a DomainList packet.<br />
- *      {@link PacketData.DomainConnectRequestData}.
+ *      {@link PacketData.DomainConnectRequestDetails}.
  *  @property {PacketType} DomainServerRequireDTLS - <code>32</code>
  *  @property {PacketType} NodeJsonStats - <code>33</code>
  *  @property {PacketType} OctreeDataNack - <code>34</code>
@@ -125,174 +244,178 @@
  *  @property {PacketType} StopInjector - <code>103</code>
  *  @property {PacketType} AvatarZonePresence - <code>104</code>
  */
-const PacketType = new (class {
+const PacketType = new class {
     // C++: PacketType
 
-    /*@devdoc
-     *  {@link PacketType(1)|Packet} types are represented by unsigned 8-bit numbers in the protocol packets.
-     *  @typedef {number} PacketType
-     */
-    #_packetTypes = [
-        "Unknown",                          // 0
-        "StunResponse",
-        "DomainList",
-        "Ping",
-        "PingReply",
-        "KillAvatar",
-        "AvatarData",
-        "InjectAudio",
-        "MixedAudio",
-        "MicrophoneAudioNoEcho",
-        "MicrophoneAudioWithEcho",          // 10
-        "BulkAvatarData",
-        "SilentAudioFrame",
-        "DomainListRequest",
-        "RequestAssignment",
-        "CreateAssignment",
-        "DomainConnectionDenied",
-        "MuteEnvironment",
-        "AudioStreamStats",
-        "DomainServerPathQuery",
-        "DomainServerPathResponse",         // 20
-        "DomainServerAddedNode",
-        "ICEServerPeerInformation",
-        "ICEServerQuery",
-        "OctreeStats",
-        "SetAvatarTraits",
-        "InjectorGainSet",
-        "AssignmentClientStatus",
-        "NoisyMute",
-        "AvatarIdentity",
-        "NodeIgnoreRequest",                // 30
-        "DomainConnectRequest",
-        "DomainServerRequireDTLS",
-        "NodeJsonStats",
-        "OctreeDataNack",
-        "StopNode",
-        "AudioEnvironment",
-        "EntityEditNack",
-        "ICEServerHeartbeat",
-        "ICEPing",
-        "ICEPingReply",                     // 40
-        "EntityData",
-        "EntityQuery",
-        "EntityAdd",
-        "EntityErase",
-        "EntityEdit",
-        "DomainServerConnectionToken",
-        "DomainSettingsRequest",
-        "DomainSettings",
-        "AssetGet",
-        "AssetGetReply",                    // 50
-        "AssetUpload",
-        "AssetUploadReply",
-        "AssetGetInfo",
-        "AssetGetInfoReply",
-        "DomainDisconnectRequest",
-        "DomainServerRemovedNode",
-        "MessagesData",
-        "MessagesSubscribe",
-        "MessagesUnsubscribe",
-        "ICEServerHeartbeatDenied",         // 60
-        "AssetMappingOperation",
-        "AssetMappingOperationReply",
-        "ICEServerHeartbeatACK",
-        "NegotiateAudioFormat",
-        "SelectedAudioFormat",
-        "MoreEntityShapes",
-        "NodeKickRequest",
-        "NodeMuteRequest",
-        "RadiusIgnoreRequest",
-        "UsernameFromIDRequest",            // 70
-        "UsernameFromIDReply",
-        "AvatarQuery",
-        "RequestsDomainListData",
-        "PerAvatarGainSet",
-        "EntityScriptGetStatus",
-        "EntityScriptGetStatusReply",
-        "ReloadEntityServerScript",
-        "EntityPhysics",
-        "EntityServerScriptLog",
-        "AdjustAvatarSorting",              // 80
-        "OctreeFileReplacement",
-        "CollisionEventChanges",
-        "ReplicatedMicrophoneAudioNoEcho",
-        "ReplicatedMicrophoneAudioWithEcho",
-        "ReplicatedInjectAudio",
-        "ReplicatedSilentAudioFrame",
-        "ReplicatedAvatarIdentity",
-        "ReplicatedKillAvatar",
-        "ReplicatedBulkAvatarData",
-        "DomainContentReplacementFromUrl",  // 90
-        "ChallengeOwnership",
-        "EntityScriptCallMethod",
-        "ChallengeOwnershipRequest",
-        "ChallengeOwnershipReply",
-        "OctreeDataFileRequest",
-        "OctreeDataFileReply",
-        "OctreeDataPersist",
-        "EntityClone",
-        "EntityQueryInitialResultsComplete",
-        "BulkAvatarTraits",                 // 100
-        "AudioSoloRequest",
-        "BulkAvatarTraitsAck",
-        "StopInjector",
-        "AvatarZonePresence"
-    ];
+    // Property values are manually added because doing so provides additional type safety compared to adding at runtime.
+    Unknown = PacketTypeValue.Unknown;
+    StunResponse = PacketTypeValue.StunResponse;
+    DomainList = PacketTypeValue.DomainList;
+    Ping = PacketTypeValue.Ping;
+    PingReply = PacketTypeValue.PingReply;
+    KillAvatar = PacketTypeValue.KillAvatar;
+    AvatarData = PacketTypeValue.AvatarData;
+    InjectAudio = PacketTypeValue.InjectAudio;
+    MixedAudio = PacketTypeValue.MixedAudio;
+    MicrophoneAudioNoEcho = PacketTypeValue.MicrophoneAudioNoEcho;
+    MicrophoneAudioWithEcho = PacketTypeValue.MicrophoneAudioWithEcho;
+    BulkAvatarData = PacketTypeValue.BulkAvatarData;
+    SilentAudioFrame = PacketTypeValue.SilentAudioFrame;
+    DomainListRequest = PacketTypeValue.DomainListRequest;
+    RequestAssignment = PacketTypeValue.RequestAssignment;
+    CreateAssignment = PacketTypeValue.CreateAssignment;
+    DomainConnectionDenied = PacketTypeValue.DomainConnectionDenied;
+    MuteEnvironment = PacketTypeValue.MuteEnvironment;
+    AudioStreamStats = PacketTypeValue.AudioStreamStats;
+    DomainServerPathQuery = PacketTypeValue.DomainServerPathQuery;
+    DomainServerPathResponse = PacketTypeValue.DomainServerPathResponse;
+    DomainServerAddedNode = PacketTypeValue.DomainServerAddedNode;
+    ICEServerPeerInformation = PacketTypeValue.ICEServerPeerInformation;
+    ICEServerQuery = PacketTypeValue.ICEServerQuery;
+    OctreeStats = PacketTypeValue.OctreeStats;
+    SetAvatarTraits = PacketTypeValue.SetAvatarTraits;
+    InjectorGainSet = PacketTypeValue.InjectorGainSet;
+    AssignmentClientStatus = PacketTypeValue.AssignmentClientStatus;
+    NoisyMute = PacketTypeValue.NoisyMute;
+    AvatarIdentity = PacketTypeValue.AvatarIdentity;
+    NodeIgnoreRequest = PacketTypeValue.NodeIgnoreRequest;
+    DomainConnectRequest = PacketTypeValue.DomainConnectRequest;
+    DomainServerRequireDTLS = PacketTypeValue.DomainServerRequireDTLS;
+    NodeJsonStats = PacketTypeValue.NodeJsonStats;
+    OctreeDataNack = PacketTypeValue.OctreeDataNack;
+    StopNode = PacketTypeValue.StopNode;
+    AudioEnvironment = PacketTypeValue.AudioEnvironment;
+    EntityEditNack = PacketTypeValue.EntityEditNack;
+    ICEServerHeartbeat = PacketTypeValue.ICEServerHeartbeat;
+    ICEPing = PacketTypeValue.ICEPing;
+    ICEPingReply = PacketTypeValue.ICEPingReply;
+    EntityData = PacketTypeValue.EntityData;
+    EntityQuery = PacketTypeValue.EntityQuery;
+    EntityAdd = PacketTypeValue.EntityAdd;
+    EntityErase = PacketTypeValue.EntityErase;
+    EntityEdit = PacketTypeValue.EntityEdit;
+    DomainServerConnectionToken = PacketTypeValue.DomainServerConnectionToken;
+    DomainSettingsRequest = PacketTypeValue.DomainSettingsRequest;
+    DomainSettings = PacketTypeValue.DomainSettings;
+    AssetGet = PacketTypeValue.AssetGet;
+    AssetGetReply = PacketTypeValue.AssetGetReply;
+    AssetUpload = PacketTypeValue.AssetUpload;
+    AssetUploadReply = PacketTypeValue.AssetUploadReply;
+    AssetGetInfo = PacketTypeValue.AssetGetInfo;
+    AssetGetInfoReply = PacketTypeValue.AssetGetInfoReply;
+    DomainDisconnectRequest = PacketTypeValue.DomainDisconnectRequest;
+    DomainServerRemovedNode = PacketTypeValue.DomainServerRemovedNode;
+    MessagesData = PacketTypeValue.MessagesData;
+    MessagesSubscribe = PacketTypeValue.MessagesSubscribe;
+    MessagesUnsubscribe = PacketTypeValue.MessagesUnsubscribe;
+    ICEServerHeartbeatDenied = PacketTypeValue.ICEServerHeartbeatDenied;
+    AssetMappingOperation = PacketTypeValue.AssetMappingOperation;
+    AssetMappingOperationReply = PacketTypeValue.AssetMappingOperationReply;
+    ICEServerHeartbeatACK = PacketTypeValue.ICEServerHeartbeatACK;
+    NegotiateAudioFormat = PacketTypeValue.NegotiateAudioFormat;
+    SelectedAudioFormat = PacketTypeValue.SelectedAudioFormat;
+    MoreEntityShapes = PacketTypeValue.MoreEntityShapes;
+    NodeKickRequest = PacketTypeValue.NodeKickRequest;
+    NodeMuteRequest = PacketTypeValue.NodeMuteRequest;
+    RadiusIgnoreRequest = PacketTypeValue.RadiusIgnoreRequest;
+    UsernameFromIDRequest = PacketTypeValue.UsernameFromIDRequest;
+    UsernameFromIDReply = PacketTypeValue.UsernameFromIDReply;
+    AvatarQuery = PacketTypeValue.AvatarQuery;
+    RequestsDomainListData = PacketTypeValue.RequestsDomainListData;
+    PerAvatarGainSet = PacketTypeValue.PerAvatarGainSet;
+    EntityScriptGetStatus = PacketTypeValue.EntityScriptGetStatus;
+    EntityScriptGetStatusReply = PacketTypeValue.EntityScriptGetStatusReply;
+    ReloadEntityServerScript = PacketTypeValue.ReloadEntityServerScript;
+    EntityPhysics = PacketTypeValue.EntityPhysics;
+    EntityServerScriptLog = PacketTypeValue.EntityServerScriptLog;
+    AdjustAvatarSorting = PacketTypeValue.AdjustAvatarSorting;
+    OctreeFileReplacement = PacketTypeValue.OctreeFileReplacement;
+    CollisionEventChanges = PacketTypeValue.CollisionEventChanges;
+    ReplicatedMicrophoneAudioNoEcho = PacketTypeValue.ReplicatedMicrophoneAudioNoEcho;
+    ReplicatedMicrophoneAudioWithEcho = PacketTypeValue.ReplicatedMicrophoneAudioWithEcho;
+    ReplicatedInjectAudio = PacketTypeValue.ReplicatedInjectAudio;
+    ReplicatedSilentAudioFrame = PacketTypeValue.ReplicatedSilentAudioFrame;
+    ReplicatedAvatarIdentity = PacketTypeValue.ReplicatedAvatarIdentity;
+    ReplicatedKillAvatar = PacketTypeValue.ReplicatedKillAvatar;
+    ReplicatedBulkAvatarData = PacketTypeValue.ReplicatedBulkAvatarData;
+    DomainContentReplacementFromUrl = PacketTypeValue.DomainContentReplacementFromUrl;
+    ChallengeOwnership = PacketTypeValue.ChallengeOwnership;
+    EntityScriptCallMethod = PacketTypeValue.EntityScriptCallMethod;
+    ChallengeOwnershipRequest = PacketTypeValue.ChallengeOwnershipRequest;
+    ChallengeOwnershipReply = PacketTypeValue.ChallengeOwnershipReply;
+    OctreeDataFileRequest = PacketTypeValue.OctreeDataFileRequest;
+    OctreeDataFileReply = PacketTypeValue.OctreeDataFileReply;
+    OctreeDataPersist = PacketTypeValue.OctreeDataPersist;
+    EntityClone = PacketTypeValue.EntityClone;
+    EntityQueryInitialResultsComplete = PacketTypeValue.EntityQueryInitialResultsComplete;
+    BulkAvatarTraits = PacketTypeValue.BulkAvatarTraits;
+    AudioSoloRequest = PacketTypeValue.AudioSoloRequest;
+    BulkAvatarTraitsAck = PacketTypeValue.BulkAvatarTraitsAck;
+    StopInjector = PacketTypeValue.StopInjector;
+    AvatarZonePresence = PacketTypeValue.AvatarZonePresence;
 
-    #_nonSourcedPackets = null;
+    // Packets that are sent without verifying that they are received.
+    private _nonVerifiedPackets = new Set([
+        PacketTypeValue.NodeJsonStats,
+        PacketTypeValue.EntityQuery,
+        PacketTypeValue.OctreeDataNack,
+        PacketTypeValue.EntityEditNack,
+        PacketTypeValue.DomainListRequest,
+        PacketTypeValue.StopNode,
+        PacketTypeValue.DomainDisconnectRequest,
+        PacketTypeValue.UsernameFromIDRequest,
+        PacketTypeValue.NodeKickRequest,
+        PacketTypeValue.NodeMuteRequest
+    ]);
 
-    #_DomainConnectRequestVersion = {
+    // Packets that don't include the local node ID of the sending node.
+    private _nonSourcedPackets = new Set([
+        PacketTypeValue.StunResponse,
+        PacketTypeValue.CreateAssignment,
+        PacketTypeValue.RequestAssignment,
+        PacketTypeValue.DomainServerRequireDTLS,
+        PacketTypeValue.DomainConnectRequest,
+        PacketTypeValue.DomainList,
+        PacketTypeValue.DomainConnectionDenied,
+        PacketTypeValue.DomainServerPathQuery,
+        PacketTypeValue.DomainServerPathResponse,
+        PacketTypeValue.DomainServerAddedNode,
+        PacketTypeValue.DomainServerConnectionToken,
+        PacketTypeValue.DomainSettingsRequest,
+        PacketTypeValue.OctreeDataFileRequest,
+        PacketTypeValue.OctreeDataFileReply,
+        PacketTypeValue.OctreeDataPersist,
+        PacketTypeValue.DomainContentReplacementFromUrl,
+        PacketTypeValue.DomainSettings,
+        PacketTypeValue.ICEServerPeerInformation,
+        PacketTypeValue.ICEServerQuery,
+        PacketTypeValue.ICEServerHeartbeat,
+        PacketTypeValue.ICEServerHeartbeatACK,
+        PacketTypeValue.ICEPing,
+        PacketTypeValue.ICEPingReply,
+        PacketTypeValue.ICEServerHeartbeatDenied,
+        PacketTypeValue.AssignmentClientStatus,
+        PacketTypeValue.StopNode,
+        PacketTypeValue.DomainServerRemovedNode,
+        PacketTypeValue.UsernameFromIDReply,
+        PacketTypeValue.OctreeFileReplacement,
+        PacketTypeValue.ReplicatedMicrophoneAudioNoEcho,
+        PacketTypeValue.ReplicatedMicrophoneAudioWithEcho,
+        PacketTypeValue.ReplicatedInjectAudio,
+        PacketTypeValue.ReplicatedSilentAudioFrame,
+        PacketTypeValue.ReplicatedAvatarIdentity,
+        PacketTypeValue.ReplicatedKillAvatar,
+        PacketTypeValue.ReplicatedBulkAvatarData,
+        PacketTypeValue.AvatarZonePresence
+    ]);
+
+    private _DomainConnectRequestVersion = {
         // C++  DomainConnectRequestVersion
         HasCompressedSystemInfo: 26
     };
 
     constructor() {
-        for (let i = 0; i < this.#_packetTypes.length; i++) {
-            this[this.#_packetTypes[i]] = i;
-        }
-
-        // Packets that don't include the local node ID of the sending node.
-        this.#_nonSourcedPackets = new Set([
-            this.StunResponse,
-            this.CreateAssignment,
-            this.RequestAssignment,
-            this.DomainServerRequireDTLS,
-            this.DomainConnectRequest,
-            this.DomainList,
-            this.DomainConnectionDenied,
-            this.DomainServerPathQuery,
-            this.DomainServerPathResponse,
-            this.DomainServerAddedNode,
-            this.DomainServerConnectionToken,
-            this.DomainSettingsRequest,
-            this.OctreeDataFileRequest,
-            this.OctreeDataFileReply,
-            this.OctreeDataPersist,
-            this.DomainContentReplacementFromUrl,
-            this.DomainSettings,
-            this.ICEServerPeerInformation,
-            this.ICEServerQuery,
-            this.ICEServerHeartbeat,
-            this.ICEServerHeartbeatACK,
-            this.ICEPing,
-            this.ICEPingReply,
-            this.ICEServerHeartbeatDenied,
-            this.AssignmentClientStatus,
-            this.StopNode,
-            this.DomainServerRemovedNode,
-            this.UsernameFromIDReply,
-            this.OctreeFileReplacement,
-            this.ReplicatedMicrophoneAudioNoEcho,
-            this.ReplicatedMicrophoneAudioWithEcho,
-            this.ReplicatedInjectAudio,
-            this.ReplicatedSilentAudioFrame,
-            this.ReplicatedAvatarIdentity,
-            this.ReplicatedKillAvatar,
-            this.ReplicatedBulkAvatarData,
-            this.AvatarZonePresence,
-            this.WebRTCSignaling
-        ]);
+        assert(PacketTypeValue.NUM_PACKETS - 1 === this.AvatarZonePresence, "Inconsistent packet data in PacketHeaders!");
     }
 
     /*@devdoc
@@ -305,11 +428,11 @@ const PacketType = new (class {
      *  {@link PacketType(1)|Packet} versions are represented by unsigned 8-bit numbers in the protocol packets.
      *  @typedef {number} PacketVersion
      */
-    versionForPacketType(packetType) {
+    versionForPacketType(packetType: PacketTypeValue): number {
         // C++  PacketVersion versionForPacketType(PacketType packetType)
         switch (packetType) {
             case this.DomainConnectRequest:
-                return this.#_DomainConnectRequestVersion.HasCompressedSystemInfo;
+                return this._DomainConnectRequestVersion.HasCompressedSystemInfo;
 
                 // WebRTC TODO: Add other packets.
 
@@ -322,16 +445,26 @@ const PacketType = new (class {
     }
 
     /*@devdoc
+     *  Gets the Set of non-verified packets, i.e., packets which are sent without verifying that they are received.
+     *  @function PacketType(1).getNonVerifiedPackets
+     *  @returns {Set<PacketType>} The Set of non-verified packets.
+     */
+    getNonVerifiedPackets() {
+        // C++  getNonSourcedPackets()
+        return this._nonVerifiedPackets;
+    }
+
+    /*@devdoc
      *  Gets the Set of non-sourced packets, i.e., packets which don't include the local node ID of the sending node.
      *  @function PacketType(1).getNonSourcedPackets
      *  @returns {Set<PacketType>} The Set of non-sourced packets.
      */
     getNonSourcedPackets() {
-        // C++  PacketType::getNonSourcedPackets()
-        return this.#_nonSourcedPackets;
+        // C++  getNonSourcedPackets()
+        return this._nonSourcedPackets;
     }
 
-})();
+}();
 
 
 /*@devdoc
@@ -339,17 +472,17 @@ const PacketType = new (class {
  *  @function protocolVersionsSignature
  *  @returns {Uint8Array} The 16-byte protocol version hash.
  */
-function protocolVersionsSignature() {
+function protocolVersionsSignature(): Uint8Array {
     // C++  QByteArray protocolVersionsSignature()
 
     // WEBRTC TODO: Retrieve value from a compile-time configuration file.
 
-    /* eslint-disable no-magic-numbers */
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
     const PROTOCOL_SIGNATURE_BYTES
         = [0x0b, 0xa2, 0x3d, 0x16, 0x33, 0x01, 0x18, 0x1b, 0x16, 0x43, 0xdd, 0x2c, 0x76, 0x7f, 0x4a, 0xc3];
-    /* eslint-enable no-magic-numbers */
+    /* eslint-enable @typescript-eslint/no-magic-numbers */
     return Uint8Array.from(PROTOCOL_SIGNATURE_BYTES);
 }
 
 
-export { PacketType as default, protocolVersionsSignature };
+export { PacketType as default, PacketTypeValue, protocolVersionsSignature };
