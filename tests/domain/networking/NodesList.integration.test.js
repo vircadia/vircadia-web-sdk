@@ -24,15 +24,16 @@ describe("NodesList - integration tests", () => {
     //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
     // Add WebRTC to Node.js environment.
-    global.RTCPeerConnection = require("wrtc").RTCPeerConnection;
+    global.WebSocket = require("ws");  // eslint-disable-line
+    global.RTCPeerConnection = require("wrtc").RTCPeerConnection;  // eslint-disable-line
 
-    /* eslint-disable no-magic-numbers */
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     // Increase the Jest timeout from the default 5s.
     jest.setTimeout(10000);
 
     // Suppress console.log messages from being displayed.
-    const log = jest.spyOn(console, "log").mockImplementation(() => { });  // eslint-disable-line no-empty-function
+    const log = jest.spyOn(console, "log").mockImplementation(() => { /* noop */ });
 
 
     test("Can perform an initial domain server check-in", (done) => {

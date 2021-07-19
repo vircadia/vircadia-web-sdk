@@ -20,21 +20,9 @@ import Uuid from "../shared/Uuid";
 const AddressManager = new (class {
     // C++  AddressManager : public QObject, public Dependency
 
-    #_domainUrl = Uuid.NULL;
-    #_possibleDomainChangeRequired = new Signal();
+    private _domainUrl = "";
+    private _possibleDomainChangeRequired = new Signal();
 
-    #handlerUrl(url) {
-        // C++  bool handleUrl(const QUrl& lookupUrl, LookupTrigger trigger = UserInput)
-
-        // WEBRTC TODO: Address further C++ code.
-
-        this.#_domainUrl = url;
-        this.#_possibleDomainChangeRequired.emit(this.#_domainUrl, Uuid.NULL);
-
-        // WEBRTC TODO: Address further C++ code.
-
-        return true;
-    }
 
     /*@devdoc
      *  Takes you to a specified metaverse address.
@@ -43,14 +31,14 @@ const AddressManager = new (class {
      *  @param {boolean} [from=false] - Set to <code>true</code> if the address is obtained from the "Explore" app. Helps ensure
      *      that the user's location history is correctly maintained.
      */
-    handleLookupString(address) {
+    handleLookupString(address: string): void {
         // C++  void handleLookupString(const QString& lookupString, bool fromSuggestions = false)
 
         // WEBRTC TODO: Address further C++ code.
 
         const sanitizedAddress = address.trim();
         if (sanitizedAddress.length > 0) {
-            this.#handlerUrl(sanitizedAddress);
+            this.handlerUrl(sanitizedAddress);
         }
 
         // WEBRTC TODO: Address further C++ code.
@@ -61,7 +49,7 @@ const AddressManager = new (class {
      *  @function AddressManager.getPlaceName
      *  @returns {string} The domain's place name if known, otherwise <code>""</code>.
      */
-    getPlaceName() {  // eslint-disable-line class-methods-use-this
+    getPlaceName(): string {  // eslint-disable-line class-methods-use-this
         // C++  QString getPlaceName()
 
         // WEBRTC TODO: Address further C++ code.
@@ -76,9 +64,23 @@ const AddressManager = new (class {
      *  @param {Uuid} id - The domain ID. May be {@link Uuid(1)|Uuid.NULL} if not yet known.
      *  @returns {Signal}
      */
-    get possibleDomainChangeRequired() {
+    get possibleDomainChangeRequired(): Signal {
         // C++  void possibleDomainChangeRequired(QUrl domainURL, QUuid domainID);
-        return this.#_possibleDomainChangeRequired;
+        return this._possibleDomainChangeRequired;
+    }
+
+
+    private handlerUrl(url: string): boolean {
+        // C++  bool handleUrl(const QUrl& lookupUrl, LookupTrigger trigger = UserInput)
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this._domainUrl = url;
+        this._possibleDomainChangeRequired.emit(this._domainUrl, Uuid.NULL);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        return true;
     }
 
 })();

@@ -159,7 +159,8 @@ const DomainConnectRequest = new class {
         }
 
         if (!info.isDomainConnected) {
-            if (!info.username || !info.usernameSignature || !info.domainUsername || !info.domainTokens) {
+
+            if (info.username === undefined || info.usernameSignature === undefined) {
                 assert(false, "DomainConnectRequest.write() missing info for connected case!");
                 return packet;
             }
@@ -179,7 +180,7 @@ const DomainConnectRequest = new class {
                 dataPosition += 1;
             }
 
-            if (info.domainUsername !== null) {
+            if (info.domainUsername !== undefined && info.domainTokens !== undefined) {
 
                 data.setUint32(dataPosition, info.domainUsername.length, UDT.BIG_ENDIAN);
                 dataPosition += 4;

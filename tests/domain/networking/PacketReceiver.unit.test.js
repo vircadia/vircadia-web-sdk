@@ -9,7 +9,7 @@
 //
 
 /* globals jest */
-/* eslint-disable no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 
 import PacketReceiver from "../../../src/domain/networking/PacketReceiver";
 import SockAddr from "../../../src/domain/networking/SockAddr";
@@ -43,10 +43,10 @@ describe("PacketReceicer - unit tests", () => {
         const listenerReference = PacketReceiver.makeUnsourcedListenerReference(fn);
         expect(listenerReference.listener).toBe(fn);
         expect(listenerReference.sourced).toBe(false);
-        expect(listenerReference.deliverPending).toBe(undefined);
+        expect(listenerReference.deliverPending).toBe(false);
     });
 
-    test("Can register a listener", () => {
+    test("Can register an unsourced listener", () => {
         function fn() {
             //
         }
@@ -57,7 +57,7 @@ describe("PacketReceicer - unit tests", () => {
         expect(listenerReference.deliverPending).toBe(false);
     });
 
-    test("Can invoke a listener", (done) => {
+    test("Can invoke an unsourced listener", (done) => {
         expect.assertions(1);
 
         function fn() {

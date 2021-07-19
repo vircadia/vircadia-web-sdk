@@ -10,43 +10,50 @@
 
 import assert from "./assert";
 
-type callback = (...args: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+/*@devdoc
+ *  A function that can be connected to a {@link Signal}. Typically, <code>this</code> should be bound to it in the constructor
+ *  of the class that implements the function.
+ *  @typedef Slot
+ *  @param {any} ...args - Any arguments included in the <code>Signal</code> are passed through to the <code>Slot</code>
+ *      function.
+ */
+type Slot = (...args: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 
 /*@devdoc
  *  Emulates Qt's signals and slots mechanism. In particular, a <code>Signal</code> object is implemented which can be connected
- *  to one or more "slot" functions, "emitted" to asynchronously call those functions, and disconnected.
+ *  to one or more "slot"<code>Slot</slot> functions, "emitted" to asynchronously call those functions, and disconnected.
  *  <p>C++: Qt's signals and slots mechanism.</p>
  *
  *  @class Signal
  */
 class Signal {
 
-    private _slots: Set<callback> = new Set();
+    private _slots: Set<Slot> = new Set();
 
     /*@devdoc
-     *  Connects the signal to a "slot" function.
+     *  Connects the signal to a <code>Slot</slot> function.
      *  <p>Note: If the slot function uses <code>this</code> then the correct <code>this</code> must be bound to it, e.g., by
-     *  applying <code>.bind(this)</code> on the slot function when it is created.</p>
-     *  @param {function} slot - Function to be called when <code>emit</code> is called.
+     *  applying <code>.bind(this)</code> in the constructor of the class that implements the slot function.</p>
+     *  @param {Slot} slot - Function to be called when <code>emit</code> is called.
      */
-    connect(slot: callback): void {
+    connect(slot: Slot): void {
         assert(typeof slot === "function");
         this._slots.add(slot);
     }
 
     /*@devdoc
-     *  Disconnects the signal from a "slot" function.
-     *  @param {function} slot - Function to no longer be called when <code>emit</code> is called.
+     *  Disconnects the signal from a <code>Slot</slot> function.
+     *  @param {Slot} slot - Slot function to no longer be called when <code>emit</code> is called.
      */
-    disconnect(slot: callback): void {
+    disconnect(slot: Slot): void {
         assert(typeof slot === "function");
         this._slots.delete(slot);  // eslint-disable-line @typescript-eslint/dot-notation
     }
 
     /*@devdoc
-     *  "Emits the signal": asynchronously calls all connected "slot" functions.
-     *  @param {any} [params] - Parameter values to call connected "slot" functions with.
+     *  "Emits the signal": asynchronously calls all connected <code>Slot</slot> functions.
+     *  @param {any} [params] - Parameter values to call connected slot functions with.
      */
     emit(...params: any[]): void {  // eslint-disable-line @typescript-eslint/no-explicit-any
         this._slots.forEach((slot) => {

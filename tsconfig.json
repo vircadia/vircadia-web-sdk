@@ -2,13 +2,14 @@
     "compilerOptions": {
         "outDir": "./dist",
         "allowJs": true,
-        "checkJs": false,  // Temporarily disable while unit and integration tests are JavaScript.
-        "target": "ES2020",  // Required for BigInt literals.
+        "checkJs": false, // Temporarily disable while unit and integration tests are JavaScript.
+        "target": "ES2020", // Required for BigInt literals.
         "lib": [ "ES2020", "DOM" ],
         "sourceMap": true,
-        "esModuleInterop": true,
         "moduleResolution": "Node",
+        "resolveJsonModule": true,
         "skipLibCheck": true,
+        "esModuleInterop": true,
         "isolatedModules": true,
 
         // TypeScript 4.2

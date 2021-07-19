@@ -14,6 +14,7 @@ import SockAddr from "./SockAddr";
 import PacketType from "./udt/PacketHeaders";
 import Socket from "./udt/Socket";
 import assert from "../shared/assert";
+import NLPacket from "./NLPacket";
 
 
 /*@devdoc
@@ -22,10 +23,9 @@ import assert from "../shared/assert";
  *  <p>See also: {@link NodesList}.</p>
  *  <p>C++: <code>LimitedNodeList : public QObject, public Dependency</code>
  *  @class LimitedNodeList
- *  @param {string} ownerType - Not used.
+ *  @param {NodeType} ownerType=DomainServer - Not used.
  *  @param {number} socketListenPort - Not used.
  *  @param {number} dtlsListenPort - Not used.
- *  @param {Object} _privateFields - Provides access for derived classes to select private fields.
  *
  *  @property {LimitedNodeList.ConnectReason} ConnectReason - Connect reason values.
  *  @property {number} INVALID_PORT=-1 - Invalid port.
@@ -57,42 +57,44 @@ class LimitedNodeList {
     static INVALID_PORT = -1;
 
 
-    #_nodeSocket;  // Socket
+    protected _nodeSocket: Socket;
 
-    #_localSockAddr = new SockAddr();
-    #_publicSockAddr = new SockAddr();
+    protected _localSockAddr = new SockAddr();
+    protected _publicSockAddr = new SockAddr();
 
-    #_packetReceiver;  // PacketReceiver
+    protected _packetReceiver: PacketReceiver;
 
 
-    constructor(ownerType = NodeType.DomainServer, socketListenPort = LimitedNodeList.INVALID_PORT,  // eslint-disable-line
-        dtlsListenPort = LimitedNodeList.INVALID_PORT, _privateFields = {}) {  // eslint-disable-line
+    // eslint-disable-next-line
+    // @ts-ignore
+    // eslint-disable-next-line
+    constructor(ownerType = NodeType.DomainServer, socketListenPort = LimitedNodeList.INVALID_PORT,
+        // eslint-disable-next-line
+        // @ts-ignore
+        dtlsListenPort = LimitedNodeList.INVALID_PORT) {  // eslint-disable-line
         // C++  LimitedNodeList(char ownerType = NodeType::DomainServer, int socketListenPort = INVALID_PORT,
         //                      int dtlsListenPort = INVALID_PORT);
 
-        this.#_nodeSocket = new Socket(this, true, ownerType);
-        this.#_packetReceiver = new PacketReceiver();
+        this._nodeSocket = new Socket();
+        this._packetReceiver = new PacketReceiver();
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.#_nodeSocket.setPacketHandler(this.#_packetReceiver.handleVerifiedPacket);
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        this._nodeSocket.setPacketHandler(this._packetReceiver.handleVerifiedPacket);  // handleVerifiedPacket is bound.
 
         // WEBRTC TODO: Address further C++ code.
 
-        // Provide access to private fields.
-        _privateFields._nodeSocket = this.#_nodeSocket;
-        _privateFields._packetReceiver = this.#_packetReceiver;
     }
-
 
     /*@devdoc
      *  Sends a a solitary packet to an address, unreliably. The packet cannot be part of a multi-packet message.
-     *  @param {Packet} packet - The packet to send.
+     *  @param {NLPacket} packet - The packet to send.
      *  @param {SockAddr} sockAddr - The address to send it to.
-     *  @param {HMACAuth} [hmacAuth=null] - Not currently used.
+     *  @param {HMACAuth} [hmacAuth=null] - Not used.
      *  @returns {number} The number of bytes sent.
      */
-    sendUnreliablePacket(packet, sockAddr, hmacAuth = null) {
+    sendUnreliablePacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth = null): number {
         // C++  qint64 sendUnreliablePacket(const NLPacket& packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
 
         assert(!packet.isPartOfMessage());
@@ -100,20 +102,20 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.#fillPacketHeader(packet, hmacAuth);
+        this.fillPacketHeader(packet, hmacAuth);
 
-        return this.#_nodeSocket.writePacket(packet, sockAddr);
+        return this._nodeSocket.writePacket(packet, sockAddr);
     }
 
     /*@devdoc
      *  Sends a solitary packet to an address, reliably or unreliably depending on the packet. The packet cannot be part of a
      *  multi-packet message.
-     *  @param {Packet} packet - The packet to send.
+     *  @param {NLPacket} packet - The packet to send.
      *  @param {SockAddr} sockAddr - The address to send it to.
      *  @param {HMACAuth} [hmacAuth=null] - Not currently used.
      *  @returns {number} The number of bytes sent.
      */
-    sendPacket(packet, sockAddr, hmacAuth = null) {
+    sendPacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth = null): number {
         // C++  qint64 sendPacket(NLPacket* packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
         assert(!packet.isPartOfMessage());
 
@@ -139,24 +141,24 @@ class LimitedNodeList {
      *  Gets the client's local socket network address.
      *  @returns {SockAddr} The local socket network address.
      */
-    getLocalSockAddr() {
+    getLocalSockAddr(): SockAddr {
         // C++  SockAddr& getLocalSockAddr()
 
         // WEBRTC TODO: Set correct value.
 
-        return this.#_localSockAddr;
+        return this._localSockAddr;
     }
 
     /*@devdoc
      *  Gets the client's public socket network address.
      *  @returns {SockAddr} The local socket network address.
      */
-    getPublicSockAddr() {
+    getPublicSockAddr(): SockAddr {
         // C++  SockAddr& getPublicSockAddr()
 
         // WEBRTC TODO: Set correct value.
 
-        return this.#_publicSockAddr;
+        return this._publicSockAddr;
     }
 
 
@@ -164,13 +166,14 @@ class LimitedNodeList {
      *  Gets the packet receiver used for handling packets received from the assignment clients.
      *  @returns {PacketReceiver} The packet receiver.
      */
-    getPacketReceiver() {
+    getPacketReceiver():PacketReceiver {
         // C++  PacketReceiver& getPacketReceiver()
-        return this.#_packetReceiver;
+        return this._packetReceiver;
     }
 
-
-    #fillPacketHeader(packet, hmacAuth) {  // eslint-disable-line
+    // eslint-disable-next-line
+    // @ts-ignore
+    private fillPacketHeader(packet: NLPacket, hmacAuth: null): void {  // eslint-disable-line
         // C++  void fillPacketHeader(const NLPacket& packet, HMACAuth* hmacAuth = nullptr) {
         if (!PacketType.getNonSourcedPackets().has(packet.getType())) {
 

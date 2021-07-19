@@ -17,7 +17,7 @@ describe("AddressManager - integration tests", () => {
 
     //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
-    /* eslint-disable no-magic-numbers */
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     test("Possible domain change signal emitted when URL set", (done) => {
         expect.assertions(2);
