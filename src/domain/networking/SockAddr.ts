@@ -18,10 +18,9 @@ class SockAddr {
 
     // WEBRTC TODO: Add address type (UDP | WebRTC | unknown)?
 
-    // WEBRTC TODO: Rename to SockAddr?
-
     private _address = 0;
     private _port = 0;
+
 
     /*@devdoc
      *  Sets the IP address.

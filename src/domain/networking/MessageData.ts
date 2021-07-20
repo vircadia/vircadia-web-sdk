@@ -99,6 +99,7 @@ class MessageData {
         // WEBRTC TODO: Seal other objects.
         Object.seal(this);  // Prevent unintended use of invalid properties.
     }
+
 }
 
 export default MessageData;

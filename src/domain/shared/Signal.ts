@@ -10,31 +10,37 @@
 
 import assert from "./assert";
 
-/*@devdoc
- *  A function that can be connected to a {@link Signal}. Typically, <code>this</code> should be bound to it in the constructor
- *  of the class that implements the function.
- *  @typedef Slot
- *  @param {any} ...args - Any arguments included in the <code>Signal</code> are passed through to the <code>Slot</code>
- *      function.
- */
+
 type Slot = (...args: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 
 /*@devdoc
  *  Emulates Qt's signals and slots mechanism. In particular, a <code>Signal</code> object is implemented which can be connected
- *  to one or more "slot"<code>Slot</slot> functions, "emitted" to asynchronously call those functions, and disconnected.
+ *  to one or more "slot"<code>Slot</code> functions, "emitted" to asynchronously call those functions, and disconnected.
  *  <p>C++: Qt's signals and slots mechanism.</p>
  *
  *  @class Signal
  */
 class Signal {
+    // C++  Qt's signals and slots mechanism.
+
+    /*@devdoc
+     *  A function that can be connected to a {@link Signal}. If the slot function uses <code>this</code> then the correct
+     *  <code>this</code> must be bound to it, e.g., by declaring the function as an arrow function or applying
+     *  <code>.bind(this)</code> in the constructor of the class that implements the slot function.
+     *  @typedef {function} Slot
+     *  @param {any} ...args - Any arguments included in the <code>Signal</code> are passed through to the <code>Slot</code>
+     *      function.
+     */
 
     private _slots: Set<Slot> = new Set();
 
+
     /*@devdoc
-     *  Connects the signal to a <code>Slot</slot> function.
+     *  Connects the signal to a <code>Slot</code> function.
      *  <p>Note: If the slot function uses <code>this</code> then the correct <code>this</code> must be bound to it, e.g., by
-     *  applying <code>.bind(this)</code> in the constructor of the class that implements the slot function.</p>
+     *  declaring the function as an arrow function or applying <code>.bind(this)</code> in the constructor of the class that
+     *  implements the slot function.</p>
      *  @param {Slot} slot - Function to be called when <code>emit</code> is called.
      */
     connect(slot: Slot): void {
@@ -43,8 +49,8 @@ class Signal {
     }
 
     /*@devdoc
-     *  Disconnects the signal from a <code>Slot</slot> function.
-     *  @param {Slot} slot - Slot function to no longer be called when <code>emit</code> is called.
+     *  Disconnects the signal from a <code>Slot</code> function.
+     *  @param {Slot} slot - The Slot function to no longer be called when <code>emit</code> is called.
      */
     disconnect(slot: Slot): void {
         assert(typeof slot === "function");
@@ -52,7 +58,7 @@ class Signal {
     }
 
     /*@devdoc
-     *  "Emits the signal": asynchronously calls all connected <code>Slot</slot> functions.
+     *  "Emits the signal": asynchronously calls all connected <code>Slot</code> functions.
      *  @param {any} [params] - Parameter values to call connected slot functions with.
      */
     emit(...params: any[]): void {  // eslint-disable-line @typescript-eslint/no-explicit-any

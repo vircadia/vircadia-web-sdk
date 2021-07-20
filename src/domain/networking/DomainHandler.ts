@@ -10,7 +10,12 @@
 
 import SockAddr from "./SockAddr";
 import Signal from "../shared/Signal";
-import Uuid, { LocalID } from "../shared/Uuid";
+import Uuid from "../shared/Uuid";
+
+
+type LocalID = number;
+// C++  using LocalID = NetworkLocalID
+//      using NetworkLocalID = quint16
 
 
 /*@devdoc
@@ -21,6 +26,13 @@ import Uuid, { LocalID } from "../shared/Uuid";
 class DomainHandler {
     // C++  DomainHandler
 
+    /*@devdoc
+     *  A local ID is an integer ID assigned to the domain server, an assignment client, or an Interface client by the domain
+     *  server.
+     *  @typedef {number} LocalID
+     */
+
+
     private _domainURL = "";
     private _sockAddr = new SockAddr();  // For WebRTC, the port is the critical part.
     private _isConnected = false;
@@ -30,15 +42,6 @@ class DomainHandler {
     private _connectedToDomain = new Signal();
     private _disconnectedFromDomain = new Signal();
 
-
-    constructor() {
-
-        // Set up slots.
-        this.setURLAndID = this.setURLAndID.bind(this);
-
-        // WEBRTC TODO: Address further C++ code.
-
-    }
 
     /*@devdoc
      *  Sets the domain's UUID.
@@ -175,7 +178,7 @@ class DomainHandler {
      */
     // eslint-disable-next-line
     // @ts-ignore
-    setURLAndID(url: string, id: Uuid): void {  // eslint-disable-line
+    setURLAndID = (url: string, id: Uuid): void => {  // eslint-disable-line
         // C++  void setURLAndID(QUrl domainURL, QUuid domainID)
 
         // WEBRTC TODO: Address further C++ code.
@@ -184,7 +187,7 @@ class DomainHandler {
 
         // WEBRTC TODO: Address further C++ code.
 
-    }
+    };
 
 
     /*@devdoc
@@ -211,3 +214,4 @@ class DomainHandler {
 }
 
 export default DomainHandler;
+export type { LocalID };

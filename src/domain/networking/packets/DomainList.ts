@@ -9,28 +9,12 @@
 //
 
 import UDT from "../udt/UDT";
-import Uuid, { LocalID } from "../../shared/Uuid";
+import Uuid from "../../shared/Uuid";
+import { LocalID } from "../DomainHandler";
 
 import "../../shared/DataViewExtensions";
 
 
-/*@devdoc
- *  Information returned by {@link Packets|reading} a {@link PacketType(1)|DomainList} packet.
- *  @typedef {object} PacketData.DomainListDetails
- *  @property {Uuid} domainUUID - The UUID of the domain server.
- *  @property {LocalID} domainLocalID - The local ID of the domain server.
- *  @property {Uuid} newUUID - The UUID assigned to the Interface client by the domain server.
- *  @property {LocalID} newLocalID - The local ID assigned to the Interface client by the domain server.
- *  @property {NodePermissions} newPermissions
- *  @property {boolean} isAuthenticated
- *  @property {BigInt} connectRequestTimestamp
- *  @property {BigInt} domainServerPingSendTime - The Unix time that the packet was sent, in usec.
- *  @property {BigInt} domainServerCheckinProcessingTime - The duration from the time domain server received the packet
- *      requesting this response and the time that the response was sent, in usec.
- *  @property {boolean} newConnection - <code>true</code> if the Interface client has just connected to the domain,
- *      <code>false</code> if was already connected.
- *  @property {PacketData.DomainListDetails-NodeInfo[]} nodes
- */
 type DomainListDetails = {
     domainUUID: Uuid,
     domainLocalID: LocalID,
@@ -45,13 +29,32 @@ type DomainListDetails = {
     // WEBRTC TODO: Address further C++ code.
 };
 
-/*@devdoc
- *  Node information included in {@link PacketData.DomainListDetails} packet data.
- *  @typedef {object} PacketData.DomainListDetails-NodeInfo
- */
-// WEBRTC TODO: Address further C++ code.
 
-const DomainList = new class A {
+const DomainList = new class {
+
+    /*@devdoc
+     *  Node information included in {@link PacketData.DomainListDetails} packet data.
+     *  @typedef {object} PacketData.DomainListDetails-NodeInfo
+     */
+    // WEBRTC TODO: Address further C++ code.
+
+    /*@devdoc
+     *  Information returned by {@link Packets|reading} a {@link PacketType(1)|DomainList} packet.
+     *  @typedef {object} PacketData.DomainListDetails
+     *  @property {Uuid} domainUUID - The UUID of the domain server.
+     *  @property {LocalID} domainLocalID - The local ID of the domain server.
+     *  @property {Uuid} newUUID - The UUID assigned to the Interface client by the domain server.
+     *  @property {LocalID} newLocalID - The local ID assigned to the Interface client by the domain server.
+     *  @property {NodePermissions} newPermissions
+     *  @property {boolean} isAuthenticated
+     *  @property {BigInt} connectRequestTimestamp
+     *  @property {BigInt} domainServerPingSendTime - The Unix time that the packet was sent, in usec.
+     *  @property {BigInt} domainServerCheckinProcessingTime - The duration from the time domain server received the packet
+     *      requesting this response and the time that the response was sent, in usec.
+     *  @property {boolean} newConnection - <code>true</code> if the Interface client has just connected to the domain,
+     *      <code>false</code> if was already connected.
+     *  @property {PacketData.DomainListDetails-NodeInfo[]} nodes
+     */
 
     /*@devdoc
      *  Reads a {@link Packets|DomainList} packet.

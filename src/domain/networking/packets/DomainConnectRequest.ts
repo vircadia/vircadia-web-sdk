@@ -18,34 +18,6 @@ import "../../shared/DataViewExtensions";
 import Uuid from "../../shared/Uuid";
 
 
-/*@devdoc
- *  Information needed for {@link Packets|writing} a {@link PacketType(1)|DomainConnectRequest} packet.
- *  @typedef {object} PacketData.DomainConnectRequestDetails
- *  @property {Uuid} connectUUID - If ICE was used to discover the domain server, the ICE client's UUID, otherwise
- *      <code>Uuid.NULL</code>. (For Web Interface, use <code>Uuid.NULL</code>.)
- *  @property {Uint8Array} protocolVersionSig - The protocol version signature from {@link protocolVersionsSignature}.
- *  @property {string} hardwareAddress - The client's MAC address if possible, otherwise <code>""</code>.
- *  @property {Uuid} machineFingerprint - The machine fingerprint from {@link FingerprintUtils}.
- *  @property {Uint8Array} compressedSystemInfo - Compressed information about the machine from {@link Platform} if it won't
- *     cause the packet to overflow, otherwise an empty value.
- *  @property {LimitedNodeList.ConnectReason} connectReason - The reason for sending this DomainConnectRequest.
- *  @property {BigInt} previousConnectionUptime - How long Interface was previously connected to the domain, in usec.
- *      <code>0</code> if not previously connected.
- *  @property {BigInt} currentTime - The current Unix time, in usec.
- *  @property {NodeType} ownerType - The type of this node, i.e., <code>NodeType.Agent</code> for Interface.
- *  @property {SockAddr} publicSockAddr - The Interface client's public address.
- *  @property {SockAddr} localSockAddr - The Interface client's local address.
- *  @property {Set<NodeType>} nodeTypesOfInterest - The types of domain server nodes that the Interface client wants to use.
- *  @property {string} placeName - The domain's place name from {@link AddressManager} if known, otherwise an empty string.
- *  @property {boolean} isDomainConnected - <code>true</code> if currently connected to the domain, <code>false</code> if not
- *      connected.
- *  @property {string} [username] - If not connected, the user's metaverse user name.
- *  @property {Uint8Array} [usernameSignature] - If not connected then the login signature of the domain requires login and the
- *      signature is known, otherwise an empty value.
- *  @property {string} [domainUsername] - If not connected and the domain has its own login, the domain login user name.
- *  @property {string} [domainTokens] - If not connected and the domain has its own login, the domain login OAuth2 token(s) as
- *      <code>&lt;access-token&gt;:&lt;refresh-toklen&gt;</code>.
- */
 type DomainConnectRequestDetails = {
     connectUUID: Uuid,
     protocolVersionSig: Uint8Array,
@@ -69,6 +41,35 @@ type DomainConnectRequestDetails = {
 
 
 const DomainConnectRequest = new class {
+
+    /*@devdoc
+     *  Information needed for {@link Packets|writing} a {@link PacketType(1)|DomainConnectRequest} packet.
+     *  @typedef {object} PacketData.DomainConnectRequestDetails
+     *  @property {Uuid} connectUUID - If ICE was used to discover the domain server, the ICE client's UUID, otherwise
+     *      <code>Uuid.NULL</code>. (For Web Interface, use <code>Uuid.NULL</code>.)
+     *  @property {Uint8Array} protocolVersionSig - The protocol version signature from {@link protocolVersionsSignature}.
+     *  @property {string} hardwareAddress - The client's MAC address if possible, otherwise <code>""</code>.
+     *  @property {Uuid} machineFingerprint - The machine fingerprint from {@link FingerprintUtils}.
+     *  @property {Uint8Array} compressedSystemInfo - Compressed information about the machine from {@link Platform} if it won't
+     *     cause the packet to overflow, otherwise an empty value.
+     *  @property {LimitedNodeList.ConnectReason} connectReason - The reason for sending this DomainConnectRequest.
+     *  @property {BigInt} previousConnectionUptime - How long Interface was previously connected to the domain, in usec.
+     *      <code>0</code> if not previously connected.
+     *  @property {BigInt} currentTime - The current Unix time, in usec.
+     *  @property {NodeType} ownerType - The type of this node, i.e., <code>NodeType.Agent</code> for Interface.
+     *  @property {SockAddr} publicSockAddr - The Interface client's public address.
+     *  @property {SockAddr} localSockAddr - The Interface client's local address.
+     *  @property {Set<NodeType>} nodeTypesOfInterest - The types of domain server nodes that the Interface client wants to use.
+     *  @property {string} placeName - The domain's place name from {@link AddressManager} if known, otherwise an empty string.
+     *  @property {boolean} isDomainConnected - <code>true</code> if currently connected to the domain, <code>false</code> if
+     *      not connected.
+     *  @property {string} [username] - If not connected, the user's metaverse user name.
+     *  @property {Uint8Array} [usernameSignature] - If not connected then the login signature of the domain requires login and
+     *      the signature is known, otherwise an empty value.
+     *  @property {string} [domainUsername] - If not connected and the domain has its own login, the domain login user name.
+     *  @property {string} [domainTokens] - If not connected and the domain has its own login, the domain login OAuth2 token(s)
+     *      as <code>&lt;access-token&gt;:&lt;refresh-toklen&gt;</code>.
+     */
 
     /*@devdoc
      *  Writes a {@link PacketType(1)|DomainConnectRequest} packet, ready for sending.

@@ -10,24 +10,14 @@
 
 import { NodeTypeValue } from "../NodeType";
 
-type EventCallback = (event: unknown) => void;
-type RTCErrorEventCallback = (event: RTCErrorEvent) => void;
+
+type EventCallback = (event: Event) => void;
 type MessageEventCallback = (data: SignalingMessage) => void;
+type CloseEventCallback = (event: CloseEvent) => void;
+type SignalingMessage = { to: NodeTypeValue, from: NodeTypeValue, data: Record<string, unknown>, echo: boolean };
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type JSONParseResult = Record<string, unknown> | Array<any> | string | number | boolean | null;
-
-
-/*@devdoc
- *  The signaling messages are sent and received as JSON objects, with either a WebRTC signaling <code>data</code> payload
- *  or an </code>echo</code> request. The domain server or assignment client bounces echo requests back for testing
- *  purposes.
- *  @typedef {object} WebRTCSignalingChannel.SignalingMessage
- *  @property {NodeType} [to] - If sending to the domain server, the node that the message is for.
- *  @property {NodeType} [from] - If receiving from the domain server, the node that the message is from.
- *  @property {object} [data] - A WebRTC signaling payload.
- *  @property {string} [echo]- An echo request or response.
- */
-type SignalingMessage = { to: NodeTypeValue, from: NodeTypeValue, data: Record<string, unknown>, echo: boolean };
 
 
 /*@devdoc
@@ -65,6 +55,47 @@ type SignalingMessage = { to: NodeTypeValue, from: NodeTypeValue, data: Record<s
  *      closes. <em>Write-only.</em>
  */
 class WebRTCSignalingChannel {
+    // C++  Related to WebRTCSignalingServer but significantly different.
+
+    /*@devdoc
+     *  The signaling messages are sent and received as JSON objects, with either a WebRTC signaling <code>data</code> payload
+     *  or an </code>echo</code> request. The domain server or assignment client bounces echo requests back for testing
+     *  purposes.
+     *  @typedef {object} WebRTCSignalingChannel.SignalingMessage
+     *  @property {NodeType} [to] - If sending to the domain server, the node that the message is for.
+     *  @property {NodeType} [from] - If receiving from the domain server, the node that the message is from.
+     *  @property {object} [data] - A WebRTC signaling payload.
+     *  @property {string} [echo]- An echo request or response.
+     */
+
+    /*@devdoc
+     *  Called when the signaling channel opens.
+     *  @callback WebRTCSignalingChannel~onOpenCallback
+     *  @param {Event} event - DOM event details.
+     *  @memberOf WebRTCSignalingChannel
+     */
+
+    /*@devdoc
+     *  Called when the signaling channel closes.
+     *  @callback WebRTCSignalingChannel~onCloseCallback
+     *  @param {number} code - The WebSocket close code provided by the server.
+     *  @param {string} reason - The WebSocket close reason provided by the server.
+     *  @param {boolean} wasClean - <code>true</codE> if the WebSocket connection closed cleanly, <code>false</code> if it
+     *      didn't.
+     */
+
+    /*@devdoc
+     *  Called when a WebRTC signaling message is received.
+     *  @callback WebRTCSignalingChannel~onMessageCallback
+     *  @param {WebRTCSignalingChannel.SignalingMessage} message - The WebRTC signaling message received.
+     */
+
+    /*@devdoc
+     *  Called when there's an error in the signaling channel.
+     *  @callback WebRTCSignalingChannel~onErrorCallback
+     *  @param {Event} event - DOM event details.
+     */
+
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
@@ -92,6 +123,7 @@ class WebRTCSignalingChannel {
 
     private _websocket: WebSocket | null = null;
 
+
     constructor(websocketURL: string) {
         if (typeof websocketURL !== "string" || websocketURL === "") {
             console.error("WebRTCSignalingChannel: Invalid WebSocket URL!");
@@ -99,27 +131,19 @@ class WebRTCSignalingChannel {
         this._websocket = new WebSocket(websocketURL);
     }
 
+
     /* eslint-disable accessor-pairs */
 
     get readyState(): number {
         return this._websocket ? this._websocket.readyState : WebRTCSignalingChannel.CLOSED;
     }
 
-    /*@devdoc
-     *  Called when the signaling channel opens.
-     *  @callback WebRTCSignalingChannel~onOpenCallback
-     */
     set onopen(callback: EventCallback) {
         if (this._websocket) {
             this._websocket.onopen = callback;
         }
     }
 
-    /*@devdoc
-     *  Called when a message is received.
-     *  @callback WebRTCSignalingChannel~onMessageCallback
-     *  @param {WebRTCSignalingChannel.SignalingMessage} message - The message received.
-     */
     set onmessage(callback: MessageEventCallback) {
         if (this._websocket) {
             this._websocket.onmessage = function (event) {
@@ -128,20 +152,12 @@ class WebRTCSignalingChannel {
         }
     }
 
-    /*@devdoc
-     *  Called when the signaling channel closes.
-     *  @callback WebRTCSignalingChannel~onCloseCallback
-     */
-    set onclose(callback: EventCallback) {
+    set onclose(callback: CloseEventCallback) {
         if (this._websocket) {
             this._websocket.onclose = callback;
         }
     }
 
-    /*@devdoc
-     *  Called when there's an error in the signaling channel.
-     *  @callback WebRTCSignalingChannel~onErrorCallback
-     */
     set onerror(callback: EventCallback) {
         if (this._websocket) {
             this._websocket.onerror = callback;
@@ -149,6 +165,7 @@ class WebRTCSignalingChannel {
     }
 
     /* eslint-enable accessor-pairs */
+
 
     /*@devdoc
      *  Sets a function to be called upon the occurrence of an <code>"open"</code>, <code>"message"</code>,
@@ -160,18 +177,18 @@ class WebRTCSignalingChannel {
      *      |WebRTCSignalingChannel~onErrorCallback|WebRTCSignalingChannel~onCloseCallback} callback - The function to be called
      *      each time the event occurs.
      */
-    addEventListener(eventName: string, callback: MessageEventCallback | RTCErrorEventCallback | EventCallback): void {
+    addEventListener(eventName: string, callback: EventCallback | MessageEventCallback | CloseEventCallback): void {
         if (this._websocket) {
             this._websocket.addEventListener(eventName, function (event) {
                 switch (event.type) {
+                    case "open":
+                    case "error":
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        <EventCallback><unknown>callback(<any>event);
+                        break;
                     case "message":
                         WebRTCSignalingChannel.handleMessage(<MessageEvent>event, <MessageEventCallback>callback);
                         break;
-                    case "error":
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        <RTCErrorEventCallback><unknown>callback(<any>event);
-                        break;
-                    case "open":
                     case "close":
                     default:
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any

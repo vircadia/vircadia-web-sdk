@@ -47,6 +47,7 @@ class BasePacket {
 
     protected _messageData: MessageData;
 
+
     constructor(param0: number | DataView | BasePacket,
         param1: undefined | number | undefined = undefined,
         param2: undefined | SockAddr | undefined = undefined) {
@@ -96,6 +97,7 @@ class BasePacket {
         }
 
     }
+
 
     /*@devdoc
      *  Gets a reference to the {@link MessageData} object used to accumulate and share private packet- and message-related data

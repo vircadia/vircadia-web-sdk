@@ -176,6 +176,7 @@ class Packet extends BasePacket {
         }
     }
 
+
     /*@devdoc
      *  Gets whether the packet is part of a multi-packet message.
      *  @returns {boolean} <code>true</code> if the packet is part of a multi-packet message, <code>false</code> if it isn't.

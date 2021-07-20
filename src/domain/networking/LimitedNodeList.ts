@@ -58,10 +58,8 @@ class LimitedNodeList {
 
 
     protected _nodeSocket: Socket;
-
     protected _localSockAddr = new SockAddr();
     protected _publicSockAddr = new SockAddr();
-
     protected _packetReceiver: PacketReceiver;
 
 
@@ -86,6 +84,7 @@ class LimitedNodeList {
         // WEBRTC TODO: Address further C++ code.
 
     }
+
 
     /*@devdoc
      *  Sends a a solitary packet to an address, unreliably. The packet cannot be part of a multi-packet message.
@@ -136,7 +135,6 @@ class LimitedNodeList {
         return size;
     }
 
-
     /*@devdoc
      *  Gets the client's local socket network address.
      *  @returns {SockAddr} The local socket network address.
@@ -161,7 +159,6 @@ class LimitedNodeList {
         return this._publicSockAddr;
     }
 
-
     /*@devdoc
      *  Gets the packet receiver used for handling packets received from the assignment clients.
      *  @returns {PacketReceiver} The packet receiver.
@@ -170,6 +167,7 @@ class LimitedNodeList {
         // C++  PacketReceiver& getPacketReceiver()
         return this._packetReceiver;
     }
+
 
     // eslint-disable-next-line
     // @ts-ignore

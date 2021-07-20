@@ -36,7 +36,7 @@ class Socket {
 
     // WEBRTC TODO: Address further C++ code.
 
-    _packetHandler: PacketHandlerCallback | null = null;
+    private _packetHandler: PacketHandlerCallback | null = null;
 
 
     constructor() {
@@ -45,9 +45,6 @@ class Socket {
 
         this._webrtcSocket = new WebRTCSocket();
 
-        // Set up slots.
-        this.readPendingDatagrams = this.readPendingDatagrams.bind(this);
-
         // Connect signals.
         // eslint-disable-next-line @typescript-eslint/unbound-method
         this._webrtcSocket.readyRead.connect(this.readPendingDatagrams);  // Method has been bound above.
@@ -55,6 +52,7 @@ class Socket {
         // WEBRTC TODO: Address further C++ code.
 
     }
+
 
     /*@devdoc
      *  Sends a packet to a destination.
@@ -110,7 +108,7 @@ class Socket {
      *  Reads datagrams from the {@link WebRTCSocket} and forwards them to the packet handler to process.
      *  @returns {Slot}
      */
-    readPendingDatagrams(): void {
+    readPendingDatagrams = (): void => {
         // C++  void readPendingDatagrams();
 
         // WEBRTC TODO: Address further C++ code.
@@ -159,7 +157,7 @@ class Socket {
 
             }
         }
-    }
+    };
 
 
     // WEBRTC TODO: Replace this temporary method.

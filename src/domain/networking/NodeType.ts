@@ -71,6 +71,7 @@ const NodeType = new class {
     DownstreamAvatarMixer = NodeTypeValue.DownstreamAvatarMixer;
     Unassigned = NodeTypeValue.Unassigned;
 
+
     private _NODE_TYPE_NAMES = {
         [this.DomainServer]: "Domain Server",
         [this.EntityServer]: "Entity Server",
@@ -86,6 +87,7 @@ const NodeType = new class {
         [this.DownstreamAvatarMixer]: "Downstream Avatar Mixer",
         [this.Unassigned]: "Unassigned"
     };
+
 
     /*@devdoc
      *  Gets the name of a NodeType value, e.g., <code>"Domain Server"</code>.

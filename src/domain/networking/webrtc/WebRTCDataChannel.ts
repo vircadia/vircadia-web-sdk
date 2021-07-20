@@ -11,11 +11,11 @@
 import NodeType, { NodeTypeValue } from "../NodeType";
 import WebRTCSignalingChannel, { SignalingMessage } from "./WebRTCSignalingChannel";
 
+
 type OnOpenCallback = () => void;
 type OnMessageCallback = (data: ArrayBuffer) => void;
 type OnCloseCallback = () => void;
 type OnErrorCallback = (message: string) => void;
-type EventListenerCallback = (data: ArrayBuffer | null) => void;
 
 
 /*@devdoc
@@ -55,6 +55,30 @@ type EventListenerCallback = (data: ArrayBuffer | null) => void;
  *      <em>Write-only.</em>
  */
 class WebRTCDataChannel {
+    // C++  Related to WebRTCDataChannels but significantly different.
+
+    /*@devdoc
+     *  Called when the data channel opens.
+     *  @callback WebRTCDataChannel~onOpenCallback
+     */
+
+    /*@devdoc
+     *  Called when a message is received.
+     *  @callback WebRTCDataChannel~onMessageCallback
+     *  @param {ArrayBuffer} message - The message received.
+     */
+
+    /*@devdoc
+     *  Called when the data channel closes.
+     *  @callback WebRTCDataChannel~onCloseCallback
+     */
+
+    /*@devdoc
+     *  Called when there's an error in the data channel.
+     *  @callback WebRTCDataChannel~onErrorCallback
+     *  @param {string} message - The error message.
+     */
+
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
@@ -81,6 +105,7 @@ class WebRTCDataChannel {
     /* eslint-enable @typescript-eslint/no-magic-numbers */
 
     private static CONFIGURATION = {
+        // WEBRTC TODO: Make configurable in the API.
         iceServers: [{ urls: "stun:ice.vircadia.com:7337" }]
     };
 
@@ -109,79 +134,100 @@ class WebRTCDataChannel {
         }, 0);
     }
 
+
     /* eslint-disable accessor-pairs */
 
-    // Gets the type of node connected to.
     get nodeType(): NodeTypeValue {
         return this._nodeType;
     }
 
-    // Gets the state of the data channel connection.
     get readyState(): number {
         return this._readyState;
     }
 
-    // Sets the data channel ID.
     set id(id: number) {
         this._dataChannelID = id;
     }
 
-    // Gets the data channel ID.
     get id(): number {
         return this._dataChannelID;
     }
 
-    /*@devdoc
-     *  Called when the data channel opens.
-     *  @callback WebRTCDataChannel~onOpenCallback
-     */
     set onopen(callback: OnOpenCallback) {
         this._onopenCallback = callback;
     }
 
-    /*@devdoc
-     *  Called when a message is received.
-     *  @callback WebRTCDataChannel~onMessageCallback
-     *  @param {ArrayBuffer} message - The message received.
-     */
     set onmessage(callback: OnMessageCallback) {
         this._onmessageCallback = callback;
     }
 
-    /*@devdoc
-     *  Called when the data channel closes.
-     *  @callback WebRTCDataChannel~onCloseCallback
-     */
     set onclose(callback: OnCloseCallback) {
         this._oncloseCallback = callback;
     }
 
-    /*@devdoc
-     *  Called when there's an error in the data channel.
-     *  @callback WebRTCDataChannel~onErrorCallback
-     *  @param {string} message - The error message.
-     */
     set onerror(callback: OnErrorCallback) {
         this._onerrorCallback = callback;
     }
 
     /* eslint-enable accessor-pairs */
 
+
     /*@devdoc
      *  <strong class="important">Not implemented.</strong>
-     *  @param {string} eventName
-     *  @param {function} callback
+     *  @param {string} eventName - <code>"open"</code>, <code>"message"</code>, <code>"error"</code>, or <code>"close"</code>.
+     *  @param {WebRTCDataChannel~onOpenCallback|WebRTCDataChannel~onMessageCallback|WebRTCDataChannel~onCloseCallback
+     *      |WebRTCDataChannel~onErrorCallback} callback
      */
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    addEventListener(event: string, callback: EventListenerCallback): void {  // eslint-disable-line
+    // eslint-disable-next-line
+    addEventListener(event: string, callback: OnOpenCallback | OnMessageCallback | OnCloseCallback | OnErrorCallback): void {
         const errorMessage = "WebRTCDataChannel.addEventListener(): Not implemented!";
         console.error(errorMessage);
         if (this._onerrorCallback) {
             this._onerrorCallback(errorMessage);
         }
     }
-    /* eslint-enable no-unused-vars, class-methods-use-this */
+
+    /*@devdoc
+     *  Sends a message to the domain server or an assignment client on the data channel.
+     *  <p>Note: The domain server or assignment client bounces echo requests &mdash; a message starting with
+     *  <code>"echo:"</code> &mdash; back for testing purposes.</p>
+     *  @param {ArrayBuffer|ArrayBufferView|Blob|string} message - The message to send.
+     *  @returns {boolean} <code>true</code> if the message was sent, <code>false</code) if the message wasn't sent (e.g.,
+     *      because the signaling channel isn't open).
+     */
+    send(message: ArrayBuffer | ArrayBufferView | Blob | string): boolean {
+        if (this._dataChannel && this._readyState === WebRTCDataChannel.OPEN) {
+            this._dataChannel.send(<any>message);  // eslint-disable-line @typescript-eslint/no-explicit-any
+            return true;
+        }
+
+        const errorMessage = "WebRTCDataChannel: Data channel not open for sending!";
+        console.error(errorMessage);
+        if (this._onerrorCallback) {
+            this._onerrorCallback(errorMessage);
+        }
+        return false;
+    }
+
+    /*@devdoc
+     *  Closes the data channel.
+     */
+    close(): void {
+        this._readyState = WebRTCDataChannel.CLOSING;
+        if (this._dataChannel) {
+            this._dataChannel.close();
+        }
+        if (this._peerConnection) {
+            this._peerConnection.close();
+        } else {
+            this._readyState = WebRTCDataChannel.CLOSED;
+            this._dataChannel = null;
+            this._peerConnection = null;
+        }
+    }
+
 
     // Starts making a WebRTC connection.
     private start() {
@@ -192,7 +238,7 @@ class WebRTCDataChannel {
         // Send ICE candidates to the domain server.
         this._peerConnection.onicecandidate = ({ candidate }) => {
             if (candidate  // The candidate is sometimes null for unknown reasons; don't send this.
-                    && this._signalingChannel && this._signalingChannel.readyState === WebRTCSignalingChannel.OPEN) {
+                && this._signalingChannel && this._signalingChannel.readyState === WebRTCSignalingChannel.OPEN) {
                 this._signalingChannel.send({ to: this._nodeType, data: candidate });
             }
         };
@@ -200,7 +246,7 @@ class WebRTCDataChannel {
         // Generate an offer.
         this._peerConnection.onnegotiationneeded = async () => {
             if (!this._peerConnection || !this._signalingChannel
-                    || this._signalingChannel.readyState !== WebRTCSignalingChannel.OPEN) {
+                || this._signalingChannel.readyState !== WebRTCSignalingChannel.OPEN) {
                 return;
             }
             try {
@@ -372,45 +418,6 @@ class WebRTCDataChannel {
         this.start();
 
     }  // #connect
-
-    /*@devdoc
-     *  Sends a message to the domain server or an assignment client on the data channel.
-     *  <p>Note: The domain server or assignment client bounces echo requests &mdash; a message starting with
-     *  <code>"echo:"</code> &mdash; back for testing purposes.</p>
-     *  @param {ArrayBuffer|ArrayBufferView|Blob|string} message - The message to send.
-     *  @returns {boolean} <code>true</code> if the message was sent, <code>false</code) if the message wasn't sent (e.g.,
-     *      because the signaling channel isn't open).
-     */
-    send(message: ArrayBuffer | ArrayBufferView | Blob | string): boolean {
-        if (this._dataChannel && this._readyState === WebRTCDataChannel.OPEN) {
-            this._dataChannel.send(<any>message);  // eslint-disable-line @typescript-eslint/no-explicit-any
-            return true;
-        }
-
-        const errorMessage = "WebRTCDataChannel: Data channel not open for sending!";
-        console.error(errorMessage);
-        if (this._onerrorCallback) {
-            this._onerrorCallback(errorMessage);
-        }
-        return false;
-    }
-
-    /*@devdoc
-     *  Closes the data channel.
-     */
-    close(): void {
-        this._readyState = WebRTCDataChannel.CLOSING;
-        if (this._dataChannel) {
-            this._dataChannel.close();
-        }
-        if (this._peerConnection) {
-            this._peerConnection.close();
-        } else {
-            this._readyState = WebRTCDataChannel.CLOSED;
-            this._dataChannel = null;
-            this._peerConnection = null;
-        }
-    }
 
 }
 

@@ -15,14 +15,7 @@ import SockAddr from "../SockAddr";
 import Signal from "../../shared/Signal";
 
 
-/*@devdoc
- *  Received datagram data and information.
- *  @typedef {object} WebRTCSocket.Datagram
- *  @property {ArrayBuffer} buffer - The datagram data.
- *  @property {SockAddr} sender - The sender that the datagram was received from.
- */
 type WebRTCSocketDatagram = { buffer: ArrayBuffer | undefined, sender: SockAddr | undefined };
-
 // WEBRTC TODO: Replace this temporary type.
 type OpenWebRTCDataChannelCallback = (channelID: number) => void;
 
@@ -41,6 +34,14 @@ type WebRTCDataChannelsByChannelID = Map<number, { nodeType: NodeTypeValue, webr
 class WebRTCSocket {
     // C++  WebRTCSocket : public QObject
     //      WebRTCDataChannels : public QObject - incorporates some functionality from this.
+
+    /*@devdoc
+     *  Received datagram data and information.
+     *  @typedef {object} WebRTCSocket.Datagram
+     *  @property {ArrayBuffer} buffer - The datagram data.
+     *  @property {SockAddr} sender - The sender that the datagram was received from.
+     */
+
 
     // A single WebRTC signaling channel connected to the domain server for use in establishing WebRTC connections with both the
     // domain server and each assignment client.
@@ -67,6 +68,7 @@ class WebRTCSocket {
 
     }
 
+
     /*@devdoc
      *  Gets whether there are any datagrams waiting to be read.
      *  @returns {boolean} <code>true</code> if there is a datagram waiting to be read, <code>false</code> if there isn't.
@@ -75,7 +77,6 @@ class WebRTCSocket {
         // C++  bool hasPendingDatagrams()
         return this._receivedQueue.length > 0;
     }
-
 
     /*@devdoc
      *  Reads the next datagram, up to a maximum number of bytes.

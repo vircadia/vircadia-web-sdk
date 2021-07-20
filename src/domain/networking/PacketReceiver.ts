@@ -14,29 +14,13 @@ import Packet from "./udt/Packet";
 import { PacketTypeValue } from "./udt/PacketHeaders";
 
 
-/*@devdoc
- *  A reference to a packet listener method along with an indication of whether the listener is for sourced messages or
- *  unsourced messages. A sourced message is one which includes the ID of the node it was sent from.
- *  @typedef {object} PacketReceiver.ListenerReference
- *  @property {Listener} listener - The listener method.
- *  @property {boolean} sourced - <code>true</code> if the listener handles sourced messages, <code>false</code> if it
- *      handles unsourced messages.
- *  @property {boolean} deliverPending - <code><true</code> if packets should be delivered to the listener as soon as they
- *      are received, <code>false</code> if packets should be accumulated into a multi-packet message and the message
- *      be delivered to the listener when complete.
- */
+type Listener = (message: ReceivedMessage) => void;
+
 type ListenerReference = {
     listener: Listener,
     sourced: boolean,
     deliverPending: boolean  // Augment the listener reference instead of encapsulating it per C++.
 };
-
-/*@devdoc
- *  A method that processes a received messages of a particular type.
- *  @typedef {function} PacketReceiver.Listener
- *  @param {ReceivedMessage} The received message.
- */
-type Listener = (message: ReceivedMessage) => void;
 
 
 /*@devdoc
@@ -48,18 +32,33 @@ type Listener = (message: ReceivedMessage) => void;
 class PacketReceiver {
     // C++  PacketReceiver : public QObject
 
+    /*@devdoc
+     *  A method that processes a received messages of a particular type.
+     *  @typedef {function} PacketReceiver.Listener
+     *  @param {ReceivedMessage} The received message.
+     */
+
+    /*@devdoc
+     *  A reference to a packet listener method along with an indication of whether the listener is for sourced messages or
+     *  unsourced messages. A sourced message is one which includes the ID of the node it was sent from.
+     *  @typedef {object} PacketReceiver.ListenerReference
+     *  @property {Listener} listener - The listener method.
+     *  @property {boolean} sourced - <code>true</code> if the listener handles sourced messages, <code>false</code> if it
+     *      handles unsourced messages.
+     *  @property {boolean} deliverPending - <code><true</code> if packets should be delivered to the listener as soon as they
+     *      are received, <code>false</code> if packets should be accumulated into a multi-packet message and the message
+     *      be delivered to the listener when complete.
+     */
+
+
     private _messageListenerMap: Map<PacketTypeValue, ListenerReference> = new Map();
 
-
-    constructor() {
-        // Set up slots.
-        this.handleVerifiedPacket = this.handleVerifiedPacket.bind(this);
-    }
 
     /*@devdoc
      *  Creates a reference to a listener method, marking the method as being for unsourced packets.
      *  <p>Note: If the listener uses <code>this</code> then the correct <code>this</code> must be bound to it, e.g., by
-     *  applying <code>.bind(this)</code> on the listener when it is created.</p>
+     *  declaring the function as an arrow function or applying <code>.bind(this)</code> in the constructor of the class that
+     *  implements the listener function.</p>
      *  <p><em>Static</em></p>
      *  @static
      *  @param {Listener} listener - The listener method that will handle a particular type of packet.
@@ -98,7 +97,7 @@ class PacketReceiver {
      *  @param {Packet} packet - The packet. It is treated as an NLPacket.
      *  @returns {Slot}
      */
-    handleVerifiedPacket(packet: Packet): void {
+    handleVerifiedPacket = (packet: Packet): void => {
         // C++  void handleVerifiedPacket(Packet* packet);
 
         // WEBRTC TODO: This method is incorrectly named - it handles both verified and unverified packets?
@@ -108,7 +107,7 @@ class PacketReceiver {
         const nlPacket = NLPacket.fromBase(packet);
         const receivedMessage = new ReceivedMessage(nlPacket);
         this.handleVerifiedMessage(receivedMessage, true);
-    }
+    };
 
 
     // eslint-disable-next-line

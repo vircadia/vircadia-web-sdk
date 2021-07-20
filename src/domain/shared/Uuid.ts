@@ -14,23 +14,6 @@
 
 
 /*@devdoc
- *  UUIDs (Universally Unique IDentifiers) are used to uniquely identify items such as entities and avatars. They are
- *  represented as {@link Uuid(1)|Uuid} objects encapsulating BigInt values in the SDK, and 16-byte (128-bit) numbers in the
- *  protocol packets.
- *  <p>Note: In the user scripting API, UUIDs are represented as formatted hexadecimal strings.</p>
- *  @typedef {BigInt} Uuid
- */
-
-/*@devdoc
- *  A local ID is an integer ID assigned to the domain server, an assignment client, or an Interface client by the domain
- *  server.
- *  @typedef {number} LocalID
- */
-// C++  using LocalID = NetworkLocalID
-//      using NetworkLocalID = quint16
-type LocalID = number;
-
-/*@devdoc
  *  A UUID (Universally Unique IDentifier) used to uniquely identify an item such as an entity or avatar. Internally, a
  *  {@link Uuid} value is a <code>bigint</code> value.
  *  <p>Note: In the user scripting API, UUIDs are represented as formatted strings.</p>
@@ -67,6 +50,13 @@ class Uuid extends BigInt {
     }
 
     /*@devdoc
+     *  UUIDs (Universally Unique IDentifiers) are used to uniquely identify items such as entities and avatars. They are
+     *  represented as {@link Uuid(1)|Uuid} objects encapsulating BigInt values in the SDK, and 16-byte (128-bit) numbers in the
+     *  protocol packets.
+     *  <p>Note: In the user scripting API, UUIDs are represented as formatted hexadecimal strings.</p>
+     *  @typedef {BigInt} Uuid
+     */
+    /*@devdoc
      *  Gets the UUID's underlying <code>bigint</code> primitive value.
      *  @returns {BigInt} The underlying <code>bigint</code> primitive value
      */
@@ -77,4 +67,3 @@ class Uuid extends BigInt {
 }
 
 export default Uuid;
-export type { LocalID };

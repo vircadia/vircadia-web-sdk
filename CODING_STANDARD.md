@@ -35,23 +35,46 @@ In public API code, JavaScript's `#` should be used for private members so that 
 In internal SDK code, TypeScript's `private`, `protected`, and `public` modifiers should be used because they are more
 expressive and it is OK to enforce their semantics at compile time.
 
+### Document Return Types
+
+Methods' return types should always be explicitly specified even if TypeScript can automatically determine the return type from
+the current code &mdash; the code may change and any changes in the return type shoulds be flagged.
+
+### Unused function parameters
+
+**TODO**
+
 
 ## Implementation Patterns
 
-### Class Code Order
+### File Code Order
 
-Code in a class should be ordered as follows:
-- Static items.
-- Member variables.
+Code in a file should be ordered as follows:
+- Imports. In directory order then alphabetical order.
+- Public types.
+- Private types.
+
+`class {`
+- JSDoc for types.
+- Public static items.
+- Private static items.
+- Private member variables.
 - Constructor.
+- Public property setters and getters.
 - Public methods.
 - Public slots.
-- Public signals (getters for).
+- Public signals' getters for.
 - Private methods.
 - Private slots.
-- Private signals (getters for).
+- Private signals' getters for.
 
-Signals and slots, here, refer to the Qt-style signals and slots implemented in the `/domain` library files.
+`}`
+- Exports.
+
+JSDoc directly adjacent to `type` statements isn't recognized, hence why it is included inside the `class { ... }` or other
+top-level block.
+
+Signals and slots, here, refer to the Qt-style signals and slots implemented by `Signal` in the `/domain` library files.
 
 ### Following the C++
 

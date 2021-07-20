@@ -414,9 +414,11 @@ const PacketType = new class {
         HasCompressedSystemInfo: 26
     };
 
+
     constructor() {
         assert(PacketTypeValue.NUM_PACKETS - 1 === this.AvatarZonePresence, "Inconsistent packet data in PacketHeaders!");
     }
+
 
     /*@devdoc
      *  Gets the current version number of a packet type.

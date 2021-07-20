@@ -62,7 +62,6 @@ const NodesList = new class extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        // Don't need to bind this to slots because this is a namespace.
     }
 
     /*@devdoc
@@ -239,7 +238,7 @@ const NodesList = new class extends LimitedNodeList {
      *  @param {ReceivedMessage} message - The DomainList message.
      *  @returns {Slot}
      */
-    processDomainList = (message: ReceivedMessage) => {  // Lambda binds this.
+    processDomainList = (message: ReceivedMessage) => {
         // C++  processDomainList(ReceivedMessage* message)
 
         // WEBRTC TODO: This should involve a NLPacketList, not just a single NLPacket.

@@ -23,6 +23,7 @@ class ReceivedMessage {
 
     private _messageData;
 
+
     constructor(packet: NLPacket) {
         // C++  ReceivedMessage(NLPacket& packet)
         this._messageData = packet.getMessageData();  // Reference the data already collected; no need to copy it.
@@ -35,6 +36,7 @@ class ReceivedMessage {
         // WEBRTC TODO: May need to add equivalent of C++ ReceivedMessage::_data that contains just the payload.
         //              And as part of this, implement the payload start etc. members and calculations.
     }
+
 
     /*@devdoc
      *  Gets the type of the message.
@@ -53,6 +55,7 @@ class ReceivedMessage {
         // C++  QByteArray getMessage()
         return new DataView(this._messageData.data.buffer, this._messageData.dataPosition);
     }
+
 }
 
 export default ReceivedMessage;
