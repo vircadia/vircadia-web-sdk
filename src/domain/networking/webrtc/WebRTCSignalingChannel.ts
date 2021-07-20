@@ -13,6 +13,7 @@ import { NodeTypeValue } from "../NodeType";
 type EventCallback = (event: unknown) => void;
 type RTCErrorEventCallback = (event: RTCErrorEvent) => void;
 type MessageEventCallback = (data: SignalingMessage) => void;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type JSONParseResult = Record<string, unknown> | Array<any> | string | number | boolean | null;
 
 

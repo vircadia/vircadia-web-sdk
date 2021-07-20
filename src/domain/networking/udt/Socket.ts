@@ -40,7 +40,8 @@ class Socket {
 
 
     constructor() {
-        // C++  Socket(QObject* object = 0, bool shouldChangeSocketOptions = true, NodeType_t nodeType = NodeType::Unassigned)
+        // C++  Socket(QObject* parent = 0, bool shouldChangeSocketOptions = true, NodeType_t nodeType = NodeType::Unassigned)
+        // All parameters are unused in TypeScript code so don't implement.
 
         this._webrtcSocket = new WebRTCSocket();
 

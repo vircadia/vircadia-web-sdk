@@ -8,7 +8,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-//import Packet from "./udt/Packet";
 import SockAddr from "./../networking/SockAddr";
 import { PacketTypeValue } from "./udt/PacketHeaders";
 

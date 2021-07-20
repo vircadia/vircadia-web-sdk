@@ -12,7 +12,10 @@
 describe("DomainServer - integration tests", () => {
 
     test("Empty test", () => {
-        //
+
+        // WEBRTC TODO: Add DomainServer integration tests.
+
+        expect(true).toBe(true);
     });
 
 });

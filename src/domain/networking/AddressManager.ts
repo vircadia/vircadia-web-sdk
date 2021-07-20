@@ -17,7 +17,7 @@ import Uuid from "../shared/Uuid";
  *  <p>C++: <code>AddressManager : public QObject, public Dependency</code></p>
  *  @namespace AddressManager
  */
-const AddressManager = new (class {
+const AddressManager = new class {
     // C++  AddressManager : public QObject, public Dependency
 
     private _domainUrl = "";
@@ -83,6 +83,6 @@ const AddressManager = new (class {
         return true;
     }
 
-})();
+}();
 
 export default AddressManager;
