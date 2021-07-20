@@ -25,6 +25,7 @@
         "lint-path": "eslint",
         "test": "jest",
         "test-watch": "jest --watch",
+        "test-debug": "jest --detectOpenHandles",
         "sdkdoc": "rimraf ./docs/sdk && rimraf ./docs/build && tsc --project tsconfig.jsdoc.json && jsdoc ./jsdoc/sdk-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-sdk.json --destination docs/sdk",
         "devdoc": "rimraf ./docs/dev && rimraf ./docs/build && tsc --project tsconfig.jsdoc.json && jsdoc ./jsdoc/dev-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-dev.json --destination docs/dev"
     },
