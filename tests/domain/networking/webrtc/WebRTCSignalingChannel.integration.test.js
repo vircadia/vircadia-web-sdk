@@ -14,14 +14,14 @@
 import WebRTCSignalingChannel from "../../../../src/domain/networking/webrtc/WebRTCSignalingChannel";
 import NodeType from "../../../../src/domain/networking/NodeType";
 
+import TestConfig from "../../../test.config.json";
+
 import "wrtc";  // WebRTC Node.js package.
 
 
 describe("WebRTCSignalingChannel - integration tests", () => {
 
-    //  Test environment expected: Domain server running on localhost.
-    const LOCALHOST_WEBSOCKET = "ws://127.0.0.1:40102";
-    const INVALID_WEBSOCKET = "ws://0.0.0.0:0";
+    //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
     // Add WebSocket to Node.js environment.
     global.WebSocket = require("ws");  // eslint-disable-line
@@ -32,7 +32,7 @@ describe("WebRTCSignalingChannel - integration tests", () => {
 
     test("Can open and close", (done) => {
         expect.assertions(4);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         expect(webrtcSignalingChannel.readyState).toBe(WebRTCSignalingChannel.CONNECTING);
         webrtcSignalingChannel.onopen = function () {
             expect(webrtcSignalingChannel.readyState).toBe(WebRTCSignalingChannel.OPEN);
@@ -48,7 +48,7 @@ describe("WebRTCSignalingChannel - integration tests", () => {
 
     test("Open invalid address fails with an error", (done) => {
         expect.assertions(1);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(INVALID_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_INVALID_URL);
         webrtcSignalingChannel.onerror = function () {
             expect(webrtcSignalingChannel.readyState).toBeGreaterThanOrEqual(WebRTCSignalingChannel.CLOSING);
             webrtcSignalingChannel.close();
@@ -59,7 +59,7 @@ describe("WebRTCSignalingChannel - integration tests", () => {
 
     test("Sending when closed fails with an error", (done) => {
         expect.assertions(3);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         function sendMessage() {
             const echoMessage = { to: NodeType.DomainServer, echo: "Hello" };
             const sent = webrtcSignalingChannel.send(echoMessage);
@@ -81,7 +81,7 @@ describe("WebRTCSignalingChannel - integration tests", () => {
 
     test("Can echo test message off domain server", (done) => {
         expect.assertions(3);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         webrtcSignalingChannel.onopen = function () {
             const echoMessage = { to: NodeType.DomainServer, echo: "Hello" };
             const sent = webrtcSignalingChannel.send(echoMessage);
@@ -98,13 +98,13 @@ describe("WebRTCSignalingChannel - integration tests", () => {
 
     test("Signaling channels are kept separate", (done) => {
         expect.assertions(4);
-        let webrtcSignalingChannel1 = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel1 = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         webrtcSignalingChannel1.onopen = function () {
             const echoMessage = { to: NodeType.DomainServer, echo: "Hello" };
             const sent = webrtcSignalingChannel1.send(echoMessage);
             expect(sent).toBe(true);
         };
-        let webrtcSignalingChannel2 = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel2 = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         webrtcSignalingChannel2.onopen = function () {
             const echoMessage = { to: NodeType.DomainServer, echo: "Goodbye" };
             const sent = webrtcSignalingChannel2.send(echoMessage);

@@ -15,14 +15,14 @@ import WebRTCDataChannel from "../../../../src/domain/networking/webrtc/WebRTCDa
 import WebRTCSignalingChannel from "../../../../src/domain/networking/webrtc/WebRTCSignalingChannel";
 import NodeType from "../../../../src/domain/networking/NodeType";
 
+import TestConfig from "../../../test.config.json";
+
 import "wrtc";  // WebRTC Node.js package.
 
 
 describe("WebRTCDataChannel - integration tests", () => {
 
-    //  Test environment expected: Domain server running on localhost that allows anonymous logins.
-    const LOCALHOST_WEBSOCKET = "ws://127.0.0.1:40102";
-    const INVALID_WEBSOCKET = "ws://0.0.0.0:0";
+    //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
     // Add WebSocket and WebRTC to Node.js environment.
     global.WebSocket = require("ws");  // eslint-disable-line @typescript-eslint/no-unsafe-assignment
@@ -49,7 +49,7 @@ describe("WebRTCDataChannel - integration tests", () => {
     // WEBRTC TODO: ELIFCECYCLE errors.
     test("Can echo test message off domain server", (done) => {
         expect.assertions(2);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         webrtcSignalingChannel.onopen = function () {
             let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
 
@@ -100,7 +100,7 @@ describe("WebRTCDataChannel - integration tests", () => {
 
     test("Open with invalid address fails with an error", (done) => {
         expect.assertions(1);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(INVALID_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_INVALID_URL);
         webrtcSignalingChannel.onerror = function () {
             let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
             webrtcDataChannel.onerror = function () {
@@ -114,7 +114,7 @@ describe("WebRTCDataChannel - integration tests", () => {
 
     test("Closing signaling channel while connecting data channel fails with an error", (done) => {
         expect.assertions(1);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         webrtcSignalingChannel.onopen = function () {
             let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
             webrtcDataChannel.onerror = function () {
@@ -130,7 +130,7 @@ describe("WebRTCDataChannel - integration tests", () => {
     // WEBRTC TODO: ELIFCECYCLE errors.
     test("Sending when closed fails with an error", (done) => {
         expect.assertions(2);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         webrtcSignalingChannel.onopen = function () {
             let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
             webrtcDataChannel.onopen = function () {
@@ -153,8 +153,8 @@ describe("WebRTCDataChannel - integration tests", () => {
     // WEBRTC TODO: ELIFCECYCLE errors.
     test("Data channels are kept separate", (done) => {
         expect.assertions(4);
-        let webrtcSignalingChannel1 = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
-        let webrtcSignalingChannel2 = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel1 = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+        let webrtcSignalingChannel2 = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         let webrtcDataChannel1 = null;
         let webrtcDataChannel2 = null;
         let repliesReceived = 0;
