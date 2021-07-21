@@ -71,7 +71,7 @@ const AddressManager = new class {
 
 
     private handlerUrl(url: string): boolean {
-        // C++  bool handleUrl(const QUrl& lookupUrl, LookupTrigger trigger = UserInput)
+        // C++  bool handleUrl(const QUrl& lookupUrlIn, LookupTrigger trigger, const QString& lookupUrlInString)
 
         // WEBRTC TODO: Address further C++ code.
 
