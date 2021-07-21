@@ -44,7 +44,7 @@ const DomainConnectRequest = new class {
 
     /*@devdoc
      *  Information needed for {@link Packets|writing} a {@link PacketType(1)|DomainConnectRequest} packet.
-     *  @typedef {object} PacketData.DomainConnectRequestDetails
+     *  @typedef {object} PacketScribe.DomainConnectRequestDetails
      *  @property {Uuid} connectUUID - If ICE was used to discover the domain server, the ICE client's UUID, otherwise
      *      <code>Uuid.NULL</code>. (For Web Interface, use <code>Uuid.NULL</code>.)
      *  @property {Uint8Array} protocolVersionSig - The protocol version signature from {@link protocolVersionsSignature}.
@@ -73,8 +73,8 @@ const DomainConnectRequest = new class {
 
     /*@devdoc
      *  Writes a {@link PacketType(1)|DomainConnectRequest} packet, ready for sending.
-     *  @function PacketData.DomainConnectRequest&period;write
-     *  @param {PacketData.DomainConnectRequestDetails} info - The information needed for writing the packet.
+     *  @function PacketScribe.DomainConnectRequest&period;write
+     *  @param {PacketScribe.DomainConnectRequestDetails} info - The information needed for writing the packet.
      *  @returns {NLPacket}
      */
     write(info: DomainConnectRequestDetails): NLPacket {  /* eslint-disable-line class-methods-use-this */

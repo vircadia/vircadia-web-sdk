@@ -33,14 +33,14 @@ type DomainListDetails = {
 const DomainList = new class {
 
     /*@devdoc
-     *  Node information included in {@link PacketData.DomainListDetails} packet data.
-     *  @typedef {object} PacketData.DomainListDetails-NodeInfo
+     *  Node information included in {@link PacketScribe.DomainListDetails} packet data.
+     *  @typedef {object} PacketScribe.DomainListDetails-NodeInfo
      */
     // WEBRTC TODO: Address further C++ code.
 
     /*@devdoc
      *  Information returned by {@link Packets|reading} a {@link PacketType(1)|DomainList} packet.
-     *  @typedef {object} PacketData.DomainListDetails
+     *  @typedef {object} PacketScribe.DomainListDetails
      *  @property {Uuid} domainUUID - The UUID of the domain server.
      *  @property {LocalID} domainLocalID - The local ID of the domain server.
      *  @property {Uuid} newUUID - The UUID assigned to the Interface client by the domain server.
@@ -53,14 +53,14 @@ const DomainList = new class {
      *      requesting this response and the time that the response was sent, in usec.
      *  @property {boolean} newConnection - <code>true</code> if the Interface client has just connected to the domain,
      *      <code>false</code> if was already connected.
-     *  @property {PacketData.DomainListDetails-NodeInfo[]} nodes
+     *  @property {PacketScribe.DomainListDetails-NodeInfo[]} nodes
      */
 
     /*@devdoc
      *  Reads a {@link Packets|DomainList} packet.
-     *  @function PacketData.DomainList&period;read
+     *  @function PacketScribe.DomainList&period;read
      *  @param {DataView} data - The {@link Packets|DomainList} message data to read.
-     *  @returns {PacketData.DomainListDetails} The domain list information.
+     *  @returns {PacketScribe.DomainListDetails} The domain list information.
      */
     read(data: DataView): DomainListDetails {  /* eslint-disable-line class-methods-use-this */
         // C++  NodeList::processDomainList(QSharedPointer<ReceivedMessage> message)

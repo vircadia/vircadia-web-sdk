@@ -15,7 +15,7 @@ import LimitedNodeList from "./LimitedNodeList";
 import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import ReceivedMessage from "./ReceivedMessage";
-import PacketData from "./packets/PacketData";
+import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
 import NLPacket from "../networking/NLPacket";
 import Uuid from "../shared/Uuid";
@@ -198,7 +198,7 @@ const NodesList = new class extends LimitedNodeList {
             }
 
             // Write the packet.
-            packet = PacketData.DomainConnectRequest.write({
+            packet = PacketScribe.DomainConnectRequest.write({
                 connectUUID,
                 protocolVersionSig,
                 hardwareAddress,
@@ -243,7 +243,7 @@ const NodesList = new class extends LimitedNodeList {
 
         // WEBRTC TODO: This should involve a NLPacketList, not just a single NLPacket.
 
-        const info = PacketData.DomainList.read(message.getMessage());
+        const info = PacketScribe.DomainList.read(message.getMessage());
 
         // WEBRTC TODO: Address further C++ code.
 
