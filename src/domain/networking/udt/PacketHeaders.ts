@@ -129,7 +129,7 @@ enum PacketTypeValue {
 
 
 /*@devdoc
- *  The Vircadia protocol packets.
+ *  The <code>PacketType</code> namespace lists the Vircadia protocol packets.
  *  <p>C++: <code>PacketHeaders.h</code>
  *
  *  @namespace PacketType

@@ -13,15 +13,16 @@ import { PacketTypeValue } from "./udt/PacketHeaders";
 
 
 /*@devdoc
- *  Collects together what would otherwise be private members used in {@link BasePacket}, {@link Packet}, {@link NLPacket},
- *  {@link Packets}, and {@link ReceivedMessage} classes.
- *  <p>TypeScript doesn't enable private members of a class to be accessed by "friend" classes. In particular, ReceivedMessage
- *  cannot access members of the packet classes. The solution adopted is to collect and exposed the relevant private members
- *  in a MessageData object, which can be used without copying the data.</p>
+ *  The <code>MessageData</code> class collects together what would otherwise be private members used in {@link BasePacket},
+ *  {@link Packet}, {@link NLPacket}, {@link Packets}, and {@link ReceivedMessage} classes.
+ *  <p>TypeScript doesn't enable private members of a class to be accessed by "friend" classes. In particular,
+ *  <code>ReceivedMessage</code> cannot access members of the packet classes. The solution adopted is to collect and expose the
+ *  relevant private members in a <code>MessageData</code> object, which can be used by reference rather than copying the
+ *  data.</p>
  *  <p>C++  N/A</p>
  *
  *  @class MessageData
- *  @param {MessageData} [other] - Another MessageData object to copy property values from.
+ *  @param {MessageData} [other] - Another <code>MessageData</code> object to copy property values from.
  *
  *  @property <strong>BasePacket</strong>
  *  @property {DataView} data - The raw packet or message data.

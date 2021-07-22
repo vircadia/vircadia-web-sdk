@@ -13,7 +13,7 @@ import Uuid from "../shared/Uuid";
 
 
 /*@devdoc
- *  Manages your current location in the metaverse.
+ *  The <code>AddressManager</code> namespace manages the current location in the metaverse.
  *  <p>C++: <code>AddressManager : public QObject, public Dependency</code></p>
  *  @namespace AddressManager
  */

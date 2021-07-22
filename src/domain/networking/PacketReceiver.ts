@@ -24,8 +24,8 @@ type ListenerReference = {
 
 
 /*@devdoc
- *  Maps received packets 1 : 1 with "listener" methods, and invokes the appropriate listener when called upon to do so for a
- *  received packet.
+ *  The <code>PacketReceiver</code> class maps received packets 1 : 1 with "listener" methods, and invokes the appropriate
+ *  listener when called upon to do so for a received packet.
  *  <p>C++: <code>PacketReceiver : public QObject</code>
  *  @class PacketReceiver
  */
@@ -45,7 +45,7 @@ class PacketReceiver {
      *  @property {Listener} listener - The listener method.
      *  @property {boolean} sourced - <code>true</code> if the listener handles sourced messages, <code>false</code> if it
      *      handles unsourced messages.
-     *  @property {boolean} deliverPending - <code><true</code> if packets should be delivered to the listener as soon as they
+     *  @property {boolean} deliverPending - <code>true</code> if packets should be delivered to the listener as soon as they
      *      are received, <code>false</code> if packets should be accumulated into a multi-packet message and the message
      *      be delivered to the listener when complete.
      */

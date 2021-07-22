@@ -47,9 +47,9 @@ const DomainList = new class {
      *  @property {LocalID} newLocalID - The local ID assigned to the Interface client by the domain server.
      *  @property {NodePermissions} newPermissions
      *  @property {boolean} isAuthenticated
-     *  @property {BigInt} connectRequestTimestamp
-     *  @property {BigInt} domainServerPingSendTime - The Unix time that the packet was sent, in usec.
-     *  @property {BigInt} domainServerCheckinProcessingTime - The duration from the time domain server received the packet
+     *  @property {bigint} connectRequestTimestamp
+     *  @property {bigint} domainServerPingSendTime - The Unix time that the packet was sent, in usec.
+     *  @property {bigint} domainServerCheckinProcessingTime - The duration from the time domain server received the packet
      *      requesting this response and the time that the response was sent, in usec.
      *  @property {boolean} newConnection - <code>true</code> if the Interface client has just connected to the domain,
      *      <code>false</code> if was already connected.

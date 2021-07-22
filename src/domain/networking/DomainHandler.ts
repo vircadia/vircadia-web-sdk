@@ -19,7 +19,7 @@ type LocalID = number;
 
 
 /*@devdoc
- *  Handles the connection to and the features of a domain.
+ *  The <code>DomainHandler</code> class handles the connection to and the features of a domain.
  *  <p>C++: <code>DomainHandler : QObject</code></p>
  *  @class DomainHandler
  */

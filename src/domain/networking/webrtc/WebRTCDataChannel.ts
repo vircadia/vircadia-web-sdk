@@ -19,8 +19,9 @@ type OnErrorCallback = (message: string) => void;
 
 
 /*@devdoc
- *  A WebRTC data channel used for Vircadia protocol communications with a domain server or assignment client. Uses a
- *  {@link WebRTCSignalingChannel} in the process of establishing the WebRTC connection.
+ *  The <code>WebRTCDataChannel</code> class provides a WebRTC data channel used for Vircadia protocol communications with a
+ *  domain server or assignment client. It uses a {@link WebRTCSignalingChannel} in the process of establishing the WebRTC
+ *  connection.
  *  <p>The API is similar to the WebRTCSignalingChannel and WebSocket APIs.</p>
  *  <p>C++: Akin to <code>WebRTCDataChannels</code> though significantly different.
  *

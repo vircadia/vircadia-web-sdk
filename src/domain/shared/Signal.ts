@@ -15,8 +15,9 @@ type Slot = (...args: any[]) => void; // eslint-disable-line @typescript-eslint/
 
 
 /*@devdoc
- *  Emulates Qt's signals and slots mechanism. In particular, a <code>Signal</code> object is implemented which can be connected
- *  to one or more "slot"<code>Slot</code> functions, "emitted" to asynchronously call those functions, and disconnected.
+ *  The <code>Signal</code> class emulates Qt's signals and slots mechanism. In particular, a <code>Signal</code> object is
+ *  implemented which can be connected to one or more "slot"<code>Slot</code> functions, "emitted" to asynchronously call those
+ *  functions, and disconnected.
  *  <p>C++: Qt's signals and slots mechanism.</p>
  *
  *  @class Signal

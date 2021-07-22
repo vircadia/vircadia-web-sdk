@@ -14,14 +14,14 @@
 
 
 /*@devdoc
- *  A UUID (Universally Unique IDentifier) used to uniquely identify an item such as an entity or avatar. Internally, a
- *  {@link Uuid} value is a <code>bigint</code> value.
+ *  The <code>Uuid</code> class provides a UUID (Universally Unique IDentifier) used to uniquely identify an item such as an
+ *  entity or avatar. Internally, a {@link Uuid} value is a <code>bigint</code> value.
  *  <p>Note: In the user scripting API, UUIDs are represented as formatted strings.</p>
  *  <p>C++: UUID.h, <code>QUuid</code></p>
  *
  *  @class Uuid
  *  @variation 1
- *  @param {BigInt} [value=0] - The UUID value. If not specified, a UUID with value of <code>Uuid.NULL</code> is created.
+ *  @param {bigint} [value=0] - The UUID value. If not specified, a UUID with value of <code>Uuid.NULL</code> is created.
  *
  *  @property {number} NUM_BYTES_RFC4122_UUID=16 - The number of bytes in a UUID when represented in RFC4122 format.
  *      <em>Read-only.</em>
@@ -54,11 +54,11 @@ class Uuid extends BigInt {
      *  represented as {@link Uuid(1)|Uuid} objects encapsulating BigInt values in the SDK, and 16-byte (128-bit) numbers in the
      *  protocol packets.
      *  <p>Note: In the user scripting API, UUIDs are represented as formatted hexadecimal strings.</p>
-     *  @typedef {BigInt} Uuid
+     *  @typedef {bigint} Uuid
      */
     /*@devdoc
      *  Gets the UUID's underlying <code>bigint</code> primitive value.
-     *  @returns {BigInt} The underlying <code>bigint</code> primitive value
+     *  @returns {bigint} The underlying <code>bigint</code> primitive value
      */
     value(): bigint {
         return this.valueOf().valueOf();

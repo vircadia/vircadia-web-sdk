@@ -9,8 +9,9 @@
 //
 
 /*@devdoc
- *  IPv4 network address and port number. The port number may be a UDP port number or an internally-assigned WebRTC data channel
- *  ID. Internally, the IP address is handled as a 4-byte number value and the port as a 2-byte number value.
+ *  The <code>SockAddr</code> class handles information on an IPv4 network address and port number. The port number may be a UDP
+ *  port number or an internally-assigned WebRTC data channel ID. Internally, the IP address is handled as a 4-byte number value
+ *  and the port as a 2-byte number value.
  *  <p>C++: <code>SockAddr : public QObject</code></p>
  *  @class SockAddr
  */

@@ -14,7 +14,8 @@ import { PacketTypeValue } from "./udt/PacketHeaders";
 
 
 /*@devdoc
- *  A Vircadia protocol message received via one or more Vircadia protocol packets.
+ *  The <code>ReceivedMessage</code> class provides information on a Vircadia protocol message received via one or more Vircadia
+ *  protocol packets.
  *  <p>C++: <code>ReceivedMessage : public QObject </code>
  *  @class ReceivedMessage
  *  @param {NLPacket} packet - The first (and possibly only) packet that forms the message.

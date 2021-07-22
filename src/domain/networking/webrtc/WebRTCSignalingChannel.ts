@@ -21,7 +21,8 @@ type JSONParseResult = Record<string, unknown> | Array<any> | string | number | 
 
 
 /*@devdoc
- *  A WebRTC signaling channel for establishing WebRTC data channels with the domain server and assignment clients.
+ *  The <code>WebRTCSignalingChannel</code> class provides a WebRTC signaling channel for establishing WebRTC data channels with
+ *  the domain server and assignment clients.
  *  A single signaling channel is used for establishing all the individual WebRTC data channels between the web client and
  *  each of the domain server and its assignment clients.
  *  <p>A WebSocket is used for the connection and the API is similar to the WebSocket API.</p>

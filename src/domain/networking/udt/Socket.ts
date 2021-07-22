@@ -24,7 +24,8 @@ type PacketHandlerCallback = (packet: Packet) => void;
 
 
 /*@devdoc
- *  A one-to-many socket used to communicate with a domain's domain server and assignment clients.
+ *  The <code>Socket</code> class provides a one-to-many socket used to communicate with a domain's domain server and
+ *  assignment clients.
  *  <p>C++: <code>Socket : public QObject</code></p>
  *  @class Socket
  */

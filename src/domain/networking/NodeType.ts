@@ -33,8 +33,8 @@ const enum NodeTypeValue {
 
 
 /*@devdoc
- *  Information on the network node types operating in a domain. Node types are represented as single 8-bit characters in the
- *  protocol packets.
+ *  The <code>NodeType</code> namespace provides information on a network node's type. Node type values are represented as
+ *  single 8-bit characters in the protocol packets.
  *  <p>C++: <code>NodeType</code></p>
  *
  *  @namespace NodeType

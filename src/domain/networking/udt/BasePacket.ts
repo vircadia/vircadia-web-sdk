@@ -15,7 +15,7 @@ import assert from "../../shared/assert";
 
 
 /*@devdoc
- *  The base data and information on a Vircadia protocol packet.
+ *  The <code>BasePacket</code> class implements the base data and information on a Vircadia protocol packet.
  *  <p>See also: {@link Packet} and {@link NLPacket}.
  *  <p>C++: <code>BasePacket: public ExtendedIODevice : public QIODevice</code>
  *  @class BasePacket

@@ -13,7 +13,7 @@ import DomainList from "./DomainList";
 
 
 /*@devdoc
- *  Packet reading and writing functions.
+ *  The <code>PacketScribe</code> namespace provides packet reading and writing functions.
  *  <p>C++: N/A</p>
  *  @namespace PacketScribe
  *  @property {function} DomainConnectRequest.write -

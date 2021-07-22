@@ -14,14 +14,15 @@ import UDT from "./udt/UDT";
 
 
 /*@devdoc
- *  A "node list" Vircadia protocol packet. Contains payload data, unlike a basic {@link Packet}.
+ *  The <code>NLPacket</code> class implements a "node list" Vircadia protocol packet. Contains payload data, unlike a basic
+ *  {@link Packet}.
  *  <p>See also: {@link BasePacket} and {@link Packet}.
  *  <p>C++ <code>NLPacket : public Packet</code></p>
  *  @class NLPacket
  *  @extends Packet
  *  @param {PacketType|Packet} type|packet - The type of NLPacket to create.
- *      <p>A base Packet to create the NLPacket from.<br />
- *      Note: The {@link MessageData} from the base packet is reused in-place, not copied.</p>
+ *      <p>A base Packet to create the NLPacket from.</p>
+ *      <p>Note: The {@link MessageData} from the base packet is reused in-place, not copied.</p>
  *  @param {number|unused} size - The size of the packet in bytes. If <code>-1</code>, a packet of the maximum size is created
  *      (though not all of it need be sent). <strong>Default Value:</strong> <code>-1</code>
  *      <p>Unused.</p>

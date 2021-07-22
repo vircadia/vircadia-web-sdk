@@ -9,7 +9,7 @@
 //
 
 /*@devdoc
- *  Vircadia protocol packet constants.
+ *  The <code>UDT</code> namespace provides Vircadia protocol packet constants.
  *  <p>C++: <code>udt</code></p>
  *
  *  @namespace UDT

@@ -53,9 +53,9 @@ const DomainConnectRequest = new class {
      *  @property {Uint8Array} compressedSystemInfo - Compressed information about the machine from {@link Platform} if it won't
      *     cause the packet to overflow, otherwise an empty value.
      *  @property {LimitedNodeList.ConnectReason} connectReason - The reason for sending this DomainConnectRequest.
-     *  @property {BigInt} previousConnectionUptime - How long Interface was previously connected to the domain, in usec.
+     *  @property {bigint} previousConnectionUptime - How long Interface was previously connected to the domain, in usec.
      *      <code>0</code> if not previously connected.
-     *  @property {BigInt} currentTime - The current Unix time, in usec.
+     *  @property {bigint} currentTime - The current Unix time, in usec.
      *  @property {NodeType} ownerType - The type of this node, i.e., <code>NodeType.Agent</code> for Interface.
      *  @property {SockAddr} publicSockAddr - The Interface client's public address.
      *  @property {SockAddr} localSockAddr - The Interface client's local address.

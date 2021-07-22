@@ -22,8 +22,8 @@ import Uuid from "../shared/Uuid";
 
 
 /*@devdoc
- *  Manages the domain server plus all the nodes (assignment clients) that the client is connected to. This includes their
- *  presence and communications with them via the Vircadia protocol.
+ *  The <code>NodesList</code> namespace manages the domain server plus all the nodes (assignment clients) that the client is
+ *  connected to. This includes their presence and communications with them via the Vircadia protocol.
  *  <p>C++: <code>NodeList : LimitedNodeList</code></p>
  *  <p>Note: This JavaScript object has a different name because <code>NodeList</code> is a JavaScript browser object.</p>
  *  @namespace NodesList

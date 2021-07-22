@@ -15,7 +15,7 @@ import assert from "../../shared/assert";
 
 
 /*@devdoc
- *  A basic Vircadia protocol packet.
+ *  The <code>Packet</code> class implements a basic Vircadia protocol packet.
  *  <p>See also: {@link BasePacket} and {@link NLPacket}.
  *  <p>C++ <code>Packet : public BasePacket</code></p>
  *  @class Packet

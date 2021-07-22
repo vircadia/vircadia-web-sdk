@@ -9,10 +9,10 @@
 //
 
 /*@devdoc
- *  Some methods are added to the prototype of JavaScript's
+ *  The <code>DataView</code> namespace comprises methods added to the prototype of JavaScript's
  *  {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView|DataView} object, for
- *  handling reading and writing large BigInt values. These methods are added only if they aren't already present in the
- *  browser's DataView implementation.
+ *  handling reading and writing large <code>bigint</vcde> values. These methods are added only if they aren't already present
+ *  in the browser's <code>DataView</code> implementation.
  *  <p>C++: N/A</p>
  *  @namespace DataView
  */
@@ -30,7 +30,7 @@ const MASK_64_BITS = 0xffffffffffffffffn;
  *  Writes an unsigned 128-bit (16-byte) integer value to the DataView.
  *  @function DataView.setBigUint128
  *  @param {number} byteOffset - The offset from the start of the DataView.
- *  @param {BigInt} value - The value to write. The maximum value is <code>2n ** 128n - 1n</code>. If larger than this value,
+ *  @param {bigint} value - The value to write. The maximum value is <code>2n ** 128n - 1n</code>. If larger than this value,
  *      a value of <code>0n</code> is written.
  *  @param {boolean} littleEndian=false - <code>true</code> to write the data in little-endian format, <code>false</codE> to
  *      write in big-endian format.
@@ -52,7 +52,7 @@ function setBigUint128(this: DataView, byteOffset: number, value: bigint, little
  *  @param {number} byteOffset - The offset from the start of the DataView.
  *  @param {boolean} littleEndian=false - <code>true</code> to read the data in little-endian format, <code>false</codE> to read
  *      read in big-endian format.
- *  @returns {BigInt} The value read.
+ *  @returns {bigint} The value read.
  */
 function getBigUint128(this: DataView, byteOffset: number, littleEndian = false): bigint {
     let result = 0n;

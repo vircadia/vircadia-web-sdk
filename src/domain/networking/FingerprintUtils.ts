@@ -12,7 +12,7 @@ import Uuid from "../shared/Uuid";
 
 
 /*@devdoc
- *  Identifies the computer running this code with an anonymous fingerprint.
+ *  The <code>FingerPrintUtils</code> namespace identifies the computer running this code with an anonymous fingerprint.
  *  <p>C++: <code>FingerprintUtils</code>
  *  @namespace FingerprintUtils
  */

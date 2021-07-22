@@ -24,7 +24,7 @@ type WebRTCDataChannelsByChannelID = Map<number, { nodeType: NodeTypeValue, webr
 
 
 /*@devdoc
- *  A one-to-many UDP-style socket wrapper for {@link WebRTCDataChannel}.
+ *  The <code>WebRTCSocket</code> class provides a one-to-many UDP-style socket wrapper for {@link WebRTCDataChannel}.
  *  <p>C++: <code>WebRTCSocket : public QObject</code></p>
  *  <p>The JavaScript differs from the C++ because the JavaScript client explicitly connects to different domains rather than
  *  accepting incoming connections.</p>
