@@ -409,6 +409,11 @@ const PacketType = new class {
         PacketTypeValue.AvatarZonePresence
     ]);
 
+    private _DomainListVersion = {
+        // C++  DomainListVersion
+        HasConnectReason: 24
+    };
+
     private _DomainConnectRequestVersion = {
         // C++  DomainConnectRequestVersion
         HasCompressedSystemInfo: 26
@@ -433,6 +438,8 @@ const PacketType = new class {
     versionForPacketType(packetType: PacketTypeValue): number {
         // C++  PacketVersion versionForPacketType(PacketType packetType)
         switch (packetType) {
+            case this.DomainList:
+                return this._DomainListVersion.HasConnectReason;
             case this.DomainConnectRequest:
                 return this._DomainConnectRequestVersion.HasCompressedSystemInfo;
 

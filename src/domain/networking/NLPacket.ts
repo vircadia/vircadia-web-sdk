@@ -94,7 +94,7 @@ class NLPacket extends Packet {
         param3: boolean | undefined = undefined,
         param4: number | undefined = undefined) {
 
-        if (typeof param0 === "number" && typeof param1 === "number") {
+        if (typeof param0 === "number") {
             // C++  NLPacket(PacketType type, qint64 size = -1, bool isReliable = false, bool isPartOfMessage = false,
             //               PacketVersion version = 0)
             const type = param0;

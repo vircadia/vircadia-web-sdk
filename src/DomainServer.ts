@@ -10,6 +10,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AddressManager from "./domain/networking/AddressManager";
+import NodesList from "./domain/networking/NodesList";
+
 
 /*@sdkdoc
  *  <table>
@@ -98,11 +101,36 @@ class DomainServer {
     }
 
 
+    static readonly #DOMAIN_SERVER_CHECK_IN_MSECS = 1000;
+    static readonly #DOMAIN_SERVER_CHECK_IN_MIN_MSECS = 100;
+
+
     #_location = "";
     #_state: ConnectionState = DomainServer.DISCONNECTED;
     #_refusalInfo = "";
     #_errorInfo = "";
     #_onStateChangedCallback: OnStateChangedCallback | null = null;
+
+    #_domainCheckInTimer: ReturnType<typeof setTimeout> | null = null;
+    #_domainCheckInLastSent = 0;
+
+
+    constructor() {
+        // C++  Application::Application()
+
+        // WEBRTC TODO: Address further C++ code.
+
+        const domainHandler = NodesList.getDomainHandler();
+        domainHandler.connectedToDomain.connect(() => {
+            this.#setState(DomainServer.CONNECTED);
+        });
+        domainHandler.disconnectedFromDomain.connect(() => {
+            this.#setState(DomainServer.DISCONNECTED);
+        });
+
+        // WEBRTC TODO: Address further C++ code.
+
+    }
 
 
     get location(): string {
@@ -148,10 +176,13 @@ class DomainServer {
             return;
         }
 
+
         this.#setState(DomainServer.CONNECTING);
 
-        // WEBRTC TODO
+        AddressManager.handleLookupString(location);
 
+        // Start sending domain server check-ins.
+        this.#sendDomainServerCheckIns();
     }
 
     /*@sdkdoc
@@ -159,8 +190,10 @@ class DomainServer {
      */
     disconnect(): void {
         this.#setState(DomainServer.DISCONNECTED);
-
-        // WEBRT TODO
+        if (this.#_domainCheckInTimer !== null) {
+            clearInterval(this.#_domainCheckInTimer);
+            this.#_domainCheckInTimer = null;
+        }
     }
 
 
@@ -176,6 +209,21 @@ class DomainServer {
         if (this.#_onStateChangedCallback) {
             this.#_onStateChangedCallback(state, info);
         }
+    }
+
+    #sendDomainServerCheckIns(): void {
+        const timestamp = Date.now();
+
+        // Schedule next send.
+        let nextTimeout = DomainServer.#DOMAIN_SERVER_CHECK_IN_MSECS - (timestamp - this.#_domainCheckInLastSent);
+        nextTimeout = Math.max(nextTimeout, DomainServer.#DOMAIN_SERVER_CHECK_IN_MIN_MSECS);
+        this.#_domainCheckInTimer = setTimeout(() => {
+            this.#sendDomainServerCheckIns();
+        }, nextTimeout);
+
+        // Perform this send.
+        NodesList.sendDomainServerCheckIn();
+        this.#_domainCheckInLastSent = timestamp;
     }
 }
 
