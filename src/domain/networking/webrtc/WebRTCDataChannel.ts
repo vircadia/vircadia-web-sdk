@@ -136,8 +136,6 @@ class WebRTCDataChannel {
     }
 
 
-    /* eslint-disable accessor-pairs */
-
     get nodeType(): NodeTypeValue {
         return this._nodeType;
     }
@@ -169,8 +167,6 @@ class WebRTCDataChannel {
     set onerror(callback: OnErrorCallback) {
         this._onerrorCallback = callback;
     }
-
-    /* eslint-enable accessor-pairs */
 
 
     /*@devdoc

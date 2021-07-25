@@ -133,8 +133,6 @@ class WebRTCSignalingChannel {
     }
 
 
-    /* eslint-disable accessor-pairs */
-
     get readyState(): number {
         return this._websocket ? this._websocket.readyState : WebRTCSignalingChannel.CLOSED;
     }
@@ -164,8 +162,6 @@ class WebRTCSignalingChannel {
             this._websocket.onerror = callback;
         }
     }
-
-    /* eslint-enable accessor-pairs */
 
 
     /*@devdoc
