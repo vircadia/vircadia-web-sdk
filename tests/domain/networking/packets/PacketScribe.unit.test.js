@@ -14,10 +14,12 @@ import PacketScribe from "../../../../src/domain/networking/packets/PacketScribe
 describe("Packets - unit tests", () => {
 
     test("The Packets namespace provides packet reading/writing", () => {
-        expect(typeof PacketScribe.DomainConnectRequest).toBe("object");
-        expect(typeof PacketScribe.DomainConnectRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainList).toBe("object");
         expect(typeof PacketScribe.DomainList.read).toBe("function");
+        expect(typeof PacketScribe.DomainConnectRequest).toBe("object");
+        expect(typeof PacketScribe.DomainConnectRequest.write).toBe("function");
+        expect(typeof PacketScribe.DomainDisconnectRequest).toBe("object");
+        expect(typeof PacketScribe.DomainDisconnectRequest.write).toBe("function");
     });
 
 });

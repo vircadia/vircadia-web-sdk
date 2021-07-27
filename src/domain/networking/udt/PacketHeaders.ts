@@ -136,7 +136,7 @@ enum PacketTypeValue {
  *  @variation 1
  *  @property {PacketType} Unknown - <code>0</code>
  *  @property {PacketType} StunResponse - <code>1</code>
- *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to Interface in response to a
+ *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to the user client in response to a
  *      DomainConnectRequest packet.<br />
  *      {@link PacketScribe.DomainListDetails}.
  *  @property {PacketType} Ping - <code>3</code>
@@ -193,7 +193,8 @@ enum PacketTypeValue {
  *  @property {PacketType} AssetUploadReply - <code>52</code>
  *  @property {PacketType} AssetGetInfo - <code>53</code>
  *  @property {PacketType} AssetGetInfoReply - <code>54</code>
- *  @property {PacketType} DomainDisconnectRequest - <code>55</code>
+ *  @property {PacketType} DomainDisconnectRequest - <code>55</code> - The user client sends this empty packet to the Domain
+ *      Server to signal that the user client is disconnecting. The Domain Server does not respond.
  *  @property {PacketType} DomainServerRemovedNode - <code>56</code>
  *  @property {PacketType} MessagesData - <code>57</code>
  *  @property {PacketType} MessagesSubscribe - <code>58</code>

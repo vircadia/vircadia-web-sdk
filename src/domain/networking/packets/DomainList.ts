@@ -57,7 +57,7 @@ const DomainList = new class {
      */
 
     /*@devdoc
-     *  Reads a {@link Packets|DomainList} packet.
+     *  Reads a {@link PacketType(1)|DomainList} packet.
      *  @function PacketScribe.DomainList&period;read
      *  @param {DataView} data - The {@link Packets|DomainList} message data to read.
      *  @returns {PacketScribe.DomainListDetails} The domain list information.

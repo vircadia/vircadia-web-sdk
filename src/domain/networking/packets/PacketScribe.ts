@@ -8,18 +8,21 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import DomainConnectRequest from "./DomainConnectRequest";
 import DomainList from "./DomainList";
+import DomainConnectRequest from "./DomainConnectRequest";
+import DomainDisconnectRequest from "./DomainDisconnectRequest";
 
 
 /*@devdoc
  *  The <code>PacketScribe</code> namespace provides packet reading and writing functions.
  *  <p>C++: N/A</p>
  *  @namespace PacketScribe
- *  @property {function} DomainConnectRequest.write -
- *      {@link PacketScribe.DomainConnectRequest&period;write|DomainConnectRequest&period;write}
  *  @property {function} DomainList.read -
  *      {@link PacketScribe.DomainList&period;read|DomainList&period;read}
+ *  @property {function} DomainConnectRequest.write -
+ *      {@link PacketScribe.DomainConnectRequest&period;write|DomainConnectRequest&period;write}
+ *  @property {function} DomainDisconnectRequest.write -
+ *      {@link PacketScribe.DomainDisconnectRequest&period;write|DomainDisconnectRequest&period;write}
  */
 
 // WEBRTC TODO: Implement similar in C++ to collect all packet reading/writing into the networking library code (and revise this
@@ -28,8 +31,10 @@ import DomainList from "./DomainList";
 // WEBRTC TODO: Add further packets to the Packets namespace as they are implemented.
 
 const PacketScribe = {
+    // In packet number order.
+    DomainList,
     DomainConnectRequest,
-    DomainList
+    DomainDisconnectRequest
 };
 
 export default PacketScribe;
