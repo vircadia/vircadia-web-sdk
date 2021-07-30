@@ -54,6 +54,7 @@ class WebRTCSocket {
 
     // WebRTC data channel IDs are assigned by us and are the equivalent of UDP ports.
     // WEBRTC TODO: Move into WebRTCDataChannel and make read-only.
+    // WEBRTC TODO: Reimplement as a generator function?
     private _lastDataChannelID = 0;  // First data channel ID is 1.
 
     private _receivedQueue: Array<{ channelID: number, message: ArrayBuffer }> = [];

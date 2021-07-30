@@ -19,7 +19,7 @@ describe("DomainServer - integration tests", () => {
 
     //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
-    // Add WebRTC to Node.js environment.
+    // Add WebSocket and WebRTC to Node.js environment.
     global.WebSocket = require("ws");  // eslint-disable-line
     global.RTCPeerConnection = require("wrtc").RTCPeerConnection;  // eslint-disable-line
 

@@ -8,9 +8,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* globals jest */
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-
 import WebRTCSignalingChannel from "../../../../src/domain/networking/webrtc/WebRTCSignalingChannel";
 import NodeType from "../../../../src/domain/networking/NodeType";
 
@@ -25,6 +22,8 @@ describe("WebRTCSignalingChannel - integration tests", () => {
 
     // Add WebSocket to Node.js environment.
     global.WebSocket = require("ws");  // eslint-disable-line
+
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     // Suppress console.error messages from being displayed.
     const error = jest.spyOn(console, "error").mockImplementation(() => { });  // eslint-disable-line

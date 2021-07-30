@@ -97,7 +97,7 @@ class LimitedNodeList {
      *  Sends a a solitary packet to an address, unreliably. The packet cannot be part of a multi-packet message.
      *  @param {NLPacket} packet - The packet to send.
      *  @param {SockAddr} sockAddr - The address to send it to.
-     *  @param {HMACAuth} [hmacAuth=null] - Not used.
+     *  @param {HMACAuth} [hmacAuth=null] - Not currently used.
      *  @returns {number} The number of bytes sent.
      */
     sendUnreliablePacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth = null): number {
@@ -141,6 +141,7 @@ class LimitedNodeList {
 
         return size;
     }
+
 
     /*@devdoc
      *  Gets the client's local socket network address.

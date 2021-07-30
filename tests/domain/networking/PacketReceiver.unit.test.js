@@ -8,9 +8,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* globals jest */
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-
 import PacketReceiver from "../../../src/domain/networking/PacketReceiver";
 import SockAddr from "../../../src/domain/networking/SockAddr";
 import Packet from "../../../src/domain/networking/udt/Packet";
@@ -18,6 +15,8 @@ import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
 
 
 describe("PacketReceicer - unit tests", () => {
+
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     // Generate a DomainServerList Packet as if just received. Copied from Packet.unit.test.js.
     /* eslint-disable-next-line max-len */

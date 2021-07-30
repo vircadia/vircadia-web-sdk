@@ -8,9 +8,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* globals jest */
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-
 import NLPacket from "../../../src/domain/networking/NLPacket";
 import SockAddr from "../../../src/domain/networking/SockAddr";
 import Packet from "../../../src/domain/networking/udt/Packet";
@@ -19,6 +16,8 @@ import UDT from "../../../src/domain/networking/udt/UDT";
 
 
 describe("NLPacket - unit tests", () => {
+
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     // Generate a DomainServerList Packet as if just received. Copied from Packet.unit.test.js.
     /* eslint-disable-next-line max-len */

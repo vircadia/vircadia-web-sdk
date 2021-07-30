@@ -125,6 +125,7 @@ class PacketReceiver {
             // WEBRTC TODO: Address further code.
 
             messageListener.listener(message);
+
         } else {
             console.error("Could not find listener for message type:", message.getType());
             // WEBRTC TODO: Add string name of packet type to message.

@@ -102,7 +102,6 @@ class DomainServer {
 
 
     static readonly #DOMAIN_SERVER_CHECK_IN_MSECS = 1000;
-    static readonly #DOMAIN_SERVER_CHECK_IN_MIN_MSECS = 100;
 
 
     #_location = "";
@@ -149,10 +148,12 @@ class DomainServer {
     }
 
     set onStateChanged(callback: OnStateChangedCallback) {
-        if (typeof callback !== "function") {
+        if (typeof callback === "function") {
+            this.#_onStateChangedCallback = callback;
+        } else {
+            console.error("ERROR: DomainServer.onStateChanged callback not a function!");
             this.#_onStateChangedCallback = null;
         }
-        this.#_onStateChangedCallback = callback;
     }
 
 
@@ -170,7 +171,12 @@ class DomainServer {
      */
     connect(location: string): void {
 
-        this.#_location = typeof location === "string" ? location.trim() : "";
+        if (typeof location === "string") {
+            this.#_location = location.trim();
+        } else {
+            console.error("ERROR: DomainServer.connect() location parameter not a string!");
+            this.#_location = "";
+        }
 
         if (this.#_location === "") {
             this.#setState(DomainServer.ERROR, "No location specified.");

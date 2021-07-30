@@ -10,20 +10,20 @@
 
 /* globals jest */
 
-import "wrtc";  // WebRTC Node.js package.
-
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodesList from "../../../src/domain/networking/NodesList";
 import NodeType from "../../../src/domain/networking/NodeType";
 
 import TestConfig from "../../test.config.json";
 
+import "wrtc";  // WebRTC Node.js package.
+
 
 describe("NodesList - integration tests", () => {
 
     //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
-    // Add WebRTC to Node.js environment.
+    // Add WebSocket and WebRTC to Node.js environment.
     global.WebSocket = require("ws");  // eslint-disable-line
     global.RTCPeerConnection = require("wrtc").RTCPeerConnection;  // eslint-disable-line
 
