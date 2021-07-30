@@ -171,7 +171,7 @@ class LimitedNodeList {
      *  Gets the packet receiver used for handling packets received from the assignment clients.
      *  @returns {PacketReceiver} The packet receiver.
      */
-    getPacketReceiver():PacketReceiver {
+    getPacketReceiver(): PacketReceiver {
         // C++  PacketReceiver& getPacketReceiver()
         return this._packetReceiver;
     }
