@@ -32,21 +32,43 @@ describe("DomainServer - integration tests", () => {
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* noop */ });
 
 
-    test("Can connect to the domain server", (done) => {
+    test("Can connect to and maintain a connection with the domain server", (done) => {
+        // Also tests: Transitions DISCONNECTED -> CONNECTING -> CONNECTED.
         const domainServer = new DomainServer();
-        let haveConnected = false;
+        expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
+        let haveSeenConnecting = false;
+        let haveRequestedDisconnect = false;
         domainServer.onStateChanged = (state, info) => {
             expect(state === DomainServer.DISCONNECTED
                 || state === DomainServer.CONNECTING
                 || state === DomainServer.CONNECTED).toBe(true);
             expect(info).toBe("");
+            haveSeenConnecting = haveSeenConnecting || state === DomainServer.CONNECTING;
             if (state === DomainServer.CONNECTED) {
-                haveConnected = true;
-                domainServer.disconnect();
-            } else if (haveConnected && state === DomainServer.DISCONNECTED) {
+                setTimeout(() => {
+                    haveRequestedDisconnect = true;
+                    domainServer.disconnect();
+                }, 2500);  // Sufficient for a couple of sendDomainServerCheckin()s.
+            } else if (state === DomainServer.DISCONNECTED && haveRequestedDisconnect) {
+                domainServer.onStateChanged = null;
                 done();
             }
         };
+        domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+    });
+
+    test("Error state when location is invalid", (done) => {
+        const domainServer = new DomainServer();
+        domainServer.onStateChanged = (state, info) => {
+            expect(state).toBe(DomainServer.ERROR);
+            expect(info).not.toBe("");
+            domainServer.onStateChanged = null;
+            done();
+        };
+        expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
+        domainServer.connect("");
+    });
+
 
         domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
     });

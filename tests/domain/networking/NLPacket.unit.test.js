@@ -15,6 +15,7 @@ import NLPacket from "../../../src/domain/networking/NLPacket";
 import SockAddr from "../../../src/domain/networking/SockAddr";
 import Packet from "../../../src/domain/networking/udt/Packet";
 import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
+import UDT from "../../../src/domain/networking/udt/UDT";
 
 
 describe("NLPacket - unit tests", () => {
@@ -74,6 +75,14 @@ describe("NLPacket - unit tests", () => {
         expect(nlPacket.getSourceID()).toBe(0);
         expect(nlPacket.getVersion()).toBeGreaterThan(0);
         expect(error).toHaveBeenCalledTimes(0);
+    });
+
+    test("Can write a source ID into a packet", () => {
+        const nlPacket = new NLPacket(PacketType.DomainListRequest);
+        const messageData = nlPacket.getMessageData();
+        expect(messageData.data.getUint16(6, UDT.LITTLE_ENDIAN)).toBe(0);
+        nlPacket.writeSourceID(37);
+        expect(messageData.data.getUint16(6, UDT.LITTLE_ENDIAN)).toBe(37);
     });
 
 

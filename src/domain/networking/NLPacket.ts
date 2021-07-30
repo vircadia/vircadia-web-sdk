@@ -11,6 +11,8 @@
 import Packet from "./udt/Packet";
 import PacketType, { PacketTypeValue } from "./udt/PacketHeaders";
 import UDT from "./udt/UDT";
+import { LocalID } from "../networking/DomainHandler";
+import assert from "../shared/assert";
 
 
 /*@devdoc
@@ -106,8 +108,11 @@ class NLPacket extends Packet {
             super(size === -1 ? -1 : NLPacket.localHeaderSize(type) + size, isReliable, isPartOfMessage);
             this._messageData.type = type;
             this._messageData.version = version === 0 ? PacketType.versionForPacketType(type) : version;
-            // adjustPayloadStartAndCapacity(); - Not used in JavaScript.
+            // adjustPayloadStartAndCapacity(); - Not used in TypeScript.
             this.writeTypeAndVersion();
+            if (!PacketType.getNonSourcedPackets().has(type)) {
+                this._messageData.dataPosition += NLPacket.NUM_BYTES_LOCALID;
+            }
 
         } else if (param0 instanceof Packet) {
             // C++  NLPacket(Packet&& packet)
@@ -151,6 +156,18 @@ class NLPacket extends Packet {
     getSourceID(): number {
         // C++  LocalID getSourceID()
         return this._messageData.sourceID;
+    }
+
+    /*@devdoc
+     *  Writes a source ID directly into the packet without using or advancing the current write position.
+     *  @param {LocalID} sourceID - The source ID.
+     */
+    writeSourceID(sourceID: LocalID): void {
+        // C++  void writeSourceID(LocalID sourceID)
+        assert(!PacketType.getNonSourcedPackets().has(this._messageData.type));
+        const offset = Packet.totalHeaderSize(this.isPartOfMessage()) + 2;
+        this._messageData.data.setUint16(offset, sourceID, UDT.LITTLE_ENDIAN);  // Yes, different endian-ness from reading!
+        this._messageData.sourceID = sourceID;
     }
 
 

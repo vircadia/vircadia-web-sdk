@@ -57,8 +57,8 @@ const DomainConnectRequest = new class {
      *      <code>0</code> if not previously connected.
      *  @property {bigint} currentTime - The current Unix time, in usec.
      *  @property {NodeType} ownerType - The type of this node, i.e., <code>NodeType.Agent</code> for Interface.
-     *  @property {SockAddr} publicSockAddr - The Interface client's public address.
-     *  @property {SockAddr} localSockAddr - The Interface client's local address.
+     *  @property {SockAddr} publicSockAddr - The Interface client's public Internet address.
+     *  @property {SockAddr} localSockAddr - The Interface client's local network address.
      *  @property {Set<NodeType>} nodeTypesOfInterest - The types of domain server nodes that the Interface client wants to use.
      *  @property {string} placeName - The domain's place name from {@link AddressManager} if known, otherwise an empty string.
      *  @property {boolean} isDomainConnected - <code>true</code> if currently connected to the domain, <code>false</code> if
@@ -138,7 +138,7 @@ const DomainConnectRequest = new class {
         data.setUint16(dataPosition, info.publicSockAddr.getPort(), UDT.BIG_ENDIAN);
         dataPosition += 2;
 
-        data.setUint8(dataPosition, 0);  // IP$
+        data.setUint8(dataPosition, 0);  // IP4
         dataPosition += 1;
         data.setUint32(dataPosition, info.localSockAddr.getAddress(), UDT.BIG_ENDIAN);
         dataPosition += 4;

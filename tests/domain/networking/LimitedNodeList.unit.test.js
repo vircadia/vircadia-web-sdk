@@ -10,9 +10,12 @@
 
 import LimitedNodeList from "../../../src/domain/networking/LimitedNodeList";
 import PacketReceiver from "../../../src/domain/networking/PacketReceiver";
+import Uuid from "../../../src/domain/shared/Uuid";
 
 
 describe("LimitedNodeList - integration tests", () => {
+
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     test("Can access ConnectReason values", () => {
         expect(LimitedNodeList.ConnectReason.Connect).toBe(0);
@@ -37,6 +40,18 @@ describe("LimitedNodeList - integration tests", () => {
         const limitedNodeList = new LimitedNodeList();
         const packetReceiver = limitedNodeList.getPacketReceiver();
         expect(packetReceiver instanceof PacketReceiver).toBe(true);
+    });
+
+    test("Can set and get session UUIDs and local IDs", () => {
+        const limitedNodeList = new LimitedNodeList();
+        expect(limitedNodeList.getSessionUUID().valueOf()).toBe(Uuid.NULL);
+        expect(limitedNodeList.getSessionLocalID()).toBe(0);
+        const testSessionUUID = new Uuid(12345678n);
+        const testSessionLocalID = 2468;
+        limitedNodeList.setSessionUUID(testSessionUUID);
+        limitedNodeList.setSessionLocalID(testSessionLocalID);
+        expect(limitedNodeList.getSessionUUID().valueOf()).toBe(testSessionUUID.valueOf());
+        expect(limitedNodeList.getSessionLocalID()).toBe(testSessionLocalID);
     });
 
     // WEBRTC TODO: Unit tests for:

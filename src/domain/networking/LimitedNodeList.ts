@@ -15,6 +15,8 @@ import PacketType from "./udt/PacketHeaders";
 import Socket from "./udt/Socket";
 import assert from "../shared/assert";
 import NLPacket from "./NLPacket";
+import { LocalID } from "./DomainHandler";
+import Uuid from "../shared/Uuid";
 
 
 /*@devdoc
@@ -61,6 +63,9 @@ class LimitedNodeList {
     protected _localSockAddr = new SockAddr();
     protected _publicSockAddr = new SockAddr();
     protected _packetReceiver: PacketReceiver;
+
+    private _sessionUUID = new Uuid(Uuid.NULL);
+    private _sessionLocalID: LocalID = 0;
 
 
     // eslint-disable-next-line
@@ -169,20 +174,57 @@ class LimitedNodeList {
     }
 
 
+    /*@devdoc
+     *  Gets the node's UUID as assigned by the domain server  for the connection session.
+     *  @returns {LocalID} The node's session UUID.
+     */
+    getSessionUUID(): Uuid {
+        // C++  LocalID getSessionUUID()
+        return this._sessionUUID;
+    }
+
+    /*@devdoc
+     *  Sets the node's UUID as assigned by the domain server  for the connection session.
+     *  @param {LocalID} sessionUUID - The node's session UUID.
+     */
+    setSessionUUID(sessionUUID: Uuid): void {
+        // C++  void setSessionUUID(const QUuid& sessionUUID);
+        this._sessionUUID = sessionUUID;
+    }
+
+    /*@devdoc
+     *  Gets the node's local ID as assigned by the domain server for the connection session.
+     *  @returns {LocalID} The node's session local ID.
+     */
+    getSessionLocalID(): LocalID {
+        // C++  LocalID getSessionLocalID()
+        return this._sessionLocalID;
+    }
+
+    /*@devdoc
+     *  Sets the node's local ID as assigned by the domain server for the connection session.
+     *  @param {LocalID} sessionLocalID - The node's session local ID.
+     */
+    setSessionLocalID(sessionLocalID: LocalID): void {
+        // C++  void setSessionLocalID(LocalID sessionLocalID);
+        this._sessionLocalID = sessionLocalID;
+    }
+
+
     // eslint-disable-next-line
     // @ts-ignore
     private fillPacketHeader(packet: NLPacket, hmacAuth: null): void {  // eslint-disable-line
         // C++  void fillPacketHeader(const NLPacket& packet, HMACAuth* hmacAuth = nullptr) {
         if (!PacketType.getNonSourcedPackets().has(packet.getType())) {
+            packet.writeSourceID(this.getSessionLocalID());
+        }
 
+        if (hmacAuth) {
             console.error("Not implemented!");
 
             // WEBRTC TODO: Address further C++ code.
 
         }
-
-        // WEBRTC TODO: Address further C++ code.
-
     }
 
 }

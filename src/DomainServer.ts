@@ -112,7 +112,6 @@ class DomainServer {
     #_onStateChangedCallback: OnStateChangedCallback | null = null;
 
     #_domainCheckInTimer: ReturnType<typeof setTimeout> | null = null;
-    #_domainCheckInLastSent = 0;
 
 
     constructor() {
@@ -158,11 +157,13 @@ class DomainServer {
 
 
     /*@sdkdoc
-     *  Initiates connection to a Domain Server.
+     *  Initiates connection of the user client to a Domain Server and keeps the connection alive.
      *  <p>The following types of location are supported:</p>
      *  <table>
      *      <tbody>
-     *          <tr><td ><code>WEBRTC TODO</code></td><td>WEBRTC TODO</td></tr>
+     *          <tr><td><code>WebSocket URL and port</code></td><td>For example, <code>ws://127.0.0.1:40102</code></td></tr>
+     *          <tr><td colspan="2">WEBRTC TODO: Support Vircadia URLs instead (<code>hifi://...</code>, place names,
+     *          ...)</td></tr>
      *      </tbody>
      *  </table>
      *  @param {string} location - The location of the Domain Server to connect to.
@@ -212,18 +213,13 @@ class DomainServer {
     }
 
     #sendDomainServerCheckIns(): void {
-        const timestamp = Date.now();
-
         // Schedule next send.
-        let nextTimeout = DomainServer.#DOMAIN_SERVER_CHECK_IN_MSECS - (timestamp - this.#_domainCheckInLastSent);
-        nextTimeout = Math.max(nextTimeout, DomainServer.#DOMAIN_SERVER_CHECK_IN_MIN_MSECS);
         this.#_domainCheckInTimer = setTimeout(() => {
             this.#sendDomainServerCheckIns();
-        }, nextTimeout);
+        }, DomainServer.#DOMAIN_SERVER_CHECK_IN_MSECS);
 
         // Perform this send.
         NodesList.sendDomainServerCheckIn();
-        this.#_domainCheckInLastSent = timestamp;
     }
 }
 

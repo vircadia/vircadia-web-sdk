@@ -15,6 +15,7 @@ describe("DomainServer - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
+
     test("Can get but not set location property", () => {
         const domainServer = new DomainServer();
         expect(domainServer.location).toBe("");
@@ -102,17 +103,6 @@ describe("DomainServer - unit tests", () => {
         expect(domainServer.refusalInfo).toBe("");
     });
 
-    test("Transitions to connecting state if location specified", () => {
-        const domainServer = new DomainServer();
-        const location = "hello";
-        expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
-        expect(domainServer.errorInfo).toBe("");
-        domainServer.connect(location);
-        expect(domainServer.state).toBe(DomainServer.CONNECTING);
-        expect(domainServer.errorInfo).toBe("");
-        expect(domainServer.refusalInfo).toBe("");
-        expect(domainServer.location).toBe(location);
-    });
 
     test("Can disconnect while connecting", () => {
         const domainServer = new DomainServer();
@@ -129,27 +119,7 @@ describe("DomainServer - unit tests", () => {
         expect(domainServer.location).toBe(location);
     });
 
-    test("State changed callback is called when transition to connecting state", (done) => {
-        const domainServer = new DomainServer();
-        domainServer.onStateChanged = (state, info) => {
-            expect(state).toBe(DomainServer.CONNECTING);
-            expect(info).toBe("");
-            done();
-        };
-        expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
-        domainServer.connect("hello");
-    });
 
-    test("State changed callback is called when transition to error state", (done) => {
-        const domainServer = new DomainServer();
-        domainServer.onStateChanged = (state, info) => {
-            expect(state).toBe(DomainServer.ERROR);
-            expect(info).not.toBe("");
-            done();
-        };
-        expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
-        domainServer.connect("");
-    });
 
 
 });
