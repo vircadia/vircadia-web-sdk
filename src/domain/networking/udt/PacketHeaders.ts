@@ -137,7 +137,7 @@ enum PacketTypeValue {
  *  @property {PacketType} Unknown - <code>0</code>
  *  @property {PacketType} StunResponse - <code>1</code>
  *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to the user client in response to a
- *      DomainConnectRequest packet.<br />
+ *      DomainConnectRequest or DomainListRequest packet.<br />
  *      {@link PacketScribe.DomainListDetails}.
  *  @property {PacketType} Ping - <code>3</code>
  *  @property {PacketType} PingReply - <code>4</code>
@@ -149,7 +149,9 @@ enum PacketTypeValue {
  *  @property {PacketType} MicrophoneAudioWithEcho - <code>10</code>
  *  @property {PacketType} BulkAvatarData - <code>11</code>
  *  @property {PacketType} SilentAudioFrame - <code>12</code>
- *  @property {PacketType} DomainListRequest - <code>13</code>
+ *  @property {PacketType} DomainListRequest - <code>13</code> - The user client periodically sends this to the Domain Server
+ *      to maintain connection to the domain. The Domain Server responds with a DomainList packet.<br />
+ *      {@link PacketScribe.DomainListRequestDetails}.
  *  @property {PacketType} RequestAssignment - <code>14</code>
  *  @property {PacketType} CreateAssignment - <code>15</code>
  *  @property {PacketType} DomainConnectionDenied - <code>16</code>
@@ -167,8 +169,8 @@ enum PacketTypeValue {
  *  @property {PacketType} NoisyMute - <code>28</code>
  *  @property {PacketType} AvatarIdentity - <code>29</code>
  *  @property {PacketType} NodeIgnoreRequest - <code>30</code>
- *  @property {PacketType} DomainConnectRequest - <code>31</code> - Interface periodically sends this to the Domain Server to
- *      initiate and maintain connection to the domain. The Domain Server responds with a DomainList packet.<br />
+ *  @property {PacketType} DomainConnectRequest - <code>31</code> - The user client sends this to the Domain Server to initiate
+ *      connection to the domain. The Domain Server responds with a DomainList packet.<br />
  *      {@link PacketScribe.DomainConnectRequestDetails}.
  *  @property {PacketType} DomainServerRequireDTLS - <code>32</code>
  *  @property {PacketType} NodeJsonStats - <code>33</code>
@@ -441,15 +443,19 @@ const PacketType = new class {
         switch (packetType) {
             case this.DomainList:
                 return this._DomainListVersion.HasConnectReason;
+            case this.DomainListRequest:
+                return 22;  // eslint-disable-line @typescript-eslint/no-magic-numbers
             case this.DomainConnectRequest:
                 return this._DomainConnectRequestVersion.HasCompressedSystemInfo;
+            case this.DomainDisconnectRequest:
+                return 22;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
                 // WebRTC TODO: Add other packets.
 
             // C++ default for remainder of packets is 22 but we want to report packets we haven't implemented, so explicitly
             // list those packets we know about.
             default:
-                console.error("ERROR - Unknown packet type in versionForPacketType()");
+                console.error("ERROR - Unknown packet type in versionForPacketType() :", packetType);
         }
         return 0;
     }

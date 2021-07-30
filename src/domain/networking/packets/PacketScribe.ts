@@ -8,7 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+// In packet number order.
 import DomainList from "./DomainList";
+import DomainListRequest from "./DomainListRequest";
 import DomainConnectRequest from "./DomainConnectRequest";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
 
@@ -19,6 +21,8 @@ import DomainDisconnectRequest from "./DomainDisconnectRequest";
  *  @namespace PacketScribe
  *  @property {function} DomainList.read -
  *      {@link PacketScribe.DomainList&period;read|DomainList&period;read}
+ *  @property {function} DomainListRequest.write -
+ *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
  *  @property {function} DomainConnectRequest.write -
  *      {@link PacketScribe.DomainConnectRequest&period;write|DomainConnectRequest&period;write}
  *  @property {function} DomainDisconnectRequest.write -
@@ -33,6 +37,7 @@ import DomainDisconnectRequest from "./DomainDisconnectRequest";
 const PacketScribe = {
     // In packet number order.
     DomainList,
+    DomainListRequest,
     DomainConnectRequest,
     DomainDisconnectRequest
 };
