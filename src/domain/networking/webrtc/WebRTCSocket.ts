@@ -241,6 +241,9 @@ class WebRTCSocket {
         const webrtcDataChannel = this._webrtcDataChannelsByNodeType.get(nodeType);
         if (webrtcDataChannel) {
             webrtcDataChannel.webrtcDataChannel.close();
+            const channelID = webrtcDataChannel.channelID;
+            this._webrtcDataChannelsByNodeType.delete(nodeType);  // eslint-disable-line @typescript-eslint/dot-notation
+            this._webrtcDataChannelsByChannelID.delete(channelID);  // eslint-disable-line @typescript-eslint/dot-notation
         }
     }
 

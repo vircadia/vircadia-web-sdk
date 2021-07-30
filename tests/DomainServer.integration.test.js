@@ -72,7 +72,37 @@ describe("DomainServer - integration tests", () => {
         expect(domainServer.location).toBe(location);
     });
 
-
+    test("Can disconnect and reconnect", (done) => {
+        const domainServer = new DomainServer();
+        expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
+        let haveSeenConnecting = false;
+        let haveRequestedDisconnect = false;
+        let haveRequestedReconnect = false;
+        domainServer.onStateChanged = (state, info) => {
+            expect(state === DomainServer.DISCONNECTED
+                || state === DomainServer.CONNECTING
+                || state === DomainServer.CONNECTED).toBe(true);
+            expect(info).toBe("");
+            haveSeenConnecting = haveSeenConnecting || state === DomainServer.CONNECTING;
+            if (state === DomainServer.CONNECTED) {
+                const timeOut = !haveRequestedReconnect
+                    ? 2000  // First connection. Wait for a couple of sendDomainServerCheckin()s before disconnecting.
+                    : 500;  // Second connection. Can finish the test.
+                setTimeout(() => {
+                    haveRequestedDisconnect = true;
+                    domainServer.disconnect();
+                }, timeOut);
+            } else if (state === DomainServer.DISCONNECTED && haveRequestedDisconnect) {
+                if (!haveRequestedReconnect) {
+                    setTimeout(() => {
+                        domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+                        haveRequestedReconnect = true;
+                    }, 0);
+                } else {
+                    done();
+                }
+            }
+        };
         domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
     });
 
