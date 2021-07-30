@@ -88,6 +88,8 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        // Bind Slot methods.
+        this.reset.bind(this);
     }
 
 
@@ -211,9 +213,27 @@ class LimitedNodeList {
     }
 
 
+    /*@devdoc
+     *  Resets the NodesList, closing all connections and deleting all node data.
+     *  @param {string} reason - The reason for resetting.
+     *  @returns {Slot}
+     */
     // eslint-disable-next-line
     // @ts-ignore
-    private fillPacketHeader(packet: NLPacket, hmacAuth: null): void {  // eslint-disable-line
+    reset(reason: string): void {  // eslint-disable-line @typescript-eslint/no-unused-vars
+        // C++  void reset(QString reason)
+        // Cannot declare this Slot function as an arrow function because derived NodesList class calls this function.
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this._nodeSocket.clearConnections();
+
+        // WEBRTC TODO: Address further C++ code.
+
+    }
+
+
+    private fillPacketHeader(packet: NLPacket, hmacAuth: null): void {
         // C++  void fillPacketHeader(const NLPacket& packet, HMACAuth* hmacAuth = nullptr) {
         if (!PacketType.getNonSourcedPackets().has(packet.getType())) {
             packet.writeSourceID(this.getSessionLocalID());

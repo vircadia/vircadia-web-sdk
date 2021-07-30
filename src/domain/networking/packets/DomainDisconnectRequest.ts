@@ -22,7 +22,7 @@ const DomainDisconnectRequest = new class {
     write(): NLPacket {  /* eslint-disable-line class-methods-use-this */
         // C++  DomainHandler::sendDisconnectPacket()
 
-        const packet = NLPacket.create(PacketType.DomainConnectRequest);
+        const packet = NLPacket.create(PacketType.DomainDisconnectRequest);
         return packet;
     }
 

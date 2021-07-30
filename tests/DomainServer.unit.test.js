@@ -104,22 +104,6 @@ describe("DomainServer - unit tests", () => {
     });
 
 
-    test("Can disconnect while connecting", () => {
-        const domainServer = new DomainServer();
-        const location = "hello";
-        domainServer.connect(location);
-        expect(domainServer.state).toBe(DomainServer.CONNECTING);
-        expect(domainServer.errorInfo).toBe("");
-        expect(domainServer.refusalInfo).toBe("");
-        expect(domainServer.location).toBe(location);
-        domainServer.disconnect();
-        expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
-        expect(domainServer.errorInfo).toBe("");
-        expect(domainServer.refusalInfo).toBe("");
-        expect(domainServer.location).toBe(location);
-    });
-
-
 
 
 });

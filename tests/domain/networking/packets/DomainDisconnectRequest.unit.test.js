@@ -18,7 +18,7 @@ describe("DomainDisconnectRequest - unit tests", () => {
     test("Can write a DomainDisonnectRequest packet", () => {
         const packet = DomainDisconnectRequest.write();
         expect(packet instanceof NLPacket).toBe(true);
-        expect(packet.getType()).toBe(PacketType.DomainConnectRequest);
+        expect(packet.getType()).toBe(PacketType.DomainDisconnectRequest);
         expect(packet.getMessageData().dataPosition).toBeGreaterThan(0);
     });
 

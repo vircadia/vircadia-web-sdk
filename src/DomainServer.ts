@@ -187,14 +187,20 @@ class DomainServer {
     }
 
     /*@sdkdoc
-     *  Disconnects from the domain server.
+     *  Disconnects the user client from the domain server.
      */
     disconnect(): void {
-        this.#setState(DomainServer.DISCONNECTED);
+
+        // Stop maintaining connection.
         if (this.#_domainCheckInTimer !== null) {
-            clearInterval(this.#_domainCheckInTimer);
+            clearTimeout(this.#_domainCheckInTimer);
             this.#_domainCheckInTimer = null;
         }
+
+        // Disconnect the networking.
+        NodesList.getDomainHandler().disconnect("User disconnected");
+
+        this.#setState(DomainServer.DISCONNECTED);
     }
 
 

@@ -8,9 +8,11 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import NodesList from "./NodesList";
 import SockAddr from "./SockAddr";
 import Signal from "../shared/Signal";
 import Uuid from "../shared/Uuid";
+import PacketScribe from "./packets/PacketScribe";
 
 
 type LocalID = number;
@@ -154,6 +156,27 @@ class DomainHandler {
     }
 
     /*@devdoc
+     *  Disconnects the user client from the Domain Server.
+     *  @param {string} reason - The reason for disconnecting.
+     */
+    disconnect(reason: string): void {
+        // C++  void DomainHandler::disconnect(QString reason)
+
+        if (this._isConnected) {
+            this.sendDisconnectPacket();
+        }
+
+        // clear member variables that hold the connection state to a domain
+        this._uuid = new Uuid(Uuid.NULL);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        console.log("[networking] Disconnecting from domain server.");
+        console.log("[networking] REASON:", reason);
+        this.setIsConnected(false);
+    }
+
+    /*@devdoc
      *  Gets whether Interface's connection to the domain server has timed out &mdash; it hasn't been responding to
      *  DomainConnectRequest and DomainListRequest packets for a while.
      *  @returns {boolean} <code>true</code> if Interface's connection to the domain server has timed out, <code>false</code> if
@@ -209,6 +232,13 @@ class DomainHandler {
     get disconnectedFromDomain(): Signal {
         // C++  void disconnectedFromDomain()
         return this._disconnectedFromDomain;
+    }
+
+
+    private sendDisconnectPacket(): void {
+        // C++  void sendDisconnectPacket()
+        const packet = PacketScribe.DomainDisconnectRequest.write();
+        NodesList.sendUnreliablePacket(packet, this._sockAddr);
     }
 
 }

@@ -54,6 +54,12 @@ describe("LimitedNodeList - integration tests", () => {
         expect(limitedNodeList.getSessionLocalID()).toBe(testSessionLocalID);
     });
 
+    test("Can reset an empty node list", () => {
+        const limitedNodeList = new LimitedNodeList();
+        limitedNodeList.reset("Some reason");
+        expect(true).toBe(true);
+    });
+
     // WEBRTC TODO: Unit tests for:
     // - sendPacket() - Currently tested implicitly by NodesList integration test.
     // - sendUnreliablePacket() - Currently tested implicitly by NodesList integration test.

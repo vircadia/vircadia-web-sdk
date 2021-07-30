@@ -10,7 +10,7 @@
 
 /* globals jest */
 
-import DomainHandler from "../../../src/domain/networking/DomainHandler";
+import NodesList from "../../../src/domain/networking/NodesList";
 import Signal from "../../../src/domain/shared/Signal";
 import Uuid from "../../../src/domain/shared/Uuid";
 
@@ -29,8 +29,7 @@ describe("DomainHandler - integration tests", () => {
 
     test("Can set and get URL", (done) => {
         expect.assertions(2);
-
-        const domainHandler = new DomainHandler();
+        const domainHandler = NodesList.getDomainHandler();
         expect(domainHandler.getURL()).toBe("");
 
         const signal = new Signal();
@@ -43,7 +42,7 @@ describe("DomainHandler - integration tests", () => {
     });
 
     test("Can set and get the domain UUID", () => {
-        const domainHandler = new DomainHandler();
+        const domainHandler = NodesList.getDomainHandler();
         expect(domainHandler.getUUID().valueOf()).toBe(Uuid.NULL);
         const uuid = new Uuid(12345);
         domainHandler.setUUID(uuid);
@@ -51,7 +50,7 @@ describe("DomainHandler - integration tests", () => {
     });
 
     test("Can set and get the domain local ID", () => {
-        const domainHandler = new DomainHandler();
+        const domainHandler = NodesList.getDomainHandler();
         expect(domainHandler.getLocalID()).toBe(0);
         const localID = 7;
         domainHandler.setLocalID(localID);
@@ -59,7 +58,7 @@ describe("DomainHandler - integration tests", () => {
     });
 
     test("Can set and get the domain port", () => {
-        const domainHandler = new DomainHandler();
+        const domainHandler = NodesList.getDomainHandler();
         expect(domainHandler.getPort()).toBe(0);
         expect(domainHandler.getSockAddr().getPort()).toBe(0);
         const port = 77;
@@ -70,7 +69,7 @@ describe("DomainHandler - integration tests", () => {
 
     test("Setting connected and disconnected emits signals", (done) => {
         expect.assertions(4);
-        const domainHandler = new DomainHandler();
+        const domainHandler = NodesList.getDomainHandler();
         expect(domainHandler.isConnected()).toBe(false);
 
         const signal = new Signal();
@@ -93,5 +92,7 @@ describe("DomainHandler - integration tests", () => {
             domainHandler.setIsConnected(false);
         }, 100);
     });
+
+    // DomainHandler.disconnect() is tested in DomainServer.integration.test.js.
 
 });

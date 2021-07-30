@@ -57,6 +57,14 @@ const NodesList = new class extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        // clear our NodeList when the domain changes
+        this._domainHandler.disconnectedFromDomain.connect(() => {
+            // C++  void resetFromDomainHandler()
+            this.reset("Reset from Domain Handler", true);
+        });
+
+        // WEBRTC TODO: Address further C++ code.
+
         this._packetReceiver.registerListener(PacketType.DomainList,
             PacketReceiver.makeUnsourcedListenerReference(this.processDomainList));
 
@@ -96,6 +104,38 @@ const NodesList = new class extends LimitedNodeList {
         // C++  NodeSet& getNodeInterestSet() const { return _nodeTypesOfInterest; }
         return this._nodeTypesOfInterest;
     }
+
+
+    /*@devdoc
+     *  Resets the LimitedNodeList, closing all connections and deleting all node data.
+     *  @function NodesList.reset
+     *  @param {string} reason - The reason for resetting.
+     *  @param {boolean} [skipDomainHandlerReset=false] - <code>true</code> if should skip clearing DomainHandler information,
+     *      e.g., if the DomainHandler initiated the reset; <code>false</code> if should clear DomainHandler information.
+     *  @returns {Slot}
+     */
+    override reset = (reason: string, skipDomainHandlerReset = false) => {
+        // C++  void reset(QString reason, bool skipDomainHandlerReset = false);
+
+        super.reset(reason);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        if (!skipDomainHandlerReset) {
+
+            console.error("Not implemented!");
+
+            // WEBRTC TODO: Address further C++ code.
+        }
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.setSessionUUID(new Uuid());
+        this.setSessionLocalID(0);
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
 
     /*@devdoc
      *  Performs a check-in with the domain server to connect with a {@link PacketType(1)|DomainConnectRequest} packet or keep a

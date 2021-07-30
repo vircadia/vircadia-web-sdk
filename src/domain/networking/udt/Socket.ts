@@ -56,6 +56,19 @@ class Socket {
 
 
     /*@devdoc
+     *  Clears all connections and closes the socket, without waiting for reading and writing to complete.
+     */
+    clearConnections(): void {
+        // C++  void clearConnections()
+
+        // WEBRTC TODO: Address further C++ code.
+
+        // Close WebRTC signaling and data channels.
+        this._webrtcSocket.abort();
+    }
+
+
+    /*@devdoc
      *  Sends a packet to a destination.
      *  @param {Packet} packet - The packet to send.
      *  @param {SockAddr} sockAddr - The destination to send the packet to.

@@ -10,7 +10,7 @@
 
 import WebRTCDataChannel from "./WebRTCDataChannel";
 import WebRTCSignalingChannel from "./WebRTCSignalingChannel";
-import { NodeTypeValue } from "../NodeType";
+import NodeType, { NodeTypeValue } from "../NodeType";
 import SockAddr from "../SockAddr";
 import Signal from "../../shared/Signal";
 
@@ -66,6 +66,24 @@ class WebRTCSocket {
 
         // WEBRTC TODO: Address further C++ code.
 
+    }
+
+
+    /*@devdoc
+     *  Immediately closes the socket, clearing the receive queue and without waiting for any outgoing data to complete being
+     *  sent.
+     */
+    abort(): void {
+        // WEBRTC TODO: Replace this temporary code.
+        if (this.isWebRTCDataChannelOpen(NodeType.DomainServer)) {
+            this.closeWebRTCDataChannel(NodeType.DomainServer);
+        }
+        if (this.isWebRTCSignalingChannelOpen()) {
+            this.closeWebRTCSignalingChannel();
+        }
+        while (this._receivedQueue.length > 0) {
+            this._receivedQueue.pop();
+        }
     }
 
 
@@ -217,11 +235,12 @@ class WebRTCSocket {
     }
 
     // WEBRTC TODO: Replace this temporary method.
-    // eslint-disable-next-line
-    // @ts-ignore
-    closeWebRTCDataChannel(nodeType: NodeTypeValue): void {  // eslint-disable-line
+    closeWebRTCDataChannel(nodeType: NodeTypeValue): void {
         // C++  WebRTC-specific method
-        console.error("Not implemented!");
+        const webrtcDataChannel = this._webrtcDataChannelsByNodeType.get(nodeType);
+        if (webrtcDataChannel) {
+            webrtcDataChannel.webrtcDataChannel.close();
+        }
     }
 
 }
