@@ -61,17 +61,20 @@ type OnStateChangedCallback = (state: ConnectionState, info: string) => void;
  *      <em>Read-only.</em>
  *  @property {DomainServer.ConnectionState} state - The current state of the connection to the domain server.
  *      <em>Read-only.</em>
- *  @property {string} refusalError - A description of the reason if <code>state == DomainServer.REFUSED</code>, otherwise
+ *  @property {string} refusalInfo - A description of the reason if <code>state == DomainServer.REFUSED</code>, otherwise
  *      <code>""</code>.
  *      <em>Read-only.</em>
- *  @property {string} errorError - A description of the reason if <code>state == DomainServer.ERROR</code>, otherwise
+ *  @property {string} errorInfo - A description of the reason if <code>state == DomainServer.ERROR</code>, otherwise
  *      <code>""</code>.
  *      <em>Read-only.</em>
  *  @property {DomainServer~onStateChangedCallback} onStateChanged - Sets a single function to be called when the state of the
- *      domain server connection changes.
+ *      domain server connection changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  */
 class DomainServer {
+    // C++  Application.cpp
+    //      The Web SDK differs from the C++ in that a "disconnect" command is explicitly provides which disconnects from the
+    //      current domain and stops the check-ins from being sent. The C++ never stops sending checkin-ins.
 
     /*@sdkdoc
      *  Called when the state of the domain server connection changes.
@@ -148,10 +151,10 @@ class DomainServer {
     }
 
     set onStateChanged(callback: OnStateChangedCallback) {
-        if (typeof callback === "function") {
+        if (typeof callback === "function" || callback === null) {
             this.#_onStateChangedCallback = callback;
         } else {
-            console.error("ERROR: DomainServer.onStateChanged callback not a function!");
+            console.error("ERROR: DomainServer.onStateChanged callback not a function or null!");
             this.#_onStateChangedCallback = null;
         }
     }
@@ -170,6 +173,10 @@ class DomainServer {
      *  @param {string} location - The location of the Domain Server to connect to.
      */
     connect(location: string): void {
+        // C++  Application.cpp's domainCheckInTimer.
+        //      AddressManager.handleLoockupString() called in many different locations.
+
+        const oldLocation = this.#_location;
 
         if (typeof location === "string") {
             this.#_location = location.trim();
@@ -179,33 +186,36 @@ class DomainServer {
         }
 
         if (this.#_location === "") {
+            this.#stopDomainServerCheckins();
             this.#setState(DomainServer.ERROR, "No location specified.");
             return;
         }
 
+        // If the domain hasn't changed we don't need to restart with a new connection.
+        // WEBRTC TODO: Test the host rather than the full location value. Perhaps work in with AddressManager's signals,
+        //              hostChanged and possibleDomainChangeRequired.
+        // WEBRTC TODO: If changing domains host a DomainDisconnectRequest should probably be sent to the current domain. The
+        // `            C++ currently doesn't do this so leave this for now.
+        if (this.#_location === oldLocation && this.#_domainCheckInTimer) {
+            return;
+        }
 
         this.#setState(DomainServer.CONNECTING);
 
         AddressManager.handleLookupString(location);
 
         // Start sending domain server check-ins.
-        this.#sendDomainServerCheckIns();
+        if (!this.#_domainCheckInTimer) {
+            this.#sendDomainServerCheckIns();
+        }
     }
 
     /*@sdkdoc
      *  Disconnects the user client from the domain server.
      */
     disconnect(): void {
-
-        // Stop maintaining connection.
-        if (this.#_domainCheckInTimer !== null) {
-            clearTimeout(this.#_domainCheckInTimer);
-            this.#_domainCheckInTimer = null;
-        }
-
-        // Disconnect the networking.
+        this.#stopDomainServerCheckins();
         NodesList.getDomainHandler().disconnect("User disconnected");
-
         this.#setState(DomainServer.DISCONNECTED);
     }
 
@@ -232,6 +242,13 @@ class DomainServer {
 
         // Perform this send.
         NodesList.sendDomainServerCheckIn();
+    }
+
+    #stopDomainServerCheckins(): void {
+        if (this.#_domainCheckInTimer !== null) {
+            clearTimeout(this.#_domainCheckInTimer);
+            this.#_domainCheckInTimer = null;
+        }
     }
 }
 

@@ -57,18 +57,6 @@ describe("DomainServer - integration tests", () => {
         domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
     });
 
-    test("Error state when location is invalid", (done) => {
-        const domainServer = new DomainServer();
-        domainServer.onStateChanged = (state, info) => {
-            expect(state).toBe(DomainServer.ERROR);
-            expect(info).not.toBe("");
-            domainServer.onStateChanged = null;
-            done();
-        };
-        expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
-        domainServer.connect("");
-    });
-
     test("Can disconnect while connecting", () => {
         const domainServer = new DomainServer();
         const location = TestConfig.SERVER_SIGNALING_SOCKET_URL;

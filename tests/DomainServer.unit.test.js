@@ -15,7 +15,6 @@ describe("DomainServer - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-
     test("Can get but not set location property", () => {
         const domainServer = new DomainServer();
         expect(domainServer.location).toBe("");
@@ -81,8 +80,12 @@ describe("DomainServer - unit tests", () => {
         expect(domainServer.errorInfo).toBe("");
     });
 
-    test("Error state if invalid location parameter specified", () => {
+    test("Error state and callback if invalid location parameter specified", () => {
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* noop */ });
         const domainServer = new DomainServer();
+        domainServer.onStateChanged = (state) => {
+            expect(state).toBe(DomainServer.ERROR);
+        };
         expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
         expect(domainServer.errorInfo).toBe("");
         expect(domainServer.refusalInfo).toBe("");
@@ -90,10 +93,16 @@ describe("DomainServer - unit tests", () => {
         expect(domainServer.state).toBe(DomainServer.ERROR);
         expect(domainServer.errorInfo).not.toBe("");
         expect(domainServer.refusalInfo).toBe("");
+        expect(error).toHaveBeenCalledTimes(1);
+        error.mockReset();
     });
 
-    test("Error state if no location specified to connect to", () => {
+    test("Error state and callback if no location specified to connect to", () => {
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* noop */ });
         const domainServer = new DomainServer();
+        domainServer.onStateChanged = (state) => {
+            expect(state).toBe(DomainServer.ERROR);
+        };
         expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
         expect(domainServer.errorInfo).toBe("");
         expect(domainServer.refusalInfo).toBe("");
@@ -101,9 +110,20 @@ describe("DomainServer - unit tests", () => {
         expect(domainServer.state).toBe(DomainServer.ERROR);
         expect(domainServer.errorInfo).not.toBe("");
         expect(domainServer.refusalInfo).toBe("");
+        expect(error).toHaveBeenCalledTimes(0);
+        error.mockReset();
     });
 
-
-
+    test("Can set and clear the onStateChanged callback", () => {
+        const domainServer = new DomainServer();
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* noop */ });
+        domainServer.onStateChanged = () => { /* noop */ };
+        expect(error).toHaveBeenCalledTimes(0);
+        domainServer.onStateChanged = null;
+        expect(error).toHaveBeenCalledTimes(0);
+        domainServer.onStateChanged = {};
+        expect(error).toHaveBeenCalledTimes(1);
+        error.mockReset();
+    });
 
 });
