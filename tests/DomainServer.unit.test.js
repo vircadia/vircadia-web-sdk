@@ -15,6 +15,10 @@ describe("DomainServer - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
+    // Suppress console.log messages from being displayed.
+    const log = jest.spyOn(console, "log").mockImplementation(() => { /* noop */ });
+
+
     test("Can get but not set location property", () => {
         const domainServer = new DomainServer();
         expect(domainServer.location).toBe("");
@@ -126,4 +130,6 @@ describe("DomainServer - unit tests", () => {
         error.mockReset();
     });
 
+
+    log.mockReset();
 });

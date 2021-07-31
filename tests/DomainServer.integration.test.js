@@ -15,6 +15,17 @@ import TestConfig from "./test.config.json";
 import "wrtc";  // WebRTC Node.js package.
 
 
+// Time needs to be allowed for the webRTC RTCPeerConnection from one test to be closed before creating a new one in the
+// next test.
+// https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/close
+function waitUntilDone(done) {
+    const DONE_TIMEOUT = 1000;
+    setTimeout(() => {
+        done();  // eslint-disable-line
+    }, DONE_TIMEOUT);
+}
+
+
 describe("DomainServer - integration tests", () => {
 
     //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
@@ -51,13 +62,13 @@ describe("DomainServer - integration tests", () => {
                 }, 2500);  // Sufficient for a couple of sendDomainServerCheckin()s.
             } else if (state === DomainServer.DISCONNECTED && haveRequestedDisconnect) {
                 domainServer.onStateChanged = null;
-                done();
+                waitUntilDone(done);
             }
         };
         domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
     });
 
-    test("Can disconnect while connecting", () => {
+    test("Can disconnect while connecting", (done) => {
         const domainServer = new DomainServer();
         const location = TestConfig.SERVER_SIGNALING_SOCKET_URL;
         domainServer.connect(location);
@@ -70,21 +81,24 @@ describe("DomainServer - integration tests", () => {
         expect(domainServer.errorInfo).toBe("");
         expect(domainServer.refusalInfo).toBe("");
         expect(domainServer.location).toBe(location);
+        waitUntilDone(done);
     });
 
     test("Can disconnect and reconnect", (done) => {
         const domainServer = new DomainServer();
         expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
-        let haveSeenConnecting = false;
         let haveRequestedDisconnect = false;
         let haveRequestedReconnect = false;
+        let lastState = DomainServer.DISCONNECTED;
         domainServer.onStateChanged = (state, info) => {
+            lastState = state;
+
             expect(state === DomainServer.DISCONNECTED
                 || state === DomainServer.CONNECTING
                 || state === DomainServer.CONNECTED).toBe(true);
             expect(info).toBe("");
-            haveSeenConnecting = haveSeenConnecting || state === DomainServer.CONNECTING;
             if (state === DomainServer.CONNECTED) {
+                // Disconnect.
                 const timeOut = !haveRequestedReconnect
                     ? 2000  // First connection. Wait for a couple of sendDomainServerCheckin()s before disconnecting.
                     : 500;  // Second connection. Can finish the test.
@@ -94,12 +108,14 @@ describe("DomainServer - integration tests", () => {
                 }, timeOut);
             } else if (state === DomainServer.DISCONNECTED && haveRequestedDisconnect) {
                 if (!haveRequestedReconnect) {
+                    // Reconnect.
                     setTimeout(() => {
-                        domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
                         haveRequestedReconnect = true;
+                        domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
                     }, 0);
                 } else {
-                    done();
+                    // Finish.
+                    waitUntilDone(done);
                 }
             }
         };
@@ -123,8 +139,7 @@ describe("DomainServer - integration tests", () => {
                 haveRequestedDisconnect = true;
                 domainServer.disconnect();
             } else if (state === DomainServer.DISCONNECTED && haveRequestedDisconnect) {
-                domainServer.onStateChanged = null;
-                done();
+                waitUntilDone(done);
             }
         };
         domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
@@ -142,8 +157,7 @@ describe("DomainServer - integration tests", () => {
                 haveRequestedConnectToEmpty = true;
                 domainServer.connect("");
             } else if (state === DomainServer.ERROR && haveRequestedConnectToEmpty) {
-                domainServer.onStateChanged = null;
-                done();
+                waitUntilDone(done);
             }
         };
         domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
@@ -158,10 +172,11 @@ describe("DomainServer - integration tests", () => {
         };
         setTimeout(() => {
             expect(hasStateChanged).toBe(false);
-            done();
+            waitUntilDone(done);
         }, 200);
         domainServer.disconnect();
     });
+
 
     log.mockReset();
 });

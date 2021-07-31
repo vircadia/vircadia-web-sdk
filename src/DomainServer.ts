@@ -115,6 +115,8 @@ class DomainServer {
 
     #_domainCheckInTimer: ReturnType<typeof setTimeout> | null = null;
 
+    #_DEBUG = false;
+
 
     constructor() {
         // C++  Application::Application()
@@ -126,7 +128,10 @@ class DomainServer {
             this.#setState(DomainServer.CONNECTED);
         });
         domainHandler.disconnectedFromDomain.connect(() => {
-            this.#setState(DomainServer.DISCONNECTED);
+            if (this.#_state !== DomainServer.DISCONNECTED) {
+                this.#stopDomainServerCheckins();
+                this.#setState(DomainServer.DISCONNECTED);
+            }
         });
 
         // WEBRTC TODO: Address further C++ code.
@@ -207,7 +212,11 @@ class DomainServer {
 
         // Start sending domain server check-ins.
         if (!this.#_domainCheckInTimer) {
-            this.#sendDomainServerCheckIns();
+            setTimeout(() => {  // Yield to AddressManager.handleLookupString() and its Signals.
+                if (this.#_state === DomainServer.CONNECTING) {
+                    this.#sendDomainServerCheckIns();
+                }
+            }, 0);
         }
     }
 
@@ -215,6 +224,9 @@ class DomainServer {
      *  Disconnects the user client from the domain server.
      */
     disconnect(): void {
+        if (this.#_state === DomainServer.DISCONNECTED) {
+            return;
+        }
         this.#stopDomainServerCheckins();
         NodesList.getDomainHandler().disconnect("User disconnected");
         this.#setState(DomainServer.DISCONNECTED);
@@ -222,6 +234,11 @@ class DomainServer {
 
 
     #setState(state: ConnectionState, info = ""): void {
+        const hasStateChanged = state !== this.#_state;
+        if (this.#_DEBUG && !hasStateChanged) {
+            console.warn("DomainServer: State hasn't changed.");
+        }
+
         this.#_state = state;
         this.#_refusalInfo = "";
         this.#_errorInfo = "";
@@ -230,7 +247,7 @@ class DomainServer {
         } else if (this.#_state === DomainServer.ERROR) {
             this.#_errorInfo = info;
         }
-        if (this.#_onStateChangedCallback) {
+        if (hasStateChanged && this.#_onStateChangedCallback) {
             this.#_onStateChangedCallback(state, info);
         }
     }
