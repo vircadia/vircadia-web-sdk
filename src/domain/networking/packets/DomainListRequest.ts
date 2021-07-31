@@ -62,8 +62,6 @@ const DomainListRequest = new class {
     write(info: DomainListRequestDetails): NLPacket {  /* eslint-disable-line class-methods-use-this */
         // C++  NodeList::sendDomainServerCheckIn()
 
-        console.log("$$$$$$$ DomainListRequest.write() :", info.publicSockAddr.getPort(), info.localSockAddr.getPort());
-
         const packet = NLPacket.create(PacketType.DomainListRequest);
         const messageData = packet.getMessageData();
         const data = messageData.data;

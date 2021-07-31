@@ -8,8 +8,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* globals jest */
-
 import NodesList from "../../../src/domain/networking/NodesList";
 import Signal from "../../../src/domain/shared/Signal";
 import Uuid from "../../../src/domain/shared/Uuid";
