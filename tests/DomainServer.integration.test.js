@@ -106,6 +106,62 @@ describe("DomainServer - integration tests", () => {
         domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
     });
 
+    test("Can connect to a domain from an error state", (done) => {
+        const domainServer = new DomainServer();
+
+        // Error state.
+        domainServer.connect("  ");
+        expect(domainServer.state).toBe(DomainServer.ERROR);
+
+        // Connect to a domain.
+        let haveRequestedDisconnect = false;
+        domainServer.onStateChanged = (state) => {
+            expect(state === DomainServer.DISCONNECTED
+                || state === DomainServer.CONNECTING
+                || state === DomainServer.CONNECTED).toBe(true);
+            if (state === DomainServer.CONNECTED) {
+                haveRequestedDisconnect = true;
+                domainServer.disconnect();
+            } else if (state === DomainServer.DISCONNECTED && haveRequestedDisconnect) {
+                domainServer.onStateChanged = null;
+                done();
+            }
+        };
+        domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+    });
+
+    test("Connecting to an empty destination disconnects", (done) => {
+        const domainServer = new DomainServer();
+        let haveRequestedConnectToEmpty = false;
+        domainServer.onStateChanged = (state) => {
+            expect(state === DomainServer.DISCONNECTED
+                || state === DomainServer.CONNECTING
+                || state === DomainServer.CONNECTED
+                || state === DomainServer.ERROR).toBe(true);
+            if (state === DomainServer.CONNECTED) {
+                haveRequestedConnectToEmpty = true;
+                domainServer.connect("");
+            } else if (state === DomainServer.ERROR && haveRequestedConnectToEmpty) {
+                domainServer.onStateChanged = null;
+                done();
+            }
+        };
+        domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+    });
+
+    test("Noop when disconnect when disconnected", (done) => {
+        const domainServer = new DomainServer();
+        expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
+        let hasStateChanged = false;
+        domainServer.onStateChanged = (state) => {
+            hasStateChanged = state !== DomainServer.DISCONNECTED;
+        };
+        setTimeout(() => {
+            expect(hasStateChanged).toBe(false);
+            done();
+        }, 200);
+        domainServer.disconnect();
+    });
 
     log.mockReset();
 });

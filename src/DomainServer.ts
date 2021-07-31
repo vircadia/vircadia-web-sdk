@@ -187,6 +187,7 @@ class DomainServer {
 
         if (this.#_location === "") {
             this.#stopDomainServerCheckins();
+            NodesList.getDomainHandler().disconnect("Invalid location");
             this.#setState(DomainServer.ERROR, "No location specified.");
             return;
         }
