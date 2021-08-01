@@ -129,7 +129,12 @@ class WebRTCSignalingChannel {
         if (typeof websocketURL !== "string" || websocketURL === "") {
             console.error("WebRTCSignalingChannel: Invalid WebSocket URL!");
         }
-        this._websocket = new WebSocket(websocketURL);
+        try {
+            this._websocket = new WebSocket(websocketURL);
+        } catch (e) {
+            this._websocket = null;
+            // WEBRTC TODO: Surface error to DomainServer and assignment client APIs.
+        }
     }
 
 

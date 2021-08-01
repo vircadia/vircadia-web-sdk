@@ -89,7 +89,6 @@ describe("DomainServer - integration tests", () => {
         expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
         let haveRequestedDisconnect = false;
         let haveRequestedReconnect = false;
-        let lastState = DomainServer.DISCONNECTED;
         domainServer.onStateChanged = (state, info) => {
             expect(state === DomainServer.DISCONNECTED
                 || state === DomainServer.CONNECTING
