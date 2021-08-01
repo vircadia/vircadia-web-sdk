@@ -1,0 +1,40 @@
+<!--
+//  interface.html
+//
+//  Created by David Rowe on 1 Aug 2021.
+//  Copyright 2021 Vircadia contributors.
+//
+//  Distributed under the Apache License, Version 2.0.
+//  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+-->
+
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Vircadia Interface Example</title>
+    <link rel="stylesheet" href="interface.css" />
+    <script type="module" src="interface.js"></script>
+</head>
+<body>
+
+    <h2>Domain Server</h2>
+
+    <div>
+        <div class="row">
+            <span>Status:</span>
+            <input id="domainStatus" type="text" readonly="readonly" />
+            <input id="domainStatusInfo" type="text" readonly="readonly" class="wide" />
+        </div>
+
+        <div class="row">
+            <span>IP address:</span> <input id="domainIPAddress" type="text" />
+            <button id="domainConnectButton">Connect</button>
+            <button id="domainDisconnectButton">Disconnect</button>
+        </div>
+    </div>
+
+</body>
+
+</html>
