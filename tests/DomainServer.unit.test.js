@@ -84,6 +84,28 @@ describe("DomainServer - unit tests", () => {
         expect(domainServer.errorInfo).toBe("");
     });
 
+    test("Can get string values for connection state values", () => {
+        expect(DomainServer.stateToString(DomainServer.DISCONNECTED)).toBe("DISCONNECTED");
+        expect(DomainServer.stateToString(DomainServer.CONNECTING)).toBe("CONNECTING");
+        expect(DomainServer.stateToString(DomainServer.CONNECTED)).toBe("CONNECTED");
+        expect(DomainServer.stateToString(DomainServer.REFUSED)).toBe("REFUSED");
+        expect(DomainServer.stateToString(DomainServer.ERROR)).toBe("ERROR");
+        expect(DomainServer.stateToString(-1)).toBe("");
+        expect(DomainServer.stateToString(100)).toBe("");
+    });
+
+    test("Can set and clear the onStateChanged callback", () => {
+        const domainServer = new DomainServer();
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* noop */ });
+        domainServer.onStateChanged = () => { /* noop */ };
+        expect(error).toHaveBeenCalledTimes(0);
+        domainServer.onStateChanged = null;
+        expect(error).toHaveBeenCalledTimes(0);
+        domainServer.onStateChanged = {};
+        expect(error).toHaveBeenCalledTimes(1);
+        error.mockReset();
+    });
+
     test("Error state and callback if invalid location parameter specified", () => {
         const error = jest.spyOn(console, "error").mockImplementation(() => { /* noop */ });
         const domainServer = new DomainServer();
@@ -115,18 +137,6 @@ describe("DomainServer - unit tests", () => {
         expect(domainServer.errorInfo).not.toBe("");
         expect(domainServer.refusalInfo).toBe("");
         expect(error).toHaveBeenCalledTimes(0);
-        error.mockReset();
-    });
-
-    test("Can set and clear the onStateChanged callback", () => {
-        const domainServer = new DomainServer();
-        const error = jest.spyOn(console, "error").mockImplementation(() => { /* noop */ });
-        domainServer.onStateChanged = () => { /* noop */ };
-        expect(error).toHaveBeenCalledTimes(0);
-        domainServer.onStateChanged = null;
-        expect(error).toHaveBeenCalledTimes(0);
-        domainServer.onStateChanged = {};
-        expect(error).toHaveBeenCalledTimes(1);
         error.mockReset();
     });
 

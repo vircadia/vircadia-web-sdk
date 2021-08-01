@@ -103,6 +103,16 @@ class DomainServer {
         return ConnectionState.ERROR;
     }
 
+    /*@sdkdoc
+     *  Gets the string representing a connection state.
+     *  @param {DomainServer.ConnectionState} state - The state to get the string representation of.
+     *  @returns {string} The string representing the connection state if a valid state, otherwise <code>""</code>.
+     */
+    static stateToString(state: ConnectionState): string {
+        const text = ConnectionState[state];
+        return text ? text : "";
+    }
+
 
     static readonly #DOMAIN_SERVER_CHECK_IN_MSECS = 1000;
 
