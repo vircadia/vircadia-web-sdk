@@ -13,13 +13,14 @@ import DomainServer from "../src/DomainServer";
 import TestConfig from "./test.config.json";
 
 import "wrtc";  // WebRTC Node.js package.
+import { protocolVersionsSignature } from "../src/domain/networking/udt/PacketHeaders";
 
 
-// Time needs to be allowed for the webRTC RTCPeerConnection from one test to be closed before creating a new one in the
+// Time needs to be allowed for the WebRTC RTCPeerConnection from one test to be closed before creating a new one in the
 // next test.
 // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/close
 function waitUntilDone(done) {
-    const DONE_TIMEOUT = 1000;
+    const DONE_TIMEOUT = 500;
     setTimeout(() => {
         done();  // eslint-disable-line
     }, DONE_TIMEOUT);
@@ -112,6 +113,7 @@ describe("DomainServer - integration tests", () => {
                     }, 0);
                 } else {
                     // Finish.
+                    domainServer.onStateChanged = null;
                     waitUntilDone(done);
                 }
             }
@@ -136,6 +138,7 @@ describe("DomainServer - integration tests", () => {
                 haveRequestedDisconnect = true;
                 domainServer.disconnect();
             } else if (state === DomainServer.DISCONNECTED && haveRequestedDisconnect) {
+                domainServer.onStateChanged = null;
                 waitUntilDone(done);
             }
         };
@@ -154,6 +157,7 @@ describe("DomainServer - integration tests", () => {
                 haveRequestedConnectToEmpty = true;
                 domainServer.connect("");
             } else if (state === DomainServer.ERROR && haveRequestedConnectToEmpty) {
+                domainServer.onStateChanged = null;
                 waitUntilDone(done);
             }
         };
@@ -169,9 +173,48 @@ describe("DomainServer - integration tests", () => {
         };
         setTimeout(() => {
             expect(hasStateChanged).toBe(false);
+            domainServer.onStateChanged = null;
             waitUntilDone(done);
         }, 200);
         domainServer.disconnect();
+    });
+
+    test("Connection denied response from domain server is handled", (done) => {
+        // This response is received for protocol mismatch, no permissions, and similar "connection denied" situations.
+
+        // Cause an invalid protocol version signature to be sent in the connect request.
+        const domainServer = new DomainServer();
+
+        // eslint-disable-next-line
+        const originalProtocolVersionsSignature = protocolVersionsSignature;
+
+        // eslint-disable-next-line
+        protocolVersionsSignature = function () {
+            return new Uint8Array(16);  // An invalid signature.
+        };
+
+        // Suppress console.log messages from being displayed.
+        const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* noop */ });
+
+        // Try connect to a domain.
+        domainServer.onStateChanged = (state) => {
+            expect(state === DomainServer.DISCONNECTED
+                || state === DomainServer.CONNECTING
+                || state === DomainServer.REFUSED).toBe(true);
+            expect(state !== DomainServer.REFUSED
+                || domainServer.refusalInfo.length > 0 && domainServer.errorInfo === "").toBe(true);
+            if (state === DomainServer.REFUSED) {
+                domainServer.disconnect();
+            } else if (state === DomainServer.DISCONNECTED) {
+                // eslint-disable-next-line
+                protocolVersionsSignature = originalProtocolVersionsSignature;
+                domainServer.onStateChanged = null;
+                waitUntilDone(done);
+            }
+        };
+        domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+
+        warn.mockReset();
     });
 
 

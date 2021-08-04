@@ -18,6 +18,8 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.DomainList.read).toBe("function");
         expect(typeof PacketScribe.DomainListRequest).toBe("object");
         expect(typeof PacketScribe.DomainListRequest.write).toBe("function");
+        expect(typeof PacketScribe.DomainConnectionDenied).toBe("object");
+        expect(typeof PacketScribe.DomainConnectionDenied.read).toBe("function");
         expect(typeof PacketScribe.DomainConnectRequest).toBe("object");
         expect(typeof PacketScribe.DomainConnectRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainDisconnectRequest).toBe("object");

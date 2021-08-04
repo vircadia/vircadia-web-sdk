@@ -24,6 +24,9 @@ describe("DomainHandler - integration tests", () => {
     // Increase the Jest timeout from the default 5s.
     jest.setTimeout(10000);
 
+    // Suppress console.log messages from being displayed.
+    const log = jest.spyOn(console, "log").mockImplementation(() => { /* noop */ });
+
 
     test("Can set and get URL", (done) => {
         expect.assertions(2);
@@ -93,4 +96,5 @@ describe("DomainHandler - integration tests", () => {
 
     // DomainHandler.disconnect() is tested in DomainServer.integration.test.js.
 
+    log.mockReset();
 });

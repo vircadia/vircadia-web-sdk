@@ -67,6 +67,8 @@ const NodesList = new class extends LimitedNodeList {
 
         this._packetReceiver.registerListener(PacketType.DomainList,
             PacketReceiver.makeUnsourcedListenerReference(this.processDomainList));
+        this._packetReceiver.registerListener(PacketType.DomainConnectionDenied,
+            PacketReceiver.makeUnsourcedListenerReference(this._domainHandler.processDomainServerConnectionDeniedPacket));
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -122,10 +124,7 @@ const NodesList = new class extends LimitedNodeList {
         // WEBRTC TODO: Address further C++ code.
 
         if (!skipDomainHandlerReset) {
-
-            console.error("Not implemented!");
-
-            // WEBRTC TODO: Address further C++ code.
+            this._domainHandler.softReset(reason);
         }
 
         // WEBRTC TODO: Address further C++ code.

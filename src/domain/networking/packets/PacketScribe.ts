@@ -10,6 +10,7 @@
 
 // In packet number order.
 import DomainList from "./DomainList";
+import DomainConnectionDenied from "./DomainConnectionDenied";
 import DomainListRequest from "./DomainListRequest";
 import DomainConnectRequest from "./DomainConnectRequest";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
@@ -23,6 +24,8 @@ import DomainDisconnectRequest from "./DomainDisconnectRequest";
  *      {@link PacketScribe.DomainList&period;read|DomainList&period;read}
  *  @property {function} DomainListRequest.write -
  *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
+ *  @property {function} DomainConnectionDenied.read -
+ *      {@link PacketScribe.DomainConnectionDenied&period;read|DomainConnectionDenied&period;read}
  *  @property {function} DomainConnectRequest.write -
  *      {@link PacketScribe.DomainConnectRequest&period;write|DomainConnectRequest&period;write}
  *  @property {function} DomainDisconnectRequest.write -
@@ -38,6 +41,7 @@ const PacketScribe = {
     // In packet number order.
     DomainList,
     DomainListRequest,
+    DomainConnectionDenied,
     DomainConnectRequest,
     DomainDisconnectRequest
 };

@@ -13,6 +13,7 @@ import SockAddr from "./SockAddr";
 import Signal from "../shared/Signal";
 import Uuid from "../shared/Uuid";
 import PacketScribe from "./packets/PacketScribe";
+import ReceivedMessage from "./ReceivedMessage";
 
 
 type LocalID = number;
@@ -41,8 +42,12 @@ class DomainHandler {
     private _localID = 0;
     private _uuid = new Uuid(Uuid.NULL);
 
+    private _errorDomainURL = "";
+    private _domainConnectionRefusals: Set<string> = new Set();
+
     private _connectedToDomain = new Signal();
     private _disconnectedFromDomain = new Signal();
+    private _domainConnectionRefused = new Signal();
 
 
     /*@devdoc
@@ -136,9 +141,12 @@ class DomainHandler {
      *  Sets whether Interface is connected to the domain.
      *  @param {boolean} isConnected - <code>true</code> if Interface is connected to the domain, <code>false</code> if it
      *      isn't.
+     *  @param {boolean} forceDisconnect - <code>true</code> if any partly open communications channels to the domain server
+     *      should be closed (e.g., if currently trying to connect), <code>false</code> if they need not be.
      */
-    setIsConnected(isConnected: boolean): void {
+    setIsConnected(isConnected: boolean, forceDisconnect = false): void {
         // C++  void setIsConnected(bool isConnected)
+        //      The extra forceDisconnect parameter is used to cause the WebRTC signaling channel to be closed.
         if (this._isConnected !== isConnected) {
             this._isConnected = isConnected;
             if (this._isConnected) {
@@ -152,16 +160,21 @@ class DomainHandler {
             } else {
                 this.disconnectedFromDomain.emit();
             }
+        } else if (!this._isConnected && forceDisconnect) {
+            // Close the WebRTC communications channel.
+            this.disconnectedFromDomain.emit();
         }
     }
 
     /*@devdoc
      *  Disconnects the user client from the Domain Server.
      *  @param {string} reason - The reason for disconnecting.
+     *  @param {boolean} forceDisconnect - <code>true</code> if any partly open communications channels to the domain server
+     *      should be closed (e.g., if currently trying to connect), <code>false</code> if they need not be.
      */
-    disconnect(reason: string): void {
+    disconnect(reason: string, forceDisconnect = false): void {
         // C++  void DomainHandler::disconnect(QString reason)
-
+        //      The extra forceDisconnect parameter is used to cause the WebRTC signaling channel to be closed.
         if (this._isConnected) {
             this.sendDisconnectPacket();
         }
@@ -173,7 +186,7 @@ class DomainHandler {
 
         console.log("[networking] Disconnecting from domain server.");
         console.log("[networking] REASON:", reason);
-        this.setIsConnected(false);
+        this.setIsConnected(false, forceDisconnect);
     }
 
     /*@devdoc
@@ -191,6 +204,19 @@ class DomainHandler {
         return false;
     }
 
+    /*@devdoc
+     *  Disconnects from the domain and restart the connection process.
+     *  @param {string} reason - The reason for the  reset.
+     */
+    softReset(reason: string): void {
+        // C++  void softReset(QString reason) {
+        console.log("[networking] Resetting current domain connection information.");
+        this.disconnect(reason);
+
+        // WEBRTC TODO: Address further C++ code.
+
+    }
+
 
     /*@devdoc
      *  Sets the current domain's URL and pending ID.
@@ -201,12 +227,64 @@ class DomainHandler {
      */
     // eslint-disable-next-line
     // @ts-ignore
-    setURLAndID = (url: string, id: Uuid): void => {  // eslint-disable-line
+    setURLAndID = (domainURL: string, domainID: Uuid): void => {  // eslint-disable-line
         // C++  void setURLAndID(QUrl domainURL, QUuid domainID)
 
         // WEBRTC TODO: Address further C++ code.
 
-        this._domainURL = url;
+        if (this._domainURL !== domainURL) {
+            this.hardReset("Changing domain URL");
+
+            // WEBRTC TODO: Address further C++ code.
+
+            this._domainURL = domainURL;
+
+            // WEBRTC TODO: Address further C++ code.
+
+        }
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
+
+    /*@devdoc
+     *  Acts upon a domain connection refusal, triggering a
+     *  {@link DomainHandler.domainConnectionRefused|domainConnectionRefused} signal to be emitted.
+     *  @function DomainHandler.setRedirectErrorState
+     *  @param {string} errorUrl - Not currently used.
+     *  @param {string} reasonMessage - The reason that the client was refused connection to the domain.
+     *  @param {ConnectionRefusedReason} - reasonCode - The reason code for the reason.
+     *  @param {string} extraInfo - Extra information about the reason.
+     *  @returns {Slot}
+     */
+    // eslint-disable-next-line
+    // @ts-ignore
+    setRedirectErrorState = (errorUrl: string, reasonMessage = "", reasonCode = -1, extraInfo = ""): void => {
+        // C++  void setRedirectErrorState(QUrl errorUrl, QString reasonMessage = "", int reasonCode = -1,
+        //          const QString& extraInfo = "")
+
+        // WEBRTC TODO: Address further C++ code.
+        this._domainConnectionRefused.emit(reasonMessage, reasonCode, extraInfo);
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|DomainConnectionDenied} message received from the domain server.
+     *  @function DomainHandler.processDomainServerConnectionDeniedPacket
+     *  @param {ReceivedMessage} message - The DomainConnectionDenied message.
+     *  @returns {Slot}
+     */
+    processDomainServerConnectionDeniedPacket = (message: ReceivedMessage): void => {
+        // C++  void DomainHandler::processDomainServerConnectionDeniedPacket(ReceivedMessage* message)
+
+        const info = PacketScribe.DomainConnectionDenied.read(message.getMessage());
+        const sanitizedExtraInfo = info.extraInfo.toLowerCase().startsWith("http") ? "" : info.extraInfo;
+        console.warn("[networking] The domain-server denied a connection request: ", info.reasonMessage, "extraInfo:",
+            sanitizedExtraInfo);
+
+        if (!this._domainConnectionRefusals.has(info.reasonMessage)) {
+            this._domainConnectionRefusals.add(info.reasonMessage);
+            this.setRedirectErrorState(this._errorDomainURL, info.reasonMessage, info.reasonCode, info.extraInfo);
+        }
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -234,11 +312,40 @@ class DomainHandler {
         return this._disconnectedFromDomain;
     }
 
+    /*@devdoc
+     *  Triggered when the client is refused connection to a domain.
+     *  @function DomainHandler.domainConnectionRefused
+     *  @param {string} reasonMessage - The reason that the client was refused connection to the domain.
+     *  @param {ConnectionRefusedReason} - reasonCode - The reason code for the reason.
+     *  @param {string} extraInfo - Extra information about the reason.
+     *  @returns {Signal}
+     */
+    get domainConnectionRefused(): Signal {
+        // C++  void domainConnectionRefused(QString reasonMessage, int reasonCode, const QString& extraInfo);
+        return this._domainConnectionRefused;
+    }
+
 
     private sendDisconnectPacket(): void {
         // C++  void sendDisconnectPacket()
         const packet = PacketScribe.DomainDisconnectRequest.write();
         NodesList.sendUnreliablePacket(packet, this._sockAddr);
+    }
+
+    private hardReset(reason: string): void {
+        // C++  void DomainHandler::hardReset(QString reason)
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.softReset(reason);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this._domainURL = "";
+        this._sockAddr = new SockAddr();
+        this._domainConnectionRefusals.clear();
+
+        // WEBRTC TODO: Address further C++ code.
     }
 
 }

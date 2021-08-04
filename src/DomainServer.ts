@@ -11,6 +11,7 @@
 //
 
 import AddressManager from "./domain/networking/AddressManager";
+import { ConnectionRefusedReasonValue } from "./domain/networking/ConnectionRefusedReason";
 import NodesList from "./domain/networking/NodesList";
 
 
@@ -143,6 +144,7 @@ class DomainServer {
                 this.#setState(DomainServer.DISCONNECTED);
             }
         });
+        domainHandler.domainConnectionRefused.connect(this.#domainConnectionRefused);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -228,6 +230,7 @@ class DomainServer {
                 }
             }, 0);
         }
+
     }
 
     /*@sdkdoc
@@ -238,7 +241,7 @@ class DomainServer {
             return;
         }
         this.#stopDomainServerCheckins();
-        NodesList.getDomainHandler().disconnect("User disconnected");
+        NodesList.getDomainHandler().disconnect("User disconnected", true);
         this.#setState(DomainServer.DISCONNECTED);
     }
 
@@ -278,6 +281,20 @@ class DomainServer {
             this.#_domainCheckInTimer = null;
         }
     }
+
+
+    // Slot.
+    // eslint-disable-next-line
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    #domainConnectionRefused = (reasonMessage: string, reasonCode: ConnectionRefusedReasonValue, extraInfo: string): void => {
+        // C++  Application::domainConnectionRefused(const QString& reasonMessage, int reasonCodeInt, const QString& extraInfo)
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#setState(ConnectionState.REFUSED, reasonMessage);
+    };
+
 }
 
 export default DomainServer;

@@ -137,7 +137,7 @@ enum PacketTypeValue {
  *  @property {PacketType} Unknown - <code>0</code>
  *  @property {PacketType} StunResponse - <code>1</code>
  *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to the user client in response to a
- *      DomainConnectRequest or DomainListRequest packet.<br />
+ *      DomainConnectRequest or DomainListRequest packet, if the client is authorized to connect to the domain.<br />
  *      {@link PacketScribe.DomainListDetails}.
  *  @property {PacketType} Ping - <code>3</code>
  *  @property {PacketType} PingReply - <code>4</code>
@@ -150,11 +150,15 @@ enum PacketTypeValue {
  *  @property {PacketType} BulkAvatarData - <code>11</code>
  *  @property {PacketType} SilentAudioFrame - <code>12</code>
  *  @property {PacketType} DomainListRequest - <code>13</code> - The user client periodically sends this to the Domain Server
- *      to maintain connection to the domain. The Domain Server responds with a DomainList packet.<br />
+ *      to maintain connection to the domain. The Domain Server responds with a DomainList or DomainConnectionDenied
+ *      packet.<br />
  *      {@link PacketScribe.DomainListRequestDetails}.
  *  @property {PacketType} RequestAssignment - <code>14</code>
  *  @property {PacketType} CreateAssignment - <code>15</code>
- *  @property {PacketType} DomainConnectionDenied - <code>16</code>
+ *  @property {PacketType} DomainConnectionDenied - <code>16</code> - The Domain Server sends this to the user client in
+ *      response to a DomainConnectRequest or DomainListRequest packet, if the client is not authorized to connect to the
+ *      domain.
+ *      {@link PacketScribe.DomainConnectionDeniedDetails}.
  *  @property {PacketType} MuteEnvironment - <code>17</code>
  *  @property {PacketType} AudioStreamStats - <code>18</code>
  *  @property {PacketType} DomainServerPathQuery - <code>19</code>
@@ -170,7 +174,7 @@ enum PacketTypeValue {
  *  @property {PacketType} AvatarIdentity - <code>29</code>
  *  @property {PacketType} NodeIgnoreRequest - <code>30</code>
  *  @property {PacketType} DomainConnectRequest - <code>31</code> - The user client sends this to the Domain Server to initiate
- *      connection to the domain. The Domain Server responds with a DomainList packet.<br />
+ *      connection to the domain. The Domain Server responds with a DomainList or DomainConnectionDenied packet.<br />
  *      {@link PacketScribe.DomainConnectRequestDetails}.
  *  @property {PacketType} DomainServerRequireDTLS - <code>32</code>
  *  @property {PacketType} NodeJsonStats - <code>33</code>
@@ -417,6 +421,11 @@ const PacketType = new class {
         HasConnectReason: 24
     };
 
+    private _DomainConnectionDeniedVersion = {
+        // C++ DomainConnectionDeniedVersion
+        IncludesExtraInfo: 19
+    };
+
     private _DomainConnectRequestVersion = {
         // C++  DomainConnectRequestVersion
         HasCompressedSystemInfo: 26
@@ -445,6 +454,8 @@ const PacketType = new class {
                 return this._DomainListVersion.HasConnectReason;
             case this.DomainListRequest:
                 return 22;  // eslint-disable-line @typescript-eslint/no-magic-numbers
+            case this.DomainConnectionDenied:
+                return this._DomainConnectionDeniedVersion.IncludesExtraInfo;
             case this.DomainConnectRequest:
                 return this._DomainConnectRequestVersion.HasCompressedSystemInfo;
             case this.DomainDisconnectRequest:
