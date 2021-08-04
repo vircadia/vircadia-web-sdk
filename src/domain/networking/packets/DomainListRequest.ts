@@ -38,10 +38,10 @@ const DomainListRequest = new class {
      *  Information needed for {@link Packets|writing} a {@link PacketType(1)|DomainListRequest} packet.
      *  @typedef {object} PacketScribe.DomainListRequestDetails
      *  @property {bigint} currentTime - The current Unix time, in usec.
-     *  @property {NodeType} ownerType - The type of this node, i.e., <code>NodeType.Agent</code> for Interface.
-     *  @property {SockAddr} publicSockAddr - The Interface client's public Internet address.
-     *  @property {SockAddr} localSockAddr - The Interface client's local network address.
-     *  @property {Set<NodeType>} nodeTypesOfInterest - The types of domain server nodes that the Interface client wants to use.
+     *  @property {NodeType} ownerType - The type of this node, i.e., <code>NodeType.Agent</code> for a web client.
+     *  @property {SockAddr} publicSockAddr - The web client's public Internet address.
+     *  @property {SockAddr} localSockAddr - The web client's local network address.
+     *  @property {Set<NodeType>} nodeTypesOfInterest - The types of domain server nodes that the web client wants to use.
      *  @property {string} placeName - The domain's place name from {@link AddressManager} if known, otherwise an empty string.
      *  @property {boolean} isDomainConnected - <code>true</code> if currently connected to the domain, <code>false</code> if
      *      not connected.

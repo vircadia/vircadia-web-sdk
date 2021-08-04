@@ -221,8 +221,8 @@ const NodesList = new class extends LimitedNodeList {
         if (domainPacketType === PacketType.DomainConnectRequest) {
 
             // Data unique to DomainConnectRequest.
-            const connectUUID = new Uuid(Uuid.NULL);  // Always Uuid.NULL for Web Interface client.
-            // Ignore ICE code because Interface didn't use ICE to discover the domain server.
+            const connectUUID = new Uuid(Uuid.NULL);  // Always Uuid.NULL for a web client.
+            // Ignore ICE code because the Web client didn't use ICE to discover the domain server.
             const protocolVersionSig = protocolVersionsSignature();
             // WEBRTC TODO: Get MAC address.
             const hardwareAddress = "";

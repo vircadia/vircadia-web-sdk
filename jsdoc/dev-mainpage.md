@@ -11,8 +11,14 @@ This SDK provides interfaces to:
 
 <hr />
 
-To use the API namespaces, import those that you want to use &mdash; either from the SDK package installed in your project or
-directly from the SDK TypeScript.
+The top-level namespaces and classes provided for an application to use are, per the _Vircadia Web SDK Reference_:
+- `Vircadia`
+- `DomainServer`
+
+<hr />
+
+To use the API, import the namespaces and classes that you want to use &mdash; either from the SDK package installed in your
+project or directly from the SDK TypeScript.
 
 - Install the SDK package in your project and import, for example:
     ```

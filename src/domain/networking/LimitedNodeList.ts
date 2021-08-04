@@ -20,7 +20,7 @@ import Uuid from "../shared/Uuid";
 
 
 /*@devdoc
- *  The <code>LimitedNodeList</code> class manages all the network nodes (assignment clients) that Interface is connected to.
+ *  The <code>LimitedNodeList</code> class manages all the network nodes (assignment clients) that the client is connected to.
  *  This includes their presence and communications with them via the Vircadia protocol.
  *  <p>See also: {@link NodesList}.</p>
  *  <p>C++: <code>LimitedNodeList : public QObject, public Dependency</code>

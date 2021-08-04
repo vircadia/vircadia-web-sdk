@@ -43,15 +43,15 @@ const DomainList = new class {
      *  @typedef {object} PacketScribe.DomainListDetails
      *  @property {Uuid} domainUUID - The UUID of the domain server.
      *  @property {LocalID} domainLocalID - The local ID of the domain server.
-     *  @property {Uuid} newUUID - The UUID assigned to the Interface client by the domain server.
-     *  @property {LocalID} newLocalID - The local ID assigned to the Interface client by the domain server.
+     *  @property {Uuid} newUUID - The UUID assigned to the web client by the domain server.
+     *  @property {LocalID} newLocalID - The local ID assigned to the web client by the domain server.
      *  @property {NodePermissions} newPermissions
      *  @property {boolean} isAuthenticated
      *  @property {bigint} connectRequestTimestamp
      *  @property {bigint} domainServerPingSendTime - The Unix time that the packet was sent, in usec.
      *  @property {bigint} domainServerCheckinProcessingTime - The duration from the time domain server received the packet
      *      requesting this response and the time that the response was sent, in usec.
-     *  @property {boolean} newConnection - <code>true</code> if the Interface client has just connected to the domain,
+     *  @property {boolean} newConnection - <code>true</code> if the web client has just connected to the domain,
      *      <code>false</code> if was already connected.
      *  @property {PacketScribe.DomainListDetails-NodeInfo[]} nodes
      */

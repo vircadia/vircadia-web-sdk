@@ -30,8 +30,7 @@ class DomainHandler {
     // C++  DomainHandler
 
     /*@devdoc
-     *  A local ID is an integer ID assigned to the domain server, an assignment client, or an Interface client by the domain
-     *  server.
+     *  A local ID is an integer ID assigned to the domain server, an assignment client, or a web client by the domain server.
      *  @typedef {number} LocalID
      */
 
@@ -129,7 +128,7 @@ class DomainHandler {
     }
 
     /*@devdoc
-     *  Gets whether Interface is connected to the domain.
+     *  Gets whether the client is connected to the domain.
      *  @returns {boolean} <code>true</code> if connect to the domain, <code>false</code> if not connected.
      */
     isConnected(): boolean {
@@ -138,8 +137,8 @@ class DomainHandler {
     }
 
     /*@devdoc
-     *  Sets whether Interface is connected to the domain.
-     *  @param {boolean} isConnected - <code>true</code> if Interface is connected to the domain, <code>false</code> if it
+     *  Sets whether the client is connected to the domain.
+     *  @param {boolean} isConnected - <code>true</code> if the client is connected to the domain, <code>false</code> if it
      *      isn't.
      *  @param {boolean} forceDisconnect - <code>true</code> if any partly open communications channels to the domain server
      *      should be closed (e.g., if currently trying to connect), <code>false</code> if they need not be.
@@ -190,10 +189,10 @@ class DomainHandler {
     }
 
     /*@devdoc
-     *  Gets whether Interface's connection to the domain server has timed out &mdash; it hasn't been responding to
+     *  Gets whether the client's connection to the domain server has timed out &mdash; it hasn't been responding to
      *  DomainConnectRequest and DomainListRequest packets for a while.
-     *  @returns {boolean} <code>true</code> if Interface's connection to the domain server has timed out, <code>false</code> if
-     *      it hasn't.
+     *  @returns {boolean} <code>true</code> if the client's connection to the domain server has timed out, <code>false</code>
+     *      if it hasn't.
      */
     // eslint-disable-next-line class-methods-use-this
     checkInPacketTimeout(): boolean {
@@ -292,7 +291,7 @@ class DomainHandler {
 
 
     /*@devdoc
-     *  Triggered when Interface connects to then domain.
+     *  Triggered when the client connects to then domain.
      *  @function DomainHandler.connectedToDomain
      *  @param {string} domainURL - The domain's URL.
      *  @returns {Signal}
@@ -303,7 +302,7 @@ class DomainHandler {
     }
 
     /*@devdoc
-     *  Triggered when Interface disconnects from the domain.
+     *  Triggered when the client disconnects from the domain.
      *  @function DomainHandler.disconnectedFromDomain
      *  @returns {Signal}
      */

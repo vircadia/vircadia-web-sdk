@@ -35,14 +35,14 @@ class PacketReceiver {
     /*@devdoc
      *  A method that processes a received messages of a particular type.
      *  @typedef {function} PacketReceiver.Listener
-     *  @param {ReceivedMessage} The received message.
+     *  @param {ReceivedMessage} message - The received message.
      */
 
     /*@devdoc
      *  A reference to a packet listener method along with an indication of whether the listener is for sourced messages or
      *  unsourced messages. A sourced message is one which includes the ID of the node it was sent from.
      *  @typedef {object} PacketReceiver.ListenerReference
-     *  @property {Listener} listener - The listener method.
+     *  @property {PacketReceiver.Listener} listener - The listener method.
      *  @property {boolean} sourced - <code>true</code> if the listener handles sourced messages, <code>false</code> if it
      *      handles unsourced messages.
      *  @property {boolean} deliverPending - <code>true</code> if packets should be delivered to the listener as soon as they
@@ -62,7 +62,7 @@ class PacketReceiver {
      *  <p><em>Static</em></p>
      *  @static
      *  @param {Listener} listener - The listener method that will handle a particular type of packet.
-     *  @returns PacketReceiver.ListenerReference
+     *  @returns {PacketReceiver.ListenerReference} A reference to the listener method.
      */
     static makeUnsourcedListenerReference(listener: Listener): ListenerReference {
         // C++  ListenerReferencePointer makeUnsourcedListenerReference(QObject*, function*)
