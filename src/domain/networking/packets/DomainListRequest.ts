@@ -151,8 +151,6 @@ const DomainListRequest = new class {
 
         messageData.dataPosition = dataPosition;
 
-        // console.log("$$$$$$$", messageData.data, messageData.data.byteLength, messageData.dataPosition);
-
         return packet;
     }
 

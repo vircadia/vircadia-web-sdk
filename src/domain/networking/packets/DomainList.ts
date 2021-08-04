@@ -69,9 +69,6 @@ const DomainList = new class {
 
         let dataPosition = 0;
 
-        // info["domainUUID"] = new Uuid(data.getBigUint128(dataPosition, UDT.LITTLE_ENDIAN));
-        // dataPosition += 16;
-
         const domainUUID = new Uuid(data.getBigUint128(dataPosition, UDT.LITTLE_ENDIAN));
         dataPosition += 16;
 
