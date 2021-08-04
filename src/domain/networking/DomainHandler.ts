@@ -183,6 +183,9 @@ class DomainHandler {
 
         // WEBRTC TODO: Address further C++ code.
 
+        // WEBRTC TODO: Should C++ clear _domainConnectionRefusals also?
+        this._domainConnectionRefusals.clear();  // Re-report any refusals if retry connecting to the same domain.
+
         console.log("[networking] Disconnecting from domain server.");
         console.log("[networking] REASON:", reason);
         this.setIsConnected(false, forceDisconnect);
