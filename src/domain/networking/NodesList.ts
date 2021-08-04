@@ -161,23 +161,23 @@ const NodesList = new class extends LimitedNodeList {
         // Open the WebRTC signaling channel to the domain server if not already open.
         if (!this._nodeSocket.hasWebRTCSignalingChannel(domainURL)) {
             this._nodeSocket.openWebRTCSignalingChannel(domainURL);
-            console.log("[Networking] Opening WebRTC signaling channel. Will not send domain server check-in.");
+            console.log("[networking] Opening WebRTC signaling channel. Will not send domain server check-in.");
             return;
         }
         if (!this._nodeSocket.isWebRTCSignalingChannelOpen()) {
-            console.log("[Networking] Waiting for WebRTC signaling channel. Will not send domain server check-in.");
+            console.log("[networking] Waiting for WebRTC signaling channel. Will not send domain server check-in.");
             return;
         }
 
         // Open the WebRTC data channel to the domain server if not already open.
         if (!this._nodeSocket.hasWebRTCDataChannel(NodeType.DomainServer)) {
-            console.log("[Networking] Opening WebRTC data channel. Will not send domain server check-in.");
+            console.log("[networking] Opening WebRTC data channel. Will not send domain server check-in.");
             this._nodeSocket.openWebRTCDataChannel(NodeType.DomainServer, (dataChannelID) => {
                 this._domainHandler.setPort(dataChannelID);
             });
         }
         if (!this._nodeSocket.isWebRTCDataChannelOpen(NodeType.DomainServer)) {
-            console.log("[Networking] Waiting for WebRTC data channel. Will not send domain server check-in.");
+            console.log("[networking] Waiting for WebRTC data channel. Will not send domain server check-in.");
             return;
         }
 
