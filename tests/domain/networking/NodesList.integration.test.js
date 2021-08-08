@@ -33,7 +33,7 @@ describe("NodesList - integration tests", () => {
     jest.setTimeout(10000);
 
     // Suppress console.log messages from being displayed.
-    const log = jest.spyOn(console, "log").mockImplementation(() => { /* noop */ });
+    const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
     const contextID = ContextManager.createContext();
     ContextManager.set(contextID, AddressManager);  // Required by NodesList.

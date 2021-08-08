@@ -16,7 +16,7 @@ describe("DomainServer - unit tests", () => {
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     // Suppress console.log messages from being displayed.
-    const log = jest.spyOn(console, "log").mockImplementation(() => { /* noop */ });
+    const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
 
     test("Can get but not set location property", () => {
@@ -96,8 +96,8 @@ describe("DomainServer - unit tests", () => {
 
     test("Can set and clear the onStateChanged callback", () => {
         const domainServer = new DomainServer();
-        const error = jest.spyOn(console, "error").mockImplementation(() => { /* noop */ });
-        domainServer.onStateChanged = () => { /* noop */ };
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+        domainServer.onStateChanged = () => { /* no-op */ };
         expect(error).toHaveBeenCalledTimes(0);
         domainServer.onStateChanged = null;
         expect(error).toHaveBeenCalledTimes(0);
@@ -107,7 +107,7 @@ describe("DomainServer - unit tests", () => {
     });
 
     test("Error state and callback if invalid location parameter specified", () => {
-        const error = jest.spyOn(console, "error").mockImplementation(() => { /* noop */ });
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
         const domainServer = new DomainServer();
         domainServer.onStateChanged = (state) => {
             expect(state).toBe(DomainServer.ERROR);
@@ -124,7 +124,7 @@ describe("DomainServer - unit tests", () => {
     });
 
     test("Error state and callback if no location specified to connect to", () => {
-        const error = jest.spyOn(console, "error").mockImplementation(() => { /* noop */ });
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
         const domainServer = new DomainServer();
         domainServer.onStateChanged = (state) => {
             expect(state).toBe(DomainServer.ERROR);

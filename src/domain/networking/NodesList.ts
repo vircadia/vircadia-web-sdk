@@ -31,8 +31,6 @@ import Uuid from "../shared/Uuid";
  *  @extends LimitedNodeList
  *  @param {number} contextID - The {@link ContextManager} context ID.
  *  @param {NodeType} [ownerType=Agent] - The type of object that the NodesList is being used in.
- *  @param {number} [socketListenPort=-1] - Not used.
- *  @param {number} [dtlsListenPort=1] - Not used.
  */
 class NodesList extends LimitedNodeList {
     // C++  NodeList : public LimitedNodeList
@@ -46,11 +44,10 @@ class NodesList extends LimitedNodeList {
     // Context objects.
     private _addressManager;
 
-    constructor(contextID: number, ownerType = NodeType.Agent, socketListenPort = LimitedNodeList.INVALID_PORT,
-        dtlsListenPort = LimitedNodeList.INVALID_PORT) {
+    constructor(contextID: number, ownerType = NodeType.Agent) {
         // C++  NodeList(char ownerType, int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
-        super(ownerType, socketListenPort, dtlsListenPort);
+        super();
 
         this._ownerType = ownerType;
 

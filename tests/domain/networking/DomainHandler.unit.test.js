@@ -23,7 +23,7 @@ describe("DomainHandler - integration tests", () => {
     @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-magic-numbers */
 
     // Suppress console.log messages from being displayed.
-    const log = jest.spyOn(console, "log").mockImplementation(() => { /* noop */ });
+    const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
     const contextID = ContextManager.createContext();
     ContextManager.set(contextID, AddressManager);  // Required by NodesList.
