@@ -76,7 +76,7 @@ type OnStateChangedCallback = (state: ConnectionState, info: string) => void;
 class DomainServer {
     // C++  Application.cpp
     //      The Web SDK differs from the C++ in that a "disconnect" command is explicitly provides which disconnects from the
-    //      current domain and stops the check-ins from being sent. The C++ never stops sending checkin-ins.
+    //      current domain and stops the check-ins from being sent. The C++ never stops sending check-ins.
 
     /*@sdkdoc
      *  Called when the state of the domain server connection changes.

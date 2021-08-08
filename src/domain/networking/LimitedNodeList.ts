@@ -26,8 +26,8 @@ import Uuid from "../shared/Uuid";
  *  <p>C++: <code>LimitedNodeList : public QObject, public Dependency</code>
  *  @class LimitedNodeList
  *  @param {NodeType} ownerType=DomainServer - Not used.
- *  @param {number} socketListenPort - Not used.
- *  @param {number} dtlsListenPort - Not used.
+ *  @param {number} socketListenPort=-1 - Not used.
+ *  @param {number} dtlsListenPort=-1 - Not used.
  *
  *  @property {LimitedNodeList.ConnectReason} ConnectReason - Connect reason values.
  *  @property {number} INVALID_PORT=-1 - Invalid port.
