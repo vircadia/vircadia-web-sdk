@@ -8,6 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import LimitedNodeList from "../../../../src/domain/networking/LimitedNodeList";
 import NLPacket from "../../../../src/domain/networking/NLPacket";
 import NodeType from "../../../../src/domain/networking/NodeType";
 import SockAddr from "../../../../src/domain/networking/SockAddr";
@@ -28,7 +29,7 @@ describe("DomainConnectRequest - unit tests", () => {
             hardwareAddress: "",
             machineFingerprint: new Uuid(),
             compressedSystemInfo: new Uint8Array(new ArrayBuffer(0)),
-            connectReason: 0,
+            connectReason: LimitedNodeList.ConnectReason.Connect,
             previousConnectionUptime: BigInt(0),
             currentTime: BigInt(Date.now().valueOf()),
             ownerType: NodeType.Agent,
@@ -58,7 +59,7 @@ describe("DomainConnectRequest - unit tests", () => {
             hardwareAddress: "",
             machineFingerprint: new Uuid(),
             compressedSystemInfo: new Uint8Array(new ArrayBuffer(0)),
-            connectReason: 0,
+            connectReason: LimitedNodeList.ConnectReason.Connect,
             previousConnectionUptime: BigInt(0),
             currentTime: BigInt(Date.now().valueOf()),
             ownerType: NodeType.Agent,

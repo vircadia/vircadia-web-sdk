@@ -8,7 +8,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import NodeType from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import SockAddr from "./SockAddr";
 import PacketType from "./udt/PacketHeaders";
@@ -23,9 +22,6 @@ import NLPacket from "./NLPacket";
  *  <p>See also: {@link NodesList}.</p>
  *  <p>C++: <code>LimitedNodeList : public QObject, public Dependency</code>
  *  @class LimitedNodeList
- *  @param {NodeType} ownerType=DomainServer - Not used.
- *  @param {number} socketListenPort - Not used.
- *  @param {number} dtlsListenPort - Not used.
  *
  *  @property {LimitedNodeList.ConnectReason} ConnectReason - Connect reason values.
  *  @property {number} INVALID_PORT=-1 - Invalid port.
@@ -63,13 +59,7 @@ class LimitedNodeList {
     protected _packetReceiver: PacketReceiver;
 
 
-    // eslint-disable-next-line
-    // @ts-ignore
-    // eslint-disable-next-line
-    constructor(ownerType = NodeType.DomainServer, socketListenPort = LimitedNodeList.INVALID_PORT,
-        // eslint-disable-next-line
-        // @ts-ignore
-        dtlsListenPort = LimitedNodeList.INVALID_PORT) {  // eslint-disable-line
+    constructor() {
         // C++  LimitedNodeList(char ownerType = NodeType::DomainServer, int socketListenPort = INVALID_PORT,
         //                      int dtlsListenPort = INVALID_PORT);
 
