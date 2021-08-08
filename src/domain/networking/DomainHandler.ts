@@ -25,6 +25,7 @@ type LocalID = number;
  *  The <code>DomainHandler</code> class handles the connection to and the features of a domain.
  *  <p>C++: <code>DomainHandler : QObject</code></p>
  *  @class DomainHandler
+ *  @param {NodesList} parent - The parent {@link NodesList} object.
  */
 class DomainHandler {
     // C++  DomainHandler
@@ -47,6 +48,15 @@ class DomainHandler {
     private _connectedToDomain = new Signal();
     private _disconnectedFromDomain = new Signal();
     private _domainConnectionRefused = new Signal();
+
+    // Context objects.
+    private _nodesList;
+
+
+    constructor(parent: NodesList) {
+        // C++  DomainHandler(QObject* parent = 0);
+        this._nodesList = parent;
+    }
 
 
     /*@devdoc
@@ -331,7 +341,7 @@ class DomainHandler {
     private sendDisconnectPacket(): void {
         // C++  void sendDisconnectPacket()
         const packet = PacketScribe.DomainDisconnectRequest.write();
-        NodesList.sendUnreliablePacket(packet, this._sockAddr);
+        this._nodesList.sendUnreliablePacket(packet, this._sockAddr);
     }
 
     private hardReset(reason: string): void {

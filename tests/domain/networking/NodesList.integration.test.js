@@ -11,6 +11,7 @@
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodesList from "../../../src/domain/networking/NodesList";
 import NodeType from "../../../src/domain/networking/NodeType";
+import DependencyManager from "../../../src/domain/shared/DependencyManager";
 
 import TestConfig from "../../test.config.json";
 
@@ -21,17 +22,24 @@ describe("NodesList - integration tests", () => {
 
     //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
+    /* eslint-disable @typescript-eslint/no-magic-numbers, @typescript-eslint/no-unsafe-call,
+    @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
+
     // Add WebSocket and WebRTC to Node.js environment.
     global.WebSocket = require("ws");  // eslint-disable-line
     global.RTCPeerConnection = require("wrtc").RTCPeerConnection;  // eslint-disable-line
-
-    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     // Increase the Jest timeout from the default 5s.
     jest.setTimeout(10000);
 
     // Suppress console.log messages from being displayed.
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* noop */ });
+
+    const contextID = DependencyManager.createContext();
+    DependencyManager.set(contextID, AddressManager);  // Required by NodesList.
+    DependencyManager.set(contextID, NodesList, contextID);
+    const addressManager = DependencyManager.get(contextID, AddressManager);
+    const nodesList = DependencyManager.get(contextID, NodesList);
 
 
     test("Can perform an initial domain server check-in", (done) => {
@@ -40,10 +48,10 @@ describe("NodesList - integration tests", () => {
         expect.assertions(1);
 
         // Set up DomainHandler.
-        AddressManager.handleLookupString(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+        addressManager.handleLookupString(TestConfig.SERVER_SIGNALING_SOCKET_URL);
 
         // Set up NodesList.
-        NodesList.addSetOfNodeTypesToNodeInterestSet(new Set([
+        nodesList.addSetOfNodeTypesToNodeInterestSet(new Set([
             NodeType.AudioMixer,
             NodeType.AvatarMixer,
             NodeType.EntityServer,
@@ -54,21 +62,21 @@ describe("NodesList - integration tests", () => {
 
         // Create WebRTC signaling channel.
         setTimeout(function () {
-            NodesList.sendDomainServerCheckIn();
+            nodesList.sendDomainServerCheckIn();
         }, 0);
 
         // Create WebRTC data channel.
         setTimeout(function () {
-            NodesList.sendDomainServerCheckIn();
+            nodesList.sendDomainServerCheckIn();
         }, 1000);
 
         // Send a DomainConnectRequest packet to the domain server.
         setTimeout(function () {
-            NodesList.sendDomainServerCheckIn();
+            nodesList.sendDomainServerCheckIn();
         }, 2000);
 
         // Receive a DomainServerList packet in response.
-        const domainHandler = NodesList.getDomainHandler();
+        const domainHandler = nodesList.getDomainHandler();
         let backupTimeout = null;
         domainHandler.connectedToDomain.connect(function () {
             clearTimeout(backupTimeout);

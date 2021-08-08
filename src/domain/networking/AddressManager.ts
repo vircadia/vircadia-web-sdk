@@ -13,11 +13,11 @@ import Uuid from "../shared/Uuid";
 
 
 /*@devdoc
- *  The <code>AddressManager</code> namespace manages the current location in the metaverse.
+ *  The <code>AddressManager</code> class manages the current location in the metaverse.
  *  <p>C++: <code>AddressManager : public QObject, public Dependency</code></p>
- *  @namespace AddressManager
+ *  @class AddressManager
  */
-const AddressManager = new class {
+class AddressManager {
     // C++  AddressManager : public QObject, public Dependency
 
     private _domainUrl = "";
@@ -83,6 +83,6 @@ const AddressManager = new class {
         return true;
     }
 
-}();
+}
 
 export default AddressManager;
