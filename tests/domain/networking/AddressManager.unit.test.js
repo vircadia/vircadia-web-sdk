@@ -9,7 +9,7 @@
 //
 
 import AddressManager from "../../../src/domain/networking/AddressManager";
-import DependencyManager from "../../../src/domain/shared/DependencyManager";
+import ContextManager from "../../../src/domain/shared/ContextManager";
 
 import TestConfig from "../../test.config.json";
 
@@ -43,10 +43,10 @@ describe("AddressManager - unit tests", () => {
         expect(typeof addressManager.getPlaceName()).toBe("string");
     });
 
-    test("The AddressManager can be obtained from the DependencyManager", () => {
-        const contextID = DependencyManager.createContext();
-        DependencyManager.set(contextID, AddressManager);
-        const addressManager = DependencyManager.get(contextID, AddressManager);
+    test("The AddressManager can be obtained from the ContextManager", () => {
+        const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AddressManager);
+        const addressManager = ContextManager.get(contextID, AddressManager);
         expect(addressManager instanceof AddressManager).toBe(true);
     });
 

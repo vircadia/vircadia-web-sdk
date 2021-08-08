@@ -1,5 +1,5 @@
 //
-//  DependencyManager.ts
+//  ContextManager.ts
 //
 //  Created by David Rowe on 7 Aug 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -26,22 +26,21 @@ type ContextTable = Array<Context>;
 
 
 /*@devdoc
- *  The <code>DependencyManager</code> namespace manages sets of unique object instances. Such a set forms a "dependency
- *  context" in which the objects jointly operate.
- *  <p>C++: <code>DependencyManager</code></p>
- *  @namespace DependencyManager
+ *  The <code>ContextManager</code> namespace manages sets of unique object instances. Such a set forms a "context" in which
+ *  the objects jointly operate.
+ *  <p>Contexts are used to manage "global" objects particular to the connection to a particular domain.</p>
+ *  <p>C++: <code>ContextManager</code></p>
+ *  @namespace ContextManager
  */
-const DependencyManager = new class {
-    // C++  DependencyManager
-    //      The TypeScript implementation of DependencyManaager supports multiple contexts whereas the C++ implementation
-    //      supports just a single, global context. Hence the TypeScript implementation's use of context IDS.
+const ContextManager = new class {
+    // C++  N/A
 
     #_contexts: ContextTable = [];
 
     /*@devdoc
-     *  Creates a new dependency context.
-     *  @function DependencyManager.createContext
-     *  @returns {number} The ID of the dependency context created/
+     *  Creates a new context.
+     *  @function ContextManager.createContext
+     *  @returns {number} The ID of the context created.
      */
     createContext(): number {
         // C++  N/A
@@ -50,9 +49,9 @@ const DependencyManager = new class {
     }
 
     /*@devdoc
-     *  Gets an object from a dependency context.
-     *  @function DependencyManager.get
-     *  @param {number} contextID - The ID of the dependency context.
+     *  Gets an object from a context.
+     *  @function ContextManager.get
+     *  @param {number} contextID - The ID of the context.
      *  @param {class} dependencyType - The type of the object to get.
      *  @returns {object} The requested object.
      *  @throws Throws an error if the context ID is invalid or an object of the specified type cannot be found in the context.
@@ -61,19 +60,19 @@ const DependencyManager = new class {
     get(contextID: number, dependencyType: DependencyType): DependencyObject {
         const context = this.#_contexts[contextID];
         if (!context) {
-            throw Error(`DependencyManager.get(): Cannot find context ${contextID}!`);
+            throw Error(`ContextManager.get(): Cannot find context ${contextID}!`);
         }
         const dependencyObject = context.get(dependencyType.name);
         if (!dependencyObject) {
-            throw Error(`DependencyManager.get(): Cannot find object of type ${dependencyType.name}!`);
+            throw Error(`ContextManager.get(): Cannot find object of type ${dependencyType.name}!`);
         }
         return dependencyObject;
     }
 
     /*@devdoc
-     *  Creates and adds a new object to a dependency context.
-     *  @function DependencyManager.set
-     *  @param {number} contextID - The ID of the dependency context.
+     *  Creates and adds a new object to a context.
+     *  @function ContextManager.set
+     *  @param {number} contextID - The ID of the context.
      *  @param {class} dependencyType - The type of the new object to create and add. The new object is created using
      *      using <code>new()</code>.
      *  @param {...any} dependencyParams - Optional parameters to use whcn creating the new object.
@@ -83,10 +82,10 @@ const DependencyManager = new class {
     set(contextID: number, dependencyType: DependencyType, ...args: unknown[]): void {
         const context = this.#_contexts[contextID];
         if (!context) {
-            throw Error(`DependencyManager.set(): Cannot find context ${contextID}!`);
+            throw Error(`ContextManager.set(): Cannot find context ${contextID}!`);
         }
         if (context.get(dependencyType.name) !== undefined) {
-            throw Error(`DependencyManager.set(): Cannot add another object of type ${dependencyType.name}!`);
+            throw Error(`ContextManager.set(): Cannot add another object of type ${dependencyType.name}!`);
         }
         const newDependency = new dependencyType(...args);  // eslint-disable-line new-cap
         context.set(dependencyType.name, newDependency);
@@ -94,4 +93,4 @@ const DependencyManager = new class {
 
 }();
 
-export default DependencyManager;
+export default ContextManager;

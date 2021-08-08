@@ -13,7 +13,7 @@
 import AddressManager from "./domain/networking/AddressManager";
 import { ConnectionRefusedReasonValue } from "./domain/networking/ConnectionRefusedReason";
 import NodesList from "./domain/networking/NodesList";
-import DependencyManager from "./domain/shared/DependencyManager";
+import ContextManager from "./domain/shared/ContextManager";
 
 
 /*@sdkdoc
@@ -137,12 +137,12 @@ class DomainServer {
     constructor() {
         // C++  Application::Application()
 
-        const contextID = DependencyManager.createContext();
-        DependencyManager.set(contextID, AddressManager);
-        DependencyManager.set(contextID, NodesList, contextID);
+        const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AddressManager);
+        ContextManager.set(contextID, NodesList, contextID);
 
-        this.#_nodesList = <NodesList>DependencyManager.get(contextID, NodesList);
-        this.#_addressManager = <AddressManager>DependencyManager.get(contextID, AddressManager);
+        this.#_nodesList = <NodesList>ContextManager.get(contextID, NodesList);
+        this.#_addressManager = <AddressManager>ContextManager.get(contextID, AddressManager);
 
         // WEBRTC TODO: Address further C++ code.
 

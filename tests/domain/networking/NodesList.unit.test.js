@@ -9,20 +9,20 @@
 //
 
 import AddressManager from "../../../src/domain/networking/AddressManager";
+import DomainHandler from "../../../src/domain/networking/DomainHandler";
 import NodesList from "../../../src/domain/networking/NodesList";
 import NodeType from "../../../src/domain/networking/NodeType";
-import DomainHandler from "../../../src/domain/networking/DomainHandler";  // Must come after NodesList namespace import.
-import DependencyManager from "../../../src/domain/shared/DependencyManager";
+import ContextManager from "../../../src/domain/shared/ContextManager";
 
 
 describe("NodesList - integration tests", () => {
 
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
-    const contextID = DependencyManager.createContext();
-    DependencyManager.set(contextID, AddressManager);  // Required by NodesList.
-    DependencyManager.set(contextID, NodesList, contextID);
-    const nodesList = DependencyManager.get(contextID, NodesList);
+    const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AddressManager);  // Required by NodesList.
+    ContextManager.set(contextID, NodesList, contextID);
+    const nodesList = ContextManager.get(contextID, NodesList);
 
 
     test("Can get the DomainHandler", () => {

@@ -11,7 +11,7 @@
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodesList from "../../../src/domain/networking/NodesList";
 import NodeType from "../../../src/domain/networking/NodeType";
-import DependencyManager from "../../../src/domain/shared/DependencyManager";
+import ContextManager from "../../../src/domain/shared/ContextManager";
 
 import TestConfig from "../../test.config.json";
 
@@ -35,11 +35,11 @@ describe("NodesList - integration tests", () => {
     // Suppress console.log messages from being displayed.
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* noop */ });
 
-    const contextID = DependencyManager.createContext();
-    DependencyManager.set(contextID, AddressManager);  // Required by NodesList.
-    DependencyManager.set(contextID, NodesList, contextID);
-    const addressManager = DependencyManager.get(contextID, AddressManager);
-    const nodesList = DependencyManager.get(contextID, NodesList);
+    const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AddressManager);  // Required by NodesList.
+    ContextManager.set(contextID, NodesList, contextID);
+    const addressManager = ContextManager.get(contextID, AddressManager);
+    const nodesList = ContextManager.get(contextID, NodesList);
 
 
     test("Can perform an initial domain server check-in", (done) => {

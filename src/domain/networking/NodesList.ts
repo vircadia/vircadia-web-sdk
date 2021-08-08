@@ -15,11 +15,11 @@ import LimitedNodeList from "./LimitedNodeList";
 import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import ReceivedMessage from "./ReceivedMessage";
+import NLPacket from "../networking/NLPacket";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
-import NLPacket from "../networking/NLPacket";
+import ContextManager from "../shared/ContextManager";
 import Uuid from "../shared/Uuid";
-import DependencyManager from "../shared/DependencyManager";
 
 
 /*@devdoc
@@ -29,7 +29,7 @@ import DependencyManager from "../shared/DependencyManager";
  *  <p>Note: This JavaScript object has a different name because <code>NodeList</code> is a JavaScript browser object.</p>
  *  @class NodesList
  *  @extends LimitedNodeList
- *  @param {number} contextID - The {@link DependencyManager} context ID.
+ *  @param {number} contextID - The {@link ContextManager} context ID.
  *  @param {NodeType} [ownerType=Agent] - The type of object that the NodesList is being used in.
  *  @param {number} [socketListenPort=-1] - Not used.
  *  @param {number} [dtlsListenPort=1] - Not used.
@@ -60,7 +60,7 @@ class NodesList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this._addressManager = <AddressManager>DependencyManager.get(contextID, AddressManager);
+        this._addressManager = <AddressManager>ContextManager.get(contextID, AddressManager);
         this._addressManager.possibleDomainChangeRequired.connect(this._domainHandler.setURLAndID);
 
         // WEBRTC TODO: Address further C++ code.
