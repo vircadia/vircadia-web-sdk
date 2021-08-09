@@ -10,8 +10,8 @@
 
 
 /*@devdoc
- *  {@link Node types}, <code>DomainServer</code> &ndash; <code>Unassigned</code>, are the types of network nodes operating in a
- *  domain. They are represented as single 8-bit characters in the protocol packets.
+ *  {@link NodeType(1)|Node types},  <code>DomainServer</code> &ndash; <code>Unassigned</code>, are the types of network nodes
+ *  operating in a domain. They are represented as single 8-bit characters in the protocol packets.
  *  @typedef {string} NodeType
  */
 const enum NodeTypeValue {
