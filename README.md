@@ -1,17 +1,21 @@
 # Vircadia Web SDK
 
 The **Vircadia Web SDK** (codename Ananke) is a JavaScript SDK for developing web-based clients for virtual worlds powered by
-Vircadia. Vircadia domain servers provide the worlds (a.k.a. "domains") to visit, and the Vircadia metaverse server provides
-global services that connect the users and domains.
-See the user docs to [Understand the Architecture](https://docs.vircadia.dev/explore/get-started/architecture.html).
+[Vircadia](https://vircadia.com/). Vircadia domain servers provide the worlds (a.k.a. "domains") to visit, and the Vircadia
+metaverse server provides global services that connect the users and domains.
+See the user docs to [Understand the Architecture](https://docs.vircadia.com/explore/get-started/architecture.html).
 
 This SDK provides interfaces to:
 - Connect to domains.
 - Use metaverse services.
 
-For scripting API documentation, see the [Vircadia API Reference](https://apidocs.vircadia.dev).
+The SDK is written in TypeScript.
+- [Project Configuration](CONFIGURATION.md)
+- [Coding Standard](CODING_STANDARD.md)
 
-To learn more about using Vircadia and exploring the metaverse, see the [User Documentation](https://docs.vircadia.dev).
+To learn more about using Vircadia and exploring the metaverse, see the [User Documentation](https://docs.vircadia.com).
+
+For scripting API documentation, see the [Vircadia API Reference](https://apidocs.vircadia.dev).
 
 
 ## Prerequisites
@@ -30,19 +34,31 @@ to. https://jestjs.io/.
 npm install
 ```
 
-### Hot-recompile for development
-```
-npm run watch
-```
-
 ### Compile and minify for production
 ```
 npm run build
 ```
 
+### Hot-recompile for development
+```
+npm run watch
+```
+
+### Clean the build directory
+```
+npm run clean
+```
+
 ### Lint files
+
+All files:
 ```
 npm run lint
+```
+
+A specific directory or file:
+```
+npm run lint-path <path>
 ```
 
 ### Run tests
@@ -58,19 +74,26 @@ npm run test-watch
 
 Specific tests (e.g., Packet.unit.test.js, all unit tests):
 ```
+npm run test <partial-path>
+
 npm run test /packet.unit
 npm run test unit.test
+```
+
+Run tests and report open handles:
+```
+npm run test-debug [<partial-path>]
 ```
 
 
 ### Generate docs
 
-SDK documentation:
+SDK API documentation:
 ```
 npm run sdkdoc
 ```
 
-Developer documentation (includes SDK documentation):
+Developer documentation (includes SDK API documentation):
 ```
 npm run devdoc
 ```

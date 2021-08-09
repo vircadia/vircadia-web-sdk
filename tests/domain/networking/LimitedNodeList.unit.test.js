@@ -8,8 +8,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import LimitedNodeList from "../../../src/domain/networking/LimitedNodeList.js";
-import PacketReceiver from "../../../src/domain/networking/PacketReceiver.js";
+import LimitedNodeList from "../../../src/domain/networking/LimitedNodeList";
+import PacketReceiver from "../../../src/domain/networking/PacketReceiver";
 
 
 describe("LimitedNodeList - integration tests", () => {

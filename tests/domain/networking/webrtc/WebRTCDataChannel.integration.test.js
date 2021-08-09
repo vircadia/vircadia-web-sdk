@@ -9,29 +9,31 @@
 //
 
 /* globals jest */
-/* eslint-disable no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 
-import WebRTCDataChannel from "../../../../src/domain/networking/webrtc/WebRTCDataChannel.js";
-import WebRTCSignalingChannel from "../../../../src/domain/networking/webrtc/WebRTCSignalingChannel.js";
-import NodeType from "../../../../src/domain/networking/NodeType.js";
+import WebRTCDataChannel from "../../../../src/domain/networking/webrtc/WebRTCDataChannel";
+import WebRTCSignalingChannel from "../../../../src/domain/networking/webrtc/WebRTCSignalingChannel";
+import NodeType from "../../../../src/domain/networking/NodeType";
+
+import TestConfig from "../../../test.config.json";
 
 import "wrtc";  // WebRTC Node.js package.
 
 
 describe("WebRTCDataChannel - integration tests", () => {
 
-    //  Test environment expected: Domain server running on localhost that allows anonymous logins.
-    const LOCALHOST_WEBSOCKET = "ws://127.0.0.1:40102";
-    const INVALID_WEBSOCKET = "ws://0.0.0.0:0";
+    //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
-    // Add WebRTC to Node.js environment.
-    global.RTCPeerConnection = require("wrtc").RTCPeerConnection;
+    // Add WebSocket and WebRTC to Node.js environment.
+    global.WebSocket = require("ws");  // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+    global.RTCPeerConnection = require("wrtc").RTCPeerConnection;  // eslint-disable-line
 
     // Add StringDecoder to Node.js environment.
-    const { StringDecoder } = require("string_decoder");
+    const { StringDecoder } = require("string_decoder");  // eslint-disable-line
 
     // Suppress console.error messages from being displayed.
-    const error = jest.spyOn(console, "error").mockImplementation(() => { });  // eslint-disable-line no-empty-function
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    const error = jest.spyOn(console, "error").mockImplementation(() => { });
 
     // Increase the Jest timeout from the default 5s.
     jest.setTimeout(10000);
@@ -44,9 +46,10 @@ describe("WebRTCDataChannel - integration tests", () => {
     let closedChannelReadyState = null;
     let openNodeType = null;
 
+    // WEBRTC TODO: ELIFCECYCLE errors.
     test("Can echo test message off domain server", (done) => {
         expect.assertions(2);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         webrtcSignalingChannel.onopen = function () {
             let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
 
@@ -97,7 +100,7 @@ describe("WebRTCDataChannel - integration tests", () => {
 
     test("Open with invalid address fails with an error", (done) => {
         expect.assertions(1);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(INVALID_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_INVALID_URL);
         webrtcSignalingChannel.onerror = function () {
             let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
             webrtcDataChannel.onerror = function () {
@@ -111,7 +114,7 @@ describe("WebRTCDataChannel - integration tests", () => {
 
     test("Closing signaling channel while connecting data channel fails with an error", (done) => {
         expect.assertions(1);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         webrtcSignalingChannel.onopen = function () {
             let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
             webrtcDataChannel.onerror = function () {
@@ -124,9 +127,10 @@ describe("WebRTCDataChannel - integration tests", () => {
         };
     });
 
+    // WEBRTC TODO: ELIFCECYCLE errors.
     test("Sending when closed fails with an error", (done) => {
         expect.assertions(2);
-        let webrtcSignalingChannel = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         webrtcSignalingChannel.onopen = function () {
             let webrtcDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
             webrtcDataChannel.onopen = function () {
@@ -146,25 +150,26 @@ describe("WebRTCDataChannel - integration tests", () => {
         };
     });
 
+    // WEBRTC TODO: ELIFCECYCLE errors.
     test("Data channels are kept separate", (done) => {
         expect.assertions(4);
-        let webrtcSignalingChannel1 = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
-        let webrtcSignalingChannel2 = new WebRTCSignalingChannel(LOCALHOST_WEBSOCKET);
+        let webrtcSignalingChannel1 = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+        let webrtcSignalingChannel2 = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         let webrtcDataChannel1 = null;
         let webrtcDataChannel2 = null;
         let repliesReceived = 0;
         webrtcSignalingChannel1.onopen = function () {
             webrtcDataChannel1 = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel1);
             webrtcDataChannel1.onopen = function () {
-                const sent = webrtcDataChannel1.send("echo:Hello");
+                const sent = webrtcDataChannel1.send("echo:Hello");  // eslint-disable-line
                 expect(sent).toBe(true);
             };
             webrtcDataChannel1.onmessage = function (data) {
                 expect(new StringDecoder("utf8").write(new Uint8Array(data))).toBe("echo:Hello");
                 repliesReceived += 1;
                 if (repliesReceived === 2) {
-                    webrtcDataChannel1.close();
-                    webrtcDataChannel2.close();
+                    webrtcDataChannel1.close();  // eslint-disable-line
+                    webrtcDataChannel2.close();  // eslint-disable-line
                 }
             };
             webrtcDataChannel1.onclose = function () {
@@ -176,15 +181,15 @@ describe("WebRTCDataChannel - integration tests", () => {
         webrtcSignalingChannel2.onopen = function () {
             webrtcDataChannel2 = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel2);
             webrtcDataChannel2.onopen = function () {
-                const sent = webrtcDataChannel2.send("echo:Goodbye");
+                const sent = webrtcDataChannel2.send("echo:Goodbye");  // eslint-disable-line
                 expect(sent).toBe(true);
             };
             webrtcDataChannel2.onmessage = function (data) {
                 expect(new StringDecoder("utf8").write(new Uint8Array(data))).toBe("echo:Goodbye");
                 repliesReceived += 1;
                 if (repliesReceived === 2) {
-                    webrtcDataChannel1.close();
-                    webrtcDataChannel2.close();
+                    webrtcDataChannel1.close();  // eslint-disable-line
+                    webrtcDataChannel2.close();  // eslint-disable-line
                 }
             };
             webrtcDataChannel2.onclose = function () {

@@ -8,12 +8,20 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import DomainServer from "../src/DomainServer.js";
+import DomainServer from "../src/DomainServer";
 
 
 describe("DomainServer - unit tests", () => {
 
     test("Is connected", () => {
+        expect(DomainServer.isConnected).toBe(false);
+        try {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            DomainServer.isConnected = true;  // Shouldn't succeed.
+        } catch (e) {
+            //
+        }
         expect(DomainServer.isConnected).toBe(false);
     });
 

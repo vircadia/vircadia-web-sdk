@@ -10,9 +10,9 @@
 
 /* globals jest */
 
-import DomainHandler from "../../../src/domain/networking/DomainHandler.js";
-import Signal from "../../../src/domain/shared/Signal.js";
-import Uuid from "../../../src/domain/shared/Uuid.js";
+import DomainHandler from "../../../src/domain/networking/DomainHandler";
+import Signal from "../../../src/domain/shared/Signal";
+import Uuid from "../../../src/domain/shared/Uuid";
 
 import TestConfig from "../../test.config.json";
 
@@ -21,7 +21,7 @@ describe("DomainHandler - integration tests", () => {
 
     //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
-    /* eslint-disable no-magic-numbers */
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     // Increase the Jest timeout from the default 5s.
     jest.setTimeout(10000);
@@ -31,10 +31,10 @@ describe("DomainHandler - integration tests", () => {
         expect.assertions(2);
 
         const domainHandler = new DomainHandler();
-        expect(domainHandler.getURL()).toBe(null);
+        expect(domainHandler.getURL()).toBe("");
 
         const signal = new Signal();
-        signal.connect(domainHandler.setURLAndID);
+        signal.connect(domainHandler.setURLAndID);  // eslint-disable-line @typescript-eslint/unbound-method
         signal.emit(TestConfig.SERVER_SIGNALING_SOCKET_URL, null);
         setTimeout(function () {
             expect(domainHandler.getURL()).toBe(TestConfig.SERVER_SIGNALING_SOCKET_URL);
@@ -44,7 +44,7 @@ describe("DomainHandler - integration tests", () => {
 
     test("Can set and get the domain UUID", () => {
         const domainHandler = new DomainHandler();
-        expect(domainHandler.getUUID()).toBe(Uuid.NULL);
+        expect(domainHandler.getUUID().valueOf()).toBe(Uuid.NULL);
         const uuid = new Uuid(12345);
         domainHandler.setUUID(uuid);
         expect(domainHandler.getUUID()).toBe(uuid);
@@ -74,7 +74,7 @@ describe("DomainHandler - integration tests", () => {
         expect(domainHandler.isConnected()).toBe(false);
 
         const signal = new Signal();
-        signal.connect(domainHandler.setURLAndID);
+        signal.connect(domainHandler.setURLAndID);  // eslint-disable-line @typescript-eslint/unbound-method
         signal.emit(TestConfig.SERVER_SIGNALING_SOCKET_URL, null);
 
         domainHandler.connectedToDomain.connect((domainURL) => {

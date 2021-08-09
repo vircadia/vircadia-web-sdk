@@ -10,13 +10,14 @@
 
 /* globals jest */
 
-import assert from "../../../src/domain/shared/assert.js";
+import assert from "../../../src/domain/shared/assert";
 
 
 describe("assert - unit tests", () => {
 
     // Suppress console.assert messages from being displayed.
-    const consoleAssert = jest.spyOn(console, "assert").mockImplementation(() => { });  // eslint-disable-line no-empty-function
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    const consoleAssert = jest.spyOn(console, "assert").mockImplementation(() => { });
 
     test("An assertion doesn't fire if the assertion value is true", () => {
         let asserted = false;

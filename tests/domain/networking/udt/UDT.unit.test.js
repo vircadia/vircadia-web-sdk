@@ -8,9 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* eslint-disable no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 
-import UDT from "../../../../src/domain/networking/udt/UDT.js";
+import UDT from "../../../../src/domain/networking/udt/UDT";
 
 
 describe("UDT - unit tests", () => {

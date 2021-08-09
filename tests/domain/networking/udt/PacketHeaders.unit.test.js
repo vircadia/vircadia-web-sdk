@@ -8,9 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* eslint-disable no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 
-import PacketType, { protocolVersionsSignature } from "../../../../src/domain/networking/udt/PacketHeaders.js";
+import PacketType, { protocolVersionsSignature } from "../../../../src/domain/networking/udt/PacketHeaders";
 
 
 describe("PacketType - unit tests", () => {
@@ -26,7 +26,13 @@ describe("PacketType - unit tests", () => {
         expect(PacketType.versionForPacketType(PacketType.DomainConnectRequest)).toBe(26);
     });
 
-    test("Nonsourced packets values can be accessed", () => {
+    test("Non-verified packets values can be accessed", () => {
+        const nonVerifiedPackets = PacketType.getNonVerifiedPackets();
+        expect(nonVerifiedPackets.has(PacketType.DomainSettings)).toBe(false);
+        expect(nonVerifiedPackets.has(PacketType.NodeMuteRequest)).toBe(true);
+    });
+
+    test("Non-sourced packets values can be accessed", () => {
         const nonSourcedPackets = PacketType.getNonSourcedPackets();
         expect(nonSourcedPackets.has(PacketType.DomainListRequest)).toBe(false);
         expect(nonSourcedPackets.has(PacketType.DomainList)).toBe(true);

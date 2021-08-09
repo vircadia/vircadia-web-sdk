@@ -8,8 +8,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import FingerprintUtils from "../../../src/domain/networking/FingerprintUtils.js";
-import Uuid from "../../../src/domain/shared/Uuid.js";
+import FingerprintUtils from "../../../src/domain/networking/FingerprintUtils";
+import Uuid from "../../../src/domain/shared/Uuid";
 
 
 describe("FingerprintUtils - unit tests", () => {

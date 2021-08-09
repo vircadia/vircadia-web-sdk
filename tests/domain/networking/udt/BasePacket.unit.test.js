@@ -9,11 +9,11 @@
 //
 
 /* globals jest */
-/* eslint-disable no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 
-import SockAddr from "../../../../src/domain/networking/SockAddr.js";
-import BasePacket from "../../../../src/domain/networking/udt/BasePacket.js";
-import UDT from "../../../../src/domain/networking/udt/UDT.js";
+import SockAddr from "../../../../src/domain/networking/SockAddr";
+import BasePacket from "../../../../src/domain/networking/udt/BasePacket";
+import UDT from "../../../../src/domain/networking/udt/UDT";
 
 
 describe("BasePacket - unit tests", () => {
@@ -67,7 +67,7 @@ describe("BasePacket - unit tests", () => {
         expect(messageData.packetSize).toBe(10);
         expect(messageData.senderSockAddr.getAddress()).toBe(IP_127_0_0_1);
         expect(messageData.senderSockAddr.getPort()).toBe(7);
-        expect(messageData.receiveTime).toBe(null);
+        expect(messageData.receiveTime).toEqual(0);
         expect(messageData.data.getUint8(0)).toBe(12);
         expect(error).toHaveBeenCalledTimes(0);
     });
@@ -78,7 +78,7 @@ describe("BasePacket - unit tests", () => {
         packetA.setReceiveTime(time);
         const packetB = new BasePacket(packetA);
         expect(packetB.getReceiveTime()).toBe(time);
-        expect(packetB.getMessageData()).toBe(packetA.getMessageData());
+        expect(packetB.getMessageData()).not.toBe(packetA.getMessageData());
         expect(packetB.getMessageData().data.getUint8(0)).toBe(12);
         expect(error).toHaveBeenCalledTimes(0);
     });

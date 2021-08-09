@@ -1,0 +1,43 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "allowJs": true,
+        "checkJs": false, // Temporarily disable while unit and integration tests are JavaScript.
+        "target": "ES2020", // Required for BigInt literals.
+        "lib": [ "ES2020", "DOM" ],
+        "sourceMap": true,
+        "moduleResolution": "Node",
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "isolatedModules": true,
+
+        // TypeScript 4.2
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "alwaysStrict": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        // "noImplicitOverride": true,  // Option not available in TypeScript 4.2.
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUncheckedIndexedAccess": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strictBindCallApply": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": true
+    },
+    "include": [
+        "./src/**/*",
+        "./tests/**/*",
+        "./.*.js",
+        "./*.js",
+        "./*.json"
+    ],
+    "exclude": [
+        "./node_modules/**/*"
+    ]
+}

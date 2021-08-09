@@ -1,13 +1,18 @@
-const path = require("path");
-const ESLintPlugin = require("eslint-webpack-plugin");
+const path = require("path");  // eslint-disable-line @typescript-eslint/no-var-requires
 
 module.exports = {
+    entry: {
+        Vircadia: "./src/Vircadia.ts"
+    },
+
+    resolve: {
+        extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
+    },
+
     experiments: {
         outputModule: true
     },
-    entry: {
-        Vircadia: "./src/Vircadia.js"
-    },
+
     output: {
         filename: "[name].js",
         path: path.resolve(__dirname, "dist"),
@@ -17,22 +22,18 @@ module.exports = {
         module: true,
         clean: true
     },
-    plugins: [new ESLintPlugin({})],
+
+    // Enable sourcemaps for debugging webpack's output.
+    devtool: "source-map",
+
     module: {
         rules: [
-            {
-                test: /\.m?js$/u,
-                exclude: /node_modules/u,
-                use: [
-                    {
-                        loader: "babel-loader",
-                        options: {
-                            presets: ["@babel/preset-env"]
-                        }
-                    }
-                ]
-            }
+
+            // '.ts' and '.tsx' files are handled by 'ts-loader'.
+            { test: /\.tsx?$/u, loader: "ts-loader" },
+
+            // '.js' files have sourcemaps re-processed by 'source-map-loader'.
+            { test: /\.js$/u, loader: "source-map-loader" }
         ]
-    },
-    devtool: "source-map"
+    }
 };
