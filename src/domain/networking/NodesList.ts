@@ -39,11 +39,10 @@ const NodesList = new class extends LimitedNodeList {
     private _domainHandler: DomainHandler;
 
 
-    constructor(ownerType: NodeTypeValue, socketListenPort = LimitedNodeList.INVALID_PORT,
-        dtlsListenPort = LimitedNodeList.INVALID_PORT) {
+    constructor(ownerType: NodeTypeValue) {
         // C++  NodeList(char ownerType, int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
-        super(ownerType, socketListenPort, dtlsListenPort);
+        super();
 
         this._ownerType = ownerType;
 
