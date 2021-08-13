@@ -68,14 +68,14 @@ type OnStateChangedCallback = (state: ConnectionState, info: string) => void;
  *  @property {string} errorInfo - A description of the reason if <code>state == DomainServer.ERROR</code>, otherwise
  *      <code>""</code>.
  *      <em>Read-only.</em>
- *  @property {DomainServer~onStateChangedCallback} onStateChanged - Sets a single function to be called when the state of the
- *      domain server connection changes. Set to <code>null</code> to remove the callback.
+ *  @property {DomainServer~onStateChangedCallback|null} onStateChanged - Sets a single function to be called when the state of
+ *      the domain server connection changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  */
 class DomainServer {
     // C++  Application.cpp
     //      The Web SDK differs from the C++ in that a "disconnect" command is explicitly provides which disconnects from the
-    //      current domain and stops the check-ins from being sent. The C++ never stops sending checkin-ins.
+    //      current domain and stops the check-ins from being sent. The C++ never stops sending check-ins.
 
     /*@sdkdoc
      *  Called when the state of the domain server connection changes.
