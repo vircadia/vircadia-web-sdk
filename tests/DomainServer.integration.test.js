@@ -42,6 +42,7 @@ describe("DomainServer - integration tests", () => {
 
     // Suppress console.log messages from being displayed.
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
 
 
     test("Can connect to and maintain a connection with the domain server", (done) => {
@@ -193,9 +194,6 @@ describe("DomainServer - integration tests", () => {
             return new Uint8Array(16);  // An invalid signature.
         };
 
-        // Suppress console.log messages from being displayed.
-        const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
-
         // Try connect to a domain.
         domainServer.onStateChanged = (state) => {
             expect(state === DomainServer.DISCONNECTED
@@ -213,10 +211,9 @@ describe("DomainServer - integration tests", () => {
             }
         };
         domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
-
-        warn.mockReset();
     });
 
 
+    warn.mockReset();
     log.mockReset();
 });

@@ -13,6 +13,7 @@
 import AddressManager from "./domain/networking/AddressManager";
 import { ConnectionRefusedReasonValue } from "./domain/networking/ConnectionRefusedReason";
 import NodesList from "./domain/networking/NodesList";
+import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
 
 
@@ -107,6 +108,7 @@ class DomainServer {
 
     /*@sdkdoc
      *  Gets the string representing a connection state.
+     *  <p><em>Static</em></p>
      *  @param {DomainServer.ConnectionState} state - The state to get the string representation of.
      *  @returns {string} The string representing the connection state if a valid state, otherwise <code>""</code>.
      */
@@ -157,6 +159,14 @@ class DomainServer {
             }
         });
         domainHandler.domainConnectionRefused.connect(this.#domainConnectionRefused);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_nodesList.addSetOfNodeTypesToNodeInterestSet(new Set([
+            NodeType.AudioMixer,
+            NodeType.MessagesMixer,
+            NodeType.AvatarMixer
+        ]));
 
         // WEBRTC TODO: Address further C++ code.
 

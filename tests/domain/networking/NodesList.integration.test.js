@@ -34,6 +34,7 @@ describe("NodesList - integration tests", () => {
 
     // Suppress console.log messages from being displayed.
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
 
     const contextID = ContextManager.createContext();
     ContextManager.set(contextID, AddressManager);  // Required by NodesList.
@@ -93,5 +94,6 @@ describe("NodesList - integration tests", () => {
     });
 
 
+    warn.mockReset();
     log.mockReset();
 });

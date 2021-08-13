@@ -69,6 +69,21 @@ class Socket {
 
 
     /*@devdoc
+     *  Clears any connection with a given address.
+     *  @param {SockAddr} sockAddr - The address to clear the connection for.
+     */
+    // eslint-disable-next-line
+    // @ts-ignore
+    cleanupConnection(sockAddr: SockAddr): void {  // eslint-disable-line
+        // C++  void cleanupConnection(SockAddr sockAddr) {
+
+        // WEBRTC TODO: Address further C++ code.
+
+        console.warn("cleanupConnection() : Not implemented!");
+    }
+
+
+    /*@devdoc
      *  Sends a packet to a destination.
      *  @param {Packet} packet - The packet to send.
      *  @param {SockAddr} sockAddr - The destination to send the packet to.
@@ -117,6 +132,23 @@ class Socket {
             handler(packet);
         };
     }
+
+
+    /*@devdoc
+     *  Handles a change in the target node's address.
+     *  @param {SockAddr} previousAddress - The previous address of the target node.
+     *  @param {SockAddr} currentAddress - The current address of the target node.
+     *  @returns {Slot}
+     */
+    handleRemoteAddressChange = (previousAddress: SockAddr, currentAddress: SockAddr): void => {
+        // C++  void handleRemoteAddressChange(SockAddr previousAddress, SockAddr currentAddress)
+
+        console.log("[networking] Remote address changes from", previousAddress.toString(), "to", currentAddress.toString());
+        console.warn("handleRemoteAddressChange() : Not implemented!");
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
 
     /*@devdoc
      *  Reads datagrams from the {@link WebRTCSocket} and forwards them to the packet handler to process.

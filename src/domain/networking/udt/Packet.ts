@@ -157,7 +157,7 @@ class Packet extends BasePacket {
             this.readHeader();
             // adjustPayloadStartAndCapacity();  N/A
             if (this._messageData.obfuscationLevel !== Packet.ObfuscationLevel.NoObfuscation) {
-                console.error("ERROR: Undoing obfuscation not implemented!");
+                console.warn("Packet() : Undo obfuscation : Not implemented!");
 
                 // WEBRTC TODO: Address further C++ code.
 

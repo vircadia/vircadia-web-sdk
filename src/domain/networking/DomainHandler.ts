@@ -8,17 +8,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { LocalID } from "./NetworkPeer";
 import NodesList from "./NodesList";
 import SockAddr from "./SockAddr";
 import Signal from "../shared/Signal";
 import Uuid from "../shared/Uuid";
 import PacketScribe from "./packets/PacketScribe";
 import ReceivedMessage from "./ReceivedMessage";
-
-
-type LocalID = number;
-// C++  using LocalID = NetworkLocalID
-//      using NetworkLocalID = quint16
 
 
 /*@devdoc
@@ -29,12 +25,6 @@ type LocalID = number;
  */
 class DomainHandler {
     // C++  DomainHandler : public QObject
-
-    /*@devdoc
-     *  A local ID is an integer ID assigned to the domain server, an assignment client, or a web client by the domain server.
-     *  @typedef {number} LocalID
-     */
-
 
     private _domainURL = "";
     private _sockAddr = new SockAddr();  // For WebRTC, the port is the critical part.
@@ -56,6 +46,10 @@ class DomainHandler {
     constructor(parent: NodesList) {
         // C++  DomainHandler(QObject* parent = 0);
         this._nodesList = parent;
+        this._sockAddr.setObjectName("DomainServer");
+
+        // WEBRTC TODO: Address further C++ code.
+
     }
 
 
@@ -363,4 +357,3 @@ class DomainHandler {
 }
 
 export default DomainHandler;
-export type { LocalID };

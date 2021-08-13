@@ -313,6 +313,16 @@ class NodesList extends LimitedNodeList {
         }
 
         // WEBRTC TODO: Address further C++ code.
+
+        for (const node of info.nodes) {
+            // If the public socket address is 0 then it's reachable at the same IP as the domain server.
+            if (node.publicSocket.getAddress() === 0) {
+                node.publicSocket.setAddress(this._domainHandler.getSockAddr().getAddress());
+            }
+
+            this.addNewNode(node);
+        }
+
     };
 
 }

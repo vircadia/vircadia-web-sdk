@@ -104,6 +104,16 @@ const NodeType = new class {
         return name;
     }
 
+    /*@devdoc
+     *  Tests whether a node type is an upstream node.
+     *  @function NodeType(1).isUpstream
+     *  @param {NodeType} nodeType - The node type.
+     *  @returns {boolean} <code>true</code> if the node type is an upstream node, <code>false</code> if it isn't.
+     */
+    isUpstream(nodeType: NodeTypeValue): boolean {  // eslint-disable-line class-methods-use-this
+        return nodeType === NodeTypeValue.UpstreamAudioMixer || nodeType === NodeTypeValue.UpstreamAvatarMixer;
+    }
+
 }();
 
 export { NodeType as default, NodeTypeValue };

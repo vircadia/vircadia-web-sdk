@@ -17,7 +17,7 @@ import assert from "../../shared/assert";
  *  @typedef {number} PacketType
  */
 // Could just define `type PacketTypeValue = number` however using an object improves type safety.
-enum PacketTypeValue {
+const enum PacketTypeValue {
     Unknown,                            // 0
     StunResponse,
     DomainList,
@@ -157,7 +157,7 @@ enum PacketTypeValue {
  *  @property {PacketType} CreateAssignment - <code>15</code>
  *  @property {PacketType} DomainConnectionDenied - <code>16</code> - The Domain Server sends this to the user client in
  *      response to a DomainConnectRequest or DomainListRequest packet, if the client is not authorized to connect to the
- *      domain.
+ *      domain.<br />
  *      {@link PacketScribe.DomainConnectionDeniedDetails}.
  *  @property {PacketType} MuteEnvironment - <code>17</code>
  *  @property {PacketType} AudioStreamStats - <code>18</code>

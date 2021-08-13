@@ -11,7 +11,8 @@
 import Packet from "./udt/Packet";
 import PacketType, { PacketTypeValue } from "./udt/PacketHeaders";
 import UDT from "./udt/UDT";
-import { LocalID } from "../networking/DomainHandler";
+import { LocalID } from "../networking/NetworkPeer";
+import Node from "../networking/Node";
 import assert from "../shared/assert";
 
 
@@ -74,7 +75,6 @@ class NLPacket extends Packet {
     }
 
 
-    private static NULL_LOCAL_ID = 0;
     private static NUM_BYTES_LOCALID = 2;
     private static NUM_BYTES_MD5_HASH = 16;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
@@ -189,7 +189,7 @@ class NLPacket extends Packet {
         // C++  void readSourceID()
         const messageData = this._messageData;
         if (PacketType.getNonSourcedPackets().has(messageData.type)) {
-            messageData.sourceID = NLPacket.NULL_LOCAL_ID;
+            messageData.sourceID = Node.NULL_LOCAL_ID;
         } else {
             messageData.sourceID = messageData.data.getUint16(messageData.dataPosition, UDT.BIG_ENDIAN);
             messageData.dataPosition += 2;

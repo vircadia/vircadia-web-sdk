@@ -16,18 +16,37 @@
  *  @class SockAddr
  */
 class SockAddr {
+    // C++  SockAddr : public QObject
 
     // WEBRTC TODO: Add address type (UDP | WebRTC | unknown)?
 
+    private _name = "";
     private _address = 0;
     private _port = 0;
 
+
+    /*@devdoc
+     *  Sets the name identifying the SockAddr.
+     *  @param {string} name - The name of the SockAddr.
+     */
+    setObjectName(name: string): void {
+        this._name = name;
+    }
+
+    /*@devdoc
+     *  Gets the name identifying the SockAddr.
+     *  @returns {string} The name of the SockAddr.
+     */
+    objectName(): string {
+        return this._name;
+    }
 
     /*@devdoc
      *  Sets the IP address.
      *  @param {number} address - The IPv4 network address as a 4-byte number.
      */
     setAddress(address: number): void {
+        // C++  QHostAddress* getAddressPointer()
         this._address = address;
     }
 
@@ -36,6 +55,7 @@ class SockAddr {
      *  @returns {number} The IPv4 network address as a 4-byte number. <strong>Default Value:</strong> <code>0</code>
      */
     getAddress(): number {
+        // C++  const QHostAddress& getAddress()
         return this._address;
     }
 
@@ -44,6 +64,7 @@ class SockAddr {
      *  @param {number} port The port number.
      */
     setPort(port: number): void {
+        // C++  void setPort(quint16 port
         this._port = port;
     }
 
@@ -52,7 +73,45 @@ class SockAddr {
      *  @returns {number} The port number. <strong>Default Value:</strong> <code>0</code>
      */
     getPort(): number {
+        // C++  quint16 getPort()
         return this._port;
+    }
+
+    /*@devdoc
+     *  Checks whether the value is null.
+     *  @returns {boolean} <code>true</code> if the network address is <code>0</code> and the port number is <code>0</code>.
+     */
+    isNull(): boolean {
+        // C++  bool isNull()
+        return this._address === 0 && this._port === 0;
+    }
+
+    /*@devdoc
+     *  Tests whether the address and port values are the same as those of another SockAddr.
+     *  @param {SockAddr} otherAddr - The other address to test against.
+     *  @returns {boolean} <code>true</code> if this SockAddr's address and port are the same to those of the other address,
+     *      <code>false</code> if they aren't.
+     */
+    isEqualTo(otherAddr: SockAddr): boolean {
+        // C++  operator==
+        return this._address === otherAddr.getAddress() && this._port === otherAddr.getPort();
+    }
+
+
+    /*@devdoc
+     *  Returns a string representation of the SockAddr value, for example, <code>"127.0.0.1:40102"</code>.
+     *  @returns {string} A string representation of the SockAddr value.
+     */
+    toString(): string {
+        // C++  QDebug operator<<
+        const BYTE_DIVISOR = 256;
+        const ipNumbers = [];
+        let address = this._address;
+        for (let i = 3; i >= 0; i--) {
+            ipNumbers[i] = address % BYTE_DIVISOR;
+            address = Math.floor(address / BYTE_DIVISOR);
+        }
+        return ipNumbers.join(".") + ":" + this.getPort().toString();
     }
 
 }

@@ -8,9 +8,14 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { LocalID } from "../NetworkPeer";
+import { NewNodeInfo } from "../LimitedNodeList";
+import NodePermissions from "../NodePermissions";
+import { NodeTypeValue } from "../NodeType";
+import SockAddr from "../SockAddr";
 import UDT from "../udt/UDT";
+import assert from "../../shared/assert";
 import Uuid from "../../shared/Uuid";
-import { LocalID } from "../DomainHandler";
 
 import "../../shared/DataViewExtensions";
 
@@ -20,23 +25,17 @@ type DomainListDetails = {
     domainLocalID: LocalID,
     newUUID: Uuid,
     newLocalID: LocalID,
-    newPermissions: number,
+    newPermissions: NodePermissions,
     isAuthenticated: boolean,
     connectRequestTimestamp: BigInt,
     domainServerPingSendTime: BigInt,
     domainServerCheckinProcessingTime: BigInt,
-    newConnection: boolean
-    // WEBRTC TODO: Address further C++ code.
+    newConnection: boolean,
+    nodes: NewNodeInfo[]
 };
 
 
 const DomainList = new class {
-
-    /*@devdoc
-     *  Node information included in {@link PacketScribe.DomainListDetails} packet data.
-     *  @typedef {object} PacketScribe.DomainListDetails-NodeInfo
-     */
-    // WEBRTC TODO: Address further C++ code.
 
     /*@devdoc
      *  Information returned by {@link Packets|reading} a {@link PacketType(1)|DomainList} packet.
@@ -45,7 +44,7 @@ const DomainList = new class {
      *  @property {LocalID} domainLocalID - The local ID of the domain server.
      *  @property {Uuid} newUUID - The UUID assigned to the web client by the domain server.
      *  @property {LocalID} newLocalID - The local ID assigned to the web client by the domain server.
-     *  @property {NodePermissions} newPermissions
+     *  @property {NodePermissions} newPermissions - The permissions granted to the user.
      *  @property {boolean} isAuthenticated
      *  @property {bigint} connectRequestTimestamp
      *  @property {bigint} domainServerPingSendTime - The Unix time that the packet was sent, in usec.
@@ -53,7 +52,8 @@ const DomainList = new class {
      *      requesting this response and the time that the response was sent, in usec.
      *  @property {boolean} newConnection - <code>true</code> if the web client has just connected to the domain,
      *      <code>false</code> if was already connected.
-     *  @property {PacketScribe.DomainListDetails-NodeInfo[]} nodes
+     *  @property {LimitedNodeList.NewNodeInfo[]} nodes - The details of the assignment clients available that are in the
+     *      client's interest set and currently running.
      */
 
     /*@devdoc
@@ -81,7 +81,8 @@ const DomainList = new class {
         const newLocalID = data.getUint16(dataPosition, UDT.BIG_ENDIAN);
         dataPosition += 2;
 
-        const newPermissions = data.getUint32(dataPosition, UDT.BIG_ENDIAN);
+        const newPermissions = new NodePermissions();
+        newPermissions.permissions = data.getUint32(dataPosition, UDT.BIG_ENDIAN);
         dataPosition += 4;
 
         const isAuthenticated = data.getUint8(dataPosition) > 0;
@@ -101,11 +102,55 @@ const DomainList = new class {
 
         // WEBRTC TODO: Address further C++ code.
 
+        const nodes: NewNodeInfo[] = [];
+        while (dataPosition < data.byteLength) {
+            // C++  void NodeList::parseNodeFromPacketStream(QDataStream& packetStream)
+
+            const type = <NodeTypeValue>String.fromCharCode(data.getUint8(dataPosition));
+            dataPosition += 1;
+
+            const uuid = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
+            dataPosition += 16;
+
+            const publicSocket = new SockAddr();
+            dataPosition += 1;
+            publicSocket.setAddress(data.getUint32(dataPosition, UDT.BIG_ENDIAN));
+            dataPosition += 4;
+            publicSocket.setPort(data.getUint16(dataPosition, UDT.BIG_ENDIAN));
+            dataPosition += 2;
+
+            const localSocket = new SockAddr();
+            dataPosition += 1;
+            localSocket.setAddress(data.getUint32(dataPosition, UDT.BIG_ENDIAN));
+            dataPosition += 4;
+            localSocket.setPort(data.getUint16(dataPosition, UDT.BIG_ENDIAN));
+            dataPosition += 2;
+
+            const permissions = new NodePermissions();
+            permissions.permissions = data.getUint32(dataPosition, UDT.BIG_ENDIAN);
+            dataPosition += 4;
+
+            const isReplicated = data.getUint8(dataPosition) > 0;
+            dataPosition += 1;
+
+            const sessionLocalID = data.getUint16(dataPosition, UDT.BIG_ENDIAN);
+            dataPosition += 2;
+
+            const connectionSecretUUID = new Uuid(data.getBigUint128(dataPosition, UDT.LITTLE_ENDIAN));
+            dataPosition += 16;
+
+            nodes.push({
+                type, uuid, publicSocket, localSocket, permissions, isReplicated, sessionLocalID, connectionSecretUUID
+            });
+        }
+
+        assert(dataPosition === data.byteLength);
+
         /* eslint-enable @typescript-eslint/no-magic-numbers */
 
         return {
             domainUUID, domainLocalID, newUUID, newLocalID, newPermissions, isAuthenticated, connectRequestTimestamp,
-            domainServerPingSendTime, domainServerCheckinProcessingTime, newConnection
+            domainServerPingSendTime, domainServerCheckinProcessingTime, newConnection, nodes
         };
     }
 

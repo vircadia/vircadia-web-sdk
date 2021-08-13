@@ -31,7 +31,7 @@ describe("DomainHandler - integration tests", () => {
     const domainHandler = ContextManager.get(contextID, NodesList).getDomainHandler();
 
 
-    test("Can set and get URL", (done) => {
+    test("Can set and get the URL", (done) => {
         expect.assertions(2);
         expect(domainHandler.getURL()).toBe("");
 
