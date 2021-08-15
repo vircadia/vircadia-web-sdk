@@ -30,26 +30,24 @@ type OnErrorCallback = (message: string) => void;
  *  @param {WebRTCSignalingChannel} signalingChannel - The WebRTCSignalingChannel to use in establishing the WebRTC connection
  *      and data channel.
  *
- *  @property {WebRTCDataChannel.ReadyState} CONNECTING=0 - The connection is opening. <em>Static.</em> <em>Read-only.</em>
- *      <p><em>Static</em></p>
- *      @static
- *  @property {WebRTCDataChannel.ReadyState} OPEN=1 - The connection is open. <em>Static.</em> <em>Read-only.</em>
- *      <p><em>Static</em></p>
- *      @static
- *  @property {WebRTCDataChannel.ReadyState} CLOSING=2 - The connection is closing. <em>Static.</em> <em>Read-only.</em>
- *      <p><em>Static</em></p>
- *      @static
- *  @property {WebRTCDataChannel.ReadyState} CLOSED=3 - The connection is closed. <em>Static.</em> <em>Read-only.</em>
- *      <p><em>Static</em></p>
- *      @static
- *  @property {WebRTCDataChannel.ReadyState} readyState - The current state of the data channel connection. <em>Read-only.</em>
+ *  @property {WebRTCDataChannel.ReadyState} CONNECTING=0 - The connection is opening.
+ *      <em>Static. Read-only.</em>
+ *  @property {WebRTCDataChannel.ReadyState} OPEN=1 - The connection is open.
+ *      <em>Static. Read-only.</em>
+ *  @property {WebRTCDataChannel.ReadyState} CLOSING=2 - The connection is closing.
+ *      <em>Static. Read-only.</em>
+ *  @property {WebRTCDataChannel.ReadyState} CLOSED=3 - The connection is closed.
+ *      <em>Static. Read-only.</em>
+ *  @property {WebRTCDataChannel.ReadyState} readyState - The current state of the data channel connection.
+ *      <em>Read-only.</em>
  *
  *  @property {number} id -  The data channel ID.
  *
  *  @property {WebRTCDataChannel~onOpenCallback} onopen - Sets a single function to be called when the data channel opens.
  *      <em>Write-only.</em>
  *  @property {WebRTCDataChannel~onMessageCallback} onmessage - Sets a single function to be called when a message is
- *      received. <em>Write-only.</em>
+ *      received.
+ *      <em>Write-only.</em>
  *  @property {WebRTCDataChannel~onErrorCallback} onerror - Sets a single function to be called when an error occurs.
  *      <em>Write-only.</em>
  *  @property {WebRTCDataChannel~onCloseCallback} onclose - Set s a single function to be called when the data channel closes.
@@ -98,10 +96,10 @@ class WebRTCDataChannel {
      *  </table>
      *  @typedef {number} WebRTCDataChannel.ReadyState
      */
-    static CONNECTING = 0;
-    static OPEN = 1;
-    static CLOSING = 2;
-    static CLOSED = 3;
+    static readonly CONNECTING = 0;
+    static readonly OPEN = 1;
+    static readonly CLOSING = 2;
+    static readonly CLOSED = 3;
 
     /* eslint-enable @typescript-eslint/no-magic-numbers */
 
