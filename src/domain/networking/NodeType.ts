@@ -35,6 +35,8 @@ const enum NodeTypeValue {
 /*@devdoc
  *  The <code>NodeType</code> namespace provides information on a network node's type. Node type values are represented as
  *  single 8-bit characters in the protocol packets.
+ *  <p>Note: The following node types are not applicable for use in a client: <code>UpstreamAudioMixer</code>,
+ *  <code>UpstreamAvatarMixer</code>, <code>DownstreamAudioMixer</code>, and <code>DownstreamAvatarMixer</code>.</p>
  *  <p>C++: <code>NodeType</code></p>
  *
  *  @namespace NodeType

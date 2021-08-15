@@ -20,6 +20,7 @@ import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
 import ContextManager from "../shared/ContextManager";
 import Uuid from "../shared/Uuid";
+import Socket from "./udt/Socket";
 
 
 /*@devdoc
@@ -163,30 +164,17 @@ class NodesList extends LimitedNodeList {
         // We don't need to worry about the domain handler requiring ICE because WebRTC handles this.
         // Instead, we open the WebRTC signaling and data channels if not already open.
 
-        // Open the WebRTC signaling channel to the domain server if not already open.
-        if (!this._nodeSocket.hasWebRTCSignalingChannel(domainURL)) {
-            this._nodeSocket.openWebRTCSignalingChannel(domainURL);
-            console.log("[networking] Opening WebRTC signaling channel. Will not send domain server check-in.");
+        // Open a WebRTC data channel to the domain server if not already open.
+        const domainServerSocketState = this._nodeSocket.getSocketState(domainURL, NodeType.DomainServer);
+        if (domainServerSocketState !== Socket.CONNECTED) {
+            console.log("[networking] Opening domain server connection. Will not send domain server check-in.");
+            if (domainServerSocketState === Socket.UNCONNECTED) {
+                this._nodeSocket.openSocket(domainURL, NodeType.DomainServer, (socketID: number) => {
+                    this._domainHandler.setPort(socketID);
+                });
+            }
             return;
         }
-        if (!this._nodeSocket.isWebRTCSignalingChannelOpen()) {
-            console.log("[networking] Waiting for WebRTC signaling channel. Will not send domain server check-in.");
-            return;
-        }
-
-        // Open the WebRTC data channel to the domain server if not already open.
-        if (!this._nodeSocket.hasWebRTCDataChannel(NodeType.DomainServer)) {
-            console.log("[networking] Opening WebRTC data channel. Will not send domain server check-in.");
-            this._nodeSocket.openWebRTCDataChannel(NodeType.DomainServer, (dataChannelID) => {
-                this._domainHandler.setPort(dataChannelID);
-            });
-        }
-        if (!this._nodeSocket.isWebRTCDataChannelOpen(NodeType.DomainServer)) {
-            console.log("[networking] Waiting for WebRTC data channel. Will not send domain server check-in.");
-            return;
-        }
-
-        // WEBRTC TODO: Rework the above to use QUdpSocket : QAbstractSocket style methods when add first assignment client.
 
         const isDomainConnected = this._domainHandler.isConnected();
         const domainPacketType = isDomainConnected ? PacketType.DomainListRequest : PacketType.DomainConnectRequest;

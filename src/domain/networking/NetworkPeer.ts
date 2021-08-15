@@ -43,6 +43,7 @@ class NetworkPeer {
     private _activeSocket: SockAddr | null = null;  // References the active socket.
     private _socketUpdated = new Signal();
     private _socketActivated = new Signal();
+    // Ping timer N/A: It is used in C++ for UDP hole punching to assignment clients.
 
 
     constructor(uuid = new Uuid(), publicSocket = new SockAddr(), localSocket = new SockAddr()) {
@@ -204,6 +205,8 @@ class NetworkPeer {
     protected setActiveSocket(discoveredSocket: SockAddr): void {
         // C++  void NetworkPeer::setActiveSocket(SockAddr* discoveredSocket)
         this._activeSocket = discoveredSocket;
+
+        // Ping timer N/A.
 
         // WEBRTC TODO: Address further C++ code.
 

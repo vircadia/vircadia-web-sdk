@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { default as WebRTCSocket, WebRTCSocketDatagram, OpenWebRTCDataChannelCallback } from "../webrtc/WebRTCSocket";
+import { default as WebRTCSocket, WebRTCSocketDatagram } from "../webrtc/WebRTCSocket";
 import Packet from "../udt/Packet";
 import assert from "../../shared/assert";
 import { NodeTypeValue } from "../NodeType";
@@ -25,12 +25,37 @@ type PacketHandlerCallback = (packet: Packet) => void;
 
 /*@devdoc
  *  The <code>Socket</code> class provides a one-to-many socket used to communicate with a domain's domain server and
- *  assignment clients.
+ *  assignment clients. Internally, a {@link WebRTCSocket} is used for the network connections.
  *  <p>C++: <code>Socket : public QObject</code></p>
  *  @class Socket
+ *  @property {Socket.ConnectionState} UNCONNECTED - There is no connection.
+ *      <em>Static. Read-only.</em>
+ *  @property {Socket.ConnectionState} CONNECTING - A connection is being made.
+ *      <em>Static. Read-only.</em>
+ *  @property {Socket.ConnectionState} CONNECTED - A connection has been established.
+ *      <em>Static. Read-only.</em>
  */
 class Socket {
     // C++  Socket : public QObject
+
+    /*@devdoc
+     *  The state of a socket connection.
+     *  <table>
+     *      <thead>
+     *          <tr><th>Name</th><th>Value</th><th>Description</th></tr>
+     *      </thead>
+     *      <tbody>
+     *          <tr><td>UNCONNECTED</td><td>0</td><td>There is no connection.</td></tr>
+     *          <tr><td>CONNECTING</td><td>1</td><td>A connection is being made.</td></tr>
+     *          <tr><td>CONNECTED</td><td>2</td><td>A connection has been established.</td></tr>
+     *      </tbody>
+     *  </table>
+     *  @typedef {number} Socket.ConnectionState
+     */
+    static readonly UNCONNECTED = 0;
+    static readonly CONNECTING = 1;
+    static readonly CONNECTED = 2;
+
 
     // Use WebRTCSocket directly without going through an intermediary NetworkSocket as is done in C++.
     private _webrtcSocket: WebRTCSocket;
@@ -38,6 +63,8 @@ class Socket {
     // WEBRTC TODO: Address further C++ code.
 
     private _packetHandler: PacketHandlerCallback | null = null;
+
+    private _WEBRTCSOCKET_TO_SOCKET_STATES = [Socket.UNCONNECTED, Socket.UNCONNECTED, Socket.CONNECTING, Socket.CONNECTED];
 
 
     constructor() {
@@ -52,6 +79,35 @@ class Socket {
 
         // WEBRTC TODO: Address further C++ code.
 
+    }
+
+
+    /*@devdoc
+     *  Gets the state of the connection to a node.
+     *  @param {string} URL - The URL of the domain server.
+     *  @param {NodeType} nodeType - The type of node.
+     *  @returns {Socket.ConnectionState} The state of the connection.
+     */
+    getSocketState(url: string, nodeType: NodeTypeValue): number {
+        // C++  N/A
+        return this._WEBRTCSOCKET_TO_SOCKET_STATES[this._webrtcSocket.state(url.trim(), nodeType)] as number;
+    }
+
+    /*@devdoc
+     *  Called when a socket is successfully opened.
+     *  @callback Socket~openSocketCallback
+     *  @param {number} socketID - The ID of the socket connection. This is considered to be the "port" number.
+     */
+    /*@devdoc
+     *  Opens a connection to a node.
+     *  @param {string} URL - The URL of the domain server.
+     *  @param {NodeType} nodeType - The type of node to connect to.
+     *  @param {Socket~openSocketCallback} callback - Function to call when the connection has been opened.
+     */
+    // Note: Not called "openConnection" because a "Connection" is a distinct type of object.
+    openSocket(url: string, nodeType: NodeTypeValue, callback: (socketID: number) => void): void {
+        // C++  N/A
+        this._webrtcSocket.connectToHost(url, nodeType, callback);
     }
 
 
@@ -204,48 +260,6 @@ class Socket {
             }
         }
     };
-
-
-    // WEBRTC TODO: Replace this temporary method.
-    hasWebRTCSignalingChannel(url: string): boolean {
-        return this._webrtcSocket.hasWebRTCSignalingChannel(url);
-    }
-
-    // WEBRTC TODO: Replace this temporary method.
-    openWebRTCSignalingChannel(url: string): void {
-        this._webrtcSocket.openWebRTCSignalingChannel(url);
-    }
-
-    // WEBRTC TODO: Replace this temporary method.
-    isWebRTCSignalingChannelOpen(): boolean {
-        return this._webrtcSocket.isWebRTCSignalingChannelOpen();
-    }
-
-    // WEBRTC TODO: Replace this temporary method.
-    closeWebRTCSignalingChannel(): void {
-        this._webrtcSocket.closeWebRTCSignalingChannel();
-    }
-
-
-    // WEBRTC TODO: Replace this temporary method.
-    hasWebRTCDataChannel(nodeType: NodeTypeValue): boolean {
-        return this._webrtcSocket.hasWebRTCDataChannel(nodeType);
-    }
-
-    // WEBRTC TODO: Replace this temporary method.
-    openWebRTCDataChannel(nodeType: NodeTypeValue, callback: OpenWebRTCDataChannelCallback): void {
-        this._webrtcSocket.openWebRTCDataChannel(nodeType, callback);
-    }
-
-    // WEBRTC TODO: Replace this temporary method.
-    isWebRTCDataChannelOpen(nodeType: NodeTypeValue): boolean {
-        return this._webrtcSocket.isWebRTCDataChannelOpen(nodeType);
-    }
-
-    // WEBRTC TODO: Replace this temporary method.
-    closeWebRTCDataChannel(nodeType: NodeTypeValue): void {  // eslint-disable-line
-        this._webrtcSocket.closeWebRTCDataChannel(nodeType);
-    }
 
 }
 

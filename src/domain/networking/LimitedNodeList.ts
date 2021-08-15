@@ -441,6 +441,8 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address C++ code.
 
+        // Ping timer N/A.
+
     }
 
 
