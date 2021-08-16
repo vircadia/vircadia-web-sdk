@@ -30,7 +30,7 @@ aid maintenance:
 
 ### Private, Protected, and Public
 
-In public API code, JavaScript's `#` should be used for private members so that their privacy is enforce at runtime.
+In public API code, JavaScript's `#` should be used for private members so that their privacy is enforced at runtime.
 
 In internal SDK code, TypeScript's `private`, `protected`, and `public` modifiers should be used because they are more
 expressive and it is OK to enforce their semantics at compile time.
@@ -38,11 +38,11 @@ expressive and it is OK to enforce their semantics at compile time.
 ### Document Return Types
 
 Methods' return types should always be explicitly specified even if TypeScript can automatically determine the return type from
-the current code &mdash; the code may change and any changes in the return type shoulds be flagged.
+the current code &mdash; the code may change and any changes in the return type should be flagged.
 
 ### Validate Public API Values
 
-Function parameter values and property values must be validate before being used &mdahs; e.g., that they're of the expected
+Function parameter values and property values must be validated before being used &mdash; e.g., that they're of the expected
 type. Note that for property values, this means that setters must be used.
 
 ### Unused function parameters
