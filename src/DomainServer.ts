@@ -70,8 +70,8 @@ type OnStateChangedCallback = (state: ConnectionState, info: string) => void;
  *  @property {string} errorInfo - A description of the reason if <code>state == DomainServer.ERROR</code>, otherwise
  *      <code>""</code>.
  *      <em>Read-only.</em>
- *  @property {DomainServer~onStateChangedCallback} onStateChanged - Sets a single function to be called when the state of the
- *      domain server connection changes. Set to <code>null</code> to remove the callback.
+ *  @property {DomainServer~onStateChangedCallback|null} onStateChanged - Sets a single function to be called when the state of
+ *      the domain server connection changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  */
 class DomainServer {

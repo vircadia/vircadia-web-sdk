@@ -69,7 +69,6 @@ describe("DomainListRequest - unit tests", () => {
         disconnectedPacketSize = packet.getMessageData().dataPosition;
         expect(disconnectedPacketSize).toBeGreaterThan(0);
         expect(disconnectedPacketSize).toBeGreaterThan(connectedPacketSize);
-
     });
 
 });

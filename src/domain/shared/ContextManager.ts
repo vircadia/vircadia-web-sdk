@@ -26,14 +26,15 @@ type ContextTable = Array<Context>;
 
 
 /*@devdoc
- *  The <code>ContextManager</code> namespace manages sets of unique object instances. Such a set forms a "context" in which
- *  the objects jointly operate.
- *  <p>Contexts are used to manage "global" objects particular to the connection to a particular domain.</p>
- *  <p>C++: <code>ContextManager</code></p>
+ *  The <code>ContextManager</code> namespace manages sets of related objects. Such a set forms a "context" and may be accessed
+ *  globally via its context ID.
+ *  <p>A context is used to manage the "global" objects particular to a domain server connection, so that the context objects
+ *  can be used in the different APIs while keeping those for different domain server connections separate.</p>
+ *  <p>C++: N/A</p>
  *  @namespace ContextManager
  */
 const ContextManager = new class {
-    // C++  N/A
+    // C++  N/A but similar to DependencyManager - ContextManager manages sets of dependencies.
 
     #_contexts: ContextTable = [];
 
