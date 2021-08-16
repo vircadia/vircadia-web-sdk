@@ -41,7 +41,7 @@ describe("ContextManager - unit tests", () => {
         expect(objectX).toBe(objectA);
     });
 
-    test("Can include parameters when add a dependency", () => {
+    test("Can include parameters when adding a dependency", () => {
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, B, contextID, "hello");
         const objectB = ContextManager.get(contextID, B);
@@ -49,7 +49,7 @@ describe("ContextManager - unit tests", () => {
         expect(objectB.sov).toBe("hello");
     });
 
-    test("Errors are thrown when try to use an invalid context ID", () => {
+    test("Errors are thrown when trying to use an invalid context ID", () => {
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, A);
         expect(() => {
@@ -63,7 +63,7 @@ describe("ContextManager - unit tests", () => {
         }).toThrow();
     });
 
-    test("An error is thrown when try to get an object not present in the context", () => {
+    test("An error is thrown when trying to get an object not present in the context", () => {
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, A);
         expect(() => {
