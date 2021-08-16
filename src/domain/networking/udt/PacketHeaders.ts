@@ -136,8 +136,8 @@ enum PacketTypeValue {
  *  @variation 1
  *  @property {PacketType} Unknown - <code>0</code>
  *  @property {PacketType} StunResponse - <code>1</code>
- *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to Interface in response to a
- *      DomainConnectRequest packet.<br />
+ *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to the user client in response to a
+ *      DomainConnectRequest or DomainListRequest packet, if the client is authorized to connect to the domain.<br />
  *      {@link PacketScribe.DomainListDetails}.
  *  @property {PacketType} Ping - <code>3</code>
  *  @property {PacketType} PingReply - <code>4</code>
@@ -149,10 +149,16 @@ enum PacketTypeValue {
  *  @property {PacketType} MicrophoneAudioWithEcho - <code>10</code>
  *  @property {PacketType} BulkAvatarData - <code>11</code>
  *  @property {PacketType} SilentAudioFrame - <code>12</code>
- *  @property {PacketType} DomainListRequest - <code>13</code>
+ *  @property {PacketType} DomainListRequest - <code>13</code> - The user client periodically sends this to the Domain Server
+ *      to maintain connection to the domain. The Domain Server responds with a DomainList or DomainConnectionDenied
+ *      packet.<br />
+ *      {@link PacketScribe.DomainListRequestDetails}.
  *  @property {PacketType} RequestAssignment - <code>14</code>
  *  @property {PacketType} CreateAssignment - <code>15</code>
- *  @property {PacketType} DomainConnectionDenied - <code>16</code>
+ *  @property {PacketType} DomainConnectionDenied - <code>16</code> - The Domain Server sends this to the user client in
+ *      response to a DomainConnectRequest or DomainListRequest packet, if the client is not authorized to connect to the
+ *      domain.
+ *      {@link PacketScribe.DomainConnectionDeniedDetails}.
  *  @property {PacketType} MuteEnvironment - <code>17</code>
  *  @property {PacketType} AudioStreamStats - <code>18</code>
  *  @property {PacketType} DomainServerPathQuery - <code>19</code>
@@ -167,8 +173,8 @@ enum PacketTypeValue {
  *  @property {PacketType} NoisyMute - <code>28</code>
  *  @property {PacketType} AvatarIdentity - <code>29</code>
  *  @property {PacketType} NodeIgnoreRequest - <code>30</code>
- *  @property {PacketType} DomainConnectRequest - <code>31</code> - Interface periodically sends this to the Domain Server to
- *      initiate and maintain connection to the domain. The Domain Server responds with a DomainList packet.<br />
+ *  @property {PacketType} DomainConnectRequest - <code>31</code> - The user client sends this to the Domain Server to initiate
+ *      connection to the domain. The Domain Server responds with a DomainList or DomainConnectionDenied packet.<br />
  *      {@link PacketScribe.DomainConnectRequestDetails}.
  *  @property {PacketType} DomainServerRequireDTLS - <code>32</code>
  *  @property {PacketType} NodeJsonStats - <code>33</code>
@@ -193,7 +199,8 @@ enum PacketTypeValue {
  *  @property {PacketType} AssetUploadReply - <code>52</code>
  *  @property {PacketType} AssetGetInfo - <code>53</code>
  *  @property {PacketType} AssetGetInfoReply - <code>54</code>
- *  @property {PacketType} DomainDisconnectRequest - <code>55</code>
+ *  @property {PacketType} DomainDisconnectRequest - <code>55</code> - The user client sends this empty packet to the Domain
+ *      Server to signal that the user client is disconnecting. The Domain Server does not respond.
  *  @property {PacketType} DomainServerRemovedNode - <code>56</code>
  *  @property {PacketType} MessagesData - <code>57</code>
  *  @property {PacketType} MessagesSubscribe - <code>58</code>
@@ -248,111 +255,111 @@ const PacketType = new class {
     // C++: PacketType
 
     // Property values are manually added because doing so provides additional type safety compared to adding at runtime.
-    Unknown = PacketTypeValue.Unknown;
-    StunResponse = PacketTypeValue.StunResponse;
-    DomainList = PacketTypeValue.DomainList;
-    Ping = PacketTypeValue.Ping;
-    PingReply = PacketTypeValue.PingReply;
-    KillAvatar = PacketTypeValue.KillAvatar;
-    AvatarData = PacketTypeValue.AvatarData;
-    InjectAudio = PacketTypeValue.InjectAudio;
-    MixedAudio = PacketTypeValue.MixedAudio;
-    MicrophoneAudioNoEcho = PacketTypeValue.MicrophoneAudioNoEcho;
-    MicrophoneAudioWithEcho = PacketTypeValue.MicrophoneAudioWithEcho;
-    BulkAvatarData = PacketTypeValue.BulkAvatarData;
-    SilentAudioFrame = PacketTypeValue.SilentAudioFrame;
-    DomainListRequest = PacketTypeValue.DomainListRequest;
-    RequestAssignment = PacketTypeValue.RequestAssignment;
-    CreateAssignment = PacketTypeValue.CreateAssignment;
-    DomainConnectionDenied = PacketTypeValue.DomainConnectionDenied;
-    MuteEnvironment = PacketTypeValue.MuteEnvironment;
-    AudioStreamStats = PacketTypeValue.AudioStreamStats;
-    DomainServerPathQuery = PacketTypeValue.DomainServerPathQuery;
-    DomainServerPathResponse = PacketTypeValue.DomainServerPathResponse;
-    DomainServerAddedNode = PacketTypeValue.DomainServerAddedNode;
-    ICEServerPeerInformation = PacketTypeValue.ICEServerPeerInformation;
-    ICEServerQuery = PacketTypeValue.ICEServerQuery;
-    OctreeStats = PacketTypeValue.OctreeStats;
-    SetAvatarTraits = PacketTypeValue.SetAvatarTraits;
-    InjectorGainSet = PacketTypeValue.InjectorGainSet;
-    AssignmentClientStatus = PacketTypeValue.AssignmentClientStatus;
-    NoisyMute = PacketTypeValue.NoisyMute;
-    AvatarIdentity = PacketTypeValue.AvatarIdentity;
-    NodeIgnoreRequest = PacketTypeValue.NodeIgnoreRequest;
-    DomainConnectRequest = PacketTypeValue.DomainConnectRequest;
-    DomainServerRequireDTLS = PacketTypeValue.DomainServerRequireDTLS;
-    NodeJsonStats = PacketTypeValue.NodeJsonStats;
-    OctreeDataNack = PacketTypeValue.OctreeDataNack;
-    StopNode = PacketTypeValue.StopNode;
-    AudioEnvironment = PacketTypeValue.AudioEnvironment;
-    EntityEditNack = PacketTypeValue.EntityEditNack;
-    ICEServerHeartbeat = PacketTypeValue.ICEServerHeartbeat;
-    ICEPing = PacketTypeValue.ICEPing;
-    ICEPingReply = PacketTypeValue.ICEPingReply;
-    EntityData = PacketTypeValue.EntityData;
-    EntityQuery = PacketTypeValue.EntityQuery;
-    EntityAdd = PacketTypeValue.EntityAdd;
-    EntityErase = PacketTypeValue.EntityErase;
-    EntityEdit = PacketTypeValue.EntityEdit;
-    DomainServerConnectionToken = PacketTypeValue.DomainServerConnectionToken;
-    DomainSettingsRequest = PacketTypeValue.DomainSettingsRequest;
-    DomainSettings = PacketTypeValue.DomainSettings;
-    AssetGet = PacketTypeValue.AssetGet;
-    AssetGetReply = PacketTypeValue.AssetGetReply;
-    AssetUpload = PacketTypeValue.AssetUpload;
-    AssetUploadReply = PacketTypeValue.AssetUploadReply;
-    AssetGetInfo = PacketTypeValue.AssetGetInfo;
-    AssetGetInfoReply = PacketTypeValue.AssetGetInfoReply;
-    DomainDisconnectRequest = PacketTypeValue.DomainDisconnectRequest;
-    DomainServerRemovedNode = PacketTypeValue.DomainServerRemovedNode;
-    MessagesData = PacketTypeValue.MessagesData;
-    MessagesSubscribe = PacketTypeValue.MessagesSubscribe;
-    MessagesUnsubscribe = PacketTypeValue.MessagesUnsubscribe;
-    ICEServerHeartbeatDenied = PacketTypeValue.ICEServerHeartbeatDenied;
-    AssetMappingOperation = PacketTypeValue.AssetMappingOperation;
-    AssetMappingOperationReply = PacketTypeValue.AssetMappingOperationReply;
-    ICEServerHeartbeatACK = PacketTypeValue.ICEServerHeartbeatACK;
-    NegotiateAudioFormat = PacketTypeValue.NegotiateAudioFormat;
-    SelectedAudioFormat = PacketTypeValue.SelectedAudioFormat;
-    MoreEntityShapes = PacketTypeValue.MoreEntityShapes;
-    NodeKickRequest = PacketTypeValue.NodeKickRequest;
-    NodeMuteRequest = PacketTypeValue.NodeMuteRequest;
-    RadiusIgnoreRequest = PacketTypeValue.RadiusIgnoreRequest;
-    UsernameFromIDRequest = PacketTypeValue.UsernameFromIDRequest;
-    UsernameFromIDReply = PacketTypeValue.UsernameFromIDReply;
-    AvatarQuery = PacketTypeValue.AvatarQuery;
-    RequestsDomainListData = PacketTypeValue.RequestsDomainListData;
-    PerAvatarGainSet = PacketTypeValue.PerAvatarGainSet;
-    EntityScriptGetStatus = PacketTypeValue.EntityScriptGetStatus;
-    EntityScriptGetStatusReply = PacketTypeValue.EntityScriptGetStatusReply;
-    ReloadEntityServerScript = PacketTypeValue.ReloadEntityServerScript;
-    EntityPhysics = PacketTypeValue.EntityPhysics;
-    EntityServerScriptLog = PacketTypeValue.EntityServerScriptLog;
-    AdjustAvatarSorting = PacketTypeValue.AdjustAvatarSorting;
-    OctreeFileReplacement = PacketTypeValue.OctreeFileReplacement;
-    CollisionEventChanges = PacketTypeValue.CollisionEventChanges;
-    ReplicatedMicrophoneAudioNoEcho = PacketTypeValue.ReplicatedMicrophoneAudioNoEcho;
-    ReplicatedMicrophoneAudioWithEcho = PacketTypeValue.ReplicatedMicrophoneAudioWithEcho;
-    ReplicatedInjectAudio = PacketTypeValue.ReplicatedInjectAudio;
-    ReplicatedSilentAudioFrame = PacketTypeValue.ReplicatedSilentAudioFrame;
-    ReplicatedAvatarIdentity = PacketTypeValue.ReplicatedAvatarIdentity;
-    ReplicatedKillAvatar = PacketTypeValue.ReplicatedKillAvatar;
-    ReplicatedBulkAvatarData = PacketTypeValue.ReplicatedBulkAvatarData;
-    DomainContentReplacementFromUrl = PacketTypeValue.DomainContentReplacementFromUrl;
-    ChallengeOwnership = PacketTypeValue.ChallengeOwnership;
-    EntityScriptCallMethod = PacketTypeValue.EntityScriptCallMethod;
-    ChallengeOwnershipRequest = PacketTypeValue.ChallengeOwnershipRequest;
-    ChallengeOwnershipReply = PacketTypeValue.ChallengeOwnershipReply;
-    OctreeDataFileRequest = PacketTypeValue.OctreeDataFileRequest;
-    OctreeDataFileReply = PacketTypeValue.OctreeDataFileReply;
-    OctreeDataPersist = PacketTypeValue.OctreeDataPersist;
-    EntityClone = PacketTypeValue.EntityClone;
-    EntityQueryInitialResultsComplete = PacketTypeValue.EntityQueryInitialResultsComplete;
-    BulkAvatarTraits = PacketTypeValue.BulkAvatarTraits;
-    AudioSoloRequest = PacketTypeValue.AudioSoloRequest;
-    BulkAvatarTraitsAck = PacketTypeValue.BulkAvatarTraitsAck;
-    StopInjector = PacketTypeValue.StopInjector;
-    AvatarZonePresence = PacketTypeValue.AvatarZonePresence;
+    readonly Unknown = PacketTypeValue.Unknown;
+    readonly StunResponse = PacketTypeValue.StunResponse;
+    readonly DomainList = PacketTypeValue.DomainList;
+    readonly Ping = PacketTypeValue.Ping;
+    readonly PingReply = PacketTypeValue.PingReply;
+    readonly KillAvatar = PacketTypeValue.KillAvatar;
+    readonly AvatarData = PacketTypeValue.AvatarData;
+    readonly InjectAudio = PacketTypeValue.InjectAudio;
+    readonly MixedAudio = PacketTypeValue.MixedAudio;
+    readonly MicrophoneAudioNoEcho = PacketTypeValue.MicrophoneAudioNoEcho;
+    readonly MicrophoneAudioWithEcho = PacketTypeValue.MicrophoneAudioWithEcho;
+    readonly BulkAvatarData = PacketTypeValue.BulkAvatarData;
+    readonly SilentAudioFrame = PacketTypeValue.SilentAudioFrame;
+    readonly DomainListRequest = PacketTypeValue.DomainListRequest;
+    readonly RequestAssignment = PacketTypeValue.RequestAssignment;
+    readonly CreateAssignment = PacketTypeValue.CreateAssignment;
+    readonly DomainConnectionDenied = PacketTypeValue.DomainConnectionDenied;
+    readonly MuteEnvironment = PacketTypeValue.MuteEnvironment;
+    readonly AudioStreamStats = PacketTypeValue.AudioStreamStats;
+    readonly DomainServerPathQuery = PacketTypeValue.DomainServerPathQuery;
+    readonly DomainServerPathResponse = PacketTypeValue.DomainServerPathResponse;
+    readonly DomainServerAddedNode = PacketTypeValue.DomainServerAddedNode;
+    readonly ICEServerPeerInformation = PacketTypeValue.ICEServerPeerInformation;
+    readonly ICEServerQuery = PacketTypeValue.ICEServerQuery;
+    readonly OctreeStats = PacketTypeValue.OctreeStats;
+    readonly SetAvatarTraits = PacketTypeValue.SetAvatarTraits;
+    readonly InjectorGainSet = PacketTypeValue.InjectorGainSet;
+    readonly AssignmentClientStatus = PacketTypeValue.AssignmentClientStatus;
+    readonly NoisyMute = PacketTypeValue.NoisyMute;
+    readonly AvatarIdentity = PacketTypeValue.AvatarIdentity;
+    readonly NodeIgnoreRequest = PacketTypeValue.NodeIgnoreRequest;
+    readonly DomainConnectRequest = PacketTypeValue.DomainConnectRequest;
+    readonly DomainServerRequireDTLS = PacketTypeValue.DomainServerRequireDTLS;
+    readonly NodeJsonStats = PacketTypeValue.NodeJsonStats;
+    readonly OctreeDataNack = PacketTypeValue.OctreeDataNack;
+    readonly StopNode = PacketTypeValue.StopNode;
+    readonly AudioEnvironment = PacketTypeValue.AudioEnvironment;
+    readonly EntityEditNack = PacketTypeValue.EntityEditNack;
+    readonly ICEServerHeartbeat = PacketTypeValue.ICEServerHeartbeat;
+    readonly ICEPing = PacketTypeValue.ICEPing;
+    readonly ICEPingReply = PacketTypeValue.ICEPingReply;
+    readonly EntityData = PacketTypeValue.EntityData;
+    readonly EntityQuery = PacketTypeValue.EntityQuery;
+    readonly EntityAdd = PacketTypeValue.EntityAdd;
+    readonly EntityErase = PacketTypeValue.EntityErase;
+    readonly EntityEdit = PacketTypeValue.EntityEdit;
+    readonly DomainServerConnectionToken = PacketTypeValue.DomainServerConnectionToken;
+    readonly DomainSettingsRequest = PacketTypeValue.DomainSettingsRequest;
+    readonly DomainSettings = PacketTypeValue.DomainSettings;
+    readonly AssetGet = PacketTypeValue.AssetGet;
+    readonly AssetGetReply = PacketTypeValue.AssetGetReply;
+    readonly AssetUpload = PacketTypeValue.AssetUpload;
+    readonly AssetUploadReply = PacketTypeValue.AssetUploadReply;
+    readonly AssetGetInfo = PacketTypeValue.AssetGetInfo;
+    readonly AssetGetInfoReply = PacketTypeValue.AssetGetInfoReply;
+    readonly DomainDisconnectRequest = PacketTypeValue.DomainDisconnectRequest;
+    readonly DomainServerRemovedNode = PacketTypeValue.DomainServerRemovedNode;
+    readonly MessagesData = PacketTypeValue.MessagesData;
+    readonly MessagesSubscribe = PacketTypeValue.MessagesSubscribe;
+    readonly MessagesUnsubscribe = PacketTypeValue.MessagesUnsubscribe;
+    readonly ICEServerHeartbeatDenied = PacketTypeValue.ICEServerHeartbeatDenied;
+    readonly AssetMappingOperation = PacketTypeValue.AssetMappingOperation;
+    readonly AssetMappingOperationReply = PacketTypeValue.AssetMappingOperationReply;
+    readonly ICEServerHeartbeatACK = PacketTypeValue.ICEServerHeartbeatACK;
+    readonly NegotiateAudioFormat = PacketTypeValue.NegotiateAudioFormat;
+    readonly SelectedAudioFormat = PacketTypeValue.SelectedAudioFormat;
+    readonly MoreEntityShapes = PacketTypeValue.MoreEntityShapes;
+    readonly NodeKickRequest = PacketTypeValue.NodeKickRequest;
+    readonly NodeMuteRequest = PacketTypeValue.NodeMuteRequest;
+    readonly RadiusIgnoreRequest = PacketTypeValue.RadiusIgnoreRequest;
+    readonly UsernameFromIDRequest = PacketTypeValue.UsernameFromIDRequest;
+    readonly UsernameFromIDReply = PacketTypeValue.UsernameFromIDReply;
+    readonly AvatarQuery = PacketTypeValue.AvatarQuery;
+    readonly RequestsDomainListData = PacketTypeValue.RequestsDomainListData;
+    readonly PerAvatarGainSet = PacketTypeValue.PerAvatarGainSet;
+    readonly EntityScriptGetStatus = PacketTypeValue.EntityScriptGetStatus;
+    readonly EntityScriptGetStatusReply = PacketTypeValue.EntityScriptGetStatusReply;
+    readonly ReloadEntityServerScript = PacketTypeValue.ReloadEntityServerScript;
+    readonly EntityPhysics = PacketTypeValue.EntityPhysics;
+    readonly EntityServerScriptLog = PacketTypeValue.EntityServerScriptLog;
+    readonly AdjustAvatarSorting = PacketTypeValue.AdjustAvatarSorting;
+    readonly OctreeFileReplacement = PacketTypeValue.OctreeFileReplacement;
+    readonly CollisionEventChanges = PacketTypeValue.CollisionEventChanges;
+    readonly ReplicatedMicrophoneAudioNoEcho = PacketTypeValue.ReplicatedMicrophoneAudioNoEcho;
+    readonly ReplicatedMicrophoneAudioWithEcho = PacketTypeValue.ReplicatedMicrophoneAudioWithEcho;
+    readonly ReplicatedInjectAudio = PacketTypeValue.ReplicatedInjectAudio;
+    readonly ReplicatedSilentAudioFrame = PacketTypeValue.ReplicatedSilentAudioFrame;
+    readonly ReplicatedAvatarIdentity = PacketTypeValue.ReplicatedAvatarIdentity;
+    readonly ReplicatedKillAvatar = PacketTypeValue.ReplicatedKillAvatar;
+    readonly ReplicatedBulkAvatarData = PacketTypeValue.ReplicatedBulkAvatarData;
+    readonly DomainContentReplacementFromUrl = PacketTypeValue.DomainContentReplacementFromUrl;
+    readonly ChallengeOwnership = PacketTypeValue.ChallengeOwnership;
+    readonly EntityScriptCallMethod = PacketTypeValue.EntityScriptCallMethod;
+    readonly ChallengeOwnershipRequest = PacketTypeValue.ChallengeOwnershipRequest;
+    readonly ChallengeOwnershipReply = PacketTypeValue.ChallengeOwnershipReply;
+    readonly OctreeDataFileRequest = PacketTypeValue.OctreeDataFileRequest;
+    readonly OctreeDataFileReply = PacketTypeValue.OctreeDataFileReply;
+    readonly OctreeDataPersist = PacketTypeValue.OctreeDataPersist;
+    readonly EntityClone = PacketTypeValue.EntityClone;
+    readonly EntityQueryInitialResultsComplete = PacketTypeValue.EntityQueryInitialResultsComplete;
+    readonly BulkAvatarTraits = PacketTypeValue.BulkAvatarTraits;
+    readonly AudioSoloRequest = PacketTypeValue.AudioSoloRequest;
+    readonly BulkAvatarTraitsAck = PacketTypeValue.BulkAvatarTraitsAck;
+    readonly StopInjector = PacketTypeValue.StopInjector;
+    readonly AvatarZonePresence = PacketTypeValue.AvatarZonePresence;
 
     // Packets that are sent without verifying that they are received.
     private _nonVerifiedPackets = new Set([
@@ -409,6 +416,16 @@ const PacketType = new class {
         PacketTypeValue.AvatarZonePresence
     ]);
 
+    private _DomainListVersion = {
+        // C++  DomainListVersion
+        HasConnectReason: 24
+    };
+
+    private _DomainConnectionDeniedVersion = {
+        // C++ DomainConnectionDeniedVersion
+        IncludesExtraInfo: 19
+    };
+
     private _DomainConnectRequestVersion = {
         // C++  DomainConnectRequestVersion
         HasCompressedSystemInfo: 26
@@ -433,15 +450,23 @@ const PacketType = new class {
     versionForPacketType(packetType: PacketTypeValue): number {
         // C++  PacketVersion versionForPacketType(PacketType packetType)
         switch (packetType) {
+            case this.DomainList:
+                return this._DomainListVersion.HasConnectReason;
+            case this.DomainListRequest:
+                return 22;  // eslint-disable-line @typescript-eslint/no-magic-numbers
+            case this.DomainConnectionDenied:
+                return this._DomainConnectionDeniedVersion.IncludesExtraInfo;
             case this.DomainConnectRequest:
                 return this._DomainConnectRequestVersion.HasCompressedSystemInfo;
+            case this.DomainDisconnectRequest:
+                return 22;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
                 // WebRTC TODO: Add other packets.
 
             // C++ default for remainder of packets is 22 but we want to report packets we haven't implemented, so explicitly
             // list those packets we know about.
             default:
-                console.error("ERROR - Unknown packet type in versionForPacketType()");
+                console.error("ERROR - Unknown packet type in versionForPacketType() :", packetType);
         }
         return 0;
     }

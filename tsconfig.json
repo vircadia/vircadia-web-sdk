@@ -12,13 +12,13 @@
         "esModuleInterop": true,
         "isolatedModules": true,
 
-        // TypeScript 4.2
+        // TypeScript 4.3
         "allowUnreachableCode": false,
         "allowUnusedLabels": false,
         "alwaysStrict": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitAny": true,
-        // "noImplicitOverride": true,  // Option not available in TypeScript 4.2.
+        "noImplicitOverride": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
         "noPropertyAccessFromIndexSignature": true,
@@ -31,6 +31,8 @@
         "strictPropertyInitialization": true
     },
     "include": [
+        "./example/**/*",
+        "./example/**/.eslintrc.js",
         "./src/**/*",
         "./tests/**/*",
         "./.*.js",

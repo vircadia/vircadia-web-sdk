@@ -1,0 +1,45 @@
+/*
+//  interface.css
+//
+//  Created by David Rowe on 1 Aug 2021.
+//  Copyright 2021 Vircadia contributors.
+//
+//  Distributed under the Apache License, Version 2.0.
+//  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+*/
+
+h2 {
+    margin: 24px 0 0 0;
+}
+
+div {
+    margin: 16px 0;
+}
+
+    div.row {
+        display: table-row;
+        height: 30px;
+    }
+
+        div.row span {
+            display: table-cell;
+            vertical-align: top;
+            width: 80px;
+        }
+
+input {
+    width: 160px;
+}
+
+    input.wide {
+        width: 480px;
+    }
+
+
+    input:read-only {
+        border: dotted 1px #d0d0d0;
+    }
+
+button {
+    width: 80px;
+}

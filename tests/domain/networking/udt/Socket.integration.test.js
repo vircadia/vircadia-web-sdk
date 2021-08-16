@@ -16,7 +16,7 @@ describe("Socket - integration tests", () => {
     test("Empty test", () => {
 
         // WEBRTC TODO: Add Socket integration tests.
-        // For now, the Socket class is exercised by NodesList.integration.test.js.
+        // For now, the Socket class is exercised by DomainServer.integration.test.js.
 
         expect(true).toBe(true);
     });

@@ -8,9 +8,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* globals jest */
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-
 import WebRTCDataChannel from "../../../../src/domain/networking/webrtc/WebRTCDataChannel";
 import WebRTCSignalingChannel from "../../../../src/domain/networking/webrtc/WebRTCSignalingChannel";
 import NodeType from "../../../../src/domain/networking/NodeType";
@@ -25,11 +22,13 @@ describe("WebRTCDataChannel - integration tests", () => {
     //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
     // Add WebSocket and WebRTC to Node.js environment.
-    global.WebSocket = require("ws");  // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+    global.WebSocket = require("ws");  // eslint-disable-line
     global.RTCPeerConnection = require("wrtc").RTCPeerConnection;  // eslint-disable-line
 
     // Add StringDecoder to Node.js environment.
     const { StringDecoder } = require("string_decoder");  // eslint-disable-line
+
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     // Suppress console.error messages from being displayed.
     // eslint-disable-next-line @typescript-eslint/no-empty-function

@@ -56,12 +56,23 @@ const NodesList = new class extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        // clear our NodeList when the domain changes
+        this._domainHandler.disconnectedFromDomain.connect(() => {
+            // C++  void resetFromDomainHandler()
+            this.reset("Reset from Domain Handler", true);
+        });
+
+        // WEBRTC TODO: Address further C++ code.
+
         this._packetReceiver.registerListener(PacketType.DomainList,
             PacketReceiver.makeUnsourcedListenerReference(this.processDomainList));
+        this._packetReceiver.registerListener(PacketType.DomainConnectionDenied,
+            PacketReceiver.makeUnsourcedListenerReference(this._domainHandler.processDomainServerConnectionDeniedPacket));
 
         // WEBRTC TODO: Address further C++ code.
 
     }
+
 
     /*@devdoc
      *  Gets the domain handler used by the NodesList.
@@ -95,6 +106,35 @@ const NodesList = new class extends LimitedNodeList {
         return this._nodeTypesOfInterest;
     }
 
+
+    /*@devdoc
+     *  Resets the LimitedNodeList, closing all connections and deleting all node data.
+     *  @function NodesList.reset
+     *  @param {string} reason - The reason for resetting.
+     *  @param {boolean} [skipDomainHandlerReset=false] - <code>true</code> if should skip clearing DomainHandler information,
+     *      e.g., if the DomainHandler initiated the reset; <code>false</code> if should clear DomainHandler information.
+     *  @returns {Slot}
+     */
+    override reset = (reason: string, skipDomainHandlerReset = false) => {
+        // C++  void reset(QString reason, bool skipDomainHandlerReset = false);
+
+        super.reset(reason);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        if (!skipDomainHandlerReset) {
+            this._domainHandler.softReset(reason);
+        }
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.setSessionUUID(new Uuid());
+        this.setSessionLocalID(0);
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
+
     /*@devdoc
      *  Performs a check-in with the domain server to connect with a {@link PacketType(1)|DomainConnectRequest} packet or keep a
      *  connection alive with a {@link PacketType(1)|DomainListRequest} packet. This method should be called by the client once
@@ -102,7 +142,7 @@ const NodesList = new class extends LimitedNodeList {
      *  @function NodesList.sendDomainServerCheckIn
      *  @returns {Slot}
      */
-    sendDomainServerCheckIn() {
+    sendDomainServerCheckIn = () => {
         // C++  void sendDomainServerCheckIn()
 
         // WEBRTC TODO: Address further C++ code.
@@ -120,23 +160,23 @@ const NodesList = new class extends LimitedNodeList {
         // Open the WebRTC signaling channel to the domain server if not already open.
         if (!this._nodeSocket.hasWebRTCSignalingChannel(domainURL)) {
             this._nodeSocket.openWebRTCSignalingChannel(domainURL);
-            console.log("[Networking] Opening WebRTC signaling channel. Will not send domain server check-in.");
+            console.log("[networking] Opening WebRTC signaling channel. Will not send domain server check-in.");
             return;
         }
         if (!this._nodeSocket.isWebRTCSignalingChannelOpen()) {
-            console.log("[Networking] Waiting for WebRTC signaling channel. Will not send domain server check-in.");
+            console.log("[networking] Waiting for WebRTC signaling channel. Will not send domain server check-in.");
             return;
         }
 
         // Open the WebRTC data channel to the domain server if not already open.
         if (!this._nodeSocket.hasWebRTCDataChannel(NodeType.DomainServer)) {
-            console.log("[Networking] Opening WebRTC data channel. Will not send domain server check-in.");
+            console.log("[networking] Opening WebRTC data channel. Will not send domain server check-in.");
             this._nodeSocket.openWebRTCDataChannel(NodeType.DomainServer, (dataChannelID) => {
                 this._domainHandler.setPort(dataChannelID);
             });
         }
         if (!this._nodeSocket.isWebRTCDataChannelOpen(NodeType.DomainServer)) {
-            console.log("[Networking] Waiting for WebRTC data channel. Will not send domain server check-in.");
+            console.log("[networking] Waiting for WebRTC data channel. Will not send domain server check-in.");
             return;
         }
 
@@ -154,47 +194,43 @@ const NodesList = new class extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        // Data common to DomainConnectRequest and DomainListRequest.
+        const currentTime = BigInt(Date.now().valueOf());
+        const ownerType = this._ownerType;
+        const publicSockAddr = super.getPublicSockAddr();
+        const localSockAddr = super.getLocalSockAddr();
+
+        const nodeTypesOfInterest = this._nodeTypesOfInterest;
+        const placeName = AddressManager.getPlaceName();
+        let username = undefined;
+        let usernameSignature = undefined;
+        const domainUsername = undefined;
+        const domainTokens = undefined;
+        if (!isDomainConnected) {
+            username = "";
+            usernameSignature = new Uint8Array(new ArrayBuffer(0));
+
+            // WEBRTC TODO: Address further C++ code.
+
+        }
+
+
         // Create and send packet.
-        let packet = undefined;
+        let packet: NLPacket | undefined = undefined;
         if (domainPacketType === PacketType.DomainConnectRequest) {
 
-            // Gather data needed for the packet.
-            const connectUUID = new Uuid(Uuid.NULL);  // Always Uuid.NULL for Web Interface client.
-            // Ignore ICE code because Interface didn't use ICE to discover the domain server.
+            // Data unique to DomainConnectRequest.
+            const connectUUID = new Uuid(Uuid.NULL);  // Always Uuid.NULL for a web client.
+            // Ignore ICE code because the Web client didn't use ICE to discover the domain server.
             const protocolVersionSig = protocolVersionsSignature();
-
-            const hardwareAddress = "";
             // WEBRTC TODO: Get MAC address.
-
+            const hardwareAddress = "";
             const machineFingerprint = FingerprintUtils.getMachineFingerprint();
-
-            const compressedSystemInfo = new Uint8Array(new ArrayBuffer(0));
             // WEBRTC TODO: Get compressed system info.
-
+            const compressedSystemInfo = new Uint8Array(new ArrayBuffer(0));
             const connectReason = this._connectReason;
-
-            const previousConnectionUptime = BigInt(0);
             // WEBRTC TODO: Calculate previousConnectionUpdate value.
-
-            const currentTime = BigInt(Date.now().valueOf());
-
-            const ownerType = this._ownerType;
-            const publicSockAddr = super.getPublicSockAddr();
-            const localSockAddr = super.getLocalSockAddr();
-            const nodeTypesOfInterest = this._nodeTypesOfInterest;
-            const placeName = AddressManager.getPlaceName();
-
-            let username = undefined;
-            let usernameSignature = undefined;
-            const domainUsername = undefined;
-            const domainTokens = undefined;
-            if (!isDomainConnected) {
-                username = "";
-                usernameSignature = new Uint8Array(new ArrayBuffer(0));
-
-                // WEBRTC TODO: Address further C++ code.
-
-            }
+            const previousConnectionUptime = BigInt(0);
 
             // Write the packet.
             packet = PacketScribe.DomainConnectRequest.write({
@@ -220,16 +256,26 @@ const NodesList = new class extends LimitedNodeList {
 
         } else {
 
-            packet = new NLPacket(PacketType.DomainList);
-
-            // WEBRTC TODO: Address further C++ code.
+            packet = PacketScribe.DomainListRequest.write({
+                currentTime,
+                ownerType,
+                publicSockAddr,
+                localSockAddr,
+                nodeTypesOfInterest,
+                placeName,
+                isDomainConnected,
+                username,
+                usernameSignature,
+                domainUsername,
+                domainTokens
+            });
 
         }
 
         // WEBRTC TODO: Address further C++ code.
 
         this.sendPacket(packet, domainSockAddr);
-    }
+    };
 
     /*@devdoc
      *  Processes a {@link PacketType(1)|DomainList} message received from the domain server.
@@ -243,6 +289,11 @@ const NodesList = new class extends LimitedNodeList {
         // WEBRTC TODO: This should involve a NLPacketList, not just a single NLPacket.
 
         const info = PacketScribe.DomainList.read(message.getMessage());
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.setSessionLocalID(info.newLocalID);
+        this.setSessionUUID(info.newUUID);
 
         // WEBRTC TODO: Address further C++ code.
 

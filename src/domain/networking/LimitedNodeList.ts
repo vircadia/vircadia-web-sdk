@@ -14,10 +14,12 @@ import PacketType from "./udt/PacketHeaders";
 import Socket from "./udt/Socket";
 import assert from "../shared/assert";
 import NLPacket from "./NLPacket";
+import { LocalID } from "./DomainHandler";
+import Uuid from "../shared/Uuid";
 
 
 /*@devdoc
- *  The <code>LimitedNodeList</code> class manages all the network nodes (assignment clients) that Interface is connected to.
+ *  The <code>LimitedNodeList</code> class manages all the network nodes (assignment clients) that the client is connected to.
  *  This includes their presence and communications with them via the Vircadia protocol.
  *  <p>See also: {@link NodesList}.</p>
  *  <p>C++: <code>LimitedNodeList : public QObject, public Dependency</code>
@@ -58,6 +60,9 @@ class LimitedNodeList {
     protected _publicSockAddr = new SockAddr();
     protected _packetReceiver: PacketReceiver;
 
+    private _sessionUUID = new Uuid(Uuid.NULL);
+    private _sessionLocalID: LocalID = 0;
+
 
     constructor() {
         // C++  LimitedNodeList(char ownerType = NodeType::DomainServer, int socketListenPort = INVALID_PORT,
@@ -73,6 +78,8 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        // Bind Slot methods.
+        this.reset.bind(this);
     }
 
 
@@ -80,7 +87,7 @@ class LimitedNodeList {
      *  Sends a a solitary packet to an address, unreliably. The packet cannot be part of a multi-packet message.
      *  @param {NLPacket} packet - The packet to send.
      *  @param {SockAddr} sockAddr - The address to send it to.
-     *  @param {HMACAuth} [hmacAuth=null] - Not used.
+     *  @param {HMACAuth} [hmacAuth=null] - Not currently used.
      *  @returns {number} The number of bytes sent.
      */
     sendUnreliablePacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth = null): number {
@@ -125,6 +132,7 @@ class LimitedNodeList {
         return size;
     }
 
+
     /*@devdoc
      *  Gets the client's local socket network address.
      *  @returns {SockAddr} The local socket network address.
@@ -153,26 +161,81 @@ class LimitedNodeList {
      *  Gets the packet receiver used for handling packets received from the assignment clients.
      *  @returns {PacketReceiver} The packet receiver.
      */
-    getPacketReceiver():PacketReceiver {
+    getPacketReceiver(): PacketReceiver {
         // C++  PacketReceiver& getPacketReceiver()
         return this._packetReceiver;
     }
 
 
+    /*@devdoc
+     *  Gets the node's UUID as assigned by the domain server  for the connection session.
+     *  @returns {LocalID} The node's session UUID.
+     */
+    getSessionUUID(): Uuid {
+        // C++  LocalID getSessionUUID()
+        return this._sessionUUID;
+    }
+
+    /*@devdoc
+     *  Sets the node's UUID as assigned by the domain server  for the connection session.
+     *  @param {LocalID} sessionUUID - The node's session UUID.
+     */
+    setSessionUUID(sessionUUID: Uuid): void {
+        // C++  void setSessionUUID(const QUuid& sessionUUID);
+        this._sessionUUID = sessionUUID;
+    }
+
+    /*@devdoc
+     *  Gets the node's local ID as assigned by the domain server for the connection session.
+     *  @returns {LocalID} The node's session local ID.
+     */
+    getSessionLocalID(): LocalID {
+        // C++  LocalID getSessionLocalID()
+        return this._sessionLocalID;
+    }
+
+    /*@devdoc
+     *  Sets the node's local ID as assigned by the domain server for the connection session.
+     *  @param {LocalID} sessionLocalID - The node's session local ID.
+     */
+    setSessionLocalID(sessionLocalID: LocalID): void {
+        // C++  void setSessionLocalID(LocalID sessionLocalID);
+        this._sessionLocalID = sessionLocalID;
+    }
+
+
+    /*@devdoc
+     *  Resets the NodesList, closing all connections and deleting all node data.
+     *  @param {string} reason - The reason for resetting.
+     *  @returns {Slot}
+     */
     // eslint-disable-next-line
     // @ts-ignore
-    private fillPacketHeader(packet: NLPacket, hmacAuth: null): void {  // eslint-disable-line
+    reset(reason: string): void {  // eslint-disable-line @typescript-eslint/no-unused-vars
+        // C++  void reset(QString reason)
+        // Cannot declare this Slot function as an arrow function because derived NodesList class calls this function.
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this._nodeSocket.clearConnections();
+
+        // WEBRTC TODO: Address further C++ code.
+
+    }
+
+
+    private fillPacketHeader(packet: NLPacket, hmacAuth: null): void {
         // C++  void fillPacketHeader(const NLPacket& packet, HMACAuth* hmacAuth = nullptr) {
         if (!PacketType.getNonSourcedPackets().has(packet.getType())) {
+            packet.writeSourceID(this.getSessionLocalID());
+        }
 
+        if (hmacAuth) {
             console.error("Not implemented!");
 
             // WEBRTC TODO: Address further C++ code.
 
         }
-
-        // WEBRTC TODO: Address further C++ code.
-
     }
 
 }

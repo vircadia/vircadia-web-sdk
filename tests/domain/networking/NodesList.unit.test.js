@@ -8,9 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import DomainHandler from "../../../src/domain/networking/DomainHandler";
 import NodesList from "../../../src/domain/networking/NodesList";
 import NodeType from "../../../src/domain/networking/NodeType";
+import DomainHandler from "../../../src/domain/networking/DomainHandler";  // Must come after NodesList namespace import.
 
 
 describe("NodesList - integration tests", () => {
@@ -24,6 +24,11 @@ describe("NodesList - integration tests", () => {
         const setOfNodes = new Set([NodeType.EntityServer, NodeType.MessagesMixer]);
         NodesList.addSetOfNodeTypesToNodeInterestSet(setOfNodes);
         expect(NodesList.getNodeInterestSet()).toEqual(setOfNodes);
+    });
+
+    test("Can reset an empty nodes list as if initiated by DomainHandler", () => {
+        NodesList.reset("Some reason", true);
+        expect(true).toBe(true);
     });
 
 });

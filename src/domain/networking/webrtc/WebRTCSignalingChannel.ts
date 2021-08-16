@@ -129,11 +129,14 @@ class WebRTCSignalingChannel {
         if (typeof websocketURL !== "string" || websocketURL === "") {
             console.error("WebRTCSignalingChannel: Invalid WebSocket URL!");
         }
-        this._websocket = new WebSocket(websocketURL);
+        try {
+            this._websocket = new WebSocket(websocketURL);
+        } catch (e) {
+            this._websocket = null;
+            // WEBRTC TODO: Surface error to DomainServer and assignment client APIs.
+        }
     }
 
-
-    /* eslint-disable accessor-pairs */
 
     get readyState(): number {
         return this._websocket ? this._websocket.readyState : WebRTCSignalingChannel.CLOSED;
@@ -164,8 +167,6 @@ class WebRTCSignalingChannel {
             this._websocket.onerror = callback;
         }
     }
-
-    /* eslint-enable accessor-pairs */
 
 
     /*@devdoc

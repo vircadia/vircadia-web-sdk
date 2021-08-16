@@ -42,7 +42,7 @@ const enum NodeTypeValue {
  *
  *  @property {NodeType} DomainServer - <code>"D"</code> - Domain server.
  *  @property {NodeType} EntityServer - <code>"o"</code> - Entity server.
- *  @property {NodeType} Agent - <code>"I"</code> - An Interface client or an assignment client emulating an avatar.
+ *  @property {NodeType} Agent - <code>"I"</code> - A web client or an assignment client emulating an avatar.
  *  @property {NodeType} AudioMixer - <code>"M"</code> - Audio mixer.
  *  @property {NodeType} AvatarMixer - <code>"W"</code> - Avatar mixer.
  *  @property {NodeType} AssetServer - <code>"A"</code> - Asset server.

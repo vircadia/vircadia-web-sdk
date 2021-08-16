@@ -43,21 +43,21 @@ const DomainList = new class {
      *  @typedef {object} PacketScribe.DomainListDetails
      *  @property {Uuid} domainUUID - The UUID of the domain server.
      *  @property {LocalID} domainLocalID - The local ID of the domain server.
-     *  @property {Uuid} newUUID - The UUID assigned to the Interface client by the domain server.
-     *  @property {LocalID} newLocalID - The local ID assigned to the Interface client by the domain server.
+     *  @property {Uuid} newUUID - The UUID assigned to the web client by the domain server.
+     *  @property {LocalID} newLocalID - The local ID assigned to the web client by the domain server.
      *  @property {NodePermissions} newPermissions
      *  @property {boolean} isAuthenticated
      *  @property {bigint} connectRequestTimestamp
      *  @property {bigint} domainServerPingSendTime - The Unix time that the packet was sent, in usec.
      *  @property {bigint} domainServerCheckinProcessingTime - The duration from the time domain server received the packet
      *      requesting this response and the time that the response was sent, in usec.
-     *  @property {boolean} newConnection - <code>true</code> if the Interface client has just connected to the domain,
+     *  @property {boolean} newConnection - <code>true</code> if the web client has just connected to the domain,
      *      <code>false</code> if was already connected.
      *  @property {PacketScribe.DomainListDetails-NodeInfo[]} nodes
      */
 
     /*@devdoc
-     *  Reads a {@link Packets|DomainList} packet.
+     *  Reads a {@link PacketType(1)|DomainList} packet.
      *  @function PacketScribe.DomainList&period;read
      *  @param {DataView} data - The {@link Packets|DomainList} message data to read.
      *  @returns {PacketScribe.DomainListDetails} The domain list information.
@@ -68,9 +68,6 @@ const DomainList = new class {
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
         let dataPosition = 0;
-
-        // info["domainUUID"] = new Uuid(data.getBigUint128(dataPosition, UDT.LITTLE_ENDIAN));
-        // dataPosition += 16;
 
         const domainUUID = new Uuid(data.getBigUint128(dataPosition, UDT.LITTLE_ENDIAN));
         dataPosition += 16;

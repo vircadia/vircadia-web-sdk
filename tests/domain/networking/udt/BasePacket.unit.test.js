@@ -8,15 +8,14 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* globals jest */
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-
 import SockAddr from "../../../../src/domain/networking/SockAddr";
 import BasePacket from "../../../../src/domain/networking/udt/BasePacket";
 import UDT from "../../../../src/domain/networking/udt/UDT";
 
 
 describe("BasePacket - unit tests", () => {
+
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     let buffer = null;
     let dataView = null;

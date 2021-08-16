@@ -8,16 +8,16 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* globals jest */
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-
 import NLPacket from "../../../src/domain/networking/NLPacket";
 import SockAddr from "../../../src/domain/networking/SockAddr";
 import Packet from "../../../src/domain/networking/udt/Packet";
 import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
+import UDT from "../../../src/domain/networking/udt/UDT";
 
 
 describe("NLPacket - unit tests", () => {
+
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     // Generate a DomainServerList Packet as if just received. Copied from Packet.unit.test.js.
     /* eslint-disable-next-line max-len */
@@ -74,6 +74,14 @@ describe("NLPacket - unit tests", () => {
         expect(nlPacket.getSourceID()).toBe(0);
         expect(nlPacket.getVersion()).toBeGreaterThan(0);
         expect(error).toHaveBeenCalledTimes(0);
+    });
+
+    test("Can write a source ID into a packet", () => {
+        const nlPacket = new NLPacket(PacketType.DomainListRequest);
+        const messageData = nlPacket.getMessageData();
+        expect(messageData.data.getUint16(6, UDT.LITTLE_ENDIAN)).toBe(0);
+        nlPacket.writeSourceID(37);
+        expect(messageData.data.getUint16(6, UDT.LITTLE_ENDIAN)).toBe(37);
     });
 
 

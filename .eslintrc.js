@@ -86,6 +86,7 @@ module.exports = {
         "@typescript-eslint/no-extra-parens": ["error"],
         "no-extra-semi": "off",
         "@typescript-eslint/no-extra-semi": ["error"],
+        "@typescript-eslint/no-floating-promises": ["error", { "ignoreIIFE": true }],
         "no-implied-eval": "off",
         "@typescript-eslint/no-implied-eval": ["error"],
         "no-invalid-this": "off",
@@ -152,7 +153,7 @@ module.exports = {
         ],
         "space-infix-ops": "off",
         "@typescript-eslint/space-infix-ops": ["error", { "int32Hint": false }],
-        "@typescript-eslint/no-floating-promises": ["error", { "ignoreIIFE": true }],
+        "@typescript-eslint/type-annotation-spacing": ["error"],
 
 
         // eslint 6.8
@@ -175,7 +176,7 @@ module.exports = {
         "require-atomic-updates": "error",
 
         // Best practices.
-        "accessor-pairs": "error",
+        // "accessor-pairs": "error",  //  There are many places where there are not pairs.
         "array-callback-return": "error",
         "block-scoped-var": "error",
         "class-methods-use-this": "error",
