@@ -132,7 +132,7 @@ describe("DomainServer - unit tests", () => {
         expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
         expect(domainServer.errorInfo).toBe("");
         expect(domainServer.refusalInfo).toBe("");
-        domainServer.connect("  ");
+        domainServer.connect("");
         expect(domainServer.state).toBe(DomainServer.ERROR);
         expect(domainServer.errorInfo).not.toBe("");
         expect(domainServer.refusalInfo).toBe("");

@@ -45,12 +45,12 @@ const DomainListRequest = new class {
      *  @property {string} placeName - The domain's place name from {@link AddressManager} if known, otherwise an empty string.
      *  @property {boolean} isDomainConnected - <code>true</code> if currently connected to the domain, <code>false</code> if
      *      not connected.
-     *  @property {string} [username] - If not connected, the user's metaverse user name.
+     *  @property {string} [username] - If not connected then the user's metaverse user name, otherwise <code>""</code>.
      *  @property {Uint8Array} [usernameSignature] - If not connected then the login signature of the domain requires login and
      *      the signature is known, otherwise an empty value.
      *  @property {string} [domainUsername] - If not connected and the domain has its own login, the domain login user name.
      *  @property {string} [domainTokens] - If not connected and the domain has its own login, the domain login OAuth2 token(s)
-     *      as <code>&lt;access-token&gt;:&lt;refresh-toklen&gt;</code>.
+     *      as <code>&lt;access-token&gt;:&lt;refresh-token&gt;</code>.
      */
 
     /*@devdoc
