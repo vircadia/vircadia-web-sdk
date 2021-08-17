@@ -25,9 +25,10 @@ type LocalID = number;
  *  The <code>DomainHandler</code> class handles the connection to and the features of a domain.
  *  <p>C++: <code>DomainHandler : QObject</code></p>
  *  @class DomainHandler
+ *  @param {NodesList} parent - The parent {@link NodesList} object.
  */
 class DomainHandler {
-    // C++  DomainHandler
+    // C++  DomainHandler : public QObject
 
     /*@devdoc
      *  A local ID is an integer ID assigned to the domain server, an assignment client, or a web client by the domain server.
@@ -47,6 +48,15 @@ class DomainHandler {
     private _connectedToDomain = new Signal();
     private _disconnectedFromDomain = new Signal();
     private _domainConnectionRefused = new Signal();
+
+    // Context objects.
+    private _nodesList;
+
+
+    constructor(parent: NodesList) {
+        // C++  DomainHandler(QObject* parent = 0);
+        this._nodesList = parent;
+    }
 
 
     /*@devdoc
@@ -255,7 +265,7 @@ class DomainHandler {
      *  @function DomainHandler.setRedirectErrorState
      *  @param {string} errorUrl - Not currently used.
      *  @param {string} reasonMessage - The reason that the client was refused connection to the domain.
-     *  @param {ConnectionRefusedReason} - reasonCode - The reason code for the reason.
+     *  @param {ConnectionRefusedReason} reasonCode - The reason code for the reason.
      *  @param {string} extraInfo - Extra information about the reason.
      *  @returns {Slot}
      */
@@ -318,7 +328,7 @@ class DomainHandler {
      *  Triggered when the client is refused connection to a domain.
      *  @function DomainHandler.domainConnectionRefused
      *  @param {string} reasonMessage - The reason that the client was refused connection to the domain.
-     *  @param {ConnectionRefusedReason} - reasonCode - The reason code for the reason.
+     *  @param {ConnectionRefusedReason} reasonCode - The reason code for the reason.
      *  @param {string} extraInfo - Extra information about the reason.
      *  @returns {Signal}
      */
@@ -331,7 +341,7 @@ class DomainHandler {
     private sendDisconnectPacket(): void {
         // C++  void sendDisconnectPacket()
         const packet = PacketScribe.DomainDisconnectRequest.write();
-        NodesList.sendUnreliablePacket(packet, this._sockAddr);
+        this._nodesList.sendUnreliablePacket(packet, this._sockAddr);
     }
 
     private hardReset(reason: string): void {

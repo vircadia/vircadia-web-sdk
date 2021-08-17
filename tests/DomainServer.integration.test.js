@@ -41,7 +41,7 @@ describe("DomainServer - integration tests", () => {
     jest.setTimeout(10000);
 
     // Suppress console.log messages from being displayed.
-    const log = jest.spyOn(console, "log").mockImplementation(() => { /* noop */ });
+    const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
 
     test("Can connect to and maintain a connection with the domain server", (done) => {
@@ -194,7 +194,7 @@ describe("DomainServer - integration tests", () => {
         };
 
         // Suppress console.log messages from being displayed.
-        const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* noop */ });
+        const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
 
         // Try connect to a domain.
         domainServer.onStateChanged = (state) => {

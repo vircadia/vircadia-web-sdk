@@ -1,5 +1,5 @@
 //
-//  AddressManager.integration.test.js
+//  AddressManager.unit.test.js
 //
 //  Created by David Rowe on 6 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -9,36 +9,45 @@
 //
 
 import AddressManager from "../../../src/domain/networking/AddressManager";
+import ContextManager from "../../../src/domain/shared/ContextManager";
 
 import TestConfig from "../../test.config.json";
 
 
-describe("AddressManager - integration tests", () => {
-
-    //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
+describe("AddressManager - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     test("Possible domain change signal emitted when URL set", (done) => {
         expect.assertions(2);
+
+        const addressManager = new AddressManager();
         let signalsHandled = 0;
 
-        AddressManager.possibleDomainChangeRequired.connect(function (url) {
+        addressManager.possibleDomainChangeRequired.connect(function (url) {
             expect(url).toBe(TestConfig.SERVER_DOMAIN_URL);
             signalsHandled += 1;
             if (signalsHandled < 2) {
                 // Signal should be emitted even when no change in URL.
-                AddressManager.handleLookupString(TestConfig.SERVER_DOMAIN_URL);
+                addressManager.handleLookupString(TestConfig.SERVER_DOMAIN_URL);
             } else {
                 done();
             }
         });
 
-        AddressManager.handleLookupString(TestConfig.SERVER_DOMAIN_URL);
+        addressManager.handleLookupString(TestConfig.SERVER_DOMAIN_URL);
     });
 
     test("The domain's place name can be retrieved", () => {
-        expect(typeof AddressManager.getPlaceName()).toBe("string");
+        const addressManager = new AddressManager();
+        expect(typeof addressManager.getPlaceName()).toBe("string");
+    });
+
+    test("The AddressManager can be obtained from the ContextManager", () => {
+        const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AddressManager);
+        const addressManager = ContextManager.get(contextID, AddressManager);
+        expect(addressManager instanceof AddressManager).toBe(true);
     });
 
 });

@@ -15,21 +15,24 @@ import LimitedNodeList from "./LimitedNodeList";
 import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import ReceivedMessage from "./ReceivedMessage";
+import NLPacket from "../networking/NLPacket";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
-import NLPacket from "../networking/NLPacket";
+import ContextManager from "../shared/ContextManager";
 import Uuid from "../shared/Uuid";
 
 
 /*@devdoc
- *  The <code>NodesList</code> namespace manages the domain server plus all the nodes (assignment clients) that the client is
+ *  The <code>NodesList</code> class manages the domain server plus all the nodes (assignment clients) that the client is
  *  connected to. This includes their presence and communications with them via the Vircadia protocol.
  *  <p>C++: <code>NodeList : LimitedNodeList</code></p>
  *  <p>Note: This JavaScript object has a different name because <code>NodeList</code> is a JavaScript browser object.</p>
- *  @namespace NodesList
+ *  @class NodesList
  *  @extends LimitedNodeList
+ *  @param {number} contextID - The {@link ContextManager} context ID.
+ *  @param {NodeType} [ownerType=Agent] - The type of object that the NodesList is being used in.
  */
-const NodesList = new class extends LimitedNodeList {
+class NodesList extends LimitedNodeList {
     // C++  NodeList : public LimitedNodeList
 
     private _ownerType: NodeTypeValue;
@@ -38,8 +41,10 @@ const NodesList = new class extends LimitedNodeList {
 
     private _domainHandler: DomainHandler;
 
+    // Context objects.
+    private _addressManager;
 
-    constructor(ownerType: NodeTypeValue) {
+    constructor(contextID: number, ownerType = NodeType.Agent) {
         // C++  NodeList(char ownerType, int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
         super();
@@ -48,11 +53,12 @@ const NodesList = new class extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this._domainHandler = new DomainHandler();
+        this._domainHandler = new DomainHandler(this);
 
         // WEBRTC TODO: Address further C++ code.
 
-        AddressManager.possibleDomainChangeRequired.connect(this._domainHandler.setURLAndID);
+        this._addressManager = <AddressManager>ContextManager.get(contextID, AddressManager);
+        this._addressManager.possibleDomainChangeRequired.connect(this._domainHandler.setURLAndID);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -79,7 +85,7 @@ const NodesList = new class extends LimitedNodeList {
      *  @function NodesList.getDomainHandler
      *  @returns {DomainHandler} The domain handler.
      */
-    getDomainHandler() {
+    getDomainHandler(): DomainHandler {
         // C++  DomainHandler& getDomainHandler()
         return this._domainHandler;
     }
@@ -89,7 +95,7 @@ const NodesList = new class extends LimitedNodeList {
      *  @function NodesList.addSetOfNodeTypesToNodeInterestSet
      *  @param {Set<NodeType>} setOfNodeTypes - The node types to add to the interest set.
      */
-    addSetOfNodeTypesToNodeInterestSet(setOfNodeTypes: Set<NodeTypeValue>) {
+    addSetOfNodeTypesToNodeInterestSet(setOfNodeTypes: Set<NodeTypeValue>): void {
         // C++  void addSetOfNodeTypesToNodeInterestSet(const NodeSet& setOfNodeTypes)
         for (const nodeType of setOfNodeTypes) {
             this._nodeTypesOfInterest.add(nodeType);
@@ -101,7 +107,7 @@ const NodesList = new class extends LimitedNodeList {
      *  @function NodesList.getNodeInterestSet
      *  @returns {Set<NodeType>} The node types in the interest set.
      */
-    getNodeInterestSet() {
+    getNodeInterestSet(): Set<NodeTypeValue> {
         // C++  NodeSet& getNodeInterestSet() const { return _nodeTypesOfInterest; }
         return this._nodeTypesOfInterest;
     }
@@ -115,7 +121,7 @@ const NodesList = new class extends LimitedNodeList {
      *      e.g., if the DomainHandler initiated the reset; <code>false</code> if should clear DomainHandler information.
      *  @returns {Slot}
      */
-    override reset = (reason: string, skipDomainHandlerReset = false) => {
+    override reset = (reason: string, skipDomainHandlerReset = false): void => {
         // C++  void reset(QString reason, bool skipDomainHandlerReset = false);
 
         super.reset(reason);
@@ -142,7 +148,7 @@ const NodesList = new class extends LimitedNodeList {
      *  @function NodesList.sendDomainServerCheckIn
      *  @returns {Slot}
      */
-    sendDomainServerCheckIn = () => {
+    sendDomainServerCheckIn = (): void => {
         // C++  void sendDomainServerCheckIn()
 
         // WEBRTC TODO: Address further C++ code.
@@ -201,7 +207,7 @@ const NodesList = new class extends LimitedNodeList {
         const localSockAddr = super.getLocalSockAddr();
 
         const nodeTypesOfInterest = this._nodeTypesOfInterest;
-        const placeName = AddressManager.getPlaceName();
+        const placeName = this._addressManager.getPlaceName();
         let username = undefined;
         let usernameSignature = undefined;
         const domainUsername = undefined;
@@ -283,7 +289,7 @@ const NodesList = new class extends LimitedNodeList {
      *  @param {ReceivedMessage} message - The DomainList message.
      *  @returns {Slot}
      */
-    processDomainList = (message: ReceivedMessage) => {
+    processDomainList = (message: ReceivedMessage): void => {
         // C++  processDomainList(ReceivedMessage* message)
 
         // WEBRTC TODO: This should involve a NLPacketList, not just a single NLPacket.
@@ -309,6 +315,6 @@ const NodesList = new class extends LimitedNodeList {
         // WEBRTC TODO: Address further C++ code.
     };
 
-}(NodeType.Agent);
+}
 
 export default NodesList;

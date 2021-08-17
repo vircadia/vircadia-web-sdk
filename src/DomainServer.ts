@@ -13,6 +13,7 @@
 import AddressManager from "./domain/networking/AddressManager";
 import { ConnectionRefusedReasonValue } from "./domain/networking/ConnectionRefusedReason";
 import NodesList from "./domain/networking/NodesList";
+import ContextManager from "./domain/shared/ContextManager";
 
 
 /*@sdkdoc
@@ -42,7 +43,7 @@ type OnStateChangedCallback = (state: ConnectionState, info: string) => void;
 
 
 /*@sdkdoc
- *  The <code>DomainServer</code> API provides the interface for connecting to a domain server.
+ *  The <code>DomainServer</code> class provides the interface for connecting to a domain server.
  *
  *  @class DomainServer
  *  @property {DomainServer.ConnectionState} DISCONNECTED - Disconnected from the domain.
@@ -126,15 +127,26 @@ class DomainServer {
 
     #_domainCheckInTimer: ReturnType<typeof setTimeout> | null = null;
 
+    // Context objects.
+    #_nodesList: NodesList;
+    #_addressManager: AddressManager;
+
     #_DEBUG = false;
 
 
     constructor() {
         // C++  Application::Application()
 
+        const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AddressManager);
+        ContextManager.set(contextID, NodesList, contextID);
+
+        this.#_nodesList = <NodesList>ContextManager.get(contextID, NodesList);
+        this.#_addressManager = <AddressManager>ContextManager.get(contextID, AddressManager);
+
         // WEBRTC TODO: Address further C++ code.
 
-        const domainHandler = NodesList.getDomainHandler();
+        const domainHandler = this.#_nodesList.getDomainHandler();
         domainHandler.connectedToDomain.connect(() => {
             this.#setState(DomainServer.CONNECTED);
         });
@@ -204,7 +216,7 @@ class DomainServer {
 
         if (this.#_location === "") {
             this.#stopDomainServerCheckins();
-            NodesList.getDomainHandler().disconnect("Invalid location");
+            this.#_nodesList.getDomainHandler().disconnect("Invalid location");
             this.#setState(DomainServer.ERROR, "No location specified.");
             return;
         }
@@ -220,7 +232,7 @@ class DomainServer {
 
         this.#setState(DomainServer.CONNECTING);
 
-        AddressManager.handleLookupString(location);
+        this.#_addressManager.handleLookupString(location);
 
         // Start sending domain server check-ins.
         if (!this.#_domainCheckInTimer) {
@@ -241,7 +253,7 @@ class DomainServer {
             return;
         }
         this.#stopDomainServerCheckins();
-        NodesList.getDomainHandler().disconnect("User disconnected", true);
+        this.#_nodesList.getDomainHandler().disconnect("User disconnected", true);
         this.#setState(DomainServer.DISCONNECTED);
     }
 
@@ -272,7 +284,7 @@ class DomainServer {
         }, DomainServer.#DOMAIN_SERVER_CHECK_IN_MSECS);
 
         // Perform this send.
-        NodesList.sendDomainServerCheckIn();
+        this.#_nodesList.sendDomainServerCheckIn();
     }
 
     #stopDomainServerCheckins(): void {
