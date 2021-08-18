@@ -36,7 +36,7 @@ import Socket from "./udt/Socket";
 class NodesList extends LimitedNodeList {
     // C++  NodeList : public LimitedNodeList
 
-    private _ownerType: NodeTypeValue;
+    private _ownerType = NodeType.Agent;
     private _connectReason = LimitedNodeList.ConnectReason.Connect;
     private _nodeTypesOfInterest: Set<NodeTypeValue> = new Set();
 
@@ -45,12 +45,10 @@ class NodesList extends LimitedNodeList {
     // Context objects.
     private _addressManager;
 
-    constructor(contextID: number, ownerType = NodeType.Agent) {
-        // C++  NodeList(char ownerType, int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
+    constructor(contextID: number) {
+        // C++  NodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
         super();
-
-        this._ownerType = ownerType;
 
         // WEBRTC TODO: Address further C++ code.
 

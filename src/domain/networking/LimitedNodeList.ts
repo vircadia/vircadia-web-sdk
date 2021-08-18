@@ -113,8 +113,7 @@ class LimitedNodeList {
 
 
     constructor() {
-        // C++  LimitedNodeList(char ownerType = NodeType::DomainServer, int socketListenPort = INVALID_PORT,
-        //                      int dtlsListenPort = INVALID_PORT);
+        // C++  LimitedNodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
         // WEBRTC TODO: Address further C++ code.
 

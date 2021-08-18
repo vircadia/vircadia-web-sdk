@@ -91,7 +91,7 @@ class WebRTCSocket {
 
 
     constructor() {  // eslint-disable-line @typescript-eslint/no-useless-constructor
-        // C++  WebRTCSocket(QObject* parent, NodeType_t nodeType)
+        // C++  WebRTCSocket(QObject* parent)
 
         // WEBRTC TODO: Address further C++ code.
 
