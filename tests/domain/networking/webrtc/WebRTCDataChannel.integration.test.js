@@ -200,6 +200,30 @@ describe("WebRTCDataChannel - integration tests", () => {
         };
     });
 
+    test("Can echo test message off message mixer", (done) => {
+        expect.assertions(2);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+        webrtcSignalingChannel.onopen = function () {
+            let webrtcDataChannel = new WebRTCDataChannel(NodeType.AudioMixer, webrtcSignalingChannel);
+
+            webrtcDataChannel.onopen = function () {
+                const echoMessage = "echo:Hello";
+                const sent = webrtcDataChannel.send(echoMessage);
+                expect(sent).toBe(true);
+            };
+            webrtcDataChannel.onmessage = function (data) {
+                expect(new StringDecoder("utf8").write(new Uint8Array(data))).toBe("echo:Hello");
+                webrtcDataChannel.close();
+            };
+            webrtcDataChannel.onclose = function () {
+                webrtcDataChannel = null;
+                webrtcSignalingChannel.close();
+                webrtcSignalingChannel = null;
+                done();
+            };
+        };
+    });
+
     // WEBRTC TODO: "Can echo test message off messages mixer"
 
     // WEBRTC TODO: Add messages mixer to node types test.
