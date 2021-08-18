@@ -19,7 +19,7 @@ describe("PacketType - unit tests", () => {
         expect(PacketType.Unknown).toBe(0);
         expect(PacketType.StunResponse).toBe(1);
         expect(PacketType.DomainListRequest).toBe(13);
-        expect(PacketType.AvatarZonePresence).toBe(104);
+        expect(PacketType.WebRTCSignaling).toBe(105);
     });
 
     test("Packet version values can be accessed", () => {

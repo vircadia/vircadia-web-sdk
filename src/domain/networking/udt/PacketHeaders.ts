@@ -123,6 +123,7 @@ const enum PacketTypeValue {
     BulkAvatarTraitsAck,
     StopInjector,
     AvatarZonePresence,
+    WebRTCSignaling,
 
     NUM_PACKETS
 }
@@ -250,6 +251,8 @@ const enum PacketTypeValue {
  *  @property {PacketType} BulkAvatarTraitsAck - <code>102</code>
  *  @property {PacketType} StopInjector - <code>103</code>
  *  @property {PacketType} AvatarZonePresence - <code>104</code>
+ *  @property {PacketType} WebRTCSignaling - <code>104</code> - Used between the domain server and assignment clients to
+ *      exchange user client WebRTC signaling messages relayed to assignment clients via the domain server.
  */
 const PacketType = new class {
     // C++: PacketType
@@ -360,6 +363,7 @@ const PacketType = new class {
     readonly BulkAvatarTraitsAck = PacketTypeValue.BulkAvatarTraitsAck;
     readonly StopInjector = PacketTypeValue.StopInjector;
     readonly AvatarZonePresence = PacketTypeValue.AvatarZonePresence;
+    readonly WebRTCSignaling = PacketTypeValue.WebRTCSignaling;
 
     // Packets that are sent without verifying that they are received.
     private _nonVerifiedPackets = new Set([
@@ -413,7 +417,8 @@ const PacketType = new class {
         PacketTypeValue.ReplicatedAvatarIdentity,
         PacketTypeValue.ReplicatedKillAvatar,
         PacketTypeValue.ReplicatedBulkAvatarData,
-        PacketTypeValue.AvatarZonePresence
+        PacketTypeValue.AvatarZonePresence,
+        PacketTypeValue.WebRTCSignaling
     ]);
 
     private _DomainListVersion = {
@@ -433,7 +438,7 @@ const PacketType = new class {
 
 
     constructor() {
-        assert(PacketTypeValue.NUM_PACKETS - 1 === this.AvatarZonePresence, "Inconsistent packet data in PacketHeaders!");
+        assert(PacketTypeValue.NUM_PACKETS - 1 === this.WebRTCSignaling, "Inconsistent packet data in PacketHeaders!");
     }
 
 
