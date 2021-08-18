@@ -40,6 +40,21 @@ describe("WebRTCSocket - integration tests", () => {
         });
     });
 
+    test("Can connect to the message mixer", (done) => {
+        const webrtcSocket = new WebRTCSocket();
+        webrtcSocket.connectToHost(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.MessagesMixer, (socketID) => {
+            expect(socketID).toBeGreaterThanOrEqual(0);
+            expect(webrtcSocket.state(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.MessagesMixer))
+                .toBe(WebRTCSocket.CONNECTED);
+            expect(webrtcSocket.state(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.DomainServer))
+                .toBe(WebRTCSocket.SIGNALING);
+            expect(webrtcSocket.state(TestConfig.SERVER_SIGNALING_SOCKET_URL + "1", NodeType.MessagesMixer))
+                .toBe(WebRTCSocket.UNCONNECTED);
+            webrtcSocket.abort();
+            done();
+        });
+    });
+
     // The WebRTCSocket class is further exercised by DomainServer.integration.test.js.
 
 });

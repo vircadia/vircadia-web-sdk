@@ -40,6 +40,21 @@ describe("Socket - integration tests", () => {
         });
     });
 
+    test("Can connect to the avatar mixer", (done) => {
+        const socket = new Socket();
+        socket.openSocket(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.AvatarMixer, (socketID) => {
+            expect(socketID).toBeGreaterThanOrEqual(0);
+            expect(socket.getSocketState(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.AvatarMixer))
+                .toBe(Socket.CONNECTED);
+            expect(socket.getSocketState(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.DomainServer))
+                .toBe(Socket.UNCONNECTED);
+            expect(socket.getSocketState(TestConfig.SERVER_SIGNALING_SOCKET_URL + "1", NodeType.AvatarMixer))
+                .toBe(Socket.UNCONNECTED);
+            socket.clearConnections();
+            done();
+        });
+    });
+
     // The Socket class is further exercised by DomainServer.integration.test.js.
 
 });
