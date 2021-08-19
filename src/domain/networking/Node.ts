@@ -17,6 +17,7 @@ import SockAddr from "./SockAddr";
 
 /*@devdoc
  *  The <code>Node</code> class handles the connection to and the features of an assignment client node.
+ *  <p>C++: <code>Node : public NetworkPeer</code></p>
  *  @class Node
  *  @extends NetworkPeer
  *  @param {Uuid} uuid - The UUID of the node.
@@ -50,7 +51,7 @@ class Node extends NetworkPeer {
 
     /*@devdoc
      *  Gets the node's type.
-     *  @returns {NodeTypeValue} The node's type.
+     *  @returns {NodeType} The node's type.
      */
     getType(): NodeTypeValue {
         // C++  char getType() const { return _type; }

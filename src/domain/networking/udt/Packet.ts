@@ -209,7 +209,7 @@ class Packet extends BasePacket {
         this._messageData.dataPosition += 4;
 
         if (this._messageData.isPartOfMessage) {
-            console.error("ERROR: Multi-packet messages not yet implemented!");
+            console.warn("Multi-packet messages not yet implemented!");
 
             // WEBRTC TODO: Address further C++ code.
 

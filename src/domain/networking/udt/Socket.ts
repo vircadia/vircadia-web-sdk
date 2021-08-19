@@ -237,7 +237,7 @@ class Socket {
 
                 // WEBRTC TODO: Address further C++ code.
 
-                console.error("Control packets not yet implemented!");
+                console.warn("Control packets not yet implemented!");
 
             } else {
 
@@ -251,7 +251,7 @@ class Socket {
 
                     // WEBRTC  TODO: Address further C++ code.
 
-                    console.error("Multi-packet messages not yet implemented!");
+                    console.warn("Multi-packet messages not yet implemented!");
 
                 } else if (this._packetHandler) {
                     this._packetHandler(packet);

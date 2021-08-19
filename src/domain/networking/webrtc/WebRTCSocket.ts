@@ -13,7 +13,6 @@ import WebRTCSignalingChannel from "./WebRTCSignalingChannel";
 import { NodeTypeValue } from "../NodeType";
 import SockAddr from "../SockAddr";
 import Signal from "../../shared/Signal";
-import assert from "../../shared/assert";
 
 
 type WebRTCSocketDatagram = { buffer: ArrayBuffer | undefined, sender: SockAddr | undefined };
@@ -149,7 +148,6 @@ class WebRTCSocket {
      */
     connectToHost(url: string, nodeType: NodeTypeValue, callback: (socketID: number) => void): void {
         // C++  N/A
-        assert(url.trim().length > 0);
 
         // Close any current connections if for a different URL.
         if (url !== this._webrtcSignalingChannelAddress) {

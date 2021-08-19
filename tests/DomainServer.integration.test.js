@@ -126,7 +126,7 @@ describe("DomainServer - integration tests", () => {
         const domainServer = new DomainServer();
 
         // Error state.
-        domainServer.connect("  ");
+        domainServer.connect("");
         expect(domainServer.state).toBe(DomainServer.ERROR);
 
         // Connect to a domain.
@@ -165,7 +165,7 @@ describe("DomainServer - integration tests", () => {
         domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
     });
 
-    test("Noop when disconnect when disconnected", (done) => {
+    test("No-op when disconnect when disconnected", (done) => {
         const domainServer = new DomainServer();
         expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
         let hasStateChanged = false;

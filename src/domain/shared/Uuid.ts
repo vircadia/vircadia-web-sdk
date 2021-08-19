@@ -58,6 +58,7 @@ class Uuid extends BigInt {
      */
     /*@devdoc
      *  Gets the UUID's underlying <code>bigint</code> primitive value.
+     *  @function Uuid(1).value
      *  @returns {bigint} The underlying <code>bigint</code> primitive value
      */
     value(): bigint {

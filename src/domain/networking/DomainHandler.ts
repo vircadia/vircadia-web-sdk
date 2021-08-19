@@ -92,12 +92,12 @@ class DomainHandler {
     }
 
     /*@devdoc
-     *  Gets the current domain's URL. <em>JavaScript-specific method.</em>
+     *  Gets the current domain's URL.
      *  <p>Note: The web app uses the domain's URL rather than its IP address.<p>
      *  @returns {string} The current domain's URL.
      */
     getURL(): string {
-        // C++  WebRTC-specific method.
+        // C++  N/A
 
         // WEBRTC TODO: Revisit using URL versus IP address..
 
