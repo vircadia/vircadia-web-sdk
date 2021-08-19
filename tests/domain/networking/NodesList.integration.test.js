@@ -82,7 +82,9 @@ describe("NodesList - integration tests", () => {
         domainHandler.connectedToDomain.connect(function () {
             clearTimeout(backupTimeout);
             expect(true).toBe(true);
-            done();
+            setTimeout(() => {  // Provide time for residual log messages to stop being emitted.
+                done();
+            }, 500);
         });
 
         // Back-up exit test

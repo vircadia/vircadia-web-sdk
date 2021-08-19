@@ -12,6 +12,7 @@
 
 import AddressManager from "./domain/networking/AddressManager";
 import { ConnectionRefusedReasonValue } from "./domain/networking/ConnectionRefusedReason";
+import Node from "./domain/networking/Node";
 import NodesList from "./domain/networking/NodesList";
 import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
@@ -159,6 +160,12 @@ class DomainServer {
             }
         });
         domainHandler.domainConnectionRefused.connect(this.#domainConnectionRefused);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_nodesList.nodeAdded.connect(this.#nodeAdded);
+        // this.#_nodesList.nodeKilled.connect(this.#nodeKilled);
+        this.#_nodesList.nodeActivated.connect(this.#nodeActivated);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -315,6 +322,52 @@ class DomainServer {
         // WEBRTC TODO: Address further C++ code.
 
         this.#setState(ConnectionState.REFUSED, reasonMessage);
+    };
+
+    // Slot.
+    #nodeAdded = (node: Node): void => {
+        // C++  void Application:: nodeAdded(Node* node)
+        if (node.getType() === NodeType.EntityServer) {
+            console.warn("DomainServer: EntityServer support implemented!");
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        }
+    };
+
+    // Slot.
+    #nodeActivated = (node: Node): void => {
+        // C++  void Application:: nodeActivated(Node* node)
+        const nodeType = node.getType();
+
+        if (nodeType === NodeType.AssetServer) {
+            console.warn("DomainServer: AssetServer support not implemented!");
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        }
+
+        if (nodeType === NodeType.EntityServer) {
+            console.warn("DomainServer: EntityServer support not implemented!");
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        }
+
+        if (nodeType === NodeType.AudioMixer) {
+            console.warn("DomainServer: AudioMixer support not implemented!");
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        }
+
+        if (nodeType === NodeType.AvatarMixer) {
+            console.warn("DomainServer: AvatarMixer support not implemented!");
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        }
+
     };
 
 }

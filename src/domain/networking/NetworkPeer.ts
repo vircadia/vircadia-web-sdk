@@ -21,6 +21,8 @@ type LocalID = number;
 
 /*@devdoc
  *  The <code>NetworkPeer</code> class manages the network connection to an assignment client.
+ *  <p>See also: {@link Node}.</p>
+ *  <p>C++: <code>NetworkPeer : public QObject</code></p>
  *  @class NetworkPeer
  *  @param {Uuid} [uuid=Uuid.NULL] - The network connections's UUID.
  *  @param {SockAddr} [publicSocket=newSockAddr()] - The public socket address.
@@ -35,6 +37,7 @@ class NetworkPeer {
      */
 
 
+    // WEBRTC TODO: Address public versus local sockets w.r.t. WebRTC and the Web SDK.
     protected _publicSocket;
     protected _localSocket;
 
@@ -165,6 +168,28 @@ class NetworkPeer {
     }
 
     /*@devdoc
+     *  Activates the node's local socket.
+     */
+    activateLocalSocket(): void {
+        // C++  void activateLocalSocket()
+        if (this._activeSocket !== this._localSocket) {
+            console.log("[networking] Activating local socket for network peer with ID", this._uuid.stringify());
+            this.setActiveSocket(this._localSocket);
+        }
+    }
+
+    /*@devdoc
+     *  Activates the node's public socket.
+     */
+    activatePublicSocket(): void {
+        // C++  void activatePublicSocket()
+        if (this._activeSocket !== this._publicSocket) {
+            console.log("[networking] Activating public socket for network peer with ID", this._uuid.stringify());
+            this.setActiveSocket(this._publicSocket);
+        }
+    }
+
+    /*@devdoc
      *  Gets the currently active socket.
      *  @returns {SockAddr|null} The currently active socket if one is active, <code>null</code> if none is active/
      */
@@ -198,11 +223,7 @@ class NetworkPeer {
     }
 
 
-    /*@devdoc
-     *  Sets the active socket.
-     *  @param {SockAddr} discoveredSocket - The socket to make active.
-     */
-    protected setActiveSocket(discoveredSocket: SockAddr): void {
+    private setActiveSocket(discoveredSocket: SockAddr): void {
         // C++  void NetworkPeer::setActiveSocket(SockAddr* discoveredSocket)
         this._activeSocket = discoveredSocket;
 
@@ -210,11 +231,8 @@ class NetworkPeer {
 
         // WEBRTC TODO: Address further C++ code.
 
-        if (this._activeSocket) {
-            this.socketActivated.emit(this._activeSocket);
-        }
+        this.socketActivated.emit(this._activeSocket);
     }
-
 
     private toString(): string {
         // C++  QDebug operator<<(QDebug debug, const NetworkPeer &peer)

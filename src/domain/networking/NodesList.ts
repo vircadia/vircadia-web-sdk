@@ -16,6 +16,7 @@ import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import ReceivedMessage from "./ReceivedMessage";
 import NLPacket from "../networking/NLPacket";
+import Node from "../networking/Node";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
 import ContextManager from "../shared/ContextManager";
@@ -66,6 +67,15 @@ class NodesList extends LimitedNodeList {
             // C++  void resetFromDomainHandler()
             this.reset("Reset from Domain Handler", true);
         });
+
+        // WEBRTC TODO: Address further C++ code.
+
+        // Whenever there is a new node connect to it.
+        this.nodeAdded.connect(this.openWebRTCConnection);
+        this.nodeSocketUpdated.connect(this.openWebRTCConnection);
+
+        // Whenever we get a new node we may need to re-send our set of ignored nodes to it.
+        this.nodeActivated.connect(this.maybeSendIgnoreSetToNode);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -308,6 +318,50 @@ class NodesList extends LimitedNodeList {
 
             this.addNewNode(node);
         }
+
+    };
+
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    private activateSocketFromNodeCommunication(socketID: number, sendingNode: Node) {  // eslint-disable-line
+        // C++  void activateSocketFromNodeCommunication(ReceivedMessage& message, const Node* sendingNode)
+
+        // Just use the node's public socket for WebRTC, for now.
+        if (sendingNode.getActiveSocket() === null) {
+            sendingNode.activatePublicSocket();
+        }
+
+        // WEBRTC TODO: Address public versus local sockets w.r.t. WebRTC and the Web SDK.
+
+        // WEBRTC TODO: Address further C++ code.
+    }
+
+
+    // Slot.
+    private openWebRTCConnection = (node: Node): void => {
+        // C++  void startNodeHolePunch(const Node* node);
+        // We don't need to do the hole punching in order to establish a connection to the node; we just need to open the
+        // WebRTC connection. WebRTC does the hole punching for us.
+
+        if (this._nodeSocket.getSocketState(this._domainHandler.getURL(), node.getType()) === Socket.UNCONNECTED) {
+            this._nodeSocket.openSocket(this._domainHandler.getURL(), node.getType(), (socketID) => {
+                this.activateSocketFromNodeCommunication(socketID, node);
+            });
+        } else {
+            console.error("Unexpected socket state for", NodeType.getNodeTypeName(node.getType()));
+        }
+
+        // Vircadia clients can never have upstream nodes or downstream nodes so we don't need to cater for these.
+    };
+
+    // Slot.
+    // eslint-disable-next-line
+    // @ts-ignore
+    private maybeSendIgnoreSetToNode = (newNode: Node): void => {  // eslint-disable-line @typescript-eslint/no-unused-vars
+        // C++  void NodeList::maybeSendIgnoreSetToNode(Node* newNode)
+
+        // WEBRTC TODO: Address further C++.
 
     };
 
