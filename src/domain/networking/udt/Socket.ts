@@ -8,11 +8,12 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { default as WebRTCSocket, WebRTCSocketDatagram } from "../webrtc/WebRTCSocket";
-import Packet from "../udt/Packet";
-import assert from "../../shared/assert";
+import Packet from "./Packet";
+import UDT from "./UDT";
 import { NodeTypeValue } from "../NodeType";
 import SockAddr from "../SockAddr";
+import { default as WebRTCSocket, WebRTCSocketDatagram } from "../webrtc/WebRTCSocket";
+import assert from "../../shared/assert";
 
 
 /*@devdoc
@@ -231,8 +232,7 @@ class Socket {
 
             const receiveTime = Date.now();
 
-            const CONTROL_BIT_MASK = 0x80;
-            const isControlPacket = dataView.getUint8(0) & CONTROL_BIT_MASK;
+            const isControlPacket = dataView.getUint32(0, UDT.LITTLE_ENDIAN) & UDT.CONTROL_BIT_MASK;
             if (isControlPacket) {
 
                 // WEBRTC TODO: Address further C++ code.
