@@ -110,6 +110,7 @@ class LimitedNodeList {
     private _nodeAdded = new Signal();
     private _nodeActivated = new Signal();
     private _nodeSocketUpdated = new Signal();
+    private _nodeKilled = new Signal();
 
 
     constructor() {
@@ -432,6 +433,17 @@ class LimitedNodeList {
         return this._nodeSocketUpdated;
     }
 
+    /*@devdoc
+     *  Triggered when a new node is killed.
+     *  @function LimitedNodeList.nodeKilled
+     *  @param {Node} node - The node killed.
+     *  @returns {Signal}
+     */
+    get nodeKilled(): Signal {
+        // C++  void nodeKilled(Node* node);
+        return this._nodeKilled;
+    }
+
 
     protected addNewNode(info: NewNodeInfo): void {  // eslint-disable-line class-methods-use-this
         // C++  void addNewNode(NewNodeInfo info);
@@ -451,11 +463,21 @@ class LimitedNodeList {
     protected handleNodeKill(node: Node, nextConnectionID = this.NULL_CONNECTION_ID): void {  // eslint-disable-line
         // C++  void handleNodeKill(const SharedNodePointer& node, ConnectionID nextConnectionID = NULL_CONNECTION_ID)
 
-        console.warn("handleNodeKill() : Not implemented!");
+        // WEBRTC TODO: Address further C++ code.
 
-        // WEBRTC TODO: Address C++ code.
+        console.log("[networking] Killed", NodeType.getNodeTypeName(node.getType()), node.getUUID().stringify(),
+            node.getPublicSocket().toString(), "/", node.getLocalSocket().toString());
 
         // Ping timer N/A.
+
+        this._nodeKilled.emit(node);
+
+        const activeSocket = node.getActiveSocket();
+        if (activeSocket) {
+            this._nodeSocket.cleanupConnection(activeSocket);
+        }
+
+        // WEBRTC TODO: Address further C++ code.
 
     }
 
@@ -502,17 +524,21 @@ class LimitedNodeList {
 
     private eraseAllNodes(reason: string): void {
         // C++  void eraseAllNodes(QString reason)
+        const killedNodes = [];
+
         if (this._nodeHash.size > 0) {
             console.log("[networking] Removing all nodes from nodes list:", reason);
-            const killedNodes = this._nodeHash.values();
-
-            // WEBRTC TODO: Address further C++ code.
-
-            this._nodeHash.clear();
-
-            for (const node of killedNodes) {
-                this.handleNodeKill(node);
+            for (const node of this._nodeHash.values()) {
+                killedNodes.push(node);
             }
+        }
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this._nodeHash.clear();
+
+        for (const node of killedNodes) {
+            this.handleNodeKill(node);
         }
 
         // WEBRTC TODO: Address further C++ code.

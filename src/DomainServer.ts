@@ -164,12 +164,15 @@ class DomainServer {
         // WEBRTC TODO: Address further C++ code.
 
         this.#_nodesList.nodeAdded.connect(this.#nodeAdded);
-        // this.#_nodesList.nodeKilled.connect(this.#nodeKilled);
         this.#_nodesList.nodeActivated.connect(this.#nodeActivated);
+        this.#_nodesList.nodeKilled.connect(this.#nodeKilled);
 
         // WEBRTC TODO: Address further C++ code.
 
         this.#_nodesList.addSetOfNodeTypesToNodeInterestSet(new Set([
+
+            // WEBRTC TODO: Configure interest set per AC APIs used.
+
             NodeType.AudioMixer,
             NodeType.MessagesMixer,
             NodeType.AvatarMixer
@@ -368,6 +371,29 @@ class DomainServer {
 
         }
 
+    };
+
+    // Slot.
+    #nodeKilled = (node: Node): void => {
+        // C++  void Application:: nodeKilled(Node* node)
+
+        // WEBRTC TODO: Address further code - for AssetServer node.
+
+        const nodeType = node.getType();
+        if (nodeType === NodeType.AudioMixer) {
+            console.warn("DomainServer: AudioMixer support not implemented!");
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        } else if (nodeType === NodeType.EntityServer) {
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        } else if (nodeType === NodeType.AssetServer) {
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        }
     };
 
 }

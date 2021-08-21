@@ -150,6 +150,23 @@ describe("LimitedNodeList - integration tests", () => {
         );
     });
 
+    test("Node killed signaled when node is killed", (done) => {
+        const limitedNodeList = new LimitedNodeList();
+        limitedNodeList.nodeAdded.connect((node) => {
+            limitedNodeList.killNodeWithUUID(node.getUUID());
+        });
+        limitedNodeList.nodeKilled.connect((node) => {
+            expect(node.getType()).toBe(AUDIO_MIXER_NODE_INFO.type);
+            expect(node.getUUID()).toBe(AUDIO_MIXER_NODE_INFO.uuid);
+            done();
+        });
+        limitedNodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
+            AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
+            AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
+            AUDIO_MIXER_NODE_INFO.permissions
+        );
+    });
+
     test("Can retrieve a solo node", () => {
         const limitedNodeList = new LimitedNodeList();
         limitedNodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,

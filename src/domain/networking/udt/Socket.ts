@@ -136,7 +136,6 @@ class Socket {
 
         // WEBRTC TODO: Address further C++ code.
 
-        console.warn("cleanupConnection() : Not implemented!");
     }
 
 
