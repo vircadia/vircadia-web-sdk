@@ -224,6 +224,37 @@ describe("LimitedNodeList - integration tests", () => {
         expect(limitedNodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type)).toBeNull();
     });
 
+    test("Can get a node with a specific UUID", () => {
+        const limitedNodeList = new LimitedNodeList();
+        limitedNodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
+            AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
+            AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
+            AUDIO_MIXER_NODE_INFO.permissions
+        );
+        expect(limitedNodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type) instanceof Node).toBe(true);
+        expect(limitedNodeList.nodeWithUUID(AUDIO_MIXER_NODE_INFO.uuid) instanceof Node).toBe(true);
+    });
+
+    test("Can remove a node with a specific UUID", () => {
+        const limitedNodeList = new LimitedNodeList();
+        limitedNodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
+            AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
+            AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
+            AUDIO_MIXER_NODE_INFO.permissions
+        );
+        expect(limitedNodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type) instanceof Node).toBe(true);
+        // Removing a non-existent node doesn't remove.
+        limitedNodeList.killNodeWithUUID(new Uuid(9999n));
+        expect(limitedNodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type) instanceof Node).toBe(true);
+        // Remove the node list.
+        limitedNodeList.killNodeWithUUID(AUDIO_MIXER_NODE_INFO.uuid);
+        expect(limitedNodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type)).toBeNull();
+        // Removing again is OK.
+        limitedNodeList.killNodeWithUUID(AUDIO_MIXER_NODE_INFO.uuid);
+        expect(limitedNodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type)).toBeNull();
+
+    });
+
     // The following items are tested elsewhere:
     // - sendPacket() - Tested implicitly by NodesList integration test.
     // - sendUnreliablePacket() - Tested implicitly by NodesList integration test.

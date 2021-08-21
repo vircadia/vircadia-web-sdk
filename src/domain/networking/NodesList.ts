@@ -81,8 +81,16 @@ class NodesList extends LimitedNodeList {
 
         this._packetReceiver.registerListener(PacketType.DomainList,
             PacketReceiver.makeUnsourcedListenerReference(this.processDomainList));
+
+        // WEBRTC TODO: Address further C++ code.
+
         this._packetReceiver.registerListener(PacketType.DomainConnectionDenied,
             PacketReceiver.makeUnsourcedListenerReference(this._domainHandler.processDomainServerConnectionDeniedPacket));
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this._packetReceiver.registerListener(PacketType.DomainServerRemovedNode,
+            PacketReceiver.makeUnsourcedListenerReference(this.processDomainServerRemovedNode));
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -318,6 +326,23 @@ class NodesList extends LimitedNodeList {
 
             this.addNewNode(node);
         }
+
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|DomainServerRemovedNode} message received from the domain server.
+     *  @function NodesList.processDomainServerRemovedNode
+     *  @param {ReceivedMessage} message - The DomainServerRemovedNode message.
+     *  @returns {Slot}
+     */
+    processDomainServerRemovedNode = (message: ReceivedMessage): void => {
+        // C++  void processDomainServerRemovedNode(ReceivedMessage* message)
+        const info = PacketScribe.DomainServerRemovedNode.read(message.getMessage());
+        const nodeUUID = info.nodeUUID;
+        console.log("[networking] Received packet from domain-server to remove node with UUID", nodeUUID.stringify());
+        this.killNodeWithUUID(nodeUUID);
+
+        // WEBRTC TODO: Address further C++ code.
 
     };
 

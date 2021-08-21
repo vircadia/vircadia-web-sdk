@@ -296,6 +296,21 @@ class LimitedNodeList {
     }
 
     /*@devdoc
+     *  Gets the node with a specified UUID.
+     *  @param {Uuid} uuid - The UUID of the node to get.
+     *  @returns {Node|null} The node with the specified UUID if found, <code>null</code> if not found.
+     */
+    nodeWithUUID(nodeUUID: Uuid): Node | null {
+        // C++  Node* nodeWithUUID(const QUuid& nodeUUID)
+        const matchingNode = this._nodeHash.get(nodeUUID.value());
+        if (!matchingNode) {
+            return null;
+        }
+        return matchingNode;
+    }
+
+
+    /*@devdoc
      *  Gets the client's local socket network address.
      *  @returns {SockAddr} The local socket network address.
      */
@@ -442,6 +457,20 @@ class LimitedNodeList {
 
         // Ping timer N/A.
 
+    }
+
+    protected killNodeWithUUID(nodeUUID: Uuid, newConnectionID = this.NULL_CONNECTION_ID): boolean {
+        // C++  bool killNodeWithUUID(const QUuid& nodeUUID, ConnectionID newConnectionID  = NULL_CONNECTION_ID)
+        const matchingNode = this.nodeWithUUID(nodeUUID);
+        if (matchingNode) {
+
+            // WEBRTC TODO: Address further C++ code.
+
+            this._nodeHash.delete(matchingNode.getUUID().value());  // eslint-disable-line @typescript-eslint/dot-notation
+            this.handleNodeKill(matchingNode, newConnectionID);
+            return true;
+        }
+        return false;
     }
 
 

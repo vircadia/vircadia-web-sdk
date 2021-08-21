@@ -132,6 +132,8 @@ const enum PacketTypeValue {
 /*@devdoc
  *  The <code>PacketType</code> namespace lists the Vircadia protocol packets.
  *  <p>C++: <code>PacketHeaders.h</code>
+ *  <p><em>Reliable</em>: These packets are sent reliably: their successful receipt is verified and the packets are resent if
+ *      necessary.</p>
  *
  *  @namespace PacketType
  *  @variation 1
@@ -202,7 +204,11 @@ const enum PacketTypeValue {
  *  @property {PacketType} AssetGetInfoReply - <code>54</code>
  *  @property {PacketType} DomainDisconnectRequest - <code>55</code> - The user client sends this empty packet to the Domain
  *      Server to signal that the user client is disconnecting. The Domain Server does not respond.
- *  @property {PacketType} DomainServerRemovedNode - <code>56</code>
+ *  @property {PacketType} DomainServerRemovedNode - <code>56</code> - The domain server broadcasts this to user clients when an
+ *      assignment client has been removed. It is sent only to clients that have registered interest in the node type
+ *      removed.<br />
+ *      <em>Reliable.</em>
+ *      {@link PacketScribe.DomainServerRemovedNodeDetails}.
  *  @property {PacketType} MessagesData - <code>57</code>
  *  @property {PacketType} MessagesSubscribe - <code>58</code>
  *  @property {PacketType} MessagesUnsubscribe - <code>59</code>
@@ -454,17 +460,20 @@ const PacketType = new class {
      */
     versionForPacketType(packetType: PacketTypeValue): number {
         // C++  PacketVersion versionForPacketType(PacketType packetType)
+        const DEFAULT_VERSION = 22;
         switch (packetType) {
             case this.DomainList:
                 return this._DomainListVersion.HasConnectReason;
             case this.DomainListRequest:
-                return 22;  // eslint-disable-line @typescript-eslint/no-magic-numbers
+                return DEFAULT_VERSION;
             case this.DomainConnectionDenied:
                 return this._DomainConnectionDeniedVersion.IncludesExtraInfo;
             case this.DomainConnectRequest:
                 return this._DomainConnectRequestVersion.HasCompressedSystemInfo;
             case this.DomainDisconnectRequest:
-                return 22;  // eslint-disable-line @typescript-eslint/no-magic-numbers
+                return DEFAULT_VERSION;
+            case this.DomainServerRemovedNode:
+                return DEFAULT_VERSION;
 
                 // WebRTC TODO: Add other packets.
 

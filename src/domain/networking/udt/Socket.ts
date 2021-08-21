@@ -247,11 +247,20 @@ class Socket {
 
                 // WEBRTC TODO: Address further C++ code.
 
+                if (packet.isReliable()) {
+                    console.warn("Reliable packets not yet implemented!");
+
+                    // WEBRTC TODO: Address further C++ code.
+
+                    return;
+                }
+
+                // WEBRTC TODO: Address further C++ code.
+
                 if (messageData.isPartOfMessage) {
-
-                    // WEBRTC  TODO: Address further C++ code.
-
                     console.warn("Multi-packet messages not yet implemented!");
+
+                    // WEBRTC TODO: Address further C++ code.
 
                 } else if (this._packetHandler) {
                     this._packetHandler(packet);
