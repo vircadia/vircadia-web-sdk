@@ -269,6 +269,7 @@ class DomainServer {
      *  Disconnects the user client from the domain server.
      */
     disconnect(): void {
+        // C++  N/A
         if (this.#_state === DomainServer.DISCONNECTED) {
             return;
         }

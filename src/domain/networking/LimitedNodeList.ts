@@ -407,7 +407,7 @@ class LimitedNodeList {
      *  @returns {Signal}
      */
     get nodeAdded(): Signal {
-        // C++  void nodeAdded(SharedNodePointer node);
+        // C++  void nodeAdded(Node* node);
         return this._nodeAdded;
     }
 
@@ -418,7 +418,7 @@ class LimitedNodeList {
      *  @returns {Signal}
      */
     get nodeActivated(): Signal {
-        // C++  void nodeActivated(SharedNodePointer node);
+        // C++  void nodeActivated(Node* node);
         return this._nodeActivated;
     }
 
@@ -429,12 +429,12 @@ class LimitedNodeList {
      *  @returns {Signal}
      */
     get nodeSocketUpdated(): Signal {
-        // C++  void nodeSocketUpdated(SharedNodePointer node);
+        // C++  void nodeSocketUpdated(Node* node);
         return this._nodeSocketUpdated;
     }
 
     /*@devdoc
-     *  Triggered when a new node is killed.
+     *  Triggered when a node is killed.
      *  @function LimitedNodeList.nodeKilled
      *  @param {Node} node - The node killed.
      *  @returns {Signal}
@@ -457,7 +457,6 @@ class LimitedNodeList {
 
     }
 
-    // WEBRTC TOOD: JSDoc
     // eslint-disable-next-line
     // @ts-ignore
     protected handleNodeKill(node: Node, nextConnectionID = this.NULL_CONNECTION_ID): void {  // eslint-disable-line

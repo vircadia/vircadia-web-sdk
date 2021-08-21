@@ -68,7 +68,7 @@ class Uuid extends BigInt {
     /*@devdoc
      *  Gets the UUID value formatted as a hexadecimal string with <code>-</code> separators.
      *  @function Uuid(1).stringify
-     *  @returns {string} The UUID value eformatted as <code>nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn</code>.
+     *  @returns {string} The UUID value formatted as <code>nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn</code>.
      */
     stringify(): string {
         /* eslint-disable @typescript-eslint/no-magic-numbers */

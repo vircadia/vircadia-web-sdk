@@ -191,7 +191,7 @@ class NetworkPeer {
 
     /*@devdoc
      *  Gets the currently active socket.
-     *  @returns {SockAddr|null} The currently active socket if one is active, <code>null</code> if none is active/
+     *  @returns {SockAddr|null} The currently active socket if one is active, <code>null</code> if none is active.
      */
     getActiveSocket(): SockAddr | null {
         // C++  const SockAddr* getActiveSocket() const { return _activeSocket; }
