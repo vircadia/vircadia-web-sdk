@@ -60,6 +60,10 @@ type OnStateChangedCallback = (state: ConnectionState, info: string) => void;
  *  @property {DomainServer.ConnectionState} ERROR - Error connecting to the domain; not connected to the domain. See
  *      <code>errorInfo</code> for details.
  *      <em>Static. Read-only.</em>
+ *  @property {number} contextID - Identifies the shared context which the DomainServer and associated assignment client objects
+ *      (AudioMixer, AvatarMixer, etc.) use to connect to and interact with a domain. The context ID is assigned when the
+ *      DomainServer object is constructed.
+ *      <em>Read-only.</em>
  *  @property {string} location - The current location that the domain server is pointed at. <code>""</code> if no location has
  *      been set.
  *      <em>Read-only.</em>
@@ -131,6 +135,7 @@ class DomainServer {
     #_domainCheckInTimer: ReturnType<typeof setTimeout> | null = null;
 
     // Context objects.
+    #_contextID;
     #_nodesList: NodesList;
     #_addressManager: AddressManager;
 
@@ -144,8 +149,9 @@ class DomainServer {
         ContextManager.set(contextID, AddressManager);
         ContextManager.set(contextID, NodesList, contextID);
 
-        this.#_nodesList = <NodesList>ContextManager.get(contextID, NodesList);
-        this.#_addressManager = <AddressManager>ContextManager.get(contextID, AddressManager);
+        this.#_nodesList = ContextManager.get(contextID, NodesList) as NodesList;
+        this.#_addressManager = ContextManager.get(contextID, AddressManager) as AddressManager;
+        this.#_contextID = contextID;
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -206,6 +212,10 @@ class DomainServer {
             console.error("ERROR: DomainServer.onStateChanged callback not a function or null!");
             this.#_onStateChangedCallback = null;
         }
+    }
+
+    get contextID(): number {
+        return this.#_contextID;
     }
 
 

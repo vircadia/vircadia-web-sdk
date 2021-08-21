@@ -19,6 +19,22 @@ describe("DomainServer - unit tests", () => {
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
 
+    test("Can get but not set the context ID", () => {
+        const domainServer = new DomainServer();
+        const contextID = domainServer.contextID;
+        expect(typeof contextID).toBe("number");
+        expect(contextID).toBeGreaterThanOrEqual(0);
+        let caughtError = false;
+        try {
+            domainServer.contextID = 1;  // Shouldn't succeed;
+        } catch (e) {
+            caughtError = true;
+        }
+        expect(caughtError).toBe(true);
+        expect(domainServer.contextID).toBe(contextID);
+
+    });
+
     test("Can get but not set location property", () => {
         const domainServer = new DomainServer();
         expect(domainServer.location).toBe("");
@@ -26,7 +42,6 @@ describe("DomainServer - unit tests", () => {
         try {
             domainServer.location = "location";  // Shouldn't succeed;
         } catch (e) {
-            //
             caughtError = true;
         }
         expect(caughtError).toBe(true);
@@ -41,7 +56,6 @@ describe("DomainServer - unit tests", () => {
         try {
             DomainServer.CONNECTING = 2;  // Shouldn't succeed;
         } catch (e) {
-            //
             caughtError = true;
         }
         expect(caughtError).toBe(true);
@@ -55,7 +69,6 @@ describe("DomainServer - unit tests", () => {
         try {
             domainServer.state = DomainServer.CONNECTED;  // Shouldn't succeed;
         } catch (e) {
-            //
             caughtError = true;
         }
         expect(caughtError).toBe(true);
@@ -70,13 +83,11 @@ describe("DomainServer - unit tests", () => {
         try {
             domainServer.refusalInfo = "refused";  // Shouldn't succeed;
         } catch (e) {
-            //
             caughtErrorCount += 1;
         }
         try {
             domainServer.errorInfo = "error";  // Shouldn't succeed;
         } catch (e) {
-            //
             caughtErrorCount += 1;
         }
         expect(caughtErrorCount).toBe(2);
