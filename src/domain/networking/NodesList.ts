@@ -370,9 +370,16 @@ class NodesList extends LimitedNodeList {
         // WebRTC connection. WebRTC does the hole punching for us.
 
         if (this._nodeSocket.getSocketState(this._domainHandler.getURL(), node.getType()) === Socket.UNCONNECTED) {
+
+            if (!this._domainHandler.isConnected()) {
+                // Cannot connect to an assignment client if the domain server isn't connected.
+                return;
+            }
+
             this._nodeSocket.openSocket(this._domainHandler.getURL(), node.getType(), (socketID) => {
                 this.activateSocketFromNodeCommunication(socketID, node);
             });
+
         } else {
             console.error("Unexpected socket state for", NodeType.getNodeTypeName(node.getType()));
         }
