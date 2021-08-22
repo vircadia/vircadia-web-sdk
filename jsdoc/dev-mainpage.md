@@ -6,7 +6,7 @@ server provides global services that connect the users and domains.
 See the user docs to [Understand the Architecture](https://docs.vircadia.com/explore/get-started/architecture.html).
 
 This SDK provides interfaces to:
-- Connect to domains.
+- Connect to domains and their assignment clients.
 - Use metaverse services.
 
 <hr />
@@ -14,6 +14,7 @@ This SDK provides interfaces to:
 The top-level namespaces and classes provided for an application to use are, per the _Vircadia Web SDK Reference_:
 - `Vircadia`
 - `DomainServer`
+- `MessageMixer`
 
 <hr />
 

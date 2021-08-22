@@ -29,3 +29,4 @@ const Vircadia = new class {
 export default Vircadia;
 export { Vircadia };
 export { default as DomainServer } from "./DomainServer";
+export { default as MessageMixer } from "./MessageMixer";
