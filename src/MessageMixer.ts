@@ -22,7 +22,7 @@ import ContextManager from "./domain/shared/ContextManager";
  *          <tr><th>Name</th><th>Value</th><th>Description</th></tr>
  *      </thead>
  *      <tbody>
- *          <tr><td>UNAVAILABLE</td><td>0</td><td>here is no Message Mixer available - you're not connected to a domain or the
+ *          <tr><td>UNAVAILABLE</td><td>0</td><td>There is no Message Mixer available - you're not connected to a domain or the
  *              domain doesn't have a Message Mixer running.</td></tr>
  *          <tr><td>DISCONNECTED</td><td>1</td><td>Not connected to the Message Mixer.</td></tr>
  *          <tr><td>CONNECTED</td><td>2</td><td>Connected to the Message Mixer.</td></tr>

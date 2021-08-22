@@ -31,7 +31,7 @@ import ContextManager from "./domain/shared/ContextManager";
  *          <tr><td>ERROR</td><td>4</td><td>Error connecting to the domain; not connected to the domain.</td></tr>
  *      </tbody>
  *  </table>
- *  @typedef {number} DomainServer.ConnectionState
+ *  @typedef {number} DomainServer.State
  */
 enum ConnectionState {
     DISCONNECTED = 0,
@@ -41,23 +41,23 @@ enum ConnectionState {
     ERROR
 }
 
-type OnStateChangedCallback = (state: ConnectionState, info: string) => void;
+type OnStateChanged = (state: ConnectionState, info: string) => void;
 
 
 /*@sdkdoc
  *  The <code>DomainServer</code> class provides the interface for connecting to a domain server.
  *
  *  @class DomainServer
- *  @property {DomainServer.ConnectionState} DISCONNECTED - Disconnected from the domain.
+ *  @property {DomainServer.State} DISCONNECTED - Disconnected from the domain.
  *      <em>Static. Read-only.</em>
- *  @property {DomainServer.ConnectionState} CONNECTING - Connecting to the domain.
+ *  @property {DomainServer.State} CONNECTING - Connecting to the domain.
  *      <em>Static. Read-only.</em>
- *  @property {DomainServer.ConnectionState} CONNECTED - Connected to the domain.
+ *  @property {DomainServer.State} CONNECTED - Connected to the domain.
  *      <em>Static. Read-only.</em>
- *  @property {DomainServer.ConnectionState} REFUSED - Connection to the domain refused; not connected to the domain. See
+ *  @property {DomainServer.State} REFUSED - Connection to the domain refused; not connected to the domain. See
  *      <code>refusalInfo</code> for details.
  *      <em>Static. Read-only.</em>
- *  @property {DomainServer.ConnectionState} ERROR - Error connecting to the domain; not connected to the domain. See
+ *  @property {DomainServer.State} ERROR - Error connecting to the domain; not connected to the domain. See
  *      <code>errorInfo</code> for details.
  *      <em>Static. Read-only.</em>
  *  @property {number} contextID - Identifies the shared context which the DomainServer and associated assignment client objects
@@ -67,7 +67,7 @@ type OnStateChangedCallback = (state: ConnectionState, info: string) => void;
  *  @property {string} location - The current location that the domain server is pointed at. <code>""</code> if no location has
  *      been set.
  *      <em>Read-only.</em>
- *  @property {DomainServer.ConnectionState} state - The current state of the connection to the domain server.
+ *  @property {DomainServer.State} state - The current state of the connection to the domain server.
  *      <em>Read-only.</em>
  *  @property {string} refusalInfo - A description of the reason if <code>state == DomainServer.REFUSED</code>, otherwise
  *      <code>""</code>.
@@ -75,8 +75,8 @@ type OnStateChangedCallback = (state: ConnectionState, info: string) => void;
  *  @property {string} errorInfo - A description of the reason if <code>state == DomainServer.ERROR</code>, otherwise
  *      <code>""</code>.
  *      <em>Read-only.</em>
- *  @property {DomainServer~onStateChangedCallback|null} onStateChanged - Sets a single function to be called when the state of
- *      the domain server connection changes. Set to <code>null</code> to remove the callback.
+ *  @property {DomainServer~onStateChanged|null} onStateChanged - Sets a single function to be called when the state of the
+ *      domain server connection changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  */
 class DomainServer {
@@ -86,8 +86,8 @@ class DomainServer {
 
     /*@sdkdoc
      *  Called when the state of the domain server connection changes.
-     *  @callback DomainServer~onStateChangedCallback
-     *  @param {DomainServer.ConnectionState} state - The state of the domain server connection.
+     *  @callback DomainServer~onStateChanged
+     *  @param {DomainServer.State} state - The state of the domain server connection.
      *  @param {string} info - Refusal or error information if the state is <code>REFUSAL</code> or <code>ERROR</code>.
      */
 
@@ -114,7 +114,7 @@ class DomainServer {
     /*@sdkdoc
      *  Gets the string representing a connection state.
      *  <p><em>Static</em></p>
-     *  @param {DomainServer.ConnectionState} state - The state to get the string representation of.
+     *  @param {DomainServer.State} state - The state to get the string representation of.
      *  @returns {string} The string representing the connection state if a valid state, otherwise <code>""</code>.
      */
     static stateToString(state: ConnectionState): string {
@@ -127,10 +127,10 @@ class DomainServer {
 
 
     #_location = "";
-    #_state: ConnectionState = DomainServer.DISCONNECTED;
+    #_state = DomainServer.DISCONNECTED;
     #_refusalInfo = "";
     #_errorInfo = "";
-    #_onStateChangedCallback: OnStateChangedCallback | null = null;
+    #_onStateChanged: OnStateChanged | null = null;
 
     #_domainCheckInTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -205,12 +205,12 @@ class DomainServer {
         return this.#_errorInfo;
     }
 
-    set onStateChanged(callback: OnStateChangedCallback) {
+    set onStateChanged(callback: OnStateChanged) {
         if (typeof callback === "function" || callback === null) {
-            this.#_onStateChangedCallback = callback;
+            this.#_onStateChanged = callback;
         } else {
             console.error("ERROR: DomainServer.onStateChanged callback not a function or null!");
-            this.#_onStateChangedCallback = null;
+            this.#_onStateChanged = null;
         }
     }
 
@@ -303,8 +303,8 @@ class DomainServer {
         } else if (this.#_state === DomainServer.ERROR) {
             this.#_errorInfo = info;
         }
-        if (hasStateChanged && this.#_onStateChangedCallback) {
-            this.#_onStateChangedCallback(state, info);
+        if (hasStateChanged && this.#_onStateChanged) {
+            this.#_onStateChanged(state, info);
         }
     }
 
