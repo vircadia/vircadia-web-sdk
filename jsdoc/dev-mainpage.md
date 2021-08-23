@@ -14,6 +14,8 @@ This SDK provides interfaces to:
 The top-level namespaces and classes provided for an application to use are, per the _Vircadia Web SDK Reference_:
 - `Vircadia`
 - `DomainServer`
+- `AudioMixer`
+- `AvatarMixer`
 - `MessageMixer`
 
 <hr />
@@ -25,17 +27,12 @@ project or directly from the SDK TypeScript.
     ```
     npm install --save-prod <path-to-vircadia-web-sdk-folder>
 
-    import { Vircadia, DomainServer } from "@vircadia/web-sdk";
-    ```
-
-- You can also only import specific modules if you wish:
-    ```
-    import { Vircadia, DomainServer } from "@vircadia/web-sdk/modules/Vircadia";
+    import { Vircadia, DomainServer , AudioMixer, AvatarMixer, MessageMixer } from "@vircadia/web-sdk";
     ```
 
 - Import directly from the SDK TypeScript:
     ```
-    import { Vircadia, DomainServer } from "<path>/Vircadia";
+    import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from "<path>/Vircadia";
     ```
 
 <hr />
