@@ -20,7 +20,7 @@ import { DomainServer, MessageMixer } from "../dist/Vircadia.js";
     // Domain Server.
     (function () {
         const domainServer = new DomainServer();
-        contextID = domainServer.context;
+        contextID = domainServer.contextID;
 
         const statusText = document.getElementById("domainStatus");
         const statusInfoText = document.getElementById("domainStatusInfo");

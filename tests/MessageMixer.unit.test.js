@@ -18,6 +18,7 @@ describe("MessageMixer - unit tests", () => {
 
 
     test("Error if try to create a MessageMixer without a DomainServer", () => {
+        // This test must be first so that it runs before any DomainServer is created which creates a context.
         let messageMixer = null;
         let caughtError = false;
         try {
