@@ -24,11 +24,11 @@ import ContextManager from "./domain/shared/ContextManager";
  *          <tr><th>Name</th><th>Value</th><th>Description</th></tr>
  *      </thead>
  *      <tbody>
- *          <tr><td>DISCONNECTED</td><td>0</td><td>Disconnected from the domain.</td></tr>
- *          <tr><td>CONNECTING</td><td>1</td><td>Connecting to the domain.</td></tr>
- *          <tr><td>CONNECTED</td><td>2</td><td>Connected to the domain.</td></tr>
- *          <tr><td>REFUSED</td><td>3</td><td>Connection to the domain refused; not connected to the domain.</td></tr>
- *          <tr><td>ERROR</td><td>4</td><td>Error connecting to the domain; not connected to the domain.</td></tr>
+ *          <tr><td>DISCONNECTED</td><td>0</td><td>Disconnected from the domain server.</td></tr>
+ *          <tr><td>CONNECTING</td><td>1</td><td>Connecting to the domain server.</td></tr>
+ *          <tr><td>CONNECTED</td><td>2</td><td>Connected to the domain server.</td></tr>
+ *          <tr><td>REFUSED</td><td>3</td><td>Connection to the domain server refused; not connected.</td></tr>
+ *          <tr><td>ERROR</td><td>4</td><td>Error connecting to the domain server; not connected.</td></tr>
  *      </tbody>
  *  </table>
  *  @typedef {number} DomainServer.State
@@ -48,24 +48,24 @@ type OnStateChanged = (state: ConnectionState, info: string) => void;
  *  The <code>DomainServer</code> class provides the interface for connecting to a domain server.
  *
  *  @class DomainServer
- *  @property {DomainServer.State} DISCONNECTED - Disconnected from the domain.
+ *  @property {DomainServer.State} DISCONNECTED - Disconnected from the domain server.
  *      <em>Static. Read-only.</em>
- *  @property {DomainServer.State} CONNECTING - Connecting to the domain.
+ *  @property {DomainServer.State} CONNECTING - Connecting to the domain server.
  *      <em>Static. Read-only.</em>
- *  @property {DomainServer.State} CONNECTED - Connected to the domain.
+ *  @property {DomainServer.State} CONNECTED - Connected to the domain server.
  *      <em>Static. Read-only.</em>
- *  @property {DomainServer.State} REFUSED - Connection to the domain refused; not connected to the domain. See
+ *  @property {DomainServer.State} REFUSED - Connection to the domain server refused; not connected to the domain. See
  *      <code>refusalInfo</code> for details.
  *      <em>Static. Read-only.</em>
- *  @property {DomainServer.State} ERROR - Error connecting to the domain; not connected to the domain. See
+ *  @property {DomainServer.State} ERROR - Error connecting to the domain server; not connected to the domain. See
  *      <code>errorInfo</code> for details.
  *      <em>Static. Read-only.</em>
  *  @property {number} contextID - Identifies the shared context which the DomainServer and associated assignment client objects
  *      (AudioMixer, AvatarMixer, etc.) use to connect to and interact with a domain. The context ID is assigned when the
  *      DomainServer object is constructed.
  *      <em>Read-only.</em>
- *  @property {string} location - The current location that the domain server is pointed at. <code>""</code> if no location has
- *      been set.
+ *  @property {string} location - The current location that the DomainServer is connected to or trying to connect to.
+ *      <code>""</code> if no location has been set.
  *      <em>Read-only.</em>
  *  @property {DomainServer.State} state - The current state of the connection to the domain server.
  *      <em>Read-only.</em>
@@ -76,18 +76,18 @@ type OnStateChanged = (state: ConnectionState, info: string) => void;
  *      <code>""</code>.
  *      <em>Read-only.</em>
  *  @property {DomainServer~onStateChanged|null} onStateChanged - Sets a single function to be called when the state of the
- *      domain server connection changes. Set to <code>null</code> to remove the callback.
+ *      connection to the domain server changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  */
 class DomainServer {
     // C++  Application.cpp
-    //      The Web SDK differs from the C++ in that a "disconnect" command is explicitly provides which disconnects from the
-    //      current domain and stops the check-ins from being sent. The C++ never stops sending check-ins.
+    //      The Web SDK differs from the C++ in that a "disconnect" command is explicitly provided to disconnect from the
+    //      current domain and stop the check-ins from being sent; the C++ never stops sending check-ins.
 
     /*@sdkdoc
-     *  Called when the state of the domain server connection changes.
+     *  Called when the state of the connection to the domain changes.
      *  @callback DomainServer~onStateChanged
-     *  @param {DomainServer.State} state - The state of the domain server connection.
+     *  @param {DomainServer.State} state - The state of the connection to the domain server connection.
      *  @param {string} info - Refusal or error information if the state is <code>REFUSAL</code> or <code>ERROR</code>.
      */
 
@@ -220,7 +220,7 @@ class DomainServer {
 
 
     /*@sdkdoc
-     *  Initiates connection of the user client to a Domain Server and keeps the connection alive.
+     *  Initiates connection of the user client to a domain server.
      *  <p>The following types of location are supported:</p>
      *  <table>
      *      <tbody>
@@ -229,7 +229,7 @@ class DomainServer {
      *          ...)</td></tr>
      *      </tbody>
      *  </table>
-     *  @param {string} location - The location of the Domain Server to connect to.
+     *  @param {string} location - The location of the domain server to connect to.
      */
     connect(location: string): void {
         // C++  Application.cpp's domainCheckInTimer.

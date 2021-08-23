@@ -58,6 +58,7 @@ describe("DomainServer - integration tests", () => {
             expect(info).toBe("");
             haveSeenConnecting = haveSeenConnecting || state === DomainServer.CONNECTING;
             if (state === DomainServer.CONNECTED) {
+                expect(haveSeenConnecting).toBe(true);  // eslint-disable-line jest/no-conditional-expect
                 setTimeout(() => {
                     haveRequestedDisconnect = true;
                     domainServer.disconnect();
