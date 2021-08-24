@@ -21,7 +21,7 @@ const FingerprintUtils = new class {
 
     // Dummy value for now.
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    private _machineFingerprint = new Uuid(213897485297723222451865858523432009088n);
+    #_machineFingerprint = new Uuid(213897485297723222451865858523432009088n);
 
     // WEBRTC TODO: Address further C++ code.
 
@@ -35,7 +35,7 @@ const FingerprintUtils = new class {
 
         // WEBRTC TODO: Address further C++ code.
 
-        return this._machineFingerprint;
+        return this.#_machineFingerprint;
     }
 
 }();

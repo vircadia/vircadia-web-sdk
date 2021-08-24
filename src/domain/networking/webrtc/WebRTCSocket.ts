@@ -72,21 +72,21 @@ class WebRTCSocket {
 
     // A single WebRTC signaling channel connected to the domain server for use in establishing WebRTC connections with both the
     // domain server and each assignment client.
-    private _webrtcSignalingChannel: WebRTCSignalingChannel | null = null;
-    private _webrtcSignalingChannelAddress = "";
+    #_webrtcSignalingChannel: WebRTCSignalingChannel | null = null;
+    #_webrtcSignalingChannelAddress = "";
 
     // A WebRTC data channel per domain server and assignment client node.
-    private _webrtcDataChannelsByNodeType: WebRTCDataChannelsByNodeType = new Map();
-    private _webrtcDataChannelsByChannelID: WebRTCDataChannelsByChannelID = new Map();
+    #_webrtcDataChannelsByNodeType: WebRTCDataChannelsByNodeType = new Map();
+    #_webrtcDataChannelsByChannelID: WebRTCDataChannelsByChannelID = new Map();
 
     // WebRTC data channel IDs are assigned by us and are the equivalent of UDP ports.
     // WEBRTC TODO: Move into WebRTCDataChannel and make read-only.
     // WEBRTC TODO: Reimplement as a generator function?
-    private _lastDataChannelID = 0;  // First data channel ID is 1.
+    #_lastDataChannelID = 0;  // First data channel ID is 1.
 
-    private _receivedQueue: Array<{ channelID: number, message: ArrayBuffer }> = [];
+    #_receivedQueue: Array<{ channelID: number, message: ArrayBuffer }> = [];
 
-    private _readyRead = new Signal();
+    #_readyRead = new Signal();
 
 
     constructor() {  // eslint-disable-line @typescript-eslint/no-useless-constructor
@@ -105,13 +105,13 @@ class WebRTCSocket {
      */
     state(url: string, nodeType: NodeTypeValue): number {
         // C++  N/A
-        if (url !== this._webrtcSignalingChannelAddress) {
+        if (url !== this.#_webrtcSignalingChannelAddress) {
             return WebRTCSocket.UNCONNECTED;
         }
 
-        if (this._webrtcDataChannelsByNodeType.has(nodeType)) {
+        if (this.#_webrtcDataChannelsByNodeType.has(nodeType)) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            switch (this._webrtcDataChannelsByNodeType.get(nodeType)!.webrtcDataChannel.readyState) {
+            switch (this.#_webrtcDataChannelsByNodeType.get(nodeType)!.webrtcDataChannel.readyState) {
                 case WebRTCDataChannel.OPEN:
                     return WebRTCSocket.CONNECTED;
                 case WebRTCDataChannel.CONNECTING:
@@ -120,8 +120,8 @@ class WebRTCSocket {
                     // Fall through.
             }
         }
-        if (this._webrtcSignalingChannel !== null) {
-            switch (this._webrtcSignalingChannel.readyState) {
+        if (this.#_webrtcSignalingChannel !== null) {
+            switch (this.#_webrtcSignalingChannel.readyState) {
                 case WebRTCSignalingChannel.OPEN:
                     return WebRTCSocket.SIGNALING;
                 case WebRTCSignalingChannel.CONNECTING:
@@ -150,25 +150,25 @@ class WebRTCSocket {
         // C++  N/A
 
         // Close any current connections if for a different URL.
-        if (url !== this._webrtcSignalingChannelAddress) {
-            this.closeWebRTCDataChannels();
-            this.closeWebRTCSignalingChannel();
+        if (url !== this.#_webrtcSignalingChannelAddress) {
+            this.#closeWebRTCDataChannels();
+            this.#closeWebRTCSignalingChannel();
         }
 
         // Adopt the URL.
-        this._webrtcSignalingChannelAddress = url.trim();
+        this.#_webrtcSignalingChannelAddress = url.trim();
         if (url.length === 0) {
             return;
         }
 
         // Open signaling channel if not already open, and data channel.
-        if (this._webrtcSignalingChannel === null
-                || this._webrtcSignalingChannel.readyState === WebRTCSignalingChannel.CLOSED) {
-            this.openWebRTCSignalingChannel(() => {
-                this.openWebRTCDataChannel(nodeType, callback);
+        if (this.#_webrtcSignalingChannel === null
+                || this.#_webrtcSignalingChannel.readyState === WebRTCSignalingChannel.CLOSED) {
+            this.#openWebRTCSignalingChannel(() => {
+                this.#openWebRTCDataChannel(nodeType, callback);
             });
         } else {
-            this.openWebRTCDataChannel(nodeType, callback);
+            this.#openWebRTCDataChannel(nodeType, callback);
         }
     }
 
@@ -178,10 +178,10 @@ class WebRTCSocket {
      */
     abort(): void {
         // C++  N/A
-        this.closeWebRTCDataChannels();
-        this.closeWebRTCSignalingChannel();
-        while (this._receivedQueue.length > 0) {
-            this._receivedQueue.pop();
+        this.#closeWebRTCDataChannels();
+        this.#closeWebRTCSignalingChannel();
+        while (this.#_receivedQueue.length > 0) {
+            this.#_receivedQueue.pop();
         }
     }
 
@@ -192,7 +192,7 @@ class WebRTCSocket {
      */
     hasPendingDatagrams(): boolean {
         // C++  bool hasPendingDatagrams()
-        return this._receivedQueue.length > 0;
+        return this.#_receivedQueue.length > 0;
     }
 
     /*@devdoc
@@ -207,7 +207,7 @@ class WebRTCSocket {
 
         // WEBRTC TODO: Address further C++.
 
-        const data = this._receivedQueue.shift();
+        const data = this.#_receivedQueue.shift();
         if (data) {
             const length = maxSize >= 0 ? Math.min(data.message.byteLength, maxSize) : data.message.byteLength;
 
@@ -239,7 +239,7 @@ class WebRTCSocket {
 
         // WEBRTC TODO: Address further code.
 
-        const dataChannel = this._webrtcDataChannelsByChannelID.get(port);
+        const dataChannel = this.#_webrtcDataChannelsByChannelID.get(port);
         if (dataChannel && dataChannel.webrtcDataChannel.send(datagram)) {
             return datagram.byteLength;
         }
@@ -257,56 +257,56 @@ class WebRTCSocket {
      */
     get readyRead(): Signal {
         // C++  void readyRead()
-        return this._readyRead;
+        return this.#_readyRead;
     }
 
 
-    private openWebRTCSignalingChannel(callback: () => void): void {
+    #openWebRTCSignalingChannel(callback: () => void): void {
         // C++  WebRTC-specific method
-        this._webrtcSignalingChannel = new WebRTCSignalingChannel(this._webrtcSignalingChannelAddress);
-        this._webrtcSignalingChannel.onopen = callback;
+        this.#_webrtcSignalingChannel = new WebRTCSignalingChannel(this.#_webrtcSignalingChannelAddress);
+        this.#_webrtcSignalingChannel.onopen = callback;
     }
 
-    private closeWebRTCSignalingChannel(): void {
+    #closeWebRTCSignalingChannel(): void {
         // C++  N/A
-        if (this._webrtcSignalingChannel) {
-            this._webrtcSignalingChannel.close();
-            this._webrtcSignalingChannel = null;
+        if (this.#_webrtcSignalingChannel) {
+            this.#_webrtcSignalingChannel.close();
+            this.#_webrtcSignalingChannel = null;
         }
     }
 
-    private openWebRTCDataChannel(nodeType: NodeTypeValue, callback: (socketID: number) => void): void {
+    #openWebRTCDataChannel(nodeType: NodeTypeValue, callback: (socketID: number) => void): void {
         // C++  WebRTC-specific method
-        if (this._webrtcSignalingChannel === null) {
+        if (this.#_webrtcSignalingChannel === null) {
             return;
         }
-        const webrtcDataChannel = new WebRTCDataChannel(nodeType, this._webrtcSignalingChannel);
+        const webrtcDataChannel = new WebRTCDataChannel(nodeType, this.#_webrtcSignalingChannel);
         webrtcDataChannel.onopen = () => {
-            this._lastDataChannelID += 1;
-            const channelID = this._lastDataChannelID;
+            this.#_lastDataChannelID += 1;
+            const channelID = this.#_lastDataChannelID;
             webrtcDataChannel.id = channelID;
-            this._webrtcDataChannelsByNodeType.set(nodeType, { channelID, webrtcDataChannel });
-            this._webrtcDataChannelsByChannelID.set(channelID, { nodeType, webrtcDataChannel });
+            this.#_webrtcDataChannelsByNodeType.set(nodeType, { channelID, webrtcDataChannel });
+            this.#_webrtcDataChannelsByChannelID.set(channelID, { nodeType, webrtcDataChannel });
             if (callback) {
                 callback(channelID);
             }
         };
         webrtcDataChannel.onmessage = (message) => {
             const channelID = webrtcDataChannel.id;
-            this._receivedQueue.push({ channelID, message });
-            this._readyRead.emit();
+            this.#_receivedQueue.push({ channelID, message });
+            this.#_readyRead.emit();
         };
     }
 
-    private closeWebRTCDataChannels(): void {
+    #closeWebRTCDataChannels(): void {
         // C++  WebRTC-specific method
-        this._webrtcDataChannelsByNodeType.forEach((dataChannel) => {
+        this.#_webrtcDataChannelsByNodeType.forEach((dataChannel) => {
             if (dataChannel.webrtcDataChannel) {
                 dataChannel.webrtcDataChannel.close();
             }
         });
-        this._webrtcDataChannelsByNodeType = new Map();
-        this._webrtcDataChannelsByChannelID = new Map();
+        this.#_webrtcDataChannelsByNodeType = new Map();
+        this.#_webrtcDataChannelsByChannelID = new Map();
     }
 
 }

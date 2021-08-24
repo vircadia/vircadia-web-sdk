@@ -3,7 +3,7 @@
         "outDir": "./dist",
         "allowJs": true,
         "checkJs": false, // Temporarily disable while unit and integration tests are JavaScript.
-        "target": "ES2020", // Required for BigInt literals.
+        "target": "ESNext", // ES2020+ required for BigInt literals. ESNext required for # methods and conditional constructors.
         "lib": [ "ES2020", "DOM" ],
         "sourceMap": true,
         "moduleResolution": "Node",
@@ -12,6 +12,7 @@
         "esModuleInterop": true,
         "isolatedModules": true,
         "preserveConstEnums": true,
+        "useDefineForClassFields": true,  // Required for ESNext.
 
         // TypeScript 4.3
         "allowUnreachableCode": false,

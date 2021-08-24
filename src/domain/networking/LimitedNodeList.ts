@@ -92,8 +92,8 @@ class LimitedNodeList {
     protected _packetReceiver = new PacketReceiver();
 
 
-    private NULL_CONNECTION_ID = -1;
-    private SOLO_NODE_TYPES = new Set([
+    #NULL_CONNECTION_ID = -1;
+    #SOLO_NODE_TYPES = new Set([
         NodeType.AvatarMixer,
         NodeType.AudioMixer,
         NodeType.AssetServer,
@@ -102,15 +102,15 @@ class LimitedNodeList {
         NodeType.EntityScriptServer
     ]);
 
-    private _sessionUUID = new Uuid(Uuid.NULL);
-    private _sessionLocalID: LocalID = 0;
+    #_sessionUUID = new Uuid(Uuid.NULL);
+    #_sessionLocalID: LocalID = 0;
 
-    private _nodeHash: Map<bigint, Node> = new Map();
+    #_nodeHash: Map<bigint, Node> = new Map();
 
-    private _nodeAdded = new Signal();
-    private _nodeActivated = new Signal();
-    private _nodeSocketUpdated = new Signal();
-    private _nodeKilled = new Signal();
+    #_nodeAdded = new Signal();
+    #_nodeActivated = new Signal();
+    #_nodeSocketUpdated = new Signal();
+    #_nodeKilled = new Signal();
 
 
     constructor() {
@@ -143,7 +143,7 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.fillPacketHeader(packet, hmacAuth);
+        this.#fillPacketHeader(packet, hmacAuth);
 
         return this._nodeSocket.writePacket(packet, sockAddr);
     }
@@ -184,7 +184,7 @@ class LimitedNodeList {
      */
     soloNodeOfType(nodeType: NodeTypeValue): Node | null {
         // C++  Node* soloNodeOfType(NodeType nodeType)
-        for (const node of this._nodeHash.values()) {
+        for (const node of this.#_nodeHash.values()) {
             if (node.getType() === nodeType) {
                 return node;
             }
@@ -199,7 +199,7 @@ class LimitedNodeList {
      */
     findNodeWithAddr(addr: SockAddr): Node | null {
         // C++  Node* findNodeWithAddr(const SockAddr& addr)
-        for (const node of this._nodeHash.values()) {
+        for (const node of this.#_nodeHash.values()) {
             if (node.getPublicSocket().isEqualTo(addr) || node.getLocalSocket().isEqualTo(addr)) {
                 return node;
             }
@@ -229,7 +229,7 @@ class LimitedNodeList {
         //                                        const NodePermissions& permissions = DEFAULT_AGENT_PERMISSIONS);
 
 
-        const matchingNode = this._nodeHash.get(uuid.value());
+        const matchingNode = this.#_nodeHash.get(uuid.value());
         if (matchingNode) {
             matchingNode.setPublicSocket(publicSocket);
             matchingNode.setLocalSocket(localSocket);
@@ -242,13 +242,13 @@ class LimitedNodeList {
         }
 
         // If this is a solo node then the domain server has replaced it and any previous node of the type should be killed.
-        if (this.SOLO_NODE_TYPES.has(nodeType)) {
-            this.removeOldNode(this.soloNodeOfType(nodeType));
+        if (this.#SOLO_NODE_TYPES.has(nodeType)) {
+            this.#removeOldNode(this.soloNodeOfType(nodeType));
         }
 
         // If there is a new node with the same socket, this is a reconnection, kill the old node
-        this.removeOldNode(this.findNodeWithAddr(publicSocket));
-        this.removeOldNode(this.findNodeWithAddr(localSocket));
+        this.#removeOldNode(this.findNodeWithAddr(publicSocket));
+        this.#removeOldNode(this.findNodeWithAddr(localSocket));
 
         // If there is an old Connection to the new node's address, kill it.
         this._nodeSocket.cleanupConnection(publicSocket);
@@ -266,7 +266,7 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this._nodeHash.set(newNode.getUUID().value(), newNode);
+        this.#_nodeHash.set(newNode.getUUID().value(), newNode);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -274,14 +274,14 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this._nodeAdded.emit(newNode);
+        this.#_nodeAdded.emit(newNode);
 
         // Signal when the network connection to the new node is established.
         if (newNode.getActiveSocket()) {
-            this._nodeActivated.emit(newNode);
+            this.#_nodeActivated.emit(newNode);
         } else {
             const callback = () => {
-                this._nodeActivated.emit(newNode);
+                this.#_nodeActivated.emit(newNode);
                 newNode.socketActivated.disconnect(callback);
             };
             newNode.socketActivated.connect(callback);
@@ -289,7 +289,7 @@ class LimitedNodeList {
 
         // Signal when the node's socket changes so that we can reconnect.
         newNode.socketUpdated.connect((previousAddress, currentAddress) => {
-            this._nodeSocketUpdated.emit(newNode);
+            this.#_nodeSocketUpdated.emit(newNode);
             this._nodeSocket.handleRemoteAddressChange(previousAddress, currentAddress);
         });
 
@@ -303,7 +303,7 @@ class LimitedNodeList {
      */
     nodeWithUUID(nodeUUID: Uuid): Node | null {
         // C++  Node* nodeWithUUID(const QUuid& nodeUUID)
-        const matchingNode = this._nodeHash.get(nodeUUID.value());
+        const matchingNode = this.#_nodeHash.get(nodeUUID.value());
         if (!matchingNode) {
             return null;
         }
@@ -351,7 +351,7 @@ class LimitedNodeList {
      */
     getSessionUUID(): Uuid {
         // C++  LocalID getSessionUUID()
-        return this._sessionUUID;
+        return this.#_sessionUUID;
     }
 
     /*@devdoc
@@ -360,7 +360,7 @@ class LimitedNodeList {
      */
     setSessionUUID(sessionUUID: Uuid): void {
         // C++  void setSessionUUID(const QUuid& sessionUUID);
-        this._sessionUUID = sessionUUID;
+        this.#_sessionUUID = sessionUUID;
     }
 
     /*@devdoc
@@ -369,7 +369,7 @@ class LimitedNodeList {
      */
     getSessionLocalID(): LocalID {
         // C++  LocalID getSessionLocalID()
-        return this._sessionLocalID;
+        return this.#_sessionLocalID;
     }
 
     /*@devdoc
@@ -378,7 +378,7 @@ class LimitedNodeList {
      */
     setSessionLocalID(sessionLocalID: LocalID): void {
         // C++  void setSessionLocalID(LocalID sessionLocalID);
-        this._sessionLocalID = sessionLocalID;
+        this.#_sessionLocalID = sessionLocalID;
     }
 
 
@@ -392,7 +392,7 @@ class LimitedNodeList {
     reset(reason: string): void {  // eslint-disable-line @typescript-eslint/no-unused-vars
         // C++  void reset(QString reason)
         // Cannot declare this Slot function as an arrow function because derived NodesList class calls this function.
-        this.eraseAllNodes(reason);
+        this.#eraseAllNodes(reason);
         this._nodeSocket.clearConnections();
 
         // WEBRTC TODO: Address further C++ code.
@@ -408,7 +408,7 @@ class LimitedNodeList {
      */
     get nodeAdded(): Signal {
         // C++  void nodeAdded(Node* node);
-        return this._nodeAdded;
+        return this.#_nodeAdded;
     }
 
     /*@devdoc
@@ -419,7 +419,7 @@ class LimitedNodeList {
      */
     get nodeActivated(): Signal {
         // C++  void nodeActivated(Node* node);
-        return this._nodeActivated;
+        return this.#_nodeActivated;
     }
 
     /*@devdoc
@@ -430,7 +430,7 @@ class LimitedNodeList {
      */
     get nodeSocketUpdated(): Signal {
         // C++  void nodeSocketUpdated(Node* node);
-        return this._nodeSocketUpdated;
+        return this.#_nodeSocketUpdated;
     }
 
     /*@devdoc
@@ -441,7 +441,7 @@ class LimitedNodeList {
      */
     get nodeKilled(): Signal {
         // C++  void nodeKilled(Node* node);
-        return this._nodeKilled;
+        return this.#_nodeKilled;
     }
 
 
@@ -459,7 +459,7 @@ class LimitedNodeList {
 
     // eslint-disable-next-line
     // @ts-ignore
-    protected handleNodeKill(node: Node, nextConnectionID = this.NULL_CONNECTION_ID): void {  // eslint-disable-line
+    protected handleNodeKill(node: Node, nextConnectionID = this.#NULL_CONNECTION_ID): void {  // eslint-disable-line
         // C++  void handleNodeKill(const SharedNodePointer& node, ConnectionID nextConnectionID = NULL_CONNECTION_ID)
 
         // WEBRTC TODO: Address further C++ code.
@@ -469,7 +469,7 @@ class LimitedNodeList {
 
         // Ping timer N/A.
 
-        this._nodeKilled.emit(node);
+        this.#_nodeKilled.emit(node);
 
         const activeSocket = node.getActiveSocket();
         if (activeSocket) {
@@ -480,14 +480,14 @@ class LimitedNodeList {
 
     }
 
-    protected killNodeWithUUID(nodeUUID: Uuid, newConnectionID = this.NULL_CONNECTION_ID): boolean {
+    protected killNodeWithUUID(nodeUUID: Uuid, newConnectionID = this.#NULL_CONNECTION_ID): boolean {
         // C++  bool killNodeWithUUID(const QUuid& nodeUUID, ConnectionID newConnectionID  = NULL_CONNECTION_ID)
         const matchingNode = this.nodeWithUUID(nodeUUID);
         if (matchingNode) {
 
             // WEBRTC TODO: Address further C++ code.
 
-            this._nodeHash.delete(matchingNode.getUUID().value());  // eslint-disable-line @typescript-eslint/dot-notation
+            this.#_nodeHash.delete(matchingNode.getUUID().value());  // eslint-disable-line @typescript-eslint/dot-notation
             this.handleNodeKill(matchingNode, newConnectionID);
             return true;
         }
@@ -495,7 +495,7 @@ class LimitedNodeList {
     }
 
 
-    private fillPacketHeader(packet: NLPacket, hmacAuth: null): void {
+    #fillPacketHeader(packet: NLPacket, hmacAuth: null): void {
         // C++  void fillPacketHeader(const NLPacket& packet, HMACAuth* hmacAuth = nullptr) {
         if (!PacketType.getNonSourcedPackets().has(packet.getType())) {
             packet.writeSourceID(this.getSessionLocalID());
@@ -509,7 +509,7 @@ class LimitedNodeList {
         }
     }
 
-    private removeOldNode(node: Node | null) {
+    #removeOldNode(node: Node | null): void {
         // C++  auto removeOldNode = [&](auto node)
         if (!node) {
             return;
@@ -517,24 +517,24 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this._nodeHash.delete(node.getUUID().value());  // eslint-disable-line @typescript-eslint/dot-notation
+        this.#_nodeHash.delete(node.getUUID().value());  // eslint-disable-line @typescript-eslint/dot-notation
         this.handleNodeKill(node);
     }
 
-    private eraseAllNodes(reason: string): void {
+    #eraseAllNodes(reason: string): void {
         // C++  void eraseAllNodes(QString reason)
         const killedNodes = [];
 
-        if (this._nodeHash.size > 0) {
+        if (this.#_nodeHash.size > 0) {
             console.log("[networking] Removing all nodes from nodes list:", reason);
-            for (const node of this._nodeHash.values()) {
+            for (const node of this.#_nodeHash.values()) {
                 killedNodes.push(node);
             }
         }
 
         // WEBRTC TODO: Address further C++ code.
 
-        this._nodeHash.clear();
+        this.#_nodeHash.clear();
 
         for (const node of killedNodes) {
             this.handleNodeKill(node);

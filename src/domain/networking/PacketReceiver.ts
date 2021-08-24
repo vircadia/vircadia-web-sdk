@@ -51,7 +51,7 @@ class PacketReceiver {
      */
 
 
-    private _messageListenerMap: Map<PacketTypeValue, ListenerReference> = new Map();
+    #_messageListenerMap: Map<PacketTypeValue, ListenerReference> = new Map();
 
 
     /*@devdoc
@@ -86,7 +86,7 @@ class PacketReceiver {
 
         listener.deliverPending = deliverPending;
 
-        this._messageListenerMap.set(packetType, listener);
+        this.#_messageListenerMap.set(packetType, listener);
         return true;
 
         // WEBRTC TODO: Address further C++ code.
@@ -94,6 +94,7 @@ class PacketReceiver {
 
     /*@devdoc
      *  Invokes the listener registered for an {@link NLPacket} per its PacketType.
+     *  @function PacketReceiver.handleVerifiedPacket
      *  @param {Packet} packet - The packet. It is treated as an NLPacket.
      *  @returns {Slot}
      */
@@ -106,20 +107,20 @@ class PacketReceiver {
 
         const nlPacket = NLPacket.fromBase(packet);
         const receivedMessage = new ReceivedMessage(nlPacket);
-        this.handleVerifiedMessage(receivedMessage, true);
+        this.#handleVerifiedMessage(receivedMessage, true);
     };
 
 
     // eslint-disable-next-line
     // @ts-ignore
-    private handleVerifiedMessage(message: ReceivedMessage, justReceived: boolean): void {  // eslint-disable-line
+    #handleVerifiedMessage(message: ReceivedMessage, justReceived: boolean): void {  // eslint-disable-line
         // C++  void handleVerifiedMessage(ReceivedMessage* receivedMessage, bool justReceived)
 
         // WEBRTC TODO: This method is incorrectly named - it handles both verified and unverified packets?
 
         // WEBRTC TODO: Address further code.
 
-        const messageListener = this._messageListenerMap.get(message.getType());
+        const messageListener = this.#_messageListenerMap.get(message.getType());
         if (messageListener) {
 
             // WEBRTC TODO: Address further code.

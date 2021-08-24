@@ -59,24 +59,24 @@ class Socket {
 
 
     // Use WebRTCSocket directly without going through an intermediary NetworkSocket as is done in C++.
-    private _webrtcSocket: WebRTCSocket;
+    #_webrtcSocket: WebRTCSocket;
 
     // WEBRTC TODO: Address further C++ code.
 
-    private _packetHandler: PacketHandlerCallback | null = null;
+    #_packetHandler: PacketHandlerCallback | null = null;
 
-    private _WEBRTCSOCKET_TO_SOCKET_STATES = [Socket.UNCONNECTED, Socket.UNCONNECTED, Socket.CONNECTING, Socket.CONNECTED];
+    #WEBRTCSOCKET_TO_SOCKET_STATES = [Socket.UNCONNECTED, Socket.UNCONNECTED, Socket.CONNECTING, Socket.CONNECTED];
 
 
     constructor() {
         // C++  Socket(QObject* parent = 0, bool shouldChangeSocketOptions = true)
         // All parameters are unused in TypeScript code so don't implement.
 
-        this._webrtcSocket = new WebRTCSocket();
+        this.#_webrtcSocket = new WebRTCSocket();
 
         // Connect signals.
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        this._webrtcSocket.readyRead.connect(this.readPendingDatagrams);  // Method has been bound above.
+        this.#_webrtcSocket.readyRead.connect(this.readPendingDatagrams);  // Method has been bound above.
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -91,7 +91,7 @@ class Socket {
      */
     getSocketState(url: string, nodeType: NodeTypeValue): number {
         // C++  N/A
-        return this._WEBRTCSOCKET_TO_SOCKET_STATES[this._webrtcSocket.state(url.trim(), nodeType)] as number;
+        return this.#WEBRTCSOCKET_TO_SOCKET_STATES[this.#_webrtcSocket.state(url.trim(), nodeType)] as number;
     }
 
     /*@devdoc
@@ -108,7 +108,7 @@ class Socket {
     // Note: Not called "openConnection" because a "Connection" is a distinct type of object.
     openSocket(url: string, nodeType: NodeTypeValue, callback: (socketID: number) => void): void {
         // C++  N/A
-        this._webrtcSocket.connectToHost(url, nodeType, callback);
+        this.#_webrtcSocket.connectToHost(url, nodeType, callback);
     }
 
 
@@ -121,7 +121,7 @@ class Socket {
         // WEBRTC TODO: Address further C++ code.
 
         // Close WebRTC signaling and data channels.
-        this._webrtcSocket.abort();
+        this.#_webrtcSocket.abort();
     }
 
 
@@ -171,7 +171,7 @@ class Socket {
 
         // WEBRTC TODO: Address further C++ code.
 
-        const bytesWritten = this._webrtcSocket.writeDatagram(datagram, sockAddr.getPort());
+        const bytesWritten = this.#_webrtcSocket.writeDatagram(datagram, sockAddr.getPort());
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -184,7 +184,7 @@ class Socket {
      */
     setPacketHandler(handler: PacketHandlerCallback): void {
         // C++  void setPacketHandler(PacketHandler handler)
-        this._packetHandler = (packet: Packet) => {
+        this.#_packetHandler = (packet: Packet) => {
             handler(packet);
         };
     }
@@ -192,6 +192,7 @@ class Socket {
 
     /*@devdoc
      *  Handles a change in the target node's address.
+     *  @function Socket.handleRemoteAddressChange
      *  @param {SockAddr} previousAddress - The previous address of the target node.
      *  @param {SockAddr} currentAddress - The current address of the target node.
      *  @returns {Slot}
@@ -208,6 +209,7 @@ class Socket {
 
     /*@devdoc
      *  Reads datagrams from the {@link WebRTCSocket} and forwards them to the packet handler to process.
+     *  @function Socket.readPendingDatagrams
      *  @returns {Slot}
      */
     readPendingDatagrams = (): void => {
@@ -215,12 +217,12 @@ class Socket {
 
         // WEBRTC TODO: Address further C++ code.
 
-        while (this._webrtcSocket.hasPendingDatagrams()) {  // WEBRTC TODO: Further C++ code in condition.
+        while (this.#_webrtcSocket.hasPendingDatagrams()) {  // WEBRTC TODO: Further C++ code in condition.
 
             // WEBRRTC TODO: Address further C++ code.
 
             const datagram: WebRTCSocketDatagram = { buffer: undefined, sender: undefined };
-            const sizeRead = this._webrtcSocket.readDatagram(datagram);
+            const sizeRead = this.#_webrtcSocket.readDatagram(datagram);
             if (sizeRead <= 0) {
                 continue;  // eslint-disable-line no-continue
             }
@@ -261,8 +263,8 @@ class Socket {
 
                     // WEBRTC TODO: Address further C++ code.
 
-                } else if (this._packetHandler) {
-                    this._packetHandler(packet);
+                } else if (this.#_packetHandler) {
+                    this.#_packetHandler(packet);
                 }
 
             }

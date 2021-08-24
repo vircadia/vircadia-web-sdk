@@ -145,7 +145,7 @@ class Packet extends BasePacket {
             this._messageData.isReliable = isReliable;
             this._messageData.isPartOfMessage = isPartOfMessage;
             // adjustPayloadStartAndCapacity();  N/A
-            this.writeHeader();
+            this.#writeHeader();
 
         } else if (param0 instanceof DataView && typeof param1 === "number" && param2 instanceof SockAddr) {
             // C++  Packet(std::unique_ptr<char[]> data, qint64 size, const SockAddr& senderSockAddr)
@@ -154,7 +154,7 @@ class Packet extends BasePacket {
             const senderSockAddr = param2;
 
             super(data, size, senderSockAddr);
-            this.readHeader();
+            this.#readHeader();
             // adjustPayloadStartAndCapacity();  N/A
             if (this._messageData.obfuscationLevel !== Packet.ObfuscationLevel.NoObfuscation) {
                 console.warn("Packet() : Undo obfuscation : Not implemented!");
@@ -197,7 +197,7 @@ class Packet extends BasePacket {
 
 
     // Reads the packet header information from the data.
-    private readHeader() {
+    #readHeader(): void {
         // C++  void readHeader()
         const seqNumBitField = this._messageData.data.getUint32(this._messageData.dataPosition, UDT.LITTLE_ENDIAN);
         assert((seqNumBitField & UDT.CONTROL_BIT_MASK) === 0, "Packet.readHeader()", "This should be a data packet!");
@@ -222,7 +222,7 @@ class Packet extends BasePacket {
     }
 
     // Writes the packet header information to the data.
-    private writeHeader() {
+    #writeHeader(): void {
         // C++  void writeHeader()
         let seqNumBitField = this._messageData.sequenceNumber;
         if (this._messageData.isReliable) {

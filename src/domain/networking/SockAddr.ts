@@ -20,9 +20,9 @@ class SockAddr {
 
     // WEBRTC TODO: Add address type (UDP | WebRTC | unknown)?
 
-    private _name = "";
-    private _address = 0;
-    private _port = 0;
+    #_name = "";
+    #_address = 0;
+    #_port = 0;
 
 
     /*@devdoc
@@ -30,7 +30,7 @@ class SockAddr {
      *  @param {string} name - The name of the SockAddr.
      */
     setObjectName(name: string): void {
-        this._name = name;
+        this.#_name = name;
     }
 
     /*@devdoc
@@ -38,7 +38,7 @@ class SockAddr {
      *  @returns {string} The name of the SockAddr.
      */
     objectName(): string {
-        return this._name;
+        return this.#_name;
     }
 
     /*@devdoc
@@ -47,7 +47,7 @@ class SockAddr {
      */
     setAddress(address: number): void {
         // C++  QHostAddress* getAddressPointer()
-        this._address = address;
+        this.#_address = address;
     }
 
     /*@devdoc
@@ -56,7 +56,7 @@ class SockAddr {
      */
     getAddress(): number {
         // C++  const QHostAddress& getAddress()
-        return this._address;
+        return this.#_address;
     }
 
     /*@devdoc
@@ -65,7 +65,7 @@ class SockAddr {
      */
     setPort(port: number): void {
         // C++  void setPort(quint16 port
-        this._port = port;
+        this.#_port = port;
     }
 
     /*@devdoc
@@ -74,7 +74,7 @@ class SockAddr {
      */
     getPort(): number {
         // C++  quint16 getPort()
-        return this._port;
+        return this.#_port;
     }
 
     /*@devdoc
@@ -83,7 +83,7 @@ class SockAddr {
      */
     isNull(): boolean {
         // C++  bool isNull()
-        return this._address === 0 && this._port === 0;
+        return this.#_address === 0 && this.#_port === 0;
     }
 
     /*@devdoc
@@ -94,7 +94,7 @@ class SockAddr {
      */
     isEqualTo(otherAddr: SockAddr): boolean {
         // C++  operator==
-        return this._address === otherAddr.getAddress() && this._port === otherAddr.getPort();
+        return this.#_address === otherAddr.getAddress() && this.#_port === otherAddr.getPort();
     }
 
 
@@ -106,7 +106,7 @@ class SockAddr {
         // C++  QDebug operator<<
         const BYTE_DIVISOR = 256;
         const ipNumbers = [];
-        let address = this._address;
+        let address = this.#_address;
         for (let i = 3; i >= 0; i--) {
             ipNumbers[i] = address % BYTE_DIVISOR;
             address = Math.floor(address / BYTE_DIVISOR);

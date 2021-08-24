@@ -20,8 +20,8 @@ import Uuid from "../shared/Uuid";
 class AddressManager {
     // C++  AddressManager : public QObject, public Dependency
 
-    private _domainUrl = "";
-    private _possibleDomainChangeRequired = new Signal();
+    #_domainUrl = "";
+    #_possibleDomainChangeRequired = new Signal();
 
 
     /*@devdoc
@@ -38,7 +38,7 @@ class AddressManager {
 
         const sanitizedAddress = address.trim();
         if (sanitizedAddress.length > 0) {
-            this.handlerUrl(sanitizedAddress);
+            this.#handlerUrl(sanitizedAddress);
         }
 
         // WEBRTC TODO: Address further C++ code.
@@ -66,17 +66,17 @@ class AddressManager {
      */
     get possibleDomainChangeRequired(): Signal {
         // C++  void possibleDomainChangeRequired(QUrl domainURL, QUuid domainID);
-        return this._possibleDomainChangeRequired;
+        return this.#_possibleDomainChangeRequired;
     }
 
 
-    private handlerUrl(url: string): boolean {
+    #handlerUrl(url: string): boolean {
         // C++  bool handleUrl(const QUrl& lookupUrlIn, LookupTrigger trigger, const QString& lookupUrlInString)
 
         // WEBRTC TODO: Address further C++ code.
 
-        this._domainUrl = url;
-        this._possibleDomainChangeRequired.emit(this._domainUrl, Uuid.NULL);
+        this.#_domainUrl = url;
+        this.#_possibleDomainChangeRequired.emit(this.#_domainUrl, Uuid.NULL);
 
         // WEBRTC TODO: Address further C++ code.
 

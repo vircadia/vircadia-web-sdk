@@ -41,18 +41,18 @@ class NetworkPeer {
     protected _publicSocket;
     protected _localSocket;
 
-    private _uuid;
-    private _localID: LocalID = 0;
-    private _activeSocket: SockAddr | null = null;  // References the active socket.
-    private _socketUpdated = new Signal();
-    private _socketActivated = new Signal();
+    #_uuid;
+    #_localID: LocalID = 0;
+    #_activeSocket: SockAddr | null = null;  // References the active socket.
+    #_socketUpdated = new Signal();
+    #_socketActivated = new Signal();
     // Ping timer N/A: It is used in C++ for UDP hole punching to assignment clients.
 
 
     constructor(uuid = new Uuid(), publicSocket = new SockAddr(), localSocket = new SockAddr()) {
         // C++  NetworkPeer(const QUuid& uuid, const SockAddr& publicSocket, const SockAddr& localSocket, QObject* parent)
         //      NetworkPeer(QObject* parent)
-        this._uuid = uuid;
+        this.#_uuid = uuid;
         this._publicSocket = publicSocket;
         this._localSocket = localSocket;
 
@@ -67,7 +67,7 @@ class NetworkPeer {
      */
     getUUID(): Uuid {
         // C++  NetworkPeer::getUUID()
-        return this._uuid;
+        return this.#_uuid;
     }
 
     /*@devdoc
@@ -76,7 +76,7 @@ class NetworkPeer {
      */
     setUUID(uuid: Uuid): void {
         // C++  NetworkPeer::setUUID()
-        this._uuid = uuid;
+        this.#_uuid = uuid;
     }
 
     /*@devdoc
@@ -85,7 +85,7 @@ class NetworkPeer {
      */
     getLocalID(): LocalID {
         // C++  LocalID getLocalID()
-        return this._localID;
+        return this.#_localID;
     }
 
     /*@devdoc
@@ -94,7 +94,7 @@ class NetworkPeer {
      */
     setLocalID(localID: LocalID): void {
         // C++  void setLocalID(LocalID localID)
-        this._localID = localID;
+        this.#_localID = localID;
     }
 
     /*@devdoc
@@ -113,8 +113,8 @@ class NetworkPeer {
     setPublicSocket(publicSocket: SockAddr): void {
         // C++  void setPublicSocket(const SockAddr& publicSocket)
         if (!publicSocket.isEqualTo(this._publicSocket)) {
-            if (this._activeSocket === this._publicSocket) {
-                this._activeSocket = null;
+            if (this.#_activeSocket === this._publicSocket) {
+                this.#_activeSocket = null;
             }
 
             const wasOldSocketNull = this._publicSocket.isNull();
@@ -124,7 +124,7 @@ class NetworkPeer {
             this._publicSocket.setObjectName(previousSocket.objectName());
 
             if (!wasOldSocketNull) {
-                console.log("[networking] Public socket change for node", this.toString(),
+                console.log("[networking] Public socket change for node", this.#toString(),
                     "; previously", previousSocket.toString());
                 this.socketUpdated.emit(previousSocket, this._publicSocket);
             }
@@ -148,9 +148,9 @@ class NetworkPeer {
         // C++  void setLocalSocket(const SockAddr& localSocket)
 
         if (!localSocket.isEqualTo(this._localSocket)) {
-            if (this._activeSocket === this._localSocket) {
+            if (this.#_activeSocket === this._localSocket) {
                 // if the active socket was the local socket then reset it to NULL
-                this._activeSocket = null;
+                this.#_activeSocket = null;
             }
 
             const wasOldSocketNull = this._localSocket.isNull();
@@ -160,7 +160,7 @@ class NetworkPeer {
             this._localSocket.setObjectName(previousSocket.objectName());
 
             if (!wasOldSocketNull) {
-                console.log("[networking] Local socket change for node", this.toString(),
+                console.log("[networking] Local socket change for node", this.#toString(),
                     "; previously", previousSocket.toString());
                 this.socketUpdated.emit(previousSocket, this._localSocket);
             }
@@ -172,9 +172,9 @@ class NetworkPeer {
      */
     activateLocalSocket(): void {
         // C++  void activateLocalSocket()
-        if (this._activeSocket !== this._localSocket) {
-            console.log("[networking] Activating local socket for network peer with ID", this._uuid.stringify());
-            this.setActiveSocket(this._localSocket);
+        if (this.#_activeSocket !== this._localSocket) {
+            console.log("[networking] Activating local socket for network peer with ID", this.#_uuid.stringify());
+            this.#setActiveSocket(this._localSocket);
         }
     }
 
@@ -183,9 +183,9 @@ class NetworkPeer {
      */
     activatePublicSocket(): void {
         // C++  void activatePublicSocket()
-        if (this._activeSocket !== this._publicSocket) {
-            console.log("[networking] Activating public socket for network peer with ID", this._uuid.stringify());
-            this.setActiveSocket(this._publicSocket);
+        if (this.#_activeSocket !== this._publicSocket) {
+            console.log("[networking] Activating public socket for network peer with ID", this.#_uuid.stringify());
+            this.#setActiveSocket(this._publicSocket);
         }
     }
 
@@ -195,7 +195,7 @@ class NetworkPeer {
      */
     getActiveSocket(): SockAddr | null {
         // C++  const SockAddr* getActiveSocket() const { return _activeSocket; }
-        return this._activeSocket;
+        return this.#_activeSocket;
     }
 
 
@@ -208,7 +208,7 @@ class NetworkPeer {
      */
     get socketUpdated(): Signal {
         // C++  void socketUpdated(SockAddr previousAddress, SockAddr currentAddress)
-        return this._socketUpdated;
+        return this.#_socketUpdated;
     }
 
     /*@devdoc
@@ -219,25 +219,24 @@ class NetworkPeer {
      */
     get socketActivated(): Signal {
         // C++  void socketActivated(const SockAddr& sockAddr)
-        return this._socketActivated;
+        return this.#_socketActivated;
     }
 
 
-    private setActiveSocket(discoveredSocket: SockAddr): void {
+    #setActiveSocket(discoveredSocket: SockAddr): void {
         // C++  void NetworkPeer::setActiveSocket(SockAddr* discoveredSocket)
-        this._activeSocket = discoveredSocket;
+        this.#_activeSocket = discoveredSocket;
 
         // Ping timer N/A.
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.socketActivated.emit(this._activeSocket);
+        this.socketActivated.emit(this.#_activeSocket);
     }
 
-    private toString(): string {
+    #toString(): string {
         // C++  QDebug operator<<(QDebug debug, const NetworkPeer &peer)
-        const BASE_16 = 16;
-        return (<bigint>(this.getUUID().valueOf())).toString(BASE_16)
+        return this.getUUID().stringify()
             + " - public:" + this._publicSocket.toString()
             + " - local:" + this._localSocket.toString();
     }

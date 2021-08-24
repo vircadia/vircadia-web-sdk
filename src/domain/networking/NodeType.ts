@@ -74,7 +74,7 @@ const NodeType = new class {
     Unassigned = NodeTypeValue.Unassigned;
 
 
-    private _NODE_TYPE_NAMES = {
+    #NODE_TYPE_NAMES = {
         [this.DomainServer]: "Domain Server",
         [this.EntityServer]: "Entity Server",
         [this.Agent]: "Agent",
@@ -99,7 +99,7 @@ const NodeType = new class {
      */
     getNodeTypeName(nodeType: NodeTypeValue): string {
         // C++  QString& getNodeTypeName(NodeType_t nodeType)
-        let name = this._NODE_TYPE_NAMES[nodeType];
+        let name = this.#NODE_TYPE_NAMES[nodeType];
         if (name === undefined) {
             name = "Unknown";
         }

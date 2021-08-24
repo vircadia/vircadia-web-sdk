@@ -114,7 +114,8 @@ describe("LimitedNodeList - integration tests", () => {
         limitedNodeList.nodeAdded.connect((node) => {
             expect(node.getType()).toBe(AUDIO_MIXER_NODE_INFO.type);
             expect(node.getUUID()).toBe(AUDIO_MIXER_NODE_INFO.uuid);
-            node.setActiveSocket(AUDIO_MIXER_NODE_INFO.publicSocket);
+            node.setPublicSocket(AUDIO_MIXER_NODE_INFO.publicSocket);
+            node.activatePublicSocket();
         });
         limitedNodeList.nodeActivated.connect((node) => {
             expect(node.getType()).toBe(AUDIO_MIXER_NODE_INFO.type);

@@ -26,27 +26,27 @@ import ReceivedMessage from "./ReceivedMessage";
 class DomainHandler {
     // C++  DomainHandler : public QObject
 
-    private _domainURL = "";
-    private _sockAddr = new SockAddr();  // For WebRTC, the port is the critical part.
-    private _isConnected = false;
-    private _localID = 0;
-    private _uuid = new Uuid(Uuid.NULL);
+    #_domainURL = "";
+    #_sockAddr = new SockAddr();  // For WebRTC, the port is the critical part.
+    #_isConnected = false;
+    #_localID = 0;
+    #_uuid = new Uuid(Uuid.NULL);
 
-    private _errorDomainURL = "";
-    private _domainConnectionRefusals: Set<string> = new Set();
+    #_errorDomainURL = "";
+    #_domainConnectionRefusals: Set<string> = new Set();
 
-    private _connectedToDomain = new Signal();
-    private _disconnectedFromDomain = new Signal();
-    private _domainConnectionRefused = new Signal();
+    #_connectedToDomain = new Signal();
+    #_disconnectedFromDomain = new Signal();
+    #_domainConnectionRefused = new Signal();
 
     // Context objects.
-    private _nodesList;
+    #_nodesList;
 
 
     constructor(parent: NodesList) {
         // C++  DomainHandler(QObject* parent = 0);
-        this._nodesList = parent;
-        this._sockAddr.setObjectName("DomainServer");
+        this.#_nodesList = parent;
+        this.#_sockAddr.setObjectName("DomainServer");
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -59,7 +59,7 @@ class DomainHandler {
      */
     setUUID(uuid: Uuid): void {
         // C++  void setUUID(const QUuid& uuid)
-        this._uuid = uuid;
+        this.#_uuid = uuid;
 
         // WEBRTC TODO: Address further C++ code.
     }
@@ -70,7 +70,7 @@ class DomainHandler {
      */
     getUUID(): Uuid {
         // C++ QUuid& getUUID()
-        return this._uuid;
+        return this.#_uuid;
     }
 
     /*@devdoc
@@ -79,7 +79,7 @@ class DomainHandler {
      */
     setLocalID(localID: LocalID): void {
         // C++ void setLocalID(LocalID localID)
-        this._localID = localID;
+        this.#_localID = localID;
     }
 
     /*@devdoc
@@ -88,7 +88,7 @@ class DomainHandler {
      */
     getLocalID(): LocalID {
         // C++  LocalID getLocalID()
-        return this._localID;
+        return this.#_localID;
     }
 
     /*@devdoc
@@ -101,7 +101,7 @@ class DomainHandler {
 
         // WEBRTC TODO: Revisit using URL versus IP address..
 
-        return this._domainURL;
+        return this.#_domainURL;
     }
 
     /*@devdoc
@@ -110,7 +110,7 @@ class DomainHandler {
      */
     getSockAddr(): SockAddr {
         // C++  SockAddr& getSockAddr()
-        return this._sockAddr;
+        return this.#_sockAddr;
     }
 
     /*@devdoc
@@ -119,7 +119,7 @@ class DomainHandler {
      */
     setPort(port: number): void {
         // C++  void setPort(quint16 port)
-        this._sockAddr.setPort(port);
+        this.#_sockAddr.setPort(port);
     }
 
     /*@devdoc
@@ -128,7 +128,7 @@ class DomainHandler {
      */
     getPort(): number {
         // C++  unsigned short getPort()
-        return this._sockAddr.getPort();
+        return this.#_sockAddr.getPort();
     }
 
     /*@devdoc
@@ -137,7 +137,7 @@ class DomainHandler {
      */
     isConnected(): boolean {
         // C++  bool isConnected()
-        return this._isConnected;
+        return this.#_isConnected;
     }
 
     /*@devdoc
@@ -150,20 +150,20 @@ class DomainHandler {
     setIsConnected(isConnected: boolean, forceDisconnect = false): void {
         // C++  void setIsConnected(bool isConnected)
         //      The extra forceDisconnect parameter is used to cause the WebRTC signaling channel to be closed.
-        if (this._isConnected !== isConnected) {
-            this._isConnected = isConnected;
-            if (this._isConnected) {
+        if (this.#_isConnected !== isConnected) {
+            this.#_isConnected = isConnected;
+            if (this.#_isConnected) {
 
                 // WEBRTC TODO: Address further C++ code.
 
-                this.connectedToDomain.emit(this._domainURL);
+                this.connectedToDomain.emit(this.#_domainURL);
 
                 // WEBRTC TODO: Address further C++ code.
 
             } else {
                 this.disconnectedFromDomain.emit();
             }
-        } else if (!this._isConnected && forceDisconnect) {
+        } else if (!this.#_isConnected && forceDisconnect) {
             // Close the WebRTC communications channel.
             this.disconnectedFromDomain.emit();
         }
@@ -178,17 +178,17 @@ class DomainHandler {
     disconnect(reason: string, forceDisconnect = false): void {
         // C++  void DomainHandler::disconnect(QString reason)
         //      The extra forceDisconnect parameter is used to cause the WebRTC signaling channel to be closed.
-        if (this._isConnected) {
-            this.sendDisconnectPacket();
+        if (this.#_isConnected) {
+            this.#sendDisconnectPacket();
         }
 
         // clear member variables that hold the connection state to a domain
-        this._uuid = new Uuid(Uuid.NULL);
+        this.#_uuid = new Uuid(Uuid.NULL);
 
         // WEBRTC TODO: Address further C++ code.
 
         // WEBRTC TODO: Should C++ clear _domainConnectionRefusals also?
-        this._domainConnectionRefusals.clear();  // Re-report any refusals if retry connecting to the same domain.
+        this.#_domainConnectionRefusals.clear();  // Re-report any refusals if retry connecting to the same domain.
 
         console.log("[networking] Disconnecting from domain server.");
         console.log("[networking] REASON:", reason);
@@ -238,12 +238,12 @@ class DomainHandler {
 
         // WEBRTC TODO: Address further C++ code.
 
-        if (this._domainURL !== domainURL) {
-            this.hardReset("Changing domain URL");
+        if (this.#_domainURL !== domainURL) {
+            this.#hardReset("Changing domain URL");
 
             // WEBRTC TODO: Address further C++ code.
 
-            this._domainURL = domainURL;
+            this.#_domainURL = domainURL;
 
             // WEBRTC TODO: Address further C++ code.
 
@@ -270,7 +270,7 @@ class DomainHandler {
         //          const QString& extraInfo = "")
 
         // WEBRTC TODO: Address further C++ code.
-        this._domainConnectionRefused.emit(reasonMessage, reasonCode, extraInfo);
+        this.#_domainConnectionRefused.emit(reasonMessage, reasonCode, extraInfo);
     };
 
     /*@devdoc
@@ -287,9 +287,9 @@ class DomainHandler {
         console.warn("[networking] The domain-server denied a connection request: ", info.reasonMessage, "extraInfo:",
             sanitizedExtraInfo);
 
-        if (!this._domainConnectionRefusals.has(info.reasonMessage)) {
-            this._domainConnectionRefusals.add(info.reasonMessage);
-            this.setRedirectErrorState(this._errorDomainURL, info.reasonMessage, info.reasonCode, info.extraInfo);
+        if (!this.#_domainConnectionRefusals.has(info.reasonMessage)) {
+            this.#_domainConnectionRefusals.add(info.reasonMessage);
+            this.setRedirectErrorState(this.#_errorDomainURL, info.reasonMessage, info.reasonCode, info.extraInfo);
         }
 
         // WEBRTC TODO: Address further C++ code.
@@ -305,7 +305,7 @@ class DomainHandler {
      */
     get connectedToDomain(): Signal {
         // C++  void connectedToDomain(QUrl domainURL)
-        return this._connectedToDomain;
+        return this.#_connectedToDomain;
     }
 
     /*@devdoc
@@ -315,7 +315,7 @@ class DomainHandler {
      */
     get disconnectedFromDomain(): Signal {
         // C++  void disconnectedFromDomain()
-        return this._disconnectedFromDomain;
+        return this.#_disconnectedFromDomain;
     }
 
     /*@devdoc
@@ -328,17 +328,17 @@ class DomainHandler {
      */
     get domainConnectionRefused(): Signal {
         // C++  void domainConnectionRefused(QString reasonMessage, int reasonCode, const QString& extraInfo);
-        return this._domainConnectionRefused;
+        return this.#_domainConnectionRefused;
     }
 
 
-    private sendDisconnectPacket(): void {
+    #sendDisconnectPacket(): void {
         // C++  void sendDisconnectPacket()
         const packet = PacketScribe.DomainDisconnectRequest.write();
-        this._nodesList.sendUnreliablePacket(packet, this._sockAddr);
+        this.#_nodesList.sendUnreliablePacket(packet, this.#_sockAddr);
     }
 
-    private hardReset(reason: string): void {
+    #hardReset(reason: string): void {
         // C++  void DomainHandler::hardReset(QString reason)
 
         // WEBRTC TODO: Address further C++ code.
@@ -347,9 +347,9 @@ class DomainHandler {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this._domainURL = "";
-        this._sockAddr = new SockAddr();
-        this._domainConnectionRefusals.clear();
+        this.#_domainURL = "";
+        this.#_sockAddr = new SockAddr();
+        this.#_domainConnectionRefusals.clear();
 
         // WEBRTC TODO: Address further C++ code.
     }

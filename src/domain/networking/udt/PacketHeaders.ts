@@ -372,7 +372,7 @@ const PacketType = new class {
     readonly WebRTCSignaling = PacketTypeValue.WebRTCSignaling;
 
     // Packets that are sent without verifying that they are received.
-    private _nonVerifiedPackets = new Set([
+    #_nonVerifiedPackets = new Set([
         PacketTypeValue.NodeJsonStats,
         PacketTypeValue.EntityQuery,
         PacketTypeValue.OctreeDataNack,
@@ -386,7 +386,7 @@ const PacketType = new class {
     ]);
 
     // Packets that don't include the local node ID of the sending node.
-    private _nonSourcedPackets = new Set([
+    #_nonSourcedPackets = new Set([
         PacketTypeValue.StunResponse,
         PacketTypeValue.CreateAssignment,
         PacketTypeValue.RequestAssignment,
@@ -427,17 +427,17 @@ const PacketType = new class {
         PacketTypeValue.WebRTCSignaling
     ]);
 
-    private _DomainListVersion = {
+    #_DomainListVersion = {
         // C++  DomainListVersion
         HasConnectReason: 24
     };
 
-    private _DomainConnectionDeniedVersion = {
+    #_DomainConnectionDeniedVersion = {
         // C++ DomainConnectionDeniedVersion
         IncludesExtraInfo: 19
     };
 
-    private _DomainConnectRequestVersion = {
+    #_DomainConnectRequestVersion = {
         // C++  DomainConnectRequestVersion
         HasCompressedSystemInfo: 26
     };
@@ -463,13 +463,13 @@ const PacketType = new class {
         const DEFAULT_VERSION = 22;
         switch (packetType) {
             case this.DomainList:
-                return this._DomainListVersion.HasConnectReason;
+                return this.#_DomainListVersion.HasConnectReason;
             case this.DomainListRequest:
                 return DEFAULT_VERSION;
             case this.DomainConnectionDenied:
-                return this._DomainConnectionDeniedVersion.IncludesExtraInfo;
+                return this.#_DomainConnectionDeniedVersion.IncludesExtraInfo;
             case this.DomainConnectRequest:
-                return this._DomainConnectRequestVersion.HasCompressedSystemInfo;
+                return this.#_DomainConnectRequestVersion.HasCompressedSystemInfo;
             case this.DomainDisconnectRequest:
                 return DEFAULT_VERSION;
             case this.DomainServerRemovedNode:
@@ -492,7 +492,7 @@ const PacketType = new class {
      */
     getNonVerifiedPackets() {
         // C++  getNonSourcedPackets()
-        return this._nonVerifiedPackets;
+        return this.#_nonVerifiedPackets;
     }
 
     /*@devdoc
@@ -502,7 +502,7 @@ const PacketType = new class {
      */
     getNonSourcedPackets() {
         // C++  getNonSourcedPackets()
-        return this._nonSourcedPackets;
+        return this.#_nonSourcedPackets;
     }
 
 }();

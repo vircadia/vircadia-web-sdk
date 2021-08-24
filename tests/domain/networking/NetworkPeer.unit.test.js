@@ -106,7 +106,8 @@ describe("NetworkPeer - unit tests", () => {
             done();
         });
         expect(networkPeer.getActiveSocket()).toBeNull();
-        networkPeer.setActiveSocket(TEST_SOCK_ADDR);
+        networkPeer.setPublicSocket(TEST_SOCK_ADDR);
+        networkPeer.activatePublicSocket();
     });
 
 
@@ -132,11 +133,11 @@ describe("NetworkPeer - unit tests", () => {
             if (haveSetLocalSocket) {
                 done();
             } else {
-                networkPeer.setActiveSocket(TEST_SOCK_ADDR);
+                networkPeer.activateLocalSocket();
             }
         });
         expect(networkPeer.getActiveSocket()).toBeNull();
-        networkPeer.setActiveSocket(TEST_SOCK_ADDR);
+        networkPeer.activatePublicSocket();
     });
 
 
