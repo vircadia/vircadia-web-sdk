@@ -305,6 +305,7 @@ class WebRTCDataChannel {
             ordered: false,
             maxRetransmits: 0
         });
+        this._dataChannel.binaryType = "arraybuffer";
         this._dataChannel.onopen = () => {
             this._readyState = WebRTCDataChannel.OPEN;
             if (this._onopenCallback) {
