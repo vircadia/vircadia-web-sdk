@@ -49,23 +49,19 @@
 const UDT = new class {
     // C++: udt
 
-    /* eslint-disable @typescript-eslint/no-magic-numbers */
+    readonly MAX_PACKET_SIZE = 1464;
 
-    MAX_PACKET_SIZE = 1464;
+    readonly CONTROL_BIT_MASK = 0x80000000;
+    readonly RELIABILITY_BIT_MASK = 0x40000000;
+    readonly MESSAGE_BIT_MASK = 0x20000000;
+    readonly OBFUSCATION_LEVEL_BIT_MASK = 0x18000000;
+    readonly SEQUENCE_NUMBER_BIT_MASK = 0x7fffff;
 
-    CONTROL_BIT_MASK = 0x80000000;
-    RELIABILITY_BIT_MASK = 0x40000000;
-    MESSAGE_BIT_MASK = 0x20000000;
-    OBFUSCATION_LEVEL_BIT_MASK = 0x18000000;
-    SEQUENCE_NUMBER_BIT_MASK = 0x7fffff;
+    readonly OBFUSCATION_LEVEL_OFFSET = 27;
+    readonly PACKET_POSITION_OFFSET = 30;
 
-    OBFUSCATION_LEVEL_OFFSET = 27;
-    PACKET_POSITION_OFFSET = 30;
-
-    LITTLE_ENDIAN = true;
-    BIG_ENDIAN = false;
-
-    /* eslint-enable @typescript-eslint/no-magic-numbers */
+    readonly LITTLE_ENDIAN = true;
+    readonly BIG_ENDIAN = false;
 
 }();
 

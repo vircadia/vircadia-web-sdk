@@ -63,7 +63,7 @@ class Packet extends BasePacket {
      *  </table>
      *  @typedef {number} Packet.PacketPosition
      */
-    static PacketPosition = {
+    static readonly PacketPosition = {
         // C++  enum PacketPosition : MessageNumberAndBitField
         ONLY: 0x0,   // 00
         FIRST: 0x2,  // 10
@@ -86,7 +86,7 @@ class Packet extends BasePacket {
      *  </table>
      *  @typedef {number} Packet.ObfuscationLevel
      */
-    static ObfuscationLevel = {
+    static readonly ObfuscationLevel = {
         // C++  enum ObfuscationLevel : SequenceNumberAndBitField
         NoObfuscation: 0x0, // 00
         ObfuscationL1: 0x1, // 01

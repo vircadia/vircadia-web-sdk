@@ -103,10 +103,11 @@ class WebRTCDataChannel {
 
     /* eslint-enable @typescript-eslint/no-magic-numbers */
 
-    static #CONFIGURATION = {
+    static readonly #CONFIGURATION = {
         // WEBRTC TODO: Make configurable in the API.
         iceServers: [{ urls: "stun:ice.vircadia.com:7337" }]
     };
+
 
     #_nodeType = NodeType.Unassigned;
     #_signalingChannel: WebRTCSignalingChannel | null = null;

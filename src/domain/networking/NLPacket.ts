@@ -75,8 +75,8 @@ class NLPacket extends Packet {
     }
 
 
-    static #NUM_BYTES_LOCALID = 2;
-    static #NUM_BYTES_MD5_HASH = 16;  // eslint-disable-line @typescript-eslint/no-magic-numbers
+    static readonly #NUM_BYTES_LOCALID = 2;
+    static readonly #NUM_BYTES_MD5_HASH = 16;
 
     static #localHeaderSize(type: PacketTypeValue): number {
         // C++  int NLPacket::localHeaderSize(PacketType type)

@@ -59,22 +59,22 @@ const enum NodeTypeValue {
 const NodeType = new class {
     // C++  NodeType
 
-    DomainServer = NodeTypeValue.DomainServer;
-    EntityServer = NodeTypeValue.EntityServer;
-    Agent = NodeTypeValue.Agent;
-    AudioMixer = NodeTypeValue.AudioMixer;
-    AvatarMixer = NodeTypeValue.AvatarMixer;
-    AssetServer = NodeTypeValue.AssetServer;
-    MessagesMixer = NodeTypeValue.MessagesMixer;
-    EntityScriptServer = NodeTypeValue.EntityScriptServer;
-    UpstreamAudioMixer = NodeTypeValue.UpstreamAudioMixer;
-    UpstreamAvatarMixer = NodeTypeValue.UpstreamAvatarMixer;
-    DownstreamAudioMixer = NodeTypeValue.DownstreamAudioMixer;
-    DownstreamAvatarMixer = NodeTypeValue.DownstreamAvatarMixer;
-    Unassigned = NodeTypeValue.Unassigned;
+    readonly DomainServer = NodeTypeValue.DomainServer;
+    readonly EntityServer = NodeTypeValue.EntityServer;
+    readonly Agent = NodeTypeValue.Agent;
+    readonly AudioMixer = NodeTypeValue.AudioMixer;
+    readonly AvatarMixer = NodeTypeValue.AvatarMixer;
+    readonly AssetServer = NodeTypeValue.AssetServer;
+    readonly MessagesMixer = NodeTypeValue.MessagesMixer;
+    readonly EntityScriptServer = NodeTypeValue.EntityScriptServer;
+    readonly UpstreamAudioMixer = NodeTypeValue.UpstreamAudioMixer;
+    readonly UpstreamAvatarMixer = NodeTypeValue.UpstreamAvatarMixer;
+    readonly DownstreamAudioMixer = NodeTypeValue.DownstreamAudioMixer;
+    readonly DownstreamAvatarMixer = NodeTypeValue.DownstreamAvatarMixer;
+    readonly Unassigned = NodeTypeValue.Unassigned;
 
 
-    #NODE_TYPE_NAMES = {
+    readonly #NODE_TYPE_NAMES = {
         [this.DomainServer]: "Domain Server",
         [this.EntityServer]: "Entity Server",
         [this.Agent]: "Agent",

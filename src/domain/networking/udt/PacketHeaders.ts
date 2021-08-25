@@ -372,7 +372,7 @@ const PacketType = new class {
     readonly WebRTCSignaling = PacketTypeValue.WebRTCSignaling;
 
     // Packets that are sent without verifying that they are received.
-    #_nonVerifiedPackets = new Set([
+    readonly #_nonVerifiedPackets = new Set([
         PacketTypeValue.NodeJsonStats,
         PacketTypeValue.EntityQuery,
         PacketTypeValue.OctreeDataNack,
@@ -386,7 +386,7 @@ const PacketType = new class {
     ]);
 
     // Packets that don't include the local node ID of the sending node.
-    #_nonSourcedPackets = new Set([
+    readonly #_nonSourcedPackets = new Set([
         PacketTypeValue.StunResponse,
         PacketTypeValue.CreateAssignment,
         PacketTypeValue.RequestAssignment,
@@ -427,17 +427,17 @@ const PacketType = new class {
         PacketTypeValue.WebRTCSignaling
     ]);
 
-    #_DomainListVersion = {
+    readonly #_DomainListVersion = {
         // C++  DomainListVersion
         HasConnectReason: 24
     };
 
-    #_DomainConnectionDeniedVersion = {
+    readonly #_DomainConnectionDeniedVersion = {
         // C++ DomainConnectionDeniedVersion
         IncludesExtraInfo: 19
     };
 
-    #_DomainConnectRequestVersion = {
+    readonly #_DomainConnectRequestVersion = {
         // C++  DomainConnectRequestVersion
         HasCompressedSystemInfo: 26
     };

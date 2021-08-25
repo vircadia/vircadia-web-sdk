@@ -71,7 +71,7 @@ enum ConnectionRefusedReasonValue {
  *      You are not authorized to connect to the domain per your domain login.
  */
 const ConnectionRefusedReason = new class {
-    Unknown = ConnectionRefusedReasonValue.Unknown;
+    readonly Unknown = ConnectionRefusedReasonValue.Unknown;
     readonly ProtocolMismatch = ConnectionRefusedReasonValue.ProtocolMismatch;
     readonly LoginErrorMetaverse = ConnectionRefusedReasonValue.LoginErrorMetaverse;
     readonly NotAuthorizedMetaverse = ConnectionRefusedReasonValue.NotAuthorizedMetaverse;

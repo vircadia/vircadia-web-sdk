@@ -18,7 +18,7 @@
  */
 const Vircadia = new class {
 
-    #_version = "0.0.1";
+    readonly #_version = "0.0.1";
 
     get version() {
         return this.#_version;

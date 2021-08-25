@@ -57,6 +57,13 @@ class Socket {
     static readonly CONNECTING = 1;
     static readonly CONNECTED = 2;
 
+    static readonly #WEBRTCSOCKET_TO_SOCKET_STATES = [
+        Socket.UNCONNECTED,
+        Socket.UNCONNECTED,
+        Socket.CONNECTING,
+        Socket.CONNECTED
+    ];
+
 
     // Use WebRTCSocket directly without going through an intermediary NetworkSocket as is done in C++.
     #_webrtcSocket: WebRTCSocket;
@@ -64,8 +71,6 @@ class Socket {
     // WEBRTC TODO: Address further C++ code.
 
     #_packetHandler: PacketHandlerCallback | null = null;
-
-    #WEBRTCSOCKET_TO_SOCKET_STATES = [Socket.UNCONNECTED, Socket.UNCONNECTED, Socket.CONNECTING, Socket.CONNECTED];
 
 
     constructor() {
@@ -91,7 +96,7 @@ class Socket {
      */
     getSocketState(url: string, nodeType: NodeTypeValue): number {
         // C++  N/A
-        return this.#WEBRTCSOCKET_TO_SOCKET_STATES[this.#_webrtcSocket.state(url.trim(), nodeType)] as number;
+        return Socket.#WEBRTCSOCKET_TO_SOCKET_STATES[this.#_webrtcSocket.state(url.trim(), nodeType)] as number;
     }
 
     /*@devdoc

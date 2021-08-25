@@ -21,7 +21,7 @@ const FingerprintUtils = new class {
 
     // Dummy value for now.
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    #_machineFingerprint = new Uuid(213897485297723222451865858523432009088n);
+    readonly #_machineFingerprint = new Uuid(213897485297723222451865858523432009088n);
 
     // WEBRTC TODO: Address further C++ code.
 

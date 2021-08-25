@@ -83,7 +83,7 @@ class LimitedNodeList {
         Awake: 2
     };
 
-    static INVALID_PORT = -1;
+    static readonly INVALID_PORT = -1;
 
 
     protected _nodeSocket = new Socket();
@@ -92,8 +92,8 @@ class LimitedNodeList {
     protected _packetReceiver = new PacketReceiver();
 
 
-    #NULL_CONNECTION_ID = -1;
-    #SOLO_NODE_TYPES = new Set([
+    readonly #NULL_CONNECTION_ID = -1;
+    readonly #SOLO_NODE_TYPES = new Set([
         NodeType.AvatarMixer,
         NodeType.AudioMixer,
         NodeType.AssetServer,

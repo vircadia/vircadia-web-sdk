@@ -37,8 +37,9 @@ class Uuid extends BigInt {
 
     // WEBRTC TODO: It may be cleaner to wrap a BigInt value rather than extend BigInt.
 
-    static NUM_BYTES_RFC4122_UUID = 16;  // eslint-disable-line @typescript-eslint/no-magic-numbers
-    static NULL = BigInt(0);
+    static readonly NUM_BYTES_RFC4122_UUID = 16;
+    static readonly NULL = BigInt(0);
+
 
     constructor(value: bigint = 0) {
         // C++  QUuid()
@@ -48,6 +49,7 @@ class Uuid extends BigInt {
         Object.setPrototypeOf(obj, new.target.prototype);
         return obj;  // eslint-disable-line no-constructor-return
     }
+
 
     /*@devdoc
      *  UUIDs (Universally Unique IDentifiers) are used to uniquely identify items such as entities and avatars. They are
