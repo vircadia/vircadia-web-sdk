@@ -98,8 +98,6 @@ class WebRTCSignalingChannel {
      */
 
 
-    /* eslint-disable @typescript-eslint/no-magic-numbers */
-
     /*@devdoc
      *  The state of a WebRTCSignalingChannel connection.
      *  <table>
@@ -120,7 +118,6 @@ class WebRTCSignalingChannel {
     static readonly CLOSING = 2;
     static readonly CLOSED = 3;
 
-    /* eslint-enable @typescript-eslint/no-magic-numbers */
 
     #_websocket: WebSocket | null = null;
 

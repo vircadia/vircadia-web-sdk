@@ -79,8 +79,6 @@ class WebRTCDataChannel {
      */
 
 
-    /* eslint-disable @typescript-eslint/no-magic-numbers */
-
     /*@devdoc
      *  The state of a WebRTCDataChannel connection.
      *  <table>
@@ -100,8 +98,6 @@ class WebRTCDataChannel {
     static readonly OPEN = 1;
     static readonly CLOSING = 2;
     static readonly CLOSED = 3;
-
-    /* eslint-enable @typescript-eslint/no-magic-numbers */
 
     static readonly #CONFIGURATION = {
         // WEBRTC TODO: Make configurable in the API.

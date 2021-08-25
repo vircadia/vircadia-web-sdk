@@ -46,8 +46,6 @@ import assert from "../../shared/assert";
 class Packet extends BasePacket {
     // C++  Packet : public BasePacket
 
-    /* eslint-disable @typescript-eslint/no-magic-numbers */
-
     /*@devdoc
      *  The position of the packet in a multi-packet message. Two-bit values suitable for use in bitwise packet operations.
      *  <table>
@@ -94,7 +92,6 @@ class Packet extends BasePacket {
         ObfuscationL3: 0x3  // 11
     };
 
-    /* eslint-enable @typescript-eslint/no-magic-numbers */
 
     /*@devdoc
      *  Creates a new Packet &mdash; an alternative to using <code>new Packet(...)</code>.
