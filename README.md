@@ -63,6 +63,9 @@ npm run lint-path <path>
 
 ### Run tests
 
+Unit tests can be run without any external dependencies but integration tests require a domain server to be running on
+`localhost` or other location specified in `test.config.json`.
+
 All tests:
 ```
 npm run test
@@ -72,12 +75,13 @@ Hot retest of all tests:
 npm run test-watch
 ```
 
-Specific tests (e.g., Packet.unit.test.js, all unit tests):
+Specific tests (e.g., Packet.unit.test.js, all unit tests, all integration tests):
 ```
 npm run test <partial-path>
 
 npm run test /packet.unit
-npm run test unit.test
+npm run test .unit.
+npm run test .integration.
 ```
 
 Run tests and report open handles:
