@@ -9,7 +9,7 @@
 //
 
 import DomainConnectionDenied from "../../../../src/domain/networking/packets/DomainConnectionDenied";
-import ConnectionRefusedReason from "../../../../src/domain/networking/ConnectionRefusedReason";
+import DomainHandler from "../../../../src/domain/networking/DomainHandler";
 
 
 describe("DomainConnectionDenied - unit tests", () => {
@@ -28,7 +28,7 @@ describe("DomainConnectionDenied - unit tests", () => {
 
         const info = DomainConnectionDenied.read(dataView);
 
-        expect(info.reasonCode).toBe(ConnectionRefusedReason.ProtocolMismatch);
+        expect(info.reasonCode).toBe(DomainHandler.ConnectionRefusedReason.ProtocolMismatch);
         expect(info.reasonMessage).toBe("Protocol version mismatch - Domain version: dev");
         expect(info.extraInfo).toBe("");
     });

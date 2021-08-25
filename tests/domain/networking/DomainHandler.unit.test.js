@@ -13,6 +13,7 @@ import NodeList from "../../../src/domain/networking/NodeList";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Signal from "../../../src/domain/shared/Signal";
 import Uuid from "../../../src/domain/shared/Uuid";
+import DomainHandler from "../../../src/domain/networking/DomainHandler";
 
 import TestConfig from "../../test.config.json";
 
@@ -30,6 +31,12 @@ describe("DomainHandler - integration tests", () => {
     ContextManager.set(contextID, NodeList, contextID);
     const domainHandler = ContextManager.get(contextID, NodeList).getDomainHandler();
 
+
+    test("Can get ConnectionRefusedReason values", () => {
+        expect(DomainHandler.ConnectionRefusedReason.Unknown).toBe(0);
+        expect(DomainHandler.ConnectionRefusedReason.ProtocolMismatch).toBe(1);
+        expect(DomainHandler.ConnectionRefusedReason.NotAuthorizedDomain).toBe(7);
+    });
 
     test("Can set and get the URL", (done) => {
         expect.assertions(2);

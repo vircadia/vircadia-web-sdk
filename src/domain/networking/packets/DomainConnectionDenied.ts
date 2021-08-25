@@ -11,11 +11,9 @@
 import UDT from "../udt/UDT";
 import assert from "../../shared/assert";
 
-import { ConnectionRefusedReasonValue } from "../ConnectionRefusedReason";
-
 
 type DomainConnectionDeniedDetails = {
-    reasonCode: ConnectionRefusedReasonValue,
+    reasonCode: number,
     reasonMessage: string,
     extraInfo: string
 };
@@ -27,7 +25,8 @@ const DomainConnectionDenied = new class {
     /*@devdoc
      *  Information returned by {@link Packets|reading} a {@link PacketType(1)|DomainConnectionDenied} packet.
      *  @typedef {object} PacketScribe.DomainConnectionDeniedDetails
-     *  @property {ConnectionRefusedReason} reasonCode - The reason that the client was refused connection to the domain.
+     *  @property {ComainHandler.ConnectionRefusedReason} reasonCode - The reason that the client was refused connection to the
+     *      domain.
      *  @property {string} reasonMessage - A description of the reason.
      *  @property {string} etraInfo - Extra information about the reason.
      */

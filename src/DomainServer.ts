@@ -11,7 +11,6 @@
 //
 
 import AddressManager from "./domain/networking/AddressManager";
-import { ConnectionRefusedReasonValue } from "./domain/networking/ConnectionRefusedReason";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType from "./domain/networking/NodeType";
@@ -330,7 +329,7 @@ class DomainServer {
     // eslint-disable-next-line
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    #domainConnectionRefused = (reasonMessage: string, reasonCode: ConnectionRefusedReasonValue, extraInfo: string): void => {
+    #domainConnectionRefused = (reasonMessage: string, reasonCodeInt: number, extraInfo: string): void => {
         // C++  Application::domainConnectionRefused(const QString& reasonMessage, int reasonCodeInt, const QString& extraInfo)
 
         // WEBRTC TODO: Address further C++ code.

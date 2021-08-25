@@ -22,9 +22,72 @@ import ReceivedMessage from "./ReceivedMessage";
  *  <p>C++: <code>DomainHandler : QObject</code></p>
  *  @class DomainHandler
  *  @param {NodeList} parent - The parent {@link NodeList} object.
+ *
+ *  @property {DomainHandler.ConnectionRefusedReasons} ConnectionRefusedReason - The reasons that a client may be refused
+ *      connection to a domain.
+ *      <em>Static. Read-only.</em>
  */
 class DomainHandler {
     // C++  DomainHandler : public QObject
+
+    /*@devdoc
+     *  <p>The reasons that a client may be refused connection to a domain.</p>
+     *  <table>
+     *      <thead>
+     *          <tr><th>Reason</th><th>Value</th><th>Description</th></tr>
+     *      </thead>
+     *  <tbody>
+     *      <tr><td>Unknown</td><td><code>0</code></td>
+     *          <td>Some unknown reason.</td></tr>
+     *      <tr><td>ProtocolMismatch</td><td><code>1</code></td>
+     *          <td>The communications protocols of the domain and your client are not the same.</td></tr>
+     *      <tr><td>LoginErrorMetaverse</td><td><code>2</code></td>
+     *          <td>You could not be logged into the domain per your metaverse login.</td></tr>
+     *      <tr><td>NotAuthorizedMetaverse</td><td><code>3</code></td>
+     *          <td>You are not authorized to connect to the domain per your metaverse login.</td></tr>
+     *      <tr><td>TooManyUsers</td><td><code>4</code></td>
+     *          <td>The domain already has its maximum number of users.</td></tr>
+     *      <tr><td>TimedOut</td><td><code>5</code></td>
+     *          <td>Connecting to the domain timed out.</td></tr>
+     *      <tr><td>LoginErrorDomain</td><td><code>6</code></td>
+     *          <td>You could not be logged into the domain per your domain login.</td></tr>
+     *      <tr><td>NotAuthorizedDomain</td><td><code>7</code></td>
+     *          <td>You are not authorized to connect to the domain per your domain login.</td></tr>
+     *   </tbody>
+     * </table>
+     * @typedef {number} DomainHandler.ConnectionRefusedReason
+     */
+    /*@devdoc
+     *  The reasons that a client may be refused connection to a domain.
+     *  @typedef {object} DomainHandler.ConnectionRefusedReasons
+     *  @property {number} Unknown - <code>0</code>:
+     *      Some unknown reason.
+     *  @property {number} ProtocolMismatch - <code>1</code>:
+     *      The communications protocols of the domain and your client are not the same.
+     *  @property {number} LoginErrorMetaverse - <code>2</code>:
+     *      You could not be logged into the domain per your metaverse login.
+     *  @property {number} NotAuthorizedMetaverse - <code>3</code>:
+     *      You are not authorized to connect to the domain per your metaverse login.
+     *  @property {number} TooManyUsers - <code>4</code>:
+     *      The domain already has its maximum number of users.
+     *  @property {number} TimedOut - <code>5</code>:
+     *      Connecting to the domain timed out.
+     *  @property {number} LoginErrorDomain - <code>6</code>:
+     *      You could not be logged into the domain per your domain login.
+     *  @property {number} NotAuthorizedDomain - <code>7</code>:
+     *      You are not authorized to connect to the domain per your domain login.
+     */
+    static readonly ConnectionRefusedReason = new class {
+        readonly Unknown = 0;
+        readonly ProtocolMismatch = 1;
+        readonly LoginErrorMetaverse = 2;
+        readonly NotAuthorizedMetaverse = 3;
+        readonly TooManyUsers = 4;
+        readonly TimedOut = 5;
+        readonly LoginErrorDomain = 6;
+        readonly NotAuthorizedDomain = 7;
+    }();
+
 
     #_domainURL = "";
     #_sockAddr = new SockAddr();  // For WebRTC, the port is the critical part.
@@ -259,8 +322,8 @@ class DomainHandler {
      *  @function DomainHandler.setRedirectErrorState
      *  @param {string} errorUrl - Not currently used.
      *  @param {string} reasonMessage - The reason that the client was refused connection to the domain.
-     *  @param {ConnectionRefusedReason} reasonCode - The reason code for the reason.
-     *  @param {string} extraInfo - Extra information about the reason.
+     *  @param {DomainHandler.ConnectionRefusedReason} reasonCode - The reason code for the refusal.
+     *  @param {string} extraInfo - Extra information about the refusal.
      *  @returns {Slot}
      */
     // eslint-disable-next-line
@@ -322,8 +385,8 @@ class DomainHandler {
      *  Triggered when the client is refused connection to a domain.
      *  @function DomainHandler.domainConnectionRefused
      *  @param {string} reasonMessage - The reason that the client was refused connection to the domain.
-     *  @param {ConnectionRefusedReason} reasonCode - The reason code for the reason.
-     *  @param {string} extraInfo - Extra information about the reason.
+     *  @param {DomainHandler.ConnectionRefusedReason} reasonCode - The reason code for the refusal.
+     *  @param {string} extraInfo - Extra information about the refusal.
      *  @returns {Signal}
      */
     get domainConnectionRefused(): Signal {
