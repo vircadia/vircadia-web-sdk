@@ -13,7 +13,7 @@ import ConnectionRefusedReason from "../../../src/domain/networking/ConnectionRe
 
 describe("ConnectionRefusedReason - unit tests", () => {
 
-    // There are few unit tests because DomainHandler needs to be hosted by NodesList.
+    // There are few unit tests because DomainHandler needs to be hosted by NodeList.
     // WEBRTC TODO: Fix this.
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */

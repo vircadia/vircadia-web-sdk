@@ -10,7 +10,7 @@
 
 import Node from "./networking/Node";
 import { NodeTypeValue } from "./networking/NodeType";
-import NodesList from "./networking/NodesList";
+import NodeList from "./networking/NodeList";
 import ContextManager from "./shared/ContextManager";
 
 
@@ -93,7 +93,7 @@ class AssignmentClient {
 
 
     // Context.
-    #_nodesList: NodesList;
+    #_nodeList: NodeList;
 
     #_nodeType;
     #_state;
@@ -103,11 +103,11 @@ class AssignmentClient {
 
     constructor(contextID: number, nodeType: NodeTypeValue) {
 
-        this.#_nodesList = ContextManager.get(contextID, NodesList) as NodesList;  // Throws error if invalid context.
+        this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;  // Throws error if invalid context.
         this.#_nodeType = nodeType;
 
         // Initial state.
-        this.#_assignmentClientNode = this.#_nodesList.soloNodeOfType(this.#_nodeType);
+        this.#_assignmentClientNode = this.#_nodeList.soloNodeOfType(this.#_nodeType);
         if (this.#_assignmentClientNode === null) {
             this.#_state = AssignmentClient.UNAVAILABLE;
         } else if (this.#_assignmentClientNode.getActiveSocket() === null) {
@@ -117,24 +117,24 @@ class AssignmentClient {
         }
 
         // Changes in state.
-        this.#_nodesList.nodeAdded.connect((node: Node) => {
+        this.#_nodeList.nodeAdded.connect((node: Node) => {
             if (node.getType() === this.#_nodeType) {
                 this.#_assignmentClientNode = node;
                 this.#setState(AssignmentClient.DISCONNECTED);
             }
         });
-        this.#_nodesList.nodeKilled.connect((node: Node) => {
+        this.#_nodeList.nodeKilled.connect((node: Node) => {
             if (node === this.#_assignmentClientNode) {
                 this.#_assignmentClientNode = null;
                 this.#setState(AssignmentClient.UNAVAILABLE);
             }
         });
-        this.#_nodesList.nodeActivated.connect((node: Node) => {
+        this.#_nodeList.nodeActivated.connect((node: Node) => {
             if (node === this.#_assignmentClientNode) {
                 this.#setState(AssignmentClient.CONNECTED);
             }
         });
-        this.#_nodesList.nodeSocketUpdated.connect((node: Node) => {
+        this.#_nodeList.nodeSocketUpdated.connect((node: Node) => {
             if (node === this.#_assignmentClientNode) {
                 this.#setState(AssignmentClient.DISCONNECTED);
             }

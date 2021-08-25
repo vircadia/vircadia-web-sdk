@@ -12,14 +12,14 @@ import AddressManager from "../../../src/domain/networking/AddressManager";
 import DomainHandler from "../../../src/domain/networking/DomainHandler";
 import Node from "../../../src/domain/networking/Node";
 import NodePermissions from "../../../src/domain/networking/NodePermissions";
-import NodesList from "../../../src/domain/networking/NodesList";
+import NodeList from "../../../src/domain/networking/NodeList";
 import NodeType from "../../../src/domain/networking/NodeType";
 import SockAddr from "../../../src/domain/networking/SockAddr";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Uuid from "../../../src/domain/shared/Uuid";
 
 
-describe("NodesList - integration tests", () => {
+describe("NodeList - integration tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
@@ -46,9 +46,9 @@ describe("NodesList - integration tests", () => {
     AUDIO_MIXER_NODE_INFO.localSocket.setPort(PORT_102);
 
     const contextID = ContextManager.createContext();
-    ContextManager.set(contextID, AddressManager);  // Required by NodesList.
-    ContextManager.set(contextID, NodesList, contextID);
-    const nodesList = ContextManager.get(contextID, NodesList);
+    ContextManager.set(contextID, AddressManager);  // Required by NodeList.
+    ContextManager.set(contextID, NodeList, contextID);
+    const nodeList = ContextManager.get(contextID, NodeList);
 
     // Suppress console messages from being displayed.
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
@@ -56,29 +56,29 @@ describe("NodesList - integration tests", () => {
 
 
     test("Can get the DomainHandler", () => {
-        expect(nodesList.getDomainHandler() instanceof DomainHandler).toBe(true);
+        expect(nodeList.getDomainHandler() instanceof DomainHandler).toBe(true);
     });
 
     test("Can set and get the nodes interest set", () => {
-        expect(nodesList.getNodeInterestSet().size).toBe(0);
+        expect(nodeList.getNodeInterestSet().size).toBe(0);
         const setOfNodes = new Set([NodeType.EntityServer, NodeType.MessagesMixer]);
-        nodesList.addSetOfNodeTypesToNodeInterestSet(setOfNodes);
-        expect(nodesList.getNodeInterestSet()).toEqual(setOfNodes);
+        nodeList.addSetOfNodeTypesToNodeInterestSet(setOfNodes);
+        expect(nodeList.getNodeInterestSet()).toEqual(setOfNodes);
     });
 
     test("Can reset the nodes list", () => {
-        nodesList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
+        nodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
             AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
             AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
             AUDIO_MIXER_NODE_INFO.permissions
         );
-        expect(nodesList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type) instanceof Node).toBe(true);
+        expect(nodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type) instanceof Node).toBe(true);
         // Reset the nodes list.
-        nodesList.reset("Some reason");
-        expect(nodesList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type)).toBeNull();
+        nodeList.reset("Some reason");
+        expect(nodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type)).toBeNull();
         // Resetting again is OK.
-        nodesList.reset("Some reason");
-        expect(nodesList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type)).toBeNull();
+        nodeList.reset("Some reason");
+        expect(nodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type)).toBeNull();
     });
 
     warn.mockReset();

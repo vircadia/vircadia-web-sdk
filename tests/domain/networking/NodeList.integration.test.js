@@ -9,7 +9,7 @@
 //
 
 import AddressManager from "../../../src/domain/networking/AddressManager";
-import NodesList from "../../../src/domain/networking/NodesList";
+import NodeList from "../../../src/domain/networking/NodeList";
 import NodeType from "../../../src/domain/networking/NodeType";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 
@@ -18,7 +18,7 @@ import TestConfig from "../../test.config.json";
 import "wrtc";  // WebRTC Node.js package.
 
 
-describe("NodesList - integration tests", () => {
+describe("NodeList - integration tests", () => {
 
     //  Test environment expected: Domain server that allows anonymous logins running on localhost or other per TestConfig.
 
@@ -37,10 +37,10 @@ describe("NodesList - integration tests", () => {
     const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
 
     const contextID = ContextManager.createContext();
-    ContextManager.set(contextID, AddressManager);  // Required by NodesList.
-    ContextManager.set(contextID, NodesList, contextID);
+    ContextManager.set(contextID, AddressManager);  // Required by NodeList.
+    ContextManager.set(contextID, NodeList, contextID);
     const addressManager = ContextManager.get(contextID, AddressManager);
-    const nodesList = ContextManager.get(contextID, NodesList);
+    const nodeList = ContextManager.get(contextID, NodeList);
 
 
     test("Can perform an initial domain server check-in", (done) => {
@@ -51,8 +51,8 @@ describe("NodesList - integration tests", () => {
         // Set up DomainHandler.
         addressManager.handleLookupString(TestConfig.SERVER_SIGNALING_SOCKET_URL);
 
-        // Set up NodesList.
-        nodesList.addSetOfNodeTypesToNodeInterestSet(new Set([
+        // Set up NodeList.
+        nodeList.addSetOfNodeTypesToNodeInterestSet(new Set([
             NodeType.AudioMixer,
             NodeType.AvatarMixer,
             NodeType.EntityServer,
@@ -63,21 +63,21 @@ describe("NodesList - integration tests", () => {
 
         // Create WebRTC signaling channel.
         setTimeout(function () {
-            nodesList.sendDomainServerCheckIn();
+            nodeList.sendDomainServerCheckIn();
         }, 0);
 
         // Create WebRTC data channel.
         setTimeout(function () {
-            nodesList.sendDomainServerCheckIn();
+            nodeList.sendDomainServerCheckIn();
         }, 1000);
 
         // Send a DomainConnectRequest packet to the domain server.
         setTimeout(function () {
-            nodesList.sendDomainServerCheckIn();
+            nodeList.sendDomainServerCheckIn();
         }, 2000);
 
         // Receive a DomainServerList packet in response.
-        const domainHandler = nodesList.getDomainHandler();
+        const domainHandler = nodeList.getDomainHandler();
         let backupTimeout = null;
         domainHandler.connectedToDomain.connect(function () {
             clearTimeout(backupTimeout);

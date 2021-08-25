@@ -9,7 +9,7 @@
 //
 
 import AddressManager from "../../../src/domain/networking/AddressManager";
-import NodesList from "../../../src/domain/networking/NodesList";
+import NodeList from "../../../src/domain/networking/NodeList";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Signal from "../../../src/domain/shared/Signal";
 import Uuid from "../../../src/domain/shared/Uuid";
@@ -26,9 +26,9 @@ describe("DomainHandler - integration tests", () => {
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
     const contextID = ContextManager.createContext();
-    ContextManager.set(contextID, AddressManager);  // Required by NodesList.
-    ContextManager.set(contextID, NodesList, contextID);
-    const domainHandler = ContextManager.get(contextID, NodesList).getDomainHandler();
+    ContextManager.set(contextID, AddressManager);  // Required by NodeList.
+    ContextManager.set(contextID, NodeList, contextID);
+    const domainHandler = ContextManager.get(contextID, NodeList).getDomainHandler();
 
 
     test("Can set and get the URL", (done) => {

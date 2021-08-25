@@ -274,8 +274,8 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     // The following items are tested elsewhere:
-    // - sendPacket() - Tested implicitly by NodesList integration test.
-    // - sendUnreliablePacket() - Tested implicitly by NodesList integration test.
+    // - sendPacket() - Tested implicitly by NodeList integration test.
+    // - sendUnreliablePacket() - Tested implicitly by NodeList integration test.
 
 
     warn.mockReset();

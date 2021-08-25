@@ -38,7 +38,7 @@ type NewNodeInfo = {
 /*@devdoc
  *  The <code>LimitedNodeList</code> class manages all the network nodes (assignment clients) that the client is connected to.
  *  This includes their presence and communications with them via the Vircadia protocol.
- *  <p>See also: {@link NodesList}.</p>
+ *  <p>See also: {@link NodeList}.</p>
  *  <p>C++: <code>LimitedNodeList : public QObject, public Dependency</code></p>
  *  @class LimitedNodeList
  *
@@ -383,7 +383,7 @@ class LimitedNodeList {
 
 
     /*@devdoc
-     *  Resets the NodesList, closing all connections and deleting all node data.
+     *  Resets the NodeList, closing all connections and deleting all node data.
      *  @param {string} reason - The reason for resetting.
      *  @returns {Slot}
      */
@@ -391,7 +391,7 @@ class LimitedNodeList {
     // @ts-ignore
     reset(reason: string): void {  // eslint-disable-line @typescript-eslint/no-unused-vars
         // C++  void reset(QString reason)
-        // Cannot declare this Slot function as an arrow function because derived NodesList class calls this function.
+        // Cannot declare this Slot function as an arrow function because derived NodeList class calls this function.
         this.#eraseAllNodes(reason);
         this._nodeSocket.clearConnections();
 

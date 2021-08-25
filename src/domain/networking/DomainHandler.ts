@@ -9,7 +9,7 @@
 //
 
 import { LocalID } from "./NetworkPeer";
-import NodesList from "./NodesList";
+import NodeList from "./NodeList";
 import SockAddr from "./SockAddr";
 import Signal from "../shared/Signal";
 import Uuid from "../shared/Uuid";
@@ -21,7 +21,7 @@ import ReceivedMessage from "./ReceivedMessage";
  *  The <code>DomainHandler</code> class handles the connection to and the features of a domain.
  *  <p>C++: <code>DomainHandler : QObject</code></p>
  *  @class DomainHandler
- *  @param {NodesList} parent - The parent {@link NodesList} object.
+ *  @param {NodeList} parent - The parent {@link NodeList} object.
  */
 class DomainHandler {
     // C++  DomainHandler : public QObject
@@ -40,12 +40,12 @@ class DomainHandler {
     #_domainConnectionRefused = new Signal();
 
     // Context objects.
-    #_nodesList;
+    #_nodeList;
 
 
-    constructor(parent: NodesList) {
+    constructor(parent: NodeList) {
         // C++  DomainHandler(QObject* parent = 0);
-        this.#_nodesList = parent;
+        this.#_nodeList = parent;
         this.#_sockAddr.setObjectName("DomainServer");
 
         // WEBRTC TODO: Address further C++ code.
@@ -335,7 +335,7 @@ class DomainHandler {
     #sendDisconnectPacket(): void {
         // C++  void sendDisconnectPacket()
         const packet = PacketScribe.DomainDisconnectRequest.write();
-        this.#_nodesList.sendUnreliablePacket(packet, this.#_sockAddr);
+        this.#_nodeList.sendUnreliablePacket(packet, this.#_sockAddr);
     }
 
     #hardReset(reason: string): void {

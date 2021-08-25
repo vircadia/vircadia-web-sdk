@@ -1,5 +1,5 @@
 //
-//  NodesList.ts
+//  NodeList.ts
 //
 //  Created by David Rowe on 5 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -25,16 +25,15 @@ import Socket from "./udt/Socket";
 
 
 /*@devdoc
- *  The <code>NodesList</code> class manages the domain server plus all the nodes (assignment clients) that the client is
+ *  The <code>NodeList</code> class manages the domain server plus all the nodes (assignment clients) that the client is
  *  connected to. This includes their presence and communications with them via the Vircadia protocol.
  *  <p>C++: <code>NodeList : LimitedNodeList</code></p>
- *  <p>Note: This JavaScript object has a different name because <code>NodeList</code> is a JavaScript browser object.</p>
- *  @class NodesList
+ *  @class NodeList
  *  @extends LimitedNodeList
  *  @param {number} contextID - The {@link ContextManager} context ID.
- *  @param {NodeType} [ownerType=Agent] - The type of object that the NodesList is being used in.
+ *  @param {NodeType} [ownerType=Agent] - The type of object that the NodeList is being used in.
  */
-class NodesList extends LimitedNodeList {
+class NodeList extends LimitedNodeList {
     // C++  NodeList : public LimitedNodeList
 
     #_ownerType = NodeType.Agent;
@@ -45,6 +44,7 @@ class NodesList extends LimitedNodeList {
 
     // Context objects.
     #_addressManager;
+
 
     constructor(contextID: number) {
         // C++  NodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
@@ -98,8 +98,8 @@ class NodesList extends LimitedNodeList {
 
 
     /*@devdoc
-     *  Gets the domain handler used by the NodesList.
-     *  @function NodesList.getDomainHandler
+     *  Gets the domain handler used by the NodeList.
+     *  @function NodeList.getDomainHandler
      *  @returns {DomainHandler} The domain handler.
      */
     getDomainHandler(): DomainHandler {
@@ -108,8 +108,8 @@ class NodesList extends LimitedNodeList {
     }
 
     /*@devdoc
-     *  Adds node types to the set of those that the NodesList will connect to.
-     *  @function NodesList.addSetOfNodeTypesToNodeInterestSet
+     *  Adds node types to the set of those that the NodeList will connect to.
+     *  @function NodeList.addSetOfNodeTypesToNodeInterestSet
      *  @param {Set<NodeType>} setOfNodeTypes - The node types to add to the interest set.
      */
     addSetOfNodeTypesToNodeInterestSet(setOfNodeTypes: Set<NodeTypeValue>): void {
@@ -120,8 +120,8 @@ class NodesList extends LimitedNodeList {
     }
 
     /*@devdoc
-     *  Gets the node types that the NodesList will connect to.
-     *  @function NodesList.getNodeInterestSet
+     *  Gets the node types that the NodeList will connect to.
+     *  @function NodeList.getNodeInterestSet
      *  @returns {Set<NodeType>} The node types in the interest set.
      */
     getNodeInterestSet(): Set<NodeTypeValue> {
@@ -132,7 +132,7 @@ class NodesList extends LimitedNodeList {
 
     /*@devdoc
      *  Resets the LimitedNodeList, closing all connections and deleting all node data.
-     *  @function NodesList.reset
+     *  @function NodeList.reset
      *  @param {string} reason - The reason for resetting.
      *  @param {boolean} [skipDomainHandlerReset=false] - <code>true</code> if should skip clearing DomainHandler information,
      *      e.g., if the DomainHandler initiated the reset; <code>false</code> if should clear DomainHandler information.
@@ -162,7 +162,7 @@ class NodesList extends LimitedNodeList {
      *  Performs a check-in with the domain server to connect with a {@link PacketType(1)|DomainConnectRequest} packet or keep a
      *  connection alive with a {@link PacketType(1)|DomainListRequest} packet. This method should be called by the client once
      *  every second.
-     *  @function NodesList.sendDomainServerCheckIn
+     *  @function NodeList.sendDomainServerCheckIn
      *  @returns {Slot}
      */
     sendDomainServerCheckIn = (): void => {
@@ -289,7 +289,7 @@ class NodesList extends LimitedNodeList {
 
     /*@devdoc
      *  Processes a {@link PacketType(1)|DomainList} message received from the domain server.
-     *  @function NodesList.processDomainList
+     *  @function NodeList.processDomainList
      *  @param {ReceivedMessage} message - The DomainList message.
      *  @returns {Slot}
      */
@@ -331,7 +331,7 @@ class NodesList extends LimitedNodeList {
 
     /*@devdoc
      *  Processes a {@link PacketType(1)|DomainServerRemovedNode} message received from the domain server.
-     *  @function NodesList.processDomainServerRemovedNode
+     *  @function NodeList.processDomainServerRemovedNode
      *  @param {ReceivedMessage} message - The DomainServerRemovedNode message.
      *  @returns {Slot}
      */
@@ -399,4 +399,4 @@ class NodesList extends LimitedNodeList {
 
 }
 
-export default NodesList;
+export default NodeList;
