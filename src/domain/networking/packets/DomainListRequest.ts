@@ -150,6 +150,7 @@ const DomainListRequest = new class {
         /* eslint-enable @typescript-eslint/no-magic-numbers */
 
         messageData.dataPosition = dataPosition;
+        messageData.packetSize = dataPosition;
 
         return packet;
     }

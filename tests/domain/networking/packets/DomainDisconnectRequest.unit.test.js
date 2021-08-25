@@ -11,6 +11,7 @@
 import NLPacket from "../../../../src/domain/networking/NLPacket";
 import DomainDisconnectRequest from "../../../../src/domain/networking/packets/DomainDisconnectRequest";
 import PacketType from "../../../../src/domain/networking/udt/PacketHeaders";
+import UDT from "../../../../src/domain/networking/udt/UDT";
 
 
 describe("DomainDisconnectRequest - unit tests", () => {
@@ -19,7 +20,9 @@ describe("DomainDisconnectRequest - unit tests", () => {
         const packet = DomainDisconnectRequest.write();
         expect(packet instanceof NLPacket).toBe(true);
         expect(packet.getType()).toBe(PacketType.DomainDisconnectRequest);
-        expect(packet.getMessageData().dataPosition).toBeGreaterThan(0);
+        const packetSize = packet.getDataSize();
+        expect(packetSize).toBeGreaterThan(0);
+        expect(packetSize).toBeLessThan(UDT.MAX_PACKET_SIZE);
     });
 
 });

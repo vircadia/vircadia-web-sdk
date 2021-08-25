@@ -13,6 +13,7 @@ import NodeType from "../../../../src/domain/networking/NodeType";
 import SockAddr from "../../../../src/domain/networking/SockAddr";
 import DomainListRequest from "../../../../src/domain/networking/packets/DomainListRequest";
 import PacketType from "../../../../src/domain/networking/udt/PacketHeaders";
+import UDT from "../../../../src/domain/networking/udt/UDT";
 
 
 describe("DomainListRequest - unit tests", () => {
@@ -39,8 +40,10 @@ describe("DomainListRequest - unit tests", () => {
         });
         expect(packet instanceof NLPacket).toBe(true);
         expect(packet.getType()).toBe(PacketType.DomainListRequest);
-        connectedPacketSize = packet.getMessageData().dataPosition;
+        connectedPacketSize = packet.getDataSize();
+        expect(connectedPacketSize).toBe(packet.getMessageData().dataPosition);
         expect(connectedPacketSize).toBeGreaterThan(0);
+        expect(connectedPacketSize).toBeLessThan(UDT.MAX_PACKET_SIZE);
     });
 
     test("Can write a disconnected DomainListRequest packet", () => {
@@ -66,8 +69,11 @@ describe("DomainListRequest - unit tests", () => {
         });
         expect(packet instanceof NLPacket).toBe(true);
         expect(packet.getType()).toBe(PacketType.DomainListRequest);
-        disconnectedPacketSize = packet.getMessageData().dataPosition;
+        disconnectedPacketSize = packet.getDataSize();
+        expect(disconnectedPacketSize).toBe(packet.getMessageData().dataPosition);
         expect(disconnectedPacketSize).toBeGreaterThan(0);
+        expect(disconnectedPacketSize).toBeLessThan(UDT.MAX_PACKET_SIZE);
+
         expect(disconnectedPacketSize).toBeGreaterThan(connectedPacketSize);
     });
 
