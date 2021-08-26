@@ -33,6 +33,7 @@ class Node extends NetworkPeer {
 
     static readonly NULL_LOCAL_ID: LocalID = 0;
 
+
     #_type = NodeType.Unassigned;
     #_permissions = new NodePermissions();
     #_connectionSecret = new Uuid();

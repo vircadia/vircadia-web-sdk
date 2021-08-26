@@ -289,7 +289,7 @@ class DomainHandler {
 
     /*@devdoc
      *  Sets the current domain's URL and pending ID.
-     *  @callback DomainHandler.setURLAndID
+     *  @function DomainHandler.setURLAndID
      *  @param {string} url - The domain's URL.
      *  @param {Uuid} id - The domain's pending ID.
      *  @returns {Slot}
