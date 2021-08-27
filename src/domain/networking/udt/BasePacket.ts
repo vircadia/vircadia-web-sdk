@@ -44,6 +44,7 @@ class BasePacket {
         return UDT.MAX_PACKET_SIZE;
     }
 
+    static #NUM_BYTES_HEADER = 4;  // Control bits and sequence number.
 
     protected _messageData: MessageData;
 
@@ -138,6 +139,14 @@ class BasePacket {
         return this._messageData.receiveTime;
     }
 
+
+    protected adjustPayloadStartAndCapacity(headerSize: number): void {
+        // C++ void adjustPayloadStartAndCapacity(qint64 headerSize, bool shouldDecreasePayloadSize = false)
+
+        // We don't use C++'s _payloadStart or _payloadCapacity members. Instead, we just need to reserve space for the header,
+        // taking into account the base packet's header.
+        this._messageData.dataPosition = BasePacket.#NUM_BYTES_HEADER + headerSize;
+    }
 }
 
 export default BasePacket;

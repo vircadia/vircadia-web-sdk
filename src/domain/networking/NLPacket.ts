@@ -79,13 +79,12 @@ class NLPacket extends Packet {
     static readonly #NUM_BYTES_MD5_HASH = 16;
 
     static #localHeaderSize(type: PacketTypeValue): number {
-        // C++  int NLPacket::localHeaderSize(PacketType type)
+        // C++  int localHeaderSize(PacketType type)
         const nonSourced = PacketType.getNonSourcedPackets().has(type);
         const nonVerified = PacketType.getNonVerifiedPackets().has(type);
         const optionalSize = (nonSourced ? 0 : NLPacket.#NUM_BYTES_LOCALID)
             + (nonSourced || nonVerified ? 0 : NLPacket.#NUM_BYTES_MD5_HASH);
-        // return sizeof(PacketType) + sizeof(PacketVersion) + optionalSize;
-        return 2 + optionalSize;
+        return 2 + optionalSize;  // C++: sizeof(PacketType) + sizeof(PacketVersion) + optionalSize
     }
 
 
@@ -108,11 +107,8 @@ class NLPacket extends Packet {
             super(size === -1 ? -1 : NLPacket.#localHeaderSize(type) + size, isReliable, isPartOfMessage);
             this._messageData.type = type;
             this._messageData.version = version === 0 ? PacketType.versionForPacketType(type) : version;
-            // adjustPayloadStartAndCapacity(); - Not used in TypeScript.
+            this.adjustPayloadStartAndCapacity(NLPacket.#localHeaderSize(type));
             this.#writeTypeAndVersion();
-            if (!PacketType.getNonSourcedPackets().has(type)) {
-                this._messageData.dataPosition += NLPacket.#NUM_BYTES_LOCALID;
-            }
 
         } else if (param0 instanceof Packet) {
             // C++  NLPacket(Packet&& packet)
@@ -202,7 +198,6 @@ class NLPacket extends Packet {
         const headerOffset = Packet.totalHeaderSize(messageData.isPartOfMessage);
         messageData.data.setUint8(headerOffset, messageData.type);
         messageData.data.setUint8(headerOffset + 1, messageData.version);
-        messageData.dataPosition += 2;
     }
 
 }
