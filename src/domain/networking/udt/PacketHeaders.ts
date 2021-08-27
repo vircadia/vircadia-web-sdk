@@ -216,7 +216,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} AssetMappingOperation - <code>61</code>
  *  @property {PacketType} AssetMappingOperationReply - <code>62</code>
  *  @property {PacketType} ICEServerHeartbeatACK - <code>63</code>
- *  @property {PacketType} NegotiateAudioFormat - <code>64</code>
+ *  @property {PacketType} NegotiateAudioFormat - <code>64</code> - The user client sends this to the audio mixer to initiate
+ *      negotiation of the audio codec to use.
+ *      {@link PacketScribe.NegotiateAudioFormatDetails}.
  *  @property {PacketType} SelectedAudioFormat - <code>65</code>
  *  @property {PacketType} MoreEntityShapes - <code>66</code>
  *  @property {PacketType} NodeKickRequest - <code>67</code>
@@ -473,6 +475,8 @@ const PacketType = new class {
             case this.DomainDisconnectRequest:
                 return DEFAULT_VERSION;
             case this.DomainServerRemovedNode:
+                return DEFAULT_VERSION;
+            case this.NegotiateAudioFormat:
                 return DEFAULT_VERSION;
 
                 // WebRTC TODO: Add other packets.

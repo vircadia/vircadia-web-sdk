@@ -15,6 +15,7 @@ import DomainListRequest from "./DomainListRequest";
 import DomainConnectRequest from "./DomainConnectRequest";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
 import DomainServerRemovedNode from "./DomainServerRemovedNode";
+import NegotiateAudioFormat from "./NegotiateAudioFormat";
 
 
 /*@devdoc
@@ -33,6 +34,8 @@ import DomainServerRemovedNode from "./DomainServerRemovedNode";
  *      {@link PacketScribe.DomainDisconnectRequest&period;write|DomainDisconnectRequest&period;write}
  *  @property {function} DomainServerRemovedNode.read -
  *      {@link PacketScribe.DomainServerRemovedNode&period;read|DomainServerRemovedNode&period;read}
+ *  @property {function} NegotiateAudioFormat.write -
+ *      {@link PacketScribe.NegotiateAudioFormat&period;write|NegotiateAudioFormat&period;write}
  */
 
 // WEBRTC TODO: Implement similar in C++ to collect all packet reading/writing into the networking library code (and revise this
@@ -47,7 +50,8 @@ const PacketScribe = {
     DomainConnectionDenied,
     DomainConnectRequest,
     DomainDisconnectRequest,
-    DomainServerRemovedNode
+    DomainServerRemovedNode,
+    NegotiateAudioFormat
 };
 
 export default PacketScribe;
