@@ -36,6 +36,15 @@ References:
 - https://github.com/zloirock/core-js
 
 
+## crypto-js
+
+- `npm install --save crypto-js`
+- `npm install --save-dev @types/crypto-js`
+
+References:
+- https://cryptojs.gitbook.io/docs/
+
+
 ## WebPack
 
 - `npm install --save-dev webpack webpack-cli`
