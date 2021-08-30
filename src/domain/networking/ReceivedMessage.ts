@@ -28,8 +28,7 @@ class ReceivedMessage {
     constructor(packet: NLPacket) {
         // C++  ReceivedMessage(NLPacket& packet)
         this.#_messageData = packet.getMessageData();  // Reference the data already collected; no need to copy it.
-        this.#_messageData.headData = this.#_messageData.data;  // Just reference the same data; no need to copy it.
-        this.#_messageData.packetType = this.#_messageData.type;  // Alias.
+        this.#_messageData.packetType = this.#_messageData.type;
         this.#_messageData.numPackets = 1;
         this.#_messageData.isComplete = this.#_messageData.packetPosition === Packet.PacketPosition.ONLY;
         this.#_messageData.firstPacketReceiveTime = this.#_messageData.receiveTime;

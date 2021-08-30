@@ -64,8 +64,7 @@ class BasePacket {
             assert(size >= 0 && size <= maxPayload, "Invalid packet size!", size);
 
             this._messageData = new MessageData();
-            const buffer = new ArrayBuffer(size);
-            this._messageData.data = new DataView(buffer);
+            this._messageData.buffer = new Uint8Array(size);
             this._messageData.dataPosition = 0;
             this._messageData.packetSize = size;
 
@@ -76,7 +75,7 @@ class BasePacket {
             const senderSockAddr = param2;
 
             this._messageData = new MessageData();
-            this._messageData.data = data;
+            this._messageData.buffer = new Uint8Array(data.buffer);
             this._messageData.dataPosition = 0;
             this._messageData.packetSize = size;
             this._messageData.senderSockAddr = senderSockAddr;

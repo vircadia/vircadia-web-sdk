@@ -45,4 +45,16 @@ describe("MessageData - unit tests", () => {
         expect(secondMessageData.dataPosition).toBe(12);
     });
 
+    test("Can access raw data via both the buffer and data properties", () => {
+        const messageData = new MessageData();
+        expect(messageData.buffer instanceof Uint8Array).toBe(true);
+        expect(messageData.data instanceof DataView).toBe(true);
+        expect(messageData.data.buffer).toBe(messageData.buffer.buffer);
+        const buffer = new Uint8Array(8);
+        messageData.buffer = buffer;
+        expect(messageData.buffer).toBe(buffer);
+        expect(messageData.buffer.buffer).toBe(buffer.buffer);
+        expect(messageData.data.buffer).toBe(buffer.buffer);
+    });
+
 });

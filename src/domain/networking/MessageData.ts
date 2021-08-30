@@ -25,7 +25,9 @@ import { PacketTypeValue } from "./udt/PacketHeaders";
  *  @param {MessageData} [other] - Another <code>MessageData</code> object to copy property values from.
  *
  *  @property <strong>BasePacket</strong>
- *  @property {DataView} data - The raw packet or message data.
+ *  @property {Uint8Array} buffer - The raw packet or message data.
+ *  @property {DataView} data - A DataView of the raw packet or message data.
+ *      <em>Read-only.</em>
  *  @property {number} dataPosition - The current read/write position in processing the raw data. This is used to simplify the
  *      JavaScript instead of using <code>payloadStart</code>, <code>payloadCapacity</code>, and <code>payloadSize</code>.
  *  @property {number} packetSize - The size of the received packet.
@@ -38,8 +40,8 @@ import { PacketTypeValue } from "./udt/PacketHeaders";
  *      if it isn't.
  *  @property {Packet.ObfuscationLevel} obfuscationLevel=NoObfuscation - The level of obfuscation used in encoding the packet
  *      data.
- *  @property {number} sequenceNumber=0 - WEBRTC TODO
- *  @property {number} messageNumber=0 - WEBRTC TODO
+ *  @property {number} sequenceNumber=0
+ *  @property {number} messageNumber=0
  *  @property {Packet.PacketPosition} packetPosition=ONLY - The position of the packet in a multi-packet message.
  *  @property {number} messagePartNumber=0 - The order of the packet in a multi-packet message.
  *
@@ -49,7 +51,8 @@ import { PacketTypeValue } from "./udt/PacketHeaders";
  *  @property {number} sourceID - The ID of the node ID that is the source of the packet.
  *
  *  @property <strong>ReceivedMessage</strong>
- *  @property {DataView} headData - The raw header data. This is an alias for <code>data</code>.
+ *  @property {DataView} headData - A DataView of the raw header data. This is an alias for <code>data</code>.
+ *      <em>Read-only.</em>
  *  @property {PacketType} packetType - The type of packet. This is a copy of the <code>type</code> value.
  *  @property {number} numPackets=1 -  The number of packets used to form the message.
  *  @property {boolean} isComplete - <code>true</code> if the message is complete, <code>false</code> if it isn't.
@@ -59,7 +62,8 @@ class MessageData {
     // Property values are added by BasePacket, Packet, NLPacket, and ReceivedMessage.
 
     // C++  BasePacket
-    data = new DataView(new ArrayBuffer(0));
+    // buffer: See setter and getter.
+    // data: See getter.
     dataPosition = 0;
     packetSize = 0;
     senderSockAddr: SockAddr | undefined = undefined;  // We can avoid creating this object now.
@@ -80,25 +84,62 @@ class MessageData {
     sourceID = 0;
 
     // C++  ReceivedMessage
-    headData = this.data;
+    // headData: See getter.
     packetType: PacketTypeValue = 0;
     numPackets = 1;
     isComplete = false;
     firstPacketReceiveTime = 0;
 
 
+    #_buffer = new Uint8Array(0);
+    #_data = new DataView(this.#_buffer.buffer);
+
+
     constructor(other: MessageData | undefined = undefined) {
         if (other) {
             const properties = Object.keys(this);
+
+            // Primitive properties.
             properties.forEach((property) => {
-                // eslint-disable-next-line
-                // @ts-ignore
-                this[property] = other[property];  // eslint-disable-line
+                if (property !== "data" && property !== "headData" && property !== "senderSockAddr") {
+                    // eslint-disable-next-line
+                    // @ts-ignore
+                    this[property] = other[property];  // eslint-disable-line
+                }
             });
+
+            // Object properties.
+            this.buffer = new Uint8Array(other.buffer.buffer);
+            if (other.senderSockAddr) {
+                this.senderSockAddr = new SockAddr();
+                this.senderSockAddr.setObjectName(other.senderSockAddr.objectName());
+                this.senderSockAddr.setAddress(other.senderSockAddr.getAddress());
+                this.senderSockAddr.setPort(other.senderSockAddr.getPort());
+            } else {
+                this.senderSockAddr = undefined;
+            }
         }
 
         // WEBRTC TODO: Seal other objects.
         Object.seal(this);  // Prevent unintended use of invalid properties.
+    }
+
+
+    set buffer(buffer: Uint8Array) {
+        this.#_buffer = buffer;
+        this.#_data = new DataView(this.#_buffer.buffer);
+    }
+
+    get buffer(): Uint8Array {
+        return this.#_buffer;
+    }
+
+    get data(): DataView {
+        return this.#_data;
+    }
+
+    get headData(): DataView {
+        return this.#_data;
     }
 
 }
