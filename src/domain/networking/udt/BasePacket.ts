@@ -44,6 +44,7 @@ class BasePacket {
         return UDT.MAX_PACKET_SIZE;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     static #NUM_BYTES_HEADER = 4;  // Control bits and sequence number.
 
     protected _messageData: MessageData;

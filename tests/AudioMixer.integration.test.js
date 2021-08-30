@@ -45,7 +45,7 @@ describe("AudioMixer - integration tests", () => {
     const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
 
 
-    test("States when connect to and disconnect from a domain", (done) => {
+    test("Check states change when connect to and disconnect from a domain", (done) => {
         const domainServer = new DomainServer();
         const audioMixer = new AudioMixer(domainServer.contextID);
         expect(audioMixer.state).toBe(AudioMixer.UNAVAILABLE);

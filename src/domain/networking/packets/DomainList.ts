@@ -45,7 +45,8 @@ const DomainList = new class {
      *  @property {Uuid} newUUID - The UUID assigned to the web client by the domain server.
      *  @property {LocalID} newLocalID - The local ID assigned to the web client by the domain server.
      *  @property {NodePermissions} newPermissions - The permissions granted to the user.
-     *  @property {boolean} isAuthenticated
+     *  @property {boolean} isAuthenticated - <code>true</code> if the domain server requires verified packets to include
+     *      authentication hash values, <code>false</code> if they're not needed.
      *  @property {bigint} connectRequestTimestamp
      *  @property {bigint} domainServerPingSendTime - The Unix time that the packet was sent, in usec.
      *  @property {bigint} domainServerCheckinProcessingTime - The duration from the time domain server received the packet

@@ -16,6 +16,9 @@ import UDT from "../../../../src/domain/networking/udt/UDT";
 
 describe("NegotiateAudioFormat - unit tests", () => {
 
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+
     test("Can write a NegotiateAudioFormat packet", () => {
         const codecs = [
             "opus",
@@ -26,8 +29,6 @@ describe("NegotiateAudioFormat - unit tests", () => {
         const packet = NegotiateAudioFormat.write({
             codecs
         });
-
-        //console.log("$$$$$$$", packet.getMessageData().data);
 
         expect(packet instanceof NLPacket).toBe(true);
         expect(packet.getType()).toBe(PacketType.NegotiateAudioFormat);

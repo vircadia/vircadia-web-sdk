@@ -81,6 +81,7 @@ describe("NodeList - integration tests", () => {
         expect(nodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type)).toBeNull();
     });
 
+
     warn.mockReset();
     log.mockReset();
 });
