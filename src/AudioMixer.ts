@@ -11,7 +11,11 @@
 //
 
 import AssignmentClient from "./domain/AssignmentClient";
+import Node from "./domain/networking/Node";
+import NodeList from "./domain/networking/NodeList";
 import NodeType from "./domain/networking/NodeType";
+import PacketScribe from "./domain/networking/packets/PacketScribe";
+import ContextManager from "./domain/shared/ContextManager";
 
 
 /*@sdkdoc
@@ -69,9 +73,77 @@ class AudioMixer extends AssignmentClient {
      *      state.
      */
 
+
+    // Context.
+    #_nodeList: NodeList;  // Need own reference rather than using AssignmentClient's because need to keep private from API.
+
+
     constructor(contextID: number) {
         super(contextID, NodeType.AudioMixer);
+
+        this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;  // Throws error if invalid context.
+
+
+        // C++  AudioClient::AudioClient()
+
+        // WEBRTC TODO: Address further C++ code.
+
+
+        // C++  Application::Application()
+        this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
+        this.#_nodeList.nodeKilled.connect(this.#nodeKilled);
     }
+
+
+    #negotiateAudioFormat(): void {
+        // C++  void AudioClient::negotiateAudioFormat()
+
+        // WEBRTC TODO: Get list of codecs that Web supports.
+        const codecs = [
+            "opus",
+            "pcm",
+            "zlib"
+        ];
+
+        const negotiateFormatPacket = PacketScribe.NegotiateAudioFormat.write({
+            codecs
+        });
+
+        const audioMixer = this.#_nodeList.soloNodeOfType(NodeType.AudioMixer);
+        if (audioMixer) {
+            this.#_nodeList.sendPacket(negotiateFormatPacket, audioMixer);
+        }
+    }
+
+    #audioMixerKilled(): void {
+        // C++  void AudioClient::audioMixerKilled()
+
+        // WEBRTC TODO: Address further C++ code.
+
+    }
+
+
+    // Slot
+    #nodeActivated = (node: Node): void => {
+        const nodeType = node.getType();
+        if (nodeType !== NodeType.AudioMixer) {
+            return;
+        }
+
+        // C++  void Application::nodeActivated(Node* node)
+        this.#negotiateAudioFormat();
+    };
+
+    // Slot
+    #nodeKilled = (node: Node): void => {
+        const nodeType = node.getType();
+        if (nodeType !== NodeType.AudioMixer) {
+            return;
+        }
+
+        // C++  void Application::nodeKilled(Node* node)
+        this.#audioMixerKilled();
+    };
 
 }
 
