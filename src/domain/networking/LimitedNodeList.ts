@@ -8,6 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import HMACAuth from "./HMACAuth";
 import { LocalID } from "./NetworkPeer";
 import NLPacket from "./NLPacket";
 import Node from "./Node";
@@ -90,7 +91,10 @@ class LimitedNodeList {
     protected _localSockAddr = new SockAddr();
     protected _publicSockAddr = new SockAddr();
     protected _packetReceiver = new PacketReceiver();
+    protected _useAuthentication = true;
 
+
+    static readonly #ERROR_SENDING_PACKET_BYTES = -1;
 
     readonly #NULL_CONNECTION_ID = -1;
     readonly #SOLO_NODE_TYPES = new Set([
@@ -132,10 +136,10 @@ class LimitedNodeList {
      *  Sends a a solitary packet to an address, unreliably. The packet cannot be part of a multi-packet message.
      *  @param {NLPacket} packet - The packet to send.
      *  @param {SockAddr} sockAddr - The address to send it to.
-     *  @param {HMACAuth} [hmacAuth=null] - Not currently used.
+     *  @param {HMACAuth} [hmacAuth=null] - The hash-based message authentication code.
      *  @returns {number} The number of bytes sent.
      */
-    sendUnreliablePacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth = null): number {
+    sendUnreliablePacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth: HMACAuth | null = null): number {
         // C++  qint64 sendUnreliablePacket(const NLPacket& packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
 
         assert(!packet.isPartOfMessage());
@@ -154,27 +158,49 @@ class LimitedNodeList {
      *  @param {NLPacket} packet - The packet to send.
      *  @param {SockAddr} sockAddr - The address to send it to.
      *  @param {HMACAuth} [hmacAuth=null] - Not currently used.
-     *  @returns {number} The number of bytes sent.
+     *  @returns {number} The number of bytes sent, or <code>-1</code> if none sent.
      */
-    sendPacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth = null): number {
+    sendPacket(packet: NLPacket, param1: SockAddr | Node, hmacAuth: HMACAuth | null = null): number {
         // C++  qint64 sendPacket(NLPacket* packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
+        //      qint64 sendPacket(NLPacket* packet, const Node& destinationNode)
         assert(!packet.isPartOfMessage());
 
-        if (packet.isReliable()) {
+        if (param1 instanceof SockAddr) {
+            const sockAddr = param1;
 
-            console.warn("sendPacket() : isReliable : Not implemented!");
+            if (packet.isReliable()) {
+
+                console.warn("sendPacket() : isReliable : Not implemented!");
+
+                // WEBRTC TODO: Address further C++ code.
+
+                return 0;
+
+            }
+
+            const size = this.sendUnreliablePacket(packet, sockAddr, hmacAuth);
 
             // WEBRTC TODO: Address further C++ code.
 
-            return 0;
+            return size;
 
         }
 
-        const size = this.sendUnreliablePacket(packet, sockAddr, hmacAuth);
+        if (param1 instanceof Node) {
+            const destinationNode = param1;
 
-        // WEBRTC TODO: Address further C++ code.
+            const activeSocket = destinationNode.getActiveSocket();
+            if (activeSocket) {
+                return this.sendPacket(packet, activeSocket, destinationNode.getAuthenticateHash());
+            }
 
-        return size;
+            console.log("[networking] LimitedNodeList.sendPacket called without active socket for node",
+                NodeType.getNodeTypeName(destinationNode.getType()), "- not sending");
+            return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
+        }
+
+        console.error("Invalid parameters in LimiteNodeList.sendPacket()!", typeof packet, typeof param1, typeof hmacAuth);
+        return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
     }
 
     /*@devdoc
@@ -381,6 +407,23 @@ class LimitedNodeList {
         this.#_sessionLocalID = sessionLocalID;
     }
 
+    /*@devdoc
+     *  Gets whether packet content should be authenticated. The default value is <code>true</code>.
+     *  @returns {boolean} <code>true</code> if packet content should be authenticated, <code>false</code> if it shouldn't be.
+     */
+    getAuthenticatePackets(): boolean {
+        return this._useAuthentication;
+    }
+
+    /*@devdoc
+     *  Sets whether packet content should be authenticated.
+     *  @param {boolean} useAuthentication - <code>true</code> if packet content should be authenticated, <code>false</code> if
+     *      it shouldn't be.
+     */
+    setAuthenticatePackets(useAuthentication: boolean): void {
+        this._useAuthentication = useAuthentication;
+    }
+
 
     /*@devdoc
      *  Resets the NodeList, closing all connections and deleting all node data.
@@ -495,17 +538,16 @@ class LimitedNodeList {
     }
 
 
-    #fillPacketHeader(packet: NLPacket, hmacAuth: null): void {
+    #fillPacketHeader(packet: NLPacket, hmacAuth: HMACAuth | null): void {
         // C++  void fillPacketHeader(const NLPacket& packet, HMACAuth* hmacAuth = nullptr) {
         if (!PacketType.getNonSourcedPackets().has(packet.getType())) {
             packet.writeSourceID(this.getSessionLocalID());
         }
 
-        if (hmacAuth) {
-            console.warn("fillPacketHeader() : hmacAuth : Not implemented!");
-
-            // WEBRTC TODO: Address further C++ code.
-
+        if (this._useAuthentication && hmacAuth
+                && !PacketType.getNonSourcedPackets().has(packet.getType())
+                && !PacketType.getNonVerifiedPackets().has(packet.getType())) {
+            packet.writeVerificationHash(hmacAuth);
         }
     }
 

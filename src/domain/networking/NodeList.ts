@@ -318,6 +318,8 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        this.setAuthenticatePackets(info.isAuthenticated);
+
         for (const node of info.nodes) {
             // If the public socket address is 0 then it's reachable at the same IP as the domain server.
             if (node.publicSocket.getAddress() === 0) {

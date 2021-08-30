@@ -8,6 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import HMACAuth from "./HMACAuth";
 import Packet from "./udt/Packet";
 import PacketType, { PacketTypeValue } from "./udt/PacketHeaders";
 import UDT from "./udt/UDT";
@@ -75,6 +76,8 @@ class NLPacket extends Packet {
     }
 
 
+    static readonly #NUM_BYTES_PACKET_TYPE = 1;
+    static readonly #NUM_BYTES_PACKET_VERSION = 1;
     static readonly #NUM_BYTES_LOCALID = 2;
     static readonly #NUM_BYTES_MD5_HASH = 16;
 
@@ -85,6 +88,15 @@ class NLPacket extends Packet {
         const optionalSize = (nonSourced ? 0 : NLPacket.#NUM_BYTES_LOCALID)
             + (nonSourced || nonVerified ? 0 : NLPacket.#NUM_BYTES_MD5_HASH);
         return 2 + optionalSize;  // C++: sizeof(PacketType) + sizeof(PacketVersion) + optionalSize
+    }
+
+    static #hashForPacketAndHMAC(packet: Packet, hash: HMACAuth): Uint8Array {
+        // C++  QByteArray hashForPacketAndHMAC(const udt::Packet& packet, HMACAuth& hash)
+        const offset = Packet.totalHeaderSize(packet.isPartOfMessage()) + NLPacket.#NUM_BYTES_PACKET_TYPE
+            + NLPacket.#NUM_BYTES_PACKET_VERSION + NLPacket.#NUM_BYTES_LOCALID + NLPacket.#NUM_BYTES_MD5_HASH;
+        const hashResult = new Uint8Array(NLPacket.#NUM_BYTES_MD5_HASH);
+        hash.calculateHash(hashResult, packet.getMessageData().buffer, offset);
+        return hashResult;
     }
 
 
@@ -164,6 +176,22 @@ class NLPacket extends Packet {
         const offset = Packet.totalHeaderSize(this.isPartOfMessage()) + 2;
         this._messageData.data.setUint16(offset, sourceID, UDT.LITTLE_ENDIAN);  // Yes, different endian-ness from reading!
         this._messageData.sourceID = sourceID;
+    }
+
+    /*@devdoc
+     *  Calculates the message authentication hash and writes it into the packet header.
+     *  @param {HMACAuth} hmacAuth - The message authentication object to use for calculating the hash.
+     */
+    writeVerificationHash(hmacAuth: HMACAuth): void {
+        // C++  void writeVerificationHash(HMACAuth & hmacAuth)
+        assert(!PacketType.getNonSourcedPackets().has(this._messageData.type)
+            && !PacketType.getNonVerifiedPackets().has(this._messageData.type));
+
+        const offset = Packet.totalHeaderSize(this.isPartOfMessage()) + NLPacket.#NUM_BYTES_PACKET_TYPE
+            + NLPacket.#NUM_BYTES_PACKET_VERSION + NLPacket.#NUM_BYTES_LOCALID;
+
+        const verificationHash = NLPacket.#hashForPacketAndHMAC(this, hmacAuth);
+        this._messageData.buffer.set(verificationHash, offset);
     }
 
 

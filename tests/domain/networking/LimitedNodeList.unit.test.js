@@ -85,6 +85,13 @@ describe("LimitedNodeList - integration tests", () => {
         expect(limitedNodeList.getSessionLocalID()).toBe(testSessionLocalID);
     });
 
+    test("Can set and get whether to authenticate packet content", () => {
+        const limitedNodeList = new LimitedNodeList();
+        expect(limitedNodeList.getAuthenticatePackets()).toBe(true);  // Default value.
+        limitedNodeList.setAuthenticatePackets(false);
+        expect(limitedNodeList.getAuthenticatePackets()).toBe(false);
+    });
+
     test("Can add a new assignment client node", (done) => {
         const limitedNodeList = new LimitedNodeList();
         limitedNodeList.nodeAdded.connect((node) => {
