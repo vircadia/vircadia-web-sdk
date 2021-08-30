@@ -41,7 +41,7 @@ enum AuthMethod {
 
 
 /*@devdoc
- *  Hash-based method authentication for signing the content of protocol packets.
+ *  The <code>HMACAuth</code> class provides hash-based message authentication for signing the content of protocol packets.
  *  <p>C++: <code>HMACAuth</code></p>
  *  @class HMACAuth
  *  @param {HMACAuth.AuthMethod} authMethod=MD5 - The hash algorithm to use.

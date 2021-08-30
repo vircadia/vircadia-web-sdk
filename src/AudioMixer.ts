@@ -49,10 +49,10 @@ class AudioMixer extends AssignmentClient {
      *          <tr><th>Name</th><th>Value</th><th>Description</th></tr>
      *      </thead>
      *      <tbody>
-     *          <tr><td>UNAVAILABLE</td><td>0</td><td>There is no audio mixer available - you're not connected to a domain or
-     *              the domain doesn't have a audio mixer running.</td></tr>
-     *          <tr><td>DISCONNECTED</td><td>1</td><td>Not connected to the audio mixer.</td></tr>
-     *          <tr><td>CONNECTED</td><td>2</td><td>Connected to the audio mixer.</td></tr>
+     *          <tr><td>UNAVAILABLE</td><td><code><code>0</code></td><td>There is no audio mixer available - you're not
+     *              connected to a domain or the domain doesn't have a audio mixer running.</td></tr>
+     *          <tr><td>DISCONNECTED</td><td><code>1</code></td><td>Not connected to the audio mixer.</td></tr>
+     *          <tr><td>CONNECTED</td><td><code>2</code></td><td>Connected to the audio mixer.</td></tr>
      *      </tbody>
      *  </table>
      *  @typedef {number} AudioMixer.State
