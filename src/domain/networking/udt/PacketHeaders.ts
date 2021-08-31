@@ -17,7 +17,7 @@ import assert from "../../shared/assert";
  *  @typedef {number} PacketType
  */
 // Could just define `type PacketTypeValue = number` however using an object improves type safety.
-enum PacketTypeValue {
+const enum PacketTypeValue {
     Unknown,                            // 0
     StunResponse,
     DomainList,
@@ -123,6 +123,7 @@ enum PacketTypeValue {
     BulkAvatarTraitsAck,
     StopInjector,
     AvatarZonePresence,
+    WebRTCSignaling,
 
     NUM_PACKETS
 }
@@ -131,6 +132,8 @@ enum PacketTypeValue {
 /*@devdoc
  *  The <code>PacketType</code> namespace lists the Vircadia protocol packets.
  *  <p>C++: <code>PacketHeaders.h</code>
+ *  <p><em>Reliable</em>: These packets are sent reliably: their successful receipt is verified and the packets are resent if
+ *      necessary.</p>
  *
  *  @namespace PacketType
  *  @variation 1
@@ -157,7 +160,7 @@ enum PacketTypeValue {
  *  @property {PacketType} CreateAssignment - <code>15</code>
  *  @property {PacketType} DomainConnectionDenied - <code>16</code> - The Domain Server sends this to the user client in
  *      response to a DomainConnectRequest or DomainListRequest packet, if the client is not authorized to connect to the
- *      domain.
+ *      domain.<br />
  *      {@link PacketScribe.DomainConnectionDeniedDetails}.
  *  @property {PacketType} MuteEnvironment - <code>17</code>
  *  @property {PacketType} AudioStreamStats - <code>18</code>
@@ -201,7 +204,11 @@ enum PacketTypeValue {
  *  @property {PacketType} AssetGetInfoReply - <code>54</code>
  *  @property {PacketType} DomainDisconnectRequest - <code>55</code> - The user client sends this empty packet to the Domain
  *      Server to signal that the user client is disconnecting. The Domain Server does not respond.
- *  @property {PacketType} DomainServerRemovedNode - <code>56</code>
+ *  @property {PacketType} DomainServerRemovedNode - <code>56</code> - The domain server broadcasts this to user clients when an
+ *      assignment client has been removed. It is sent only to clients that have registered interest in the node type
+ *      removed.<br />
+ *      <em>Reliable.</em>
+ *      {@link PacketScribe.DomainServerRemovedNodeDetails}.
  *  @property {PacketType} MessagesData - <code>57</code>
  *  @property {PacketType} MessagesSubscribe - <code>58</code>
  *  @property {PacketType} MessagesUnsubscribe - <code>59</code>
@@ -250,6 +257,8 @@ enum PacketTypeValue {
  *  @property {PacketType} BulkAvatarTraitsAck - <code>102</code>
  *  @property {PacketType} StopInjector - <code>103</code>
  *  @property {PacketType} AvatarZonePresence - <code>104</code>
+ *  @property {PacketType} WebRTCSignaling - <code>104</code> - Used between the domain server and assignment clients to
+ *      exchange user client WebRTC signaling messages relayed to assignment clients via the domain server.
  */
 const PacketType = new class {
     // C++: PacketType
@@ -360,6 +369,7 @@ const PacketType = new class {
     readonly BulkAvatarTraitsAck = PacketTypeValue.BulkAvatarTraitsAck;
     readonly StopInjector = PacketTypeValue.StopInjector;
     readonly AvatarZonePresence = PacketTypeValue.AvatarZonePresence;
+    readonly WebRTCSignaling = PacketTypeValue.WebRTCSignaling;
 
     // Packets that are sent without verifying that they are received.
     private _nonVerifiedPackets = new Set([
@@ -413,7 +423,8 @@ const PacketType = new class {
         PacketTypeValue.ReplicatedAvatarIdentity,
         PacketTypeValue.ReplicatedKillAvatar,
         PacketTypeValue.ReplicatedBulkAvatarData,
-        PacketTypeValue.AvatarZonePresence
+        PacketTypeValue.AvatarZonePresence,
+        PacketTypeValue.WebRTCSignaling
     ]);
 
     private _DomainListVersion = {
@@ -433,7 +444,7 @@ const PacketType = new class {
 
 
     constructor() {
-        assert(PacketTypeValue.NUM_PACKETS - 1 === this.AvatarZonePresence, "Inconsistent packet data in PacketHeaders!");
+        assert(PacketTypeValue.NUM_PACKETS - 1 === this.WebRTCSignaling, "Inconsistent packet data in PacketHeaders!");
     }
 
 
@@ -449,17 +460,20 @@ const PacketType = new class {
      */
     versionForPacketType(packetType: PacketTypeValue): number {
         // C++  PacketVersion versionForPacketType(PacketType packetType)
+        const DEFAULT_VERSION = 22;
         switch (packetType) {
             case this.DomainList:
                 return this._DomainListVersion.HasConnectReason;
             case this.DomainListRequest:
-                return 22;  // eslint-disable-line @typescript-eslint/no-magic-numbers
+                return DEFAULT_VERSION;
             case this.DomainConnectionDenied:
                 return this._DomainConnectionDeniedVersion.IncludesExtraInfo;
             case this.DomainConnectRequest:
                 return this._DomainConnectRequestVersion.HasCompressedSystemInfo;
             case this.DomainDisconnectRequest:
-                return 22;  // eslint-disable-line @typescript-eslint/no-magic-numbers
+                return DEFAULT_VERSION;
+            case this.DomainServerRemovedNode:
+                return DEFAULT_VERSION;
 
                 // WebRTC TODO: Add other packets.
 
@@ -506,7 +520,7 @@ function protocolVersionsSignature(): Uint8Array {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
     const PROTOCOL_SIGNATURE_BYTES
-        = [0x0b, 0xa2, 0x3d, 0x16, 0x33, 0x01, 0x18, 0x1b, 0x16, 0x43, 0xdd, 0x2c, 0x76, 0x7f, 0x4a, 0xc3];
+        = [0xa9, 0x35, 0x77, 0xea, 0xce, 0xb8, 0xb1, 0xb7, 0xd5, 0xdf, 0x9d, 0x38, 0xc5, 0x85, 0x0b, 0x09];
     /* eslint-enable @typescript-eslint/no-magic-numbers */
     return Uint8Array.from(PROTOCOL_SIGNATURE_BYTES);
 }

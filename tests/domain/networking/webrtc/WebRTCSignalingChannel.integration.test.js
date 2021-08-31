@@ -127,6 +127,23 @@ describe("WebRTCSignalingChannel - integration tests", () => {
         });
     });
 
+    test("Can echo test message off message mixer", (done) => {
+        expect.assertions(3);
+        let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+        webrtcSignalingChannel.onopen = function () {
+            const echoMessage = { to: NodeType.MessagesMixer, echo: "Hello" };
+            const sent = webrtcSignalingChannel.send(echoMessage);
+            expect(sent).toBe(true);
+        };
+        webrtcSignalingChannel.onmessage = function (message) {
+            expect(message.from).toBe(NodeType.MessagesMixer);
+            expect(message.echo).toBe("Hello");
+            webrtcSignalingChannel.close();
+            webrtcSignalingChannel = null;
+            done();
+        };
+    });
+
     // WEBRTC TODO: "Can echo test message off messages mixer"
 
     // Testing that WebRTC signaling messages are able to be used is done through testing higher level function.

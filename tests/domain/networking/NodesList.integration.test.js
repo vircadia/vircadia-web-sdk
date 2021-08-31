@@ -34,6 +34,7 @@ describe("NodesList - integration tests", () => {
 
     // Suppress console.log messages from being displayed.
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
 
     const contextID = ContextManager.createContext();
     ContextManager.set(contextID, AddressManager);  // Required by NodesList.
@@ -81,7 +82,9 @@ describe("NodesList - integration tests", () => {
         domainHandler.connectedToDomain.connect(function () {
             clearTimeout(backupTimeout);
             expect(true).toBe(true);
-            done();
+            setTimeout(() => {  // Provide time for residual log messages to stop being emitted.
+                done();
+            }, 500);
         });
 
         // Back-up exit test
@@ -93,5 +96,6 @@ describe("NodesList - integration tests", () => {
     });
 
 
+    warn.mockReset();
     log.mockReset();
 });

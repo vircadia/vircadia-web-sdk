@@ -8,10 +8,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import SockAddr from "../../../../src/domain/networking/SockAddr";
 import DomainListRequest from "../../../../src/domain/networking/packets/DomainList";
 import Uuid from "../../../../src/domain/shared/Uuid";
 
 describe("DomainList - unit tests", () => {
+
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     test("Can read a DomainList packet", () => {
         /* eslint-disable-next-line max-len */
@@ -29,9 +32,23 @@ describe("DomainList - unit tests", () => {
         expect(typeof info.domainLocalID).toBe("number");
         expect(info.newUUID instanceof Uuid).toBe(true);
         expect(typeof info.newLocalID).toBe("number");
-        expect(typeof info.newPermissions).toBe("number");
+        expect(typeof info.newPermissions).toBe("object");
         expect(typeof info.isAuthenticated).toBe("boolean");
         expect(typeof info.newConnection).toBe("boolean");
+
+        expect(info.nodes.length === 6).toBe(true);
+        const node = info.nodes[0];
+        expect(typeof node.type).toBe("string");
+        expect(node.publicSocket instanceof SockAddr).toBe(true);
+        expect(node.localSocket instanceof SockAddr).toBe(true);
+        expect(typeof node.permissions).toBe("object");
+        expect(typeof node.isReplicated).toBe("boolean");
+        expect(typeof node.sessionLocalID).toBe("number");
+        expect(node.connectionSecretUUID instanceof Uuid).toBe(true);
+    });
+
+    test("Can obtain assignment client details from a DomainList packet", () => {
+        expect(true).toBe(true);
     });
 
 });

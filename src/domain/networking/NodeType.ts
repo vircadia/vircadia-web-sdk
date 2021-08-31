@@ -10,8 +10,8 @@
 
 
 /*@devdoc
- *  {@link Node types}, <code>DomainServer</code> &ndash; <code>Unassigned</code>, are the types of network nodes operating in a
- *  domain. They are represented as single 8-bit characters in the protocol packets.
+ *  {@link NodeType(1)|Node types},  <code>DomainServer</code> &ndash; <code>Unassigned</code>, are the types of network nodes
+ *  operating in a domain. They are represented as single 8-bit characters in the protocol packets.
  *  @typedef {string} NodeType
  */
 const enum NodeTypeValue {
@@ -35,6 +35,8 @@ const enum NodeTypeValue {
 /*@devdoc
  *  The <code>NodeType</code> namespace provides information on a network node's type. Node type values are represented as
  *  single 8-bit characters in the protocol packets.
+ *  <p>Note: The following node types are not applicable for use in a client: <code>UpstreamAudioMixer</code>,
+ *  <code>UpstreamAvatarMixer</code>, <code>DownstreamAudioMixer</code>, and <code>DownstreamAvatarMixer</code>.</p>
  *  <p>C++: <code>NodeType</code></p>
  *
  *  @namespace NodeType
@@ -102,6 +104,16 @@ const NodeType = new class {
             name = "Unknown";
         }
         return name;
+    }
+
+    /*@devdoc
+     *  Tests whether a node type is an upstream node.
+     *  @function NodeType(1).isUpstream
+     *  @param {NodeType} nodeType - The node type.
+     *  @returns {boolean} <code>true</code> if the node type is an upstream node, <code>false</code> if it isn't.
+     */
+    isUpstream(nodeType: NodeTypeValue): boolean {  // eslint-disable-line class-methods-use-this
+        return nodeType === NodeTypeValue.UpstreamAudioMixer || nodeType === NodeTypeValue.UpstreamAvatarMixer;
     }
 
 }();

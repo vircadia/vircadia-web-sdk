@@ -31,7 +31,6 @@ describe("DomainConnectionDenied - unit tests", () => {
         expect(info.reasonCode).toBe(ConnectionRefusedReason.ProtocolMismatch);
         expect(info.reasonMessage).toBe("Protocol version mismatch - Domain version: dev");
         expect(info.extraInfo).toBe("");
-
     });
 
 });

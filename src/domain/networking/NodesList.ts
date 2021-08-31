@@ -16,10 +16,12 @@ import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import ReceivedMessage from "./ReceivedMessage";
 import NLPacket from "../networking/NLPacket";
+import Node from "../networking/Node";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
 import ContextManager from "../shared/ContextManager";
 import Uuid from "../shared/Uuid";
+import Socket from "./udt/Socket";
 
 
 /*@devdoc
@@ -35,7 +37,7 @@ import Uuid from "../shared/Uuid";
 class NodesList extends LimitedNodeList {
     // C++  NodeList : public LimitedNodeList
 
-    private _ownerType: NodeTypeValue;
+    private _ownerType = NodeType.Agent;
     private _connectReason = LimitedNodeList.ConnectReason.Connect;
     private _nodeTypesOfInterest: Set<NodeTypeValue> = new Set();
 
@@ -44,12 +46,10 @@ class NodesList extends LimitedNodeList {
     // Context objects.
     private _addressManager;
 
-    constructor(contextID: number, ownerType = NodeType.Agent) {
-        // C++  NodeList(char ownerType, int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
+    constructor(contextID: number) {
+        // C++  NodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
         super();
-
-        this._ownerType = ownerType;
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -70,10 +70,27 @@ class NodesList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        // Whenever there is a new node connect to it.
+        this.nodeAdded.connect(this.openWebRTCConnection);
+        this.nodeSocketUpdated.connect(this.openWebRTCConnection);
+
+        // Whenever we get a new node we may need to re-send our set of ignored nodes to it.
+        this.nodeActivated.connect(this.maybeSendIgnoreSetToNode);
+
+        // WEBRTC TODO: Address further C++ code.
+
         this._packetReceiver.registerListener(PacketType.DomainList,
             PacketReceiver.makeUnsourcedListenerReference(this.processDomainList));
+
+        // WEBRTC TODO: Address further C++ code.
+
         this._packetReceiver.registerListener(PacketType.DomainConnectionDenied,
             PacketReceiver.makeUnsourcedListenerReference(this._domainHandler.processDomainServerConnectionDeniedPacket));
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this._packetReceiver.registerListener(PacketType.DomainServerRemovedNode,
+            PacketReceiver.makeUnsourcedListenerReference(this.processDomainServerRemovedNode));
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -163,30 +180,17 @@ class NodesList extends LimitedNodeList {
         // We don't need to worry about the domain handler requiring ICE because WebRTC handles this.
         // Instead, we open the WebRTC signaling and data channels if not already open.
 
-        // Open the WebRTC signaling channel to the domain server if not already open.
-        if (!this._nodeSocket.hasWebRTCSignalingChannel(domainURL)) {
-            this._nodeSocket.openWebRTCSignalingChannel(domainURL);
-            console.log("[networking] Opening WebRTC signaling channel. Will not send domain server check-in.");
+        // Open a WebRTC data channel to the domain server if not already open.
+        const domainServerSocketState = this._nodeSocket.getSocketState(domainURL, NodeType.DomainServer);
+        if (domainServerSocketState !== Socket.CONNECTED) {
+            console.log("[networking] Opening domain server connection. Will not send domain server check-in.");
+            if (domainServerSocketState === Socket.UNCONNECTED) {
+                this._nodeSocket.openSocket(domainURL, NodeType.DomainServer, (socketID: number) => {
+                    this._domainHandler.setPort(socketID);
+                });
+            }
             return;
         }
-        if (!this._nodeSocket.isWebRTCSignalingChannelOpen()) {
-            console.log("[networking] Waiting for WebRTC signaling channel. Will not send domain server check-in.");
-            return;
-        }
-
-        // Open the WebRTC data channel to the domain server if not already open.
-        if (!this._nodeSocket.hasWebRTCDataChannel(NodeType.DomainServer)) {
-            console.log("[networking] Opening WebRTC data channel. Will not send domain server check-in.");
-            this._nodeSocket.openWebRTCDataChannel(NodeType.DomainServer, (dataChannelID) => {
-                this._domainHandler.setPort(dataChannelID);
-            });
-        }
-        if (!this._nodeSocket.isWebRTCDataChannelOpen(NodeType.DomainServer)) {
-            console.log("[networking] Waiting for WebRTC data channel. Will not send domain server check-in.");
-            return;
-        }
-
-        // WEBRTC TODO: Rework the above to use QUdpSocket : QAbstractSocket style methods when add first assignment client.
 
         const isDomainConnected = this._domainHandler.isConnected();
         const domainPacketType = isDomainConnected ? PacketType.DomainListRequest : PacketType.DomainConnectRequest;
@@ -313,6 +317,84 @@ class NodesList extends LimitedNodeList {
         }
 
         // WEBRTC TODO: Address further C++ code.
+
+        for (const node of info.nodes) {
+            // If the public socket address is 0 then it's reachable at the same IP as the domain server.
+            if (node.publicSocket.getAddress() === 0) {
+                node.publicSocket.setAddress(this._domainHandler.getSockAddr().getAddress());
+            }
+
+            this.addNewNode(node);
+        }
+
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|DomainServerRemovedNode} message received from the domain server.
+     *  @function NodesList.processDomainServerRemovedNode
+     *  @param {ReceivedMessage} message - The DomainServerRemovedNode message.
+     *  @returns {Slot}
+     */
+    processDomainServerRemovedNode = (message: ReceivedMessage): void => {
+        // C++  void processDomainServerRemovedNode(ReceivedMessage* message)
+        const info = PacketScribe.DomainServerRemovedNode.read(message.getMessage());
+        const nodeUUID = info.nodeUUID;
+        console.log("[networking] Received packet from domain-server to remove node with UUID", nodeUUID.stringify());
+        this.killNodeWithUUID(nodeUUID);
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
+
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    private activateSocketFromNodeCommunication(socketID: number, sendingNode: Node) {  // eslint-disable-line
+        // C++  void activateSocketFromNodeCommunication(ReceivedMessage& message, const Node* sendingNode)
+
+        // Just use the node's public socket for WebRTC, for now.
+        if (sendingNode.getActiveSocket() === null) {
+            sendingNode.activatePublicSocket();
+        }
+
+        // WEBRTC TODO: Address public versus local sockets w.r.t. WebRTC and the Web SDK.
+
+        // WEBRTC TODO: Address further C++ code.
+    }
+
+
+    // Slot.
+    private openWebRTCConnection = (node: Node): void => {
+        // C++  void startNodeHolePunch(const Node* node);
+        // We don't need to do the hole punching in order to establish a connection to the node; we just need to open the
+        // WebRTC connection. WebRTC does the hole punching for us.
+
+        if (this._nodeSocket.getSocketState(this._domainHandler.getURL(), node.getType()) === Socket.UNCONNECTED) {
+
+            if (!this._domainHandler.isConnected()) {
+                // Cannot connect to an assignment client if the domain server isn't connected.
+                return;
+            }
+
+            this._nodeSocket.openSocket(this._domainHandler.getURL(), node.getType(), (socketID) => {
+                this.activateSocketFromNodeCommunication(socketID, node);
+            });
+
+        } else {
+            console.error("Unexpected socket state for", NodeType.getNodeTypeName(node.getType()));
+        }
+
+        // Vircadia clients can never have upstream nodes or downstream nodes so we don't need to cater for these.
+    };
+
+    // Slot.
+    // eslint-disable-next-line
+    // @ts-ignore
+    private maybeSendIgnoreSetToNode = (newNode: Node): void => {  // eslint-disable-line @typescript-eslint/no-unused-vars
+        // C++  void NodeList::maybeSendIgnoreSetToNode(Node* newNode)
+
+        // WEBRTC TODO: Address further C++.
+
     };
 
 }

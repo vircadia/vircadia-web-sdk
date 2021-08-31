@@ -14,8 +14,9 @@ import NLPacket from "../NLPacket";
 import SockAddr from "../SockAddr";
 import { NodeTypeValue } from "../../networking/NodeType";
 import assert from "../../shared/assert";
-import "../../shared/DataViewExtensions";
 import Uuid from "../../shared/Uuid";
+
+import "../../shared/DataViewExtensions";
 
 
 type DomainConnectRequestDetails = {

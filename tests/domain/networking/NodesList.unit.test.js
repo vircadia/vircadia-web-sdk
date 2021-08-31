@@ -10,19 +10,49 @@
 
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import DomainHandler from "../../../src/domain/networking/DomainHandler";
+import Node from "../../../src/domain/networking/Node";
+import NodePermissions from "../../../src/domain/networking/NodePermissions";
 import NodesList from "../../../src/domain/networking/NodesList";
 import NodeType from "../../../src/domain/networking/NodeType";
+import SockAddr from "../../../src/domain/networking/SockAddr";
 import ContextManager from "../../../src/domain/shared/ContextManager";
+import Uuid from "../../../src/domain/shared/Uuid";
 
 
 describe("NodesList - integration tests", () => {
 
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+
+    const IP_127_0_0_1 = 127 * 2 ** 24 + 1;  // 127.0.0.1
+    const IP_127_0_0_2 = 127 * 2 ** 24 + 2;  // 127.0.0.2
+    const PORT_101 = 101;
+    const PORT_102 = 102;
+    const AUDIO_MIXER_NODE_INFO = {
+        type: NodeType.AudioMixer,
+        uuid: new Uuid(1234n),
+        publicSocket: new SockAddr(),
+        localSocket: new SockAddr(),
+        permissions: new NodePermissions(),
+        isReplicated: true,
+        isUpstream: true,
+        sessionLocalID: 11,
+        connectionSecretUUID: new Uuid(5678n)
+    };
+    AUDIO_MIXER_NODE_INFO.publicSocket.setAddress(IP_127_0_0_1);
+    AUDIO_MIXER_NODE_INFO.publicSocket.setAddress(IP_127_0_0_1);
+    AUDIO_MIXER_NODE_INFO.publicSocket.setPort(PORT_101);
+    AUDIO_MIXER_NODE_INFO.localSocket.setAddress(IP_127_0_0_2);
+    AUDIO_MIXER_NODE_INFO.localSocket.setPort(PORT_102);
 
     const contextID = ContextManager.createContext();
     ContextManager.set(contextID, AddressManager);  // Required by NodesList.
     ContextManager.set(contextID, NodesList, contextID);
     const nodesList = ContextManager.get(contextID, NodesList);
+
+    // Suppress console messages from being displayed.
+    const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
 
 
     test("Can get the DomainHandler", () => {
@@ -36,9 +66,21 @@ describe("NodesList - integration tests", () => {
         expect(nodesList.getNodeInterestSet()).toEqual(setOfNodes);
     });
 
-    test("Can reset an empty nodes list as if initiated by DomainHandler", () => {
-        nodesList.reset("Some reason", true);
-        expect(true).toBe(true);
+    test("Can reset the nodes list", () => {
+        nodesList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
+            AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
+            AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
+            AUDIO_MIXER_NODE_INFO.permissions
+        );
+        expect(nodesList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type) instanceof Node).toBe(true);
+        // Reset the nodes list.
+        nodesList.reset("Some reason");
+        expect(nodesList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type)).toBeNull();
+        // Resetting again is OK.
+        nodesList.reset("Some reason");
+        expect(nodesList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type)).toBeNull();
     });
 
+    warn.mockReset();
+    log.mockReset();
 });

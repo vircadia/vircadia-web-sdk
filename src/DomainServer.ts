@@ -12,7 +12,9 @@
 
 import AddressManager from "./domain/networking/AddressManager";
 import { ConnectionRefusedReasonValue } from "./domain/networking/ConnectionRefusedReason";
+import Node from "./domain/networking/Node";
 import NodesList from "./domain/networking/NodesList";
+import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
 
 
@@ -22,14 +24,14 @@ import ContextManager from "./domain/shared/ContextManager";
  *          <tr><th>Name</th><th>Value</th><th>Description</th></tr>
  *      </thead>
  *      <tbody>
- *          <tr><td>DISCONNECTED</td><td>0</td><td>Disconnected from the domain.</td></tr>
- *          <tr><td>CONNECTING</td><td>1</td><td>Connecting to the domain.</td></tr>
- *          <tr><td>CONNECTED</td><td>2</td><td>Connected to the domain.</td></tr>
- *          <tr><td>REFUSED</td><td>3</td><td>Connection to the domain refused; not connected to the domain.</td></tr>
- *          <tr><td>ERROR</td><td>4</td><td>Error connecting to the domain; not connected to the domain.</td></tr>
+ *          <tr><td>DISCONNECTED</td><td>0</td><td>Disconnected from the domain server.</td></tr>
+ *          <tr><td>CONNECTING</td><td>1</td><td>Connecting to the domain server.</td></tr>
+ *          <tr><td>CONNECTED</td><td>2</td><td>Connected to the domain server.</td></tr>
+ *          <tr><td>REFUSED</td><td>3</td><td>Connection to the domain server refused; not connected.</td></tr>
+ *          <tr><td>ERROR</td><td>4</td><td>Error connecting to the domain server; not connected.</td></tr>
  *      </tbody>
  *  </table>
- *  @typedef {number} DomainServer.ConnectionState
+ *  @typedef {number} DomainServer.State
  */
 enum ConnectionState {
     DISCONNECTED = 0,
@@ -39,29 +41,33 @@ enum ConnectionState {
     ERROR
 }
 
-type OnStateChangedCallback = (state: ConnectionState, info: string) => void;
+type OnStateChanged = (state: ConnectionState, info: string) => void;
 
 
 /*@sdkdoc
  *  The <code>DomainServer</code> class provides the interface for connecting to a domain server.
  *
  *  @class DomainServer
- *  @property {DomainServer.ConnectionState} DISCONNECTED - Disconnected from the domain.
+ *  @property {DomainServer.State} DISCONNECTED - Disconnected from the domain server.
  *      <em>Static. Read-only.</em>
- *  @property {DomainServer.ConnectionState} CONNECTING - Connecting to the domain.
+ *  @property {DomainServer.State} CONNECTING - Connecting to the domain server.
  *      <em>Static. Read-only.</em>
- *  @property {DomainServer.ConnectionState} CONNECTED - Connected to the domain.
+ *  @property {DomainServer.State} CONNECTED - Connected to the domain server.
  *      <em>Static. Read-only.</em>
- *  @property {DomainServer.ConnectionState} REFUSED - Connection to the domain refused; not connected to the domain. See
+ *  @property {DomainServer.State} REFUSED - Connection to the domain server refused; not connected to the domain. See
  *      <code>refusalInfo</code> for details.
  *      <em>Static. Read-only.</em>
- *  @property {DomainServer.ConnectionState} ERROR - Error connecting to the domain; not connected to the domain. See
+ *  @property {DomainServer.State} ERROR - Error connecting to the domain server; not connected to the domain. See
  *      <code>errorInfo</code> for details.
  *      <em>Static. Read-only.</em>
- *  @property {string} location - The current location that the domain server is pointed at. <code>""</code> if no location has
- *      been set.
+ *  @property {number} contextID - Identifies the shared context which the DomainServer and associated assignment client objects
+ *      (AudioMixer, AvatarMixer, etc.) use to connect to and interact with a domain. The context ID is assigned when the
+ *      DomainServer object is constructed.
  *      <em>Read-only.</em>
- *  @property {DomainServer.ConnectionState} state - The current state of the connection to the domain server.
+ *  @property {string} location - The current location that the DomainServer is connected to or trying to connect to.
+ *      <code>""</code> if no location has been set.
+ *      <em>Read-only.</em>
+ *  @property {DomainServer.State} state - The current state of the connection to the domain server.
  *      <em>Read-only.</em>
  *  @property {string} refusalInfo - A description of the reason if <code>state == DomainServer.REFUSED</code>, otherwise
  *      <code>""</code>.
@@ -69,19 +75,19 @@ type OnStateChangedCallback = (state: ConnectionState, info: string) => void;
  *  @property {string} errorInfo - A description of the reason if <code>state == DomainServer.ERROR</code>, otherwise
  *      <code>""</code>.
  *      <em>Read-only.</em>
- *  @property {DomainServer~onStateChangedCallback|null} onStateChanged - Sets a single function to be called when the state of
- *      the domain server connection changes. Set to <code>null</code> to remove the callback.
+ *  @property {DomainServer~onStateChanged|null} onStateChanged - Sets a single function to be called when the state of the
+ *      connection to the domain server changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  */
 class DomainServer {
     // C++  Application.cpp
-    //      The Web SDK differs from the C++ in that a "disconnect" command is explicitly provides which disconnects from the
-    //      current domain and stops the check-ins from being sent. The C++ never stops sending check-ins.
+    //      The Web SDK differs from the C++ in that a "disconnect" command is explicitly provided to disconnect from the
+    //      current domain and stop the check-ins from being sent; the C++ never stops sending check-ins.
 
     /*@sdkdoc
-     *  Called when the state of the domain server connection changes.
-     *  @callback DomainServer~onStateChangedCallback
-     *  @param {DomainServer.ConnectionState} state - The state of the domain server connection.
+     *  Called when the state of the connection to the domain changes.
+     *  @callback DomainServer~onStateChanged
+     *  @param {DomainServer.State} state - The state of the connection to the domain server connection.
      *  @param {string} info - Refusal or error information if the state is <code>REFUSAL</code> or <code>ERROR</code>.
      */
 
@@ -107,7 +113,8 @@ class DomainServer {
 
     /*@sdkdoc
      *  Gets the string representing a connection state.
-     *  @param {DomainServer.ConnectionState} state - The state to get the string representation of.
+     *  <p><em>Static</em></p>
+     *  @param {DomainServer.State} state - The state to get the string representation of.
      *  @returns {string} The string representing the connection state if a valid state, otherwise <code>""</code>.
      */
     static stateToString(state: ConnectionState): string {
@@ -120,14 +127,15 @@ class DomainServer {
 
 
     #_location = "";
-    #_state: ConnectionState = DomainServer.DISCONNECTED;
+    #_state = DomainServer.DISCONNECTED;
     #_refusalInfo = "";
     #_errorInfo = "";
-    #_onStateChangedCallback: OnStateChangedCallback | null = null;
+    #_onStateChanged: OnStateChanged | null = null;
 
     #_domainCheckInTimer: ReturnType<typeof setTimeout> | null = null;
 
     // Context objects.
+    #_contextID;
     #_nodesList: NodesList;
     #_addressManager: AddressManager;
 
@@ -141,8 +149,9 @@ class DomainServer {
         ContextManager.set(contextID, AddressManager);
         ContextManager.set(contextID, NodesList, contextID);
 
-        this.#_nodesList = <NodesList>ContextManager.get(contextID, NodesList);
-        this.#_addressManager = <AddressManager>ContextManager.get(contextID, AddressManager);
+        this.#_nodesList = ContextManager.get(contextID, NodesList) as NodesList;
+        this.#_addressManager = ContextManager.get(contextID, AddressManager) as AddressManager;
+        this.#_contextID = contextID;
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -157,6 +166,23 @@ class DomainServer {
             }
         });
         domainHandler.domainConnectionRefused.connect(this.#domainConnectionRefused);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_nodesList.nodeAdded.connect(this.#nodeAdded);
+        this.#_nodesList.nodeActivated.connect(this.#nodeActivated);
+        this.#_nodesList.nodeKilled.connect(this.#nodeKilled);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_nodesList.addSetOfNodeTypesToNodeInterestSet(new Set([
+
+            // WEBRTC TODO: Configure interest set per AC APIs used.
+
+            NodeType.AudioMixer,
+            NodeType.MessagesMixer,
+            NodeType.AvatarMixer
+        ]));
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -179,18 +205,22 @@ class DomainServer {
         return this.#_errorInfo;
     }
 
-    set onStateChanged(callback: OnStateChangedCallback) {
+    set onStateChanged(callback: OnStateChanged) {
         if (typeof callback === "function" || callback === null) {
-            this.#_onStateChangedCallback = callback;
+            this.#_onStateChanged = callback;
         } else {
             console.error("ERROR: DomainServer.onStateChanged callback not a function or null!");
-            this.#_onStateChangedCallback = null;
+            this.#_onStateChanged = null;
         }
+    }
+
+    get contextID(): number {
+        return this.#_contextID;
     }
 
 
     /*@sdkdoc
-     *  Initiates connection of the user client to a Domain Server and keeps the connection alive.
+     *  Initiates connection of the user client to a domain server.
      *  <p>The following types of location are supported:</p>
      *  <table>
      *      <tbody>
@@ -199,7 +229,7 @@ class DomainServer {
      *          ...)</td></tr>
      *      </tbody>
      *  </table>
-     *  @param {string} location - The location of the Domain Server to connect to.
+     *  @param {string} location - The location of the domain server to connect to.
      */
     connect(location: string): void {
         // C++  Application.cpp's domainCheckInTimer.
@@ -249,6 +279,7 @@ class DomainServer {
      *  Disconnects the user client from the domain server.
      */
     disconnect(): void {
+        // C++  N/A
         if (this.#_state === DomainServer.DISCONNECTED) {
             return;
         }
@@ -272,8 +303,8 @@ class DomainServer {
         } else if (this.#_state === DomainServer.ERROR) {
             this.#_errorInfo = info;
         }
-        if (hasStateChanged && this.#_onStateChangedCallback) {
-            this.#_onStateChangedCallback(state, info);
+        if (hasStateChanged && this.#_onStateChanged) {
+            this.#_onStateChanged(state, info);
         }
     }
 
@@ -305,6 +336,75 @@ class DomainServer {
         // WEBRTC TODO: Address further C++ code.
 
         this.#setState(ConnectionState.REFUSED, reasonMessage);
+    };
+
+    // Slot.
+    #nodeAdded = (node: Node): void => {
+        // C++  void Application:: nodeAdded(Node* node)
+        if (node.getType() === NodeType.EntityServer) {
+            console.warn("DomainServer: EntityServer support implemented!");
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        }
+    };
+
+    // Slot.
+    #nodeActivated = (node: Node): void => {
+        // C++  void Application:: nodeActivated(Node* node)
+        const nodeType = node.getType();
+
+        if (nodeType === NodeType.AssetServer) {
+            console.warn("DomainServer: AssetServer support not implemented!");
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        }
+
+        if (nodeType === NodeType.EntityServer) {
+            console.warn("DomainServer: EntityServer support not implemented!");
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        }
+
+        if (nodeType === NodeType.AudioMixer) {
+            console.warn("DomainServer: AudioMixer support not implemented!");
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        }
+
+        if (nodeType === NodeType.AvatarMixer) {
+            console.warn("DomainServer: AvatarMixer support not implemented!");
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        }
+
+    };
+
+    // Slot.
+    #nodeKilled = (node: Node): void => {
+        // C++  void Application:: nodeKilled(Node* node)
+
+        // WEBRTC TODO: Address further code - for AssetServer node.
+
+        const nodeType = node.getType();
+        if (nodeType === NodeType.AudioMixer) {
+            console.warn("DomainServer: AudioMixer support not implemented!");
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        } else if (nodeType === NodeType.EntityServer) {
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        } else if (nodeType === NodeType.AssetServer) {
+
+            // WEBRTC TODO: Address further code - for AssetServer node.
+
+        }
     };
 
 }

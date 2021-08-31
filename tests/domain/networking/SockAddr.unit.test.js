@@ -15,15 +15,25 @@ import SockAddr from "../../../src/domain/networking/SockAddr";
 
 describe("SockAddr - unit tests", () => {
 
+    const IP_127_0_0_1 = 127 * 2 ** 24 + 1;  // 127.0.0.1
+    const IP_255_255_255_255 = 2 ** 32 - 1;  // 255.255.255.255
+
     test("Default address values are correct", () => {
         const sockAddr = new SockAddr();
+        expect(sockAddr.objectName()).toBe("");
         expect(sockAddr.getAddress()).toBe(0);
         expect(sockAddr.getPort()).toBe(0);
+        expect(sockAddr.isNull()).toBe(true);
+    });
+
+    test("Can set and get the object name", () => {
+        const sockAddr = new SockAddr();
+        expect(sockAddr.objectName()).toBe("");
+        sockAddr.setObjectName("X");
+        expect(sockAddr.objectName()).toBe("X");
     });
 
     test("Can set and get the IPv4 address", () => {
-        const IP_127_0_0_1 = 127 * 2 ** 24 + 1;  // 127.0.0.1
-        const IP_255_255_255_255 = 2 ** 32 - 1;  // 255.255.255.255
         const sockAddr = new SockAddr();
         sockAddr.setAddress(IP_127_0_0_1);
         expect(sockAddr.getAddress()).toBe(IP_127_0_0_1);
@@ -35,6 +45,31 @@ describe("SockAddr - unit tests", () => {
         const sockAddr = new SockAddr();
         sockAddr.setPort(3);
         expect(sockAddr.getPort()).toBe(3);
+    });
+
+    test("Can test equality of two values", () => {
+        const sockAddrA = new SockAddr();
+        sockAddrA.setAddress(IP_127_0_0_1);
+        sockAddrA.setPort(1);
+        const sockAddrB = new SockAddr();
+        sockAddrB.setAddress(IP_127_0_0_1);
+        sockAddrB.setPort(1);
+        expect(sockAddrA.isEqualTo(sockAddrB)).toBe(true);
+        sockAddrB.setAddress(IP_255_255_255_255);
+        expect(sockAddrA.isEqualTo(sockAddrB)).toBe(false);
+        sockAddrB.setAddress(IP_127_0_0_1);
+        expect(sockAddrA.isEqualTo(sockAddrB)).toBe(true);
+        sockAddrB.setPort(2);
+        expect(sockAddrA.isEqualTo(sockAddrB)).toBe(false);
+        sockAddrB.setAddress(IP_255_255_255_255);
+        expect(sockAddrA.isEqualTo(sockAddrB)).toBe(false);
+    });
+
+    test("Can format as a string", () => {
+        const sockAddr = new SockAddr();
+        sockAddr.setAddress(IP_127_0_0_1);
+        sockAddr.setPort(103);
+        expect(sockAddr.toString()).toBe("127.0.0.1:103");
     });
 
 });

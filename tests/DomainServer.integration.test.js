@@ -42,6 +42,7 @@ describe("DomainServer - integration tests", () => {
 
     // Suppress console.log messages from being displayed.
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
 
 
     test("Can connect to and maintain a connection with the domain server", (done) => {
@@ -57,6 +58,7 @@ describe("DomainServer - integration tests", () => {
             expect(info).toBe("");
             haveSeenConnecting = haveSeenConnecting || state === DomainServer.CONNECTING;
             if (state === DomainServer.CONNECTED) {
+                expect(haveSeenConnecting).toBe(true);  // eslint-disable-line jest/no-conditional-expect
                 setTimeout(() => {
                     haveRequestedDisconnect = true;
                     domainServer.disconnect();
@@ -125,7 +127,7 @@ describe("DomainServer - integration tests", () => {
         const domainServer = new DomainServer();
 
         // Error state.
-        domainServer.connect("  ");
+        domainServer.connect("");
         expect(domainServer.state).toBe(DomainServer.ERROR);
 
         // Connect to a domain.
@@ -164,7 +166,7 @@ describe("DomainServer - integration tests", () => {
         domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
     });
 
-    test("Noop when disconnect when disconnected", (done) => {
+    test("No-op when disconnect when disconnected", (done) => {
         const domainServer = new DomainServer();
         expect(domainServer.state).toBe(DomainServer.DISCONNECTED);
         let hasStateChanged = false;
@@ -193,9 +195,6 @@ describe("DomainServer - integration tests", () => {
             return new Uint8Array(16);  // An invalid signature.
         };
 
-        // Suppress console.log messages from being displayed.
-        const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
-
         // Try connect to a domain.
         domainServer.onStateChanged = (state) => {
             expect(state === DomainServer.DISCONNECTED
@@ -213,10 +212,9 @@ describe("DomainServer - integration tests", () => {
             }
         };
         domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
-
-        warn.mockReset();
     });
 
 
+    warn.mockReset();
     log.mockReset();
 });

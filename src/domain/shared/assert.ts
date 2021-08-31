@@ -15,10 +15,9 @@
  *  @param {...any} info - Information to report to the console if the assertion is <code>false</code>.
  */
 function assert(assertion: boolean, ...info: any[]): void {  // eslint-disable-line @typescript-eslint/no-explicit-any
-    console.assert(assertion, ...info);
+    // console.assert(assertion, ...info);
     if (!assertion) {
-        // Generate a call stack.
-        throw new Error("Assertion failed");
+        throw new Error(["Assertion failed!", ...info as [string]].join(" "));
     }
 }
 

@@ -58,10 +58,24 @@ class Uuid extends BigInt {
      */
     /*@devdoc
      *  Gets the UUID's underlying <code>bigint</code> primitive value.
+     *  @function Uuid(1).value
      *  @returns {bigint} The underlying <code>bigint</code> primitive value
      */
     value(): bigint {
         return this.valueOf().valueOf();
+    }
+
+    /*@devdoc
+     *  Gets the UUID value formatted as a hexadecimal string with <code>-</code> separators.
+     *  @function Uuid(1).stringify
+     *  @returns {string} The UUID value formatted as <code>nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn</code>.
+     */
+    stringify(): string {
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+        const hexadecimal = this.value().toString(16);
+        return hexadecimal.slice(0, 8) + "-" + hexadecimal.slice(8, 12) + "-" + hexadecimal.slice(12, 16) + "-"
+            + hexadecimal.slice(16, 20) + "-" + hexadecimal.slice(20);
+        /* eslint-enable @typescript-eslint/no-magic-numbers */
     }
 
 }

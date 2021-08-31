@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Vircadia, DomainServer } from "../src/Vircadia";
+import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from "../src/Vircadia";
 
 
 describe("Vircadia - integration tests", () => {
@@ -16,6 +16,9 @@ describe("Vircadia - integration tests", () => {
     test("Multiple API import", () => {
         expect(Vircadia).toBeDefined();
         expect(DomainServer).toBeDefined();
+        expect(AudioMixer).toBeDefined();
+        expect(AvatarMixer).toBeDefined();
+        expect(MessageMixer).toBeDefined();
     });
 
 });

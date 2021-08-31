@@ -4,7 +4,7 @@ server provides global services that connect the users and domains.
 See the user docs to [Understand the Architecture](https://docs.vircadia.com/explore/get-started/architecture.html).
 
 This SDK provides interfaces to:
-- Connect to domains.
+- Connect to domains and their assignment clients.
 - Use metaverse services.
 
 <hr />
@@ -16,17 +16,12 @@ project or directly from the SDK TypeScript.
     ```
     npm install --save-prod <path-to-vircadia-web-sdk-folder>
 
-    import { Vircadia, DomainServer } from "@vircadia/web-sdk";
-    ```
-
-- You can also only import specific modules if you wish:
-    ```
-    import { Vircadia, DomainServer } from "@vircadia/web-sdk/modules/Vircadia";
+    import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from "@vircadia/web-sdk";
     ```
 
 - Import directly from the SDK TypeScript:
     ```
-    import { Vircadia, DomainServer } from "<path>/Vircadia";
+    import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from "<path>/Vircadia";
     ```
 
 <hr />

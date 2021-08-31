@@ -24,6 +24,8 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.DomainConnectRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainDisconnectRequest).toBe("object");
         expect(typeof PacketScribe.DomainDisconnectRequest.write).toBe("function");
+        expect(typeof PacketScribe.DomainServerRemovedNode).toBe("object");
+        expect(typeof PacketScribe.DomainServerRemovedNode.read).toBe("function");
     });
 
 });

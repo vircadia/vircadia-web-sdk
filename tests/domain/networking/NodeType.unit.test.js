@@ -25,4 +25,12 @@ describe("NodeType - unit tests", () => {
         expect(NodeType.getNodeTypeName(NodeType.Unassigned)).toBe("Unassigned");
         expect(NodeType.getNodeTypeName("-")).toBe("Unknown");
     });
+
+    test("Upstream node types are identified", () => {
+        expect(NodeType.isUpstream(NodeType.AudioMixer)).toBe(false);
+        expect(NodeType.isUpstream(NodeType.UpstreamAudioMixer)).toBe(true);
+        expect(NodeType.isUpstream(NodeType.UpstreamAvatarMixer)).toBe(true);
+        expect(NodeType.isUpstream(NodeType.DownstreamAudioMixer)).toBe(false);
+        expect(NodeType.isUpstream(NodeType.Unassigned)).toBe(false);
+    });
 });

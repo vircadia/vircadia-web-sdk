@@ -11,6 +11,7 @@
         "skipLibCheck": true,
         "esModuleInterop": true,
         "isolatedModules": true,
+        "preserveConstEnums": true,
 
         // TypeScript 4.3
         "allowUnreachableCode": false,

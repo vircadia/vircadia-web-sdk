@@ -8,17 +8,22 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-// import Socket from "../../../../src/domain/networking/udt/Socket";
+import NodeType from "../../../../src/domain/networking/NodeType";
+import Socket from "../../../../src/domain/networking/udt/Socket";
+
+import TestConfig from "../../../test.config.json";
 
 
 describe("Socket - unit tests", () => {
 
-    test("Empty test", () => {
-
-        // WEBRTC TODO: Add Socket unit tests.
-        // For now, the Socket class is exercised by DomainServer.integration.test.js.
-
-        expect(true).toBe(true);
+    test("Check initial state", () => {
+        expect(Socket.UNCONNECTED).toBe(0);
+        expect(Socket.CONNECTING).toBe(1);
+        expect(Socket.CONNECTED).toBe(2);
+        const socket = new Socket();
+        expect(socket.getSocketState(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.DomainServer)).toBe(Socket.UNCONNECTED);
     });
+
+    // The Socket class is further exercised by DomainServer.unit.test.js.
 
 });

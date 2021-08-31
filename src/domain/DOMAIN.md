@@ -2,13 +2,13 @@
 
 The files in the `/domain` directory are used in the domain server and assignment client APIs implemented in the root directory
 files:
-- `AgentClient.js`
-- `AudioMixer.js`
-- `AssetServer.js`
-- `AvatarMixer.js`
-- `DomainServer.js`
-- `EntityServer.js`
-- `MessageMixer.js`
+- `AgentClient.ts`
+- `AudioMixer.ts`
+- `AssetServer.ts`
+- `AvatarMixer.ts`
+- `DomainServer.ts`
+- `EntityServer.ts`
+- `MessageMixer.ts`
 
 The files in the `/domain` directory reflect the native Interface app code, with files, classes, and variables named the same
 and reimplemented in JavaScript. This helps lighten the intellectual load of understanding and maintaining both codebases and

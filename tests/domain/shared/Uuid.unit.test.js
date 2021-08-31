@@ -32,4 +32,9 @@ describe("Uuid - unit tests", () => {
         expect(value).toBe(1234n);
     });
 
+    test("Can stringify a Uuid", () => {
+        const uuid = new Uuid(217897985291723272451165858623432009288n);
+        expect(uuid.stringify()).toBe("a3eda01e-c4de-456d-bf07-858a26c5a648");
+    });
+
 });

@@ -8,16 +8,19 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { DomainServer } from "../dist/Vircadia.js";
+import { DomainServer, AudioMixer, AvatarMixer, MessageMixer } from "../dist/Vircadia.js";
 
 (function () {
 
     const DEFAULT_URL = "ws://127.0.0.1:40102";
 
-    const domainServer = new DomainServer();
+    // Shared context.
+    let contextID = -1;
 
     // Domain Server.
     (function () {
+        const domainServer = new DomainServer();
+        contextID = domainServer.contextID;
 
         const statusText = document.getElementById("domainStatus");
         const statusInfoText = document.getElementById("domainStatusInfo");
@@ -42,6 +45,48 @@ import { DomainServer } from "../dist/Vircadia.js";
             domainServer.disconnect();
         }
         disconnectButton.onclick = onDisconnectButtonClick;
+
+    }());
+
+    // Audio Mixer.
+    (function () {
+        const audioMixer = new AudioMixer(contextID);
+
+        const statusText = document.getElementById("audioMixerStatus");
+
+        function onStateChanged(state) {
+            statusText.value = AudioMixer.stateToString(state);
+        }
+        onStateChanged(audioMixer.state);
+        audioMixer.onStateChanged = onStateChanged;
+
+    }());
+
+    // Avatar Mixer.
+    (function () {
+        const avatarMixer = new AvatarMixer(contextID);
+
+        const statusText = document.getElementById("avatarMixerStatus");
+
+        function onStateChanged(state) {
+            statusText.value = AvatarMixer.stateToString(state);
+        }
+        onStateChanged(avatarMixer.state);
+        avatarMixer.onStateChanged = onStateChanged;
+
+    }());
+
+    // Message Mixer.
+    (function () {
+        const messageMixer = new MessageMixer(contextID);
+
+        const statusText = document.getElementById("messageMixerStatus");
+
+        function onStateChanged(state) {
+            statusText.value = MessageMixer.stateToString(state);
+        }
+        onStateChanged(messageMixer.state);
+        messageMixer.onStateChanged = onStateChanged;
 
     }());
 
