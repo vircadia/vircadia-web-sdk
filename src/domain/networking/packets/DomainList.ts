@@ -114,14 +114,16 @@ const DomainList = new class {
             dataPosition += 16;
 
             const publicSocket = new SockAddr();
-            dataPosition += 1;
+            publicSocket.setType(data.getUint8(dataPosition));
+            dataPosition += 2;  // Type and IP4
             publicSocket.setAddress(data.getUint32(dataPosition, UDT.BIG_ENDIAN));
             dataPosition += 4;
             publicSocket.setPort(data.getUint16(dataPosition, UDT.BIG_ENDIAN));
             dataPosition += 2;
 
             const localSocket = new SockAddr();
-            dataPosition += 1;
+            localSocket.setType(data.getUint8(dataPosition));
+            dataPosition += 2;  // Type and IP4
             localSocket.setAddress(data.getUint32(dataPosition, UDT.BIG_ENDIAN));
             dataPosition += 4;
             localSocket.setPort(data.getUint16(dataPosition, UDT.BIG_ENDIAN));
