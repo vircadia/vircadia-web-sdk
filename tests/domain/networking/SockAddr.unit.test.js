@@ -11,6 +11,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
 import SockAddr from "../../../src/domain/networking/SockAddr";
+import SocketType, { SocketTypeValue } from "../../../src/domain/networking/SocketType";
 
 
 describe("SockAddr - unit tests", () => {
@@ -21,6 +22,7 @@ describe("SockAddr - unit tests", () => {
     test("Default address values are correct", () => {
         const sockAddr = new SockAddr();
         expect(sockAddr.objectName()).toBe("");
+        expect(sockAddr.getType()).toBe(SocketType.WebRTC);
         expect(sockAddr.getAddress()).toBe(0);
         expect(sockAddr.getPort()).toBe(0);
         expect(sockAddr.isNull()).toBe(true);
@@ -31,6 +33,13 @@ describe("SockAddr - unit tests", () => {
         expect(sockAddr.objectName()).toBe("");
         sockAddr.setObjectName("X");
         expect(sockAddr.objectName()).toBe("X");
+    });
+
+    test("Can set and get the socket type", () => {
+        const sockAddr = new SockAddr();
+        expect(sockAddr.getType()).toBe(SocketTypeValue.WebRTC);
+        sockAddr.setType(SocketTypeValue.Unknown);
+        expect(sockAddr.getType()).toBe(SocketTypeValue.Unknown);
     });
 
     test("Can set and get the IPv4 address", () => {
@@ -55,6 +64,10 @@ describe("SockAddr - unit tests", () => {
         sockAddrB.setAddress(IP_127_0_0_1);
         sockAddrB.setPort(1);
         expect(sockAddrA.isEqualTo(sockAddrB)).toBe(true);
+        sockAddrB.setType(SocketTypeValue.Unknown);
+        expect(sockAddrA.isEqualTo(sockAddrB)).toBe(false);
+        sockAddrB.setType(SocketTypeValue.WebRTC);
+        expect(sockAddrA.isEqualTo(sockAddrB)).toBe(true);
         sockAddrB.setAddress(IP_255_255_255_255);
         expect(sockAddrA.isEqualTo(sockAddrB)).toBe(false);
         sockAddrB.setAddress(IP_127_0_0_1);
@@ -69,7 +82,7 @@ describe("SockAddr - unit tests", () => {
         const sockAddr = new SockAddr();
         sockAddr.setAddress(IP_127_0_0_1);
         sockAddr.setPort(103);
-        expect(sockAddr.toString()).toBe("127.0.0.1:103");
+        expect(sockAddr.toString()).toBe("WebRTC 127.0.0.1:103");
     });
 
 });

@@ -55,7 +55,7 @@ const SocketType = new class {
      */
     socketTypeToString(socketType: SocketTypeValue): string {
         // C++  QString socketTypeToString(SocketType socketType)
-        //      Provided as a global function in C++ but as a method of the SocketType namespace in JavaScript.
+        //      Provided as a global function in C++ but as a method of the SocketType namespace in TypeScript.
         const value = this.#_SOCKET_TYPE_STRINGS[socketType];
         return value ? value : this.#_UNKNOWN;
     }
