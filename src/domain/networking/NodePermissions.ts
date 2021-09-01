@@ -25,17 +25,17 @@ class NodePermissions {
      */
 
 
-    private _permissions: NodePermissionsValue = 0;
+    #_permissions: NodePermissionsValue = 0;
 
 
     get permissions(): NodePermissionsValue {
         // C++  Permissions permissions
-        return this._permissions;
+        return this.#_permissions;
     }
 
     set permissions(permissions: NodePermissionsValue) {
         // C++  Permissions permissions
-        this._permissions = permissions;
+        this.#_permissions = permissions;
     }
 
 }

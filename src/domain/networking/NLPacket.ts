@@ -75,15 +75,15 @@ class NLPacket extends Packet {
     }
 
 
-    private static NUM_BYTES_LOCALID = 2;
-    private static NUM_BYTES_MD5_HASH = 16;  // eslint-disable-line @typescript-eslint/no-magic-numbers
+    static readonly #NUM_BYTES_LOCALID = 2;
+    static readonly #NUM_BYTES_MD5_HASH = 16;
 
-    private static localHeaderSize(type: PacketTypeValue): number {
+    static #localHeaderSize(type: PacketTypeValue): number {
         // C++  int NLPacket::localHeaderSize(PacketType type)
         const nonSourced = PacketType.getNonSourcedPackets().has(type);
         const nonVerified = PacketType.getNonVerifiedPackets().has(type);
-        const optionalSize = (nonSourced ? 0 : NLPacket.NUM_BYTES_LOCALID)
-            + (nonSourced || nonVerified ? 0 : NLPacket.NUM_BYTES_MD5_HASH);
+        const optionalSize = (nonSourced ? 0 : NLPacket.#NUM_BYTES_LOCALID)
+            + (nonSourced || nonVerified ? 0 : NLPacket.#NUM_BYTES_MD5_HASH);
         // return sizeof(PacketType) + sizeof(PacketVersion) + optionalSize;
         return 2 + optionalSize;
     }
@@ -105,13 +105,13 @@ class NLPacket extends Packet {
             const isPartOfMessage = param3 ? param3 : false;
             const version = param4 ? param4 : 0;
 
-            super(size === -1 ? -1 : NLPacket.localHeaderSize(type) + size, isReliable, isPartOfMessage);
+            super(size === -1 ? -1 : NLPacket.#localHeaderSize(type) + size, isReliable, isPartOfMessage);
             this._messageData.type = type;
             this._messageData.version = version === 0 ? PacketType.versionForPacketType(type) : version;
             // adjustPayloadStartAndCapacity(); - Not used in TypeScript.
-            this.writeTypeAndVersion();
+            this.#writeTypeAndVersion();
             if (!PacketType.getNonSourcedPackets().has(type)) {
-                this._messageData.dataPosition += NLPacket.NUM_BYTES_LOCALID;
+                this._messageData.dataPosition += NLPacket.#NUM_BYTES_LOCALID;
             }
 
         } else if (param0 instanceof Packet) {
@@ -119,9 +119,9 @@ class NLPacket extends Packet {
             const packet = param0;
 
             super(packet);
-            this.readType();
-            this.readVersion();
-            this.readSourceID();
+            this.#readType();
+            this.#readVersion();
+            this.#readSourceID();
 
         } else {
             console.error("Invalid parameters in Packet constructor!", typeof param0, typeof param1, typeof param2,
@@ -171,21 +171,21 @@ class NLPacket extends Packet {
     }
 
 
-    private readType() {
+    #readType(): void {
         // C++  void readType()
         const messageData = this._messageData;
         this._messageData.type = messageData.data.getUint8(messageData.dataPosition);
         messageData.dataPosition += 1;
     }
 
-    private readVersion() {
+    #readVersion(): void {
         // C++  void readVersion()
         const messageData = this._messageData;
         messageData.version = messageData.data.getUint8(messageData.dataPosition);
         messageData.dataPosition += 1;
     }
 
-    private readSourceID() {
+    #readSourceID(): void {
         // C++  void readSourceID()
         const messageData = this._messageData;
         if (PacketType.getNonSourcedPackets().has(messageData.type)) {
@@ -196,7 +196,7 @@ class NLPacket extends Packet {
         }
     }
 
-    private writeTypeAndVersion() {
+    #writeTypeAndVersion(): void {
         // C++  void writeTypeAndVersion()
         const messageData = this._messageData;
         const headerOffset = Packet.totalHeaderSize(messageData.isPartOfMessage);

@@ -30,10 +30,12 @@ aid maintenance:
 
 ### Private, Protected, and Public
 
-In public API code, JavaScript's `#` should be used for private members so that their privacy is enforced at runtime.
+JavaScript's `#` should be used for private members (not TypeScript's `private`) so that their privacy is enforced at runtime.
 
-In internal SDK code, TypeScript's `private`, `protected`, and `public` modifiers should be used because they are more
-expressive and it is OK to enforce their semantics at compile time.
+TypeScript's `protected` may be used in internal SDK code where necessary to make internal members available to derived
+classes. However, `protected` should not be used in classes that are part of the public API (because when transpiled to
+JavaScript, `protected` becomes `public`).
+
 
 ### Document Return Types
 

@@ -33,11 +33,12 @@ class Node extends NetworkPeer {
 
     static readonly NULL_LOCAL_ID: LocalID = 0;
 
-    private _type = NodeType.Unassigned;
-    private _permissions = new NodePermissions();
-    private _connectionSecret = new Uuid();
-    private _isReplicated = false;
-    private _isUpstream = false;
+
+    #_type = NodeType.Unassigned;
+    #_permissions = new NodePermissions();
+    #_connectionSecret = new Uuid();
+    #_isReplicated = false;
+    #_isUpstream = false;
 
 
     constructor(uuid: Uuid, type: NodeTypeValue, publicSocket: SockAddr, localSocket: SockAddr) {
@@ -55,7 +56,7 @@ class Node extends NetworkPeer {
      */
     getType(): NodeTypeValue {
         // C++  char getType() const { return _type; }
-        return this._type;
+        return this.#_type;
     }
 
     /*@devdoc
@@ -64,7 +65,7 @@ class Node extends NetworkPeer {
      */
     setType(type: NodeTypeValue): void {
         // C++  void setType(char type);
-        this._type = type;
+        this.#_type = type;
 
         const typeString = NodeType.getNodeTypeName(type);
         this._publicSocket.setObjectName(typeString);
@@ -80,7 +81,7 @@ class Node extends NetworkPeer {
      */
     getPermissions(): NodePermissions {
         // C++  NodePermissions getPermissions() const
-        return this._permissions;
+        return this.#_permissions;
     }
 
     /*@devdoc
@@ -89,7 +90,7 @@ class Node extends NetworkPeer {
      */
     setPermissions(newPermissions: NodePermissions): void {
         // C++  void setPermissions(const NodePermissions& newPermissions)
-        this._permissions = newPermissions;
+        this.#_permissions = newPermissions;
     }
 
     /*@devdoc
@@ -98,7 +99,7 @@ class Node extends NetworkPeer {
      */
     getConnectionSecret(): Uuid {
         // C++  QUuid& getConnectionSecret() const
-        return this._connectionSecret;
+        return this.#_connectionSecret;
     }
 
     /*@devdoc
@@ -107,13 +108,13 @@ class Node extends NetworkPeer {
      */
     setConnectionSecret(connectionSecret: Uuid): void {
         // C++  void setConnectionSecret(const QUuid& connectionSecret);
-        if (this._connectionSecret.valueOf() === connectionSecret.valueOf()) {
+        if (this.#_connectionSecret.valueOf() === connectionSecret.valueOf()) {
             return;
         }
 
         // WEBRTC TODO: Address further C++ code.
 
-        this._connectionSecret = connectionSecret;
+        this.#_connectionSecret = connectionSecret;
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -125,7 +126,7 @@ class Node extends NetworkPeer {
      */
     getIsReplicated(): boolean {
         // C++  bool isReplicated() const
-        return this._isReplicated;
+        return this.#_isReplicated;
     }
 
     /*@devdoc
@@ -134,7 +135,7 @@ class Node extends NetworkPeer {
      */
     setIsReplicated(isReplicated: boolean): void {
         // C++  void setIsReplicated(bool isReplicated)
-        this._isReplicated = isReplicated;
+        this.#_isReplicated = isReplicated;
     }
 
     /*@devdoc
@@ -143,7 +144,7 @@ class Node extends NetworkPeer {
      */
     getIsUpstream(): boolean {
         // C++  bool isUpstream() const
-        return this._isUpstream;
+        return this.#_isUpstream;
     }
 
     /*@devdoc
@@ -152,7 +153,7 @@ class Node extends NetworkPeer {
      */
     setIsUpstream(isUpstream: boolean): void {
         // c++  void setIsUpstream(bool isUpstream)
-        this._isUpstream = isUpstream;
+        this.#_isUpstream = isUpstream;
     }
 
 

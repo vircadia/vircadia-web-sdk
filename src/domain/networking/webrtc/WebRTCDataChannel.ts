@@ -79,8 +79,6 @@ class WebRTCDataChannel {
      */
 
 
-    /* eslint-disable @typescript-eslint/no-magic-numbers */
-
     /*@devdoc
      *  The state of a WebRTCDataChannel connection.
      *  <table>
@@ -101,69 +99,68 @@ class WebRTCDataChannel {
     static readonly CLOSING = 2;
     static readonly CLOSED = 3;
 
-    /* eslint-enable @typescript-eslint/no-magic-numbers */
-
-    private static CONFIGURATION = {
+    static readonly #CONFIGURATION = {
         // WEBRTC TODO: Make configurable in the API.
         iceServers: [{ urls: "stun:ice.vircadia.com:7337" }]
     };
 
-    private _nodeType = NodeType.Unassigned;
-    private _signalingChannel: WebRTCSignalingChannel | null = null;
 
-    private _peerConnection: RTCPeerConnection | null = null;
-    private _dataChannel: RTCDataChannel | null = null;
-    private _dataChannelID = 0;
-    private _readyState = WebRTCDataChannel.CLOSED;
+    #_nodeType = NodeType.Unassigned;
+    #_signalingChannel: WebRTCSignalingChannel | null = null;
 
-    private _onopenCallback: OnOpenCallback | null = null;
-    private _onmessageCallback: OnMessageCallback | null = null;
-    private _oncloseCallback: OnCloseCallback | null = null;
-    private _onerrorCallback: OnErrorCallback | null = null;
+    #_peerConnection: RTCPeerConnection | null = null;
+    #_dataChannel: RTCDataChannel | null = null;
+    #_dataChannelID = 0;
+    #_readyState = WebRTCDataChannel.CLOSED;
+
+    #_onopenCallback: OnOpenCallback | null = null;
+    #_onmessageCallback: OnMessageCallback | null = null;
+    #_oncloseCallback: OnCloseCallback | null = null;
+    #_onerrorCallback: OnErrorCallback | null = null;
 
 
     constructor(nodeType: NodeTypeValue, signalingChannel: WebRTCSignalingChannel) {
-        this._nodeType = nodeType;
-        this._signalingChannel = signalingChannel;
-        this._readyState = WebRTCDataChannel.CONNECTING;
+        this.#_nodeType = nodeType;
+        this.#_signalingChannel = signalingChannel;
+        this.#_readyState = WebRTCDataChannel.CONNECTING;
         setTimeout(() => {
             // Defer connecting by scheduling it in the event queue, so that WebRTCDataChannel event handlers can be hooked up
             // immediately after the object is created.
-            this.connect();
+            this.#connect();
         }, 0);
     }
 
 
     get nodeType(): NodeTypeValue {
-        return this._nodeType;
+        return this.#_nodeType;
     }
 
     get readyState(): number {
-        return this._readyState;
+        return this.#_readyState;
     }
 
     set id(id: number) {
-        this._dataChannelID = id;
+        this.#_dataChannelID = id;
     }
 
     get id(): number {
-        return this._dataChannelID;
+        return this.#_dataChannelID;
     }
 
     set onopen(callback: OnOpenCallback) {
-        this._onopenCallback = callback;
+        this.#_onopenCallback = callback;
     }
 
     set onmessage(callback: OnMessageCallback) {
-        this._onmessageCallback = callback;
+        this.#_onmessageCallback = callback;
     }
 
     set onclose(callback: OnCloseCallback) {
-        this._oncloseCallback = callback;
+        this.#_oncloseCallback = callback;
     }
 
     set onerror(callback: OnErrorCallback) {
-        this._onerrorCallback = callback;
+        this.#_onerrorCallback = callback;
     }
 
 
@@ -179,8 +176,8 @@ class WebRTCDataChannel {
     addEventListener(event: string, callback: OnOpenCallback | OnMessageCallback | OnCloseCallback | OnErrorCallback): void {
         const errorMessage = "WebRTCDataChannel.addEventListener(): Not implemented!";
         console.error(errorMessage);
-        if (this._onerrorCallback) {
-            this._onerrorCallback(errorMessage);
+        if (this.#_onerrorCallback) {
+            this.#_onerrorCallback(errorMessage);
         }
     }
 
@@ -193,15 +190,15 @@ class WebRTCDataChannel {
      *      because the signaling channel isn't open).
      */
     send(message: ArrayBuffer | ArrayBufferView | Blob | string): boolean {
-        if (this._dataChannel && this._readyState === WebRTCDataChannel.OPEN) {
-            this._dataChannel.send(<any>message);  // eslint-disable-line @typescript-eslint/no-explicit-any
+        if (this.#_dataChannel && this.#_readyState === WebRTCDataChannel.OPEN) {
+            this.#_dataChannel.send(<any>message);  // eslint-disable-line @typescript-eslint/no-explicit-any
             return true;
         }
 
         const errorMessage = "WebRTCDataChannel: Data channel not open for sending!";
         console.error(errorMessage);
-        if (this._onerrorCallback) {
-            this._onerrorCallback(errorMessage);
+        if (this.#_onerrorCallback) {
+            this.#_onerrorCallback(errorMessage);
         }
         return false;
     }
@@ -210,67 +207,67 @@ class WebRTCDataChannel {
      *  Closes the data channel.
      */
     close(): void {
-        this._readyState = WebRTCDataChannel.CLOSING;
-        if (this._dataChannel) {
-            this._dataChannel.close();
+        this.#_readyState = WebRTCDataChannel.CLOSING;
+        if (this.#_dataChannel) {
+            this.#_dataChannel.close();
         }
-        if (this._peerConnection) {
-            this._peerConnection.close();
+        if (this.#_peerConnection) {
+            this.#_peerConnection.close();
         } else {
-            this._readyState = WebRTCDataChannel.CLOSED;
-            this._dataChannel = null;
-            this._peerConnection = null;
+            this.#_readyState = WebRTCDataChannel.CLOSED;
+            this.#_dataChannel = null;
+            this.#_peerConnection = null;
         }
     }
 
 
     // Starts making a WebRTC connection.
-    private start() {
+    #start(): void {
 
         // Create new peer connection object.
-        this._peerConnection = new RTCPeerConnection(WebRTCDataChannel.CONFIGURATION);
+        this.#_peerConnection = new RTCPeerConnection(WebRTCDataChannel.#CONFIGURATION);
 
         // Send ICE candidates to the domain server.
-        this._peerConnection.onicecandidate = ({ candidate }) => {
+        this.#_peerConnection.onicecandidate = ({ candidate }) => {
             if (candidate  // The candidate is sometimes null for unknown reasons; don't send this.
-                && this._signalingChannel && this._signalingChannel.readyState === WebRTCSignalingChannel.OPEN) {
-                this._signalingChannel.send({ to: this._nodeType, data: candidate });
+                && this.#_signalingChannel && this.#_signalingChannel.readyState === WebRTCSignalingChannel.OPEN) {
+                this.#_signalingChannel.send({ to: this.#_nodeType, data: candidate });
             }
         };
 
         // Generate an offer.
-        this._peerConnection.onnegotiationneeded = async () => {
-            if (!this._peerConnection || !this._signalingChannel
-                || this._signalingChannel.readyState !== WebRTCSignalingChannel.OPEN) {
+        this.#_peerConnection.onnegotiationneeded = async () => {
+            if (!this.#_peerConnection || !this.#_signalingChannel
+                || this.#_signalingChannel.readyState !== WebRTCSignalingChannel.OPEN) {
                 return;
             }
             try {
                 // Create offer.
-                const offer = await this._peerConnection.createOffer();
-                await this._peerConnection.setLocalDescription(offer);
+                const offer = await this.#_peerConnection.createOffer();
+                await this.#_peerConnection.setLocalDescription(offer);
 
                 // Send offer to domain server.
-                this._signalingChannel.send({
-                    to: this._nodeType,
-                    data: { description: this._peerConnection.localDescription }
+                this.#_signalingChannel.send({
+                    to: this.#_nodeType,
+                    data: { description: this.#_peerConnection.localDescription }
                 });
             } catch (err) {
                 const errorMessage = "WebRTCDataChannel: Error during offer negotiation: " + <string>err;
                 console.error(errorMessage);
-                if (this._onerrorCallback) {
-                    this._onerrorCallback(errorMessage);
+                if (this.#_onerrorCallback) {
+                    this.#_onerrorCallback(errorMessage);
                 }
             }
         };
 
         // Observe connection state changes.
-        this._peerConnection.onconnectionstatechange = () => {
+        this.#_peerConnection.onconnectionstatechange = () => {
             let errorMessage = "";
-            switch (this._peerConnection ? this._peerConnection.connectionState : "") {
+            switch (this.#_peerConnection ? this.#_peerConnection.connectionState : "") {
                 case "new":
                 case "connecting":
                     // The connection is being established.
-                    this._readyState = WebRTCDataChannel.CONNECTING;
+                    this.#_readyState = WebRTCDataChannel.CONNECTING;
                     break;
                 case "connected":
                     // The connection has become fully connected.
@@ -280,114 +277,114 @@ class WebRTCDataChannel {
                 case "failed":
                 case "closed":
                     // One or more transports has terminated or is in error.
-                    this._readyState = WebRTCDataChannel.CLOSED;
-                    this._peerConnection = null;
-                    if (this._oncloseCallback) {
-                        this._oncloseCallback();
+                    this.#_readyState = WebRTCDataChannel.CLOSED;
+                    this.#_peerConnection = null;
+                    if (this.#_oncloseCallback) {
+                        this.#_oncloseCallback();
                     }
                     break;
                 default:
                     // Unexpected condition.
                     errorMessage = "WebRTCDataChannel: Unexpected connection state: "
-                        + (this._peerConnection ? this._peerConnection.connectionState : "undefined");
+                        + (this.#_peerConnection ? this.#_peerConnection.connectionState : "undefined");
                     console.error(errorMessage);
-                    if (this._onerrorCallback) {
-                        this._onerrorCallback(errorMessage);
+                    if (this.#_onerrorCallback) {
+                        this.#_onerrorCallback(errorMessage);
                     }
             }
         };
 
         // Create the data channel.
         // ordered = false and maxRetransmits = 0 creates an unreliable and unordered data channel, like UDP.
-        this._dataChannel = this._peerConnection.createDataChannel("label", {
+        this.#_dataChannel = this.#_peerConnection.createDataChannel("label", {
             protocol: "protocol",
             negotiated: false,
             ordered: false,
             maxRetransmits: 0
         });
-        this._dataChannel.binaryType = "arraybuffer";
-        this._dataChannel.onopen = () => {
-            this._readyState = WebRTCDataChannel.OPEN;
-            if (this._onopenCallback) {
-                this._onopenCallback();
+        this.#_dataChannel.binaryType = "arraybuffer";
+        this.#_dataChannel.onopen = () => {
+            this.#_readyState = WebRTCDataChannel.OPEN;
+            if (this.#_onopenCallback) {
+                this.#_onopenCallback();
             }
         };
-        this._dataChannel.onmessage = ({ data }) => {
-            if (this._onmessageCallback) {
-                this._onmessageCallback(data);
+        this.#_dataChannel.onmessage = ({ data }) => {
+            if (this.#_onmessageCallback) {
+                this.#_onmessageCallback(data);
             }
         };
         // FIXME: Enable the following code once RTCDataChannel.onclosing is defined in lib.dom.d.ts.
         /*
-        this._dataChannel.onclosing = () => {
-            this._readyState = WebRTCDataChannel.CLOSING;
+        this.#_dataChannel.onclosing = () => {
+            this.#_readyState = WebRTCDataChannel.CLOSING;
         };
         */
-        this._dataChannel.onclose = () => {
-            this._readyState = WebRTCDataChannel.CLOSING;  // CLOSED state will happen when the peer connection is closed.
-            this._dataChannel = null;
-            if (this._peerConnection) {
-                this._peerConnection.close();
+        this.#_dataChannel.onclose = () => {
+            this.#_readyState = WebRTCDataChannel.CLOSING;  // CLOSED state will happen when the peer connection is closed.
+            this.#_dataChannel = null;
+            if (this.#_peerConnection) {
+                this.#_peerConnection.close();
             }
         };
 
     }  // start
 
     // Instigates the WebRTC connection process.
-    private connect() {
+    #connect(): void {
 
         // Signaling channel must be open.
-        if (!this._signalingChannel || this._signalingChannel.readyState !== WebRTCSignalingChannel.OPEN) {
-            this._readyState = WebRTCDataChannel.CLOSED;
+        if (!this.#_signalingChannel || this.#_signalingChannel.readyState !== WebRTCSignalingChannel.OPEN) {
+            this.#_readyState = WebRTCDataChannel.CLOSED;
             const errorMessage = "WebRTCDataChannel: Signaling channel not open!";
             console.error(errorMessage);
-            if (this._onerrorCallback) {
-                this._onerrorCallback(errorMessage);
+            if (this.#_onerrorCallback) {
+                this.#_onerrorCallback(errorMessage);
             }
             return;
         }
 
         // Respond to signaling channel messages.
-        this._signalingChannel.addEventListener("message", ({ from, data, echo }: SignalingMessage) => {
+        this.#_signalingChannel.addEventListener("message", ({ from, data, echo }: SignalingMessage) => {
             (async () => {
                 const description = data ? <RTCSessionDescriptionInit>data["description"] : null;
                 const candidate = data ? <RTCIceCandidateInit>data["candidate"] : null;
 
                 // Ignore messages not directed at this data channel.
-                if (from !== this._nodeType) {
+                if (from !== this.#_nodeType) {
                     return;
                 }
 
                 // Start a new peer connection if necessary.
-                if (!this._peerConnection && (description || candidate)) {
-                    this.start();
+                if (!this.#_peerConnection && (description || candidate)) {
+                    this.#start();
                 }
 
                 try {
                     if (description) {
-                        if (!this._peerConnection) {
+                        if (!this.#_peerConnection) {
                             const errorMessage = "WebRTCDataChannel: Peer connection is closed!";
                             console.error(errorMessage);
-                            if (this._onerrorCallback) {
-                                this._onerrorCallback(errorMessage);
+                            if (this.#_onerrorCallback) {
+                                this.#_onerrorCallback(errorMessage);
                             }
                             return;
                         }
 
                         // Add remote connection information to peer connection.
-                        await this._peerConnection.setRemoteDescription(description);
+                        await this.#_peerConnection.setRemoteDescription(description);
 
                         // We got an offer; reply with an answer.
-                        if (description.type === "offer" && this._signalingChannel) {
-                            await this._peerConnection.setLocalDescription(description);
-                            this._signalingChannel.send({
-                                description: this._peerConnection.localDescription
+                        if (description.type === "offer" && this.#_signalingChannel) {
+                            await this.#_peerConnection.setLocalDescription(description);
+                            this.#_signalingChannel.send({
+                                description: this.#_peerConnection.localDescription
                             });
                         }
                     } else if (candidate) {
                         // Add ICE candidate to peer connection.
-                        if (this._peerConnection) {
-                            await this._peerConnection.addIceCandidate(candidate);
+                        if (this.#_peerConnection) {
+                            await this.#_peerConnection.addIceCandidate(candidate);
                         }
                     } else if (echo) {
                         // Ignore signaling channel "echo" messages.
@@ -396,22 +393,22 @@ class WebRTCDataChannel {
                         // Unexpected message.
                         const errorMessage = "WebRTCDataChannel: Unexpected signaling channel message!";
                         console.error(errorMessage);
-                        if (this._onerrorCallback) {
-                            this._onerrorCallback(errorMessage);
+                        if (this.#_onerrorCallback) {
+                            this.#_onerrorCallback(errorMessage);
                         }
                     }
                 } catch (err) {
                     const errorMessage = "WebRTCDataChannel: Error processing signaling channel message!";
                     console.error(errorMessage);
-                    if (this._onerrorCallback) {
-                        this._onerrorCallback(errorMessage);
+                    if (this.#_onerrorCallback) {
+                        this.#_onerrorCallback(errorMessage);
                     }
                 }
             })();
         });
 
         // Start the WebRTC connection process.
-        this.start();
+        this.#start();
 
     }  // #connect
 

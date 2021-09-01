@@ -11,9 +11,8 @@
 //
 
 import AddressManager from "./domain/networking/AddressManager";
-import { ConnectionRefusedReasonValue } from "./domain/networking/ConnectionRefusedReason";
 import Node from "./domain/networking/Node";
-import NodesList from "./domain/networking/NodesList";
+import NodeList from "./domain/networking/NodeList";
 import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
 
@@ -136,7 +135,7 @@ class DomainServer {
 
     // Context objects.
     #_contextID;
-    #_nodesList: NodesList;
+    #_nodeList: NodeList;
     #_addressManager: AddressManager;
 
     #_DEBUG = false;
@@ -147,15 +146,15 @@ class DomainServer {
 
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, AddressManager);
-        ContextManager.set(contextID, NodesList, contextID);
+        ContextManager.set(contextID, NodeList, contextID);
 
-        this.#_nodesList = ContextManager.get(contextID, NodesList) as NodesList;
+        this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
         this.#_addressManager = ContextManager.get(contextID, AddressManager) as AddressManager;
         this.#_contextID = contextID;
 
         // WEBRTC TODO: Address further C++ code.
 
-        const domainHandler = this.#_nodesList.getDomainHandler();
+        const domainHandler = this.#_nodeList.getDomainHandler();
         domainHandler.connectedToDomain.connect(() => {
             this.#setState(DomainServer.CONNECTED);
         });
@@ -169,13 +168,13 @@ class DomainServer {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.#_nodesList.nodeAdded.connect(this.#nodeAdded);
-        this.#_nodesList.nodeActivated.connect(this.#nodeActivated);
-        this.#_nodesList.nodeKilled.connect(this.#nodeKilled);
+        this.#_nodeList.nodeAdded.connect(this.#nodeAdded);
+        this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
+        this.#_nodeList.nodeKilled.connect(this.#nodeKilled);
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.#_nodesList.addSetOfNodeTypesToNodeInterestSet(new Set([
+        this.#_nodeList.addSetOfNodeTypesToNodeInterestSet(new Set([
 
             // WEBRTC TODO: Configure interest set per AC APIs used.
 
@@ -246,7 +245,7 @@ class DomainServer {
 
         if (this.#_location === "") {
             this.#stopDomainServerCheckins();
-            this.#_nodesList.getDomainHandler().disconnect("Invalid location");
+            this.#_nodeList.getDomainHandler().disconnect("Invalid location");
             this.#setState(DomainServer.ERROR, "No location specified.");
             return;
         }
@@ -284,7 +283,7 @@ class DomainServer {
             return;
         }
         this.#stopDomainServerCheckins();
-        this.#_nodesList.getDomainHandler().disconnect("User disconnected", true);
+        this.#_nodeList.getDomainHandler().disconnect("User disconnected", true);
         this.#setState(DomainServer.DISCONNECTED);
     }
 
@@ -315,7 +314,7 @@ class DomainServer {
         }, DomainServer.#DOMAIN_SERVER_CHECK_IN_MSECS);
 
         // Perform this send.
-        this.#_nodesList.sendDomainServerCheckIn();
+        this.#_nodeList.sendDomainServerCheckIn();
     }
 
     #stopDomainServerCheckins(): void {
@@ -330,7 +329,7 @@ class DomainServer {
     // eslint-disable-next-line
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    #domainConnectionRefused = (reasonMessage: string, reasonCode: ConnectionRefusedReasonValue, extraInfo: string): void => {
+    #domainConnectionRefused = (reasonMessage: string, reasonCodeInt: number, extraInfo: string): void => {
         // C++  Application::domainConnectionRefused(const QString& reasonMessage, int reasonCodeInt, const QString& extraInfo)
 
         // WEBRTC TODO: Address further C++ code.

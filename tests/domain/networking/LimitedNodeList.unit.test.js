@@ -114,7 +114,8 @@ describe("LimitedNodeList - integration tests", () => {
         limitedNodeList.nodeAdded.connect((node) => {
             expect(node.getType()).toBe(AUDIO_MIXER_NODE_INFO.type);
             expect(node.getUUID()).toBe(AUDIO_MIXER_NODE_INFO.uuid);
-            node.setActiveSocket(AUDIO_MIXER_NODE_INFO.publicSocket);
+            node.setPublicSocket(AUDIO_MIXER_NODE_INFO.publicSocket);
+            node.activatePublicSocket();
         });
         limitedNodeList.nodeActivated.connect((node) => {
             expect(node.getType()).toBe(AUDIO_MIXER_NODE_INFO.type);
@@ -273,8 +274,8 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     // The following items are tested elsewhere:
-    // - sendPacket() - Tested implicitly by NodesList integration test.
-    // - sendUnreliablePacket() - Tested implicitly by NodesList integration test.
+    // - sendPacket() - Tested implicitly by NodeList integration test.
+    // - sendUnreliablePacket() - Tested implicitly by NodeList integration test.
 
 
     warn.mockReset();

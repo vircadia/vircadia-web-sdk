@@ -35,7 +35,7 @@ class Signal {
      */
 
 
-    private _slots: Set<Slot> = new Set();
+    #_slots: Set<Slot> = new Set();
 
 
     /*@devdoc
@@ -47,7 +47,7 @@ class Signal {
      */
     connect(slot: Slot): void {
         assert(typeof slot === "function");
-        this._slots.add(slot);
+        this.#_slots.add(slot);
     }
 
     /*@devdoc
@@ -56,7 +56,7 @@ class Signal {
      */
     disconnect(slot: Slot): void {
         assert(typeof slot === "function");
-        this._slots.delete(slot);  // eslint-disable-line @typescript-eslint/dot-notation
+        this.#_slots.delete(slot);  // eslint-disable-line @typescript-eslint/dot-notation
     }
 
     /*@devdoc
@@ -64,7 +64,7 @@ class Signal {
      *  @param {any} [params] - Parameter values to call connected slot functions with.
      */
     emit(...params: any[]): void {  // eslint-disable-line @typescript-eslint/no-explicit-any
-        this._slots.forEach((slot) => {
+        this.#_slots.forEach((slot) => {
             setTimeout(slot, 0, ...params);
         });
     }

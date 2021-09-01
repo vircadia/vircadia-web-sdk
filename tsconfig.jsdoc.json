@@ -2,13 +2,14 @@
     "compilerOptions": {
         "outDir": "./docs/build",
         "allowJs": true,
-        "target": "ES2020",
+        "target": "ESNext",
         "lib": [ "ES2020", "DOM" ],
         "sourceMap": false,
         "esModuleInterop": true,
         "moduleResolution": "Node",
         "skipLibCheck": true,
-        "preserveConstEnums":  true
+        "preserveConstEnums": true,
+        "useDefineForClassFields": true
     },
     "include": [
         "./src/**/*"

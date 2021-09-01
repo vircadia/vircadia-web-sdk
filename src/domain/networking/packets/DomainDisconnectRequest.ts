@@ -23,6 +23,8 @@ const DomainDisconnectRequest = new class {
         // C++  DomainHandler::sendDisconnectPacket()
 
         const packet = NLPacket.create(PacketType.DomainDisconnectRequest);
+        const messageData = packet.getMessageData();
+        messageData.packetSize = messageData.dataPosition;
         return packet;
     }
 

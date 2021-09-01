@@ -22,17 +22,17 @@ import { PacketTypeValue } from "./udt/PacketHeaders";
  */
 class ReceivedMessage {
 
-    private _messageData;
+    #_messageData;
 
 
     constructor(packet: NLPacket) {
         // C++  ReceivedMessage(NLPacket& packet)
-        this._messageData = packet.getMessageData();  // Reference the data already collected; no need to copy it.
-        this._messageData.headData = this._messageData.data;  // Just reference the same data; no need to copy it.
-        this._messageData.packetType = this._messageData.type;  // Alias.
-        this._messageData.numPackets = 1;
-        this._messageData.isComplete = this._messageData.packetPosition === Packet.PacketPosition.ONLY;
-        this._messageData.firstPacketReceiveTime = this._messageData.receiveTime;
+        this.#_messageData = packet.getMessageData();  // Reference the data already collected; no need to copy it.
+        this.#_messageData.headData = this.#_messageData.data;  // Just reference the same data; no need to copy it.
+        this.#_messageData.packetType = this.#_messageData.type;  // Alias.
+        this.#_messageData.numPackets = 1;
+        this.#_messageData.isComplete = this.#_messageData.packetPosition === Packet.PacketPosition.ONLY;
+        this.#_messageData.firstPacketReceiveTime = this.#_messageData.receiveTime;
 
         // WEBRTC TODO: May need to add equivalent of C++ ReceivedMessage::_data that contains just the payload.
         //              And as part of this, implement the payload start etc. members and calculations.
@@ -46,7 +46,7 @@ class ReceivedMessage {
      */
     getType(): PacketTypeValue {
         // C++  PacketType getType()
-        return this._messageData.packetType;
+        return this.#_messageData.packetType;
     }
 
     /*@devdoc
@@ -55,7 +55,7 @@ class ReceivedMessage {
      */
     getMessage(): DataView {
         // C++  QByteArray getMessage()
-        return new DataView(this._messageData.data.buffer, this._messageData.dataPosition);
+        return new DataView(this.#_messageData.data.buffer, this.#_messageData.dataPosition);
     }
 
 }
