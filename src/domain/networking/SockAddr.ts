@@ -33,6 +33,7 @@ class SockAddr {
      *  @param {string} name - The name of the SockAddr.
      */
     setObjectName(name: string): void {
+        // C++  void QObject::setObjecctName(const QString& name)
         this.#_name = name;
     }
 
@@ -41,6 +42,7 @@ class SockAddr {
      *  @returns {string} The name of the SockAddr.
      */
     objectName(): string {
+        // C++  QString QObject::objectName()
         return this.#_name;
     }
 
@@ -49,7 +51,7 @@ class SockAddr {
      *  @param {SocketType} type - The type of network socket.
      */
     setType(type: SocketTypeValue): void {
-        // C++  QHostAddress* getAddressPointer()
+        // C++  void setType(const SocketType socketType)
         this.#_type = type;
     }
 
@@ -58,7 +60,7 @@ class SockAddr {
      *  @returns {SocketType} The type of network socket.
      */
     getType(): SocketTypeValue {
-        // C++  SocketType getSocketType()
+        // C++  SocketType getType()
         return this.#_type;
     }
 

@@ -132,6 +132,8 @@ const DomainConnectRequest = new class {
         data.setUint8(dataPosition, info.ownerType.charCodeAt(0));
         dataPosition += 1;
 
+        data.setUint8(dataPosition, info.publicSockAddr.getType());
+        dataPosition += 1;
         data.setUint8(dataPosition, 0);  // IP4
         dataPosition += 1;
         data.setUint32(dataPosition, info.publicSockAddr.getAddress(), UDT.BIG_ENDIAN);
@@ -139,6 +141,8 @@ const DomainConnectRequest = new class {
         data.setUint16(dataPosition, info.publicSockAddr.getPort(), UDT.BIG_ENDIAN);
         dataPosition += 2;
 
+        data.setUint8(dataPosition, info.localSockAddr.getType());
+        dataPosition += 1;
         data.setUint8(dataPosition, 0);  // IP4
         dataPosition += 1;
         data.setUint32(dataPosition, info.localSockAddr.getAddress(), UDT.BIG_ENDIAN);
