@@ -110,7 +110,7 @@ class LimitedNodeList {
     #_sessionUUID = new Uuid(Uuid.NULL);
     #_sessionLocalID: LocalID = 0;
 
-    #_nodeHash: Map<bigint, Node> = new Map();
+    #_nodeHash: Map<bigint, Node> = new Map();  // Map<Uuid, Node>
 
     #_nodeAdded = new Signal();
     #_nodeActivated = new Signal();
@@ -390,8 +390,8 @@ class LimitedNodeList {
 
 
     /*@devdoc
-     *  Gets the node's UUID as assigned by the domain server  for the connection session.
-     *  @returns {LocalID} The node's session UUID.
+     *  Gets the node's UUID as assigned by the domain server for the connection session.
+     *  @returns {Uuid} The node's session UUID.
      */
     getSessionUUID(): Uuid {
         // C++  LocalID getSessionUUID()
@@ -399,8 +399,8 @@ class LimitedNodeList {
     }
 
     /*@devdoc
-     *  Sets the node's UUID as assigned by the domain server  for the connection session.
-     *  @param {LocalID} sessionUUID - The node's session UUID.
+     *  Sets the node's UUID as assigned by the domain server for the connection session.
+     *  @param {Uuid} sessionUUID - The node's session UUID.
      */
     setSessionUUID(sessionUUID: Uuid): void {
         // C++  void setSessionUUID(const QUuid& sessionUUID);

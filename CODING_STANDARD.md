@@ -57,7 +57,7 @@ type. Note that for property values, this means that setters must be used.
 ### File Code Order
 
 Code in a file should be ordered as follows:
-- Imports. In directory order then alphabetical order.
+- Imports. In directory order then alphabetical order, except where inheritance requires differently.
 - Public types.
 - Private types.
 

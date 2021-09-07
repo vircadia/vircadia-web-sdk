@@ -21,6 +21,7 @@ import { PacketTypeValue } from "./udt/PacketHeaders";
  *  @param {NLPacket} packet - The first (and possibly only) packet that forms the message.
  */
 class ReceivedMessage {
+    // C++  ReceivedMessage : public QObject
 
     #_messageData;
 

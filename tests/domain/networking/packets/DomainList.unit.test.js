@@ -9,7 +9,7 @@
 //
 
 import SockAddr from "../../../../src/domain/networking/SockAddr";
-import DomainListRequest from "../../../../src/domain/networking/packets/DomainList";
+import DomainList from "../../../../src/domain/networking/packets/DomainList";
 import Uuid from "../../../../src/domain/shared/Uuid";
 
 describe("DomainList - unit tests", () => {
@@ -27,7 +27,7 @@ describe("DomainList - unit tests", () => {
         }
         const dataView = new DataView(arrayBuffer, MESSAGE_START);
 
-        const info = DomainListRequest.read(dataView);
+        const info = DomainList.read(dataView);
         expect(info.domainUUID instanceof Uuid).toBe(true);
         expect(typeof info.domainLocalID).toBe("number");
         expect(info.newUUID instanceof Uuid).toBe(true);

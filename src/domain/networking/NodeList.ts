@@ -12,16 +12,17 @@ import AddressManager from "./AddressManager";
 import DomainHandler from "./DomainHandler";
 import FingerprintUtils from "./FingerprintUtils";
 import LimitedNodeList from "./LimitedNodeList";
+import NLPacket from "./NLPacket";
+import Node from "./Node";
 import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import ReceivedMessage from "./ReceivedMessage";
-import NLPacket from "../networking/NLPacket";
-import Node from "../networking/Node";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
+import Socket from "./udt/Socket";
+import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
 import Uuid from "../shared/Uuid";
-import Socket from "./udt/Socket";
 
 
 /*@devdoc
