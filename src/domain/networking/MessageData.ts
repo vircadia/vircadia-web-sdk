@@ -8,6 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import Node from "./../networking/Node";
 import SockAddr from "./../networking/SockAddr";
 import { PacketTypeValue } from "./udt/PacketHeaders";
 
@@ -48,7 +49,8 @@ import { PacketTypeValue } from "./udt/PacketHeaders";
  *  @property <strong>NLPacket</strong>
  *  @property {PacketType} type - The type of packet.
  *  @property {number} version - The version of the packet type.
- *  @property {number} sourceID - The ID of the node ID that is the source of the packet.
+ *  @property {number} sourceID - The local ID of the node that is the source of the packet if known (i.e., it is a sourced
+ *      packet), {@link Node|Node.NULL_LOCAL_ID} if not known.
  *
  *  @property <strong>ReceivedMessage</strong>
  *  @property {DataView} headData - A DataView of the raw header data. This is an alias for <code>data</code>.
@@ -81,7 +83,7 @@ class MessageData {
     // C++  NLPacket
     type = PacketTypeValue.Unknown;
     version = 0;
-    sourceID = 0;
+    sourceID = Node.NULL_LOCAL_ID;
 
     // C++  ReceivedMessage
     // headData: See getter.

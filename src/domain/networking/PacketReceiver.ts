@@ -9,12 +9,15 @@
 //
 
 import NLPacket from "./NLPacket";
+import Node from "./Node";
+import NodeList from "./NodeList";
 import ReceivedMessage from "./ReceivedMessage";
 import Packet from "./udt/Packet";
 import { PacketTypeValue } from "./udt/PacketHeaders";
+import ContextManager from "../shared/ContextManager";
 
 
-type Listener = (message: ReceivedMessage) => void;
+type Listener = (message: ReceivedMessage, sendingNode?: Node) => void;
 
 type ListenerReference = {
     listener: Listener,
@@ -28,14 +31,16 @@ type ListenerReference = {
  *  listener when called upon to do so for a received packet.
  *  <p>C++: <code>PacketReceiver : public QObject</code>
  *  @class PacketReceiver
+ *  @param {number} contextID - The {@link ContextManager} context ID.
  */
 class PacketReceiver {
     // C++  PacketReceiver : public QObject
 
     /*@devdoc
-     *  A method that processes a received messages of a particular type.
+     *  A method that processes a received message of a particular type.
      *  @typedef {function} PacketReceiver.Listener
      *  @param {ReceivedMessage} message - The received message.
+     *  @param {Node} [sendingNode] - The sending node if a sourced message.
      */
 
     /*@devdoc
@@ -51,9 +56,6 @@ class PacketReceiver {
      */
 
 
-    #_messageListenerMap: Map<PacketTypeValue, ListenerReference> = new Map();
-
-
     /*@devdoc
      *  Creates a reference to a listener method, marking the method as being for unsourced packets.
      *  <p>Note: If the listener uses <code>this</code> then the correct <code>this</code> must be bound to it, e.g., by
@@ -65,13 +67,39 @@ class PacketReceiver {
      *  @returns {PacketReceiver.ListenerReference} A reference to the listener method.
      */
     static makeUnsourcedListenerReference(listener: Listener): ListenerReference {
-        // C++  ListenerReferencePointer makeUnsourcedListenerReference(QObject*, function*)
+        // C++  ListenerReference* makeUnsourcedListenerReference(QObject*, function*(ReceivedMessage*))
         // The proper deliverPending property value is set when the listener is registered.
         return { listener, sourced: false, deliverPending: false };
     }
 
     /*@devdoc
-     *  Registers a listener function to invoke for a PacketType.
+     *  Creates a reference to a listener method, marking the method as being for sourced packets.
+     *  <p>Note: If the listener uses <code>this</code> then the correct <code>this</code> must be bound to it, e.g., by
+     *  declaring the function as an arrow function or applying <code>.bind(this)</code> in the constructor of the class that
+     *  implements the listener function.</p>
+     *  <p><em>Static</em></p>
+     *  @static
+     *  @param {Listener} listener - The listener method that will handle a particular type of packet.
+     *  @returns {PacketReceiver.ListenerReference} A reference to the listener method.
+     */
+    static makeSourcedListenerReference(listener: Listener): ListenerReference {
+        // C++  ListenerReference* makeSourcedListenerReference(QObject*, function*(ReceivedMessage*, Node*))
+        return { listener, sourced: true, deliverPending: false };
+    }
+
+
+    #_contextID;
+
+    #_messageListenerMap: Map<PacketTypeValue, ListenerReference> = new Map();
+
+
+    constructor(contextID: number) {
+        this.#_contextID = contextID;
+    }
+
+
+    /*@devdoc
+     *  Registers a listener function to invoke for a particular {@link PacketType(1)|PacketType}.
      *  @param {PacketType} packetType - The type of packet.
      *  @param {PacketReceiver.ListenerReference} listener - The reference to the listener function.
      *  @param {boolean} deliverPending - <code>true</code> if packets should be delivered to the listener as soon as they
@@ -113,26 +141,39 @@ class PacketReceiver {
 
     // eslint-disable-next-line
     // @ts-ignore
-    #handleVerifiedMessage(message: ReceivedMessage, justReceived: boolean): void {  // eslint-disable-line
+    #handleVerifiedMessage(receivedMessage: ReceivedMessage, justReceived: boolean): void {  // eslint-disable-line
         // C++  void handleVerifiedMessage(ReceivedMessage* receivedMessage, bool justReceived)
 
         // WEBRTC TODO: This method is incorrectly named - it handles both verified and unverified packets?
 
-        // WEBRTC TODO: Address further code.
-
-        const messageListener = this.#_messageListenerMap.get(message.getType());
+        const messageListener = this.#_messageListenerMap.get(receivedMessage.getType());
         if (messageListener) {
 
             // WEBRTC TODO: Address further code.
 
-            messageListener.listener(message);
+            if (messageListener.sourced) {
+                let matchingNode = null;
+                if (receivedMessage.getSourceID() !== Node.NULL_LOCAL_ID) {
+                    const nodeList = ContextManager.get(this.#_contextID, NodeList) as NodeList;
+                    matchingNode = nodeList.nodeWithLocalID(receivedMessage.getSourceID());
+                }
+                if (matchingNode) {
+                    messageListener.listener(receivedMessage, matchingNode);
+                } else {
+                    console.error("Could not find node for message type:", receivedMessage.getType());
+                    // WEBRTC TODO: Add string name of packet type to message.
+                }
+            } else {
+                messageListener.listener(receivedMessage);
+            }
 
         } else {
-            console.error("Could not find listener for message type:", message.getType());
+            console.error("Could not find listener for message type:", receivedMessage.getType());
             // WEBRTC TODO: Add string name of packet type to message.
-        }
 
-        // WEBRTC TODO: Address further code.
+            // WEBRTC TODO: Address further code.
+
+        }
     }
 
 }

@@ -130,6 +130,7 @@ class NLPacket extends Packet {
             this.#readType();
             this.#readVersion();
             this.#readSourceID();
+            this.adjustPayloadStartAndCapacity(NLPacket.#localHeaderSize(this._messageData.type));
 
         } else {
             console.error("Invalid parameters in Packet constructor!", typeof param0, typeof param1, typeof param2,
@@ -215,7 +216,7 @@ class NLPacket extends Packet {
         if (PacketType.getNonSourcedPackets().has(messageData.type)) {
             messageData.sourceID = Node.NULL_LOCAL_ID;
         } else {
-            messageData.sourceID = messageData.data.getUint16(messageData.dataPosition, UDT.BIG_ENDIAN);
+            messageData.sourceID = messageData.data.getUint16(messageData.dataPosition, UDT.LITTLE_ENDIAN);
             messageData.dataPosition += 2;
         }
     }

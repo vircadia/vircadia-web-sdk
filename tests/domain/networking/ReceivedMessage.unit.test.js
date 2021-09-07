@@ -11,6 +11,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
 import NLPacket from "../../../src/domain/networking//NLPacket";
+import Node from "../../../src/domain/networking//Node";
 import ReceivedMessage from "../../../src/domain/networking/ReceivedMessage";
 import SockAddr from "../../../src/domain/networking/SockAddr";
 import Packet from "../../../src/domain/networking/udt/Packet";
@@ -35,6 +36,7 @@ describe("ReceivedMessage - unit tests", () => {
         expect(nlPacket.getType()).toBe(PacketType.DomainList);
 
         const receivedMessage = new ReceivedMessage(nlPacket);
+        expect(receivedMessage.getSourceID()).toBe(Node.NULL_LOCAL_ID);
         expect(receivedMessage.getType()).toBe(PacketType.DomainList);
         const message = receivedMessage.getMessage();
         expect(message instanceof DataView).toBe(true);

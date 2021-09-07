@@ -49,6 +49,15 @@ class ReceivedMessage {
     }
 
     /*@devdoc
+     *  Gets the local ID of the node that is the source of the message.
+     *  @returns {number} The ID of the node that is the source of the packet if known (i.e., it is a sourced message),
+     *      {@link Node|Node.NULL_LOCAL_ID} if not known.
+     */
+    getSourceID(): number {
+        return this.#_messageData.sourceID;
+    }
+
+    /*@devdoc
      *  Gets the raw message data, excluding the Packet and NLPacket protocol headers.
      *  @returns {DataView} The raw message data.
      */

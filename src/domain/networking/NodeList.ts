@@ -49,7 +49,7 @@ class NodeList extends LimitedNodeList {
     constructor(contextID: number) {
         // C++  NodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
-        super();
+        super(contextID);
 
         // WEBRTC TODO: Address further C++ code.
 

@@ -8,12 +8,15 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import LimitedNodeList from "../../../src/domain/networking/LimitedNodeList";
-import NodePermissions from "../../../src/domain/networking/NodePermissions";
+import AddressManager from "../../../src/domain/networking/AddressManager";
 import Node from "../../../src/domain/networking/Node";
+import NodeList from "../../../src/domain/networking/NodeList";
+import LimitedNodeList from "../../../src/domain/networking/LimitedNodeList";  // Must come after NodeList.
+import NodePermissions from "../../../src/domain/networking/NodePermissions";
 import NodeType from "../../../src/domain/networking/NodeType";
 import PacketReceiver from "../../../src/domain/networking/PacketReceiver";
 import SockAddr from "../../../src/domain/networking/SockAddr";
+import ContextManager from "../../../src/domain/shared/ContextManager";
 import Uuid from "../../../src/domain/shared/Uuid";
 
 
@@ -21,6 +24,10 @@ describe("LimitedNodeList - integration tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+
+    const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AddressManager);  // Required by NodeList.
+    ContextManager.set(contextID, NodeList, contextID);  // Required by PacketReceiver.
 
     const IP_127_0_0_1 = 127 * 2 ** 24 + 1;  // 127.0.0.1
     const IP_127_0_0_2 = 127 * 2 ** 24 + 2;  // 127.0.0.2
@@ -58,7 +65,7 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("Can get the local and public network addresses", () => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         const localSockAddr = limitedNodeList.getLocalSockAddr();
         expect(localSockAddr.getAddress()).toBe(0);
         expect(localSockAddr.getPort()).toBe(0);
@@ -68,13 +75,13 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("Can get the PacketReceiver", () => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         const packetReceiver = limitedNodeList.getPacketReceiver();
         expect(packetReceiver instanceof PacketReceiver).toBe(true);
     });
 
     test("Can set and get session UUIDs and local IDs", () => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         expect(limitedNodeList.getSessionUUID().valueOf()).toBe(Uuid.NULL);
         expect(limitedNodeList.getSessionLocalID()).toBe(0);
         const testSessionUUID = new Uuid(12345678n);
@@ -86,14 +93,14 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("Can set and get whether to authenticate packet content", () => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         expect(limitedNodeList.getAuthenticatePackets()).toBe(true);  // Default value.
         limitedNodeList.setAuthenticatePackets(false);
         expect(limitedNodeList.getAuthenticatePackets()).toBe(false);
     });
 
     test("Can add a new assignment client node", (done) => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         limitedNodeList.nodeAdded.connect((node) => {
             expect(node.getType()).toBe(AUDIO_MIXER_NODE_INFO.type);
             expect(node.getUUID()).toBe(AUDIO_MIXER_NODE_INFO.uuid);
@@ -117,7 +124,7 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("Node activated signaled when node is activated", (done) => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         limitedNodeList.nodeAdded.connect((node) => {
             expect(node.getType()).toBe(AUDIO_MIXER_NODE_INFO.type);
             expect(node.getUUID()).toBe(AUDIO_MIXER_NODE_INFO.uuid);
@@ -137,7 +144,7 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("Node socket updated signaled when node socket is updated", (done) => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         limitedNodeList.nodeAdded.connect((node) => {
             expect(node.getType()).toBe(AUDIO_MIXER_NODE_INFO.type);
             expect(node.getUUID()).toBe(AUDIO_MIXER_NODE_INFO.uuid);
@@ -159,7 +166,7 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("Node killed signaled when node is killed", (done) => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         limitedNodeList.nodeAdded.connect((node) => {
             limitedNodeList.killNodeWithUUID(node.getUUID());
         });
@@ -176,7 +183,7 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("Can retrieve a solo node", () => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         limitedNodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
             AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
             AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
@@ -187,7 +194,7 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("Can retrieve the node with a specific address", () => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         limitedNodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
             AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
             AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
@@ -203,7 +210,7 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("addOrUpdateNode doesn't create a new node if it already exists", () => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         const nodeA = limitedNodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
             AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
             AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
@@ -218,7 +225,7 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("Can update an existing node", () => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         const nodeA = limitedNodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
             AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
             AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
@@ -234,7 +241,7 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("Can reset the node list", () => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         limitedNodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
             AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
             AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
@@ -250,7 +257,7 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("Can get a node with a specific UUID", () => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         limitedNodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
             AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
             AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
@@ -261,7 +268,7 @@ describe("LimitedNodeList - integration tests", () => {
     });
 
     test("Can remove a node with a specific UUID", () => {
-        const limitedNodeList = new LimitedNodeList();
+        const limitedNodeList = new LimitedNodeList(contextID);
         limitedNodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
             AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
             AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
@@ -278,6 +285,17 @@ describe("LimitedNodeList - integration tests", () => {
         limitedNodeList.killNodeWithUUID(AUDIO_MIXER_NODE_INFO.uuid);
         expect(limitedNodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type)).toBeNull();
 
+    });
+
+    test("Can get a node with a specific local ID", () => {
+        const limitedNodeList = new LimitedNodeList(contextID);
+        limitedNodeList.addOrUpdateNode(AUDIO_MIXER_NODE_INFO.uuid, AUDIO_MIXER_NODE_INFO.type,
+            AUDIO_MIXER_NODE_INFO.publicSocket, AUDIO_MIXER_NODE_INFO.localSocket, AUDIO_MIXER_NODE_INFO.sessionLocalID,
+            AUDIO_MIXER_NODE_INFO.isReplicated, AUDIO_MIXER_NODE_INFO.isUpstream, AUDIO_MIXER_NODE_INFO.connectionSecretUUID,
+            AUDIO_MIXER_NODE_INFO.permissions
+        );
+        expect(limitedNodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type) instanceof Node).toBe(true);
+        expect(limitedNodeList.nodeWithLocalID(AUDIO_MIXER_NODE_INFO.sessionLocalID) instanceof Node).toBe(true);
     });
 
     // The following items are tested elsewhere:

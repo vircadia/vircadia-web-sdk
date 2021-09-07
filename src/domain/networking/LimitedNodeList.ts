@@ -42,6 +42,7 @@ type NewNodeInfo = {
  *  <p>See also: {@link NodeList}.</p>
  *  <p>C++: <code>LimitedNodeList : public QObject, public Dependency</code></p>
  *  @class LimitedNodeList
+ *  @param {number} contextID - The {@link ContextManager} context ID.
  *
  *  @property {LimitedNodeList.ConnectReason} ConnectReason - Connect reason values.
  *  @property {number} INVALID_PORT=-1 - Invalid port.
@@ -90,7 +91,7 @@ class LimitedNodeList {
     protected _nodeSocket = new Socket();
     protected _localSockAddr = new SockAddr();
     protected _publicSockAddr = new SockAddr();
-    protected _packetReceiver = new PacketReceiver();
+    protected _packetReceiver;
     protected _useAuthentication = true;
 
 
@@ -117,8 +118,10 @@ class LimitedNodeList {
     #_nodeKilled = new Signal();
 
 
-    constructor() {
+    constructor(contextID: number) {
         // C++  LimitedNodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
+
+        this._packetReceiver = new PacketReceiver(contextID);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -334,6 +337,21 @@ class LimitedNodeList {
             return null;
         }
         return matchingNode;
+    }
+
+    /*@devdoc
+     *  Gets the node with a specified local ID.
+     *  @param {number} localID - The local ID of the node to get.
+     *  @returns {Node|null} The node with the specified local ID if found, <code>null</code> if not found.
+     */
+    nodeWithLocalID(localID: number): Node | null {
+        // C++  Node* nodeWithLocalID(Node::LocalID localID)
+        for (const node of this.#_nodeHash.values()) {
+            if (node.getLocalID() === localID) {
+                return node;
+            }
+        }
+        return null;
     }
 
 
