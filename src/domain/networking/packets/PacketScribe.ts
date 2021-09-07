@@ -10,8 +10,9 @@
 
 // In packet number order.
 import DomainList from "./DomainList";
-import DomainConnectionDenied from "./DomainConnectionDenied";
+import Ping from "./Ping";
 import DomainListRequest from "./DomainListRequest";
+import DomainConnectionDenied from "./DomainConnectionDenied";
 import DomainConnectRequest from "./DomainConnectRequest";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
 import DomainServerRemovedNode from "./DomainServerRemovedNode";
@@ -24,6 +25,8 @@ import NegotiateAudioFormat from "./NegotiateAudioFormat";
  *  @namespace PacketScribe
  *  @property {function} DomainList.read -
  *      {@link PacketScribe.DomainList&period;read|DomainList&period;read}
+ *  @property {function} Ping.read -
+ *      {@link PacketScribe.Ping&period;read|Ping&period;read}
  *  @property {function} DomainListRequest.write -
  *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
  *  @property {function} DomainConnectionDenied.read -
@@ -46,6 +49,7 @@ import NegotiateAudioFormat from "./NegotiateAudioFormat";
 const PacketScribe = {
     // In packet number order.
     DomainList,
+    Ping,
     DomainListRequest,
     DomainConnectionDenied,
     DomainConnectRequest,

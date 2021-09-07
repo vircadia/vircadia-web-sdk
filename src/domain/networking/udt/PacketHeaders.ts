@@ -142,7 +142,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to the user client in response to a
  *      DomainConnectRequest or DomainListRequest packet, if the client is authorized to connect to the domain.<br />
  *      {@link PacketScribe.DomainListDetails}.
- *  @property {PacketType} Ping - <code>3</code>
+ *  @property {PacketType} Ping - <code>3</code> - Assignment clients periodically send this to the user client to check that it
+ *      is still connected.
+ *      {@link PacketScribe.PingDetails}.
  *  @property {PacketType} PingReply - <code>4</code>
  *  @property {PacketType} KillAvatar - <code>5</code>
  *  @property {PacketType} AvatarData - <code>6</code>

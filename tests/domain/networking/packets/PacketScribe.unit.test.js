@@ -16,6 +16,8 @@ describe("Packets - unit tests", () => {
     test("The Packets namespace provides packet reading/writing", () => {
         expect(typeof PacketScribe.DomainList).toBe("object");
         expect(typeof PacketScribe.DomainList.read).toBe("function");
+        expect(typeof PacketScribe.Ping).toBe("object");
+        expect(typeof PacketScribe.Ping.read).toBe("function");
         expect(typeof PacketScribe.DomainListRequest).toBe("object");
         expect(typeof PacketScribe.DomainListRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainConnectionDenied).toBe("object");
