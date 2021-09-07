@@ -145,7 +145,8 @@ const enum PacketTypeValue {
  *  @property {PacketType} Ping - <code>3</code> - Assignment clients periodically send this to the user client to check that it
  *      is still connected.
  *      {@link PacketScribe.PingDetails}.
- *  @property {PacketType} PingReply - <code>4</code>
+ *  @property {PacketType} PingReply - <code>4</code> - Sent in response to a Ping packet.
+ *      {@link PacketScribe.PingReplyDetails}.
  *  @property {PacketType} KillAvatar - <code>5</code>
  *  @property {PacketType} AvatarData - <code>6</code>
  *  @property {PacketType} InjectAudio - <code>7</code>
@@ -478,6 +479,8 @@ const PacketType = new class {
         switch (packetType) {
             case this.DomainList:
                 return this.#_DomainListVersion.SocketTypes;
+            case this.PingReply:
+                return DEFAULT_VERSION;
             case this.DomainListRequest:
                 return this.#_DomainListRequestVersion.SocketTypes;
             case this.DomainConnectionDenied:

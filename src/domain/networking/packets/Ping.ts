@@ -23,10 +23,10 @@ const Ping = new class {
     // C++  N/A
 
     /*@devdoc
-     *  Information returned by {@link Packets|reading} a {@link PacketType(1)|Ping} packet.
+     *  Information returned by {@link PacketScribe|reading} a {@link PacketType(1)|Ping} packet.
      *  @typedef {object} PacketScribe.PingDetails
      *  @property {PingType} pingType - The type of ping.
-     *  @property {bigint} timestamp - The time at which he ping was sent.
+     *  @property {bigint} timestamp - The time at which the ping packet was created, in usec.
      *  @property {bigint} connectionID - The ID of the connection that the ping was sent on.
      */
 

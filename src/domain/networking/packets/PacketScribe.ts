@@ -11,6 +11,7 @@
 // In packet number order.
 import DomainList from "./DomainList";
 import Ping from "./Ping";
+import PingReply from "./PingReply";
 import DomainListRequest from "./DomainListRequest";
 import DomainConnectionDenied from "./DomainConnectionDenied";
 import DomainConnectRequest from "./DomainConnectRequest";
@@ -27,6 +28,8 @@ import NegotiateAudioFormat from "./NegotiateAudioFormat";
  *      {@link PacketScribe.DomainList&period;read|DomainList&period;read}
  *  @property {function} Ping.read -
  *      {@link PacketScribe.Ping&period;read|Ping&period;read}
+ *  @property {function} PingReply.write -
+ *      {@link PacketScribe.PingReply&period;write|PingReply&period;write}
  *  @property {function} DomainListRequest.write -
  *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
  *  @property {function} DomainConnectionDenied.read -
@@ -50,6 +53,7 @@ const PacketScribe = {
     // In packet number order.
     DomainList,
     Ping,
+    PingReply,
     DomainListRequest,
     DomainConnectionDenied,
     DomainConnectRequest,
