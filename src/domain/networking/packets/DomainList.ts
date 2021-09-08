@@ -139,7 +139,7 @@ const DomainList = new class {
             const sessionLocalID = data.getUint16(dataPosition, UDT.BIG_ENDIAN);
             dataPosition += 2;
 
-            const connectionSecretUUID = new Uuid(data.getBigUint128(dataPosition, UDT.LITTLE_ENDIAN));
+            const connectionSecretUUID = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
             dataPosition += 16;
 
             nodes.push({

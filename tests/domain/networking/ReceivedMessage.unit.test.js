@@ -36,6 +36,7 @@ describe("ReceivedMessage - unit tests", () => {
         expect(nlPacket.getType()).toBe(PacketType.DomainList);
 
         const receivedMessage = new ReceivedMessage(nlPacket);
+        expect(receivedMessage.getSenderSockAddr().getPort()).toBe(7);
         expect(receivedMessage.getSourceID()).toBe(Node.NULL_LOCAL_ID);
         expect(receivedMessage.getType()).toBe(PacketType.DomainList);
         const message = receivedMessage.getMessage();

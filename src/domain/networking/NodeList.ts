@@ -82,6 +82,8 @@ class NodeList extends LimitedNodeList {
 
         this._packetReceiver.registerListener(PacketType.DomainList,
             PacketReceiver.makeUnsourcedListenerReference(this.processDomainList));
+        this._packetReceiver.registerListener(PacketType.Ping,
+            PacketReceiver.makeSourcedListenerReference(this.processPingPacket));
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -344,6 +346,32 @@ class NodeList extends LimitedNodeList {
         const nodeUUID = info.nodeUUID;
         console.log("[networking] Received packet from domain-server to remove node with UUID", nodeUUID.stringify());
         this.killNodeWithUUID(nodeUUID);
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|Ping} packet received from an assignment client.
+     *  @function NodeList.processPingPacket
+     *  @param {ReceivedMessage} message - The Ping message.
+     *  @param {Node} sendingNode - The assignment client that sent the ping.
+     *  @returns {Slot}
+     */
+    processPingPacket = (message: ReceivedMessage, sendingNode?: Node): void => {
+        // C++  void processPingPacket(ReceivedMessage* message, Node* sendingNode)
+        assert(sendingNode !== undefined);
+
+        const MS_TO_USEC = 1000n;
+
+        const info = PacketScribe.Ping.read(message.getMessage());
+
+        const replyPacket = PacketScribe.PingReply.write({
+            pingType: info.pingType,
+            timestampPing: info.timestamp,
+            timestampReply: BigInt(Date.now()) * MS_TO_USEC
+        });
+        this.sendPacket(replyPacket, sendingNode, message.getSenderSockAddr());
 
         // WEBRTC TODO: Address further C++ code.
 

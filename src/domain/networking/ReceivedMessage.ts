@@ -9,6 +9,7 @@
 //
 
 import NLPacket from "./NLPacket";
+import SockAddr from "./SockAddr";
 import Packet from "./udt/Packet";
 import { PacketTypeValue } from "./udt/PacketHeaders";
 
@@ -47,6 +48,15 @@ class ReceivedMessage {
     getType(): PacketTypeValue {
         // C++  PacketType getType()
         return this.#_messageData.packetType;
+    }
+
+    /*@devdoc
+     *  Gets the sender's address.
+     *  @returns {SockAddr} The sender's address if known, a null SockAddr if not known.
+     */
+    getSenderSockAddr(): SockAddr {
+        // C++  SockAddr getSenderSockAddr()
+        return this.#_messageData.senderSockAddr ? this.#_messageData.senderSockAddr : new SockAddr();
     }
 
     /*@devdoc
