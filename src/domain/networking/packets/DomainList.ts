@@ -38,7 +38,7 @@ type DomainListDetails = {
 const DomainList = new class {
 
     /*@devdoc
-     *  Information returned by {@link Packets|reading} a {@link PacketType(1)|DomainList} packet.
+     *  Information returned by {@link PacketScribe|reading} a {@link PacketType(1)|DomainList} packet.
      *  @typedef {object} PacketScribe.DomainListDetails
      *  @property {Uuid} domainUUID - The UUID of the domain server.
      *  @property {LocalID} domainLocalID - The local ID of the domain server.

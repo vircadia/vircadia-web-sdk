@@ -35,7 +35,7 @@ type DomainListRequestDetails = {
 const DomainListRequest = new class {
 
     /*@devdoc
-     *  Information needed for {@link Packets|writing} a {@link PacketType(1)|DomainListRequest} packet.
+     *  Information needed for {@link PacketScribe|writing} a {@link PacketType(1)|DomainListRequest} packet.
      *  @typedef {object} PacketScribe.DomainListRequestDetails
      *  @property {bigint} currentTime - The current Unix time, in usec.
      *  @property {NodeType} ownerType - The type of this node, i.e., <code>NodeType.Agent</code> for a web client.
@@ -111,10 +111,8 @@ const DomainListRequest = new class {
 
         if (!info.isDomainConnected) {
 
-            if (info.username === undefined || info.usernameSignature === undefined) {
-                assert(false, "DomainListRequest.write() missing info for connected case!");
-                return packet;
-            }
+            assert(info.username !== undefined && info.usernameSignature !== undefined,
+                "DomainListRequest.write() missing info for connected case!");
 
             data.setUint32(dataPosition, info.username.length, UDT.BIG_ENDIAN);
             dataPosition += 4;

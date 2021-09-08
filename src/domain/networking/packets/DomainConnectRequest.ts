@@ -44,7 +44,7 @@ type DomainConnectRequestDetails = {
 const DomainConnectRequest = new class {
 
     /*@devdoc
-     *  Information needed for {@link Packets|writing} a {@link PacketType(1)|DomainConnectRequest} packet.
+     *  Information needed for {@link PacketScribe|writing} a {@link PacketType(1)|DomainConnectRequest} packet.
      *  @typedef {object} PacketScribe.DomainConnectRequestDetails
      *  @property {Uuid} connectUUID - If ICE was used to discover the domain server, the ICE client's UUID, otherwise
      *      <code>Uuid.NULL</code>. (For a web client, use <code>Uuid.NULL</code>.)
@@ -166,10 +166,8 @@ const DomainConnectRequest = new class {
 
         if (!info.isDomainConnected) {
 
-            if (info.username === undefined || info.usernameSignature === undefined) {
-                assert(false, "DomainConnectRequest.write() missing info for connected case!");
-                return packet;
-            }
+            assert(info.username !== undefined && info.usernameSignature !== undefined,
+                "DomainConnectRequest.write() missing info for connected case!");
 
             data.setUint32(dataPosition, info.username.length, UDT.BIG_ENDIAN);
             dataPosition += 4;

@@ -123,7 +123,7 @@ class SockAddr {
 
 
     /*@devdoc
-     *  Returns a string representation of the SockAddr value, for example, <code>"127.0.0.1:40102"</code>.
+     *  Returns a string representation of the SockAddr value, for example, <code>"WebRTC 127.0.0.1:11111"</code>.
      *  @returns {string} A string representation of the SockAddr value.
      */
     toString(): string {

@@ -23,7 +23,7 @@ const DomainConnectionDenied = new class {
     // C++  N/A
 
     /*@devdoc
-     *  Information returned by {@link Packets|reading} a {@link PacketType(1)|DomainConnectionDenied} packet.
+     *  Information returned by {@link PacketScribe|reading} a {@link PacketType(1)|DomainConnectionDenied} packet.
      *  @typedef {object} PacketScribe.DomainConnectionDeniedDetails
      *  @property {ComainHandler.ConnectionRefusedReason} reasonCode - The reason that the client was refused connection to the
      *      domain.

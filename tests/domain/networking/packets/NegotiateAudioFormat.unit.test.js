@@ -44,7 +44,6 @@ describe("NegotiateAudioFormat - unit tests", () => {
             + 1  // Number of codecs.
             + 4 * codecs.length  // lengths for each codec.
             + codecs.join("").length);  // UTF8 chars for each codec.
-
     });
 
 });

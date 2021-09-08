@@ -376,7 +376,7 @@ class DomainServer {
 
     // Slot.
     #nodeKilled = (node: Node): void => {
-        // C++  void Application:: nodeKilled(Node* node)
+        // C++  void Application::nodeKilled(Node* node)
 
         const nodeType = node.getType();
 

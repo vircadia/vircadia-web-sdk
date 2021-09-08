@@ -22,7 +22,7 @@ type NegotiateAudioFormatDetails = {
 const NegotiateAudioFormat = new class {
 
     /*@devdoc
-     *  Information needed for {@link Packets|writing} a {@link PacketType(1)|NegotiateAudioFormat} packet.
+     *  Information needed for {@link PacketScribe|writing} a {@link PacketType(1)|NegotiateAudioFormat} packet.
      *  @typedef {object} PacketScribe.NegotiateAudioFormatDetails
      *  @property {string[]} codecs - The names of the audio codecs that the user client can use, e.g., <code>"opus"</code>.
      */
