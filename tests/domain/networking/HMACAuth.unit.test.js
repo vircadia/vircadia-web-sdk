@@ -18,11 +18,11 @@ describe("HNACAuth - unit tests", () => {
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     // Data captured from C++.
-    // eslint-disable-next-line max-len
-    const dataHex = "000000004016502c000000000000000000000000000000000406000000686966694143040000006f7075730300000070636d040000007a6c6962";
+    const dataHex = "000000000416550c00000000000000000000000000000000010005cb77e2d264280005cb77e2d292d8";
     const DATA_OFFSET = 24;
-    const keyHex = "8a7660882a6940bda7d8b678fe8cee81";
-    const hashHex = "176f5ea71473ea9d8592060ddf38337f";
+    const keyHex = "96deabc106e3495f8a43932df376ba21";
+    const hashHex = "7787c7c3a9b4cb667207a1a952cf3c68";
+
     const dataUint8Array = new Uint8Array(dataHex.match(/[\da-f]{2}/giu).map(function (hex) {
         return parseInt(hex, 16);
     }));
@@ -52,7 +52,8 @@ describe("HNACAuth - unit tests", () => {
     test("Hashing before setting the key fails", () => {
         const hmacAuth = new HMACAuth();
         const resultUint8Array = new Uint8Array(16);
-        const hashSet = hmacAuth.calculateHash(resultUint8Array, dataUint8Array, DATA_OFFSET);
+        const hashSet = hmacAuth.calculateHash(resultUint8Array, dataUint8Array, DATA_OFFSET,
+            dataUint8Array.length - DATA_OFFSET);
         expect(hashSet).toBe(false);
     });
 
@@ -62,7 +63,8 @@ describe("HNACAuth - unit tests", () => {
         expect(keySet).toBe(true);
 
         const resultUint8Array = new Uint8Array(16);
-        const hashSet = hmacAuth.calculateHash(resultUint8Array, dataUint8Array, DATA_OFFSET);
+        const hashSet = hmacAuth.calculateHash(resultUint8Array, dataUint8Array, DATA_OFFSET,
+            dataUint8Array.length - DATA_OFFSET);
         expect(hashSet).toBe(true);
         const resultValue = new DataView(resultUint8Array.buffer).getBigUint128(0);
         expect(resultValue).toEqual(hashValue);

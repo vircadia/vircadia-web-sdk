@@ -118,9 +118,10 @@ class HMACAuth {
      *  @param {Uint8Array} hashResult - The destination to write the calculated hash.
      *  @param {Uint8Array} data - The packet data to hash.
      *  @param {number} offset - The start index within the packet data to hash.
+     *  @param {number} dataLength - The length of the data within the packet to hash.
      *  @returns {boolean} <code>true</code> if the hash was successfully calculated, <code>false</code> if it wasn't.
      */
-    calculateHash(hashResult: Uint8Array, data: Uint8Array, offset: number): boolean {
+    calculateHash(hashResult: Uint8Array, data: Uint8Array, offset: number, dataLen: number): boolean {
         // C++  bool calculateHash(HMACHash& hashResult, const char* data, int dataLen)
 
         // The key must be set.
@@ -129,7 +130,8 @@ class HMACAuth {
         }
 
         // Prepare the data.
-        const bytes = data.slice(offset, data.byteLength);
+        const bytes = data.slice(offset, offset + dataLen);
+
         // The @types/crypto-js definitions haven't caught up with CryptoJS working with ArrayBuffers.
         // eslint-disable-next-line
         // @ts-ignore

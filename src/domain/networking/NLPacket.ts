@@ -95,7 +95,7 @@ class NLPacket extends Packet {
         const offset = Packet.totalHeaderSize(packet.isPartOfMessage()) + NLPacket.#NUM_BYTES_PACKET_TYPE
             + NLPacket.#NUM_BYTES_PACKET_VERSION + NLPacket.#NUM_BYTES_LOCALID + NLPacket.#NUM_BYTES_MD5_HASH;
         const hashResult = new Uint8Array(NLPacket.#NUM_BYTES_MD5_HASH);
-        hash.calculateHash(hashResult, packet.getMessageData().buffer, offset);
+        hash.calculateHash(hashResult, packet.getMessageData().buffer, offset, packet.getDataSize() - offset);
         return hashResult;
     }
 
