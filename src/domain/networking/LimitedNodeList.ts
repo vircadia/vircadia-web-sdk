@@ -159,17 +159,23 @@ class LimitedNodeList {
      *  Sends a solitary packet to an address, reliably or unreliably depending on the packet. The packet cannot be part of a
      *  multi-packet message.
      *  @param {NLPacket} packet - The packet to send.
-     *  @param {SockAddr} sockAddr - The address to send it to.
-     *  @param {HMACAuth} [hmacAuth=null] - Not currently used.
+     *  @param {SockAddr|Node} sockAddr|destinationNode - The address to send the packet to.
+     *      <p>The packet's destination node.</p>
+     *  @param {HMACAuth|SockAddr} [hmacAuth|overridenSockAddr=null] - The message authentication object to use.
+     *      <p>The address to send the packet to, over-riding that of the <code>node</code>.
      *  @returns {number} The number of bytes sent, or <code>-1</code> if none sent.
      */
-    sendPacket(packet: NLPacket, param1: SockAddr | Node, hmacAuth: HMACAuth | null = null): number {
+    sendPacket(packet: NLPacket, param1: SockAddr | Node, param2: HMACAuth | SockAddr | null = null): number {
         // C++  qint64 sendPacket(NLPacket* packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
         //      qint64 sendPacket(NLPacket* packet, const Node& destinationNode)
+        //      qint64 sendPacket(NLPacket* packet, const Node& destinationNode, const SockAddr& overridenSockAddr);
+
         assert(!packet.isPartOfMessage());
 
         if (param1 instanceof SockAddr) {
+            assert(param2 instanceof HMACAuth || param2 === null);
             const sockAddr = param1;
+            const hmacAuth = param2 as HMACAuth | null;  // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
 
             if (packet.isReliable()) {
 
@@ -189,7 +195,7 @@ class LimitedNodeList {
 
         }
 
-        if (param1 instanceof Node) {
+        if (param1 instanceof Node && param2 === null) {
             const destinationNode = param1;
 
             const activeSocket = destinationNode.getActiveSocket();
@@ -202,7 +208,27 @@ class LimitedNodeList {
             return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
         }
 
-        console.error("Invalid parameters in LimiteNodeList.sendPacket()!", typeof packet, typeof param1, typeof hmacAuth);
+        if (param1 instanceof Node && param2 instanceof SockAddr) {
+            const destinationNode = param1;
+            const overridenSockAddr = param2;
+
+            if (overridenSockAddr.isNull() && !destinationNode.getActiveSocket()) {
+                console.log("[networking] LimitedNodeList.sendPacket called without active socket for node",
+                    destinationNode.getUUID(), ". Not sending.");
+                return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
+            }
+
+            // Use the node's active socket as the destination socket if there is no overridden socket address.
+            let destinationSockAddr = overridenSockAddr.isNull() ? destinationNode.getActiveSocket() : overridenSockAddr;
+            if (destinationSockAddr === null) {
+                destinationSockAddr = new SockAddr();
+            }
+
+            return this.sendPacket(packet, destinationSockAddr, destinationNode.getAuthenticateHash());
+
+        }
+
+        console.error("Invalid parameters in LimiteNodeList.sendPacket()!", typeof packet, typeof param1, typeof param2);
         return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
     }
 
