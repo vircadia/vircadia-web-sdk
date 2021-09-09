@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { DomainServer, AudioMixer, AvatarMixer, MessageMixer } from "../dist/Vircadia.js";
+import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from "../dist/Vircadia.js";
 
 (function () {
 
@@ -89,5 +89,7 @@ import { DomainServer, AudioMixer, AvatarMixer, MessageMixer } from "../dist/Vir
         messageMixer.onStateChanged = onStateChanged;
 
     }());
+
+    document.getElementById("sdkVersion").innerText = Vircadia.version;
 
 }());
