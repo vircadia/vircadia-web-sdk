@@ -145,8 +145,9 @@ class LimitedNodeList {
     sendUnreliablePacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth: HMACAuth | null = null): number {
         // C++  qint64 sendUnreliablePacket(const NLPacket& packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
 
-        assert(!packet.isPartOfMessage());
-        assert(!packet.isReliable());
+        assert(!packet.isPartOfMessage(), "Cannot send a part-message packet unreliably!");
+        assert(!packet.isReliable(), "Cannot send a reliable packet unreliably!");
+        assert(sockAddr.getType() === SocketType.WebRTC, "Destination is not a WebRTC socket!");
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -169,8 +170,6 @@ class LimitedNodeList {
         // C++  qint64 sendPacket(NLPacket* packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
         //      qint64 sendPacket(NLPacket* packet, const Node& destinationNode)
         //      qint64 sendPacket(NLPacket* packet, const Node& destinationNode, const SockAddr& overridenSockAddr);
-
-        assert(!packet.isPartOfMessage());
 
         if (param1 instanceof SockAddr) {
             assert(param2 instanceof HMACAuth || param2 === null);
@@ -510,7 +509,7 @@ class LimitedNodeList {
     }
 
     /*@devdoc
-     *  Triggered when the network connection to the node is established.
+     *  Triggered when the network connection to a node is established.
      *  @function LimitedNodeList.nodeActivated
      *  @param {Node} node - The node that activated.
      *  @returns {Signal}

@@ -386,14 +386,14 @@ class NodeList extends LimitedNodeList {
     #activateSocketFromNodeCommunication(message: ReceivedMessage, sendingNode: Node) {  // eslint-disable-line
         // C++  void activateSocketFromNodeCommunication(ReceivedMessage& message, const Node* sendingNode)
 
-        // Just use the node's public socket for WebRTC, for now.
+        // WebRTC: Just use the node's public socket for WebRTC, for now.
         if (sendingNode.getActiveSocket() === null) {
             sendingNode.activatePublicSocket();
         }
 
-        // WEBRTC TODO: Address public versus local sockets w.r.t. WebRTC and the Web SDK.
+        // WEBRTC TODO: Address public, local, and symmetric sockets w.r.t. WebRTC and the Web SDK.
 
-        // WEBRTC TODO: Address further C++ code.
+        // WEBRTC TODO: Address further C++ code. Audio mixer.
     }
 
 

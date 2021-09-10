@@ -41,7 +41,8 @@ type OnErrorCallback = (message: string) => void;
  *  @property {WebRTCDataChannel.ReadyState} readyState - The current state of the data channel connection.
  *      <em>Read-only.</em>
  *
- *  @property {number} id -  The data channel ID.
+ *  @property {number} id -  The data channel ID. The SDK assigns a unique number to each WebRTC data channel, starting at
+ *      <code>1</code>.
  *
  *  @property {WebRTCDataChannel~onOpenCallback} onopen - Sets a single function to be called when the data channel opens.
  *      <em>Write-only.</em>
