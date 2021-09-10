@@ -28,6 +28,14 @@ describe("SockAddr - unit tests", () => {
         expect(sockAddr.isNull()).toBe(true);
     });
 
+    test("Can create with specified type, address, and port", () => {
+        const sockAddr = new SockAddr(SocketType.UDP, 1234, 5);
+        expect(sockAddr.getType()).toBe(SocketType.UDP);
+        expect(sockAddr.getAddress()).toBe(1234);
+        expect(sockAddr.getPort()).toBe(5);
+        expect(sockAddr.isNull()).toBe(false);
+    });
+
     test("Can set and get the object name", () => {
         const sockAddr = new SockAddr();
         expect(sockAddr.objectName()).toBe("");

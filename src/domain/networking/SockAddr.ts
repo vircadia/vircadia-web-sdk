@@ -18,6 +18,9 @@ import SocketType, { SocketTypeValue } from "./SocketType";
  *  <p>For convenience, the socket type defaults to <code>WebRTC</code>.</p>
  *  <p>C++: <code>SockAddr : public QObject</code></p>
  *  @class SockAddr
+ *  @param {SocketType} [type=WebRTC] - The type of network socket.
+ *  @param {number} [address=0] - The IPv4 network address as a 4-byte number.
+ *  @param {number} [port=0] - The port number.
  */
 class SockAddr {
     // C++  SockAddr : public QObject
@@ -26,6 +29,14 @@ class SockAddr {
     #_type = SocketTypeValue.WebRTC;  // Default to WebRTC as a convenience in the SDK.
     #_address = 0;
     #_port = 0;
+
+
+    constructor(type = SocketType.WebRTC, address = 0, port = 0) {
+        // C++  SockAddr(SocketType socketType, const QHostAddress& address, quint16 port)
+        this.#_type = type;
+        this.#_address = address;
+        this.#_port = port;
+    }
 
 
     /*@devdoc
