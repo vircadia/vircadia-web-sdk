@@ -72,8 +72,8 @@ class NodeList extends LimitedNodeList {
         // WEBRTC TODO: Address further C++ code.
 
         // Whenever there is a new node connect to it.
-        this.nodeAdded.connect(this.#openWebRTCConnection);
-        this.nodeSocketUpdated.connect(this.#openWebRTCConnection);
+        this.nodeAdded.connect(this.#startNodeHolePunch);
+        this.nodeSocketUpdated.connect(this.#startNodeHolePunch);
 
         // Whenever we get a new node we may need to re-send our set of ignored nodes to it.
         this.nodeActivated.connect(this.#maybeSendIgnoreSetToNode);
@@ -375,12 +375,15 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        // WEBRTC TODO: Move this to processPingReplyPacket() when implement sending pings to the assignment client.
+        this.#activateSocketFromNodeCommunication(message, sendingNode);
+
     };
 
 
     // eslint-disable-next-line
     // @ts-ignore
-    #activateSocketFromNodeCommunication(socketID: number, sendingNode: Node) {  // eslint-disable-line
+    #activateSocketFromNodeCommunication(message: ReceivedMessage, sendingNode: Node) {  // eslint-disable-line
         // C++  void activateSocketFromNodeCommunication(ReceivedMessage& message, const Node* sendingNode)
 
         // Just use the node's public socket for WebRTC, for now.
@@ -395,11 +398,13 @@ class NodeList extends LimitedNodeList {
 
 
     // Slot.
-    #openWebRTCConnection = (node: Node): void => {
+    #startNodeHolePunch = (node: Node): void => {
         // C++  void startNodeHolePunch(const Node* node);
-        // We don't need to do the hole punching in order to establish a connection to the node; we just need to open the
-        // WebRTC connection. WebRTC does the hole punching for us.
+        // While we don't need to do hole punching per se because WebRTC handles this, we initiate opening the WebRTC data
+        // channel and adopt the native client's use of pings and replys to coordinate setting up communications with the
+        // assignment client.
 
+        // WebRTC: Initiate opening the WebRTC data channel.
         if (this._nodeSocket.getSocketState(this.#_domainHandler.getURL(), node.getType()) === Socket.UNCONNECTED) {
 
             if (!this.#_domainHandler.isConnected()) {
@@ -408,12 +413,24 @@ class NodeList extends LimitedNodeList {
             }
 
             this._nodeSocket.openSocket(this.#_domainHandler.getURL(), node.getType(), (socketID) => {
-                this.#activateSocketFromNodeCommunication(socketID, node);
+                // We could in theory call #activateSocketFromNodeCommunication() here, however this is too soon for other
+                // user client / assignment client interactions.
+
+                // WebRTC: Fill in the public and local SockAddrs with the port just opened.
+                node.getPublicSocket().setPort(socketID);
+                node.getLocalSocket().setPort(socketID);
             });
 
         } else {
             console.error("Unexpected socket state for", NodeType.getNodeTypeName(node.getType()));
         }
+
+        // Vircadia clients can never have upstream nodes or downstream nodes so we don't need to cater for these.
+
+        // WEBRTC TODO: Implement the native client's ping timer and response handling to call
+        // #activateSocketFromNodeCommunication().
+        // In the interim we piggyback on the Ping packets received from the assignment client in processPingPacket(). However,
+        // this is most likely makes setting up the connection less responsive.
 
         // Vircadia clients can never have upstream nodes or downstream nodes so we don't need to cater for these.
     };
