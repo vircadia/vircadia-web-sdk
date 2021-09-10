@@ -198,9 +198,9 @@ class Socket {
     /*@devdoc
      *  Handles a change in the target node's address.
      *  @function Socket.handleRemoteAddressChange
+     *  @type {Slot}
      *  @param {SockAddr} previousAddress - The previous address of the target node.
      *  @param {SockAddr} currentAddress - The current address of the target node.
-     *  @returns {Slot}
      */
     handleRemoteAddressChange = (previousAddress: SockAddr, currentAddress: SockAddr): void => {
         // C++  void handleRemoteAddressChange(SockAddr previousAddress, SockAddr currentAddress)
@@ -215,7 +215,7 @@ class Socket {
     /*@devdoc
      *  Reads datagrams from the {@link WebRTCSocket} and forwards them to the packet handler to process.
      *  @function Socket.readPendingDatagrams
-     *  @returns {Slot}
+     *  @type {Slot}
      */
     readPendingDatagrams = (): void => {
         // C++  void readPendingDatagrams();

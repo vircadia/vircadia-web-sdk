@@ -38,9 +38,9 @@ class PacketReceiver {
 
     /*@devdoc
      *  A method that processes a received message of a particular type.
-     *  @typedef {function} PacketReceiver.Listener
+     *  @typedef {Slot} Listener
      *  @param {ReceivedMessage} message - The received message.
-     *  @param {Node} [sendingNode] - The sending node if a sourced message.
+     *  @param {Node} [sendingNode] - The sending node if a sourced message, <code>undefined</code> if an unsourced message.
      */
 
     /*@devdoc
@@ -123,8 +123,8 @@ class PacketReceiver {
     /*@devdoc
      *  Invokes the listener registered for an {@link NLPacket} per its PacketType.
      *  @function PacketReceiver.handleVerifiedPacket
+     *  @type {Slot}
      *  @param {Packet} packet - The packet. It is treated as an NLPacket.
-     *  @returns {Slot}
      */
     handleVerifiedPacket = (packet: Packet): void => {
         // C++  void handleVerifiedPacket(Packet* packet);

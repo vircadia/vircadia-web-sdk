@@ -71,13 +71,16 @@ Code in a file should be ordered as follows:
 - Constructor.
 - Public property setters and getters.
 - Public methods.
+- Public listeners.
 - Public slots.
 - Public signals' getters for.
 - Protected property setters and getters.
 - Protected methods.
+- Protected listeners.
 - Protected slots.
 - Protected signals' getters for.
 - Private methods.
+- Private listeners.
 - Private slots.
 - Private signals' getters for.
 

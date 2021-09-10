@@ -482,8 +482,9 @@ class LimitedNodeList {
 
     /*@devdoc
      *  Resets the NodeList, closing all connections and deleting all node data.
+     *  @function LimitedNodeList.reset
+     *  @type {Slot}
      *  @param {string} reason - The reason for resetting.
-     *  @returns {Slot}
      */
     // eslint-disable-next-line
     // @ts-ignore

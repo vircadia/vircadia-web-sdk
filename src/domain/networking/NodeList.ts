@@ -134,12 +134,117 @@ class NodeList extends LimitedNodeList {
 
 
     /*@devdoc
+     *  Processes a {@link PacketType(1)|DomainList} message received from the domain server.
+     *  @function NodeList.processDomainList
+     *  @param {ReceivedMessage} message - The DomainList message.
+     *  @type {Listener}
+     */
+    processDomainList = (message: ReceivedMessage): void => {
+        // C++  processDomainList(ReceivedMessage* message)
+
+        // WEBRTC TODO: This should involve a NLPacketList, not just a single NLPacket.
+
+        const info = PacketScribe.DomainList.read(message.getMessage());
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.setSessionLocalID(info.newLocalID);
+        this.setSessionUUID(info.newUUID);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        if (!this.#_domainHandler.isConnected()) {
+            this.#_domainHandler.setLocalID(info.domainLocalID);
+            this.#_domainHandler.setUUID(info.domainUUID);
+            this.#_domainHandler.setIsConnected(true);
+
+            // WEBRTC TODO: Address further C++ code.
+
+        }
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.setAuthenticatePackets(info.isAuthenticated);
+
+        for (const node of info.nodes) {
+            // If the public socket address is 0 then it's reachable at the same IP as the domain server.
+            if (node.publicSocket.getAddress() === 0) {
+                node.publicSocket.setAddress(this.#_domainHandler.getSockAddr().getAddress());
+            }
+
+            this.addNewNode(node);
+        }
+
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|DomainServerRemovedNode} message received from the domain server.
+     *  @function NodeList.processDomainServerRemovedNode
+     *  @type {Listener}
+     *  @param {ReceivedMessage} message - The DomainServerRemovedNode message.
+     */
+    processDomainServerRemovedNode = (message: ReceivedMessage): void => {
+        // C++  void processDomainServerRemovedNode(ReceivedMessage* message)
+        const info = PacketScribe.DomainServerRemovedNode.read(message.getMessage());
+        const nodeUUID = info.nodeUUID;
+        console.log("[networking] Received packet from domain-server to remove node with UUID", nodeUUID.stringify());
+        this.killNodeWithUUID(nodeUUID);
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|Ping} packet received from an assignment client.
+     *  @function NodeList.processPingPacket
+     *  @type {Listener}
+     *  @param {ReceivedMessage} message - The Ping message.
+     *  @param {Node} sendingNode - The assignment client that sent the ping.
+     */
+    processPingPacket = (message: ReceivedMessage, sendingNode?: Node): void => {
+        // C++  void processPingPacket(ReceivedMessage* message, Node* sendingNode)
+        assert(sendingNode !== undefined);
+
+        const MS_TO_USEC = 1000n;
+
+        const info = PacketScribe.Ping.read(message.getMessage());
+
+        const replyPacket = PacketScribe.PingReply.write({
+            pingType: info.pingType,
+            timestampPing: info.timestamp,
+            timestampReply: BigInt(Date.now()) * MS_TO_USEC
+        });
+        this.sendPacket(replyPacket, sendingNode, message.getSenderSockAddr());
+
+        // WEBRTC TODO: Address further C++ code.
+
+        /*
+        int64_t connectionID;
+        message -> readPrimitive(& connectionID);
+
+        auto it = _connectionIDs.find(sendingNode -> getUUID());
+        if (it != _connectionIDs.end()) {
+            if (connectionID > it -> second) {
+                qDebug() << "Received a ping packet with a larger connection id (" << connectionID << ">" << it -> second
+                    << ") from " << sendingNode -> getUUID();
+                killNodeWithUUID(sendingNode -> getUUID(), connectionID);
+            }
+        }
+        */
+
+        // WEBRTC TODO: Move this to processPingReplyPacket() when implement sending pings to the assignment client.
+        this.#activateSocketFromNodeCommunication(message, sendingNode);
+
+    };
+
+
+    /*@devdoc
      *  Resets the LimitedNodeList, closing all connections and deleting all node data.
      *  @function NodeList.reset
+     *  @type {Slot}
      *  @param {string} reason - The reason for resetting.
      *  @param {boolean} [skipDomainHandlerReset=false] - <code>true</code> if should skip clearing DomainHandler information,
      *      e.g., if the DomainHandler initiated the reset; <code>false</code> if should clear DomainHandler information.
-     *  @returns {Slot}
      */
     override reset = (reason: string, skipDomainHandlerReset = false): void => {
         // C++  void reset(QString reason, bool skipDomainHandlerReset = false);
@@ -166,7 +271,7 @@ class NodeList extends LimitedNodeList {
      *  connection alive with a {@link PacketType(1)|DomainListRequest} packet. This method should be called by the client once
      *  every second.
      *  @function NodeList.sendDomainServerCheckIn
-     *  @returns {Slot}
+     *  @type {Slot}
      */
     sendDomainServerCheckIn = (): void => {
         // C++  void sendDomainServerCheckIn()
@@ -288,96 +393,6 @@ class NodeList extends LimitedNodeList {
         // WEBRTC TODO: Address further C++ code.
 
         this.sendPacket(packet, domainSockAddr);
-    };
-
-    /*@devdoc
-     *  Processes a {@link PacketType(1)|DomainList} message received from the domain server.
-     *  @function NodeList.processDomainList
-     *  @param {ReceivedMessage} message - The DomainList message.
-     *  @returns {Slot}
-     */
-    processDomainList = (message: ReceivedMessage): void => {
-        // C++  processDomainList(ReceivedMessage* message)
-
-        // WEBRTC TODO: This should involve a NLPacketList, not just a single NLPacket.
-
-        const info = PacketScribe.DomainList.read(message.getMessage());
-
-        // WEBRTC TODO: Address further C++ code.
-
-        this.setSessionLocalID(info.newLocalID);
-        this.setSessionUUID(info.newUUID);
-
-        // WEBRTC TODO: Address further C++ code.
-
-        if (!this.#_domainHandler.isConnected()) {
-            this.#_domainHandler.setLocalID(info.domainLocalID);
-            this.#_domainHandler.setUUID(info.domainUUID);
-            this.#_domainHandler.setIsConnected(true);
-
-            // WEBRTC TODO: Address further C++ code.
-
-        }
-
-        // WEBRTC TODO: Address further C++ code.
-
-        this.setAuthenticatePackets(info.isAuthenticated);
-
-        for (const node of info.nodes) {
-            // If the public socket address is 0 then it's reachable at the same IP as the domain server.
-            if (node.publicSocket.getAddress() === 0) {
-                node.publicSocket.setAddress(this.#_domainHandler.getSockAddr().getAddress());
-            }
-
-            this.addNewNode(node);
-        }
-
-    };
-
-    /*@devdoc
-     *  Processes a {@link PacketType(1)|DomainServerRemovedNode} message received from the domain server.
-     *  @function NodeList.processDomainServerRemovedNode
-     *  @param {ReceivedMessage} message - The DomainServerRemovedNode message.
-     *  @returns {Slot}
-     */
-    processDomainServerRemovedNode = (message: ReceivedMessage): void => {
-        // C++  void processDomainServerRemovedNode(ReceivedMessage* message)
-        const info = PacketScribe.DomainServerRemovedNode.read(message.getMessage());
-        const nodeUUID = info.nodeUUID;
-        console.log("[networking] Received packet from domain-server to remove node with UUID", nodeUUID.stringify());
-        this.killNodeWithUUID(nodeUUID);
-
-        // WEBRTC TODO: Address further C++ code.
-
-    };
-
-    /*@devdoc
-     *  Processes a {@link PacketType(1)|Ping} packet received from an assignment client.
-     *  @function NodeList.processPingPacket
-     *  @param {ReceivedMessage} message - The Ping message.
-     *  @param {Node} sendingNode - The assignment client that sent the ping.
-     *  @returns {Slot}
-     */
-    processPingPacket = (message: ReceivedMessage, sendingNode?: Node): void => {
-        // C++  void processPingPacket(ReceivedMessage* message, Node* sendingNode)
-        assert(sendingNode !== undefined);
-
-        const MS_TO_USEC = 1000n;
-
-        const info = PacketScribe.Ping.read(message.getMessage());
-
-        const replyPacket = PacketScribe.PingReply.write({
-            pingType: info.pingType,
-            timestampPing: info.timestamp,
-            timestampReply: BigInt(Date.now()) * MS_TO_USEC
-        });
-        this.sendPacket(replyPacket, sendingNode, message.getSenderSockAddr());
-
-        // WEBRTC TODO: Address further C++ code.
-
-        // WEBRTC TODO: Move this to processPingReplyPacket() when implement sending pings to the assignment client.
-        this.#activateSocketFromNodeCommunication(message, sendingNode);
-
     };
 
 
