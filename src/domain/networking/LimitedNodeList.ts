@@ -286,6 +286,11 @@ class LimitedNodeList {
 
         const matchingNode = this.#_nodeHash.get(uuid.value());
         if (matchingNode) {
+
+            // WebRTC: Retain current public and local socket ports (data channel IDs).
+            publicSocket.setPort(matchingNode.getPublicSocket().getPort());
+            localSocket.setPort(matchingNode.getLocalSocket().getPort());
+
             matchingNode.setPublicSocket(publicSocket);
             matchingNode.setLocalSocket(localSocket);
             matchingNode.setPermissions(permissions);
@@ -298,16 +303,22 @@ class LimitedNodeList {
 
         // If this is a solo node then the domain server has replaced it and any previous node of the type should be killed.
         if (this.#SOLO_NODE_TYPES.has(nodeType)) {
-            this.#removeOldNode(this.soloNodeOfType(nodeType));
+            const oldNode = this.soloNodeOfType(nodeType);
+            if (oldNode) {
+
+                // WebRTC: Clean up old node's connection here before removing the node, rather than below.
+                this._nodeSocket.cleanupConnection(oldNode.getPublicSocket());
+                this._nodeSocket.cleanupConnection(oldNode.getLocalSocket());
+
+                this.#removeOldNode(this.soloNodeOfType(nodeType));
+            }
+
         }
 
-        // If there is a new node with the same socket, this is a reconnection, kill the old node
-        this.#removeOldNode(this.findNodeWithAddr(publicSocket));
-        this.#removeOldNode(this.findNodeWithAddr(localSocket));
+        // WebRTC: Further calls to #removeOldNode() are not needed because user clients are only told of solo nodes, which are
+        // handled above.
 
-        // If there is an old Connection to the new node's address, kill it.
-        this._nodeSocket.cleanupConnection(publicSocket);
-        this._nodeSocket.cleanupConnection(localSocket);
+        // WebRTC: Old connections are cleaned up before removing any old node, above.
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -537,7 +548,13 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.addOrUpdateNode(info.uuid, info.type, info.publicSocket, info.localSocket, info.sessionLocalID, info.isReplicated,
+        // WebRTC: The public and local SockAddrs provided are the assignment clients' UDP SockAddrs. Use their IP addresses as
+        // nominal WebRTC addresses but leave their ports to be filled in later - either when updating an existing node or when
+        // the WebRTC connection is made (NodeList.#activateSocketFromNodeCommunication()).
+        const publicSocket = new SockAddr(SocketType.WebRTC, info.publicSocket.getAddress(), 0);
+        const localSocket = new SockAddr(SocketType.WebRTC, info.localSocket.getAddress(), 0);
+
+        this.addOrUpdateNode(info.uuid, info.type, publicSocket, localSocket, info.sessionLocalID, info.isReplicated,
             false, info.connectionSecretUUID, info.permissions);
 
         // WEBRTC TODO: Address further C++ code.
