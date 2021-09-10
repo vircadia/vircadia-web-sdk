@@ -224,7 +224,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} NegotiateAudioFormat - <code>64</code> - The user client sends this to the audio mixer to initiate
  *      negotiation of the audio codec to use.
  *      {@link PacketScribe.NegotiateAudioFormatDetails}.
- *  @property {PacketType} SelectedAudioFormat - <code>65</code>
+ *  @property {PacketType} SelectedAudioFormat - <code>65</code> - The audio mixer sends this to the user client in response to
+ *      the client sending a NegotiateAudioFormat packet. It specifies the audio codec that the audio mixer has selected to use.
+ *      {@link PacketScribe.SelectedAudioFormatDetails}.
  *  @property {PacketType} MoreEntityShapes - <code>66</code>
  *  @property {PacketType} NodeKickRequest - <code>67</code>
  *  @property {PacketType} NodeMuteRequest - <code>68</code>
@@ -492,6 +494,8 @@ const PacketType = new class {
             case this.DomainServerRemovedNode:
                 return DEFAULT_VERSION;
             case this.NegotiateAudioFormat:
+                return DEFAULT_VERSION;
+            case this.SelectedAudioFormat:
                 return DEFAULT_VERSION;
 
                 // WebRTC TODO: Add other packets.

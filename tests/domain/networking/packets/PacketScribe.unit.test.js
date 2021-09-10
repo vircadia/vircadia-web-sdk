@@ -32,6 +32,8 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.DomainServerRemovedNode.read).toBe("function");
         expect(typeof PacketScribe.NegotiateAudioFormat).toBe("object");
         expect(typeof PacketScribe.NegotiateAudioFormat.write).toBe("function");
+        expect(typeof PacketScribe.SelectedAudioFormat).toBe("object");
+        expect(typeof PacketScribe.SelectedAudioFormat.read).toBe("function");
     });
 
 });
