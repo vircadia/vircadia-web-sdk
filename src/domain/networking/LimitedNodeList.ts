@@ -16,6 +16,7 @@ import NodePermissions from "./NodePermissions";
 import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import SockAddr from "./SockAddr";
+import SocketType from "./SocketType";
 import PacketType from "./udt/PacketHeaders";
 import Socket from "./udt/Socket";
 import assert from "../shared/assert";
