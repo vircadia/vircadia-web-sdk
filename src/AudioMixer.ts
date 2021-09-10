@@ -14,7 +14,10 @@ import AssignmentClient from "./domain/AssignmentClient";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType from "./domain/networking/NodeType";
+import PacketReceiver from "./domain/networking/PacketReceiver";
+import ReceivedMessage from "./domain/networking/ReceivedMessage";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
+import PacketType from "./domain/networking/udt/PacketHeaders";
 import ContextManager from "./domain/shared/ContextManager";
 
 
@@ -40,6 +43,7 @@ import ContextManager from "./domain/shared/ContextManager";
  */
 class AudioMixer extends AssignmentClient {
     // C++  Application.cpp
+    //      AudioClient.cpp
 
     // Base class developer documentation is copied here and updated for the SDK documentation.
 
@@ -77,11 +81,14 @@ class AudioMixer extends AssignmentClient {
     // Context.
     #_nodeList: NodeList;  // Need own reference rather than using AssignmentClient's because need to keep private from API.
 
+    #_packetReceiver;
+
 
     constructor(contextID: number) {
         super(contextID, NodeType.AudioMixer);
 
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;  // Throws error if invalid context.
+        this.#_packetReceiver = this.#_nodeList.getPacketReceiver();
 
 
         // C++  AudioClient::AudioClient()
@@ -92,6 +99,11 @@ class AudioMixer extends AssignmentClient {
         // C++  Application::Application()
         this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
         this.#_nodeList.nodeKilled.connect(this.#nodeKilled);
+
+        // C++  AudioClient::AudioClient()
+        this.#_packetReceiver.registerListener(PacketType.SelectedAudioFormat,
+            PacketReceiver.makeUnsourcedListenerReference(this.#handleSelectedAudioFormat));
+
     }
 
 
@@ -115,12 +127,26 @@ class AudioMixer extends AssignmentClient {
         }
     }
 
+    // eslint-disable-next-line class-methods-use-this
     #audioMixerKilled(): void {
         // C++  void AudioClient::audioMixerKilled()
 
         // WEBRTC TODO: Address further C++ code.
 
     }
+
+
+    // Listener
+    // eslint-disable-next-line class-methods-use-this
+    #handleSelectedAudioFormat = (message: ReceivedMessage): void => {
+        // C++  void AudioClient::handleSelectedAudioFormat(ReceivedMessage* message)
+        const info = PacketScribe.SelectedAudioFormat.read(message.getMessage());
+
+        console.warn("AudioMixer: SelectedAudioFormat packet not processed. Codec:", info.selectedCodecName);
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
 
 
     // Slot
