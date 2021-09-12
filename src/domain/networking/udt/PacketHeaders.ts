@@ -154,7 +154,10 @@ const enum PacketTypeValue {
  *  @property {PacketType} MicrophoneAudioNoEcho - <code>9</code>
  *  @property {PacketType} MicrophoneAudioWithEcho - <code>10</code>
  *  @property {PacketType} BulkAvatarData - <code>11</code>
- *  @property {PacketType} SilentAudioFrame - <code>12</code>
+ *  @property {PacketType} SilentAudioFrame - <code>12</code> - The user client repeatedly sends this to the audio mixer when
+ *      there isn't any audio (microphone) input from the user. The user client's audio position is included. The audio mixer
+ *      repeatedly sends this to the user client when there isn't any audio to play at the user client's audio position.
+ *      {@link PacketScribe.SilentAudioFrameDetails}.
  *  @property {PacketType} DomainListRequest - <code>13</code> - The user client periodically sends this to the Domain Server
  *      to maintain connection to the domain. The Domain Server responds with a DomainList or DomainConnectionDenied
  *      packet.<br />
@@ -459,6 +462,11 @@ const PacketType = new class {
         SocketTypes: 23
     };
 
+    readonly #_AudioVersion = {
+        // C++  AudioVersion
+        StopInjectors: 24
+    };
+
 
     constructor() {
         assert(PacketTypeValue.NUM_PACKETS - 1 === this.WebRTCSignaling, "Inconsistent packet data in PacketHeaders!");
@@ -483,6 +491,8 @@ const PacketType = new class {
                 return this.#_DomainListVersion.SocketTypes;
             case this.PingReply:
                 return DEFAULT_VERSION;
+            case this.SilentAudioFrame:
+                return this.#_AudioVersion.StopInjectors;
             case this.DomainListRequest:
                 return this.#_DomainListRequestVersion.SocketTypes;
             case this.DomainConnectionDenied:

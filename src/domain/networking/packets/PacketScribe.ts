@@ -12,6 +12,7 @@
 import DomainList from "./DomainList";
 import Ping from "./Ping";
 import PingReply from "./PingReply";
+import SilentAudioFrame from "./SilentAudioFrame";
 import DomainListRequest from "./DomainListRequest";
 import DomainConnectionDenied from "./DomainConnectionDenied";
 import DomainConnectRequest from "./DomainConnectRequest";
@@ -31,6 +32,8 @@ import SelectedAudioFormat from "./SelectedAudioFormat";
  *      {@link PacketScribe.Ping&period;read|Ping&period;read}
  *  @property {function} PingReply.write -
  *      {@link PacketScribe.PingReply&period;write|PingReply&period;write}
+ *  @property {function} SilentAudioFrame.write -
+ *      {@link PacketScribe.SilentAudioFrame&period;write|SilentAudioFrame&period;write}
  *  @property {function} DomainListRequest.write -
  *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
  *  @property {function} DomainConnectionDenied.read -
@@ -57,6 +60,7 @@ const PacketScribe = {
     DomainList,
     Ping,
     PingReply,
+    SilentAudioFrame,
     DomainListRequest,
     DomainConnectionDenied,
     DomainConnectRequest,
