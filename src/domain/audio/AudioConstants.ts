@@ -10,20 +10,32 @@
 
 /*@devdoc
  *  The <code>AudioConstants</code> namespace provides the values of audio constants used in the SDK.
- *  <p>C++: <code>PingType</code></p>
+ *  <p>C++: <code>AudioConstants</code></p>
  *
  *  @namespace AudioConstants
+ *
+ *  @property {number} SAMPLE_RATE - <code<24000</code> - The audio sample rate, in Hz.
  *
  *  @property {number} NETWORK_FRAME_SAMPLES_STEREO - <code>480</code> - The number of samples in a network packet for a stereo
  *      channel.
  *  @property {number} NETWORK_FRAME_SAMPLES_PER_CHANNEL - <code>240</code> - The number of samples in a network packet for a
  *      mono channel.
+ *
+ *  @property {number} NETWORK_FRAME_SECS - <code>0.01</code> - The interval between audio network packets, in seconds.
+ *  @property {number} NETWORK_FRAME_MSECS - <code>10</code> - The interval between audio network packets, in milliseconds.
  */
 const AudioConstants = new class {
     // C++  AudioConstants
 
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+    readonly SAMPLE_RATE = 24000;
+
     readonly NETWORK_FRAME_SAMPLES_STEREO = 480;
     readonly NETWORK_FRAME_SAMPLES_PER_CHANNEL = 240;
+
+    readonly NETWORK_FRAME_SECS = this.NETWORK_FRAME_SAMPLES_PER_CHANNEL / this.SAMPLE_RATE;
+    readonly NETWORK_FRAME_MSECS = this.NETWORK_FRAME_SECS * 1000;
 
 }();
 

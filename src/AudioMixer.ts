@@ -11,13 +11,15 @@
 //
 
 import AssignmentClient from "./domain/AssignmentClient";
+import AudioConstants from "./domain/audio/AudioConstants";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType from "./domain/networking/NodeType";
 import PacketReceiver from "./domain/networking/PacketReceiver";
 import ReceivedMessage from "./domain/networking/ReceivedMessage";
+import SockAddr from "./domain/networking/SockAddr";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
-import PacketType from "./domain/networking/udt/PacketHeaders";
+import PacketType, { PacketTypeValue } from "./domain/networking/udt/PacketHeaders";
 import ContextManager from "./domain/shared/ContextManager";
 
 
@@ -80,21 +82,28 @@ class AudioMixer extends AssignmentClient {
 
     // Context.
     #_nodeList: NodeList;  // Need own reference rather than using AssignmentClient's because need to keep private from API.
-
     #_packetReceiver;
+
+    #_selectedCodeName = "";
+    #_dummyAudioInputTimer: ReturnType<typeof setTimeout> | null = null;
+    #_outgoingAvatarAudioSequenceNumber = 0;
+
+    // WEBRTC TODO: Set these via the API.
+    #_isStereoInput = false;
+    #_audioPosition = { x: 0, y: 1, z: 0 };
+    #_audioOrientation = { x: 0, y: 0, z: 0, w: 1.0 };
+    #_avatarBoundingBoxCorner = { x: -0.5, y: 0.0, z: -0.5 };
+    #_avatarBoundingBoxScale = { x: 1, y: 2, z: 1 };
 
 
     constructor(contextID: number) {
+        // C++  AudioClient::AudioClient()
         super(contextID, NodeType.AudioMixer);
 
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;  // Throws error if invalid context.
         this.#_packetReceiver = this.#_nodeList.getPacketReceiver();
 
-
-        // C++  AudioClient::AudioClient()
-
         // WEBRTC TODO: Address further C++ code.
-
 
         // C++  Application::Application()
         this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
@@ -110,7 +119,7 @@ class AudioMixer extends AssignmentClient {
     #negotiateAudioFormat(): void {
         // C++  void AudioClient::negotiateAudioFormat()
 
-        // WEBRTC TODO: Get list of codecs that Web supports.
+        // WEBRTC TODO: Address further C++ code.
         const codecs = [
             "opus",
             "pcm",
@@ -131,8 +140,75 @@ class AudioMixer extends AssignmentClient {
     #audioMixerKilled(): void {
         // C++  void AudioClient::audioMixerKilled()
 
+        this.#_outgoingAvatarAudioSequenceNumber = 0;
+
         // WEBRTC TODO: Address further C++ code.
 
+    }
+
+    #emitAudioPacket(packetType: PacketTypeValue): void {
+        // C++  void AbstractAudioInterface::emitAudioPacket(const void* audioData, size_t bytes, quint16 & sequenceNumber,
+        //          bool isStereo, const Transform& transform, glm::vec3 avatarBoundingBoxCorner,
+        //          glm::vec3 avatarBoundingBoxScale, PacketType packetType, QString codecName)
+
+        const audioMixer = this.#_nodeList.soloNodeOfType(NodeType.AudioMixer);
+        if (!audioMixer || !audioMixer.getActiveSocket()) {
+            return;
+        }
+
+        if (packetType !== PacketType.SilentAudioFrame) {
+            console.error("AudioMixer.emitAudioPacket() not implemented for packet", packetType, "!");
+            return;
+        }
+
+        this.#_outgoingAvatarAudioSequenceNumber += 1;
+
+        // WEBRTC TODO: Address further C++ code.
+        // - PacketType.MicrophoneAudioWithEcho
+        // - PacketType.MicrophoneAudioNoEcho
+
+        const audioPacket = PacketScribe.SilentAudioFrame.write({
+            sequenceNumber: this.#_outgoingAvatarAudioSequenceNumber,
+            codecName: this.#_selectedCodeName,
+            isStereo: this.#_isStereoInput,
+            audioPosition: this.#_audioPosition,
+            audioOrientation: this.#_audioOrientation,
+            avatarBoundingBoxCorner: this.#_avatarBoundingBoxCorner,
+            avatarBoundingBoxScale: this.#_avatarBoundingBoxScale
+        });
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_nodeList.sendUnreliablePacket(audioPacket, audioMixer.getActiveSocket() as SockAddr,
+            audioMixer.getAuthenticateHash());
+    }
+
+    #handleAudioInput(): void {
+        // C++  void AudioClient::handleAudioInput(QByteArray& audioBuffer)
+
+        // An audio gate is not the responsibility of the AudioMixer SDK class.
+
+        // WEBRTC TODO: Address further C++ code.
+        // - Audio encoding... TBD.
+
+        const packetType = PacketType.SilentAudioFrame;
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#emitAudioPacket(packetType);
+
+        // WEBRTC TODO: Address further C++ code.
+
+    }
+
+    #handleDummyAudioInput(): void {
+        // C++  void AudioClient::handleDummyAudioInput()
+
+        this.#handleAudioInput();
+
+        this.#_dummyAudioInputTimer = setTimeout(() => {
+            this.#handleDummyAudioInput();
+        }, AudioConstants.NETWORK_FRAME_MSECS);
     }
 
 
@@ -158,6 +234,11 @@ class AudioMixer extends AssignmentClient {
 
         // C++  void Application::nodeActivated(Node* node)
         this.#negotiateAudioFormat();
+
+        // C++  bool AudioClient::switchInputToAudioDevice(...)
+        this.#_dummyAudioInputTimer = setTimeout(() => {
+            this.#handleDummyAudioInput();
+        }, AudioConstants.NETWORK_FRAME_MSECS);
     };
 
     // Slot
@@ -169,6 +250,12 @@ class AudioMixer extends AssignmentClient {
 
         // C++  void Application::nodeKilled(Node* node)
         this.#audioMixerKilled();
+
+        // C++  bool AudioClient::switchInputToAudioDevice(...)
+        if (this.#_dummyAudioInputTimer) {
+            clearTimeout(this.#_dummyAudioInputTimer);
+            this.#_dummyAudioInputTimer = null;
+        }
     };
 
 }
