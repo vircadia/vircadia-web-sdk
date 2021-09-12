@@ -112,7 +112,14 @@ class AudioMixer extends AssignmentClient {
         // C++  AudioClient::AudioClient()
         this.#_packetReceiver.registerListener(PacketType.SelectedAudioFormat,
             PacketReceiver.makeUnsourcedListenerReference(this.#handleSelectedAudioFormat));
-
+        this.#_packetReceiver.registerListener(PacketType.SilentAudioFrame,
+            PacketReceiver.makeUnsourcedListenerReference(this.#handleAudioDataPacket));
+        this.#_packetReceiver.registerListener(PacketType.MixedAudio,
+            PacketReceiver.makeUnsourcedListenerReference(this.#handleAudioDataPacket));
+        this.#_packetReceiver.registerListener(PacketType.AudioStreamStats,
+            PacketReceiver.makeSourcedListenerReference(this.#processStreamStatsPacket));
+        this.#_packetReceiver.registerListener(PacketType.AudioEnvironment,
+            PacketReceiver.makeUnsourcedListenerReference(this.#handleAudioEnvironmentDataPacket));
     }
 
 
@@ -219,6 +226,45 @@ class AudioMixer extends AssignmentClient {
         const info = PacketScribe.SelectedAudioFormat.read(message.getMessage());
 
         console.warn("AudioMixer: SelectedAudioFormat packet not processed. Codec:", info.selectedCodecName);
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
+
+    // Listener
+    // eslint-disable-next-line class-methods-use-this
+    #handleAudioDataPacket = (message: ReceivedMessage): void => {
+        // C++  void AudioClient::handleAudioDataPacket(ReceivedMessage* message)
+
+        if (message.getType() === PacketType.SilentAudioFrame) {
+            console.warn("AudioMixer: SilentAudioFrame packet not processed.");
+        } else {
+            console.warn("AudioMixer: MixedAudio packet not processed.");
+        }
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
+
+    // Listener
+    // eslint-disable-next-line
+    // @ts-ignore
+    #processStreamStatsPacket = (message: ReceivedMessage, sendingNode?: Node): void => {  // eslint-disable-line
+        // C++  void AudioIOStats::processStreamStatsPacket(ReceivedMessage*, Node* sendingNode)
+
+        console.warn("AudioMixer: AudioStreamStats packet not processed.");
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
+
+    // Listener
+    // eslint-disable-next-line
+    // @ts-ignore
+    #handleAudioEnvironmentDataPacket = (message: ReceivedMessage): void => {  // eslint-disable-line
+        // C++  void AudioClient::handleAudioEnvironmentDataPacket(ReceivedMessage* message)
+
+        console.warn("AudioMixer: AudioEnvironment packet not processed.");
 
         // WEBRTC TODO: Address further C++ code.
 
