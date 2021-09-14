@@ -36,8 +36,8 @@ const SilentAudioFrame = new class {
      *  @property {number} sequenceNumber - The sequence number of the audio packet.
      *      <p>The sequence number starts at <code>0</code> each connection to the audio mixer and is shared among the following
      *      audio packets sent, incrementing each time one of these packets is sent: <code>MicrophoneAudioWithEcho</code>,
-     *      <code>MicrophoneAudioNoEcho</code>, and <code>SilentAudioFrame</code>.</p>
-     *      <code>
+     *      <code>MicrophoneAudioNoEcho</code>, and <code>SilentAudioFrame</code>. The value wraps around to <code>0</code>
+     *      after <code>65535</code>.</p>
      *  @property {string} codecName - The name of the audio codec used, e.g., <code>"opus"</code>.
      *  @property {boolean} isStereo - <code>true</code> if the audio stream is stereo, <code>false</code> if it is mono.
      *  @property {vec3} audioPosition - The position of the audio source or hearing position in the domain.

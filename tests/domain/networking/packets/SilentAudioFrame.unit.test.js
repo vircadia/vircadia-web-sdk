@@ -1,7 +1,7 @@
 //
 //  SilentAudioFrame.unit.test.js
 //
-//  Created by David Rowe on 7 Sep 2021.
+//  Created by David Rowe on 11 Sep 2021.
 //  Copyright 2021 Vircadia contributors.
 //
 //  Distributed under the Apache License, Version 2.0.

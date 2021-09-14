@@ -150,7 +150,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} KillAvatar - <code>5</code>
  *  @property {PacketType} AvatarData - <code>6</code>
  *  @property {PacketType} InjectAudio - <code>7</code>
- *  @property {PacketType} MixedAudio - <code>8</code>
+ *  @property {PacketType} MixedAudio - <code>8</code> - The audio mixer repeatedly sends this to the user client when there is
+ *      audio to play at the user client's audio position.
+ *      {@link PacketScribe.MixedAudioDetails}.
  *  @property {PacketType} MicrophoneAudioNoEcho - <code>9</code>
  *  @property {PacketType} MicrophoneAudioWithEcho - <code>10</code>
  *  @property {PacketType} BulkAvatarData - <code>11</code>

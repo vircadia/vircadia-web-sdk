@@ -20,6 +20,8 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.Ping.read).toBe("function");
         expect(typeof PacketScribe.PingReply).toBe("object");
         expect(typeof PacketScribe.PingReply.write).toBe("function");
+        expect(typeof PacketScribe.MixedAudio).toBe("object");
+        expect(typeof PacketScribe.MixedAudio.read).toBe("function");
         expect(typeof PacketScribe.SilentAudioFrame).toBe("object");
         expect(typeof PacketScribe.SilentAudioFrame.write).toBe("function");
         expect(typeof PacketScribe.DomainListRequest).toBe("object");
