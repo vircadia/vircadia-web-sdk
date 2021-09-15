@@ -33,8 +33,10 @@ import SelectedAudioFormat from "./SelectedAudioFormat";
  *      {@link PacketScribe.Ping&period;read|Ping&period;read}
  *  @property {function} PingReply.write -
  *      {@link PacketScribe.PingReply&period;write|PingReply&period;write}
- *  @property {function} MixedAudio.read-
+ *  @property {function} MixedAudio.read -
  *      {@link PacketScribe.MixedAudio&period;read|MixedAudio&period;read}
+ *  @property {function} SilentAudioFrame.read -
+ *      {@link PacketScribe.SilentAudioFrame&period;read|SilentAudioFrame&period;read}
  *  @property {function} SilentAudioFrame.write -
  *      {@link PacketScribe.SilentAudioFrame&period;write|SilentAudioFrame&period;write}
  *  @property {function} DomainListRequest.write -

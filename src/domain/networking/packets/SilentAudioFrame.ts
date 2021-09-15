@@ -12,6 +12,7 @@ import PacketType from "../udt/PacketHeaders";
 import UDT from "../udt/UDT";
 import NLPacket from "../NLPacket";
 import AudioConstants from "../../audio/AudioConstants";
+import assert from "../../shared/assert";
 import { vec3 } from "../../shared/Vec3";
 import { quat } from "../../shared/Quat";
 
@@ -20,10 +21,10 @@ type SilentAudioFrameDetails = {
     sequenceNumber: number,
     codecName: string,
     isStereo: boolean,
-    audioPosition: vec3,
-    audioOrientation: quat,
-    avatarBoundingBoxCorner: vec3,
-    avatarBoundingBoxScale: vec3
+    audioPosition?: vec3,
+    audioOrientation?: quat,
+    avatarBoundingBoxCorner?: vec3,
+    avatarBoundingBoxScale?: vec3
 };
 
 
@@ -33,20 +34,67 @@ const SilentAudioFrame = new class {
     /*@devdoc
      *  Information needed for {@link PacketScribe|writing} a {@link PacketType(1)|SilentAudioFrame} packet.
      *  @typedef {object} PacketScribe.SilentAudioFrameDetails
-     *  @property {number} sequenceNumber - The sequence number of the audio packet.
-     *      <p>The sequence number starts at <code>0</code> each connection to the audio mixer and is shared among the following
-     *      audio packets sent, incrementing each time one of these packets is sent: <code>MicrophoneAudioWithEcho</code>,
-     *      <code>MicrophoneAudioNoEcho</code>, and <code>SilentAudioFrame</code>. The value wraps around to <code>0</code>
-     *      after <code>65535</code>.</p>
+     *  @property {number} sequenceNumber - The sequence number of the audio packet. It starts at <code>0</code> for each
+     *      connection to the audio mixer, incrementing each time an audio packet is sent. The value wraps around to
+     *      <code>0</code> after <code>65535</code>.</p>
+     *      <p>The sequence number for the client sending audio packets to the audio mixer is shared among the following
+     *      packets: <code>MicrophoneAudioWithEcho</code>, <code>MicrophoneAudioNoEcho</code>, and
+     *      <code>SilentAudioFrame</code>.
+     *      The sequence number for the audio mixer sending audio packets to the user client is shared among the following
+     *      packets: <code>MixedAudio</code> and <code>SilentAudioFrame</code>.
      *  @property {string} codecName - The name of the audio codec used, e.g., <code>"opus"</code>.
      *  @property {boolean} isStereo - <code>true</code> if the audio stream is stereo, <code>false</code> if it is mono.
-     *  @property {vec3} audioPosition - The position of the audio source or hearing position in the domain.
-     *  @property {quat} audioOrientation - The orientation of the audio source or hearing position in the domain.
-     *  @property {vec3} avatarBoundingBoxCorner - The position of the minimum-xyz corner of the axis-aligned bounding box
-     *      containing the user's avatar.
-     *  @property {vec3} avatarBoundingBoxScale - The size of the axis-aligned bounding box containing the user's avatar.
+     *  @property {vec3} [audioPosition] - The position of the audio source in the domain. The user client sends this to the
+     *      audio mixer.
+     *  @property {quat} [audioOrientation] - The orientation of the audio source in the domain. The user client sends this to
+     *      the audio mixer.
+     *  @property {vec3} [avatarBoundingBoxCorner] - The position of the minimum-xyz corner of the axis-aligned bounding box
+     *      containing the user's avatar. The user client sends this to the audio mixer.
+     *  @property {vec3} [avatarBoundingBoxScale] - The size of the axis-aligned bounding box containing the user's avatar. The
+     *      user client sends this to the audio mixer.
      */
 
+
+    /*@devdoc
+     *  Reads a {@link PacketType(1)|SilentAudioFrame} packet.
+     *  @function PacketScribe.SilentAudioFrame&period;read
+     *  @param {DataView} data - The {@link Packets|SilentAudioFrame} message data to read.
+     *  @returns {PacketScribe.SilentAudioFrameDetails} The silent audio frame information.
+     */
+    read(data: DataView): SilentAudioFrameDetails {  /* eslint-disable-line class-methods-use-this */
+        // C++  int InboundAudioStream::parseData(ReceivedMessage& message)
+        //      void AudioMixerSlave::sendSilentPacket(const SharedNodePointer& node, AudioMixerClientData& data)
+
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+        const textDecoder = new TextDecoder();
+
+        let dataPosition = 0;
+
+        const sequenceNumber = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+        dataPosition += 2;
+
+        const codecNameSize = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+        dataPosition += 4;
+        const codecName = textDecoder.decode(new Uint8Array(data.buffer, data.byteOffset + dataPosition, codecNameSize));
+        dataPosition += codecNameSize;
+
+        // FIXME: AudioMixerSlave::sendSilentPacket() currently writes a 4-byte value instead of a 2--byte value/
+        const numSilentSamples = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+        dataPosition += 4;
+
+        const isStereo = numSilentSamples === AudioConstants.NETWORK_FRAME_SAMPLES_STEREO;
+
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+        assert(dataPosition === data.byteLength);
+
+        return {
+            sequenceNumber,
+            codecName,
+            isStereo
+        };
+    }
 
     /*@devdoc
      *  Writes a {@link PacketType(1)|SilentAudioFrame} packet, ready for sending.
@@ -82,6 +130,9 @@ const SilentAudioFrame = new class {
             : AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL;
         data.setUint16(dataPosition, numSilentSamples, UDT.LITTLE_ENDIAN);
         dataPosition += 2;
+
+        assert(info.audioPosition !== undefined && info.audioOrientation !== undefined
+            && info.avatarBoundingBoxCorner !== undefined && info.avatarBoundingBoxScale !== undefined);
 
         data.setFloat32(dataPosition, info.audioPosition.x, UDT.LITTLE_ENDIAN);
         dataPosition += 4;

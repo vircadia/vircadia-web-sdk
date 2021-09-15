@@ -20,6 +20,22 @@ describe("SilentAudioFrame - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
+    test("Can read a SilentAudioFrame packet", () => {
+        const PACKET_HEX = "b90200000c188d32cdc72b0d8626d38a1f4943393e8f3a759602040000006f707573e0010000";
+        const MESSAGE_START = 24;
+        const arrayBuffer = new ArrayBuffer(PACKET_HEX.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(PACKET_HEX.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer, MESSAGE_START);
+
+        const info = SilentAudioFrame.read(dataView);
+        expect(info.sequenceNumber).toBeGreaterThanOrEqual(0);
+        expect(info.codecName).toBe("opus");
+        expect(info.isStereo).toBe(true);
+    });
+
     test("Can write a SilentAudioFrame packet", () => {
         // eslint-disable-next-line max-len
         const EXPECTED_PACKET = "000000000c180000000000000000000000000000000000001700040000006f707573f0009a99993f9a9959403333b340cdcc4c3e9a99993e0000003fcdcccc3d0000c84200004843000096430000003f0000003f00000040";

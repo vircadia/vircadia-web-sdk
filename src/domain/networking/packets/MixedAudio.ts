@@ -10,6 +10,7 @@
 
 import UDT from "../udt/UDT";
 import AudioConstants from "../../audio/AudioConstants";
+import assert from "../../shared/assert";
 
 
 type MixedAudioDetails = {
@@ -63,8 +64,11 @@ const MixedAudio = new class {
         const numAudioSamples = AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL;
 
         const audioBuffer = new Uint8Array(data.buffer, data.byteOffset + dataPosition);
+        dataPosition += audioBuffer.byteLength;
 
         /* eslint-ENable @typescript-eslint/no-magic-numbers */
+
+        assert(dataPosition === data.byteLength);
 
         return {
             sequenceNumber,

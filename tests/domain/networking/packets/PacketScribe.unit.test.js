@@ -23,6 +23,7 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.MixedAudio).toBe("object");
         expect(typeof PacketScribe.MixedAudio.read).toBe("function");
         expect(typeof PacketScribe.SilentAudioFrame).toBe("object");
+        expect(typeof PacketScribe.SilentAudioFrame.read).toBe("function");
         expect(typeof PacketScribe.SilentAudioFrame.write).toBe("function");
         expect(typeof PacketScribe.DomainListRequest).toBe("object");
         expect(typeof PacketScribe.DomainListRequest.write).toBe("function");
