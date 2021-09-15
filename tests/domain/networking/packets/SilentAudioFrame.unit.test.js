@@ -33,7 +33,8 @@ describe("SilentAudioFrame - unit tests", () => {
         const info = SilentAudioFrame.read(dataView);
         expect(info.sequenceNumber).toBeGreaterThanOrEqual(0);
         expect(info.codecName).toBe("opus");
-        expect(info.isStereo).toBe(true);
+        expect(info.numSilentSamples).toBe(480);
+
     });
 
     test("Can write a SilentAudioFrame packet", () => {
@@ -43,7 +44,7 @@ describe("SilentAudioFrame - unit tests", () => {
         const packet = SilentAudioFrame.write({
             sequenceNumber: 23,
             codecName: "opus",
-            isStereo: false,
+            numSilentSamples: 240,
             audioPosition: { x: 1.2, y: 3.4, z: 5.6 },
             audioOrientation: { x: 0.2, y: 0.3, z: 0.5, w: 0.1 },
             avatarBoundingBoxCorner: { x: 100.0, y: 200.0, z: 300.0 },

@@ -153,7 +153,9 @@ class AudioClient {
         const audioPacket = PacketScribe.SilentAudioFrame.write({
             sequenceNumber: this.#_outgoingAvatarAudioSequenceNumber,
             codecName: this.#_selectedCodeName,
-            isStereo: this.#_isStereoInput,
+            numSilentSamples: this.#_isStereoInput
+                ? AudioConstants.NETWORK_FRAME_SAMPLES_STEREO
+                : AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL,
             audioPosition: this.#_audioPosition,
             audioOrientation: this.#_audioOrientation,
             avatarBoundingBoxCorner: this.#_avatarBoundingBoxCorner,

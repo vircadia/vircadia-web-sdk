@@ -11,7 +11,6 @@
 import PacketType from "../udt/PacketHeaders";
 import UDT from "../udt/UDT";
 import NLPacket from "../NLPacket";
-import AudioConstants from "../../audio/AudioConstants";
 import assert from "../../shared/assert";
 import { vec3 } from "../../shared/Vec3";
 import { quat } from "../../shared/Quat";
@@ -20,7 +19,7 @@ import { quat } from "../../shared/Quat";
 type SilentAudioFrameDetails = {
     sequenceNumber: number,
     codecName: string,
-    isStereo: boolean,
+    numSilentSamples: number,
     audioPosition?: vec3,
     audioOrientation?: quat,
     avatarBoundingBoxCorner?: vec3,
@@ -32,7 +31,8 @@ const SilentAudioFrame = new class {
     // C++  N/A
 
     /*@devdoc
-     *  Information needed for {@link PacketScribe|writing} a {@link PacketType(1)|SilentAudioFrame} packet.
+     *  Information needed for {@link PacketScribe|writing} or returned by {@link PacketScribe|reading} a
+     *  {@link PacketType(1)|SilentAudioFrame} packet.
      *  @typedef {object} PacketScribe.SilentAudioFrameDetails
      *  @property {number} sequenceNumber - The sequence number of the audio packet. It starts at <code>0</code> for each
      *      connection to the audio mixer, incrementing each time an audio packet is sent. The value wraps around to
@@ -43,7 +43,8 @@ const SilentAudioFrame = new class {
      *      The sequence number for the audio mixer sending audio packets to the user client is shared among the following
      *      packets: <code>MixedAudio</code> and <code>SilentAudioFrame</code>.
      *  @property {string} codecName - The name of the audio codec used, e.g., <code>"opus"</code>.
-     *  @property {boolean} isStereo - <code>true</code> if the audio stream is stereo, <code>false</code> if it is mono.
+     *  @property {number} numSilentSamples - The number of silent samples the packet represents. <code>480</code> for stereo,
+     *      <code>240</code> for mono.
      *  @property {vec3} [audioPosition] - The position of the audio source in the domain. The user client sends this to the
      *      audio mixer.
      *  @property {quat} [audioOrientation] - The orientation of the audio source in the domain. The user client sends this to
@@ -83,8 +84,6 @@ const SilentAudioFrame = new class {
         const numSilentSamples = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
         dataPosition += 4;
 
-        const isStereo = numSilentSamples === AudioConstants.NETWORK_FRAME_SAMPLES_STEREO;
-
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
         assert(dataPosition === data.byteLength);
@@ -92,7 +91,7 @@ const SilentAudioFrame = new class {
         return {
             sequenceNumber,
             codecName,
-            isStereo
+            numSilentSamples
         };
     }
 
@@ -125,10 +124,7 @@ const SilentAudioFrame = new class {
             dataPosition += 1;
         }
 
-        const numSilentSamples = info.isStereo
-            ? AudioConstants.NETWORK_FRAME_SAMPLES_STEREO
-            : AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL;
-        data.setUint16(dataPosition, numSilentSamples, UDT.LITTLE_ENDIAN);
+        data.setUint16(dataPosition, info.numSilentSamples, UDT.LITTLE_ENDIAN);
         dataPosition += 2;
 
         assert(info.audioPosition !== undefined && info.audioOrientation !== undefined
