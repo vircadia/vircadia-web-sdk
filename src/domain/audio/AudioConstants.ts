@@ -14,12 +14,14 @@
  *
  *  @namespace AudioConstants
  *
- *  @property {number} SAMPLE_RATE - <code<24000</code> - The audio sample rate, in Hz.
+ *  @property {number} SAMPLE_RATE - <code>24000</code> - The audio sample rate, in Hz.
+ *
+ *  @property {number} STEREO - <code>2</code> - The number of audio channels for stereo.
  *
  *  @property {number} NETWORK_FRAME_SAMPLES_STEREO - <code>480</code> - The number of samples in a network packet for a stereo
  *      channel.
- *  @property {number} NETWORK_FRAME_SAMPLES_PER_CHANNEL - <code>240</code> - The number of samples in a network packet for a
- *      mono channel.
+ *  @property {number} NETWORK_FRAME_SAMPLES_PER_CHANNEL - <code>240</code> - The number of samples in a network packet per
+ *      channel.
  *
  *  @property {number} NETWORK_FRAME_SECS - <code>0.01</code> - The interval between audio network packets, in seconds.
  *  @property {number} NETWORK_FRAME_MSECS - <code>10</code> - The interval between audio network packets, in milliseconds.
@@ -30,6 +32,8 @@ const AudioConstants = new class {
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     readonly SAMPLE_RATE = 24000;
+
+    readonly STEREO = 2;
 
     readonly NETWORK_FRAME_SAMPLES_STEREO = 480;
     readonly NETWORK_FRAME_SAMPLES_PER_CHANNEL = 240;

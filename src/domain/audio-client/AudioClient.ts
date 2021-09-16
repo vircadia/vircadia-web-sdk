@@ -9,6 +9,7 @@
 //
 
 import AudioConstants from "../audio/AudioConstants";
+import InboundAudioStream from "../audio/InboundAudioStream";
 import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
 import NodeType from "../networking/NodeType";
@@ -30,6 +31,10 @@ class AudioClient {
     // C++  AudioClient : public AbstractAudioInterface, public Dependency
     //      AbstractAudioInterface : public QObject
 
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+    static #RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES = 100;
+
+
     // Context
     #_nodeList: NodeList;
     #_packetReceiver;
@@ -37,7 +42,15 @@ class AudioClient {
     #_dummyAudioInputTimer: ReturnType<typeof setTimeout> | null = null;
     #_outgoingAvatarAudioSequenceNumber = 0;
 
-    #_selectedCodeName = "";
+    #_selectedCodecName = "";
+
+    // The following field is not a MixedProcessedAudioStream in the Web SDK version of AudioClient on the assumptions:
+    // - Resampling to match the desired audio rate is not needed - or is better implemented in the AudioWorklet.
+    // - Applying reverb is not needed - or is better implemented in the AudioWorklet, or applied in the user client app.
+    // WEBRTC TODO: Address resampling.
+    // WEBRTC TODO: Address reverb.
+    #_receivedAudioStream = new InboundAudioStream(AudioConstants.STEREO, AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL,
+        AudioClient.#RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES, -1);
 
     // WEBRTC TODO: Set these via the API.
     #_isStereoInput = false;
@@ -76,9 +89,9 @@ class AudioClient {
 
         // WEBRTC TODO: Address further C++ code.
         const codecs = [
-            "opus",
-            "pcm",
-            "zlib"
+            // "opus",
+            "pcm"
+            // "zlib"
         ];
 
         const negotiateFormatPacket = PacketScribe.NegotiateAudioFormat.write({
@@ -152,7 +165,7 @@ class AudioClient {
 
         const audioPacket = PacketScribe.SilentAudioFrame.write({
             sequenceNumber: this.#_outgoingAvatarAudioSequenceNumber,
-            codecName: this.#_selectedCodeName,
+            codecName: this.#_selectedCodecName,
             numSilentSamples: this.#_isStereoInput
                 ? AudioConstants.NETWORK_FRAME_SAMPLES_STEREO
                 : AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL,
@@ -168,17 +181,30 @@ class AudioClient {
             audioMixer.getAuthenticateHash());
     }
 
+    #selectAudioFormat(selectedCodecName: string): void {
+        // C++  void selectAudioFormat(const QString& selectedCodecName)
+
+        this.#_selectedCodecName = selectedCodecName;
+
+        console.log("[audioclient] Selected codec:", this.#_selectedCodecName, "; Is stereo input:", this.#_isStereoInput);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_receivedAudioStream.cleanupCodec();
+        this.#_receivedAudioStream.setupCodec(this.#_selectedCodecName);
+
+        // WEBRTC TODO: Address further C++ code.
+
+    }
+
 
     // Listener
     // eslint-disable-next-line class-methods-use-this
     #handleSelectedAudioFormat = (message: ReceivedMessage): void => {
         // C++  void handleSelectedAudioFormat(ReceivedMessage* message)
+
         const info = PacketScribe.SelectedAudioFormat.read(message.getMessage());
-
-        console.warn("AudioMixer: SelectedAudioFormat packet not processed. Codec:", info.selectedCodecName);
-
-        // WEBRTC TODO: Address further C++ code.
-
+        this.#selectAudioFormat(info.selectedCodecName);
     };
 
     // Listener
@@ -186,14 +212,9 @@ class AudioClient {
     #handleAudioDataPacket = (message: ReceivedMessage): void => {
         // C++  void handleAudioDataPacket(ReceivedMessage* message)
 
-        if (message.getType() === PacketType.SilentAudioFrame) {
-            console.warn("AudioClient: SilentAudioFrame packet not processed.");
-        } else {
-            console.warn("AudioClient: MixedAudio packet not processed.");
-        }
-
         // WEBRTC TODO: Address further C++ code.
 
+        this.#_receivedAudioStream.parseData(message);
     };
 
     // Listener
