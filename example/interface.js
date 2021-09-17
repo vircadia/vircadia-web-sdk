@@ -39,12 +39,12 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         function onConnectButtonClick() {
             domainServer.connect(ipAddress.value);
         }
-        connectButton.onclick = onConnectButtonClick;
+        connectButton.addEventListener("click", onConnectButtonClick);
 
         function onDisconnectButtonClick() {
             domainServer.disconnect();
         }
-        disconnectButton.onclick = onDisconnectButtonClick;
+        disconnectButton.addEventListener("click", onDisconnectButtonClick);
 
     }());
 
@@ -53,6 +53,9 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         const audioMixer = new AudioMixer(contextID);
 
         const statusText = document.getElementById("audioMixerStatus");
+        const audioElement = document.getElementById("audioElement");
+        const connectButton = document.getElementById("domainConnectButton");
+        const disconnectButton = document.getElementById("domainDisconnectButton");
 
         function onStateChanged(state) {
             statusText.value = AudioMixer.stateToString(state);
@@ -60,6 +63,27 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         onStateChanged(audioMixer.state);
         audioMixer.onStateChanged = onStateChanged;
 
+        // Assigning the audio mixer stream here works but causes a "The AuxioContext was not allowed to start" warning in the
+        // console.log because Web Audio requires user input on the page in order for audio to play.
+        // https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide
+        /*
+        audioElement.srcObject = audioMixer.audioOuput;
+        */
+
+        function onConnectButtonClick() {
+            // Assign (or reassign) the audio mixer stream now that we have user input on the page.
+            audioElement.srcObject = audioMixer.audioOuput;
+
+            audioElement.play();
+            audioMixer.play();
+        }
+        connectButton.addEventListener("click", onConnectButtonClick);
+
+        function onDisconnectButtonClick() {
+            audioMixer.pause();
+            audioElement.pause();
+        }
+        disconnectButton.addEventListener("click", onDisconnectButtonClick);
     }());
 
     // Avatar Mixer.
