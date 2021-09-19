@@ -17,10 +17,16 @@ import NodeType from "./domain/networking/NodeType";
 import assert from "./domain/shared/assert";
 import ContextManager from "./domain/shared/ContextManager";
 
+// eslint-disable-next-line
+// @ts-ignore
+import audioOutputProcessorUrl from "worklet-loader!./domain/worklets/AudioOutputProcessor";
+
 
 /*@sdkdoc
  *  The <code>AudioMixer</code> class provides the interface for working with audio mixer assignment clients.
  *  <p>Prerequisite: A {@link DomainServer} object must be created first in order to create the domain context.</p>
+ *  <p>Environment: A web app using the <code>AudioMixer</code> must be served via HTTPS or from <code<localhost</code> in order
+ *  for the audio to work.</p>
  *
  *  @class AudioMixer
  *  @extends AssignmentClient
@@ -84,6 +90,7 @@ class AudioMixer extends AssignmentClient {
     #_audioContext: AudioContext | null = null;
     #_oscillatorNode: OscillatorNode | null = null;
     #_gainNode: GainNode | null = null;
+    #_audioWorkletNode: AudioWorkletNode | null = null;
     #_streamDestination: MediaStreamAudioDestinationNode | null = null;
 
 
@@ -97,7 +104,7 @@ class AudioMixer extends AssignmentClient {
 
     get audioOuput(): MediaStream {
         if (!this.#_audioContext) {
-            this.#setUpAudioContext();
+            void this.#setUpAudioContext();
         }
         assert(this.#_streamDestination !== null);
         return this.#_streamDestination.stream;
@@ -110,30 +117,36 @@ class AudioMixer extends AssignmentClient {
      *  play. See
      *  {@link https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide|Autoplay guide for media and Web Audio APIs}.
      *  </p>
+     *  <p><em>Async</em></p>
+     *  @async
+     *  @returns {Promise<void>}
      */
-    play(): void {
+    async play(): Promise<void> {
         if (!this.#_audioContext) {
-            this.#setUpAudioContext();
+            await this.#setUpAudioContext();
         }
         assert(this.#_audioContext !== null);
         if (this.#_audioContext.state === "suspended") {
-            void this.#_audioContext.resume();
+            await this.#_audioContext.resume();
         }
     }
 
     /*@sdkdoc
      *  Suspends playing audio received from the audio mixer. This halts hardware processing, reducing CPU/batter usage.
+     *  <p><em>Async</em></p>
+     *  @async
+     *  @returns {Promise<void>}
      */
-    pause(): void {
+    async pause(): Promise<void> {
         if (!this.#_audioContext) {
             return;
         }
-        void this.#_audioContext.suspend();
+        await this.#_audioContext.suspend();
     }
 
 
     // Sets up the AudioContext etc.
-    #setUpAudioContext(): void {
+    async #setUpAudioContext(): Promise<void> {
         assert(this.#_audioContext === null);
 
         this.#_audioContext = new AudioContext({
@@ -141,18 +154,28 @@ class AudioMixer extends AssignmentClient {
             sampleRate: AudioConstants.SAMPLE_RATE
         });
 
+        // AudioStream output.
+        // Create this before async operations so that audioOutput property can be retrieved via audioOuput while setting up.
+        this.#_streamDestination = this.#_audioContext.createMediaStreamDestination();
+
         // Temporarily provide a fixed tone as the output.
         this.#_oscillatorNode = this.#_audioContext.createOscillator();
         this.#_gainNode = this.#_audioContext.createGain();
         const GAIN = 0.2;
         this.#_gainNode.gain.setValueAtTime(GAIN, this.#_audioContext.currentTime);
 
-        // AudioStream output.
-        this.#_streamDestination = this.#_audioContext.createMediaStreamDestination();
+        // Audio worklet.
+        if (!this.#_audioContext.audioWorklet) {
+            console.error("Cannot set up audio output stream. App may not be being server via HTTPS or from localhost?");
+            return;
+        }
+        await this.#_audioContext.audioWorklet.addModule(audioOutputProcessorUrl);
+        this.#_audioWorkletNode = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-output-processor");
 
         // Wire up the nodes.
         this.#_oscillatorNode.connect(this.#_gainNode);
-        this.#_gainNode.connect(this.#_streamDestination);
+        this.#_gainNode.connect(this.#_audioWorkletNode);
+        this.#_audioWorkletNode.connect(this.#_streamDestination);
         this.#_oscillatorNode.start();
     }
 

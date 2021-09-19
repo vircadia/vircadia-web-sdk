@@ -10,9 +10,9 @@
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
-        "isolatedModules": true,
+        "isolatedModules": false, // The audio worklets require this to be false.
         "preserveConstEnums": true,
-        "useDefineForClassFields": true,  // Required for ESNext.
+        "useDefineForClassFields": true, // Required for ESNext.
 
         // TypeScript 4.3
         "allowUnreachableCode": false,
@@ -37,6 +37,7 @@
         "./example/**/.eslintrc.js",
         "./src/**/*",
         "./tests/**/*",
+        "./typings/**/*",
         "./.*.js",
         "./*.js",
         "./*.json"
