@@ -60,7 +60,6 @@ class InboundAudioStream {
         }
 
         // WEBRTC TODO: Address further C++ code.
-        console.warn("InboundAudioStream.parseData() not implemented.");
         // Assume that the packet arrived in order and on time, for now.
 
         if (message.getType() === PacketType.SilentAudioFrame) {

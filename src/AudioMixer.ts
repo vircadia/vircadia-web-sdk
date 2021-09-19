@@ -11,15 +11,10 @@
 //
 
 import AssignmentClient from "./domain/AssignmentClient";
-import AudioConstants from "./domain/audio/AudioConstants";
+import AudioOutput from "./domain/audio/AudioOutput";
 import AudioClient from "./domain/audio-client/AudioClient";
 import NodeType from "./domain/networking/NodeType";
-import assert from "./domain/shared/assert";
 import ContextManager from "./domain/shared/ContextManager";
-
-// eslint-disable-next-line
-// @ts-ignore
-import audioOutputProcessorUrl from "worklet-loader!./domain/worklets/AudioOutputProcessor";
 
 
 /*@sdkdoc
@@ -87,27 +82,21 @@ class AudioMixer extends AssignmentClient {
      */
 
 
-    #_audioContext: AudioContext | null = null;
-    #_oscillatorNode: OscillatorNode | null = null;
-    #_gainNode: GainNode | null = null;
-    #_audioWorkletNode: AudioWorkletNode | null = null;
-    #_streamDestination: MediaStreamAudioDestinationNode | null = null;
+    #_audioOutput;
 
 
     constructor(contextID: number) {
         super(contextID, NodeType.AudioMixer);
 
         // Context
+        ContextManager.set(contextID, AudioOutput);
         ContextManager.set(contextID, AudioClient, contextID);
+        this.#_audioOutput = ContextManager.get(contextID, AudioOutput) as AudioOutput;
     }
 
 
     get audioOuput(): MediaStream {
-        if (!this.#_audioContext) {
-            void this.#setUpAudioContext();
-        }
-        assert(this.#_streamDestination !== null);
-        return this.#_streamDestination.stream;
+        return this.#_audioOutput.audioOutput;
     }
 
 
@@ -122,13 +111,7 @@ class AudioMixer extends AssignmentClient {
      *  @returns {Promise<void>}
      */
     async play(): Promise<void> {
-        if (!this.#_audioContext) {
-            await this.#setUpAudioContext();
-        }
-        assert(this.#_audioContext !== null);
-        if (this.#_audioContext.state === "suspended") {
-            await this.#_audioContext.resume();
-        }
+        return this.#_audioOutput.play();
     }
 
     /*@sdkdoc
@@ -138,45 +121,7 @@ class AudioMixer extends AssignmentClient {
      *  @returns {Promise<void>}
      */
     async pause(): Promise<void> {
-        if (!this.#_audioContext) {
-            return;
-        }
-        await this.#_audioContext.suspend();
-    }
-
-
-    // Sets up the AudioContext etc.
-    async #setUpAudioContext(): Promise<void> {
-        assert(this.#_audioContext === null);
-
-        this.#_audioContext = new AudioContext({
-            // The audio stream is at the Vircadia audio sample rate. Browsers convert this to their required hardware rate.
-            sampleRate: AudioConstants.SAMPLE_RATE
-        });
-
-        // AudioStream output.
-        // Create this before async operations so that audioOutput property can be retrieved via audioOuput while setting up.
-        this.#_streamDestination = this.#_audioContext.createMediaStreamDestination();
-
-        // Temporarily provide a fixed tone as the output.
-        this.#_oscillatorNode = this.#_audioContext.createOscillator();
-        this.#_gainNode = this.#_audioContext.createGain();
-        const GAIN = 0.2;
-        this.#_gainNode.gain.setValueAtTime(GAIN, this.#_audioContext.currentTime);
-
-        // Audio worklet.
-        if (!this.#_audioContext.audioWorklet) {
-            console.error("Cannot set up audio output stream. App may not be being server via HTTPS or from localhost?");
-            return;
-        }
-        await this.#_audioContext.audioWorklet.addModule(audioOutputProcessorUrl);
-        this.#_audioWorkletNode = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-output-processor");
-
-        // Wire up the nodes.
-        this.#_oscillatorNode.connect(this.#_gainNode);
-        this.#_gainNode.connect(this.#_audioWorkletNode);
-        this.#_audioWorkletNode.connect(this.#_streamDestination);
-        this.#_oscillatorNode.start();
+        return this.#_audioOutput.pause();
     }
 
 }
