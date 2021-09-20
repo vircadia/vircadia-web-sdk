@@ -20,21 +20,23 @@ module.exports = {
         "enhancement",
         "bugfix",
         "unmerged-dev",
-        "CR Approved",
-        "QA Approved",
+        "CR approved",
+        "QA approved",
         "bug",
         "confirmed",
         "do not merge",
         "duplicate",
         "good first issue",
         "help wanted",
-        "high risk"
+        "high risk",
+        "housekeeping"
     ],
     "onlyMilestones": false,
     "groupBy": {
         "Enhancements": ["enhancement"],
         "Bug Fixes": ["bugfix"],
         "Docs": ["docs"],
+        "Housekeeping": ["housekeeping"],
         "In Development": ["unmerged-dev"]
     },
     "changelogFilename": "CHANGELOG.md"
