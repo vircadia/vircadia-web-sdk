@@ -58,7 +58,7 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.#_addressManager = <AddressManager>ContextManager.get(contextID, AddressManager);
+        this.#_addressManager = ContextManager.get(contextID, AddressManager) as AddressManager;
         this.#_addressManager.possibleDomainChangeRequired.connect(this.#_domainHandler.setURLAndID);
 
         // WEBRTC TODO: Address further C++ code.

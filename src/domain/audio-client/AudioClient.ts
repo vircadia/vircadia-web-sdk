@@ -32,8 +32,7 @@ class AudioClient {
     // C++  AudioClient : public AbstractAudioInterface, public Dependency
     //      AbstractAudioInterface : public QObject
 
-    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    static #RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES = 100;
+    static readonly #RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES = 100;
 
 
     // Context

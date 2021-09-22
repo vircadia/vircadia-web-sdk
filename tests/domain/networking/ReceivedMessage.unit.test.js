@@ -10,7 +10,7 @@
 
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-import NLPacket from "../../../src/domain/networking//NLPacket";
+import NLPacket from "../../../src/domain/networking/NLPacket";
 import Node from "../../../src/domain/networking//Node";
 import ReceivedMessage from "../../../src/domain/networking/ReceivedMessage";
 import SockAddr from "../../../src/domain/networking/SockAddr";

@@ -22,7 +22,7 @@ import NodeType from "./domain/networking/NodeType";
  *  @param {number} contextID - The domain context to use. See {@link DomainServer|DomainServer.contextID}.
  *
  *  @property {AvatarMixer.State} UNAVAILABLE - There is no avatar mixer available - you're not connected to a domain or the
- *      domain doesn't have a avatar mixer running.
+ *      domain doesn't have an avatar mixer running.
  *      <em>Static. Read-only.</em>
  *  @property {AvatarMixer.State} DISCONNECTED - Not connected to the avatar mixer.
  *      <em>Static. Read-only.</em>
