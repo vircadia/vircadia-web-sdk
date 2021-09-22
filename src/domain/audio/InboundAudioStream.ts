@@ -8,17 +8,21 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AudioOutput from "../audio/AudioOutput";
 import ReceivedMessage from "../networking/ReceivedMessage";
 import { MixedAudioDetails } from "../networking/packets/MixedAudio";
 import PacketScribe from "../networking/packets/PacketScribe";
 import { SilentAudioFrameDetails } from "../networking/packets/SilentAudioFrame";
 import PacketType from "../networking/udt/PacketHeaders";
+import UDT from "../networking/udt/UDT";
+import ContextManager from "../shared/ContextManager";
 
 
 /*@devdoc
  *  The <code>InboundAudioStream</code> class manages an inbound audio stream received from the audio mixer.
  *  <p>C++: <code>InboundAudioStream : public NodeData : QObject</code></p>
  *  @class InboundAudioStream
+ *  @param {number} contextID - The {@link ContextManager} context ID.
  *  @param {number} numChannels - The number of audio channels. <code>2</code> for stereo.
  *  @param {number} numFrames - The number of samples in a network packet per channel.
  *  @param {number} numBlocks - The number of network packets to handle in the audio ring buffer.
@@ -28,14 +32,20 @@ import PacketType from "../networking/udt/PacketHeaders";
 class InboundAudioStream {
     // C++  InboundAudioStream : public NodeData : QObject
 
+    // Context.
+    #_audioOutput;
+
     #_selectedCodecName = "";
     #_decoder = null;
 
 
     /* eslint-disable */
     // @ts-ignore
-    constructor(numChannels: number, numFrames: number, numBlocks: number, numStaticJitterBlocks: number) {
+    constructor(contextID: number, numChannels: number, numFrames: number, numBlocks: number, numStaticJitterBlocks: number) {
         // C++  InboundAudioStream(int numChannels, int numFrames, int numBlocks, int numStaticJitterBlocks)
+
+        // Context.
+        this.#_audioOutput = ContextManager.get(contextID, AudioOutput) as AudioOutput;
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -118,27 +128,32 @@ class InboundAudioStream {
 
     }
 
-    #parseAudioData(packetData: Uint8Array): number {
+    #parseAudioData(packetData: DataView): number {
         // C++  int parseAudioData(const QByteArray& packetAfterStreamProperties)
 
-        let decodedBuffer: Uint8Array;  // eslint-disable-line @typescript-eslint/init-declarations
+        let decodedBuffer: Int16Array;  // eslint-disable-line @typescript-eslint/init-declarations
 
         if (this.#_decoder) {
 
             // WEBRTC TODO: Address further C++ code.
             console.warn("Codec support not implemented.", this.#_selectedCodecName);
-            decodedBuffer = new Uint8Array();
+            decodedBuffer = new Int16Array();
 
         } else {
-            decodedBuffer = packetData;
+
+            // Extract PCM data.
+            decodedBuffer = new Int16Array(packetData.byteLength / 2);
+            for (let i = 0, length = decodedBuffer.length; i < length; i++) {
+                decodedBuffer[i] = packetData.getInt16(i * 2, UDT.LITTLE_ENDIAN);
+            }
+
         }
 
-        // WEBRTC TODO: Address further C++ code.
-        console.warn("InboundAudioStream.#parseAudioData() not implemented. Bytes:", decodedBuffer.byteLength);
+        // In place of C++'s _ringBuffer use the Web SDK's AudioOutput.
+        this.#_audioOutput.writeData(decodedBuffer);
 
         return decodedBuffer.byteLength;
     }
-
 
 }
 

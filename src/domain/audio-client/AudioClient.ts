@@ -22,7 +22,8 @@ import ContextManager from "../shared/ContextManager";
 
 
 /*@devdoc
- *  The <code>AudioClient</code> class manages user client audio.
+ *  The <code>AudioClient</code> class manages user client audio, sending and receiving audio packets and interfacing these
+ *  with Web Audio streams.
  *  <p>C++: <code>AudioClient : public AbstractAudioInterface, public Dependency</code></p>
  *  @class AudioClient
  *  @param {number} contextID - The {@link ContextManager} context ID.
@@ -36,21 +37,15 @@ class AudioClient {
 
 
     // Context
-    #_nodeList: NodeList;
+    #_nodeList;
     #_packetReceiver;
+
+    #_selectedCodecName = "";
 
     #_dummyAudioInputTimer: ReturnType<typeof setTimeout> | null = null;
     #_outgoingAvatarAudioSequenceNumber = 0;
 
-    #_selectedCodecName = "";
-
-    // The following field is not a MixedProcessedAudioStream in the Web SDK version of AudioClient on the assumptions:
-    // - Resampling to match the desired audio rate is not needed - or is better implemented in the AudioWorklet.
-    // - Applying reverb is not needed - or is better implemented in the AudioWorklet, or applied in the user client app.
-    // WEBRTC TODO: Address resampling.
-    // WEBRTC TODO: Address reverb.
-    #_receivedAudioStream = new InboundAudioStream(AudioConstants.STEREO, AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL,
-        AudioClient.#RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES, -1);
+    #_receivedAudioStream;
 
     // WEBRTC TODO: Set these via the API.
     #_isStereoInput = false;
@@ -65,6 +60,11 @@ class AudioClient {
         // Context
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
         this.#_packetReceiver = this.#_nodeList.getPacketReceiver();
+
+        // This field is not a MixedProcessedAudioStream in the Web SDK version of AudioClient because the features of
+        // MixedProcessedAudioStream haven't been needed so far.
+        this.#_receivedAudioStream = new InboundAudioStream(contextID, AudioConstants.STEREO,
+            AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL, AudioClient.#RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES, -1);
 
         // C++  AudioClient::AudioClient()
         this.#_packetReceiver.registerListener(PacketType.SelectedAudioFormat,
@@ -90,8 +90,8 @@ class AudioClient {
         // WEBRTC TODO: Address further C++ code.
         const codecs = [
             // "opus",
+            // "zlib",
             "pcm"
-            // "zlib"
         ];
 
         const negotiateFormatPacket = PacketScribe.NegotiateAudioFormat.write({

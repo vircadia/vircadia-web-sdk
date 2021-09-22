@@ -17,7 +17,7 @@ type MixedAudioDetails = {
     sequenceNumber: number,
     codecName: string,
     numAudioSamples: number,
-    audioBuffer: Uint8Array
+    audioBuffer: DataView
 };
 
 
@@ -35,7 +35,9 @@ const MixedAudio = new class {
      *  @property {string} codecName - The name of the audio codec used, e.g., <code>"opus"</code>.
      *  @property {number} numAudioSamples - The number of audio samples in the packet. This number is always <code>240</code>
      *      and the samples are always stereo.
-     *  @property {Uint8Array} audioBuffer - The encoded audio data comprising the samples.
+     *  @property {DataView} audioBuffer - The encoded audio data comprising the samples per the {@link AudioConstants},
+     *      i.e., 240 frames of stereo samples being 10ms of audio data. The number of bytes depends on the codec used &mdash;
+     *      960 bytes for PCM (240 frames, each a stereo pair of 2-byte samples), significantly fewer bytes for other codecs.
      */
 
     /*@devdoc
@@ -63,7 +65,9 @@ const MixedAudio = new class {
 
         const numAudioSamples = AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL;
 
-        const audioBuffer = new Uint8Array(data.buffer, data.byteOffset + dataPosition);
+        // A DataView is used in order to defer how to use the buffer contents per the codec used, i.e., avoid unnecessary
+        // copying of the buffer data.
+        const audioBuffer = new DataView(data.buffer, data.byteOffset + dataPosition);
         dataPosition += audioBuffer.byteLength;
 
         /* eslint-ENable @typescript-eslint/no-magic-numbers */

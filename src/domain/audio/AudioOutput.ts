@@ -34,9 +34,20 @@ class AudioOutput {
 
     #_audioContext: AudioContext | null = null;
     #_oscillatorNode: OscillatorNode | null = null;
+    #_channelSplitterNode: ChannelSplitterNode | null = null;
     #_gainNode: GainNode | null = null;
     #_audioWorkletNode: AudioWorkletNode | null = null;
+    #_audioWorkletPort: MessagePort | null = null;
     #_streamDestination: MediaStreamAudioDestinationNode | null = null;
+
+    #_isPlaying = false;
+
+    // FIXME: The AudioWorkletProcessor data blocks size may change and even be variable in the future.
+    // https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletProcessor/process
+    readonly #AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE = 256;  // 128 samples for each of two channels.
+    #_outputArray = new Float32Array(this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE);
+    #_outputArrayLength = this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE;
+    #_outputOffset = 0;  // The next write position.
 
 
     get audioOutput(): MediaStream {
@@ -47,6 +58,7 @@ class AudioOutput {
         return this.#_streamDestination.stream;
     }
 
+
     /*@devdoc
      *  Starts or resumes playing audio received from the audio mixer, if it isn't already playing.
      *  <p>This must be called after the user has interacted with the web page in some manner, otherwise the audio will not
@@ -54,7 +66,6 @@ class AudioOutput {
      *  {@link https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide|Autoplay guide for media and Web Audio APIs}.
      *  </p>
      *  <p><em>Async</em></p>
-     *  @function AudioOutput.play
      *  @async
      *  @returns {Promise<void>}
      */
@@ -67,12 +78,12 @@ class AudioOutput {
         if (this.#_audioContext.state === "suspended") {
             await this.#_audioContext.resume();
         }
+        this.#_isPlaying = true;
     }
 
     /*@devdoc
-     *  Suspends playing audio received from the audio mixer. This halts hardware processing, reducing CPU/batter usage.
+     *  Suspends playing audio received from the audio mixer. This halts hardware processing, reducing CPU/battery usage.
      *  <p><em>Async</em></p>
-     *  @function AudioOutput.pause
      *  @async
      *  @returns {Promise<void>}
      */
@@ -82,6 +93,49 @@ class AudioOutput {
             return;
         }
         await this.#_audioContext.suspend();
+        this.#_isPlaying = false;
+    }
+
+    /*@devdoc
+     *  Writes PCM audio data to the audio output stream via an {@link AudioOutputProcessor} Web Audio worklet.
+     *  The number of frames received each packet from the audio mixer
+     *  ({@link AudioConstants|AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL}) is different to the number of frames needed
+     *  in each data block that the audio worklet processes. This method buffers frames as necessary and writes correctly sized
+     *  data blocks to the audio worklet.
+     *  @param {Int16Array} pcmData - The PCM audio data to output.
+     */
+    writeData(pcmData: Int16Array): void {
+        // C++  N/A
+        if (!this.#_audioWorkletPort || !this.#_isPlaying) {
+            return;
+        }
+
+        const FLOAT_TO_INT = 32768;
+        let outputArray = this.#_outputArray;
+        const outputLength = this.#_outputArrayLength;
+        let index = this.#_outputOffset;
+
+        for (const value of pcmData) {
+
+            // Convert int32 PCM value to float32 PCM value ready for the audio worklet to use.
+            outputArray[index] = value / FLOAT_TO_INT;
+
+            index += 1;  // Next index.
+
+            if (index === outputLength) {
+                // The current output array is full. Send it off.
+
+                // Could use a SharedArrayBuffer which may be more efficient but this isn't well-supported on mobile devices at
+                // present (Sep 2021).
+                this.#_audioWorkletPort.postMessage(outputArray.buffer, [this.#_outputArray.buffer]);
+
+                this.#_outputArray = new Float32Array(this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE);
+                outputArray = this.#_outputArray;
+                index = 0;
+            }
+        }
+
+        this.#_outputOffset = index;  // Starting point for next packet of audio.
     }
 
 
@@ -104,18 +158,26 @@ class AudioOutput {
         this.#_gainNode = this.#_audioContext.createGain();
         const GAIN = 0.2;
         this.#_gainNode.gain.setValueAtTime(GAIN, this.#_audioContext.currentTime);
+        this.#_channelSplitterNode = this.#_audioContext.createChannelSplitter(2);
 
         // Audio worklet.
         if (!this.#_audioContext.audioWorklet) {
-            console.error("Cannot set up audio output stream. App may not be being server via HTTPS or from localhost?");
+            console.error("Cannot set up audio output stream. App may not be being served via HTTPS or from localhost.");
             return;
         }
         await this.#_audioContext.audioWorklet.addModule(audioOutputProcessorUrl);
-        this.#_audioWorkletNode = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-output-processor");
+        this.#_audioWorkletNode = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-output-processor", {
+            numberOfInputs: 1,
+            numberOfOutputs: 1,
+            channelCount: 2,
+            channelCountMode: "explicit"
+        });
+        this.#_audioWorkletPort = this.#_audioWorkletNode.port;
 
         // Wire up the nodes.
         this.#_oscillatorNode.connect(this.#_gainNode);
-        this.#_gainNode.connect(this.#_audioWorkletNode);
+        this.#_gainNode.connect(this.#_channelSplitterNode);
+        this.#_channelSplitterNode.connect(this.#_audioWorkletNode);
         this.#_audioWorkletNode.connect(this.#_streamDestination);
         this.#_oscillatorNode.start();
     }
