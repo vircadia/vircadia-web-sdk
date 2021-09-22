@@ -28,10 +28,11 @@
 class AudioOutputProcessor extends AudioWorkletProcessor {
 
     // Buffer blocks of audio data so that they can be played back smoothly.
-    #_audioBuffer: Float32Array[] = [];
-    readonly #MAX_AUDIO_BUFFER_LENGTH = 12;  // The maximum number of audio blocks to buffer.
-    readonly #MIN_AUDIO_BUFFER_LENGTH = 2;  // The minimum number of audio blocks to have before starting to play them.
-    #_isPlaying = false;  // Is playing audio blocks from the buffer.
+    // FIXME: All these fields should be private (#s) but Firefox doesn't currently support this (Sep 2021).
+    _audioBuffer: Float32Array[] = [];
+    readonly MAX_AUDIO_BUFFER_LENGTH = 12;  // The maximum number of audio blocks to buffer.
+    readonly MIN_AUDIO_BUFFER_LENGTH = 2;  // The minimum number of audio blocks to have before starting to play them.
+    _isPlaying = false;  // Is playing audio blocks from the buffer.
 
 
     // The typings aren't complete for the Web Audio API (Sep 2021), hence the ESlint and TypesScript disablings.
@@ -45,22 +46,22 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
 
             // Buffer the new block of audio samples.
             const audioBlock = new Float32Array(message.data);  // eslint-disable-line
-            this.#_audioBuffer.push(audioBlock);
+            this._audioBuffer.push(audioBlock);
 
             // If we've reached the maximum buffer size, skip some of audio blocks.
-            if (this.#_audioBuffer.length > this.#MAX_AUDIO_BUFFER_LENGTH) {
+            if (this._audioBuffer.length > this.MAX_AUDIO_BUFFER_LENGTH) {
                 // console.log("AudioOutputProcessor: Discard", this.#_audioBuffer.length - this.#MIN_AUDIO_BUFFER_LENGTH,
                 //     "blocks");
-                while (this.#_audioBuffer.length > this.#MIN_AUDIO_BUFFER_LENGTH) {
-                    this.#_audioBuffer.shift();
+                while (this._audioBuffer.length > this.MIN_AUDIO_BUFFER_LENGTH) {
+                    this._audioBuffer.shift();
                 }
             }
 
             // Start playing if not playing and we now have enough audio blocks.
-            if (!this.#_isPlaying) {
-                if (this.#_audioBuffer.length >= this.#MIN_AUDIO_BUFFER_LENGTH) {
+            if (!this._isPlaying) {
+                if (this._audioBuffer.length >= this.MIN_AUDIO_BUFFER_LENGTH) {
                     // console.log("AudioOutputProcessor: Start playing");
-                    this.#_isPlaying = true;
+                    this._isPlaying = true;
                 }
             }
 
@@ -76,11 +77,11 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
 
         // Grab the next block of audio to play.
         let audioBlock: Float32Array | undefined = undefined;
-        if (this.#_isPlaying) {
-            audioBlock = this.#_audioBuffer.shift();
+        if (this._isPlaying) {
+            audioBlock = this._audioBuffer.shift();
             if (audioBlock === undefined) {
                 // console.log("AudioOutputProcessor: Stop playing");
-                this.#_isPlaying = false;
+                this._isPlaying = false;
             }
         }
 
