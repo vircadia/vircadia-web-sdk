@@ -34,8 +34,6 @@ class AudioOutput {
 
     #_audioContext: AudioContext | null = null;
     #_oscillatorNode: OscillatorNode | null = null;
-    #_channelSplitterNode: ChannelSplitterNode | null = null;
-    #_gainNode: GainNode | null = null;
     #_audioWorkletNode: AudioWorkletNode | null = null;
     #_audioWorkletPort: MessagePort | null = null;
     #_streamDestination: MediaStreamAudioDestinationNode | null = null;
@@ -153,12 +151,9 @@ class AudioOutput {
         // Create this before async operations so that audioOutput property can be retrieved via audioOuput while setting up.
         this.#_streamDestination = this.#_audioContext.createMediaStreamDestination();
 
-        // Temporarily provide a fixed tone as the output.
+        // Use an oscillator node to trigger output generation.
+        // FIXME: An oscillator node shouldn't be necessary. Chrome/Edge doesn't require this but Firefox does (Sep 2021).
         this.#_oscillatorNode = this.#_audioContext.createOscillator();
-        this.#_gainNode = this.#_audioContext.createGain();
-        const GAIN = 0.2;
-        this.#_gainNode.gain.setValueAtTime(GAIN, this.#_audioContext.currentTime);
-        this.#_channelSplitterNode = this.#_audioContext.createChannelSplitter(2);
 
         // Audio worklet.
         if (!this.#_audioContext.audioWorklet) {
@@ -167,6 +162,7 @@ class AudioOutput {
         }
         await this.#_audioContext.audioWorklet.addModule(audioOutputProcessorUrl);
         this.#_audioWorkletNode = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-output-processor", {
+            // FIXME: Chrome/Edge requires number of inputs > 0 in order for the worklet to generate output (Sep 2021).
             numberOfInputs: 1,
             numberOfOutputs: 1,
             channelCount: 2,
@@ -175,9 +171,7 @@ class AudioOutput {
         this.#_audioWorkletPort = this.#_audioWorkletNode.port;
 
         // Wire up the nodes.
-        this.#_oscillatorNode.connect(this.#_gainNode);
-        this.#_gainNode.connect(this.#_channelSplitterNode);
-        this.#_channelSplitterNode.connect(this.#_audioWorkletNode);
+        this.#_oscillatorNode.connect(this.#_audioWorkletNode);
         this.#_audioWorkletNode.connect(this.#_streamDestination);
         this.#_oscillatorNode.start();
     }
