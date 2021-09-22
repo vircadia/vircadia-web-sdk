@@ -43,7 +43,7 @@ class AudioOutput {
     // FIXME: The AudioWorkletProcessor data blocks size may change and even be variable in the future.
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletProcessor/process
     readonly #AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE = 256;  // 128 samples for each of two channels.
-    #_outputArray = new Float32Array(this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE);
+    #_outputArray = new Int16Array(this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE);
     #_outputArrayLength = this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE;
     #_outputOffset = 0;  // The next write position.
 
@@ -108,16 +108,12 @@ class AudioOutput {
             return;
         }
 
-        const FLOAT_TO_INT = 32768;
         let outputArray = this.#_outputArray;
         const outputLength = this.#_outputArrayLength;
         let index = this.#_outputOffset;
 
         for (const value of pcmData) {
-
-            // Convert int32 PCM value to float32 PCM value ready for the audio worklet to use.
-            outputArray[index] = value / FLOAT_TO_INT;
-
+            outputArray[index] = value;
             index += 1;  // Next index.
 
             if (index === outputLength) {
@@ -127,7 +123,7 @@ class AudioOutput {
                 // present (Sep 2021).
                 this.#_audioWorkletPort.postMessage(outputArray.buffer, [this.#_outputArray.buffer]);
 
-                this.#_outputArray = new Float32Array(this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE);
+                this.#_outputArray = new Int16Array(this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE);
                 outputArray = this.#_outputArray;
                 index = 0;
             }

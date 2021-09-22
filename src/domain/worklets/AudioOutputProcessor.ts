@@ -29,7 +29,7 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
 
     // Buffer blocks of audio data so that they can be played back smoothly.
     // FIXME: All these fields should be private (#s) but Firefox doesn't currently support this (Sep 2021).
-    _audioBuffer: Float32Array[] = [];
+    _audioBuffer: Int16Array[] = [];
     readonly MAX_AUDIO_BUFFER_LENGTH = 16;  // The maximum number of audio blocks to buffer.
     readonly MIN_AUDIO_BUFFER_LENGTH = 4;  // The minimum number of audio blocks to have before starting to play them.
     _isPlaying = false;  // Is playing audio blocks from the buffer.
@@ -46,7 +46,7 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
         this.port.onmessage = (message) => {  // eslint-disable-line
 
             // Buffer the new block of audio samples.
-            const audioBlock = new Float32Array(message.data);  // eslint-disable-line
+            const audioBlock = new Int16Array(message.data);  // eslint-disable-line
             this._audioBuffer.push(audioBlock);
 
             // If we've reached the maximum buffer size, skip some of audio blocks.
@@ -74,7 +74,9 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
      */
     // eslint-disable-next-line
     // @ts-ignore
-    process(inputList: Float32Array[][], outputList: Float32Array[][] /* , parameters: Record<string, Float32Array> */) {
+    process(inputList: Int16Array[][], outputList: Int16Array[][] /* , parameters: Record<string, Float32Array> */) {
+
+        const FLOAT_TO_INT = 32768;
 
         // if (this._audioBuffer.length !== this._lastAudioBufferLength) {
         //     console.log("Buffer length =", this._audioBuffer.length);
@@ -82,7 +84,7 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
         // }
 
         // Grab the next block of audio to play.
-        let audioBlock: Float32Array | undefined = undefined;
+        let audioBlock: Int16Array | undefined = undefined;
         if (this._isPlaying) {
             audioBlock = this._audioBuffer.shift();
             if (audioBlock === undefined) {
@@ -102,11 +104,11 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
 
         const output = outputList[0];
         for (let channel = 0; channel < channelCount; channel++) {
-            const samples = output[channel] as Float32Array;
+            const samples = output[channel] as Int16Array;
             for (let i = 0; i < sampleCount; i++) {
                 let sample = 0;
                 if (audioBlock) {
-                    sample = audioBlock[i * 2 + channel] as number;
+                    sample = audioBlock[i * 2 + channel] as number / FLOAT_TO_INT;
                 }
                 samples[i] = sample;
             }
