@@ -27,6 +27,12 @@ div {
             width: 80px;
         }
 
+        div.row span input {
+            width: 80px;
+            position: relative;
+            left: 24px;
+        }
+
 input {
     width: 160px;
 }
@@ -34,7 +40,6 @@ input {
     input.wide {
         width: 480px;
     }
-
 
     input:read-only {
         border: dotted 1px #d0d0d0;

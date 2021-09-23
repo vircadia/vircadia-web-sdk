@@ -56,6 +56,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         const audioElement = document.getElementById("audioElement");
         const connectButton = document.getElementById("domainConnectButton");
         const disconnectButton = document.getElementById("domainDisconnectButton");
+        const micMutedCheckbox = document.getElementById("micMuted");
 
         function onStateChanged(state) {
             statusText.value = AudioMixer.stateToString(state);
@@ -70,9 +71,25 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         audioElement.srcObject = audioMixer.audioOuput;
         */
 
+        function setInputStream() {
+            const constraints = {
+                audio: true,
+                video: false
+            };
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then((stream) => {
+                    audioMixer.audioInput = stream;
+                })
+                .catch(() => {  // eslint-disable-line
+                    console.warn("User didn't allow app to use microphone.");
+                });
+        }
+
         function onConnectButtonClick() {
             // Assign (or reassign) the audio mixer stream now that we have user input on the page.
             audioElement.srcObject = audioMixer.audioOuput;
+
+            setInputStream();
 
             audioElement.play();
             audioMixer.play();
@@ -84,6 +101,11 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
             audioElement.pause();
         }
         disconnectButton.addEventListener("click", onDisconnectButtonClick);
+
+        function onMicMutecCheckboxClick() {
+            audioMixer.inputMuted = micMutedCheckbox.checked;
+        }
+        micMutedCheckbox.addEventListener("click", onMicMutecCheckboxClick);
     }());
 
     // Avatar Mixer.

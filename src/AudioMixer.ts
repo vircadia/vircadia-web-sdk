@@ -45,6 +45,11 @@ import ContextManager from "./domain/shared/ContextManager";
  *      <p>This should be accessed after the user has interacted with the web page in some manner, otherwise a warning will be
  *      generated in the console log because Web Audio requires user input on the page in order for audio to play. See:
  *      {@link https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide|Autoplay guide for media and Web Audio APIs}.
+ *  @property {MediaStream|null} audioInput - The audio input stream from the user client to be sent to the audio mixer and
+ *      played in-world. If <code>null</code> then no audio is played.
+ *      <em>Write-only.</em>
+ *  @property {boolean} inputMuted=false - <code>true</code> to mute the <code>audioInput</code> so that it is not sent to the
+ *      audio mixer, <code>false</code> to let it be sent.
  */
 class AudioMixer extends AssignmentClient {
     // C++  Application.cpp
@@ -83,6 +88,8 @@ class AudioMixer extends AssignmentClient {
 
 
     #_audioOutput;
+    #_audioInput: MediaStream | null = null;
+    #_audioInputMuted = false;
 
 
     constructor(contextID: number) {
@@ -97,6 +104,25 @@ class AudioMixer extends AssignmentClient {
 
     get audioOuput(): MediaStream {
         return this.#_audioOutput.audioOutput;
+    }
+
+    set audioInput(audioInput: MediaStream | null) {
+        if (audioInput !== null && !(audioInput instanceof MediaStream)) {
+            console.error("Tried to set an invalid AudioMixer.audioInput value!");
+            return;
+        }
+        this.#_audioInput = audioInput;
+        console.log("$$$$$$$ Set audioInput =", this.#_audioInput);
+    }
+
+    set inputMuted(inputMuted: boolean) {
+        if (typeof inputMuted !== "boolean") {
+            console.error("Tried to set an invalid AudioMixer.inputMuted value!");
+            return;
+        }
+        this.#_audioInputMuted = inputMuted;
+        // $$$$$$$
+        console.log("$$$$$$$ Set inputMuted =", this.#_audioInputMuted);
     }
 
 
