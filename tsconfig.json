@@ -6,6 +6,7 @@
         "target": "ESNext", // ES2020+ required for BigInt literals. ESNext required for # methods and conditional constructors.
         "lib": [ "ES2020", "DOM" ],
         "sourceMap": true,
+        "declaration": true,
         "moduleResolution": "Node",
         "resolveJsonModule": true,
         "skipLibCheck": true,
