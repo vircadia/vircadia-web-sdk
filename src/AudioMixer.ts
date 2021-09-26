@@ -115,6 +115,10 @@ class AudioMixer extends AssignmentClient {
         console.log("$$$$$$$ Set audioInput =", this.#_audioInput);
     }
 
+    get inputMuted(): boolean {
+        return this.#_audioInputMuted;
+    }
+
     set inputMuted(inputMuted: boolean) {
         if (typeof inputMuted !== "boolean") {
             console.error("Tried to set an invalid AudioMixer.inputMuted value!");
