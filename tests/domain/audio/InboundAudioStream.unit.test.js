@@ -9,17 +9,26 @@
 //
 
 import AudioConstants from "../../../src/domain/audio/AudioConstants";
+import AudioOutput from "../../../src/domain/audio/AudioOutput";
 import InboundAudioStream from "../../../src/domain/audio/InboundAudioStream";
 import NLPacket from "../../../src/domain/networking/NLPacket";
 import ReceivedMessage from "../../../src/domain/networking/ReceivedMessage";
 import SockAddr from "../../../src/domain/networking/SockAddr";
 import Packet from "../../../src/domain/networking/udt/Packet";
 import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
+import ContextManager from "../../../src/domain/shared/ContextManager";
 
 
 describe("InboundAudioStream - unit tests", () => {
 
+    const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AudioOutput);
+
     /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+    // Suppress console messages from being displayed.
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
+
 
     test("Can parse a silent audio packet", () => {
         const PACKET_HEX = "b90200000c188d32cdc72b0d8626d38a1f4943393e8f3a759602040000006f707573e0010000";
@@ -37,18 +46,21 @@ describe("InboundAudioStream - unit tests", () => {
         expect(nlPacket.getType()).toBe(PacketType.SilentAudioFrame);
         const receivedMessage = new ReceivedMessage(nlPacket);
 
-        const inboundAudioStream = new InboundAudioStream(AudioConstants.STEREO,
+        const inboundAudioStream = new InboundAudioStream(contextID, AudioConstants.STEREO,
             AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL, 100, -1);
         const bytesProcessed = inboundAudioStream.parseData(receivedMessage);
         expect(bytesProcessed).toBe(14);
     });
 
     test("Can set and clear the codec", () => {
-        const inboundAudioStream = new InboundAudioStream(AudioConstants.STEREO,
+        const inboundAudioStream = new InboundAudioStream(contextID, AudioConstants.STEREO,
             AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL, 100, -1);
         inboundAudioStream.setupCodec("pcm");
         inboundAudioStream.cleanupCodec();
         expect(true).toBe(true);
     });
+
+
+    warn.mockReset();
 
 });
