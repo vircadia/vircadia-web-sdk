@@ -36,6 +36,7 @@
     "include": [
         "./example/**/*",
         "./example/**/.eslintrc.js",
+        "./mocks/**/*",
         "./src/**/*",
         "./tests/**/*",
         "./typings/**/*",
