@@ -30,7 +30,7 @@ describe("MixedAudio - unit tests", () => {
         expect(info.sequenceNumber).toBeGreaterThanOrEqual(0);
         expect(info.codecName).toBe("opus");
         expect(info.numAudioSamples).toBe(240);
-        expect(info.audioBuffer.length).toBeGreaterThan(0);
+        expect(info.audioBuffer.byteLength).toBeGreaterThan(0);
     });
 
 });

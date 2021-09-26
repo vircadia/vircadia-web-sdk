@@ -8,6 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AudioOutput from "../../../src/domain/audio/AudioOutput";
 import AudioClient from "../../../src/domain/audio-client/AudioClient";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodeList from "../../../src/domain/networking/NodeList";
@@ -20,6 +21,7 @@ describe("AudioClient - unit tests", () => {
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, AddressManager);
         ContextManager.set(contextID, NodeList, contextID);
+        ContextManager.set(contextID, AudioOutput);
         ContextManager.set(contextID, AudioClient, contextID);
         const audioClient = ContextManager.get(contextID, AudioClient);
         expect(audioClient instanceof AudioClient).toBe(true);
