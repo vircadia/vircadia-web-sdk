@@ -13,6 +13,7 @@ import DomainList from "./DomainList";
 import Ping from "./Ping";
 import PingReply from "./PingReply";
 import MixedAudio from "./MixedAudio";
+import MicrophoneAudioNoEcho from "./MicrophoneAudioNoEcho";
 import SilentAudioFrame from "./SilentAudioFrame";
 import DomainListRequest from "./DomainListRequest";
 import DomainConnectionDenied from "./DomainConnectionDenied";
@@ -66,6 +67,7 @@ const PacketScribe = {
     Ping,
     PingReply,
     MixedAudio,
+    MicrophoneAudioNoEcho,
     SilentAudioFrame,
     DomainListRequest,
     DomainConnectionDenied,

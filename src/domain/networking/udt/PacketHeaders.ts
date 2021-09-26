@@ -153,8 +153,10 @@ const enum PacketTypeValue {
  *  @property {PacketType} MixedAudio - <code>8</code> - The audio mixer repeatedly sends this to the user client when there is
  *      audio to play at the user client's audio position.
  *      {@link PacketScribe.MixedAudioDetails}.
- *  @property {PacketType} MicrophoneAudioNoEcho - <code>9</code>
- *  @property {PacketType} MicrophoneAudioWithEcho - <code>10</code>
+ *  @property {PacketType} MicrophoneAudioNoEcho - <code>9</code> - The user client sends this to the audio mixer with user
+ *      audio to play at the user client's audio position. The audio mixer should not echo the audio back to the user client.
+ *  @property {PacketType} MicrophoneAudioWithEcho - <code>10</code> - The user client sends this to the audio mixer with user
+ *      audio to play at the user client's audio position. The audio mixer should echo the audio back to the user client.
  *  @property {PacketType} BulkAvatarData - <code>11</code>
  *  @property {PacketType} SilentAudioFrame - <code>12</code> - The user client repeatedly sends this to the audio mixer when
  *      there isn't any audio (microphone) input from the user. The user client's audio position is included. The audio mixer
@@ -494,6 +496,7 @@ const PacketType = new class {
             case this.PingReply:
                 return DEFAULT_VERSION;
             case this.SilentAudioFrame:
+            case this.MicrophoneAudioNoEcho:
                 return this.#_AudioVersion.StopInjectors;
             case this.DomainListRequest:
                 return this.#_DomainListRequestVersion.SocketTypes;
