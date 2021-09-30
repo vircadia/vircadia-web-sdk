@@ -13,7 +13,7 @@ import AudioConstants from "../audio/AudioConstants";
 
 // eslint-disable-next-line
 // @ts-ignore
-import audioOutputProcessorUrl from "worklet-loader!../worklets/AudioOutputProcessor";
+import audioOutputProcessorURL from "worklet-loader!../worklets/AudioOutputProcessor";
 
 
 /*@devdoc
@@ -156,7 +156,7 @@ class AudioOutput {
             console.error("Cannot set up audio output stream. App may not be being served via HTTPS or from localhost.");
             return;
         }
-        await this.#_audioContext.audioWorklet.addModule(audioOutputProcessorUrl);
+        await this.#_audioContext.audioWorklet.addModule(audioOutputProcessorURL);
         this.#_audioWorkletNode = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-output-processor", {
             // FIXME: Chrome/Edge requires number of inputs > 0 in order for the worklet to generate output (Sep 2021).
             numberOfInputs: 1,

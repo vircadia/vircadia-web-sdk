@@ -11,11 +11,10 @@
 
 /*@devdoc
  *  The <code>AudioOutputProcessor</code> class implements a Web Audio
- *  {@link https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletProcessor|AudioWorkletProcessor} that outputs audio
- *  posted to it in messages. It doesn't have any SDK API; it is used as a node in the Web Audio graph that {@link AudioOutput}
- *  uses to provide an output MediaStream.
- *  <p>It runs on its own thread and buffers an amount of data received to play, in order to maintain a smooth output
- *  stream.</p>
+ *  {@link https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletProcessor|AudioWorkletProcessor} that outputs SDK audio
+ *  to a MediaStream. It is used as a node in a Web Audio graph in {@link AudioOutput}.
+ *  <p>It runs on its own thread and uses a ring buffer to buffer an amount of data received to play in order to help maintain a
+ *  smooth output stream.</p>
  *  <p>C++: <code>N/A</code></p>
  *  @class AudioOutputProcessor
  *  @param {AudioWorkletNodeOptions} options -
@@ -36,47 +35,59 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
 
     // _lastAudioBufferLength = 0;
 
-    // The typings aren't complete for the Web Audio API (Sep 2021), hence the ESlint and TypesScript disablings.
+    // The typings aren't complete for the Web Audio API (Sep 2021), hence the ESlint and TypeScript disablings.
 
     constructor(options?: AudioWorkletNodeOptions) {
-        super(options);  // eslint-disable-line
+        super(options);
 
-        // eslint-disable-next-line
-        // @ts-ignore
-        this.port.onmessage = (message) => {  // eslint-disable-line
-
-            // Buffer the new block of audio samples.
-            const audioBlock = new Int16Array(message.data);  // eslint-disable-line
-            this._audioBuffer.push(audioBlock);
-
-            // If we've reached the maximum buffer size, skip some of audio blocks.
-            if (this._audioBuffer.length > this.MAX_AUDIO_BUFFER_LENGTH) {
-                // console.log("AudioOutputProcessor: Discard", this._audioBuffer.length - this.MIN_AUDIO_BUFFER_LENGTH,
-                //     "blocks");
-                while (this._audioBuffer.length > this.MIN_AUDIO_BUFFER_LENGTH) {
-                    this._audioBuffer.shift();
-                }
-            }
-
-            // Start playing if not playing and we now have enough audio blocks.
-            if (!this._isPlaying) {
-                if (this._audioBuffer.length >= this.MIN_AUDIO_BUFFER_LENGTH) {
-                    // console.log("AudioOutputProcessor: Start playing");
-                    this._isPlaying = true;
-                }
-            }
-
-        };
+        this.port.onmessage = this.onMessage;
     }
 
     /*@devdoc
-     *  Called by the Web Audio pipeline to provide the next block of audio samples.
+     *  Takes incoming audio blocks posted to the audio worklet's message port and queues them in a ring buffer for playing.
+     *  If too many audio blocks are queued, some of the older ones are discarded.
+     *  If too few audio blocks are queued, playing is paused while a minimum number of audio blocks are accumulated.
+     *  @function AudioOutputProcessor.onMessage
+     *  @param {MessageEvent} message - The message posted to the audio worklet, with <code>message.data</code> being an
+     *      <code>Int16Array</code> of PCM audio samples, ready to play.
+     */
+    onMessage = (message: MessageEvent) => {
+        // Buffer the new block of audio samples.
+        const audioBlock = new Int16Array(message.data);
+        this._audioBuffer.push(audioBlock);
+
+        // If we've reached the maximum buffer size, skip some of the audio blocks.
+        if (this._audioBuffer.length > this.MAX_AUDIO_BUFFER_LENGTH) {
+            // console.log("AudioOutputProcessor: Discard", this._audioBuffer.length - this.MIN_AUDIO_BUFFER_LENGTH,
+            //     "blocks");
+            while (this._audioBuffer.length > this.MIN_AUDIO_BUFFER_LENGTH) {
+                this._audioBuffer.shift();
+            }
+        }
+
+        // Start playing if not playing and we now have enough audio blocks.
+        if (!this._isPlaying) {
+            if (this._audioBuffer.length >= this.MIN_AUDIO_BUFFER_LENGTH) {
+                // console.log("AudioOutputProcessor: Start playing");
+                this._isPlaying = true;
+            }
+        }
+    };
+
+
+    /*@devdoc
+     *  Called by the Web Audio pipeline to provide the next block of audio samples to play. The next audio block from the ring
+     *  buffer is played if one is available and playing is not paused, otherwise a block of silence is played. The Int32 values
+     *  from the ring buffer are converted to Float32 values.
+     *  @param {Float32Array[][]} inputList - Input PCM audio samples. <em>Not used.</em>
+     *  @param {Float32Array[][]} outputList - Output PCM audio samples.
+     *  @param {Record<string, Float32Array>} parameters - Processing parameters. <em>Not used.</em>
      */
     // eslint-disable-next-line
     // @ts-ignore
-    process(inputList: Int16Array[][], outputList: Int16Array[][] /* , parameters: Record<string, Float32Array> */) {
+    process(inputList: Float32Array[][], outputList: Float32Array[][] /* , parameters: Record<string, Float32Array> */) {
 
-        const FLOAT_TO_INT = 32768;
+        const FLOAT_TO_INT = 32767;
 
         // if (this._audioBuffer.length !== this._lastAudioBufferLength) {
         //     console.log("Buffer length =", this._audioBuffer.length);
@@ -104,7 +115,7 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
 
         const output = outputList[0];
         for (let channel = 0; channel < channelCount; channel++) {
-            const samples = output[channel] as Int16Array;
+            const samples = output[channel] as Float32Array;
             for (let i = 0; i < sampleCount; i++) {
                 let sample = 0;
                 if (audioBlock) {

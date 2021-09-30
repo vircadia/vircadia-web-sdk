@@ -36,8 +36,8 @@ const MixedAudio = new class {
      *  @property {number} numAudioSamples - The number of audio samples in the packet. This number is always <code>240</code>
      *      and the samples are always stereo.
      *  @property {DataView} audioBuffer - The encoded audio data comprising the samples per the {@link AudioConstants},
-     *      i.e., 240 frames of stereo samples being 10ms of audio data. The number of bytes depends on the codec used &mdash;
-     *      960 bytes for PCM (240 frames, each a stereo pair of 2-byte samples), significantly fewer bytes for other codecs.
+     *      i.e., 240 frames being 10ms of audio data. The number of bytes depends on the codec used &mdash; 960 bytes for PCM
+     *      (240 frames, each a stereo pair of 2-byte samples), significantly fewer bytes for other codecs.
      */
 
     /*@devdoc
