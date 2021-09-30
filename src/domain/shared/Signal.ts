@@ -26,9 +26,9 @@ class Signal {
     // C++  Qt's signals and slots mechanism.
 
     /*@devdoc
-     *  A function that can be connected to a {@link Signal}. If the slot function uses <code>this</code> then the correct
-     *  <code>this</code> must be bound to it, e.g., by declaring using an arrow function or applying <code>.bind(this)</code>
-     *  in the constructor of the class that implements the slot function.
+     *  A function that can be connected to a {@link Signal} or otherwise used as a callback. If the slot function uses
+     *  <code>this</code> then the correct <code>this</code> must be bound to it, e.g., by declaring using an arrow function or
+     *  applying <code>.bind(this)</code> in the constructor of the class that implements the slot function.
      *  @typedef {function} Slot
      *  @param {any} ...args - Any arguments included in the <code>Signal</code> are passed through to the <code>Slot</code>
      *      function.

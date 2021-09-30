@@ -34,7 +34,7 @@ JavaScript's `#` should be used for private members (not TypeScript's `private`)
 
 TypeScript's `protected` may be used in internal SDK code where necessary to make internal members available to derived
 classes. However, `protected` should not be used in classes that are part of the public API (because when transpiled to
-JavaScript, `protected` becomes `public`).
+JavaScript, `protected` in effect becomes `public`).
 
 
 ### Document Return Types

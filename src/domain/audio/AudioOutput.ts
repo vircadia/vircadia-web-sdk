@@ -49,6 +49,7 @@ class AudioOutput {
 
 
     get audioOutput(): MediaStream {
+        // C++  N/A
         if (!this.#_audioContext) {
             void this.#setUpAudioContext();
         }

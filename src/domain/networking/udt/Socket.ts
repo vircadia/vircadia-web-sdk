@@ -80,8 +80,7 @@ class Socket {
         this.#_webrtcSocket = new WebRTCSocket();
 
         // Connect signals.
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        this.#_webrtcSocket.readyRead.connect(this.readPendingDatagrams);  // Method has been bound above.
+        this.#_webrtcSocket.readyRead.connect(this.readPendingDatagrams);
 
         // WEBRTC TODO: Address further C++ code.
 
