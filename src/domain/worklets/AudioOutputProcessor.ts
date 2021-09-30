@@ -27,7 +27,7 @@
 class AudioOutputProcessor extends AudioWorkletProcessor {
 
     // Buffer blocks of audio data so that they can be played back smoothly.
-    // FIXME: All these fields should be private (#s) but Firefox doesn't currently support this (Sep 2021).
+    // FIXME: All these fields should be private (#s) but Firefox is handling transpiled code with them (Sep 2021).
     _audioBuffer: Int16Array[] = [];
     readonly MAX_AUDIO_BUFFER_LENGTH = 16;  // The maximum number of audio blocks to buffer.
     readonly MIN_AUDIO_BUFFER_LENGTH = 4;  // The minimum number of audio blocks to have before starting to play them.

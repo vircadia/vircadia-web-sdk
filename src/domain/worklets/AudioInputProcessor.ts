@@ -26,26 +26,27 @@
  */
 class AudioInputProcessor extends AudioWorkletProcessor {
 
-    readonly #SDK_MONO_BUFFER_SAMPLES = 240;
-    readonly #SDK_MONO_BUFFER_BYTES = 480;
-    readonly #SDK_STEREO_BUFFER_SAMPLES = 480;
-    readonly #SDK_STEREO_BUFFER_BYTES = 960;
+    // FIXME: All these fields should be private (#s) but Firefox is handling transpiled code with them (Sep 2021).
+    readonly SDK_MONO_BUFFER_SAMPLES = 240;
+    readonly SDK_MONO_BUFFER_BYTES = 480;
+    readonly SDK_STEREO_BUFFER_SAMPLES = 480;
+    readonly SDK_STEREO_BUFFER_BYTES = 960;
 
-    #_channelCount;
-    #_samplesSize;
-    #_bufferSize;
-    #_buffer: Int16Array;
-    #_bufferView: DataView;
-    #_bufferIndex = 0;  // The next write position.
+    _channelCount;
+    _samplesSize;
+    _bufferSize;
+    _buffer: Int16Array;
+    _bufferView: DataView;
+    _bufferIndex = 0;  // The next write position.
 
     constructor(options?: AudioWorkletNodeOptions) {
         super(options);  // eslint-disable-line
 
-        this.#_channelCount = options?.channelCount ? options.channelCount : 1;  // Default to mono.
-        this.#_samplesSize = this.#_channelCount === 1 ? this.#SDK_MONO_BUFFER_SAMPLES : this.#SDK_STEREO_BUFFER_SAMPLES;
-        this.#_buffer = new Int16Array(this.#_samplesSize);
-        this.#_bufferView = new DataView(this.#_buffer.buffer);
-        this.#_bufferSize = this.#_channelCount === 1 ? this.#SDK_MONO_BUFFER_BYTES : this.#SDK_STEREO_BUFFER_BYTES;
+        this._channelCount = options?.channelCount ? options.channelCount : 1;  // Default to mono.
+        this._samplesSize = this._channelCount === 1 ? this.SDK_MONO_BUFFER_SAMPLES : this.SDK_STEREO_BUFFER_SAMPLES;
+        this._buffer = new Int16Array(this._samplesSize);
+        this._bufferView = new DataView(this._buffer.buffer);
+        this._bufferSize = this._channelCount === 1 ? this.SDK_MONO_BUFFER_BYTES : this.SDK_STEREO_BUFFER_BYTES;
 
         this.port.onmessage = this.onMessage;
     }
@@ -59,8 +60,8 @@ class AudioInputProcessor extends AudioWorkletProcessor {
      */
     onMessage = (message: MessageEvent) => {
         if (message.data === "clear") {
-            this.#_buffer = new Int16Array(this.#_samplesSize);
-            this.#_bufferView = new DataView(this.#_buffer.buffer);
+            this._buffer = new Int16Array(this._samplesSize);
+            this._bufferView = new DataView(this._buffer.buffer);
         }
     };
 
@@ -73,7 +74,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     // eslint-disable-next-line
     // @ts-ignore
     process(inputList: Float32Array[][] /* , outputList: Float32Array[][], parameters: Record<string, Float32Array> */) {
-        if (!inputList || !inputList[0] || !inputList[0][0] || this.#_channelCount === 2 && !inputList[0][1]) {
+        if (!inputList || !inputList[0] || !inputList[0][0] || this._channelCount === 2 && !inputList[0][1]) {
             console.log("Early return!");
             return true;
         }
@@ -81,49 +82,49 @@ class AudioInputProcessor extends AudioWorkletProcessor {
         const FLOAT_TO_INT = 32767;
         const LITTLE_ENDIAN = true;
 
-        let index = this.#_bufferIndex;
+        let index = this._bufferIndex;
 
         const inputSamplesCount = inputList[0][0].length;
-        const bufferSize = this.#_bufferSize;
+        const bufferSize = this._bufferSize;
 
-        if (this.#_channelCount === 2) {
+        if (this._channelCount === 2) {
             // Stereo.
             const leftInput = inputList[0][0];
             const rightInput = inputList[0][1] as Float32Array;
-            let bufferView = this.#_bufferView;
+            let bufferView = this._bufferView;
             for (let i = 0; i < inputSamplesCount; i++) {
                 bufferView.setInt16(index, leftInput[i] as number * FLOAT_TO_INT, LITTLE_ENDIAN);
                 bufferView.setInt16(index + 2, rightInput[i] as number * FLOAT_TO_INT, LITTLE_ENDIAN);
                 index += 4;  // eslint-disable-line @typescript-eslint/no-magic-numbers
-                if (index === this.#_bufferSize) {
+                if (index === this._bufferSize) {
                     // The output buffer is full; send it off.
-                    this.port.postMessage(this.#_buffer.buffer, [this.#_buffer.buffer]);
-                    this.#_buffer = new Int16Array(this.#_samplesSize);
-                    this.#_bufferView = new DataView(this.#_buffer.buffer);
-                    bufferView = this.#_bufferView;
+                    this.port.postMessage(this._buffer.buffer, [this._buffer.buffer]);
+                    this._buffer = new Int16Array(this._samplesSize);
+                    this._bufferView = new DataView(this._buffer.buffer);
+                    bufferView = this._bufferView;
                     index = 0;
                 }
             }
         } else {
             // Mono.
             const monoInput = inputList[0][0];
-            let bufferView = this.#_bufferView;
+            let bufferView = this._bufferView;
             for (let i = 0; i < inputSamplesCount; i++) {
                 bufferView.setInt16(index, monoInput[i] as number * FLOAT_TO_INT, LITTLE_ENDIAN);
                 index += 2;
                 if (index === bufferSize) {
                     // The output buffer is full; send it off.
-                    this.port.postMessage(this.#_buffer.buffer, [this.#_buffer.buffer]);
-                    this.#_buffer = new Int16Array(this.#_samplesSize);
-                    this.#_bufferView = new DataView(this.#_buffer.buffer);
-                    bufferView = this.#_bufferView;
+                    this.port.postMessage(this._buffer.buffer, [this._buffer.buffer]);
+                    this._buffer = new Int16Array(this._samplesSize);
+                    this._bufferView = new DataView(this._buffer.buffer);
+                    bufferView = this._bufferView;
                     index = 0;
                 }
             }
 
         }
 
-        this.#_bufferIndex = index;
+        this._bufferIndex = index;
 
         return true;
     }
