@@ -13,6 +13,13 @@
 
 // WEBRTC TODO: Try using https://www.npmjs.com/package/@types/audioworklet instead.
 
+/* eslint-disable @typescript-eslint/no-redeclare */
+
+interface AudioWorkletProcessor {
+    readonly port: MessagePort;
+    process(inputs: Float32Array[][], outputs: Float32Array[][], parameters: Map<string, Float32Array>): void;
+}
+
 declare const AudioWorkletProcessor: {
     prototype: AudioWorkletProcessor;
     new(options?: AudioWorkletNodeOptions): AudioWorkletProcessor;

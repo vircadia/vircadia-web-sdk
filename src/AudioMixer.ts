@@ -50,6 +50,7 @@ import ContextManager from "./domain/shared/ContextManager";
  *      <em>Write-only.</em>
  *  @property {boolean} inputMuted=false - <code>true</code> to mute the <code>audioInput</code> so that it is not sent to the
  *      audio mixer, <code>false</code> to let it be sent.
+ *      <p>When muted, processing of audio input is suspended. This halts hardware processing, reducing CPU/battery usage.</p>
  */
 class AudioMixer extends AssignmentClient {
     // C++  Application.cpp
@@ -87,9 +88,8 @@ class AudioMixer extends AssignmentClient {
      */
 
 
+    #_audioClient;
     #_audioOutput;
-    #_audioInput: MediaStream | null = null;
-    #_audioInputMuted = false;
 
 
     constructor(contextID: number) {
@@ -98,6 +98,7 @@ class AudioMixer extends AssignmentClient {
         // Context
         ContextManager.set(contextID, AudioOutput);
         ContextManager.set(contextID, AudioClient, contextID);
+        this.#_audioClient = ContextManager.get(contextID, AudioClient) as AudioClient;
         this.#_audioOutput = ContextManager.get(contextID, AudioOutput) as AudioOutput;
     }
 
@@ -111,12 +112,16 @@ class AudioMixer extends AssignmentClient {
             console.error("Tried to set an invalid AudioMixer.audioInput value!");
             return;
         }
-        this.#_audioInput = audioInput;
-        console.log("$$$$$$$ Set audioInput =", this.#_audioInput);
+
+        void this.#_audioClient.switchInputDevice(audioInput).then((success) => {
+            if (!success) {
+                console.warn("Could not set the audio input.");
+            }
+        });
     }
 
     get inputMuted(): boolean {
-        return this.#_audioInputMuted;
+        return this.#_audioClient.isMuted();
     }
 
     set inputMuted(inputMuted: boolean) {
@@ -124,9 +129,7 @@ class AudioMixer extends AssignmentClient {
             console.error("Tried to set an invalid AudioMixer.inputMuted value!");
             return;
         }
-        this.#_audioInputMuted = inputMuted;
-        // $$$$$$$
-        console.log("$$$$$$$ Set inputMuted =", this.#_audioInputMuted);
+        this.#_audioClient.setMuted(inputMuted);
     }
 
 
@@ -145,7 +148,7 @@ class AudioMixer extends AssignmentClient {
     }
 
     /*@sdkdoc
-     *  Suspends playing audio received from the audio mixer. This halts hardware processing, reducing CPU/batter usage.
+     *  Suspends playing audio received from the audio mixer. This halts hardware processing, reducing CPU/battery usage.
      *  <p><em>Async</em></p>
      *  @async
      *  @returns {Promise<void>}

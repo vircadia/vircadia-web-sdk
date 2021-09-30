@@ -36,6 +36,8 @@ import SelectedAudioFormat from "./SelectedAudioFormat";
  *      {@link PacketScribe.PingReply&period;write|PingReply&period;write}
  *  @property {function} MixedAudio.read -
  *      {@link PacketScribe.MixedAudio&period;read|MixedAudio&period;read}
+ *  @property {function} MicrophoneAudioNoEcho.write -
+ *      {@link PacketScribe.MicrophoneAudioNoEcho&period;write|MixedAudio&period;write}
  *  @property {function} SilentAudioFrame.read -
  *      {@link PacketScribe.SilentAudioFrame&period;read|SilentAudioFrame&period;read}
  *  @property {function} SilentAudioFrame.write -

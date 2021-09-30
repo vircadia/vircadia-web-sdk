@@ -53,9 +53,9 @@ const MicrophoneAudioNoEcho = new class {
      *  @property {vec3} [avatarBoundingBoxScale] - The size of the axis-aligned bounding box containing the user's avatar. The
      *      user client sends this to the audio mixer.
      *  @property {Uint8Array} audioBuffer - The encoded audio data comprising the samples per the {@link AudioConstants},
-     *      i.e., 240 frames of stereo samples being 10ms of audio data. The number of bytes depends on the codec used &mdash;
-     *      e.g., 960 bytes for PCM stereo (240 frames, each a stereo pair of 2-byte samples), significantly fewer bytes for
-     *      other codecs.
+     *      i.e., 240 frames being 10ms of audio data. The number of bytes depends on the number of channels and the codec used
+     *      &mdash; e.g., 960 bytes for PCM stereo (240 frames, each a stereo pair of 2-byte samples), significantly fewer bytes
+     *      for other codecs.
      */
 
 
