@@ -121,4 +121,12 @@ describe("Signal - unit tests", () => {
         }, 100);
     });
 
+    test("Can obtain the public API object", () => {
+        const signal = new Signal();
+        const api = signal.value();
+        expect(typeof api.connect).toBe("function");
+        expect(typeof api.disconnect).toBe("function");
+        expect(api.emit).toBeUndefined();
+    });
+
 });

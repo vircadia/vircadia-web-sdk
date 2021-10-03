@@ -13,6 +13,11 @@ import assert from "./assert";
 
 type Slot = (...args: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 
+type SignalValue = {
+    connect: (slot: Slot) => void,
+    disconnect: (slot: Slot) => void
+};
+
 
 /*@devdoc
  *  The <code>Signal</code> class emulates Qt's signals and slots mechanism. In particular, a <code>Signal</code> object is
@@ -25,13 +30,27 @@ type Slot = (...args: any[]) => void; // eslint-disable-line @typescript-eslint/
 class Signal {
     // C++  Qt's signals and slots mechanism.
 
-    /*@devdoc
+    /*@sdkdoc
      *  A function that can be connected to a {@link Signal} or otherwise used as a callback. If the slot function uses
-     *  <code>this</code> then the correct <code>this</code> must be bound to it, e.g., by declaring using an arrow function or
-     *  applying <code>.bind(this)</code> in the constructor of the class that implements the slot function.
+     *  <code>this</code> then the correct <code>this</code> must be bound to it, e.g., by declaring it using an arrow function
+     *  or applying <code>.bind(this)</code> in the constructor of the class that implements the slot function.
      *  @typedef {function} Slot
      *  @param {any} ...args - Any arguments included in the <code>Signal</code> are passed through to the <code>Slot</code>
      *      function.
+     */
+
+    /*@sdkdoc
+     *  Connects or disconnects a {@link SignalValue} to or from a function.
+     *  @typedef {function} SignalConnector
+     *  @param {Slot} slot - The Slot function to connect to or disconnect from a SignalValue.
+     */
+
+    /*@sdkdoc
+     *  A SignalValue can be connected to, or subsequently disconnected from, a {@link Slot} function that is called when the
+     *  signal is triggered.
+     *  @typedef {object} SignalValue
+     *  @property {SignalConnector} connect - Connects the signal to a {@link Slot}.
+     *  @property {SignalConnector} disconnect - Disconnects the signal from a {@link Slot}.
      */
 
 
@@ -69,6 +88,22 @@ class Signal {
         });
     }
 
+    /*@devdoc
+     *  Gets the public API of the Signal object.
+     *  @returns {SignalValue} The public API of the Signal object.
+     */
+    value(): SignalValue {
+        return {
+            connect: (fn: Slot): void => {
+                this.connect(fn);
+            },
+            disconnect: (fn: Slot): void => {
+                this.disconnect(fn);
+            }
+        };
+    }
+
 }
 
 export default Signal;
+export type { SignalValue };
