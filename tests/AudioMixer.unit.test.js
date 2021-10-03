@@ -14,6 +14,8 @@ import AudioMixer from "../src/AudioMixer";
 
 describe("AudioMixer - unit tests", () => {
 
+    const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
+
     test("Can create an AudioMixer with a DomainServer", () => {
         const domainServer = new DomainServer();
         const audioMixer = new AudioMixer(domainServer.contextID);
@@ -22,4 +24,5 @@ describe("AudioMixer - unit tests", () => {
         expect(audioMixer.state).toBe(AudioMixer.UNAVAILABLE);
     });
 
+    log.mockReset();
 });

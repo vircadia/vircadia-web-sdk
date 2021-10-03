@@ -17,6 +17,8 @@ import ContextManager from "../../../src/domain/shared/ContextManager";
 
 describe("AudioClient - unit tests", () => {
 
+    const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
+
     test("The AudioClient can be obtained from the ContextManager", () => {
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, AddressManager);
@@ -27,4 +29,5 @@ describe("AudioClient - unit tests", () => {
         expect(audioClient instanceof AudioClient).toBe(true);
     });
 
+    log.mockReset();
 });
