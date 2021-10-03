@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import Signal from "../shared/Signal";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Uuid from "../shared/Uuid";
 
 
@@ -21,7 +21,7 @@ class AddressManager {
     // C++  AddressManager : public QObject, public Dependency
 
     #_domainUrl = "";
-    #_possibleDomainChangeRequired = new Signal();
+    #_possibleDomainChangeRequired = new SignalEmitter();
 
 
     /*@devdoc
@@ -66,7 +66,7 @@ class AddressManager {
      */
     get possibleDomainChangeRequired(): Signal {
         // C++  void possibleDomainChangeRequired(QUrl domainURL, QUuid domainID);
-        return this.#_possibleDomainChangeRequired;
+        return this.#_possibleDomainChangeRequired.signal();
     }
 
 

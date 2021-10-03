@@ -12,7 +12,7 @@ import WebRTCDataChannel from "./WebRTCDataChannel";
 import WebRTCSignalingChannel from "./WebRTCSignalingChannel";
 import { NodeTypeValue } from "../NodeType";
 import SockAddr from "../SockAddr";
-import Signal from "../../shared/Signal";
+import SignalEmitter, { Signal } from "../../shared/SignalEmitter";
 
 
 type WebRTCSocketDatagram = { buffer: ArrayBuffer | undefined, sender: SockAddr | undefined };
@@ -86,7 +86,7 @@ class WebRTCSocket {
 
     #_receivedQueue: Array<{ channelID: number, message: ArrayBuffer }> = [];
 
-    #_readyRead = new Signal();
+    #_readyRead = new SignalEmitter();
 
 
     constructor() {  // eslint-disable-line @typescript-eslint/no-useless-constructor
@@ -257,7 +257,7 @@ class WebRTCSocket {
      */
     get readyRead(): Signal {
         // C++  void readyRead()
-        return this.#_readyRead;
+        return this.#_readyRead.signal();
     }
 
 

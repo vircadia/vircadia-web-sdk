@@ -12,7 +12,7 @@
 
 import AssignmentClient from "./domain/AssignmentClient";
 import NodeType from "./domain/networking/NodeType";
-import Signal, { SignalValue } from "./domain/shared/Signal";
+import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
 
 
 /*@sdkdoc
@@ -35,8 +35,8 @@ import Signal, { SignalValue } from "./domain/shared/Signal";
  *      message mixer changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  *
- *  @property {SignalValue} messageReceived - Triggered when a text message is received.
- *  @property {SignalValue} dataReceived - Triggered when a data message is received.
+ *  @property {Signal} messageReceived - Triggered when a text message is received.
+ *  @property {Signal} dataReceived - Triggered when a data message is received.
  */
 class MessageMixer extends AssignmentClient {
     // C++  Application.cpp
@@ -74,8 +74,8 @@ class MessageMixer extends AssignmentClient {
      */
 
 
-    #_messageReceivedSignal = new Signal();
-    #_dataReceivedSignal = new Signal();
+    #_messageReceivedSignal = new SignalEmitter();
+    #_dataReceivedSignal = new SignalEmitter();
 
 
     constructor(contextID: number) {
@@ -83,12 +83,12 @@ class MessageMixer extends AssignmentClient {
     }
 
 
-    get messageReceived(): SignalValue {
-        return this.#_messageReceivedSignal.value();
+    get messageReceived(): Signal {
+        return this.#_messageReceivedSignal.signal();
     }
 
-    get dataReceived(): SignalValue {
-        return this.#_dataReceivedSignal.value();
+    get dataReceived(): Signal {
+        return this.#_dataReceivedSignal.signal();
     }
 
 

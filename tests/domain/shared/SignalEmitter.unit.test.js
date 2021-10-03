@@ -1,5 +1,5 @@
 //
-//  Signal.unit.test.js
+//  SignalEmitter.unit.test.js
 //
 //  Created by David Rowe on 6 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -11,10 +11,10 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import Signal from "../../../src/domain/shared/Signal";
+import SignalEmitter from "../../../src/domain/shared/SignalEmitter";
 
 
-describe("Signal - unit tests", () => {
+describe("SignalEmitter - unit tests", () => {
 
     let aCalled = null;
     let aParam1 = null;
@@ -45,7 +45,7 @@ describe("Signal - unit tests", () => {
         bParam1 = null;
         bParam2 = null;
 
-        let signal = new Signal();
+        let signal = new SignalEmitter();
         signal.connect(a);
         signal.emit("a", "b");
 
@@ -72,7 +72,7 @@ describe("Signal - unit tests", () => {
         bParam1 = null;
         bParam2 = null;
 
-        let signal = new Signal();
+        let signal = new SignalEmitter();
         signal.connect(a);
         signal.connect(b);
         signal.emit("a", "b");
@@ -100,8 +100,8 @@ describe("Signal - unit tests", () => {
         bParam1 = null;
         bParam2 = null;
 
-        let signal1 = new Signal();
-        let signal2 = new Signal();
+        let signal1 = new SignalEmitter();
+        let signal2 = new SignalEmitter();
         signal1.connect(a);
         signal2.connect(b);
         signal1.emit("a", "b");
@@ -122,8 +122,8 @@ describe("Signal - unit tests", () => {
     });
 
     test("Can obtain the public API object", () => {
-        const signal = new Signal();
-        const api = signal.value();
+        const signal = new SignalEmitter();
+        const api = signal.signal();
         expect(typeof api.connect).toBe("function");
         expect(typeof api.disconnect).toBe("function");
         expect(api.emit).toBeUndefined();

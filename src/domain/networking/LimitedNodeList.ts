@@ -20,7 +20,7 @@ import SocketType from "./SocketType";
 import PacketType from "./udt/PacketHeaders";
 import Socket from "./udt/Socket";
 import assert from "../shared/assert";
-import Signal from "../shared/Signal";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Uuid from "../shared/Uuid";
 
 
@@ -113,10 +113,10 @@ class LimitedNodeList {
 
     #_nodeHash: Map<bigint, Node> = new Map();  // Map<Uuid, Node>
 
-    #_nodeAdded = new Signal();
-    #_nodeActivated = new Signal();
-    #_nodeSocketUpdated = new Signal();
-    #_nodeKilled = new Signal();
+    #_nodeAdded = new SignalEmitter();
+    #_nodeActivated = new SignalEmitter();
+    #_nodeSocketUpdated = new SignalEmitter();
+    #_nodeKilled = new SignalEmitter();
 
 
     constructor(contextID: number) {
@@ -507,7 +507,7 @@ class LimitedNodeList {
      */
     get nodeAdded(): Signal {
         // C++  void nodeAdded(Node* node);
-        return this.#_nodeAdded;
+        return this.#_nodeAdded.signal();
     }
 
     /*@devdoc
@@ -518,7 +518,7 @@ class LimitedNodeList {
      */
     get nodeActivated(): Signal {
         // C++  void nodeActivated(Node* node);
-        return this.#_nodeActivated;
+        return this.#_nodeActivated.signal();
     }
 
     /*@devdoc
@@ -529,7 +529,7 @@ class LimitedNodeList {
      */
     get nodeSocketUpdated(): Signal {
         // C++  void nodeSocketUpdated(Node* node);
-        return this.#_nodeSocketUpdated;
+        return this.#_nodeSocketUpdated.signal();
     }
 
     /*@devdoc
@@ -540,7 +540,7 @@ class LimitedNodeList {
      */
     get nodeKilled(): Signal {
         // C++  void nodeKilled(Node* node);
-        return this.#_nodeKilled;
+        return this.#_nodeKilled.signal();
     }
 
 

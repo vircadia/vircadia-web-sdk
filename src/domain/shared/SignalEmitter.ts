@@ -1,5 +1,5 @@
 //
-//  Signal.ts
+//  SignalEmitter.ts
 //
 //  Created by David Rowe on 6 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -13,21 +13,21 @@ import assert from "./assert";
 
 type Slot = (...args: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-type SignalValue = {
+type Signal = {
     connect: (slot: Slot) => void,
     disconnect: (slot: Slot) => void
 };
 
 
 /*@devdoc
- *  The <code>Signal</code> class emulates Qt's signals and slots mechanism. In particular, a <code>Signal</code> object is
- *  implemented which can be connected to one or more "slot"<code>Slot</code> functions, "emitted" to asynchronously call those
- *  functions, and disconnected.
+ *  The <code>SignalEmitter</code> class emulates Qt's signals and slots mechanism. In particular, a <code>SignalEmitter</code>
+ *  object is implemented which can be connected to one or more "slot"<code>Slot</code> functions, "emitted" to asynchronously
+ *  call those functions, and disconnected.
  *  <p>C++: Qt's signals and slots mechanism.</p>
  *
- *  @class Signal
+ *  @class SignalEmitter
  */
-class Signal {
+class SignalEmitter {
     // C++  Qt's signals and slots mechanism.
 
     /*@sdkdoc
@@ -40,15 +40,15 @@ class Signal {
      */
 
     /*@sdkdoc
-     *  Connects or disconnects a {@link SignalValue} to or from a function.
+     *  Connects or disconnects a {@link Signal} to or from a function.
      *  @typedef {function} SignalConnector
-     *  @param {Slot} slot - The Slot function to connect to or disconnect from a SignalValue.
+     *  @param {Slot} slot - The Slot function to connect to or disconnect from.
      */
 
     /*@sdkdoc
-     *  A SignalValue can be connected to, or subsequently disconnected from, a {@link Slot} function that is called when the
-     *  signal is triggered.
-     *  @typedef {object} SignalValue
+     *  A Signal can be connected to, or subsequently disconnected from, a {@link Slot} function that is called when the signal
+     *  is triggered.
+     *  @typedef {object} Signal
      *  @property {SignalConnector} connect - Connects the signal to a {@link Slot}.
      *  @property {SignalConnector} disconnect - Disconnects the signal from a {@link Slot}.
      */
@@ -89,10 +89,10 @@ class Signal {
     }
 
     /*@devdoc
-     *  Gets the public API of the Signal object.
-     *  @returns {SignalValue} The public API of the Signal object.
+     *  Gets the Signal API of the SignalEmitter object.
+     *  @returns {Signal} The Signal API of the SignalEmitter object.
      */
-    value(): SignalValue {
+    signal(): Signal {
         return {
             connect: (fn: Slot): void => {
                 this.connect(fn);
@@ -105,5 +105,5 @@ class Signal {
 
 }
 
-export default Signal;
-export type { SignalValue };
+export default SignalEmitter;
+export type { Signal };
