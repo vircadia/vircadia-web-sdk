@@ -12,6 +12,7 @@
 
 import AssignmentClient from "./domain/AssignmentClient";
 import NodeType from "./domain/networking/NodeType";
+import Signal, { SignalValue } from "./domain/shared/Signal";
 
 
 /*@sdkdoc
@@ -33,6 +34,9 @@ import NodeType from "./domain/networking/NodeType";
  *  @property {MessageMixer~onStateChanged|null} onStateChanged - Sets a single function to be called when the state of the
  *      message mixer changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
+ *
+ *  @property {SignalValue} messageReceived - Triggered when a text message is received.
+ *  @property {SignalValue} dataReceived - Triggered when a data message is received.
  */
 class MessageMixer extends AssignmentClient {
     // C++  Application.cpp
@@ -69,8 +73,77 @@ class MessageMixer extends AssignmentClient {
      *      state.
      */
 
+
+    #_messageReceivedSignal = new Signal();
+    #_dataReceivedSignal = new Signal();
+
+
     constructor(contextID: number) {
         super(contextID, NodeType.MessagesMixer);
+    }
+
+
+    get messageReceived(): SignalValue {
+        return this.#_messageReceivedSignal.value();
+    }
+
+    get dataReceived(): SignalValue {
+        return this.#_dataReceivedSignal.value();
+    }
+
+
+    /*@sdkdoc
+     * Subscribes to receive messages on a particular message mixer channel.
+     * @function MessageMixer.subscribe
+     * @param {string} channel - The channel to subscribe to.
+     */
+    subscribe(channel: string): void {
+
+        // WEBRTC TODO
+
+    }
+
+    /*@sdkdoc
+     * Unsubscribes from receiving messages on a particular message mixer channel.
+     * @function MessageMixer.unsubscribe
+     * @param {string} channel - The channel to no longer subscribe to.
+     */
+    unsubscribe(channel: string): void {
+
+        // WEBRTC TODO
+
+    }
+
+    /*@sdkdoc
+     * Sends a text message on a channel.
+     * @function MessageMixer.sendMessage
+     * @param {string} channel - The channel to send the message on.
+     * @param {string} message - The message to send.
+     * @param {boolean} [localOnly=false] - If <code>false</code> then the message is sent to all user client, client entity,
+     *     server entity, and assignment client scripts in the domain.
+     *     <p>If <code>true</code> then the message is sent to all user client scripts and client entity scripts that are using
+     *     the MessageMixer's domain context. <em>Not implemented yet.</em></p>
+     */
+    sendMessage(channel: string, message: string, localOnly = false): void {
+
+        // WEBRTC TODO
+
+    }
+
+    /*@sdkdoc
+     * Sends a data message on a channel.
+     * @function MessageMixer.sendData
+     * @param {string} channel - The channel to send the data on.
+     * @param {ArrayBuffer} data - The data to send.
+     * @param {boolean} [localOnly=false] - If <code>false</code> then the data are sent to all user client, client entity,
+     *     server entity, and assignment client scripts in the domain.
+     *     <p>If <code>true</code> then the data are sent to all user client scripts and client entity scripts that are using
+     *     the MessageMixer's domain context. <em>Not implemented yet.</em></p>
+     */
+    sendData(channel: string, data: ArrayBuffer, localOnly = false): void {
+
+        // WEBRTC TODO
+
     }
 
 }

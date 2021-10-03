@@ -77,4 +77,20 @@ describe("MessageMixer - unit tests", () => {
         error.mockReset();
     });
 
+    test("Can connect to and disconnect from message signals", () => {
+        const domainServer = new DomainServer();
+        const messageMixer = new MessageMixer(domainServer.contextID);
+
+        function messageFunction() { /* no-op */ }
+        function dataFunction() { /* no-op */ }
+
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+        messageMixer.messageReceived.connect(messageFunction);
+        messageMixer.messageReceived.disconnect(messageFunction);
+        messageMixer.dataReceived.connect(dataFunction);
+        messageMixer.dataReceived.disconnect(dataFunction);
+        expect(error).toHaveBeenCalledTimes(0);
+        error.mockReset();
+    });
+
 });
