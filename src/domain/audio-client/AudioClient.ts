@@ -28,12 +28,18 @@ import ContextManager from "../shared/ContextManager";
  *  The <code>AudioClient</code> class manages user client audio, sending and receiving audio packets and interfacing these
  *  with Web Audio streams.
  *  <p>C++: <code>AudioClient : public AbstractAudioInterface, public Dependency</code></p>
+ *
  *  @class AudioClient
+ *  @property {string} contextItemType="AudioClient" - The type name for use with the {@link ContextManager}.
+ *      <p><em>Static. Read-only.</em></p>
+ *
  *  @param {number} contextID - The {@link ContextManager} context ID.
  */
 class AudioClient {
     // C++  AudioClient : public AbstractAudioInterface, public Dependency
     //      AbstractAudioInterface : public QObject
+
+    static readonly contextItemType = "AudioClient";
 
     static readonly #RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES = 100;
 

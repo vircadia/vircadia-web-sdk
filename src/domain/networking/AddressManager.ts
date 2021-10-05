@@ -15,10 +15,16 @@ import Uuid from "../shared/Uuid";
 /*@devdoc
  *  The <code>AddressManager</code> class manages the current location in the metaverse.
  *  <p>C++: <code>AddressManager : public QObject, public Dependency</code></p>
+ *
  *  @class AddressManager
+ *  @property {string} contextItemType="AddressManager" - The type name for use with the {@link ContextManager}.
+ *      <p><em>Static. Read-only.</em></p>
  */
 class AddressManager {
     // C++  AddressManager : public QObject, public Dependency
+
+    static readonly contextItemType = "AddressManager";
+
 
     #_domainUrl = "";
     #_possibleDomainChangeRequired = new Signal();
