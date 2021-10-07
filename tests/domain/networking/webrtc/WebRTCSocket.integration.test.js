@@ -41,17 +41,20 @@ describe("WebRTCSocket - integration tests", () => {
     });
 
     test("Can connect to the message mixer", (done) => {
+        // Need a domain server connection to relay mixer signaling messages.
         const webrtcSocket = new WebRTCSocket();
-        webrtcSocket.connectToHost(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.MessagesMixer, (socketID) => {
-            expect(socketID).toBeGreaterThanOrEqual(0);
-            expect(webrtcSocket.state(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.MessagesMixer))
-                .toBe(WebRTCSocket.CONNECTED);
-            expect(webrtcSocket.state(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.DomainServer))
-                .toBe(WebRTCSocket.SIGNALING);
-            expect(webrtcSocket.state(TestConfig.SERVER_SIGNALING_SOCKET_URL + "1", NodeType.MessagesMixer))
-                .toBe(WebRTCSocket.UNCONNECTED);
-            webrtcSocket.abort();
-            done();
+        webrtcSocket.connectToHost(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.DomainServer, () => {
+            webrtcSocket.connectToHost(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.MessagesMixer, (socketID) => {
+                expect(socketID).toBeGreaterThanOrEqual(0);
+                expect(webrtcSocket.state(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.MessagesMixer))
+                    .toBe(WebRTCSocket.CONNECTED);
+                expect(webrtcSocket.state(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.DomainServer))
+                    .toBe(WebRTCSocket.CONNECTED);
+                expect(webrtcSocket.state(TestConfig.SERVER_SIGNALING_SOCKET_URL + "1", NodeType.MessagesMixer))
+                    .toBe(WebRTCSocket.UNCONNECTED);
+                webrtcSocket.abort();
+                done();
+            });
         });
     });
 

@@ -44,6 +44,8 @@ class BasePacket {
         return UDT.MAX_PACKET_SIZE;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+    static #NUM_BYTES_HEADER = 4;  // Control bits and sequence number.
 
     protected _messageData: MessageData;
 
@@ -63,8 +65,7 @@ class BasePacket {
             assert(size >= 0 && size <= maxPayload, "Invalid packet size!", size);
 
             this._messageData = new MessageData();
-            const buffer = new ArrayBuffer(size);
-            this._messageData.data = new DataView(buffer);
+            this._messageData.buffer = new Uint8Array(size);
             this._messageData.dataPosition = 0;
             this._messageData.packetSize = size;
 
@@ -75,7 +76,7 @@ class BasePacket {
             const senderSockAddr = param2;
 
             this._messageData = new MessageData();
-            this._messageData.data = data;
+            this._messageData.buffer = new Uint8Array(data.buffer);
             this._messageData.dataPosition = 0;
             this._messageData.packetSize = size;
             this._messageData.senderSockAddr = senderSockAddr;
@@ -138,6 +139,14 @@ class BasePacket {
         return this._messageData.receiveTime;
     }
 
+
+    protected adjustPayloadStartAndCapacity(headerSize: number): void {
+        // C++ void adjustPayloadStartAndCapacity(qint64 headerSize, bool shouldDecreasePayloadSize = false)
+
+        // We don't use C++'s _payloadStart or _payloadCapacity members. Instead, we just need to reserve space for the header,
+        // taking into account the base packet's header.
+        this._messageData.dataPosition = BasePacket.#NUM_BYTES_HEADER + headerSize;
+    }
 }
 
 export default BasePacket;

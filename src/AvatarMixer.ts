@@ -22,7 +22,7 @@ import NodeType from "./domain/networking/NodeType";
  *  @param {number} contextID - The domain context to use. See {@link DomainServer|DomainServer.contextID}.
  *
  *  @property {AvatarMixer.State} UNAVAILABLE - There is no avatar mixer available - you're not connected to a domain or the
- *      domain doesn't have a avatar mixer running.
+ *      domain doesn't have an avatar mixer running.
  *      <em>Static. Read-only.</em>
  *  @property {AvatarMixer.State} DISCONNECTED - Not connected to the avatar mixer.
  *      <em>Static. Read-only.</em>
@@ -45,10 +45,10 @@ class AvatarMixer extends AssignmentClient {
      *          <tr><th>Name</th><th>Value</th><th>Description</th></tr>
      *      </thead>
      *      <tbody>
-     *          <tr><td>UNAVAILABLE</td><td>0</td><td>There is no avatar mixer available - you're not connected to a domain or
-     *              the domain doesn't have a avatar mixer running.</td></tr>
-     *          <tr><td>DISCONNECTED</td><td>1</td><td>Not connected to the avatar mixer.</td></tr>
-     *          <tr><td>CONNECTED</td><td>2</td><td>Connected to the avatar mixer.</td></tr>
+     *          <tr><td>UNAVAILABLE</td><td><code>0</code></td><td>There is no avatar mixer available - you're not connected to
+     *              a domain or the domain doesn't have a avatar mixer running.</td></tr>
+     *          <tr><td>DISCONNECTED</td><td><code>1</code></td><td>Not connected to the avatar mixer.</td></tr>
+     *          <tr><td>CONNECTED</td><td><code>2</code></td><td>Connected to the avatar mixer.</td></tr>
      *      </tbody>
      *  </table>
      *  @typedef {number} AvatarMixer.State

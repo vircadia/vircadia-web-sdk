@@ -9,7 +9,7 @@
 //
 
 import SockAddr from "../../../../src/domain/networking/SockAddr";
-import DomainListRequest from "../../../../src/domain/networking/packets/DomainList";
+import DomainList from "../../../../src/domain/networking/packets/DomainList";
 import Uuid from "../../../../src/domain/shared/Uuid";
 
 describe("DomainList - unit tests", () => {
@@ -18,7 +18,7 @@ describe("DomainList - unit tests", () => {
 
     test("Can read a DomainList packet", () => {
         /* eslint-disable-next-line max-len */
-        const MESSAGE_TEXT = "030000000218a3eda01ec4de456dbf07858a26c5a6486525652fd4cfdaef4ba3899b3a09e2c05f413fe2000000010100000000fd792d130005c48621581c4d000000000000003700418d539e40469f4f85991a2e26d3c1a103002bf9c711f29c00c0a8086ef29c0000079f00115b40fc7ccac5a9418c8a9d444018ad4d486f4062d328789b416a8146eae0f0d02655002bf9c711f29e00c0a8086ef29e0000079f0069c76bde4becd0ce442aa8cb5d13c87f286f6d6d2ae3a2ed67493c9fc3bcb8b601b924002bf9c711f29f00c0a8086ef29f0000079f003b4044eceda4577e4ca2a00f4177d64871e04d60256a079add443684315fb301da10a4002bf9c711f2a000c0a8086ef2a00000079f00bd916ff1ab42fdd64bc28bb5fc83fe7e3f72574c3a0cb9a21646948d73579b6b695dcf002bf9c711f2a100c0a8086ef2a10000079f00e77622cfcb8b839d42a9a56f7ff40b6eb0e0533ab0441a8a2f48a5a7a3956f0e9796a1002bf9c711f29d00c0a8086ef29d0000079f0093aca00ef67311254a43bbb63a403d885081";
+        const MESSAGE_TEXT = "030000000218a3eda01ec4de456dbf07858a26c5a648d918a0bf3247e1dd4f2293d2090edd56e385209500000bff010005cb1c31c626330005cb1c31c633ec000000000000025f00530ea4097df21e49f69c91691cbce65b7301002bf9c737fceb0100c0a8086efceb00000f9f0079df8d77ceed1bb84d4a9d7c1a6b6b0ccad9574d3a734f75be4c5d8ee7677fb3e2f70c01002bf9c737fce50100c0a8086efce500000f9f007fcec992d04d7b484d29b329a18339c94d9f4de50cb739a5504e74a951f706fd284abd01002bf9c737fce60100c0a8086efce600000f9f002684ea136d7b4ea344048639a16a45d5d0166f421045d34640437685f00e5bd8e9251601002bf9c737fce90100c0a8086efce900000f9f00cd3a958f5bafe09d49219e2588d27a787476418d1c008f837f4cb480e569f180a7cdd001002bf9c737fce70100c0a8086efce700000f9f00d32985acbc1570154664b33c3702ebede2716dd794d6149d95412ba476bc6dd160c6b701002bf9c737fce80100c0a8086efce800000f9f002c7375d1b8ed522f4fada1f047cd1b1194bc";
         const MESSAGE_START = 6;
         const arrayBuffer = new ArrayBuffer(MESSAGE_TEXT.length / 2);
         const uint8Array = new Uint8Array(arrayBuffer);
@@ -27,7 +27,7 @@ describe("DomainList - unit tests", () => {
         }
         const dataView = new DataView(arrayBuffer, MESSAGE_START);
 
-        const info = DomainListRequest.read(dataView);
+        const info = DomainList.read(dataView);
         expect(info.domainUUID instanceof Uuid).toBe(true);
         expect(typeof info.domainLocalID).toBe("number");
         expect(info.newUUID instanceof Uuid).toBe(true);
@@ -35,9 +35,8 @@ describe("DomainList - unit tests", () => {
         expect(typeof info.newPermissions).toBe("object");
         expect(typeof info.isAuthenticated).toBe("boolean");
         expect(typeof info.newConnection).toBe("boolean");
-
-        expect(info.nodes.length === 6).toBe(true);
-        const node = info.nodes[0];
+        expect(info.nodes).toHaveLength(6);
+        const node = info.nodes[5];
         expect(typeof node.type).toBe("string");
         expect(node.publicSocket instanceof SockAddr).toBe(true);
         expect(node.localSocket instanceof SockAddr).toBe(true);

@@ -38,14 +38,15 @@ type DomainListDetails = {
 const DomainList = new class {
 
     /*@devdoc
-     *  Information returned by {@link Packets|reading} a {@link PacketType(1)|DomainList} packet.
+     *  Information returned by {@link PacketScribe|reading} a {@link PacketType(1)|DomainList} packet.
      *  @typedef {object} PacketScribe.DomainListDetails
      *  @property {Uuid} domainUUID - The UUID of the domain server.
      *  @property {LocalID} domainLocalID - The local ID of the domain server.
      *  @property {Uuid} newUUID - The UUID assigned to the web client by the domain server.
      *  @property {LocalID} newLocalID - The local ID assigned to the web client by the domain server.
      *  @property {NodePermissions} newPermissions - The permissions granted to the user.
-     *  @property {boolean} isAuthenticated
+     *  @property {boolean} isAuthenticated - <code>true</code> if the domain server requires verified packets to include
+     *      authentication hash values, <code>false</code> if they're not needed.
      *  @property {bigint} connectRequestTimestamp
      *  @property {bigint} domainServerPingSendTime - The Unix time that the packet was sent, in usec.
      *  @property {bigint} domainServerCheckinProcessingTime - The duration from the time domain server received the packet
@@ -113,14 +114,16 @@ const DomainList = new class {
             dataPosition += 16;
 
             const publicSocket = new SockAddr();
-            dataPosition += 1;
+            publicSocket.setType(data.getUint8(dataPosition));
+            dataPosition += 2;  // Socket type and IP4.
             publicSocket.setAddress(data.getUint32(dataPosition, UDT.BIG_ENDIAN));
             dataPosition += 4;
             publicSocket.setPort(data.getUint16(dataPosition, UDT.BIG_ENDIAN));
             dataPosition += 2;
 
             const localSocket = new SockAddr();
-            dataPosition += 1;
+            localSocket.setType(data.getUint8(dataPosition));
+            dataPosition += 2;  // Socket type and IP4.
             localSocket.setAddress(data.getUint32(dataPosition, UDT.BIG_ENDIAN));
             dataPosition += 4;
             localSocket.setPort(data.getUint16(dataPosition, UDT.BIG_ENDIAN));
@@ -136,7 +139,7 @@ const DomainList = new class {
             const sessionLocalID = data.getUint16(dataPosition, UDT.BIG_ENDIAN);
             dataPosition += 2;
 
-            const connectionSecretUUID = new Uuid(data.getBigUint128(dataPosition, UDT.LITTLE_ENDIAN));
+            const connectionSecretUUID = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
             dataPosition += 16;
 
             nodes.push({

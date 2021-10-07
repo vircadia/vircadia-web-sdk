@@ -8,6 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import HMACAuth from "./HMACAuth";
 import { LocalID } from "./NetworkPeer";
 import NLPacket from "./NLPacket";
 import Node from "./Node";
@@ -15,6 +16,7 @@ import NodePermissions from "./NodePermissions";
 import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import SockAddr from "./SockAddr";
+import SocketType from "./SocketType";
 import PacketType from "./udt/PacketHeaders";
 import Socket from "./udt/Socket";
 import assert from "../shared/assert";
@@ -41,6 +43,7 @@ type NewNodeInfo = {
  *  <p>See also: {@link NodeList}.</p>
  *  <p>C++: <code>LimitedNodeList : public QObject, public Dependency</code></p>
  *  @class LimitedNodeList
+ *  @param {number} contextID - The {@link ContextManager} context ID.
  *
  *  @property {LimitedNodeList.ConnectReason} ConnectReason - Connect reason values.
  *  @property {number} INVALID_PORT=-1 - Invalid port.
@@ -89,8 +92,11 @@ class LimitedNodeList {
     protected _nodeSocket = new Socket();
     protected _localSockAddr = new SockAddr();
     protected _publicSockAddr = new SockAddr();
-    protected _packetReceiver = new PacketReceiver();
+    protected _packetReceiver;
+    protected _useAuthentication = true;
 
+
+    static readonly #ERROR_SENDING_PACKET_BYTES = -1;
 
     readonly #NULL_CONNECTION_ID = -1;
     readonly #SOLO_NODE_TYPES = new Set([
@@ -105,7 +111,7 @@ class LimitedNodeList {
     #_sessionUUID = new Uuid(Uuid.NULL);
     #_sessionLocalID: LocalID = 0;
 
-    #_nodeHash: Map<bigint, Node> = new Map();
+    #_nodeHash: Map<bigint, Node> = new Map();  // Map<Uuid, Node>
 
     #_nodeAdded = new Signal();
     #_nodeActivated = new Signal();
@@ -113,8 +119,10 @@ class LimitedNodeList {
     #_nodeKilled = new Signal();
 
 
-    constructor() {
+    constructor(contextID: number) {
         // C++  LimitedNodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
+
+        this._packetReceiver = new PacketReceiver(contextID);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -132,14 +140,15 @@ class LimitedNodeList {
      *  Sends a a solitary packet to an address, unreliably. The packet cannot be part of a multi-packet message.
      *  @param {NLPacket} packet - The packet to send.
      *  @param {SockAddr} sockAddr - The address to send it to.
-     *  @param {HMACAuth} [hmacAuth=null] - Not currently used.
+     *  @param {HMACAuth} [hmacAuth=null] - The hash-based message authentication code.
      *  @returns {number} The number of bytes sent.
      */
-    sendUnreliablePacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth = null): number {
+    sendUnreliablePacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth: HMACAuth | null = null): number {
         // C++  qint64 sendUnreliablePacket(const NLPacket& packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
 
-        assert(!packet.isPartOfMessage());
-        assert(!packet.isReliable());
+        assert(!packet.isPartOfMessage(), "Cannot send a part-message packet unreliably!");
+        assert(!packet.isReliable(), "Cannot send a reliable packet unreliably!");
+        assert(sockAddr.getType() === SocketType.WebRTC, "Destination is not a WebRTC socket!");
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -152,29 +161,75 @@ class LimitedNodeList {
      *  Sends a solitary packet to an address, reliably or unreliably depending on the packet. The packet cannot be part of a
      *  multi-packet message.
      *  @param {NLPacket} packet - The packet to send.
-     *  @param {SockAddr} sockAddr - The address to send it to.
-     *  @param {HMACAuth} [hmacAuth=null] - Not currently used.
-     *  @returns {number} The number of bytes sent.
+     *  @param {SockAddr|Node} sockAddr|destinationNode - The address to send the packet to.
+     *      <p>The packet's destination node.</p>
+     *  @param {HMACAuth|SockAddr} [hmacAuth|overridenSockAddr=null] - The message authentication object to use.
+     *      <p>The address to send the packet to, over-riding that of the <code>node</code>.
+     *  @returns {number} The number of bytes sent, or <code>-1</code> if none sent.
      */
-    sendPacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth = null): number {
+    sendPacket(packet: NLPacket, param1: SockAddr | Node, param2: HMACAuth | SockAddr | null = null): number {
         // C++  qint64 sendPacket(NLPacket* packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
-        assert(!packet.isPartOfMessage());
+        //      qint64 sendPacket(NLPacket* packet, const Node& destinationNode)
+        //      qint64 sendPacket(NLPacket* packet, const Node& destinationNode, const SockAddr& overridenSockAddr);
 
-        if (packet.isReliable()) {
+        if (param1 instanceof SockAddr) {
+            assert(param2 instanceof HMACAuth || param2 === null);
+            const sockAddr = param1;
+            const hmacAuth = param2 as HMACAuth | null;  // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
 
-            console.warn("sendPacket() : isReliable : Not implemented!");
+            if (packet.isReliable()) {
+
+                console.warn("sendPacket() : isReliable : Not implemented!");
+
+                // WEBRTC TODO: Address further C++ code.
+
+                return 0;
+
+            }
+
+            const size = this.sendUnreliablePacket(packet, sockAddr, hmacAuth);
 
             // WEBRTC TODO: Address further C++ code.
 
-            return 0;
+            return size;
 
         }
 
-        const size = this.sendUnreliablePacket(packet, sockAddr, hmacAuth);
+        if (param1 instanceof Node && param2 === null) {
+            const destinationNode = param1;
 
-        // WEBRTC TODO: Address further C++ code.
+            const activeSocket = destinationNode.getActiveSocket();
+            if (activeSocket) {
+                return this.sendPacket(packet, activeSocket, destinationNode.getAuthenticateHash());
+            }
 
-        return size;
+            console.log("[networking] LimitedNodeList.sendPacket called without active socket for node",
+                NodeType.getNodeTypeName(destinationNode.getType()), "- not sending");
+            return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
+        }
+
+        if (param1 instanceof Node && param2 instanceof SockAddr) {
+            const destinationNode = param1;
+            const overridenSockAddr = param2;
+
+            if (overridenSockAddr.isNull() && !destinationNode.getActiveSocket()) {
+                console.log("[networking] LimitedNodeList.sendPacket called without active socket for node",
+                    destinationNode.getUUID(), ". Not sending.");
+                return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
+            }
+
+            // Use the node's active socket as the destination socket if there is no overridden socket address.
+            let destinationSockAddr = overridenSockAddr.isNull() ? destinationNode.getActiveSocket() : overridenSockAddr;
+            if (destinationSockAddr === null) {
+                destinationSockAddr = new SockAddr();
+            }
+
+            return this.sendPacket(packet, destinationSockAddr, destinationNode.getAuthenticateHash());
+
+        }
+
+        console.error("Invalid parameters in LimiteNodeList.sendPacket()!", typeof packet, typeof param1, typeof param2);
+        return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
     }
 
     /*@devdoc
@@ -231,6 +286,11 @@ class LimitedNodeList {
 
         const matchingNode = this.#_nodeHash.get(uuid.value());
         if (matchingNode) {
+
+            // WebRTC: Retain current public and local socket ports (data channel IDs).
+            publicSocket.setPort(matchingNode.getPublicSocket().getPort());
+            localSocket.setPort(matchingNode.getLocalSocket().getPort());
+
             matchingNode.setPublicSocket(publicSocket);
             matchingNode.setLocalSocket(localSocket);
             matchingNode.setPermissions(permissions);
@@ -243,16 +303,22 @@ class LimitedNodeList {
 
         // If this is a solo node then the domain server has replaced it and any previous node of the type should be killed.
         if (this.#SOLO_NODE_TYPES.has(nodeType)) {
-            this.#removeOldNode(this.soloNodeOfType(nodeType));
+            const oldNode = this.soloNodeOfType(nodeType);
+            if (oldNode) {
+
+                // WebRTC: Clean up old node's connection here before removing the node, rather than below.
+                this._nodeSocket.cleanupConnection(oldNode.getPublicSocket());
+                this._nodeSocket.cleanupConnection(oldNode.getLocalSocket());
+
+                this.#removeOldNode(this.soloNodeOfType(nodeType));
+            }
+
         }
 
-        // If there is a new node with the same socket, this is a reconnection, kill the old node
-        this.#removeOldNode(this.findNodeWithAddr(publicSocket));
-        this.#removeOldNode(this.findNodeWithAddr(localSocket));
+        // WebRTC: Further calls to #removeOldNode() are not needed because user clients are only told of solo nodes, which are
+        // handled above.
 
-        // If there is an old Connection to the new node's address, kill it.
-        this._nodeSocket.cleanupConnection(publicSocket);
-        this._nodeSocket.cleanupConnection(localSocket);
+        // WebRTC: Old connections are cleaned up before removing any old node, above.
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -310,6 +376,21 @@ class LimitedNodeList {
         return matchingNode;
     }
 
+    /*@devdoc
+     *  Gets the node with a specified local ID.
+     *  @param {number} localID - The local ID of the node to get.
+     *  @returns {Node|null} The node with the specified local ID if found, <code>null</code> if not found.
+     */
+    nodeWithLocalID(localID: number): Node | null {
+        // C++  Node* nodeWithLocalID(Node::LocalID localID)
+        for (const node of this.#_nodeHash.values()) {
+            if (node.getLocalID() === localID) {
+                return node;
+            }
+        }
+        return null;
+    }
+
 
     /*@devdoc
      *  Gets the client's local socket network address.
@@ -346,8 +427,8 @@ class LimitedNodeList {
 
 
     /*@devdoc
-     *  Gets the node's UUID as assigned by the domain server  for the connection session.
-     *  @returns {LocalID} The node's session UUID.
+     *  Gets the node's UUID as assigned by the domain server for the connection session.
+     *  @returns {Uuid} The node's session UUID.
      */
     getSessionUUID(): Uuid {
         // C++  LocalID getSessionUUID()
@@ -355,8 +436,8 @@ class LimitedNodeList {
     }
 
     /*@devdoc
-     *  Sets the node's UUID as assigned by the domain server  for the connection session.
-     *  @param {LocalID} sessionUUID - The node's session UUID.
+     *  Sets the node's UUID as assigned by the domain server for the connection session.
+     *  @param {Uuid} sessionUUID - The node's session UUID.
      */
     setSessionUUID(sessionUUID: Uuid): void {
         // C++  void setSessionUUID(const QUuid& sessionUUID);
@@ -381,11 +462,29 @@ class LimitedNodeList {
         this.#_sessionLocalID = sessionLocalID;
     }
 
+    /*@devdoc
+     *  Gets whether packet content should be authenticated. The default value is <code>true</code>.
+     *  @returns {boolean} <code>true</code> if packet content should be authenticated, <code>false</code> if it shouldn't be.
+     */
+    getAuthenticatePackets(): boolean {
+        return this._useAuthentication;
+    }
+
+    /*@devdoc
+     *  Sets whether packet content should be authenticated.
+     *  @param {boolean} useAuthentication - <code>true</code> if packet content should be authenticated, <code>false</code> if
+     *      it shouldn't be.
+     */
+    setAuthenticatePackets(useAuthentication: boolean): void {
+        this._useAuthentication = useAuthentication;
+    }
+
 
     /*@devdoc
      *  Resets the NodeList, closing all connections and deleting all node data.
+     *  @function LimitedNodeList.reset
+     *  @type {Slot}
      *  @param {string} reason - The reason for resetting.
-     *  @returns {Slot}
      */
     // eslint-disable-next-line
     // @ts-ignore
@@ -412,7 +511,7 @@ class LimitedNodeList {
     }
 
     /*@devdoc
-     *  Triggered when the network connection to the node is established.
+     *  Triggered when the network connection to a node is established.
      *  @function LimitedNodeList.nodeActivated
      *  @param {Node} node - The node that activated.
      *  @returns {Signal}
@@ -450,7 +549,13 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.addOrUpdateNode(info.uuid, info.type, info.publicSocket, info.localSocket, info.sessionLocalID, info.isReplicated,
+        // WebRTC: The public and local SockAddrs provided are the assignment clients' UDP SockAddrs. Use their IP addresses as
+        // nominal WebRTC addresses but leave their ports to be filled in later - either when updating an existing node or when
+        // the WebRTC connection is made (NodeList.#activateSocketFromNodeCommunication()).
+        const publicSocket = new SockAddr(SocketType.WebRTC, info.publicSocket.getAddress(), 0);
+        const localSocket = new SockAddr(SocketType.WebRTC, info.localSocket.getAddress(), 0);
+
+        this.addOrUpdateNode(info.uuid, info.type, publicSocket, localSocket, info.sessionLocalID, info.isReplicated,
             false, info.connectionSecretUUID, info.permissions);
 
         // WEBRTC TODO: Address further C++ code.
@@ -495,17 +600,16 @@ class LimitedNodeList {
     }
 
 
-    #fillPacketHeader(packet: NLPacket, hmacAuth: null): void {
+    #fillPacketHeader(packet: NLPacket, hmacAuth: HMACAuth | null): void {
         // C++  void fillPacketHeader(const NLPacket& packet, HMACAuth* hmacAuth = nullptr) {
         if (!PacketType.getNonSourcedPackets().has(packet.getType())) {
             packet.writeSourceID(this.getSessionLocalID());
         }
 
-        if (hmacAuth) {
-            console.warn("fillPacketHeader() : hmacAuth : Not implemented!");
-
-            // WEBRTC TODO: Address further C++ code.
-
+        if (this._useAuthentication && hmacAuth
+                && !PacketType.getNonSourcedPackets().has(packet.getType())
+                && !PacketType.getNonVerifiedPackets().has(packet.getType())) {
+            packet.writeVerificationHash(hmacAuth);
         }
     }
 

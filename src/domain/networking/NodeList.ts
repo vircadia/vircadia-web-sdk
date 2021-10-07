@@ -12,29 +12,37 @@ import AddressManager from "./AddressManager";
 import DomainHandler from "./DomainHandler";
 import FingerprintUtils from "./FingerprintUtils";
 import LimitedNodeList from "./LimitedNodeList";
+import NLPacket from "./NLPacket";
+import Node from "./Node";
 import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import ReceivedMessage from "./ReceivedMessage";
-import NLPacket from "../networking/NLPacket";
-import Node from "../networking/Node";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
+import Socket from "./udt/Socket";
+import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
 import Uuid from "../shared/Uuid";
-import Socket from "./udt/Socket";
 
 
 /*@devdoc
  *  The <code>NodeList</code> class manages the domain server plus all the nodes (assignment clients) that the client is
  *  connected to. This includes their presence and communications with them via the Vircadia protocol.
  *  <p>C++: <code>NodeList : LimitedNodeList</code></p>
+ *
  *  @class NodeList
  *  @extends LimitedNodeList
+ *  @property {string} contextItemType="NodeList" - The type name for use with the {@link ContextManager}.
+ *      <p><em>Static. Read-only.</em></p>
+ *
  *  @param {number} contextID - The {@link ContextManager} context ID.
  *  @param {NodeType} [ownerType=Agent] - The type of object that the NodeList is being used in.
  */
 class NodeList extends LimitedNodeList {
     // C++  NodeList : public LimitedNodeList
+
+    static readonly contextItemType = "NodeList";
+
 
     #_ownerType = NodeType.Agent;
     #_connectReason = LimitedNodeList.ConnectReason.Connect;
@@ -49,7 +57,7 @@ class NodeList extends LimitedNodeList {
     constructor(contextID: number) {
         // C++  NodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
-        super();
+        super(contextID);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -57,7 +65,7 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.#_addressManager = <AddressManager>ContextManager.get(contextID, AddressManager);
+        this.#_addressManager = ContextManager.get(contextID, AddressManager) as AddressManager;
         this.#_addressManager.possibleDomainChangeRequired.connect(this.#_domainHandler.setURLAndID);
 
         // WEBRTC TODO: Address further C++ code.
@@ -71,8 +79,8 @@ class NodeList extends LimitedNodeList {
         // WEBRTC TODO: Address further C++ code.
 
         // Whenever there is a new node connect to it.
-        this.nodeAdded.connect(this.#openWebRTCConnection);
-        this.nodeSocketUpdated.connect(this.#openWebRTCConnection);
+        this.nodeAdded.connect(this.#startNodeHolePunch);
+        this.nodeSocketUpdated.connect(this.#startNodeHolePunch);
 
         // Whenever we get a new node we may need to re-send our set of ignored nodes to it.
         this.nodeActivated.connect(this.#maybeSendIgnoreSetToNode);
@@ -81,6 +89,8 @@ class NodeList extends LimitedNodeList {
 
         this._packetReceiver.registerListener(PacketType.DomainList,
             PacketReceiver.makeUnsourcedListenerReference(this.processDomainList));
+        this._packetReceiver.registerListener(PacketType.Ping,
+            PacketReceiver.makeSourcedListenerReference(this.processPingPacket));
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -131,12 +141,117 @@ class NodeList extends LimitedNodeList {
 
 
     /*@devdoc
+     *  Processes a {@link PacketType(1)|DomainList} message received from the domain server.
+     *  @function NodeList.processDomainList
+     *  @param {ReceivedMessage} message - The DomainList message.
+     *  @type {Listener}
+     */
+    processDomainList = (message: ReceivedMessage): void => {
+        // C++  processDomainList(ReceivedMessage* message)
+
+        // WEBRTC TODO: This should involve a NLPacketList, not just a single NLPacket.
+
+        const info = PacketScribe.DomainList.read(message.getMessage());
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.setSessionLocalID(info.newLocalID);
+        this.setSessionUUID(info.newUUID);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        if (!this.#_domainHandler.isConnected()) {
+            this.#_domainHandler.setLocalID(info.domainLocalID);
+            this.#_domainHandler.setUUID(info.domainUUID);
+            this.#_domainHandler.setIsConnected(true);
+
+            // WEBRTC TODO: Address further C++ code.
+
+        }
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.setAuthenticatePackets(info.isAuthenticated);
+
+        for (const node of info.nodes) {
+            // If the public socket address is 0 then it's reachable at the same IP as the domain server.
+            if (node.publicSocket.getAddress() === 0) {
+                node.publicSocket.setAddress(this.#_domainHandler.getSockAddr().getAddress());
+            }
+
+            this.addNewNode(node);
+        }
+
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|DomainServerRemovedNode} message received from the domain server.
+     *  @function NodeList.processDomainServerRemovedNode
+     *  @type {Listener}
+     *  @param {ReceivedMessage} message - The DomainServerRemovedNode message.
+     */
+    processDomainServerRemovedNode = (message: ReceivedMessage): void => {
+        // C++  void processDomainServerRemovedNode(ReceivedMessage* message)
+        const info = PacketScribe.DomainServerRemovedNode.read(message.getMessage());
+        const nodeUUID = info.nodeUUID;
+        console.log("[networking] Received packet from domain-server to remove node with UUID", nodeUUID.stringify());
+        this.killNodeWithUUID(nodeUUID);
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|Ping} packet received from an assignment client.
+     *  @function NodeList.processPingPacket
+     *  @type {Listener}
+     *  @param {ReceivedMessage} message - The Ping message.
+     *  @param {Node} sendingNode - The assignment client that sent the ping.
+     */
+    processPingPacket = (message: ReceivedMessage, sendingNode?: Node): void => {
+        // C++  void processPingPacket(ReceivedMessage* message, Node* sendingNode)
+        assert(sendingNode !== undefined);
+
+        const MS_TO_USEC = 1000n;
+
+        const info = PacketScribe.Ping.read(message.getMessage());
+
+        const replyPacket = PacketScribe.PingReply.write({
+            pingType: info.pingType,
+            timestampPing: info.timestamp,
+            timestampReply: BigInt(Date.now()) * MS_TO_USEC
+        });
+        this.sendPacket(replyPacket, sendingNode, message.getSenderSockAddr());
+
+        // WEBRTC TODO: Address further C++ code.
+
+        /*
+        int64_t connectionID;
+        message -> readPrimitive(& connectionID);
+
+        auto it = _connectionIDs.find(sendingNode -> getUUID());
+        if (it != _connectionIDs.end()) {
+            if (connectionID > it -> second) {
+                qDebug() << "Received a ping packet with a larger connection id (" << connectionID << ">" << it -> second
+                    << ") from " << sendingNode -> getUUID();
+                killNodeWithUUID(sendingNode -> getUUID(), connectionID);
+            }
+        }
+        */
+
+        // WEBRTC TODO: Move this to processPingReplyPacket() when implement sending pings to the assignment client.
+        this.#activateSocketFromNodeCommunication(message, sendingNode);
+
+    };
+
+
+    /*@devdoc
      *  Resets the LimitedNodeList, closing all connections and deleting all node data.
      *  @function NodeList.reset
+     *  @type {Slot}
      *  @param {string} reason - The reason for resetting.
      *  @param {boolean} [skipDomainHandlerReset=false] - <code>true</code> if should skip clearing DomainHandler information,
      *      e.g., if the DomainHandler initiated the reset; <code>false</code> if should clear DomainHandler information.
-     *  @returns {Slot}
      */
     override reset = (reason: string, skipDomainHandlerReset = false): void => {
         // C++  void reset(QString reason, bool skipDomainHandlerReset = false);
@@ -163,7 +278,7 @@ class NodeList extends LimitedNodeList {
      *  connection alive with a {@link PacketType(1)|DomainListRequest} packet. This method should be called by the client once
      *  every second.
      *  @function NodeList.sendDomainServerCheckIn
-     *  @returns {Slot}
+     *  @type {Slot}
      */
     sendDomainServerCheckIn = (): void => {
         // C++  void sendDomainServerCheckIn()
@@ -287,88 +402,31 @@ class NodeList extends LimitedNodeList {
         this.sendPacket(packet, domainSockAddr);
     };
 
-    /*@devdoc
-     *  Processes a {@link PacketType(1)|DomainList} message received from the domain server.
-     *  @function NodeList.processDomainList
-     *  @param {ReceivedMessage} message - The DomainList message.
-     *  @returns {Slot}
-     */
-    processDomainList = (message: ReceivedMessage): void => {
-        // C++  processDomainList(ReceivedMessage* message)
-
-        // WEBRTC TODO: This should involve a NLPacketList, not just a single NLPacket.
-
-        const info = PacketScribe.DomainList.read(message.getMessage());
-
-        // WEBRTC TODO: Address further C++ code.
-
-        this.setSessionLocalID(info.newLocalID);
-        this.setSessionUUID(info.newUUID);
-
-        // WEBRTC TODO: Address further C++ code.
-
-        if (!this.#_domainHandler.isConnected()) {
-            this.#_domainHandler.setLocalID(info.domainLocalID);
-            this.#_domainHandler.setUUID(info.domainUUID);
-            this.#_domainHandler.setIsConnected(true);
-
-            // WEBRTC TODO: Address further C++ code.
-
-        }
-
-        // WEBRTC TODO: Address further C++ code.
-
-        for (const node of info.nodes) {
-            // If the public socket address is 0 then it's reachable at the same IP as the domain server.
-            if (node.publicSocket.getAddress() === 0) {
-                node.publicSocket.setAddress(this.#_domainHandler.getSockAddr().getAddress());
-            }
-
-            this.addNewNode(node);
-        }
-
-    };
-
-    /*@devdoc
-     *  Processes a {@link PacketType(1)|DomainServerRemovedNode} message received from the domain server.
-     *  @function NodeList.processDomainServerRemovedNode
-     *  @param {ReceivedMessage} message - The DomainServerRemovedNode message.
-     *  @returns {Slot}
-     */
-    processDomainServerRemovedNode = (message: ReceivedMessage): void => {
-        // C++  void processDomainServerRemovedNode(ReceivedMessage* message)
-        const info = PacketScribe.DomainServerRemovedNode.read(message.getMessage());
-        const nodeUUID = info.nodeUUID;
-        console.log("[networking] Received packet from domain-server to remove node with UUID", nodeUUID.stringify());
-        this.killNodeWithUUID(nodeUUID);
-
-        // WEBRTC TODO: Address further C++ code.
-
-    };
-
 
     // eslint-disable-next-line
     // @ts-ignore
-    #activateSocketFromNodeCommunication(socketID: number, sendingNode: Node) {  // eslint-disable-line
+    #activateSocketFromNodeCommunication(message: ReceivedMessage, sendingNode: Node) {  // eslint-disable-line
         // C++  void activateSocketFromNodeCommunication(ReceivedMessage& message, const Node* sendingNode)
 
-        // Just use the node's public socket for WebRTC, for now.
+        // WebRTC: Just use the node's public socket for WebRTC, for now.
         if (sendingNode.getActiveSocket() === null) {
             sendingNode.activatePublicSocket();
         }
 
-        // WEBRTC TODO: Address public versus local sockets w.r.t. WebRTC and the Web SDK.
+        // WEBRTC TODO: Address public, local, and symmetric sockets w.r.t. WebRTC and the Web SDK.
 
-        // WEBRTC TODO: Address further C++ code.
+        // WEBRTC TODO: Address further C++ code. Audio mixer.
     }
 
 
     // Slot.
-    #openWebRTCConnection = (node: Node): void => {
+    #startNodeHolePunch = (node: Node): void => {
         // C++  void startNodeHolePunch(const Node* node);
-        // We don't need to do the hole punching in order to establish a connection to the node; we just need to open the
-        // WebRTC connection. WebRTC does the hole punching for us.
+        // While we don't need to do hole punching per se because WebRTC handles this, we initiate opening the WebRTC data
+        // channel and adopt the native client's use of pings and replys to coordinate setting up communications with the
+        // assignment client.
 
+        // WebRTC: Initiate opening the WebRTC data channel.
         if (this._nodeSocket.getSocketState(this.#_domainHandler.getURL(), node.getType()) === Socket.UNCONNECTED) {
 
             if (!this.#_domainHandler.isConnected()) {
@@ -377,12 +435,24 @@ class NodeList extends LimitedNodeList {
             }
 
             this._nodeSocket.openSocket(this.#_domainHandler.getURL(), node.getType(), (socketID) => {
-                this.#activateSocketFromNodeCommunication(socketID, node);
+                // We could in theory call #activateSocketFromNodeCommunication() here, however this is too soon for other
+                // user client / assignment client interactions.
+
+                // WebRTC: Fill in the public and local SockAddrs with the port just opened.
+                node.getPublicSocket().setPort(socketID);
+                node.getLocalSocket().setPort(socketID);
             });
 
         } else {
             console.error("Unexpected socket state for", NodeType.getNodeTypeName(node.getType()));
         }
+
+        // Vircadia clients can never have upstream nodes or downstream nodes so we don't need to cater for these.
+
+        // WEBRTC TODO: Implement the native client's ping timer and response handling to call
+        // #activateSocketFromNodeCommunication().
+        // In the interim we piggyback on the Ping packets received from the assignment client in processPingPacket(). However,
+        // this is most likely makes setting up the connection less responsive.
 
         // Vircadia clients can never have upstream nodes or downstream nodes so we don't need to cater for these.
     };

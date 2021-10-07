@@ -6,13 +6,14 @@
         "target": "ESNext", // ES2020+ required for BigInt literals. ESNext required for # methods and conditional constructors.
         "lib": [ "ES2020", "DOM" ],
         "sourceMap": true,
+        "declaration": true,
         "moduleResolution": "Node",
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
-        "isolatedModules": true,
+        "isolatedModules": false, // The audio worklets require this to be false.
         "preserveConstEnums": true,
-        "useDefineForClassFields": true,  // Required for ESNext.
+        "useDefineForClassFields": true, // Required for ESNext.
 
         // TypeScript 4.3
         "allowUnreachableCode": false,
@@ -35,8 +36,10 @@
     "include": [
         "./example/**/*",
         "./example/**/.eslintrc.js",
+        "./mocks/**/*",
         "./src/**/*",
         "./tests/**/*",
+        "./typings/**/*",
         "./.*.js",
         "./*.js",
         "./*.json"

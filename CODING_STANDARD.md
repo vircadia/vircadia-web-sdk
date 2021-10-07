@@ -34,7 +34,7 @@ JavaScript's `#` should be used for private members (not TypeScript's `private`)
 
 TypeScript's `protected` may be used in internal SDK code where necessary to make internal members available to derived
 classes. However, `protected` should not be used in classes that are part of the public API (because when transpiled to
-JavaScript, `protected` becomes `public`).
+JavaScript, `protected` in effect becomes `public`).
 
 
 ### Document Return Types
@@ -57,7 +57,7 @@ type. Note that for property values, this means that setters must be used.
 ### File Code Order
 
 Code in a file should be ordered as follows:
-- Imports. In directory order then alphabetical order.
+- Imports. In directory order then alphabetical order, except where inheritance requires differently.
 - Public types.
 - Private types.
 
@@ -71,13 +71,16 @@ Code in a file should be ordered as follows:
 - Constructor.
 - Public property setters and getters.
 - Public methods.
+- Public listeners.
 - Public slots.
 - Public signals' getters for.
 - Protected property setters and getters.
 - Protected methods.
+- Protected listeners.
 - Protected slots.
 - Protected signals' getters for.
 - Private methods.
+- Private listeners.
 - Private slots.
 - Private signals' getters for.
 

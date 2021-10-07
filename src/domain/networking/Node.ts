@@ -8,11 +8,12 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import HMACAuth from "./HMACAuth";
 import NetworkPeer, { LocalID } from "./NetworkPeer";
 import NodePermissions from "./NodePermissions";
-import Uuid from "../shared/Uuid";
 import NodeType, { NodeTypeValue } from "./NodeType";
 import SockAddr from "./SockAddr";
+import Uuid from "../shared/Uuid";
 
 
 /*@devdoc
@@ -37,6 +38,7 @@ class Node extends NetworkPeer {
     #_type = NodeType.Unassigned;
     #_permissions = new NodePermissions();
     #_connectionSecret = new Uuid();
+    #_authenticateHash: HMACAuth | null = null;
     #_isReplicated = false;
     #_isUpstream = false;
 
@@ -76,6 +78,16 @@ class Node extends NetworkPeer {
     }
 
     /*@devdoc
+     *  Gets the {@link HMACAuth} object used for authenticating the content of packets sent and received.
+     *  @returns {HMACAuth|null} The HMACAuth object if available, otherwise <code>null</code>.
+     */
+    getAuthenticateHash(): HMACAuth | null {
+        // C++  HMACAuth* getAuthenticateHash()
+        return this.#_authenticateHash;
+    }
+
+
+    /*@devdoc
      *  Gets the node's permissions.
      *  @returns {NodePermissions} The node's permissions.
      */
@@ -112,12 +124,12 @@ class Node extends NetworkPeer {
             return;
         }
 
-        // WEBRTC TODO: Address further C++ code.
+        if (!this.#_authenticateHash) {
+            this.#_authenticateHash = new HMACAuth();
+        }
 
         this.#_connectionSecret = connectionSecret;
-
-        // WEBRTC TODO: Address further C++ code.
-
+        this.#_authenticateHash.setKey(this.#_connectionSecret);
     }
 
     /*@devdoc

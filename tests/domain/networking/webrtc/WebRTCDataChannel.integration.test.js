@@ -204,19 +204,29 @@ describe("WebRTCDataChannel - integration tests", () => {
         expect.assertions(2);
         let webrtcSignalingChannel = new WebRTCSignalingChannel(TestConfig.SERVER_SIGNALING_SOCKET_URL);
         webrtcSignalingChannel.onopen = function () {
-            let webrtcDataChannel = new WebRTCDataChannel(NodeType.AudioMixer, webrtcSignalingChannel);
 
-            webrtcDataChannel.onopen = function () {
-                const echoMessage = "echo:Hello";
-                const sent = webrtcDataChannel.send(echoMessage);
-                expect(sent).toBe(true);
+            // Need a domain server connection to relay mixer signaling messages.
+            let domainDataChannel = new WebRTCDataChannel(NodeType.DomainServer, webrtcSignalingChannel);
+            domainDataChannel.onopen = function () {
+
+                let mixerDataChannel = new WebRTCDataChannel(NodeType.AudioMixer, webrtcSignalingChannel);
+                mixerDataChannel.onopen = function () {
+                    const echoMessage = "echo:Hello";
+                    const sent = mixerDataChannel.send(echoMessage);
+                    expect(sent).toBe(true);
+                };
+                mixerDataChannel.onmessage = function (data) {
+                    expect(new StringDecoder("utf8").write(new Uint8Array(data))).toBe("echo:Hello");
+                    mixerDataChannel.close();
+                };
+                mixerDataChannel.onclose = function () {
+                    mixerDataChannel = null;
+                    domainDataChannel.close();
+                };
             };
-            webrtcDataChannel.onmessage = function (data) {
-                expect(new StringDecoder("utf8").write(new Uint8Array(data))).toBe("echo:Hello");
-                webrtcDataChannel.close();
-            };
-            webrtcDataChannel.onclose = function () {
-                webrtcDataChannel = null;
+
+            domainDataChannel.onclose = function () {
+                domainDataChannel = null;
                 webrtcSignalingChannel.close();
                 webrtcSignalingChannel = null;
                 done();

@@ -10,11 +10,18 @@
 
 // In packet number order.
 import DomainList from "./DomainList";
-import DomainConnectionDenied from "./DomainConnectionDenied";
+import Ping from "./Ping";
+import PingReply from "./PingReply";
+import MixedAudio from "./MixedAudio";
+import MicrophoneAudioNoEcho from "./MicrophoneAudioNoEcho";
+import SilentAudioFrame from "./SilentAudioFrame";
 import DomainListRequest from "./DomainListRequest";
+import DomainConnectionDenied from "./DomainConnectionDenied";
 import DomainConnectRequest from "./DomainConnectRequest";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
 import DomainServerRemovedNode from "./DomainServerRemovedNode";
+import NegotiateAudioFormat from "./NegotiateAudioFormat";
+import SelectedAudioFormat from "./SelectedAudioFormat";
 
 
 /*@devdoc
@@ -23,6 +30,18 @@ import DomainServerRemovedNode from "./DomainServerRemovedNode";
  *  @namespace PacketScribe
  *  @property {function} DomainList.read -
  *      {@link PacketScribe.DomainList&period;read|DomainList&period;read}
+ *  @property {function} Ping.read -
+ *      {@link PacketScribe.Ping&period;read|Ping&period;read}
+ *  @property {function} PingReply.write -
+ *      {@link PacketScribe.PingReply&period;write|PingReply&period;write}
+ *  @property {function} MixedAudio.read -
+ *      {@link PacketScribe.MixedAudio&period;read|MixedAudio&period;read}
+ *  @property {function} MicrophoneAudioNoEcho.write -
+ *      {@link PacketScribe.MicrophoneAudioNoEcho&period;write|MixedAudio&period;write}
+ *  @property {function} SilentAudioFrame.read -
+ *      {@link PacketScribe.SilentAudioFrame&period;read|SilentAudioFrame&period;read}
+ *  @property {function} SilentAudioFrame.write -
+ *      {@link PacketScribe.SilentAudioFrame&period;write|SilentAudioFrame&period;write}
  *  @property {function} DomainListRequest.write -
  *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
  *  @property {function} DomainConnectionDenied.read -
@@ -33,6 +52,10 @@ import DomainServerRemovedNode from "./DomainServerRemovedNode";
  *      {@link PacketScribe.DomainDisconnectRequest&period;write|DomainDisconnectRequest&period;write}
  *  @property {function} DomainServerRemovedNode.read -
  *      {@link PacketScribe.DomainServerRemovedNode&period;read|DomainServerRemovedNode&period;read}
+ *  @property {function} NegotiateAudioFormat.write -
+ *      {@link PacketScribe.NegotiateAudioFormat&period;write|NegotiateAudioFormat&period;write}
+ *  @property {function} SelectedAudioFormat.read -
+ *      {@link PacketScribe.SelectedAudioFormat&period;read|SelectedAudioFormat&period;read}
  */
 
 // WEBRTC TODO: Implement similar in C++ to collect all packet reading/writing into the networking library code (and revise this
@@ -43,11 +66,18 @@ import DomainServerRemovedNode from "./DomainServerRemovedNode";
 const PacketScribe = {
     // In packet number order.
     DomainList,
+    Ping,
+    PingReply,
+    MixedAudio,
+    MicrophoneAudioNoEcho,
+    SilentAudioFrame,
     DomainListRequest,
     DomainConnectionDenied,
     DomainConnectRequest,
     DomainDisconnectRequest,
-    DomainServerRemovedNode
+    DomainServerRemovedNode,
+    NegotiateAudioFormat,
+    SelectedAudioFormat
 };
 
 export default PacketScribe;

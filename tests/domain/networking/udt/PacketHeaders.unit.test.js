@@ -23,7 +23,7 @@ describe("PacketType - unit tests", () => {
     });
 
     test("Packet version values can be accessed", () => {
-        expect(PacketType.versionForPacketType(PacketType.DomainConnectRequest)).toBe(26);
+        expect(PacketType.versionForPacketType(PacketType.DomainConnectRequest)).toBe(27);
     });
 
     test("Non-verified packets values can be accessed", () => {

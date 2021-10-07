@@ -8,6 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import HMACAuth from "../../../src/domain/networking/HMACAuth";
 import Node from "../../../src/domain/networking/Node";
 import NodePermissions from "../../../src/domain/networking/NodePermissions";
 import NodeType from "../../../src/domain/networking/NodeType";
@@ -56,11 +57,18 @@ describe("Node - unit tests", () => {
         expect(nodePermissions.permissions).toBe(7);
     });
 
-    test("Can get and set new secret values", () => {
+    test("Can get and set connection secret values", () => {
         const node = new Node(TEST_UUID, TEST_NODE_TYPE, TEST_PUBLIC_SOCKET, TEST_LOCAL_SOCKET);
         expect(node.getConnectionSecret().valueOf()).toBe(Uuid.NULL);
         node.setConnectionSecret(new Uuid(1234n));
         expect(node.getConnectionSecret().valueOf()).toBe(1234n);
+    });
+
+    test("Can get the HMACAuth object", () => {
+        const node = new Node(TEST_UUID, TEST_NODE_TYPE, TEST_PUBLIC_SOCKET, TEST_LOCAL_SOCKET);
+        expect(node.getAuthenticateHash()).toBeNull();
+        node.setConnectionSecret(new Uuid(1234n));
+        expect(node.getAuthenticateHash() instanceof HMACAuth).toBe(true);
     });
 
     test("Can get and set node is replicated values", () => {

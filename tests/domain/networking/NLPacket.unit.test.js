@@ -8,11 +8,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import HMACAuth from "../../../src/domain/networking/HMACAuth";
 import NLPacket from "../../../src/domain/networking/NLPacket";
 import SockAddr from "../../../src/domain/networking/SockAddr";
 import Packet from "../../../src/domain/networking/udt/Packet";
 import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
 import UDT from "../../../src/domain/networking/udt/UDT";
+import Uuid from "../../../src/domain/shared/Uuid";
 
 
 describe("NLPacket - unit tests", () => {
@@ -82,6 +84,15 @@ describe("NLPacket - unit tests", () => {
         expect(messageData.data.getUint16(6, UDT.LITTLE_ENDIAN)).toBe(0);
         nlPacket.writeSourceID(37);
         expect(messageData.data.getUint16(6, UDT.LITTLE_ENDIAN)).toBe(37);
+    });
+
+    test("Can write a verification hash into a packet", () => {
+        const nlPacket = new NLPacket(PacketType.NegotiateAudioFormat);
+        expect(nlPacket.getMessageData().data.getBigUint128(8)).toBe(0n);
+        const hmacAuth = new HMACAuth();
+        hmacAuth.setKey(new Uuid(1234n));
+        nlPacket.writeVerificationHash(hmacAuth);
+        expect(nlPacket.getMessageData().data.getBigUint128(12)).not.toBe(0n);
     });
 
 

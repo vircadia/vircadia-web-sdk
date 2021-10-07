@@ -40,6 +40,12 @@
             <span>Status:</span>
             <input id="audioMixerStatus" type="text" readonly="readonly" />
         </div>
+
+        <div class="row">
+            <span><input id="micMuted" type="checkbox" /></span>
+            <span><label for="micMuted">Mic muted.</label></span>
+        </div>
+        <audio id="audioElement" />
     </div>
 
     <h2>Avatar Mixer</h2>
@@ -57,6 +63,10 @@
             <input id="messageMixerStatus" type="text" readonly="readonly" />
         </div>
     </div>
+
+    <hr />
+
+    <div>Vircadia Web SDK: <span id="sdkVersion"></span></div>
 
 </body>
 

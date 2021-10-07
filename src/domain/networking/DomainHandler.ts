@@ -288,11 +288,35 @@ class DomainHandler {
 
 
     /*@devdoc
+     *  Processes a {@link PacketType(1)|DomainConnectionDenied} message received from the domain server.
+     *  @function DomainHandler.processDomainServerConnectionDeniedPacket
+     *  @type {Listener}
+     *  @param {ReceivedMessage} message - The DomainConnectionDenied message.
+     */
+    processDomainServerConnectionDeniedPacket = (message: ReceivedMessage): void => {
+        // C++  void DomainHandler::processDomainServerConnectionDeniedPacket(ReceivedMessage* message)
+
+        const info = PacketScribe.DomainConnectionDenied.read(message.getMessage());
+        const sanitizedExtraInfo = info.extraInfo.toLowerCase().startsWith("http") ? "" : info.extraInfo;
+        console.warn("[networking] The domain-server denied a connection request: ", info.reasonMessage, "extraInfo:",
+            sanitizedExtraInfo);
+
+        if (!this.#_domainConnectionRefusals.has(info.reasonMessage)) {
+            this.#_domainConnectionRefusals.add(info.reasonMessage);
+            this.setRedirectErrorState(this.#_errorDomainURL, info.reasonMessage, info.reasonCode, info.extraInfo);
+        }
+
+        // WEBRTC TODO: Address further C++ code.
+
+    };
+
+
+    /*@devdoc
      *  Sets the current domain's URL and pending ID.
      *  @function DomainHandler.setURLAndID
+     *  @type {Slot}
      *  @param {string} url - The domain's URL.
      *  @param {Uuid} id - The domain's pending ID.
-     *  @returns {Slot}
      */
     // eslint-disable-next-line
     // @ts-ignore
@@ -320,11 +344,11 @@ class DomainHandler {
      *  Acts upon a domain connection refusal, triggering a
      *  {@link DomainHandler.domainConnectionRefused|domainConnectionRefused} signal to be emitted.
      *  @function DomainHandler.setRedirectErrorState
+     *  @type {Slot}
      *  @param {string} errorUrl - Not currently used.
      *  @param {string} reasonMessage - The reason that the client was refused connection to the domain.
      *  @param {DomainHandler.ConnectionRefusedReason} reasonCode - The reason code for the refusal.
      *  @param {string} extraInfo - Extra information about the refusal.
-     *  @returns {Slot}
      */
     // eslint-disable-next-line
     // @ts-ignore
@@ -334,29 +358,6 @@ class DomainHandler {
 
         // WEBRTC TODO: Address further C++ code.
         this.#_domainConnectionRefused.emit(reasonMessage, reasonCode, extraInfo);
-    };
-
-    /*@devdoc
-     *  Processes a {@link PacketType(1)|DomainConnectionDenied} message received from the domain server.
-     *  @function DomainHandler.processDomainServerConnectionDeniedPacket
-     *  @param {ReceivedMessage} message - The DomainConnectionDenied message.
-     *  @returns {Slot}
-     */
-    processDomainServerConnectionDeniedPacket = (message: ReceivedMessage): void => {
-        // C++  void DomainHandler::processDomainServerConnectionDeniedPacket(ReceivedMessage* message)
-
-        const info = PacketScribe.DomainConnectionDenied.read(message.getMessage());
-        const sanitizedExtraInfo = info.extraInfo.toLowerCase().startsWith("http") ? "" : info.extraInfo;
-        console.warn("[networking] The domain-server denied a connection request: ", info.reasonMessage, "extraInfo:",
-            sanitizedExtraInfo);
-
-        if (!this.#_domainConnectionRefusals.has(info.reasonMessage)) {
-            this.#_domainConnectionRefusals.add(info.reasonMessage);
-            this.setRedirectErrorState(this.#_errorDomainURL, info.reasonMessage, info.reasonCode, info.extraInfo);
-        }
-
-        // WEBRTC TODO: Address further C++ code.
-
     };
 
 

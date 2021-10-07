@@ -8,17 +8,26 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import LimitedNodeList from "../../../../src/domain/networking/LimitedNodeList";
+import AddressManager from "../../../../src/domain/networking/AddressManager";
 import NLPacket from "../../../../src/domain/networking/NLPacket";
+import NodeList from "../../../../src/domain/networking/NodeList";
+import LimitedNodeList from "../../../../src/domain/networking/LimitedNodeList";  // Must come after NodeList.
 import NodeType from "../../../../src/domain/networking/NodeType";
 import SockAddr from "../../../../src/domain/networking/SockAddr";
 import DomainConnectRequest from "../../../../src/domain/networking/packets/DomainConnectRequest";
 import UDT from "../../../../src/domain/networking/udt/UDT";
 import PacketType, { protocolVersionsSignature } from "../../../../src/domain/networking/udt/PacketHeaders";
+import ContextManager from "../../../../src/domain/shared/ContextManager";
 import Uuid from "../../../../src/domain/shared/Uuid";
 
 
 describe("DomainConnectRequest - unit tests", () => {
+
+    // Context is required for LimitedNodeList.
+    const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AddressManager);
+    ContextManager.set(contextID, NodeList, contextID);
+
 
     let connectedPacketSize = 0;
     let disconnectedPacketSize = 0;

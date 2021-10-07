@@ -9,6 +9,7 @@
 //
 
 import NLPacket from "./NLPacket";
+import SockAddr from "./SockAddr";
 import Packet from "./udt/Packet";
 import { PacketTypeValue } from "./udt/PacketHeaders";
 
@@ -16,11 +17,14 @@ import { PacketTypeValue } from "./udt/PacketHeaders";
 /*@devdoc
  *  The <code>ReceivedMessage</code> class provides information on a Vircadia protocol message received via one or more Vircadia
  *  protocol packets.
+ *  <p>The likes of C++'s <code>readPrimitive()</code> and <code>readString()</code> are not implemented because it's better to
+ *  in-line such methods in the packet readers/writers for packet handling speed.</p>
  *  <p>C++: <code>ReceivedMessage : public QObject </code>
  *  @class ReceivedMessage
  *  @param {NLPacket} packet - The first (and possibly only) packet that forms the message.
  */
 class ReceivedMessage {
+    // C++  ReceivedMessage : public QObject
 
     #_messageData;
 
@@ -28,8 +32,7 @@ class ReceivedMessage {
     constructor(packet: NLPacket) {
         // C++  ReceivedMessage(NLPacket& packet)
         this.#_messageData = packet.getMessageData();  // Reference the data already collected; no need to copy it.
-        this.#_messageData.headData = this.#_messageData.data;  // Just reference the same data; no need to copy it.
-        this.#_messageData.packetType = this.#_messageData.type;  // Alias.
+        this.#_messageData.packetType = this.#_messageData.type;
         this.#_messageData.numPackets = 1;
         this.#_messageData.isComplete = this.#_messageData.packetPosition === Packet.PacketPosition.ONLY;
         this.#_messageData.firstPacketReceiveTime = this.#_messageData.receiveTime;
@@ -47,6 +50,24 @@ class ReceivedMessage {
     getType(): PacketTypeValue {
         // C++  PacketType getType()
         return this.#_messageData.packetType;
+    }
+
+    /*@devdoc
+     *  Gets the sender's address.
+     *  @returns {SockAddr} The sender's address if known, a null SockAddr if not known.
+     */
+    getSenderSockAddr(): SockAddr {
+        // C++  SockAddr getSenderSockAddr()
+        return this.#_messageData.senderSockAddr ? this.#_messageData.senderSockAddr : new SockAddr();
+    }
+
+    /*@devdoc
+     *  Gets the local ID of the node that is the source of the message.
+     *  @returns {number} The ID of the node that is the source of the packet if known (i.e., it is a sourced message),
+     *      {@link Node|Node.NULL_LOCAL_ID} if not known.
+     */
+    getSourceID(): number {
+        return this.#_messageData.sourceID;
     }
 
     /*@devdoc

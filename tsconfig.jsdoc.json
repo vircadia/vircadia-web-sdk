@@ -12,7 +12,8 @@
         "useDefineForClassFields": true
     },
     "include": [
-        "./src/**/*"
+        "./src/**/*",
+        "./typings/**/*"
     ],
     "exclude": [
         "./node_modules/**/*"

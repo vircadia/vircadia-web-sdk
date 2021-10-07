@@ -14,10 +14,12 @@ import ContextManager from "../../../src/domain/shared/ContextManager";
 describe("ContextManager - unit tests", () => {
 
     class A {
+        static contextItemType = "A";
         //
     }
 
     class B {
+        static contextItemType = "B";
         cid;
         sov;
         constructor(contextID, someOtherValue) {
@@ -27,8 +29,36 @@ describe("ContextManager - unit tests", () => {
     }
 
     class C {
+        static contextItemType = "C";
         //
     }
+
+    class NoName {
+        // static contextItemType = "NoName";
+    }
+
+    class BlankName {
+        static contextItemType = "";
+    }
+
+    test("The context item must include a \"contextItemName\" property", () => {
+        const contextID = ContextManager.createContext();
+        expect(() => {
+            ContextManager.set(contextID, NoName);
+        }).toThrow();
+        expect(() => {
+            ContextManager.get(contextID, NoName);
+        }).toThrow();
+        expect(() => {
+            ContextManager.set(contextID, BlankName);
+        }).toThrow();
+        expect(() => {
+            ContextManager.get(contextID, BlankName);
+        }).toThrow();
+        ContextManager.set(contextID, A);
+        const objectA = ContextManager.get(contextID, A);
+        expect(objectA instanceof A).toBe(true);
+    });
 
     test("Can create and use a context", () => {
         const contextID = ContextManager.createContext();
@@ -104,10 +134,12 @@ describe("ContextManager - unit tests", () => {
     test("Can get an existing object from the context when constructing a new object in the context", () => {
 
         class D {
+            static contextItemType = "D";
             propertyD = "X";
         }
 
         class E {
+            static contextItemType = "E";
             constructor(contextID) {
                 const objectD = ContextManager.get(contextID, D);
                 this.propertyE = objectD.propertyD;  // eslint-disable-line @typescript-eslint/no-unsafe-assignment

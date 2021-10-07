@@ -24,7 +24,7 @@ const DomainServerRemovedNode = new class {
     // C++  N/A
 
     /*@devdoc
-     *  Information returned by {@link Packets|reading} a {@link PacketType(1)|DomainServerRemovedNode} packet.
+     *  Information returned by {@link PacketScribe|reading} a {@link PacketType(1)|DomainServerRemovedNode} packet.
      *  @typedef {object} PacketScribe.DomainServerRemovedNodeDetails
      *  @property {Uuid} nodeUUID - The UUID of the assignment client node that has been removed.
      */

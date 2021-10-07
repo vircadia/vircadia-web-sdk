@@ -43,6 +43,7 @@ describe("DomainServer - integration tests", () => {
     // Suppress console.log messages from being displayed.
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
     const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
+    const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
 
 
     test("Can connect to and maintain a connection with the domain server", (done) => {
@@ -215,6 +216,7 @@ describe("DomainServer - integration tests", () => {
     });
 
 
+    error.mockReset();
     warn.mockReset();
     log.mockReset();
 });

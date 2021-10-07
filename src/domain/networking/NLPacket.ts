@@ -8,6 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import HMACAuth from "./HMACAuth";
 import Packet from "./udt/Packet";
 import PacketType, { PacketTypeValue } from "./udt/PacketHeaders";
 import UDT from "./udt/UDT";
@@ -75,17 +76,27 @@ class NLPacket extends Packet {
     }
 
 
+    static readonly #NUM_BYTES_PACKET_TYPE = 1;
+    static readonly #NUM_BYTES_PACKET_VERSION = 1;
     static readonly #NUM_BYTES_LOCALID = 2;
     static readonly #NUM_BYTES_MD5_HASH = 16;
 
     static #localHeaderSize(type: PacketTypeValue): number {
-        // C++  int NLPacket::localHeaderSize(PacketType type)
+        // C++  int localHeaderSize(PacketType type)
         const nonSourced = PacketType.getNonSourcedPackets().has(type);
         const nonVerified = PacketType.getNonVerifiedPackets().has(type);
         const optionalSize = (nonSourced ? 0 : NLPacket.#NUM_BYTES_LOCALID)
             + (nonSourced || nonVerified ? 0 : NLPacket.#NUM_BYTES_MD5_HASH);
-        // return sizeof(PacketType) + sizeof(PacketVersion) + optionalSize;
-        return 2 + optionalSize;
+        return 2 + optionalSize;  // C++: sizeof(PacketType) + sizeof(PacketVersion) + optionalSize
+    }
+
+    static #hashForPacketAndHMAC(packet: Packet, hash: HMACAuth): Uint8Array {
+        // C++  QByteArray hashForPacketAndHMAC(const udt::Packet& packet, HMACAuth& hash)
+        const offset = Packet.totalHeaderSize(packet.isPartOfMessage()) + NLPacket.#NUM_BYTES_PACKET_TYPE
+            + NLPacket.#NUM_BYTES_PACKET_VERSION + NLPacket.#NUM_BYTES_LOCALID + NLPacket.#NUM_BYTES_MD5_HASH;
+        const hashResult = new Uint8Array(NLPacket.#NUM_BYTES_MD5_HASH);
+        hash.calculateHash(hashResult, packet.getMessageData().buffer, offset, packet.getDataSize() - offset);
+        return hashResult;
     }
 
 
@@ -108,11 +119,8 @@ class NLPacket extends Packet {
             super(size === -1 ? -1 : NLPacket.#localHeaderSize(type) + size, isReliable, isPartOfMessage);
             this._messageData.type = type;
             this._messageData.version = version === 0 ? PacketType.versionForPacketType(type) : version;
-            // adjustPayloadStartAndCapacity(); - Not used in TypeScript.
+            this.adjustPayloadStartAndCapacity(NLPacket.#localHeaderSize(type));
             this.#writeTypeAndVersion();
-            if (!PacketType.getNonSourcedPackets().has(type)) {
-                this._messageData.dataPosition += NLPacket.#NUM_BYTES_LOCALID;
-            }
 
         } else if (param0 instanceof Packet) {
             // C++  NLPacket(Packet&& packet)
@@ -122,6 +130,7 @@ class NLPacket extends Packet {
             this.#readType();
             this.#readVersion();
             this.#readSourceID();
+            this.adjustPayloadStartAndCapacity(NLPacket.#localHeaderSize(this._messageData.type));
 
         } else {
             console.error("Invalid parameters in Packet constructor!", typeof param0, typeof param1, typeof param2,
@@ -170,6 +179,22 @@ class NLPacket extends Packet {
         this._messageData.sourceID = sourceID;
     }
 
+    /*@devdoc
+     *  Calculates the message authentication hash and writes it into the packet header.
+     *  @param {HMACAuth} hmacAuth - The message authentication object to use for calculating the hash.
+     */
+    writeVerificationHash(hmacAuth: HMACAuth): void {
+        // C++  void writeVerificationHash(HMACAuth & hmacAuth)
+        assert(!PacketType.getNonSourcedPackets().has(this._messageData.type)
+            && !PacketType.getNonVerifiedPackets().has(this._messageData.type));
+
+        const offset = Packet.totalHeaderSize(this.isPartOfMessage()) + NLPacket.#NUM_BYTES_PACKET_TYPE
+            + NLPacket.#NUM_BYTES_PACKET_VERSION + NLPacket.#NUM_BYTES_LOCALID;
+
+        const verificationHash = NLPacket.#hashForPacketAndHMAC(this, hmacAuth);
+        this._messageData.buffer.set(verificationHash, offset);
+    }
+
 
     #readType(): void {
         // C++  void readType()
@@ -191,7 +216,7 @@ class NLPacket extends Packet {
         if (PacketType.getNonSourcedPackets().has(messageData.type)) {
             messageData.sourceID = Node.NULL_LOCAL_ID;
         } else {
-            messageData.sourceID = messageData.data.getUint16(messageData.dataPosition, UDT.BIG_ENDIAN);
+            messageData.sourceID = messageData.data.getUint16(messageData.dataPosition, UDT.LITTLE_ENDIAN);
             messageData.dataPosition += 2;
         }
     }
@@ -202,7 +227,6 @@ class NLPacket extends Packet {
         const headerOffset = Packet.totalHeaderSize(messageData.isPartOfMessage);
         messageData.data.setUint8(headerOffset, messageData.type);
         messageData.data.setUint8(headerOffset + 1, messageData.version);
-        messageData.dataPosition += 2;
     }
 
 }

@@ -14,8 +14,20 @@ import PacketScribe from "../../../../src/domain/networking/packets/PacketScribe
 describe("Packets - unit tests", () => {
 
     test("The Packets namespace provides packet reading/writing", () => {
+        // In packet number order.
         expect(typeof PacketScribe.DomainList).toBe("object");
         expect(typeof PacketScribe.DomainList.read).toBe("function");
+        expect(typeof PacketScribe.Ping).toBe("object");
+        expect(typeof PacketScribe.Ping.read).toBe("function");
+        expect(typeof PacketScribe.PingReply).toBe("object");
+        expect(typeof PacketScribe.PingReply.write).toBe("function");
+        expect(typeof PacketScribe.MixedAudio).toBe("object");
+        expect(typeof PacketScribe.MixedAudio.read).toBe("function");
+        expect(typeof PacketScribe.MicrophoneAudioNoEcho).toBe("object");
+        expect(typeof PacketScribe.MicrophoneAudioNoEcho.write).toBe("function");
+        expect(typeof PacketScribe.SilentAudioFrame).toBe("object");
+        expect(typeof PacketScribe.SilentAudioFrame.read).toBe("function");
+        expect(typeof PacketScribe.SilentAudioFrame.write).toBe("function");
         expect(typeof PacketScribe.DomainListRequest).toBe("object");
         expect(typeof PacketScribe.DomainListRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainConnectionDenied).toBe("object");
@@ -26,6 +38,10 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.DomainDisconnectRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainServerRemovedNode).toBe("object");
         expect(typeof PacketScribe.DomainServerRemovedNode.read).toBe("function");
+        expect(typeof PacketScribe.NegotiateAudioFormat).toBe("object");
+        expect(typeof PacketScribe.NegotiateAudioFormat.write).toBe("function");
+        expect(typeof PacketScribe.SelectedAudioFormat).toBe("object");
+        expect(typeof PacketScribe.SelectedAudioFormat.read).toBe("function");
     });
 
 });

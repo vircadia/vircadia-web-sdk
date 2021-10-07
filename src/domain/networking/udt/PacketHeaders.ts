@@ -142,16 +142,26 @@ const enum PacketTypeValue {
  *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to the user client in response to a
  *      DomainConnectRequest or DomainListRequest packet, if the client is authorized to connect to the domain.<br />
  *      {@link PacketScribe.DomainListDetails}.
- *  @property {PacketType} Ping - <code>3</code>
- *  @property {PacketType} PingReply - <code>4</code>
+ *  @property {PacketType} Ping - <code>3</code> - Assignment clients periodically send this to the user client to check that it
+ *      is still connected.
+ *      {@link PacketScribe.PingDetails}.
+ *  @property {PacketType} PingReply - <code>4</code> - Sent in response to a Ping packet.
+ *      {@link PacketScribe.PingReplyDetails}.
  *  @property {PacketType} KillAvatar - <code>5</code>
  *  @property {PacketType} AvatarData - <code>6</code>
  *  @property {PacketType} InjectAudio - <code>7</code>
- *  @property {PacketType} MixedAudio - <code>8</code>
- *  @property {PacketType} MicrophoneAudioNoEcho - <code>9</code>
- *  @property {PacketType} MicrophoneAudioWithEcho - <code>10</code>
+ *  @property {PacketType} MixedAudio - <code>8</code> - The audio mixer repeatedly sends this to the user client when there is
+ *      audio to play at the user client's audio position.
+ *      {@link PacketScribe.MixedAudioDetails}.
+ *  @property {PacketType} MicrophoneAudioNoEcho - <code>9</code> - The user client sends this to the audio mixer with user
+ *      audio to play at the user client's audio position. The audio mixer should not echo the audio back to the user client.
+ *  @property {PacketType} MicrophoneAudioWithEcho - <code>10</code> - The user client sends this to the audio mixer with user
+ *      audio to play at the user client's audio position. The audio mixer should echo the audio back to the user client.
  *  @property {PacketType} BulkAvatarData - <code>11</code>
- *  @property {PacketType} SilentAudioFrame - <code>12</code>
+ *  @property {PacketType} SilentAudioFrame - <code>12</code> - The user client repeatedly sends this to the audio mixer when
+ *      there isn't any audio (microphone) input from the user. The user client's audio position is included. The audio mixer
+ *      repeatedly sends this to the user client when there isn't any audio to play at the user client's audio position.
+ *      {@link PacketScribe.SilentAudioFrameDetails}.
  *  @property {PacketType} DomainListRequest - <code>13</code> - The user client periodically sends this to the Domain Server
  *      to maintain connection to the domain. The Domain Server responds with a DomainList or DomainConnectionDenied
  *      packet.<br />
@@ -166,7 +176,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} AudioStreamStats - <code>18</code>
  *  @property {PacketType} DomainServerPathQuery - <code>19</code>
  *  @property {PacketType} DomainServerPathResponse - <code>20</code>
- *  @property {PacketType} DomainServerAddedNode - <code>21</code>
+ *  @property {PacketType} DomainServerAddedNode - <code>21</code> - The Domain Server sends this to user clients when an
+ *      assignment client start up, and to assignment clients and when another assignment client starts up or a user connects to
+ *      the domain.
  *  @property {PacketType} ICEServerPeerInformation - <code>22</code>
  *  @property {PacketType} ICEServerQuery - <code>23</code>
  *  @property {PacketType} OctreeStats - <code>24</code>
@@ -216,8 +228,12 @@ const enum PacketTypeValue {
  *  @property {PacketType} AssetMappingOperation - <code>61</code>
  *  @property {PacketType} AssetMappingOperationReply - <code>62</code>
  *  @property {PacketType} ICEServerHeartbeatACK - <code>63</code>
- *  @property {PacketType} NegotiateAudioFormat - <code>64</code>
- *  @property {PacketType} SelectedAudioFormat - <code>65</code>
+ *  @property {PacketType} NegotiateAudioFormat - <code>64</code> - The user client sends this to the audio mixer to initiate
+ *      negotiation of the audio codec to use.
+ *      {@link PacketScribe.NegotiateAudioFormatDetails}.
+ *  @property {PacketType} SelectedAudioFormat - <code>65</code> - The audio mixer sends this to the user client in response to
+ *      the client sending a NegotiateAudioFormat packet. It specifies the audio codec that the audio mixer has selected to use.
+ *      {@link PacketScribe.SelectedAudioFormatDetails}.
  *  @property {PacketType} MoreEntityShapes - <code>66</code>
  *  @property {PacketType} NodeKickRequest - <code>67</code>
  *  @property {PacketType} NodeMuteRequest - <code>68</code>
@@ -429,7 +445,8 @@ const PacketType = new class {
 
     readonly #_DomainListVersion = {
         // C++  DomainListVersion
-        HasConnectReason: 24
+        HasConnectReason: 24,
+        SocketTypes: 25
     };
 
     readonly #_DomainConnectionDeniedVersion = {
@@ -439,7 +456,19 @@ const PacketType = new class {
 
     readonly #_DomainConnectRequestVersion = {
         // C++  DomainConnectRequestVersion
-        HasCompressedSystemInfo: 26
+        HasCompressedSystemInfo: 26,
+        SocketTypes: 27
+    };
+
+    readonly #_DomainListRequestVersion = {
+        // C++  DomainListRequestVersion
+        PreSocketTypes: 22,
+        SocketTypes: 23
+    };
+
+    readonly #_AudioVersion = {
+        // C++  AudioVersion
+        StopInjectors: 24
     };
 
 
@@ -463,16 +492,25 @@ const PacketType = new class {
         const DEFAULT_VERSION = 22;
         switch (packetType) {
             case this.DomainList:
-                return this.#_DomainListVersion.HasConnectReason;
-            case this.DomainListRequest:
+                return this.#_DomainListVersion.SocketTypes;
+            case this.PingReply:
                 return DEFAULT_VERSION;
+            case this.SilentAudioFrame:
+            case this.MicrophoneAudioNoEcho:
+                return this.#_AudioVersion.StopInjectors;
+            case this.DomainListRequest:
+                return this.#_DomainListRequestVersion.SocketTypes;
             case this.DomainConnectionDenied:
                 return this.#_DomainConnectionDeniedVersion.IncludesExtraInfo;
             case this.DomainConnectRequest:
-                return this.#_DomainConnectRequestVersion.HasCompressedSystemInfo;
+                return this.#_DomainConnectRequestVersion.SocketTypes;
             case this.DomainDisconnectRequest:
                 return DEFAULT_VERSION;
             case this.DomainServerRemovedNode:
+                return DEFAULT_VERSION;
+            case this.NegotiateAudioFormat:
+                return DEFAULT_VERSION;
+            case this.SelectedAudioFormat:
                 return DEFAULT_VERSION;
 
                 // WebRTC TODO: Add other packets.
@@ -520,7 +558,7 @@ function protocolVersionsSignature(): Uint8Array {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
     const PROTOCOL_SIGNATURE_BYTES
-        = [0xa9, 0x35, 0x77, 0xea, 0xce, 0xb8, 0xb1, 0xb7, 0xd5, 0xdf, 0x9d, 0x38, 0xc5, 0x85, 0x0b, 0x09];
+        = [0xad, 0x15, 0xda, 0x90, 0xe0, 0x7d, 0x2c, 0x7b, 0x40, 0x83, 0x25, 0x38, 0x3a, 0xd8, 0xb7, 0x7d];
     /* eslint-enable @typescript-eslint/no-magic-numbers */
     return Uint8Array.from(PROTOCOL_SIGNATURE_BYTES);
 }

@@ -17,9 +17,6 @@ describe("BasePacket - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-    let buffer = null;
-    let dataView = null;
-    let sockAddr = null;
     const IP_127_0_0_1 = 127 * 2 ** 24 + 1;  // 127.0.0.1
 
     const error = jest.spyOn(console, "error").mockImplementation((a) => {
@@ -31,10 +28,10 @@ describe("BasePacket - unit tests", () => {
     }
 
     function createPacketFromDataView() {
-        buffer = new ArrayBuffer(10);
-        dataView = new DataView(buffer);
+        const buffer = new ArrayBuffer(10);
+        const dataView = new DataView(buffer);
         dataView.setUint8(0, 12);
-        sockAddr = new SockAddr();
+        const sockAddr = new SockAddr();
         sockAddr.setAddress(IP_127_0_0_1);
         sockAddr.setPort(7);
         return new BasePacket(dataView, dataView.byteLength, sockAddr);
@@ -51,6 +48,7 @@ describe("BasePacket - unit tests", () => {
         const messageData = packet.getMessageData();
         expect(messageData.packetSize).toBe(14);
         expect(messageData.data.byteLength).toBe(14);
+        expect(messageData.buffer.byteLength).toBe(14);
         for (let i = 0; i < messageData.packetSize; i++) {
             expect(messageData.data.getUint8(i)).toBe(0);
         }
@@ -61,7 +59,6 @@ describe("BasePacket - unit tests", () => {
         const packet = createPacketFromDataView();
         expect(packet.getDataSize()).toBe(10);
         const messageData = packet.getMessageData();
-        expect(messageData.data).toBe(dataView);
         expect(messageData.dataPosition).toBe(0);
         expect(messageData.packetSize).toBe(10);
         expect(messageData.senderSockAddr.getAddress()).toBe(IP_127_0_0_1);
