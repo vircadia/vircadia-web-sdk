@@ -36,3 +36,6 @@ export { default as AudioMixer } from "./AudioMixer";
 export { default as AvatarMixer } from "./AvatarMixer";
 export { default as MessageMixer } from "./MessageMixer";
 export type { AssignmentClientState } from "./domain/AssignmentClient";
+
+export { default as Signal } from "./domain/shared/Signal";
+export type { Slot } from "./domain/shared/Signal";
