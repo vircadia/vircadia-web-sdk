@@ -16,7 +16,7 @@ import assert from "../../shared/assert";
 
 /*@devdoc
  *  The <code>BasePacket</code> class implements the base data and information on a Vircadia protocol packet.
- *  <p>See also: {@link Packet} and {@link NLPacket}.
+ *  <p>See also: {@link Packet}, {@link NLPacket}, and {@link ControlPacket}.
  *  <p>C++: <code>BasePacket: public ExtendedIODevice : public QIODevice</code>
  *  @class BasePacket
  *  @param {number|DataView|BasePacket} size|data|packet - The size of the packet to create, in bytes. If <code>-1</code>, a
@@ -34,10 +34,13 @@ import assert from "../../shared/assert";
 class BasePacket {
     // C++  BasePacket: public ExtendedIODevice : public QIODevice
 
+
     /*@devdoc
      *  Gets the maximum size of a BasePacket's Vircadia protocol payload.
+     *  <p><em>Static</em></p>
      *  @function BasePacket.maxPayloadSize
-     *  @returns {number} The maximum Vircadia protocol payload size, in bytes.
+     *  @static
+     *  @returns {number} The maximum BasePacket payload size, in bytes.
      */
     static maxPayloadSize(): number {
         // C++  int maxPayloadSize()

@@ -20,7 +20,7 @@ import assert from "../shared/assert";
 /*@devdoc
  *  The <code>NLPacket</code> class implements a "node list" Vircadia protocol packet. Contains payload data, unlike a basic
  *  {@link Packet}.
- *  <p>See also: {@link BasePacket} and {@link Packet}.
+ *  <p>See also: {@link BasePacket}, {@link Packet}, and {@link ControlPacket}.
  *  <p>C++ <code>NLPacket : public Packet</code></p>
  *  @class NLPacket
  *  @extends Packet

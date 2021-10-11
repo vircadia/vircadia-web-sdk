@@ -16,11 +16,11 @@ import assert from "../../shared/assert";
 
 /*@devdoc
  *  The <code>Packet</code> class implements a basic Vircadia protocol packet.
- *  <p>See also: {@link BasePacket} and {@link NLPacket}.
+ *  <p>See also: {@link BasePacket}, {@link NLPacket}, and {@link ControlPacket}.
  *  <p>C++ <code>Packet : public BasePacket</code></p>
  *  @class Packet
  *  @extends BasePacket
- *  @param {number|DataView|Packet} size|data|packet - The size of the packet to create, in bytes.  If <code>-1</code>, a packet
+ *  @param {number|DataView|Packet} size|data|packet - The size of the packet to create, in bytes. If <code>-1</code>, a packet
  *      of the maximum size is created (though not all of it need be sent).
  *      <p>The raw byte data for a new packet.</p>
  *      <p>Another packet to reuse the packet data from. In this case, the packet's internal {@link MessageData} is reused by
@@ -94,7 +94,7 @@ class Packet extends BasePacket {
 
 
     /*@devdoc
-     *  Creates a new Packet &mdash; an alternative to using <code>new Packet(...)</code>.
+     *  Creates a new Packet from received data &mdash; an alternative to using <code>new Packet(...)</code>.
      *  <p><em>Static</em></p>
      *  @function Packet.fromReceivedPacket
      *  @param {DataView} data - The raw byte data of a new packet.
