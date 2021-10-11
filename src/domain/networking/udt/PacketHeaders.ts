@@ -222,8 +222,14 @@ const enum PacketTypeValue {
  *      <em>Reliable.</em>
  *      {@link PacketScribe.DomainServerRemovedNodeDetails}.
  *  @property {PacketType} MessagesData - <code>57</code>
- *  @property {PacketType} MessagesSubscribe - <code>58</code>
- *  @property {PacketType} MessagesUnsubscribe - <code>59</code>
+ *  @property {PacketType} MessagesSubscribe - <code>58</code> - The user client sends this to the message mixer to subscribe to
+ *      a message channel.<br />
+ *      <em>Reliable. Ordered.</em>
+ *      {@link PacketScribe.MessagesSubscribeDetails}.
+ *  @property {PacketType} MessagesUnsubscribe - <code>59</code> - The user client sends this to the message mixer to
+ *      unsubscribe from a message channel.<br />
+ *      <em>Reliable. Ordered.</em>
+ *      {@link PacketScribe.MessagesSubscribeDetails}.
  *  @property {PacketType} ICEServerHeartbeatDenied - <code>60</code>
  *  @property {PacketType} AssetMappingOperation - <code>61</code>
  *  @property {PacketType} AssetMappingOperationReply - <code>62</code>
@@ -507,6 +513,10 @@ const PacketType = new class {
             case this.DomainDisconnectRequest:
                 return DEFAULT_VERSION;
             case this.DomainServerRemovedNode:
+                return DEFAULT_VERSION;
+            case this.MessagesSubscribe:
+                return DEFAULT_VERSION;
+            case this.MessagesUnsubscribe:
                 return DEFAULT_VERSION;
             case this.NegotiateAudioFormat:
                 return DEFAULT_VERSION;
