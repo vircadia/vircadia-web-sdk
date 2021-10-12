@@ -11,6 +11,7 @@
 //
 
 import AssignmentClient from "./domain/AssignmentClient";
+import MessagesClient from "./domain/networking/MessagesClient";
 import NodeType from "./domain/networking/NodeType";
 import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
 
@@ -77,9 +78,13 @@ class MessageMixer extends AssignmentClient {
     #_messageReceivedSignal = new SignalEmitter();
     #_dataReceivedSignal = new SignalEmitter();
 
+    #_messagesClient;
+
 
     constructor(contextID: number) {
         super(contextID, NodeType.MessagesMixer);
+
+        this.#_messagesClient = new MessagesClient(contextID);
     }
 
 
@@ -93,36 +98,43 @@ class MessageMixer extends AssignmentClient {
 
 
     /*@sdkdoc
-     * Subscribes to receive messages on a particular message mixer channel.
+     * Subscribes the script environment to receive messages on a particular channel.
      * @function MessageMixer.subscribe
      * @param {string} channel - The channel to subscribe to.
      */
     subscribe(channel: string): void {
+        if (typeof channel !== "string" || channel.length === 0) {
+            console.error("[MessageMixer] subscribe() called with invalid channel value!");
+            return;
+        }
 
-        // WEBRTC TODO
-
+        this.#_messagesClient.subscribe(channel);
     }
 
     /*@sdkdoc
-     * Unsubscribes from receiving messages on a particular message mixer channel.
+     * Unsubscribes the script environment from receiving messages on a particular channel.
      * @function MessageMixer.unsubscribe
      * @param {string} channel - The channel to no longer subscribe to.
      */
     unsubscribe(channel: string): void {
+        if (typeof channel !== "string" || channel.length === 0) {
+            console.error("[MessageMixer] unsubscribe() called with invalid channel value!");
+            return;
+        }
 
-        // WEBRTC TODO
-
+        this.#_messagesClient.unsubscribe(channel);
     }
 
     /*@sdkdoc
      * Sends a text message on a channel.
+     * <p>Note: The sender will also receive the message if subscribed to the channel.</p>
      * @function MessageMixer.sendMessage
      * @param {string} channel - The channel to send the message on.
      * @param {string} message - The message to send.
      * @param {boolean} [localOnly=false] - If <code>false</code> then the message is sent to all user client, client entity,
      *     server entity, and assignment client scripts in the domain.
-     *     <p>If <code>true</code> then the message is sent to all user client scripts and client entity scripts that are using
-     *     the MessageMixer's domain context. <em>Not implemented yet.</em></p>
+     *     <p>If <code>true</code> then the message is sent to all user client scripts that are using the MessageMixer's domain
+     *     context. <em>Not implemented yet.</em></p>
      */
     sendMessage(channel: string, message: string, localOnly = false): void {
 
@@ -132,6 +144,7 @@ class MessageMixer extends AssignmentClient {
 
     /*@sdkdoc
      * Sends a data message on a channel.
+     * <p>Note: The sender will also receive the message if subscribed to the channel.</p>
      * @function MessageMixer.sendData
      * @param {string} channel - The channel to send the data on.
      * @param {ArrayBuffer} data - The data to send.
