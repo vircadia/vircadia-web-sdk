@@ -11,6 +11,7 @@
 import HMACAuth from "./HMACAuth";
 import { LocalID } from "./NetworkPeer";
 import NLPacket from "./NLPacket";
+import NLPacketList from "./NLPacketList";
 import Node from "./Node";
 import NodePermissions from "./NodePermissions";
 import NodeType, { NodeTypeValue } from "./NodeType";
@@ -128,6 +129,10 @@ class LimitedNodeList {
 
         // eslint-disable-next-line @typescript-eslint/unbound-method
         this._nodeSocket.setPacketHandler(this._packetReceiver.handleVerifiedPacket);  // handleVerifiedPacket is bound.
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this._nodeSocket.setConnectionCreationFilterOperator(this.sockAddrBelongsToNode);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -479,6 +484,56 @@ class LimitedNodeList {
         this._useAuthentication = useAuthentication;
     }
 
+    /*@devdoc
+     *  Sends an {@link NLPacketList} to a node.
+     *  @param {NLPacketList} packetList - The packet list to send.
+     *  @param {Node} destinationNode - The node to send the packet list to.
+     *  @returns {number} The number of bytes known to have been sent &mdash; <code>0</code> if the packet list has been queued
+     *      to send reliably.
+     */
+    sendPacketList(packetList: NLPacketList, destinationNode: Node): number {  // eslint-disable-line class-methods-use-this
+        // C++  qint64 sendPacketList(NLPacketList* packetList, const Node& destinationNode)
+
+        const activeSocket = destinationNode.getActiveSocket();
+        if (activeSocket) {
+            packetList.closeCurrentPacket();
+
+            const packets = packetList.getPackets();
+            for (let i = 0; i < packets.length; i++) {
+                assert(packets[i] !== undefined);
+                const nlPacket = new NLPacket(packets[i]!);
+                this.#fillPacketHeader(nlPacket, destinationNode.getAuthenticateHash());
+            }
+
+            return this._nodeSocket.writePacketList(packetList, activeSocket);
+        }
+
+        console.log(`[networking] LimitedNodeList.sendPacketList called without active socket for node
+            ${destinationNode.getUUID().stringify()}. Not sending.`);
+        return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
+    }
+
+
+    /*@devdoc
+     *  Checks whether an address is belongs to a node. Used as a {@link Socket~connectionCreationFilterOperator}.
+     *  @function LimitedNodeList.sockAddrBelongsToNode
+     *  @param {SockAddr} sockAddr - The address to check.
+     *  @returns {boolean} <code>true</code> if the address belongs to a node, <code>false</code> if it doesn't.
+     */
+    sockAddrBelongsToNode = (sockAddr: SockAddr): boolean => {
+        // C++  bool sockAddrBelongsToNode(const SockAddr& sockAddr)
+
+        for (const node of this.#_nodeHash.values()) {
+            // Compare just the port numbers / WebRTC data channels because the Socket where this method is used doesn't know
+            // the actual IP address.
+            if (node.getPublicSocket().getPort() === sockAddr.getPort()
+                    || node.getLocalSocket().getPort() === sockAddr.getPort()) {
+
+                return true;
+            }
+        }
+        return false;
+    };
 
     /*@devdoc
      *  Resets the NodeList, closing all connections and deleting all node data.
@@ -552,8 +607,8 @@ class LimitedNodeList {
         // WebRTC: The public and local SockAddrs provided are the assignment clients' UDP SockAddrs. Use their IP addresses as
         // nominal WebRTC addresses but leave their ports to be filled in later - either when updating an existing node or when
         // the WebRTC connection is made (NodeList.#activateSocketFromNodeCommunication()).
-        const publicSocket = new SockAddr(SocketType.WebRTC, info.publicSocket.getAddress(), 0);
-        const localSocket = new SockAddr(SocketType.WebRTC, info.localSocket.getAddress(), 0);
+        const publicSocket = new SockAddr(SocketType.WebRTC, 0, 0);
+        const localSocket = new SockAddr(SocketType.WebRTC, 0, 0);
 
         this.addOrUpdateNode(info.uuid, info.type, publicSocket, localSocket, info.sessionLocalID, info.isReplicated,
             false, info.connectionSecretUUID, info.permissions);
@@ -602,13 +657,15 @@ class LimitedNodeList {
 
     #fillPacketHeader(packet: NLPacket, hmacAuth: HMACAuth | null): void {
         // C++  void fillPacketHeader(const NLPacket& packet, HMACAuth* hmacAuth = nullptr) {
-        if (!PacketType.getNonSourcedPackets().has(packet.getType())) {
+        const packetType = packet.getType();
+
+        if (!PacketType.getNonSourcedPackets().has(packetType)) {
             packet.writeSourceID(this.getSessionLocalID());
         }
 
         if (this._useAuthentication && hmacAuth
-                && !PacketType.getNonSourcedPackets().has(packet.getType())
-                && !PacketType.getNonVerifiedPackets().has(packet.getType())) {
+                && !PacketType.getNonSourcedPackets().has(packetType)
+                && !PacketType.getNonVerifiedPackets().has(packetType)) {
             packet.writeVerificationHash(hmacAuth);
         }
     }

@@ -47,21 +47,31 @@
  *      <p><em>Static</em></p>
  */
 const UDT = new class {
-    // C++: udt
+    // C++: udt - Constants.h
+
 
     readonly MAX_PACKET_SIZE = 1464;
 
+    readonly LITTLE_ENDIAN = true;
+    readonly BIG_ENDIAN = false;
+
+
+    // Header constants
+
+    // Bit sizes (in order)
+    readonly MESSAGE_NUMBER_SIZE = 30;
+
+    // Offsets
+    readonly OBFUSCATION_LEVEL_OFFSET = 27;
+    readonly PACKET_POSITION_OFFSET = 30;
+
+    // Masks
     readonly CONTROL_BIT_MASK = 0x80000000;
     readonly RELIABILITY_BIT_MASK = 0x40000000;
     readonly MESSAGE_BIT_MASK = 0x20000000;
     readonly OBFUSCATION_LEVEL_BIT_MASK = 0x18000000;
     readonly SEQUENCE_NUMBER_BIT_MASK = 0x7fffff;
-
-    readonly OBFUSCATION_LEVEL_OFFSET = 27;
-    readonly PACKET_POSITION_OFFSET = 30;
-
-    readonly LITTLE_ENDIAN = true;
-    readonly BIG_ENDIAN = false;
+    readonly BIT_FIELD_MASK = 0xF8000000;
 
 }();
 

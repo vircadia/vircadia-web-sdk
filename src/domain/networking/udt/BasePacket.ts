@@ -48,7 +48,6 @@ class BasePacket {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    static #NUM_BYTES_HEADER = 4;  // Control bits and sequence number.
 
     protected _messageData: MessageData;
 
@@ -142,13 +141,22 @@ class BasePacket {
         return this._messageData.receiveTime;
     }
 
+    /*@devdoc
+     *  Gets the number of bytes in that packet that remain available for writing to.
+     *  @returns {number} The number of bytes that remain available for writing to.
+     */
+    bytesAvailableForWrite(): number {
+        // C++  qint64 bytesAvailableForWrite()
+        return this._messageData.buffer.byteLength - this._messageData.dataPosition;
+    }
+
 
     protected adjustPayloadStartAndCapacity(headerSize: number): void {
         // C++ void adjustPayloadStartAndCapacity(qint64 headerSize, bool shouldDecreasePayloadSize = false)
 
         // We don't use C++'s _payloadStart or _payloadCapacity members. Instead, we just need to reserve space for the header,
         // taking into account the base packet's header.
-        this._messageData.dataPosition = BasePacket.#NUM_BYTES_HEADER + headerSize;
+        this._messageData.dataPosition += headerSize;
     }
 }
 

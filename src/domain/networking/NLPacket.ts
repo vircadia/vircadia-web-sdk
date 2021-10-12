@@ -127,9 +127,11 @@ class NLPacket extends Packet {
             const packet = param0;
 
             super(packet);
+            const headerStart = this._messageData.dataPosition;
             this.#readType();
             this.#readVersion();
             this.#readSourceID();
+            this._messageData.dataPosition = headerStart;  // Reset to start of header for #localHeaderSize().
             this.adjustPayloadStartAndCapacity(NLPacket.#localHeaderSize(this._messageData.type));
 
         } else {

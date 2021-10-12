@@ -8,20 +8,23 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import BasePacket from "./BasePacket";
+import CongestionControl from "./CongestionControl";
+import Connection from "./Connection";
+import ControlPacket from "./ControlPacket";
 import Packet from "./Packet";
+import SequenceNumber from "./SequenceNumber";
 import UDT from "./UDT";
+import NLPacket from "../NLPacket";
+import NLPacketList from "../NLPacketList";
 import { NodeTypeValue } from "../NodeType";
 import SockAddr from "../SockAddr";
 import { default as WebRTCSocket, WebRTCSocketDatagram } from "../webrtc/WebRTCSocket";
 import assert from "../../shared/assert";
 
 
-/*@devdoc
- *  Called to handle a received packet.
- *  @callback Socket~handlePacketCallback
- *  @param {Packet} packet - The received packet to handle.
- */
 type PacketHandlerCallback = (packet: Packet) => void;
+type ConnectionCreationFilterOperator = (sockAddr: SockAddr) => boolean;
 
 
 /*@devdoc
@@ -64,6 +67,8 @@ class Socket {
         Socket.CONNECTED
     ];
 
+    static UDT_CONNECTION_DEBUG = false;
+
 
     // Use WebRTCSocket directly without going through an intermediary NetworkSocket as is done in C++.
     #_webrtcSocket: WebRTCSocket;
@@ -71,6 +76,21 @@ class Socket {
     // WEBRTC TODO: Address further C++ code.
 
     #_packetHandler: PacketHandlerCallback | null = null;
+    /* Not used at present.
+    #_messageHandler: ((packet: Packet) => void) | null = null;
+    #_messageFailureHandler: ((connectionAddress: SockAddr, messageNumber: number) => void) | null = null;
+    */
+
+    // WEBRTC TODO: Address further C++ code.
+
+    #_connectionCreationFilterOperator: ConnectionCreationFilterOperator | null = null;
+
+    // WEBRTC TODO: Address further C++ code.
+
+    #_unreliableSequenceNumbers: Map<number, SequenceNumber> = new Map();  // Map<SockAdd port, SequenceNumber>
+    #_connectionsHash: Map<number, Connection> = new Map();  // Map<port number, Connection>
+
+    // WEBRTC TODO: Address further C++ code.
 
 
     constructor() {
@@ -122,7 +142,10 @@ class Socket {
     clearConnections(): void {
         // C++  void clearConnections()
 
-        // WEBRTC TODO: Address further C++ code.
+        if (this.#_connectionsHash.size > 0) {
+            console.log("[networking] Clearing all remaining connections in Socket.");
+            this.#_connectionsHash.clear();
+        }
 
         // Close WebRTC signaling and data channels.
         this.#_webrtcSocket.abort();
@@ -138,10 +161,28 @@ class Socket {
     cleanupConnection(sockAddr: SockAddr): void {  // eslint-disable-line
         // C++  void cleanupConnection(SockAddr sockAddr) {
 
-        // WEBRTC TODO: Address further C++ code.
-
+        // eslint-disable-next-line @typescript-eslint/dot-notation
+        const connectionErased = this.#_connectionsHash.delete(sockAddr.getPort());
+        if (connectionErased && Socket.UDT_CONNECTION_DEBUG) {
+            console.log("[networking] Socket.cleanupConnection called for connection to", sockAddr.toString());
+        }
     }
 
+    /*@devdoc
+     *  Sends a control packet to a destination. Cannot be used to send Packet or NLPacket packets.
+     *  @param {BasePacket} packet - The packet to send.
+     *  @param {SockAddr} sockAddr - The destination to send the packet to.
+     */
+    writeBasePacket(packet: BasePacket, sockAddr: SockAddr): number {
+        // C++  qint64 writeBasePacket(const BasePacket& packet, const SockAddr &sockAddr)
+        // Since this is a base packet we have no way to know if this is reliable or not - we just fire it off.
+
+        // This should not be called with an instance of Packet.
+        assert(!(packet instanceof Packet || packet instanceof NLPacket), "Socket.writeBasePacket",
+            "Cannot send a Packet/NLPacket via writeBasePacket.");
+
+        return this.writeDatagram(packet.getMessageData().buffer, packet.getDataSize(), sockAddr);
+    }
 
     /*@devdoc
      *  Sends a packet to a destination.
@@ -151,9 +192,22 @@ class Socket {
      */
     writePacket(packet: Packet, sockAddr: SockAddr): number {
         // C++  qint64 writePacket(const Packet& packet, const SockAddr& sockAddr)
-        assert(!packet.isReliable());
+
+        // WEBRTC TODO: Address further C++ code. - Handle sending reliable packets. (There are two variants of this method.)
+
+        assert(!packet.isReliable(), "Sending a reliable packet is not implemented.");
+
+        let sequenceNumber = this.#_unreliableSequenceNumbers.get(sockAddr.getPort());
+        if (sequenceNumber === undefined) {
+            sequenceNumber = new SequenceNumber(1);
+        } else {
+            sequenceNumber.increment();
+        }
+        this.#_unreliableSequenceNumbers.set(sockAddr.getPort(), sequenceNumber);
 
         // WEBRTC TODO: Address further C++ code.
+
+        packet.writeSequenceNumber(sequenceNumber);
 
         return this.writeDatagram(packet.getMessageData().data.buffer, packet.getDataSize(), sockAddr);
     }
@@ -183,6 +237,11 @@ class Socket {
     }
 
     /*@devdoc
+     *  Called to handle a received packet.
+     *  @callback Socket~handlePacketCallback
+     *  @param {Packet} packet - The received packet to handle.
+     */
+    /*@devdoc
      *  Sets the function called to handle a received packet.
      *  @param {Socket~handlePacketCallback} handler - The function to call to handle the received packet.
      */
@@ -192,6 +251,66 @@ class Socket {
             handler(packet);
         };
     }
+
+    /*@devdoc
+     *  Called to filter the creation of a connection to an address.
+     *  @callback Socket~connectionCreationFilterOperator
+     *  @param {SockAddr} sockAddr - The address to filter.
+     *  @returns {boolean} <code>true</code> if the address is known and so connection should be allowed, <code>false</code> if
+     *      it isn't known.
+     */
+    /*@devdoc
+     *  Sets the function to use for filtering making connections to an address.
+     *  @param {Socket~connectionCreationFilterOperator} filterOperator - The filter function.
+     */
+    setConnectionCreationFilterOperator(filterOperator: ConnectionCreationFilterOperator): void {
+        // C++  void setConnectionCreationFilterOperator(ConnectionCreationFilterOperator filterOperator)
+        this.#_connectionCreationFilterOperator = filterOperator;
+    }
+
+    /*@devdoc
+     *  Sends an {@NLPacketList} to an address.
+     *  @param {NLPacketList} packetList - The packet list to send.
+     *  @param {SockAddr} sockAddr - The address to send the packet list to.
+     *  @returns {number} The number of bytes known to have been sent &mdash; <code>0</code> if the packet list has been queued
+     *      to send reliably.
+     */
+    writePacketList(packetList: NLPacketList, sockAddr: SockAddr): number {
+        // C++  qint64 writePacketList(PacketList* packetList, const SockAddr& sockAddr)
+
+        if (packetList.getNumPackets() === 0) {
+            console.warn("[networking] Trying to send packet list with 0 packets, bailing.");
+            return 0;
+        }
+
+        if (packetList.isReliable()) {
+            this.#writeReliablePacketList(packetList, sockAddr);
+            return 0;
+        }
+
+        // Unreliable and unordered.
+        let totalBytesSent = 0;
+        while (packetList.getNumPackets() > 0) {
+            totalBytesSent += this.writePacket(packetList.takeFront(), sockAddr);
+        }
+        return totalBytesSent;
+    }
+
+    /* Not used at present.
+    messageReceived(packet: Packet): void {
+        // C++  void messageReceived(Packet* packet)
+        if (this.#_messageHandler) {
+            this.#_messageHandler(packet);
+        }
+    }
+
+    messageFailed(connection: Connection, messageNumber: number): void {
+        // C++  void messageFailed(Connection* connection, MessageNumber messageNumber)
+        if (this.#_messageFailureHandler) {
+            this.#_messageFailureHandler(connection.getDestination(), messageNumber);
+        }
+    }
+    */
 
 
     /*@devdoc
@@ -209,6 +328,24 @@ class Socket {
 
         // WEBRTC TODO: Address further C++ code.
 
+        const connection = this.#_connectionsHash.get(previousAddress.getPort());
+        // Don't move values that are unused so far.
+        if (connection && connection.hasReceivedHandshake()) {
+            // eslint-disable-next-line @typescript-eslint/dot-notation
+            this.#_connectionsHash.delete(previousAddress.getPort());
+
+            connection.setDestinationAddress(currentAddress);
+            this.#_connectionsHash.set(currentAddress.getPort(), connection);
+            console.log("[networking] Moved Connection class from", previousAddress.toString(), "to",
+                currentAddress.toString());
+
+            const sequenceNumber = this.#_unreliableSequenceNumbers.get(previousAddress.getPort());
+            if (sequenceNumber !== undefined) {
+                // eslint-disable-next-line @typescript-eslint/dot-notation
+                this.#_unreliableSequenceNumbers.delete(previousAddress.getPort());
+                this.#_unreliableSequenceNumbers.set(currentAddress.getPort(), sequenceNumber);
+            }
+        }
     };
 
     /*@devdoc
@@ -230,6 +367,7 @@ class Socket {
             if (sizeRead <= 0) {
                 continue;  // eslint-disable-line no-continue
             }
+            assert(datagram.sender !== undefined);
 
             const dataView = new DataView(<ArrayBuffer>datagram.buffer);
 
@@ -240,13 +378,19 @@ class Socket {
             const isControlPacket = dataView.getUint32(0, UDT.LITTLE_ENDIAN) & UDT.CONTROL_BIT_MASK;
             if (isControlPacket) {
 
-                // WEBRTC TODO: Address further C++ code.
+                // Set up a control packet from the data we just read.
+                const controlPacket = ControlPacket.fromReceivedPacket(dataView, dataView.byteLength, datagram.sender);
+                controlPacket.setReceiveTime(receiveTime);
 
-                console.warn("Control packets not yet implemented!");
+                // Process this control packet in the matching connection, if there is one.
+                const connection = this.#findOrCreateConnection(datagram.sender, true);
+                if (connection) {
+                    connection.processControl(controlPacket);
+                }
 
             } else {
 
-                const packet = Packet.fromReceivedPacket(dataView, dataView.byteLength, <SockAddr>datagram.sender);
+                const packet = Packet.fromReceivedPacket(dataView, dataView.byteLength, datagram.sender);
                 const messageData = packet.getMessageData();
                 messageData.receiveTime = receiveTime;
 
@@ -266,6 +410,12 @@ class Socket {
                     console.warn("Multi-packet messages not yet implemented!");
 
                     // WEBRTC TODO: Address further C++ code.
+                    /* Not used at present.
+                    const connection = this.findOrCreateConnection(datagram.sender, true);
+                    if (connection) {
+                        connection.queueReceivedMessagePacket(packet);
+                    }
+                    */
 
                 } else if (this.#_packetHandler) {
                     this.#_packetHandler(packet);
@@ -274,6 +424,48 @@ class Socket {
             }
         }
     };
+
+
+    #writeReliablePacketList(packetList: NLPacketList, sockAddr: SockAddr): void {
+        // C++  void writeReliablePacketList(PacketList* packetList, const SockAddr& sockAddr)
+        const connection = this.#findOrCreateConnection(sockAddr);
+        if (connection) {
+            connection.sendReliablePacketList(packetList);
+        } else if (Socket.UDT_CONNECTION_DEBUG) {
+            console.log("[networking] Socket.writeReliablePacketList refusing to send packet list - no connection was created");
+        }
+    }
+
+    #findOrCreateConnection(sockAddr: SockAddr, filterCreate = false): Connection | null {
+        // C++  Connection* findOrCreateConnection(const SockAddr& sockAddr, bool filterCreate = false) {
+
+        let connection = this.#_connectionsHash.get(sockAddr.getPort());
+
+        if (connection === undefined) {
+            // We did not have a matching connection, time to see if we should make one.
+
+            if (filterCreate && this.#_connectionCreationFilterOperator && !this.#_connectionCreationFilterOperator(sockAddr)) {
+                // The connection creation filter did not allow us to create a new connection.
+                if (Socket.UDT_CONNECTION_DEBUG) {
+                    console.log("[networking] Socket.findOrCreateConnection refusing to create Connection class for",
+                        sockAddr.toString(), "due to connection creation filter");
+                }
+                return null;
+            }
+
+            const congestionControl = new CongestionControl();
+            // Don't need to call congestionControl.setMaxBandwidth() because this is only changed in the asset server.
+            connection = new Connection(this, sockAddr, congestionControl);
+
+            // WEBRTC TODO: Address further C++ code.
+
+            console.log("[networking] Creating new Connection class for", sockAddr.toString());
+
+            this.#_connectionsHash.set(sockAddr.getPort(), connection);
+        }
+
+        return connection;
+    }
 
 }
 

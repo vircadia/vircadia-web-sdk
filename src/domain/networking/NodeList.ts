@@ -17,6 +17,7 @@ import Node from "./Node";
 import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import ReceivedMessage from "./ReceivedMessage";
+import SockAddr from "./SockAddr";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
 import Socket from "./udt/Socket";
@@ -77,6 +78,10 @@ class NodeList extends LimitedNodeList {
 
         // Whenever we get a new node we may need to re-send our set of ignored nodes to it.
         this.nodeActivated.connect(this.#maybeSendIgnoreSetToNode);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this._nodeSocket.setConnectionCreationFilterOperator(this.sockAddrBelongsToDomainOrNode);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -237,6 +242,21 @@ class NodeList extends LimitedNodeList {
 
     };
 
+
+    /*@devdoc
+     *  Checks whether an address is belongs to the domain or a node. Used as a {@link Socket~connectionCreationFilterOperator}.
+     *  @function LimitedNodeList.sockAddrBelongsToNode
+     *  @param {SockAddr} sockAddr - The address to check.
+     *  @returns {boolean} <code>true</code> if the address belongs to the domain or a node, <code>false</code> if it doesn't.
+     */
+    sockAddrBelongsToDomainOrNode = (sockAddr: SockAddr): boolean => {
+        // C++  bool sockAddrBelongsToDomainOrNode(const SockAddr& sockAddr)
+
+        // Compare just the port numbers / WebRTC data channels because the Socket where this method is used doesn't know
+        // the actual IP address.
+
+        return this.#_domainHandler.getSockAddr().getPort() === sockAddr.getPort() || this.sockAddrBelongsToNode(sockAddr);
+    };
 
     /*@devdoc
      *  Resets the LimitedNodeList, closing all connections and deleting all node data.

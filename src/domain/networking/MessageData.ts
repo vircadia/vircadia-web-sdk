@@ -41,8 +41,9 @@ import { PacketTypeValue } from "./udt/PacketHeaders";
  *      if it isn't.
  *  @property {Packet.ObfuscationLevel} obfuscationLevel=NoObfuscation - The level of obfuscation used in encoding the packet
  *      data.
- *  @property {number} sequenceNumber=0
- *  @property {number} messageNumber=0
+ *  @property {number} sequenceNumber=0 - The packet's {@link SequenceNumber} value, which identifies the order that the packet
+ *      was sent in relative to other packets.
+ *  @property {number} messageNumber=0 - The number of the message that a packet is part of in a multi-packet message.
  *  @property {Packet.PacketPosition} packetPosition=ONLY - The position of the packet in a multi-packet message.
  *  @property {number} messagePartNumber=0 - The order of the packet in a multi-packet message.
  *
