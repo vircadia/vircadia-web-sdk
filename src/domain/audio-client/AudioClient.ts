@@ -314,7 +314,8 @@ class AudioClient {
 
         assert(packetType === PacketType.SilentAudioFrame || packetType === PacketType.MicrophoneAudioNoEcho);
 
-        this.#_outgoingAvatarAudioSequenceNumber += 1;
+        const AUDIO_SEQUENCE_MODULUS = 65536;
+        this.#_outgoingAvatarAudioSequenceNumber = this.#_outgoingAvatarAudioSequenceNumber % AUDIO_SEQUENCE_MODULUS;
 
         // WEBRTC TODO: Address further C++ code.
 

@@ -222,7 +222,7 @@ class LossList {
                 if (start.isLessThanOrEqual(it.first)) {
                     // Segment is contained, update new length and erase it.
                     this.#_length -= SequenceNumber.seqlen(it.first, it.second);
-                    this.#_lossList.splice(index, 1)
+                    this.#_lossList.splice(index, 1);
                     it = this.#_lossList[index];
                 } else {
                     // Beginning of segment not contained, modify end of segment.

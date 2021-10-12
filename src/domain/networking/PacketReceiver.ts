@@ -120,6 +120,7 @@ class PacketReceiver {
         // WEBRTC TODO: Address further C++ code.
     }
 
+
     /*@devdoc
      *  Invokes the listener registered for an {@link NLPacket} per its PacketType.
      *  @function PacketReceiver.handleVerifiedPacket

@@ -85,7 +85,6 @@ class MessagesClient {
         }
     }
 
-
     // Listener
     handleMessagesPacket = (/* receivedMessage: ReceivedMessage, sendingNode?: Node */): void => {
         // C++  void handleMessagesPacket(ReceivedMessage* receivedMessage, Node* senderNode)

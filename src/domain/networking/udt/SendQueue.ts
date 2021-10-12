@@ -199,7 +199,7 @@ class SendQueue {
 
     /*@devdoc
      *  Sets the estimated send timeout.
-     *  @param {biting} estimatedTimeout - The estimated timeout, in microseconds.
+     *  @param {bigint} estimatedTimeout - The estimated timeout, in microseconds.
      */
     setEstimatedTimeout(estimatedTimeout: bigint): void {
         // C++  void setEstimatedTimeout(int estimatedTimeout)
@@ -273,8 +273,8 @@ class SendQueue {
     /*@devdoc
      *  Updates the destination address.
      *  @function SendQueue.updateDestinationAddress
+     *  @type {Slot}
      *  @param {SockAddr} newAddress - The new destination address.
-     *  @returns {Slot}
      */
     updateDestinationAddress = (newAddress: SockAddr): void => {
         // C++  void updateDestinationAddress(SockAddr newAddress);

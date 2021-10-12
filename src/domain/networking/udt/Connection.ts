@@ -369,7 +369,7 @@ class Connection {
         // Clear the loss list.
         this.#_lossList.clear();
 
-        /* Not used at present/
+        /* Not used at present.
         // Clear any pending received messages.
         for (const messageNumber of this.#_pendingReceivedMessages.keys()) {
             this.#_parentSocket.messageFailed(this, messageNumber);

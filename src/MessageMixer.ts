@@ -136,7 +136,9 @@ class MessageMixer extends AssignmentClient {
      *     <p>If <code>true</code> then the message is sent to all user client scripts that are using the MessageMixer's domain
      *     context. <em>Not implemented yet.</em></p>
      */
-    sendMessage(channel: string, message: string, localOnly = false): void {
+    // eslint-disable-next-line
+    // @ts-ignore
+    sendMessage(channel: string, message: string, localOnly = false): void {  // eslint-disable-line
 
         // WEBRTC TODO
 
@@ -153,7 +155,9 @@ class MessageMixer extends AssignmentClient {
      *     <p>If <code>true</code> then the data are sent to all user client scripts and client entity scripts that are using
      *     the MessageMixer's domain context. <em>Not implemented yet.</em></p>
      */
-    sendData(channel: string, data: ArrayBuffer, localOnly = false): void {
+    // eslint-disable-next-line
+    // @ts-ignore
+    sendData(channel: string, data: ArrayBuffer, localOnly = false): void {  // eslint-disable-line
 
         // WEBRTC TODO
 

@@ -67,6 +67,7 @@ class ReceivedMessage {
      *      {@link Node|Node.NULL_LOCAL_ID} if not known.
      */
     getSourceID(): number {
+        // C++  NLPacket::LocalID getSourceID()
         return this.#_messageData.sourceID;
     }
 

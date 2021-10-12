@@ -21,7 +21,7 @@ type Signal = {
 
 /*@devdoc
  *  The <code>SignalEmitter</code> class emulates Qt's signals and slots mechanism. In particular, a <code>SignalEmitter</code>
- *  object is implemented which can be connected to one or more "slot"<code>Slot</code> functions, "emitted" to asynchronously
+ *  object is implemented which can be connected to one or more <code>Slot</code> functions, "emitted" to asynchronously
  *  call those functions, and disconnected.
  *  <p>C++: Qt's signals and slots mechanism.</p>
  *

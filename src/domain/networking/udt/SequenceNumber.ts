@@ -14,6 +14,8 @@ type SequenceNumberValue = number;
  *  The <code>SequenceNumber</code> class handles packet sequence numbers. These are 27-bit integer values that wrap around at
  *  binary <code>111...1</code> to continue counting starting at <code>0</code>. Magnitude comparisons between a pair of
  *  sequence numbers is conducted in the "forwards" direction around the loop.
+ *  <p>C++: <code>SequenceNumber</code></p>
+ *
  *  @class SequenceNumber
  *  @param {number} [value=0] - The numeric value of the sequence number.
  *

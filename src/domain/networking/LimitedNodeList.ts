@@ -501,7 +501,7 @@ class LimitedNodeList {
             const packets = packetList.getPackets();
             for (let i = 0; i < packets.length; i++) {
                 assert(packets[i] !== undefined);
-                const nlPacket = new NLPacket(packets[i]!);
+                const nlPacket = new NLPacket(packets[i]!);  // eslint-disable-line @typescript-eslint/no-non-null-assertion
                 this.#fillPacketHeader(nlPacket, destinationNode.getAuthenticateHash());
             }
 
