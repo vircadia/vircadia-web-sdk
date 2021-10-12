@@ -42,7 +42,7 @@
         </div>
 
         <div class="row">
-            <span><input id="micMuted" type="checkbox" /></span>
+            <span><input id="micMuted" type="checkbox" checked /></span>
             <span><label for="micMuted">Mic muted.</label></span>
         </div>
         <audio id="audioElement" />
@@ -61,6 +61,12 @@
         <div class="row">
             <span>Status:</span>
             <input id="messageMixerStatus" type="text" readonly="readonly" />
+        </div>
+
+        <div class="row">
+            <span>Channel:</span> <input id="messagesChannel" type="text" />
+            <button id="messagesSubscribeButton">Subscribe</button>
+            <button id="messagesUnsubscribeButton">Unsubscribe</button>
         </div>
     </div>
 

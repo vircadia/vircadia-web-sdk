@@ -127,12 +127,26 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         const messageMixer = new MessageMixer(contextID);
 
         const statusText = document.getElementById("messageMixerStatus");
+        const messagesChannel = document.getElementById("messagesChannel");
+        messagesChannel.value = "example-message-channel";
+        const messagesSubscribeButton = document.getElementById("messagesSubscribeButton");
+        const messagesUnsubscribeButton = document.getElementById("messagesUnsubscribeButton");
 
         function onStateChanged(state) {
             statusText.value = MessageMixer.stateToString(state);
         }
         onStateChanged(messageMixer.state);
         messageMixer.onStateChanged = onStateChanged;
+
+        function onMessagesSubscribeButtonClick() {
+            messageMixer.subscribe(messagesChannel.value);
+        }
+        messagesSubscribeButton.addEventListener("click", onMessagesSubscribeButtonClick);
+
+        function onMessagesUnsubscribeButtonClick() {
+            messageMixer.unsubscribe(messagesChannel.value);
+        }
+        messagesUnsubscribeButton.addEventListener("click", onMessagesUnsubscribeButtonClick);
 
     }());
 
