@@ -19,10 +19,9 @@ type Signal = {
 };
 
 
-/*@devdoc
- *  The <code>SignalEmitter</code> class emulates Qt's signals and slots mechanism. In particular, a <code>SignalEmitter</code>
- *  object is implemented which can be connected to one or more <code>Slot</code> functions, "emitted" to asynchronously
- *  call those functions, and disconnected.
+/*@sdkdoc
+ *  The <code>SignalEmitter</code> class emulates Qt's signals and slots mechanism. A <code>SignalEmitter</code> object can be
+ *  connected to one or more "slot" functions and "emitted" to asynchronously call those functions.
  *  <p>C++: Qt's signals and slots mechanism.</p>
  *
  *  @class SignalEmitter
@@ -57,29 +56,29 @@ class SignalEmitter {
     #_slots: Set<Slot> = new Set();
 
 
-    /*@devdoc
-     *  Connects the signal to a <code>Slot</code> function.
+    /*@sdkdoc
+     *  Connects the signal to a {@link Slot} function.
      *  <p>Note: If the slot function uses <code>this</code> then the correct <code>this</code> must be bound to it, e.g., by
      *  declaring the function as an arrow function or applying <code>.bind(this)</code> in the constructor of the class that
      *  implements the slot function.</p>
-     *  @param {Slot} slot - Function to be called when <code>emit</code> is called.
+     *  @param {Slot} slot - The function to be called when the signal is emitted.
      */
     connect(slot: Slot): void {
         assert(typeof slot === "function");
         this.#_slots.add(slot);
     }
 
-    /*@devdoc
-     *  Disconnects the signal from a <code>Slot</code> function.
-     *  @param {Slot} slot - The Slot function to no longer be called when <code>emit</code> is called.
+    /*@sdkdoc
+     *  Disconnects the signal from a {@link Slot} function.
+     *  @param {Slot} slot - The function to no longer be called when the signal is emitted.
      */
     disconnect(slot: Slot): void {
         assert(typeof slot === "function");
         this.#_slots.delete(slot);  // eslint-disable-line @typescript-eslint/dot-notation
     }
 
-    /*@devdoc
-     *  "Emits the signal": asynchronously calls all connected <code>Slot</code> functions.
+    /*@sdkdoc
+     *  "Emits the signal": asynchronously calls all connected {@link Slot} functions.
      *  @param {any} [params] - Parameter values to call connected slot functions with.
      */
     emit(...params: any[]): void {  // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -88,9 +87,9 @@ class SignalEmitter {
         });
     }
 
-    /*@devdoc
-     *  Gets the Signal API of the SignalEmitter object.
-     *  @returns {Signal} The Signal API of the SignalEmitter object.
+    /*@sdkdoc
+     *  Gets the Signal API of the SignalEmitter object. This can be used when exposing the signal in an API.
+     *  @returns {Signal} The Signal API of the <code>SignalEmitter</code> object.
      */
     signal(): Signal {
         return {
