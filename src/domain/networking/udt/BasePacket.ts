@@ -142,7 +142,7 @@ class BasePacket {
     }
 
     /*@devdoc
-     *  Gets the number of bytes in that packet that remain available for writing to.
+     *  Gets the number of bytes in the packet that remain available for writing to.
      *  @returns {number} The number of bytes that remain available for writing to.
      */
     bytesAvailableForWrite(): number {

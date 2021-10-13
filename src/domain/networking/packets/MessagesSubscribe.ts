@@ -21,7 +21,7 @@ const MessagesSubscribe = new class {
     // C++  N/A
 
     /*@devdoc
-     *  Information needed for {@link PacketScribe|writing} a {@link PacketType(1)|MessagesSubscribe} packet lsit.
+     *  Information needed for {@link PacketScribe|writing} a {@link PacketType(1)|MessagesSubscribe} packet list.
      *  @typedef {object} PacketScribe.MessagesSubscribeDetails
      *  @property {string} channel - The message channel to subscribe to.
      */
