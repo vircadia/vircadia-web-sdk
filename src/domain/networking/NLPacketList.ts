@@ -11,7 +11,9 @@
 import NLPacket from "./NLPacket";
 import Packet from "./udt/Packet";
 import { PacketTypeValue } from "./udt/PacketHeaders";
+import UDT from "./udt/UDT";
 import assert from "../shared/assert";
+import Uuid from "../shared/Uuid";
 
 
 /*@devdoc
@@ -66,6 +68,22 @@ class NLPacketList {
 
     #_segmentStartIndex = -1;
 
+    // Helpers for writing primitive values.
+    readonly #UINT32_LENGTH = 4;
+    #_uint32Buffer = new ArrayBuffer(this.#UINT32_LENGTH);
+    #_uint32Array = new Uint8Array(this.#_uint32Buffer);
+    #_uint32Data = new DataView(this.#_uint32Buffer);
+
+    readonly #BOOLEAN_LENGTH = 1;
+    #_booleanBuffer = new ArrayBuffer(this.#BOOLEAN_LENGTH);
+    #_booleanArray = new Uint8Array(this.#_booleanBuffer);
+    #_booleanData = new DataView(this.#_booleanBuffer);
+
+    readonly #UUID_LENGTH = 16;
+    #_uuidBuffer = new ArrayBuffer(this.#UUID_LENGTH);
+    #_uuidArray = new Uint8Array(this.#_uuidBuffer);
+    #_uuidData = new DataView(this.#_uuidBuffer);
+
 
     constructor(packetType: PacketTypeValue, extendedHeader: ArrayBuffer | null, isReliable: boolean, isOrdered: boolean) {
         // C++  PacketList(PacketType packetType, QByteArray extendedHeader = QByteArray(), bool isReliable = false,
@@ -90,6 +108,42 @@ class NLPacketList {
         //  C++ qint64 QIODevice::write(const QByteArray &data)
         //      Return value isn't used.
         return this.#writeData(data, data.byteLength);
+    }
+
+    /*@devdoc
+     *  Writes a "primitive" value to the current packet.
+     *  @param {number|boolean|Uuid} value - The value to write.
+     *  @param {number|undefined|undefined} bytes=4 - The number of bytes to write the number value into.
+     *  @returns {number} The number of bytes written.
+     */
+    writePrimitive(value: number | boolean | Uuid, bytes?: number): number {
+        // C++  qint64 ExtendedIODevice::writePrimitive(const T& data)
+        const DEFAULT_NUM_BYTES = 4;
+        switch (typeof value) {
+            case "number":
+                if (value > 0) {
+                    this.#_uint32Data.setUint32(0, value, UDT.LITTLE_ENDIAN);
+                } else {
+                    this.#_uint32Data.setInt32(0, value, UDT.LITTLE_ENDIAN);
+                }
+                if (!bytes || bytes === DEFAULT_NUM_BYTES) {
+                    return this.#writeData(this.#_uint32Array, this.#UINT32_LENGTH);
+                }
+                return this.#writeData(this.#_uint32Array.slice(0, bytes), bytes);
+            case "boolean":
+                this.#_booleanData.setUint8(0, value ? 1 : 0);
+                return this.#writeData(this.#_booleanArray, this.#BOOLEAN_LENGTH);
+            case "object":
+                if (value instanceof Uuid) {
+                    this.#_uuidData.setBigUint128(0, value.value(), UDT.BIG_ENDIAN);
+                    return this.#writeData(this.#_uuidArray, this.#UUID_LENGTH);
+                }
+                console.error("NLPacketList.writePrimitive() - Unhandled type:", typeof value);
+                return 0;
+            default:
+                console.error("NLPacketList.writePrimitive() - Unhandled type:", typeof value);
+                return 0;
+        }
     }
 
     /*@devdoc
