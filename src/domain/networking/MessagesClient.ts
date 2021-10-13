@@ -15,6 +15,7 @@ import PacketReceiver from "./PacketReceiver";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType from "./udt/PacketHeaders";
 import ContextManager from "../shared/ContextManager";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 
 
 /*@devdoc
@@ -22,6 +23,9 @@ import ContextManager from "../shared/ContextManager";
  *  <p>C++: <code>MessagesClient : public QObject, public Dependency</code></p>
  *  @class MessagesClient
  *  @param {number} contextID - The {@link ContextManager} context ID.
+ *
+ *  @property {Signal<MessagesClient~MessageReceivedCallback>} messageReceived - Triggered when a text message is received.
+ *  @property {Signal<MessagesClient~DataReceivedCallback>} dataReceived - Triggered when a data message is received.
  */
 class MessagesClient {
     // C++  MessagesClient : public QObject, public Dependency
