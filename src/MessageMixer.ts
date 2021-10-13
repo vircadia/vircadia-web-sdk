@@ -13,7 +13,7 @@
 import AssignmentClient from "./domain/AssignmentClient";
 import MessagesClient from "./domain/networking/MessagesClient";
 import NodeType from "./domain/networking/NodeType";
-import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
+import { Signal } from "./domain/shared/SignalEmitter";
 
 
 /*@sdkdoc
@@ -36,8 +36,8 @@ import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
  *      message mixer changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  *
- *  @property {Signal} messageReceived - Triggered when a text message is received.
- *  @property {Signal} dataReceived - Triggered when a data message is received.
+ *  @property {Signal<MessageMixer~MessageReceivedCallback>} messageReceived - Triggered when a text message is received.
+ *  @property {Signal<MessageMixer~DataReceivedCallback>} dataReceived - Triggered when a data message is received.
  */
 class MessageMixer extends AssignmentClient {
     // C++  Application.cpp
@@ -75,8 +75,8 @@ class MessageMixer extends AssignmentClient {
      */
 
 
-    #_messageReceivedSignal = new SignalEmitter();
-    #_dataReceivedSignal = new SignalEmitter();
+    #_messageReceivedSignal;
+    #_dataReceivedSignal;
 
     #_messagesClient;
 
@@ -85,15 +85,8 @@ class MessageMixer extends AssignmentClient {
         super(contextID, NodeType.MessagesMixer);
 
         this.#_messagesClient = new MessagesClient(contextID);
-    }
-
-
-    get messageReceived(): Signal {
-        return this.#_messageReceivedSignal.signal();
-    }
-
-    get dataReceived(): Signal {
-        return this.#_dataReceivedSignal.signal();
+        this.#_messageReceivedSignal = this.#_messagesClient.messageReceived;
+        this.#_dataReceivedSignal = this.#_messagesClient.dataReceived;
     }
 
 
@@ -168,7 +161,35 @@ class MessageMixer extends AssignmentClient {
         }
 
         this.#_messagesClient.sendData(channel, data, localOnly);
+    }
 
+
+    /*@sdkdoc
+     *  Called when a text message is received.
+     *  @callback MessageMixer~MessageReceivedCallback
+     *  @param {string} channel - The channel that the message was sent on. This can be used to filter out irrelevant messages.
+     *  @param {string} message - The message received.
+     *  @param {Uuid} senderID - The UUID of the sender: the user's session UUID if sent by user client or client entity script,
+     *      the UUID of the entity script server if sent by a server entity script, or the UUID of the assignment client
+     *      instance if sent by an assignment client script.
+     *  @param {boolean} localOnly - <code>true</code> if the message was sent with localOnly == true.
+     */
+    get messageReceived(): Signal {
+        return this.#_messageReceivedSignal;
+    }
+
+    /*@sdkdoc
+     *  Called when a data message is received.
+     *  @callback MessageMixer~DataReceivedCallback
+     *  @param {string} channel - The channel that the message was sent on. This can be used to filter out irrelevant messages.
+     *  @param {ArrayBuffer} data - The data received.
+     *  @param {Uuid} senderID - The UUID of the sender: the user's session UUID if sent by user client or client entity script,
+     *      the UUID of the entity script server if sent by a server entity script, or the UUID of the assignment client
+     *      instance if sent by an assignment client script.
+     *  @param {boolean} localOnly - <code>true</code> if the message was sent with localOnly == true.
+     */
+    get dataReceived(): Signal {
+        return this.#_dataReceivedSignal;
     }
 
 }

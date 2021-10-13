@@ -33,6 +33,9 @@ class MessagesClient {
 
     #_subscribedChannels: Set<string> = new Set();
 
+    #_messageReceivedSignal = new SignalEmitter();
+    #_dataReceivedSignal = new SignalEmitter();
+
 
     constructor(contextID: number) {
         // C++  MessagesClient()
@@ -44,6 +47,68 @@ class MessagesClient {
         this.#_packetReceiver.registerListener(PacketType.MessagesData,
             PacketReceiver.makeSourcedListenerReference(this.handleMessagesPacket));
         this.#_nodeList.nodeActivated.connect(this.handleNodeActivated);
+    }
+
+    /*@devdoc
+     *  Sends a text message on a channel.
+     *  <p>Note: The sender will also receive the message if subscribed to the channel.</p>
+     *  @function MessageMixer.sendMessage
+     *  @param {string} channel - The channel to send the message on.
+     *  @param {string} message - The message to send.
+     *  @param {boolean} [localOnly=false] - If <code>false</code> then the message is sent to all user client, client entity,
+     *      server entity, and assignment client scripts in the domain.
+     *      <p>If <code>true</code> then the message is sent to all user client scripts that are running in the MessageMixer's
+     *      domain context.</p>
+     */
+    sendMessage(channel: string, message: string, localOnly: boolean): void {
+        // C++  void sendMessage(QString channel, QString message, bool localOnly)
+        const senderID = this.#_nodeList.getSessionUUID();
+        if (localOnly) {
+            this.#_messageReceivedSignal.emit(channel, message, senderID, true);
+        } else {
+            const messagesMixer = this.#_nodeList.soloNodeOfType(NodeType.MessagesMixer);
+            if (messagesMixer) {
+                const packetList = PacketScribe.MessagesData.write({
+                    channel,
+                    message,
+                    senderID
+                });
+                this.#_nodeList.sendPacketList(packetList, messagesMixer);
+            } else {
+                this.#_messageReceivedSignal.emit(channel, message, senderID, true);
+            }
+        }
+    }
+
+    /*@devdoc
+     *  Sends a data message on a channel.
+     *  <p>Note: The sender will also receive the message if subscribed to the channel.</p>
+     *  @function MessageMixer.sendData
+     *  @param {string} channel - The channel to send the data on.
+     *  @param {ArrayBuffer} data - The data to send.
+     *  @param {boolean} [localOnly=false] - If <code>false</code> then the data are sent to all user client, client entity,
+     *      server entity, and assignment client scripts in the domain.
+     *      <p>If <code>true</code> then the data are sent to all user client scripts that are running in the MessageMixer's
+     *      domain context.</p>
+     */
+    sendData(channel: string, data: ArrayBuffer, localOnly: boolean): void {
+        // C++  void sendData(QString channel, QByteArray data, bool localOnly)
+        const senderID = this.#_nodeList.getSessionUUID();
+        if (localOnly) {
+            this.#_dataReceivedSignal.emit(channel, data, senderID, true);
+        } else {
+            const messagesMixer = this.#_nodeList.soloNodeOfType(NodeType.MessagesMixer);
+            if (messagesMixer) {
+                const packetList = PacketScribe.MessagesData.write({
+                    channel,
+                    message: data,
+                    senderID
+                });
+                this.#_nodeList.sendPacketList(packetList, messagesMixer);
+            } else {
+                this.#_dataReceivedSignal.emit(channel, data, senderID, true);
+            }
+        }
     }
 
     /*@devdoc
@@ -109,6 +174,35 @@ class MessagesClient {
             }
         }
     };
+
+
+    /*@devdoc
+     *  Called when a text message is received.
+     *  @callback MessagesClient~MessageReceivedCallback
+     *  @param {string} channel - The channel that the message was sent on. This can be used to filter out irrelevant messages.
+     *  @param {string} message - The message received.
+     *  @param {Uuid} senderID - The UUID of the sender: the user's session UUID if sent by user client or client entity script,
+     *      the UUID of the entity script server if sent by a server entity script, or the UUID of the assignment client
+     *      instance if sent by an assignment client script.
+     *  @param {boolean} localOnly - <code>true</code> if the message was sent with localOnly == true.
+     */
+    get messageReceived(): Signal {
+        return this.#_messageReceivedSignal.signal();
+    }
+
+    /*@devdoc
+     *  Called when a data message is received.
+     *  @callback MessagesClient~DataReceivedCallback
+     *  @param {string} channel - The channel that the message was sent on. This can be used to filter out irrelevant messages.
+     *  @param {ArrayBuffer} data - The data received.
+     *  @param {Uuid} senderID - The UUID of the sender: the user's session UUID if sent by user client or client entity script,
+     *      the UUID of the entity script server if sent by a server entity script, or the UUID of the assignment client
+     *      instance if sent by an assignment client script.
+     *  @param {boolean} localOnly - <code>true</code> if the message was sent with localOnly == true.
+     */
+    get dataReceived(): Signal {
+        return this.#_dataReceivedSignal.signal();
+    }
 
 }
 
