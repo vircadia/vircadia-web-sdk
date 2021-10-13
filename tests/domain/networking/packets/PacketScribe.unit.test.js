@@ -38,6 +38,12 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.DomainDisconnectRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainServerRemovedNode).toBe("object");
         expect(typeof PacketScribe.DomainServerRemovedNode.read).toBe("function");
+        expect(typeof PacketScribe.MessagesData).toBe("object");
+        expect(typeof PacketScribe.MessagesData.write).toBe("function");
+        expect(typeof PacketScribe.MessagesSubscribe).toBe("object");
+        expect(typeof PacketScribe.MessagesSubscribe.write).toBe("function");
+        expect(typeof PacketScribe.MessagesUnsubscribe).toBe("object");
+        expect(typeof PacketScribe.MessagesUnsubscribe.write).toBe("function");
         expect(typeof PacketScribe.NegotiateAudioFormat).toBe("object");
         expect(typeof PacketScribe.NegotiateAudioFormat.write).toBe("function");
         expect(typeof PacketScribe.SelectedAudioFormat).toBe("object");

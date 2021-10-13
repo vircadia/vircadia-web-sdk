@@ -477,6 +477,11 @@ const PacketType = new class {
         StopInjectors: 24
     };
 
+    readonly #_MessageDataVersion = {
+        // C++  MessageDataVersion
+        TextOrBinaryData: 18
+    };
+
 
     constructor() {
         assert(PacketTypeValue.NUM_PACKETS - 1 === this.WebRTCSignaling, "Inconsistent packet data in PacketHeaders!");
@@ -514,6 +519,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.DomainServerRemovedNode:
                 return DEFAULT_VERSION;
+            case this.MessagesData:
+                return this.#_MessageDataVersion.TextOrBinaryData;
             case this.MessagesSubscribe:
                 return DEFAULT_VERSION;
             case this.MessagesUnsubscribe:
