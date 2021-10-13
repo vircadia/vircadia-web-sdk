@@ -18,7 +18,7 @@
  */
 const Vircadia = new class {
 
-    readonly #_version = "0.0.2";  // Version number is also in package.json.
+    readonly #_version = "0.0.3";  // Version number is also in package.json.
 
     get version() {
         return this.#_version;
@@ -28,7 +28,14 @@ const Vircadia = new class {
 
 export default Vircadia;
 export { Vircadia };
+
 export { default as DomainServer } from "./DomainServer";
+export type { ConnectionState } from "./DomainServer";
+
 export { default as AudioMixer } from "./AudioMixer";
 export { default as AvatarMixer } from "./AvatarMixer";
 export { default as MessageMixer } from "./MessageMixer";
+export type { AssignmentClientState } from "./domain/AssignmentClient";
+
+export { default as Signal } from "./domain/shared/Signal";
+export type { Slot } from "./domain/shared/Signal";
