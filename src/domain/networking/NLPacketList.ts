@@ -296,10 +296,10 @@ class NLPacketList {
             if (sizeRemaining <= this.#_currentPacket.bytesAvailableForWrite()) {
                 // It fits - just write it to the current packet.
                 const messageData = this.#_currentPacket.getMessageData();
-                messageData.buffer.set(data, messageData.dataPosition);
-                messageData.dataPosition += data.byteLength;
-
+                messageData.buffer.set(data.slice(dataOffset, dataOffset + sizeRemaining), messageData.dataPosition);
+                messageData.dataPosition += sizeRemaining;
                 sizeRemaining = 0;
+
             } else {
                 // It does not fit - this may need to be in the next packet.
 
@@ -330,8 +330,8 @@ class NLPacketList {
                         }
 
                         // Copy from currentPacket where the segment started to the beginning of the newPacket.
-                        newMessageData.buffer.set(messageData.buffer.slice(this.#_segmentStartIndex, segmentSize),
-                            newMessageData.dataPosition);
+                        newMessageData.buffer.set(messageData.buffer.slice(this.#_segmentStartIndex,
+                            this.#_segmentStartIndex + segmentSize), newMessageData.dataPosition);
                         newMessageData.dataPosition += segmentSize;
 
                         // The current segment now starts at the beginning of the new packet.
@@ -359,13 +359,14 @@ class NLPacketList {
 
                     // We've written all of the data, so set sizeRemaining to 0.
                     sizeRemaining = 0;
+
                 } else {
                     // We're an ordered PacketList - let's fit what we can into the current packet and then put the leftover
                     // into a new packet.
-
                     const numBytesToEnd = this.#_currentPacket.bytesAvailableForWrite();
                     const currentMessageData = this.#_currentPacket.getMessageData();
-                    currentMessageData.buffer.set(data.slice(dataOffset, numBytesToEnd), currentMessageData.dataPosition);
+                    currentMessageData.buffer.set(data.slice(dataOffset, dataOffset + numBytesToEnd),
+                        currentMessageData.dataPosition);
                     currentMessageData.dataPosition += numBytesToEnd;
 
                     // Remove number of bytes written from sizeRemaining.
