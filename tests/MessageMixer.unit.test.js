@@ -126,14 +126,4 @@ describe("MessageMixer - unit tests", () => {
         error.mockReset();
     });
 
-    test("Error if try to send a message localOnly", () => {
-        const domainServer = new DomainServer();
-        const messageMixer = new MessageMixer(domainServer.contextID);
-
-        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
-        messageMixer.sendMessage("unit-test-channel", "test message", true);
-        expect(error).toHaveBeenCalledTimes(1);
-        error.mockReset();
-    });
-
 });

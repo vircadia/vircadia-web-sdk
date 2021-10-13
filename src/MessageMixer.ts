@@ -126,40 +126,48 @@ class MessageMixer extends AssignmentClient {
     }
 
     /*@sdkdoc
-     * Sends a text message on a channel.
-     * <p>Note: The sender will also receive the message if subscribed to the channel.</p>
-     * @function MessageMixer.sendMessage
-     * @param {string} channel - The channel to send the message on.
-     * @param {string} message - The message to send.
-     * @param {boolean} [localOnly=false] - If <code>false</code> then the message is sent to all user client, client entity,
-     *     server entity, and assignment client scripts in the domain.
-     *     <p>If <code>true</code> then the message is sent to all user client scripts that are using the MessageMixer's domain
-     *     context. <em>Not implemented yet.</em></p>
+     *  Sends a text message on a channel.
+     *  <p>Note: The sender will also receive the message if subscribed to the channel.</p>
+     *  @function MessageMixer.sendMessage
+     *  @param {string} channel - The channel to send the message on.
+     *  @param {string} message - The message to send.
+     *  @param {boolean} [localOnly=false] - If <code>false</code> then the message is sent to all user client, client entity,
+     *      server entity, and assignment client scripts in the domain.
+     *      <p>If <code>true</code> then the message is sent to all user client scripts that are running in the MessageMixer's
+     *      domain context.</p>
      */
     // eslint-disable-next-line
     // @ts-ignore
     sendMessage(channel: string, message: string, localOnly = false): void {  // eslint-disable-line
+        if (typeof channel !== "string" || typeof message !== "string" || typeof localOnly !== "boolean") {
+            console.error("[MessageMixer] sendMessage() called with invalid channel parameters!");
+            return;
+        }
 
-        // WEBRTC TODO
 
+        this.#_messagesClient.sendMessage(channel, message, localOnly);
     }
 
     /*@sdkdoc
-     * Sends a data message on a channel.
-     * <p>Note: The sender will also receive the message if subscribed to the channel.</p>
-     * @function MessageMixer.sendData
-     * @param {string} channel - The channel to send the data on.
-     * @param {ArrayBuffer} data - The data to send.
-     * @param {boolean} [localOnly=false] - If <code>false</code> then the data are sent to all user client, client entity,
-     *     server entity, and assignment client scripts in the domain.
-     *     <p>If <code>true</code> then the data are sent to all user client scripts and client entity scripts that are using
-     *     the MessageMixer's domain context. <em>Not implemented yet.</em></p>
+     *  Sends a data message on a channel.
+     *  <p>Note: The sender will also receive the message if subscribed to the channel.</p>
+     *  @function MessageMixer.sendData
+     *  @param {string} channel - The channel to send the data on.
+     *  @param {ArrayBuffer} data - The data to send.
+     *  @param {boolean} [localOnly=false] - If <code>false</code> then the data are sent to all user client, client entity,
+     *      server entity, and assignment client scripts in the domain.
+     *      <p>If <code>true</code> then the data are sent to all user client scripts and client entity scripts that are running
+     *      in the MessageMixer's domain context.</p>
      */
     // eslint-disable-next-line
     // @ts-ignore
     sendData(channel: string, data: ArrayBuffer, localOnly = false): void {  // eslint-disable-line
+        if (typeof channel !== "string" || !(data instanceof ArrayBuffer) || typeof localOnly !== "boolean") {
+            console.error("[MessageMixer] sendData() called with invalid channel parameters!");
+            return;
+        }
 
-        // WEBRTC TODO
+        this.#_messagesClient.sendData(channel, data, localOnly);
 
     }
 
