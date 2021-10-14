@@ -131,6 +131,8 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         messagesChannel.value = "example-message-channel";
         const messagesSubscribeButton = document.getElementById("messagesSubscribeButton");
         const messagesUnsubscribeButton = document.getElementById("messagesUnsubscribeButton");
+        const messagesTextMessage = document.getElementById("messagesTextMessage");
+        const messagesTextSendButton = document.getElementById("messagesTextSendButton");
 
         function onStateChanged(state) {
             statusText.value = MessageMixer.stateToString(state);
@@ -147,6 +149,11 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
             messageMixer.unsubscribe(messagesChannel.value);
         }
         messagesUnsubscribeButton.addEventListener("click", onMessagesUnsubscribeButtonClick);
+
+        function onMessagesTextSemdButtonClick() {
+            messageMixer.sendMessage(messagesChannel.value, messagesTextMessage.value);
+        }
+        messagesTextSendButton.addEventListener("click", onMessagesTextSemdButtonClick);
 
     }());
 
