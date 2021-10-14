@@ -53,6 +53,7 @@ class AudioClient {
     #_audioInput;
     #_isStereoInput = false;
     #_isMuted = false;
+    #_inputDevice: MediaStream | null = null;  // Web SDK-specific member.
 
     #_dummyAudioInputTimer: ReturnType<typeof setTimeout> | null = null;
     #_outgoingAvatarAudioSequenceNumber = 0;
@@ -110,6 +111,7 @@ class AudioClient {
         //      is always a MediaStream, not a particular device.
         //      The method has been renamed accordingly.
         //      The deviceInfo parameter has been repurposed to be an input MediaStream or null.
+        this.#_inputDevice = inputDevice;
         return this.#switchInputToAudioDevice(inputDevice);
     }
 
@@ -128,10 +130,14 @@ class AudioClient {
             // WEBRTC TODO: Address further C++c code.
             // The emitSignal parameter is currently not used because it is for the scripting API.
 
+            // Web SDK-specific code.
+            // When muted, switch the input device to null in order to suspend the audio context (saves power) and use the dummy
+            // input device to send SilentAudioFrame packets to the audio mixer (otherwise the audio mixer doesn't send audio
+            // packets to us).
             if (this.#_isMuted) {
-                void this.#_audioInput.suspend();
+                void this.#switchInputToAudioDevice(null);
             } else {
-                void this.#_audioInput.resume();
+                void this.#switchInputToAudioDevice(this.#_inputDevice);
             }
 
         }
