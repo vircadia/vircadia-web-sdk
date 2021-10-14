@@ -102,6 +102,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         }
         disconnectButton.addEventListener("click", onDisconnectButtonClick);
 
+        audioMixer.inputMuted = micMutedCheckbox.checked;
         function onMicMutecCheckboxClick() {
             audioMixer.inputMuted = micMutedCheckbox.checked;
         }
