@@ -9,12 +9,52 @@
 //
 
 import AudioConstants from "../audio/AudioConstants";
-import assert from "../shared/assert";
 
-const InputBuffer = Float32Array;
-const OutputBuffer = Int16Array;
+/*@devdoc
+ *  see: https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletGlobalScope
+ */
+declare const sampleRate: number;
 
-export type AudioInputProcessorOptions = { sourceSampleRate?: number };
+/*@devdoc
+ *  The <code>AudioBufferPolyfill</code> class is a partial implementation of
+ *  {@link https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer|AudioBuffer} in context of audio worklets that don't
+ *  have access to window scope.
+ *  @class AudioBufferPolyfill
+ */
+class AudioBufferPolyfill implements AudioBuffer {
+    readonly duration: number;
+    readonly length: number;
+    readonly numberOfChannels: number;
+    readonly sampleRate: number;
+
+    _channels: Array<Float32Array>;
+
+    constructor(options: AudioBufferOptions) {
+        this.length = Math.ceil(options.length);
+        this.numberOfChannels = options.numberOfChannels || 1;
+        this.sampleRate = options.sampleRate;
+        this.duration = this.length / this.sampleRate;
+
+        this._channels = [];
+        for (let i = 0; i < this.numberOfChannels; ++i) {
+            this._channels.push(new Float32Array(this.length));
+        }
+    }
+
+    copyFromChannel(destination: Float32Array, channelNumber: number, startInChannel?: number) {
+        const view = new Float32Array(this.getChannelData(channelNumber).buffer,
+            (startInChannel || 0) * Float32Array.BYTES_PER_ELEMENT);
+        destination.set(view);
+    }
+
+    copyToChannel(source: Float32Array, channelNumber: number, startInChannel?: number): void {
+        this.getChannelData(channelNumber).set(source, startInChannel || 0);
+    }
+
+    getChannelData(channel: number): Float32Array {
+        return this._channels[channel] as Float32Array;
+    }
+}
 
 /*@devdoc
  *  The <code>AudioInputProcessor</code> class implements a Web Audio
@@ -34,30 +74,21 @@ export type AudioInputProcessorOptions = { sourceSampleRate?: number };
 class AudioInputProcessor extends AudioWorkletProcessor {
 
     // FIXME: All these fields should be private (#s) but Firefox is handling transpiled code with them (Sep 2021).
-    readonly SDK_MONO_BUFFER_SAMPLES = 240;
-    readonly SDK_MONO_BUFFER_BYTES = 480;
-    readonly SDK_STEREO_BUFFER_SAMPLES = 480;
-    readonly SDK_STEREO_BUFFER_BYTES = 960;
-
 
     _channelCount;
-    _outputSampleSize: number;
-    _accumulator: AudioBuffer;
+    _accumulator: AudioBufferPolyfill;
     _accumulatorIndex = 0;
     _sourceSampleRate: number;
-    _bufferQeue: Promise<void> = Promise.resolve();
 
     constructor(options?: AudioWorkletNodeOptions) {
         super(options);  // eslint-disable-line
 
         this._channelCount = options?.channelCount ? options.channelCount : 1;  // Default to mono.
-        this._outputSampleSize = this._channelCount === 1 ? this.SDK_MONO_BUFFER_SAMPLES : this.SDK_STEREO_BUFFER_SAMPLES;
-        const outputBufferSize = this._channelCount === 1 ? this.SDK_MONO_BUFFER_BYTES : this.SDK_STEREO_BUFFER_BYTES;
+        this._sourceSampleRate = sampleRate;
 
-        let accumulatorSize = outputBufferSize / this._channelCount / InputBuffer.BYTES_PER_ELEMENT;
-
-        const preprocessorOptions = options?.processorOptions as AudioInputProcessorOptions ?? {};
-        this._sourceSampleRate = preprocessorOptions?.sourceSampleRate || AudioConstants.SAMPLE_RATE;
+        let accumulatorSize = this._channelCount === 1
+            ? AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL
+            : AudioConstants.NETWORK_FRAME_SAMPLES_STEREO;
         if (this._sourceSampleRate !== AudioConstants.SAMPLE_RATE) {
             const resampleRatio = AudioConstants.SAMPLE_RATE / this._sourceSampleRate;
             accumulatorSize /= resampleRatio;
@@ -69,9 +100,9 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     }
 
     _createAccumulator(size: number) {
-        return new window.AudioBuffer({
+        return new AudioBufferPolyfill({
             numberOfChannels: this._channelCount,
-            sampleRate: this._sourceSampleRate || AudioConstants.SAMPLE_RATE,
+            sampleRate: this._sourceSampleRate,
             length: size
         });
     }
@@ -79,37 +110,6 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     _resetAccumulator() {
         this._accumulator = this._createAccumulator(this._accumulator.length);
         this._accumulatorIndex = 0;
-    }
-
-    _resample(buffer: AudioBuffer): Promise<AudioBuffer> {
-        const context = new OfflineAudioContext({
-            numberOfChannels: buffer.numberOfChannels,
-            sampleRate: AudioConstants.SAMPLE_RATE,
-            length: this._outputSampleSize
-        });
-        const source = context.createBufferSource();
-        source.buffer = buffer;
-        source.connect(context.destination);
-        source.start();
-        return context.startRendering();
-    }
-
-    _send(buffer: AudioBuffer) {
-        const output = new OutputBuffer(this._outputSampleSize);
-        const view = new DataView(output);
-
-        assert(output.length === buffer.length * buffer.numberOfChannels);
-
-        const FLOAT_TO_INT = 32767;
-        const LITTLE_ENDIAN = true;
-
-        for (let i = 0; i < buffer.length; ++i) {
-            for (let j = 0; j < buffer.numberOfChannels; ++j) {
-                view.setInt16(i + j * 2, buffer.getChannelData(j)[i] as number * FLOAT_TO_INT, LITTLE_ENDIAN);
-            }
-        }
-
-        this.port.postMessage(output.buffer, [output.buffer]);
     }
 
     /*@devdoc
@@ -140,33 +140,28 @@ class AudioInputProcessor extends AudioWorkletProcessor {
         }
 
         const input = inputList[0];
-
-        let inputSize = inputList[0].length;
-        while (inputSize) {
-
+        let inputSize = (input[0] as Float32Array).length;
+        while (inputSize > 0) {
             const remaining = this._accumulator.length - this._accumulatorIndex;
-            const accumulated = Math.min(remaining, inputSize);
-            const inputIndex = inputList[0].length - inputSize;
+            const accumulation = Math.min(remaining, inputSize);
+            const inputIndex = (input[0] as Float32Array).length - inputSize;
 
             for (let i = 0; i < this._accumulator.numberOfChannels; ++i) {
                 const channel = input[i] as Float32Array;
-                const inputView = new InputBuffer(channel.buffer, inputIndex * InputBuffer.BYTES_PER_ELEMENT);
+                const rawInputIndex = inputIndex * Float32Array.BYTES_PER_ELEMENT;
+                const inputView = new Float32Array(channel.buffer, rawInputIndex, accumulation);
                 this._accumulator.copyToChannel(inputView, i, this._accumulatorIndex);
             }
 
-            this._accumulatorIndex += accumulated;
-            inputSize -= accumulated;
+            this._accumulatorIndex += accumulation;
+            inputSize -= accumulation;
 
             if (this._accumulatorIndex === this._accumulator.length) {
-
-                if (this._sourceSampleRate !== AudioConstants.SAMPLE_RATE) {
-                    this._bufferQeue = this._bufferQeue
-                        .then(() => this._resample(this._accumulator))
-                        .then((resampled: AudioBuffer) => this._send(resampled));
-                } else {
-                    this._send(this._accumulator);
+                const output = [];
+                for (let i = 0; i < this._accumulator.numberOfChannels; ++i) {
+                    output.push(this._accumulator.getChannelData(i).buffer);
                 }
-
+                this.port.postMessage(output, output);
                 this._resetAccumulator();
             }
         }

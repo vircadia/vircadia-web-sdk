@@ -46,6 +46,10 @@ class AudioInput {
 
     #_readyRead = new Signal();
 
+    #_resampleQueue: Promise<void> = Promise.resolve();
+    #_channelCount = 0;
+    #_outputSampleSize = 0;
+
 
     set audioInput(audioInput: MediaStream | null) {
         // C++  N/A
@@ -229,23 +233,88 @@ class AudioInput {
 
 
     /*@devdoc
-     *  Receives the next network frame of data from the audio input from the {@link AudioInputProcessor} used, triggering a
-     *  {@link AudioInput.readyRead} signal.
+     *  Receives the next chunk of buffered audio data from the {@link AudioInputProcessor}, resamples if necessary,
+     *  converts to 16bit signed integer PCM, triggering a {@link AudioInput.readyRead} signal.
      *  @function AudioInput.processAudioInputString
-     *  @param {MessageEvent<ArrayBuffer>} The PCM audio data.
+     *  @param {MessageEvent<Array<ArrayBuffer>>} The PCM audio data per channel.
      *  @returns {Slot}
      */
-    processAudioInputMessage = (message: MessageEvent<ArrayBuffer>): void => {
+    processAudioInputMessage = (message: MessageEvent<Array<ArrayBuffer>>): void => {
         // C++  N/A
 
-        const frame = new Int16Array(message.data);
-        this.#_frameBuffer.push(frame);
+        assert(this.#_audioContext !== null);
+        if (this.#_audioContext.sampleRate !== AudioConstants.SAMPLE_RATE) {
+            this.#_resampleQueue = this.#_resampleQueue
+                .then(() => this.#_resample(message.data))
+                .then((resampled: AudioBuffer) => this.#_convertAudioBuffer(resampled));
+        } else {
+            this.#_convertRaw(message.data);
+        }
+    };
+
+    #_resample(buffers: Array<ArrayBuffer>): Promise<AudioBuffer> {
+        assert(this.#_audioContext !== null);
+        const typedBuffers = buffers.map((buffer) => new Float32Array(buffer));
+
+        assert(typedBuffers[0] !== undefined);
+
+        const buffer = new AudioBuffer({
+            numberOfChannels: typedBuffers.length,
+            sampleRate: this.#_audioContext.sampleRate,
+            length: typedBuffers[0].length
+        });
+
+
+        for (let i = 0; i < typedBuffers.length; ++i) {
+            buffer.copyToChannel(typedBuffers[i] as Float32Array, i);
+        }
+
+        const context = new OfflineAudioContext({
+            numberOfChannels: buffer.numberOfChannels,
+            sampleRate: AudioConstants.SAMPLE_RATE,
+            length: this.#_outputSampleSize
+        });
+        const source = context.createBufferSource();
+        source.buffer = buffer;
+        source.connect(context.destination);
+        source.start();
+        return context.startRendering();
+    }
+
+    #_convertAudioBuffer(buffer: AudioBuffer): void {
+        const typedBuffers = [];
+        for (let i = 0; i < buffer.numberOfChannels; ++i) {
+            typedBuffers.push(buffer.getChannelData(i));
+        }
+        this.#_convertTyped(typedBuffers);
+    }
+
+    #_convertRaw(buffers: Array<ArrayBuffer>): void {
+        this.#_convertTyped(buffers.map((buffer) => new Float32Array(buffer)));
+    }
+
+    #_convertTyped(buffers: Array<Float32Array>): void {
+        const output = new Int16Array(this.#_outputSampleSize);
+        const view = new DataView(output.buffer);
+
+        const FLOAT_TO_INT = 32767;
+        const LITTLE_ENDIAN = true;
+
+        for (let i = 0; i < output.length; ++i) {
+            for (let j = 0; j < this.#_channelCount; ++j) {
+                const channel = buffers[j] as Float32Array;
+                const sampleIndex = i * Int16Array.BYTES_PER_ELEMENT * this.#_channelCount;
+                const rightIndex = j * Int16Array.BYTES_PER_ELEMENT;
+                view.setInt16(sampleIndex + rightIndex, channel[i] as number * FLOAT_TO_INT, LITTLE_ENDIAN);
+            }
+        }
+
+        this.#_frameBuffer.push(output);
 
         // WEBRTC TODO: Could perhaps throttle the #_readyRead.emit()s on the understanding that multiple packets will be
         // processed by the method connected to the signal.
         this.#_readyRead.emit();
-    };
-
+    }
 
     // Sets up the AudioContext etc.
     async #setUpAudioContext(): Promise<boolean> {
@@ -258,12 +327,22 @@ class AudioInput {
             sampleRate: AudioConstants.SAMPLE_RATE
         });
 
-        this.#_audioStreamSource = this.#_audioContext.createMediaStreamSource(this.#_audioInput);
+        try {
+            this.#_audioStreamSource = this.#_audioContext.createMediaStreamSource(this.#_audioInput);
+        } catch {
+            this.#_audioContext = new AudioContext();
+            this.#_audioStreamSource = this.#_audioContext.createMediaStreamSource(this.#_audioInput);
+        }
+
         this.#_audioStreamSource.channelInterpretation = "discrete";
 
-        const channelCount = Math.min(this.#_audioStreamSource.mediaStream.getAudioTracks().length, 2);  // Mono or stereo.
-        assert(channelCount > 0);
+        this.#_channelCount = Math.min(this.#_audioStreamSource.mediaStream.getAudioTracks().length, 2);  // Mono or stereo.
+        assert(this.#_channelCount > 0);
         // The channel count has already been checked in AudioClient.#switchInputToAudioDevice().
+
+        this.#_outputSampleSize = this.#_channelCount === 2
+            ? AudioConstants.NETWORK_FRAME_SAMPLES_STEREO
+            : AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL;
 
         // Audio worklet.
         if (!this.#_audioContext.audioWorklet) {
@@ -275,7 +354,7 @@ class AudioInput {
         this.#_audioInputProcessor = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-input-processor", {
             numberOfInputs: 1,
             numberOfOutputs: 0,
-            channelCount,
+            channelCount: this.#_channelCount,
             channelCountMode: "explicit"
         });
         this.#_audioInputProcessorPort = this.#_audioInputProcessor.port;
