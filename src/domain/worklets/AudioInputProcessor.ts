@@ -54,6 +54,24 @@ class AudioBufferPolyfill implements AudioBuffer {
     getChannelData(channel: number): Float32Array {
         return this._channels[channel] as Float32Array;
     }
+
+    /*@devdoc
+     *  Set channel data from a source range.
+     *  @function AudioBufferPolyfill.setChannelData
+     *  @param {number} channelIndex - The index of the channel
+     *  @param {Float32Array} source - The source data
+     *  @param {number} sourceBegin - The starting index in source data (< source.length)
+     *  @param {number} sourceEnd - The ending index in source data (one past the last element to set, <= source.length)
+     *  @param {number} channelBegin - The starting index in destination channel (be < this.length - (sourceEnd - sourceBegin))
+     */
+    setChannelData(channelIndex: number, source: Float32Array, sourceBegin: number, sourceEnd: number, channelBegin = 0) {
+        const channel = this._channels[channelIndex] as Float32Array;
+        let begin = sourceBegin;
+        let out = channelBegin;
+        for (; begin !== sourceEnd; ++begin, ++out) {
+            channel[out] = source[begin] || 0;
+        }
+    }
 }
 
 /*@devdoc
@@ -140,21 +158,19 @@ class AudioInputProcessor extends AudioWorkletProcessor {
         }
 
         const input = inputList[0];
-        let inputSize = (input[0] as Float32Array).length;
-        while (inputSize > 0) {
+        const inputSize = (input[0] as Float32Array).length;
+        let inputIndex = 0;
+        while (inputIndex < inputSize) {
             const remaining = this._accumulator.length - this._accumulatorIndex;
-            const accumulation = Math.min(remaining, inputSize);
-            const inputIndex = (input[0] as Float32Array).length - inputSize;
+            const accumulation = Math.min(remaining, inputSize - inputIndex);
 
             for (let i = 0; i < this._accumulator.numberOfChannels; ++i) {
                 const channel = input[i] as Float32Array;
-                const rawInputIndex = inputIndex * Float32Array.BYTES_PER_ELEMENT;
-                const inputView = new Float32Array(channel.buffer, rawInputIndex, accumulation);
-                this._accumulator.copyToChannel(inputView, i, this._accumulatorIndex);
+                this._accumulator.setChannelData(i, channel, inputIndex, inputSize, this._accumulatorIndex);
             }
 
             this._accumulatorIndex += accumulation;
-            inputSize -= accumulation;
+            inputIndex += accumulation;
 
             if (this._accumulatorIndex === this._accumulator.length) {
                 const output = [];
