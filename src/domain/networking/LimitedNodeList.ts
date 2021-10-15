@@ -129,6 +129,7 @@ class LimitedNodeList {
 
         // eslint-disable-next-line @typescript-eslint/unbound-method
         this._nodeSocket.setPacketHandler(this._packetReceiver.handleVerifiedPacket);  // handleVerifiedPacket is bound.
+        // Skip message failure handling because it's only used in UDTTest which isn't provided in the SDK.
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -189,7 +190,6 @@ class LimitedNodeList {
                 // WEBRTC TODO: Address further C++ code.
 
                 return 0;
-
             }
 
             const size = this.sendUnreliablePacket(packet, sockAddr, hmacAuth);
@@ -197,7 +197,6 @@ class LimitedNodeList {
             // WEBRTC TODO: Address further C++ code.
 
             return size;
-
         }
 
         if (param1 instanceof Node && param2 === null) {
@@ -230,12 +229,12 @@ class LimitedNodeList {
             }
 
             return this.sendPacket(packet, destinationSockAddr, destinationNode.getAuthenticateHash());
-
         }
 
         console.error("Invalid parameters in LimiteNodeList.sendPacket()!", typeof packet, typeof param1, typeof param2);
         return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
     }
+
 
     /*@devdoc
      *  Gets the assignment client node of a specified type, if present.
@@ -287,7 +286,6 @@ class LimitedNodeList {
         //                                        Node::LocalID localID = Node::NULL_LOCAL_ID, bool isReplicated = false,
         //                                        bool isUpstream = false, const QUuid& connectionSecret = QUuid(),
         //                                        const NodePermissions& permissions = DEFAULT_AGENT_PERMISSIONS);
-
 
         const matchingNode = this.#_nodeHash.get(uuid.value());
         if (matchingNode) {
@@ -467,6 +465,7 @@ class LimitedNodeList {
         this.#_sessionLocalID = sessionLocalID;
     }
 
+
     /*@devdoc
      *  Gets whether packet content should be authenticated. The default value is <code>true</code>.
      *  @returns {boolean} <code>true</code> if packet content should be authenticated, <code>false</code> if it shouldn't be.
@@ -483,6 +482,7 @@ class LimitedNodeList {
     setAuthenticatePackets(useAuthentication: boolean): void {
         this._useAuthentication = useAuthentication;
     }
+
 
     /*@devdoc
      *  Sends an {@link NLPacketList} to a node.
@@ -528,7 +528,6 @@ class LimitedNodeList {
             // the actual IP address.
             if (node.getPublicSocket().getPort() === sockAddr.getPort()
                     || node.getLocalSocket().getPort() === sockAddr.getPort()) {
-
                 return true;
             }
         }

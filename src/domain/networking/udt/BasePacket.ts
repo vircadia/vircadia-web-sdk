@@ -47,7 +47,6 @@ class BasePacket {
         return UDT.MAX_PACKET_SIZE;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
 
     protected _messageData: MessageData;
 
@@ -112,6 +111,20 @@ class BasePacket {
     getMessageData(): MessageData {
         // C++  N/A
         return this._messageData;
+    }
+
+    /*@devdoc
+     *  Resets the packet ready for overwriting with new data (excluding the header).
+     *  @returns {boolean} <code>true</code> always, to indicate that the reset was successful.
+     */
+    reset(): boolean {
+        // C++  bool reset()
+
+        // #_payloadSize isn't used.
+
+        this._messageData.dataPosition = 4;
+
+        return true;
     }
 
     /*@devdoc

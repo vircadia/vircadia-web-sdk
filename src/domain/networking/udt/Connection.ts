@@ -12,6 +12,7 @@ import CongestionControl from "./CongestionControl";
 import ControlPacket from "./ControlPacket";
 import LossList from "./LossList";
 import Packet from "./Packet";
+import PendingReceivedMessage from "./PendingReceivedMessage";
 import SendQueue from "./SendQueue";
 import SequenceNumber from "./SequenceNumber";
 import Socket from "./Socket";
@@ -34,9 +35,7 @@ class Connection {
 
     #_hasReceivedHandshake = false;  // Flag for receipt of handshake from server.
     #_hasReceivedHandshakeACK = false;  // Flag for receipt of handshake ACK from client.
-    /* Not used at present.
     #_didRequestHandshake = false;  // Flag for request of handshake from server.
-    */
 
     #_initialSequenceNumber;  // Identifies connection during re-connect requests.
     #_initialReceiveSequenceNumber = new SequenceNumber();  // Identifies connection during re-connect requests.
@@ -44,9 +43,7 @@ class Connection {
     #_lastMessageNumber = 0;
 
     #_lossList = new LossList();  // List of all missing packets.
-    /* Not used at present.
     #_lastReceivedSequenceNumber = new SequenceNumber();  // The largest sequence number received from the peer.
-    */
     #_lastReceivedACK = new SequenceNumber();
 
     #_parentSocket;
@@ -54,14 +51,11 @@ class Connection {
 
     #_congestionControl;
     #_sendQueue: SendQueue | null = null;
-    /* Not used at present.
     #_pendingReceivedMessages: Map<number, PendingReceivedMessage> = new Map();
-    */
 
-    /* Not used at present.
+    // Re-used control packets.
     #_ackPacket;
     #_handshakeACK;
-    */
 
 
     #_destinationAddressChange = new SignalEmitter();
@@ -80,13 +74,11 @@ class Connection {
 
         this.#_congestionControl.init();
 
-        /* Not used at present.
+        // Set up re-used packets.
         const ACK_PACKET_PAYLOAD_BYTES = 4;
         const HANDSHAKE_ACK_PAYLOAD_BYTES = 4;
-
         this.#_ackPacket = ControlPacket.create(ControlPacket.ACK, ACK_PACKET_PAYLOAD_BYTES);
         this.#_handshakeACK = ControlPacket.create(ControlPacket.HandshakeACK, HANDSHAKE_ACK_PAYLOAD_BYTES);
-        */
 
         // Randomize the initial sequence number.
         this.#_initialSequenceNumber = new SequenceNumber(Math.floor(Math.random() * SequenceNumber.MAX));
@@ -175,6 +167,48 @@ class Connection {
         return this.#_hasReceivedHandshake;
     }
 
+    processReceivedSequenceNumber(sequenceNumber: SequenceNumber /* , packetSize: number, payloadSize: number */): boolean {
+        // C++  bool processReceivedSequenceNumber(SequenceNumber sequenceNumber, int packetSize, int payloadSize)
+
+        if (!this.#_hasReceivedHandshake) {
+            // Refuse to process any packets until we've received the handshake.
+            // Send handshake request to re-request a handshake.
+            if (Socket.UDT_CONNECTION_DEBUG) {
+                console.log("[networking] Received packet before receiving handshake, sending HandshakeRequest.");
+            }
+            this.#sendHandshakeRequest();
+            return false;
+        }
+
+        // If this is not the next sequence number, report loss
+        const lastReceivedSequenceNumberPlusOne = this.#_lastReceivedSequenceNumber.copy().increment();
+        const sequenceNumberMinusOne = sequenceNumber.copy().decrement();
+        if (sequenceNumber.isGreaterThan(lastReceivedSequenceNumberPlusOne)) {
+            if (lastReceivedSequenceNumberPlusOne === sequenceNumberMinusOne) {
+                this.#_lossList.append(lastReceivedSequenceNumberPlusOne);
+            } else {
+                this.#_lossList.append(lastReceivedSequenceNumberPlusOne, sequenceNumberMinusOne);
+            }
+        }
+
+        let wasDuplicate = false;
+
+        if (sequenceNumber.isGreaterThan(this.#_lastReceivedSequenceNumber)) {
+            // Update largest received sequence number.
+            this.#_lastReceivedSequenceNumber = sequenceNumber;
+        } else {
+            // Otherwise, it could be a resend. Try and remove it from the loss list.
+            wasDuplicate = !this.#_lossList.remove(sequenceNumber);
+        }
+
+        // Using a congestion control that ACKs every packet (like TCP Vegas).
+        this.#sendACK();
+
+        // WEBRTC TODO: Address further C++ code. - Connection stats.
+
+        return !wasDuplicate;
+    }
+
     /*@devdoc
      *  Process a {@link ControlPacket} that has been received.
      *  @param {ControlPacket} controlPacket - The control packet to process.
@@ -260,6 +294,31 @@ class Connection {
     */
 
 
+    #sendACK(): void {
+        // C++  void Connection::sendACK()
+        const nextACKNumber = this.#nextACK();
+
+        // We have received new packets since the last sent ACK or our congestion control dictates that we always send ACKs.
+
+        this.#_ackPacket.reset();  // We need to reset it every time.
+
+        // pack in the ACK number
+        this.#_ackPacket.writeSequenceNumber(nextACKNumber);
+
+        // have the socket send off our packet
+        this.#_parentSocket.writeBasePacket(this.#_ackPacket, this.#_destination);
+
+        // WEBRTC TODO: Address further C++ code. - Connection stats.
+    }
+
+    #nextACK(): SequenceNumber {
+        // C++  SequenceNumber Connection::nextACK() const
+        if (this.#_lossList.getLength() > 0) {
+            return this.#_lossList.getFirstSequenceNumber().copy().decrement();  // eslint-disable-line newline-per-chained-call
+        }
+        return this.#_lastReceivedSequenceNumber;  // Don't need to copy() because caller doesn't modify.
+    }
+
     #processACK(controlPacket: ControlPacket): void {
         // C++  void processACK(ControlPacketPointer controlPacket)
         const ack = controlPacket.readSequenceNumber();
@@ -301,6 +360,14 @@ class Connection {
 
     }
 
+    #sendHandshakeRequest(): void {
+        // C++  void sendHandshakeRequest()
+        const handshakeRequestPacket = ControlPacket.create(ControlPacket.HandshakeRequest, 0);
+        this.#_parentSocket.writeBasePacket(handshakeRequestPacket, this.#_destination);
+
+        this.#_didRequestHandshake = true;
+    }
+
     #processHandshake(controlPacket: ControlPacket): void {
         // C++  void Connection::processHandshake(ControlPacketPointer controlPacket)
 
@@ -318,27 +385,23 @@ class Connection {
 
             this.#resetReceiveState();
             this.#_initialReceiveSequenceNumber = initialSequenceNumber;
-            /*
-            // Used for reliable packets which aren't implemented yet.
             this.#_lastReceivedSequenceNumber = initialSequenceNumber.copy().decrement();
-            */
         }
 
-        /* Not used at present.
         this.#_handshakeACK.reset();
-        this.#_handshakeACK.writePrimitive(initialSequenceNumber);
+        this.#_handshakeACK.writeSequenceNumber(initialSequenceNumber);
         this.#_parentSocket.writeBasePacket(this.#_handshakeACK, this.#_destination);
-        */
 
         // Indicate that handshake has been received.
         this.#_hasReceivedHandshake = true;
 
-        /* Not used at present.
         if (this.#_didRequestHandshake) {
+            // WEBRTC TODO: Address further C++ code.
+            /* Not required at present: Is for AssetClient and EntityScriptClient.
             this.#_receiverHandshakeRequestComplete.emit(this.#_destination);
+            */
             this.#_didRequestHandshake = false;
         }
-        */
     }
 
     #processHandshakeACK(controlPacket: ControlPacket): void {
@@ -361,21 +424,15 @@ class Connection {
     #resetReceiveState(): void {
         // C++  void Connection::resetReceiveState()
 
-        /* Not used at present.
         // Reset all SequenceNumber member variables back to default.
         this.#_lastReceivedSequenceNumber = new SequenceNumber();
-        */
 
         // Clear the loss list.
         this.#_lossList.clear();
 
-        /* Not used at present.
         // Clear any pending received messages.
-        for (const messageNumber of this.#_pendingReceivedMessages.keys()) {
-            this.#_parentSocket.messageFailed(this, messageNumber);
-        }
+        // Skip message failure handling because it's only used in UDTTest which isn't provided in the SDK.
         this.#_pendingReceivedMessages.clear();
-        */
     }
 
     #getSendQueue(): SendQueue {
