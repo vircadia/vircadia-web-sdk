@@ -269,16 +269,37 @@ class AudioInput {
             buffer.copyToChannel(typedBuffers[i] as Float32Array, i);
         }
 
-        const context = new OfflineAudioContext({
+        const resampled = new AudioBuffer({
             numberOfChannels: buffer.numberOfChannels,
             sampleRate: AudioConstants.SAMPLE_RATE,
             length: this.#_outputSampleSize
         });
-        const source = context.createBufferSource();
-        source.buffer = buffer;
-        source.connect(context.destination);
-        source.start();
-        return context.startRendering();
+        const samplingRatio = buffer.length / resampled.length;
+        for (let i = 0; i < resampled.length; ++i) {
+            for (let j = 0; j < resampled.numberOfChannels; ++j) {
+                const sampleIndex = i * samplingRatio;
+                const first = Math.floor(sampleIndex);
+                const second = first + 1;
+                const ratio = sampleIndex - first;
+                const channel = buffer.getChannelData(j);
+                resampled.getChannelData(j)[i] =
+                    (channel[first] as number) * (1-ratio) +
+                    (channel[second] as number) * ratio;
+            }
+        }
+        return Promise.resolve(resampled);
+
+        // built-in re-sampling doesn't work well
+        // const context = new OfflineAudioContext({
+        //     numberOfChannels: buffer.numberOfChannels,
+        //     sampleRate: AudioConstants.SAMPLE_RATE,
+        //     length: this.#_outputSampleSize
+        // });
+        // const source = context.createBufferSource();
+        // source.buffer = buffer;
+        // source.connect(context.destination);
+        // source.start();
+        // return context.startRendering();
     }
 
     #_convertAudioBuffer(buffer: AudioBuffer): void {
