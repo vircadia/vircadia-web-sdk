@@ -177,7 +177,7 @@ class NLPacketList {
             this.#_packets[0]!.writeMessageNumber(messageNumber, Packet.PacketPosition.FIRST, index);
             index += 1;
             while (index < this.#_packets.length - 1) {
-                this.#_packets[0]!.writeMessageNumber(messageNumber, Packet.PacketPosition.MIDDLE, index);
+                this.#_packets[index]!.writeMessageNumber(messageNumber, Packet.PacketPosition.MIDDLE, index);
                 index += 1;
             }
             this.#_packets[index]!.writeMessageNumber(messageNumber, Packet.PacketPosition.LAST, index);
