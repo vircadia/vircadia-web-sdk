@@ -16,65 +16,6 @@ import AudioConstants from "../audio/AudioConstants";
 declare const sampleRate: number;
 
 /*@devdoc
- *  The <code>AudioBufferPolyfill</code> class is a partial implementation of
- *  {@link https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer|AudioBuffer} in context of audio worklets that don't
- *  have access to window scope.
- *  @class AudioBufferPolyfill
- */
-class AudioBufferPolyfill implements AudioBuffer {
-    readonly duration: number;
-    readonly length: number;
-    readonly numberOfChannels: number;
-    readonly sampleRate: number;
-
-    _channels: Array<Float32Array>;
-
-    constructor(options: AudioBufferOptions) {
-        this.length = Math.ceil(options.length);
-        this.numberOfChannels = options.numberOfChannels || 1;
-        this.sampleRate = options.sampleRate;
-        this.duration = this.length / this.sampleRate;
-
-        this._channels = [];
-        for (let i = 0; i < this.numberOfChannels; ++i) {
-            this._channels.push(new Float32Array(this.length));
-        }
-    }
-
-    copyFromChannel(destination: Float32Array, channelNumber: number, startInChannel?: number) {
-        const view = new Float32Array(this.getChannelData(channelNumber).buffer,
-            (startInChannel || 0) * Float32Array.BYTES_PER_ELEMENT);
-        destination.set(view);
-    }
-
-    copyToChannel(source: Float32Array, channelNumber: number, startInChannel?: number): void {
-        this.getChannelData(channelNumber).set(source, startInChannel || 0);
-    }
-
-    getChannelData(channel: number): Float32Array {
-        return this._channels[channel] as Float32Array;
-    }
-
-    /*@devdoc
-     *  Set channel data from a source range.
-     *  @function AudioBufferPolyfill.setChannelData
-     *  @param {number} channelIndex - The index of the channel
-     *  @param {Float32Array} source - The source data
-     *  @param {number} sourceBegin - The starting index in source data (< source.length)
-     *  @param {number} sourceEnd - The ending index in source data (one past the last element to set, <= source.length)
-     *  @param {number} channelBegin - The starting index in destination channel (be < this.length - (sourceEnd - sourceBegin))
-     */
-    setChannelData(channelIndex: number, source: Float32Array, sourceBegin: number, sourceEnd: number, channelBegin = 0) {
-        const channel = this._channels[channelIndex] as Float32Array;
-        let begin = sourceBegin;
-        let out = channelBegin;
-        for (; begin !== sourceEnd; ++begin, ++out) {
-            channel[out] = source[begin] || 0;
-        }
-    }
-}
-
-/*@devdoc
  *  The <code>AudioInputProcessor</code> class implements a Web Audio
  *  {@link https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletProcessor|AudioWorkletProcessor} that takes incoming Web
  *  Audio and provides it for the SDK to use. It is used as a node in a Web Audio graph in {@link AudioInput}.
@@ -94,9 +35,15 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     // FIXME: All these fields should be private (#s) but Firefox is handling transpiled code with them (Sep 2021).
 
     _channelCount;
-    _accumulator: AudioBufferPolyfill;
-    _accumulatorIndex = 0;
+    _lastInput: Array<number>;
+    _inputRange: { begin: number, end: number };
+    _output: Int16Array;
+    _outputView: DataView;
+    _outputSize: number;
+    _outputIndex = 0;
+    _outputTotalIndex = 0;
     _sourceSampleRate: number;
+    _resampleRatio = 1;
 
     constructor(options?: AudioWorkletNodeOptions) {
         super(options);  // eslint-disable-line
@@ -104,30 +51,53 @@ class AudioInputProcessor extends AudioWorkletProcessor {
         this._channelCount = options?.channelCount ? options.channelCount : 1;  // Default to mono.
         this._sourceSampleRate = sampleRate;
 
-        let accumulatorSize = this._channelCount === 1
-            ? AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL
-            : AudioConstants.NETWORK_FRAME_SAMPLES_STEREO;
         if (this._sourceSampleRate !== AudioConstants.SAMPLE_RATE) {
-            const resampleRatio = AudioConstants.SAMPLE_RATE / this._sourceSampleRate;
-            accumulatorSize /= resampleRatio;
+            this._resampleRatio = AudioConstants.SAMPLE_RATE / this._sourceSampleRate;
         }
 
-        this._accumulator = this._createAccumulator(accumulatorSize);
+        this._outputSize = this._channelCount === 1
+            ? AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL
+            : AudioConstants.NETWORK_FRAME_SAMPLES_STEREO;
+        this._output = new Int16Array(this._outputSize);
+        this._outputView = new DataView(this._output.buffer);
+
+        this._lastInput = [0, 0];
+        this._inputRange = { begin: 0, end: 0 };
 
         this.port.onmessage = this.onMessage;
     }
 
-    _createAccumulator(size: number) {
-        return new AudioBufferPolyfill({
-            numberOfChannels: this._channelCount,
-            sampleRate: this._sourceSampleRate,
-            length: size
-        });
+    _resetOutput() {
+        this._output = new Int16Array(this._outputSize);
+        this._outputView = new DataView(this._output.buffer);
+        this._outputIndex = 0;
     }
 
-    _resetAccumulator() {
-        this._accumulator = this._createAccumulator(this._accumulator.length);
-        this._accumulatorIndex = 0;
+    _resetInput(end: number) {
+        this._lastInput = [0, 0];
+        this._inputRange = { begin: 0, end };
+    }
+
+    _getResampled(channelIndex: number, inputPosition: number, input: Array<Float32Array>): number {
+        const channel = input[channelIndex] as Float32Array;
+        const localPosition = inputPosition - this._inputRange.begin;
+
+        let first = 0;
+        let second = 0;
+        let ratio = 0;
+        if (localPosition < 0) {
+            ratio = 1 - localPosition;
+            first = this._lastInput[channelIndex] as number;
+            second = channel[0] as number;
+        } else {
+            const firstIndex = Math.floor(localPosition);
+            const secondIndex = Math.ceil(localPosition);
+            ratio = localPosition - firstIndex;
+            first = channel[firstIndex] as number;
+            second = channel[secondIndex] as number;
+        }
+
+        return first * (1 - ratio) + second * ratio;
     }
 
     /*@devdoc
@@ -139,7 +109,8 @@ class AudioInputProcessor extends AudioWorkletProcessor {
      */
     onMessage = (message: MessageEvent) => {
         if (message.data === "clear") {
-            this._resetAccumulator();
+            this._resetInput(0);
+            this._resetOutput();
         }
     };
 
@@ -159,28 +130,43 @@ class AudioInputProcessor extends AudioWorkletProcessor {
 
         const input = inputList[0];
         const inputSize = (input[0] as Float32Array).length;
-        let inputIndex = 0;
-        while (inputIndex < inputSize) {
-            const remaining = this._accumulator.length - this._accumulatorIndex;
-            const accumulation = Math.min(remaining, inputSize - inputIndex);
 
-            for (let i = 0; i < this._accumulator.numberOfChannels; ++i) {
-                const channel = input[i] as Float32Array;
-                this._accumulator.setChannelData(i, channel, inputIndex, inputSize, this._accumulatorIndex);
+        this._inputRange.end += inputSize;
+
+        let inputPosition = this._outputTotalIndex / this._resampleRatio;
+        while (Math.ceil(inputPosition) < this._inputRange.end) {
+
+            const FLOAT_TO_INT = 32767;
+            const LITTLE_ENDIAN = true;
+
+            const rawIndex = this._outputIndex * Int16Array.BYTES_PER_ELEMENT * this._channelCount;
+            for (let channel = 0; channel < this._channelCount; ++channel) {
+                const resampled = this._getResampled(channel, inputPosition, input);
+                const rawChannel = channel * Int16Array.BYTES_PER_ELEMENT;
+                this._outputView.setInt16(rawIndex + rawChannel, resampled * FLOAT_TO_INT, LITTLE_ENDIAN);
             }
 
-            this._accumulatorIndex += accumulation;
-            inputIndex += accumulation;
+            this._outputTotalIndex += 1;
+            this._outputIndex += 1;
 
-            if (this._accumulatorIndex === this._accumulator.length) {
-                const output = [];
-                for (let i = 0; i < this._accumulator.numberOfChannels; ++i) {
-                    output.push(this._accumulator.getChannelData(i).buffer);
-                }
-                this.port.postMessage(output, output);
-                this._resetAccumulator();
+            if (this._outputIndex === this._output.length / this._channelCount) {
+                this.port.postMessage(this._output.buffer, [this._output.buffer]);
+                this._resetOutput();
             }
+
+            if (this._outputTotalIndex === AudioConstants.SAMPLE_RATE) {
+                this._outputTotalIndex = 0;
+                this._resetInput(inputSize);
+            }
+
+            inputPosition = this._outputTotalIndex / this._resampleRatio;
         }
+
+        for (let i = 0; i < this._channelCount; ++i) {
+            const channel = input[i] as Float32Array;
+            this._lastInput[i] = channel[channel.length - 1] || 0;
+        }
+        this._inputRange.begin += inputSize;
 
         return true;
     }
