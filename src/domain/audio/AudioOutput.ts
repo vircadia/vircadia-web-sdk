@@ -22,6 +22,8 @@ import audioOutputProcessorURL from "worklet-loader!../worklets/AudioOutputProce
  *  <p>C++: <code>N/A</code></p>
  *
  *  @class AudioOutput
+ *  @property {string} contextItemType="AudioOutput" - The type name for use with the {@link ContextManager}.
+ *      <p><em>Static. Read-only.</em></p>
  *
  *  @property {MediaStream} audioOuput - The audio output stream to be played in the user client.
  *      <em>Read-only.</em>
@@ -31,6 +33,9 @@ import audioOutputProcessorURL from "worklet-loader!../worklets/AudioOutputProce
  */
 class AudioOutput {
     //  C++ N/A - This is a Web SDK-specific class.
+
+    static readonly contextItemType = "AudioOutput";
+
 
     #_audioContext: AudioContext | null = null;
     #_oscillatorNode: OscillatorNode | null = null;

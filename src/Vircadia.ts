@@ -28,11 +28,15 @@ const Vircadia = new class {
 
 export default Vircadia;
 export { Vircadia };
+
 export { default as DomainServer } from "./DomainServer";
+export type { ConnectionState } from "./DomainServer";
 
 export { default as AudioMixer } from "./AudioMixer";
 export { default as AvatarMixer } from "./AvatarMixer";
 export { default as MessageMixer } from "./MessageMixer";
+export type { AssignmentClientState } from "./domain/AssignmentClient";
 
-export { Signal } from "./domain/shared/SignalEmitter";
+export type { Signal, Slot } from "./domain/shared/SignalEmitter";
+
 export { default as Uuid } from "./domain/shared/Uuid";

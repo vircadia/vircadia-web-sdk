@@ -10,13 +10,10 @@
         "url": "https://github.com/vircadia/vircadia-web-sdk.git"
     },
     "license": "Apache-2.0",
-    "exports": {
-        ".": "./src/Vircadia.ts",
-        "./modules/": "./src/",
-        "./Vircadia": "./src/Vircadia.ts",
-        "./DomainServer": "./src/DomainServer.ts"
-    },
-    "main": "Vircadia.ts",
+    "main": "dist/Vircadia.js",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build": "webpack --mode production",
         "watch": "webpack --watch --mode development",

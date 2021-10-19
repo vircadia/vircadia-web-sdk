@@ -30,13 +30,20 @@ import Uuid from "../shared/Uuid";
  *  The <code>NodeList</code> class manages the domain server plus all the nodes (assignment clients) that the client is
  *  connected to. This includes their presence and communications with them via the Vircadia protocol.
  *  <p>C++: <code>NodeList : LimitedNodeList</code></p>
+ *
  *  @class NodeList
  *  @extends LimitedNodeList
+ *  @property {string} contextItemType="NodeList" - The type name for use with the {@link ContextManager}.
+ *      <p><em>Static. Read-only.</em></p>
+ *
  *  @param {number} contextID - The {@link ContextManager} context ID.
  *  @param {NodeType} [ownerType=Agent] - The type of object that the NodeList is being used in.
  */
 class NodeList extends LimitedNodeList {
     // C++  NodeList : public LimitedNodeList
+
+    static readonly contextItemType = "NodeList";
+
 
     #_ownerType = NodeType.Agent;
     #_connectReason = LimitedNodeList.ConnectReason.Connect;

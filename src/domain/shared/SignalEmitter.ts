@@ -20,12 +20,12 @@ type Signal = {
 
 
 /*@sdkdoc
- *  The <code>SignalEmitter</code> class emulates Qt's signals and slots mechanism. A <code>SignalEmitter</code> object can be
- *  connected to one or more "slot" functions and "emitted" to asynchronously call those functions.
- *  <p>C++: Qt's signals and slots mechanism.</p>
+ *  The <code>SignalEmitter</code> class provides a signals and slots mechanism. A <code>SignalEmitter</code> object can be
+ *  connected to one or more "slot" functions and "emitted" to asynchronously call ("trigger") those functions.
  *
  *  @class SignalEmitter
  */
+// The Signal class emulate's QT's signals and slots mechanism.
 class SignalEmitter {
     // C++  Qt's signals and slots mechanism.
 
@@ -88,7 +88,7 @@ class SignalEmitter {
     }
 
     /*@sdkdoc
-     *  Gets the Signal API of the SignalEmitter object. This can be used when exposing the signal in an API.
+     *  Gets the {@link Signal} API of the SignalEmitter object. This can be used when exposing the signal in an API.
      *  @returns {Signal} The Signal API of the <code>SignalEmitter</code> object.
      */
     signal(): Signal {
@@ -105,4 +105,4 @@ class SignalEmitter {
 }
 
 export default SignalEmitter;
-export type { Signal };
+export type { Signal, Slot };

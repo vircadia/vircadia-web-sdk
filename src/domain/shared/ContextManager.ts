@@ -10,7 +10,7 @@
 
 
 type DependencyType = {
-    name: string,
+    contextItemType: string,
     new(...args: any[]): object  // eslint-disable-line @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types
 };
 
@@ -36,7 +36,19 @@ type ContextTable = Array<Context>;
 const ContextManager = new class {
     // C++  N/A but similar to DependencyManager - ContextManager manages sets of dependencies.
 
+    /*@devdoc
+     *  In order to be added to a context, the class must include a static <code>contextItemType</code> property.
+     *  <p>In theory, the <code>&lt;class&gt;.name</code> should be able to be used, however, upon minification and packaging
+     *  this property can become unavailable. Hence the need for the <code>contextItemType</code> property.</p>
+     *  @typedef {class} ContextManager.DependencyType
+     *  @property {string} contextItemType - A static property containing the context item's type name. This should be the same
+     *      as the class name.
+     *      <p><em>Static.</em></p>
+     */
+
+
     #_contexts: ContextTable = [];
+
 
     /*@devdoc
      *  Creates a new context.
@@ -53,7 +65,7 @@ const ContextManager = new class {
      *  Gets an object from a context.
      *  @function ContextManager.get
      *  @param {number} contextID - The ID of the context.
-     *  @param {class} dependencyType - The type of the object to get.
+     *  @param {ContextManager.DependencyType} dependencyType - The type of the object to get.
      *  @returns {object} The requested object.
      *  @throws Throws an error if the context ID is invalid or an object of the specified type cannot be found in the context.
      */
@@ -63,9 +75,13 @@ const ContextManager = new class {
         if (!context) {
             throw Error(`ContextManager.get(): Cannot find context ${contextID}!`);
         }
-        const dependencyObject = context.get(dependencyType.name);
+        const contextItemType = dependencyType.contextItemType;
+        if (typeof contextItemType !== "string" || contextItemType.length === 0) {
+            throw Error(`ContextManager.set(): Cannot find an object without a valid contextItemType property!`);
+        }
+        const dependencyObject = context.get(contextItemType);
         if (!dependencyObject) {
-            throw Error(`ContextManager.get(): Cannot find object of type ${dependencyType.name}!`);
+            throw Error(`ContextManager.get(): Cannot find object of type ${contextItemType}!`);
         }
         return dependencyObject;
     }
@@ -74,9 +90,9 @@ const ContextManager = new class {
      *  Creates and adds a new object to a context.
      *  @function ContextManager.set
      *  @param {number} contextID - The ID of the context.
-     *  @param {class} dependencyType - The type of the new object to create and add. The new object is created using
-     *      using <code>new()</code>.
-     *  @param {...any} dependencyParams - Optional parameters to use whcn creating the new object.
+     *  @param {ContextManager.DependencyType} dependencyType - The type of the new object to create and add. The new object is
+     *      created using using <code>new()</code>.
+     *  @param {...any} dependencyParams - Optional parameters to use when creating the new object.
      *  @throws Throws an error of the context ID is invalid or an object of the specified type already exists in the context.
      */
     // Errors are thrown because this is internal code and it is reasonable to expect that it is correctly used.
@@ -85,11 +101,15 @@ const ContextManager = new class {
         if (!context) {
             throw Error(`ContextManager.set(): Cannot find context ${contextID}!`);
         }
-        if (context.get(dependencyType.name) !== undefined) {
-            throw Error(`ContextManager.set(): Cannot add another object of type ${dependencyType.name}!`);
+        const contextItemType = dependencyType.contextItemType;
+        if (typeof contextItemType !== "string" || contextItemType.length === 0) {
+            throw Error(`ContextManager.set(): Cannot add an object without a valid contextItemType property!`);
+        }
+        if (context.get(contextItemType) !== undefined) {
+            throw Error(`ContextManager.set(): Cannot add another object of type ${contextItemType}!`);
         }
         const newDependency = new dependencyType(...args);  // eslint-disable-line new-cap
-        context.set(dependencyType.name, newDependency);
+        context.set(contextItemType, newDependency);
     }
 
 }();
