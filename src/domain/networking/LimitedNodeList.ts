@@ -18,6 +18,7 @@ import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import SockAddr from "./SockAddr";
 import SocketType from "./SocketType";
+import Packet from "./udt/Packet";
 import PacketType from "./udt/PacketHeaders";
 import Socket from "./udt/Socket";
 import assert from "../shared/assert";
@@ -99,6 +100,15 @@ class LimitedNodeList {
 
     static readonly #ERROR_SENDING_PACKET_BYTES = -1;
 
+    static #versionDebugSuppressMap: Set<string> = new Set();
+    // C++  QMultiHash<SockAddr, PacketType>
+    // In TypeScript, the set item is sockAddr.toString() + packetType.toString();
+
+    static #sourcedVersionDebugSuppressMap: Set<string> = new Set();
+    // C++  QMultiHash<QUuid, PacketType>
+    // In TypeScript, the set item is uuid.toString() + packetType.toString().
+
+
     readonly #NULL_CONNECTION_ID = -1;
     readonly #SOLO_NODE_TYPES = new Set([
         NodeType.AvatarMixer,
@@ -118,6 +128,7 @@ class LimitedNodeList {
     #_nodeActivated = new SignalEmitter();
     #_nodeSocketUpdated = new SignalEmitter();
     #_nodeKilled = new SignalEmitter();
+    #_packetVersionMismatch = new SignalEmitter();
 
 
     constructor(contextID: number) {
@@ -127,11 +138,14 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        this._nodeSocket.setPacketHandler(this._packetReceiver.handleVerifiedPacket);  // handleVerifiedPacket is bound.
+        this._nodeSocket.setPacketHandler(this._packetReceiver.handleVerifiedPacket);
+        this._nodeSocket.setMessageHandler(this._packetReceiver.handleVerifiedMessagePacket);
+        this._nodeSocket.setMessageFailureHandler(this._packetReceiver.handleMessageFailure);
+
         // Skip message failure handling because it's only used in UDTTest which isn't provided in the SDK.
 
-        // WEBRTC TODO: Address further C++ code.
+        // Set the isPacketVerified method as the verify operator for the Socket.
+        this._nodeSocket.setPacketFilterOperator(this.#isPacketVerified);
 
         this._nodeSocket.setConnectionCreationFilterOperator(this.sockAddrBelongsToNode);
 
@@ -139,6 +153,41 @@ class LimitedNodeList {
 
         // Bind Slot methods.
         this.reset.bind(this);
+    }
+
+
+    /*@devdoc
+     *  Gets whether the code is being used for the connection to a domain server.
+     *  <p>For a <code>LimitedNodeList</code> this is always <code>true</code>, for a <code>NodeList</code> this is always
+     *  <code>false</code>.
+     *  @returns {boolean} <code>true</code> if the node list is for the connection to a domain server, <code>false</code> if
+     *  it isn't.
+     */
+    isDomainServer(): boolean {  // eslint-disable-line class-methods-use-this
+        // C++  bool isDomainServer()
+        return true;
+    }
+
+    /*@devdoc
+     *  Gets the domain server's local ID.
+     *  <p>For a <code>LimitedNodeList</code> this throws an error because it shouldn't be called for a domain server node
+     *  list.</p>
+     *  @returns {number} The domain server's local ID.
+     */
+    getDomainLocalID(): number {  // eslint-disable-line class-methods-use-this
+        // C++  LocalID getDomainLocalID()
+        assert(false);  // This method should not be called for a domain server node list.
+    }
+
+    /*@devdoc
+     *  Gets the domain server's network address.
+     *  <p>For a <code>LimitedNodeList</code> this throws an error because it shouldn't be called for a domain server node
+     *  list.</p>
+     *  @returns {SockAddr} The domain server's network address.
+     */
+    getDomainSockAddr(): SockAddr {  // eslint-disable-line class-methods-use-this
+        // C++  SockAddr getDomainSockAddr()
+        assert(false);  // This method should not be called for on a domain server node list.
     }
 
 
@@ -597,6 +646,19 @@ class LimitedNodeList {
         return this.#_nodeKilled.signal();
     }
 
+    /*@devdoc
+     *  Triggered when there's a packet version mismatch in a packet received.
+     *  @function LimitedNodeList.packetVersionMismatch
+     *  @param {PacketTypeValue} pacektType - The type of packet received.
+     *  @param {SockAddr} senderSockAddr - The address of the packet sender.
+     *  @param {Uuid} senderUUID - The session ID of the sender.
+     *  @returns {Signal}
+     */
+    get packetVersionMismatch(): Signal {
+        // C++  void packetVersionMismatch(PacketType type, const SockAddr& senderSockAddr, const QUuid& senderUUID)
+        return this.#_packetVersionMismatch.signal();
+    }
+
 
     protected addNewNode(info: NewNodeInfo): void {  // eslint-disable-line class-methods-use-this
         // C++  void addNewNode(NewNodeInfo info);
@@ -606,8 +668,8 @@ class LimitedNodeList {
         // WebRTC: The public and local SockAddrs provided are the assignment clients' UDP SockAddrs. Use their IP addresses as
         // nominal WebRTC addresses but leave their ports to be filled in later - either when updating an existing node or when
         // the WebRTC connection is made (NodeList.#activateSocketFromNodeCommunication()).
-        const publicSocket = new SockAddr(SocketType.WebRTC, 0, 0);
-        const localSocket = new SockAddr(SocketType.WebRTC, 0, 0);
+        const publicSocket = new SockAddr(SocketType.WebRTC, info.publicSocket.getAddress(), 0);
+        const localSocket = new SockAddr(SocketType.WebRTC, info.localSocket.getAddress(), 0);
 
         this.addOrUpdateNode(info.uuid, info.type, publicSocket, localSocket, info.sessionLocalID, info.isReplicated,
             false, info.connectionSecretUUID, info.permissions);
@@ -703,6 +765,146 @@ class LimitedNodeList {
         // WEBRTC TODO: Address further C++ code.
 
     }
+
+    #isPacketVerifiedWithSource(packet: Packet, sourceNode: Node | null = null): boolean {
+        // C++  bool isPacketVerifiedWithSource(const Packet& packet, Node* sourceNode)
+        // We track bandwidth when doing packet verification to avoid needing to do a node lookup later when we already do it in
+        // packetSourceAndHashMatchAndTrackBandwidth.
+        return this.#packetVersionMatch(packet) && this.#packetSourceAndHashMatchAndTrackBandwidth(packet, sourceNode);
+    }
+
+    #packetVersionMatch(packet: Packet): boolean {
+        // C++  bool packetVersionMatch(const Packet& packet)
+        const headerType = NLPacket.typeInHeader(packet);
+        const headerVersion = NLPacket.versionInHeader(packet);
+
+        if (headerVersion !== PacketType.versionForPacketType(headerType)) {
+            let hasBeenOutput = false;
+            let senderString = "";
+            const senderSockAddr = packet.getMessageData().senderSockAddr ?? new SockAddr();
+            let sourceID = new Uuid();
+
+            if (PacketType.getNonSourcedPackets().has(headerType)) {
+                const item = senderSockAddr.toString() + headerType.toString();
+                hasBeenOutput = LimitedNodeList.#versionDebugSuppressMap.has(item);
+                if (!hasBeenOutput) {
+                    LimitedNodeList.#versionDebugSuppressMap.add(item);
+                    senderString = senderSockAddr.toString();
+                }
+            } else {
+                const sourceNode = this.nodeWithLocalID(NLPacket.sourceIDInHeader(packet));
+                if (sourceNode) {
+                    sourceID = sourceNode.getUUID();
+                    const item = sourceID.toString() + headerType.toString();
+                    hasBeenOutput = LimitedNodeList.#sourcedVersionDebugSuppressMap.has(item);
+                    if (!hasBeenOutput) {
+                        LimitedNodeList.#sourcedVersionDebugSuppressMap.add(item);
+                        senderString = sourceID.toString();
+                    }
+                }
+            }
+
+            if (!hasBeenOutput) {
+                console.log("[networking]  Packet version mismatch on", headerType, "- Sender", senderString, "sent",
+                    headerVersion, "but", PacketType.versionForPacketType(headerType), "expected.");
+                this.#_packetVersionMismatch.emit(headerType, senderSockAddr, sourceID);
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    #packetSourceAndHashMatchAndTrackBandwidth(packet: Packet, sourceNodeIn: Node | null): boolean {
+        // C++ bool packetSourceAndHashMatchAndTrackBandwidth(const Packet& packet, Node* sourceNode)
+
+        // In the Web SDK, sourceNode is always null because it is operating as a client.
+        let sourceNode = sourceNodeIn;
+        assert(sourceNode === null);
+
+        const headerType = NLPacket.typeInHeader(packet);
+
+        if (PacketType.getNonSourcedPackets().has(headerType)) {
+            if ([...PacketType.getReplicatedPacketMapping()].findIndex(([, value]) => {
+                return value === headerType;
+            }) !== -1) {
+                // This is a replicated packet type - make sure the socket that sent it to us matches one from one of our
+                // current upstream nodes
+
+                let sendingNodeType = NodeType.Unassigned;
+                const senderSockAddr = packet.getMessageData().senderSockAddr;
+                if (senderSockAddr) {
+                    this.#_nodeHash.forEach((key) => {
+                        if (key.getPublicSocket().isEqualTo(senderSockAddr)) {
+                            sendingNodeType = key.getType();
+                        }
+                    });
+                }
+
+                if (sendingNodeType !== NodeType.Unassigned) {
+                    return true;
+                }
+                console.log("[networking] Replicated packet of type", headerType, "received from unknown upstream",
+                    senderSockAddr?.toString());
+                return false;
+
+            }
+
+            return true;
+        }
+
+        let sourceLocalID = Node.NULL_LOCAL_ID;
+
+        // Check if we were passed a sourceNode hint or if we need to look it up.
+        if (!sourceNode) {
+            // Figure out which node this is from
+            sourceLocalID = NLPacket.sourceIDInHeader(packet);
+
+            sourceNode = this.nodeWithLocalID(sourceLocalID);
+        }
+
+        const sourceID = sourceNode?.getUUID();
+
+        if (!sourceNode
+            && !this.isDomainServer()
+            && sourceLocalID === this.getDomainLocalID()
+            && packet.getMessageData().senderSockAddr?.isEqualTo(this.getDomainSockAddr())
+            && PacketType.getDomainSourcedPackets().has(headerType)) {
+            // This is a packet sourced by the domain server.
+            return true;
+        }
+
+        if (sourceNode) {
+
+            // WEBRTC TODO: Address further C++ code. - Verify received packet.
+
+            return true;
+        }
+
+        if (!this.#isDelayedNode(sourceID)) {
+            console.log("[networking] Packet of type", headerType, "received from unknown node with Local ID",
+                sourceLocalID);
+        }
+
+        return false;
+    }
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    #isDelayedNode(sourceID: Uuid | undefined): boolean {  // eslint-disable-line
+
+        // WEBRTC TODO: Address further C++ code.
+
+        return false;
+    }
+
+
+    // Callback.
+    #isPacketVerified = (packet: Packet): boolean => {
+        // C++  bool isPacketVerified(const Packet& packet)
+        return this.#isPacketVerifiedWithSource(packet);
+    };
 
 }
 

@@ -59,8 +59,7 @@ class Connection {
 
 
     #_destinationAddressChange = new SignalEmitter();
-    // Not used at present.
-    /*
+    /* Not used at present.
     #_packetSent = new SignalEmitter();
     */
 
@@ -98,8 +97,8 @@ class Connection {
     }
 
     /*@devdoc
-     *  Gets the destination address that packets are being sent to.
-     *  @returns {SockAddr} The destination address that packets are being sent to.
+     *  Gets the destination address that packets are being sent to or received from.
+     *  @returns {SockAddr} The destination address that packets are being sent to or received from.
      */
     getDestination(): SockAddr {
         // C++  SockAddr getDestination()
@@ -126,38 +125,6 @@ class Connection {
         this.#getSendQueue().queuePacketList(packetList);
     }
 
-    /* Not used at present
-    queueReceivedMessagePacket(packet: Packet): void {
-        // C++  void queueReceivedMessagePacket(std::unique_ptr<Packet> packet)
-        assert(packet.isPartOfMessage());
-
-        const messageNumber = packet.getMessageNumber();
-        const pendingMessage = this.#_pendingReceivedMessages.get(messageNumber);
-        assert(pendingMessage !== undefined);
-
-        pendingMessage.enqueuePacket(packet);
-
-        let processedLastOrOnly = false;
-
-        while (pendingMessage.hasAvailablePackets()) {
-            const receivedPacket = pendingMessage.removeNextPacket();
-            / eslint-disable @typescript-eslint/no-non-null-assertion /
-            const packetPosition = receivedPacket!.getPacketPosition();
-            this.#_parentSocket.messageReceived(receivedPacket!);
-            / eslint-enable @typescript-eslint/no-non-null-assertion /
-
-            // If this was the last or only packet, then we can remove the pending message from our hash.
-            if (packetPosition === Packet.PacketPosition.LAST || packetPosition === Packet.PacketPosition.ONLY) {
-                processedLastOrOnly = true;
-            }
-        }
-
-        if (processedLastOrOnly) {
-            this.#_pendingReceivedMessages.delete(messageNumber);  // eslint-disable-line @typescript-eslint/dot-notation
-        }
-    }
-    */
-
     /*@devdoc
      *  Gets whether a handshake has been received.
      *  @returns {boolean} <code>true</code> if a handshake has been received, <code>false</code> if one hasn't.
@@ -180,7 +147,7 @@ class Connection {
             return false;
         }
 
-        // If this is not the next sequence number, report loss
+        // If this is not the next sequence number, report loss.
         const lastReceivedSequenceNumberPlusOne = this.#_lastReceivedSequenceNumber.copy().increment();
         const sequenceNumberMinusOne = sequenceNumber.copy().decrement();
         if (sequenceNumber.isGreaterThan(lastReceivedSequenceNumberPlusOne)) {
@@ -247,6 +214,44 @@ class Connection {
         }
     }
 
+    /*@devdoc
+     *  Queues a received packet that is part of a message and when a message is complete, sends it to the connection's parent
+     *  {@link Socket} for handling.
+     *  @param {Packet} packet - The message packet received.
+     */
+    queueReceivedMessagePacket(packet: Packet): void {
+        // C++  void queueReceivedMessagePacket(std::unique_ptr<Packet> packet)
+        assert(packet.isPartOfMessage());
+
+        const messageNumber = packet.getMessageNumber();
+        let pendingMessage = this.#_pendingReceivedMessages.get(messageNumber);
+        if (pendingMessage === undefined) {
+            pendingMessage = new PendingReceivedMessage();
+            this.#_pendingReceivedMessages.set(messageNumber, pendingMessage);
+        }
+
+        pendingMessage.enqueuePacket(packet);
+
+        let processedLastOrOnly = false;
+
+        while (pendingMessage.hasAvailablePackets()) {
+            const receivedPacket = pendingMessage.removeNextPacket();
+            /* eslint-disable @typescript-eslint/no-non-null-assertion */
+            const packetPosition = receivedPacket!.getPacketPosition();
+            this.#_parentSocket.messageReceived(receivedPacket!);
+            /* eslint-enable @typescript-eslint/no-non-null-assertion */
+
+            // If this was the last or only packet, then we can remove the pending message from our hash.
+            if (packetPosition === Packet.PacketPosition.LAST || packetPosition === Packet.PacketPosition.ONLY) {
+                processedLastOrOnly = true;
+            }
+        }
+
+        if (processedLastOrOnly) {
+            this.#_pendingReceivedMessages.delete(messageNumber);  // eslint-disable-line @typescript-eslint/dot-notation
+        }
+    }
+
 
     /*@devdoc
      *  Acts upon the send queue becoming inactive.
@@ -302,10 +307,10 @@ class Connection {
 
         this.#_ackPacket.reset();  // We need to reset it every time.
 
-        // pack in the ACK number
+        // Pack in the ACK number.
         this.#_ackPacket.writeSequenceNumber(nextACKNumber);
 
-        // have the socket send off our packet
+        // Have the socket send off our packet.
         this.#_parentSocket.writeBasePacket(this.#_ackPacket, this.#_destination);
 
         // WEBRTC TODO: Address further C++ code. - Connection stats.
@@ -347,7 +352,7 @@ class Connection {
 
         // Give this ACK to the congestion control and update the send queue parameters.
         /*
-        // Default CongestionControl.onACK() always returns false.
+        // Default CongestionControl.onACK() always returns false so there's no need for this code.
         this.#updateCongestionControlAndSendQueue(() => {
             if (this.#_congestionControl.onACK(ack, controlPacket.getReceiveTime())) {
                 // The congestion control has told us it needs a fast re-transmit of ack + 1 - add that now.
@@ -374,8 +379,8 @@ class Connection {
         const initialSequenceNumber = controlPacket.readSequenceNumber();
 
         if (!this.#_hasReceivedHandshake || initialSequenceNumber.isNotEqualTo(this.#_initialReceiveSequenceNumber)) {
-            // server sent us a handshake - we need to assume this means state should be reset
-            // as long as we haven't received a handshake yet or we have and we've received some data
+            // The server sent us a handshake. We assume this means that state should be reset as long as we haven't received
+            // a handshake yet, or we have and we've received some data.
 
             if (Socket.UDT_CONNECTION_DEBUG) {
                 if (initialSequenceNumber.isNotEqualTo(this.#_initialReceiveSequenceNumber)) {
@@ -431,7 +436,9 @@ class Connection {
         this.#_lossList.clear();
 
         // Clear any pending received messages.
-        // Skip message failure handling because it's only used in UDTTest which isn't provided in the SDK.
+        for (const messageNumber of this.#_pendingReceivedMessages.keys()) {
+            this.#_parentSocket.messageFailed(this, messageNumber);
+        }
         this.#_pendingReceivedMessages.clear();
     }
 
@@ -496,8 +503,7 @@ class Connection {
 
         const sendQueue = this.#getSendQueue();
 
-        // Not used at present.
-        /*
+        /* Not used at present.
         // Update the last sent sequence number in congestion control.
         this.#_congestionControl.setSendCurrentSequenceNumber(this.#getSendQueue().getCurrentSequenceNumber());
         */

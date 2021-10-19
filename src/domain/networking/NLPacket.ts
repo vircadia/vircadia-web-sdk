@@ -75,6 +75,52 @@ class NLPacket extends Packet {
         return new NLPacket(packet);
     }
 
+    /*@devdoc
+     *  Gets the packet type direct from a packet's data.
+     *  @returns {PacketTypeValue} The packet type.
+     */
+    static typeInHeader(packet: Packet): PacketTypeValue {
+        // C++  PacketType typeInHeader(const Packet& packet)
+        const headerOffset = Packet.totalHeaderSize(packet.isPartOfMessage());
+        return packet.getMessageData().data.getUint8(headerOffset);
+    }
+
+    /*@devdoc
+     *  Gets the packet type version direct from a packet's data.
+     *  @returns {number} The packet type version.
+     */
+    static versionInHeader(packet: Packet): number {
+        // C++  PacketVersion versionInHeader(const udt:: Packet& packet)
+        const headerOffset = Packet.totalHeaderSize(packet.isPartOfMessage());
+        return packet.getMessageData().data.getUint8(headerOffset + 1);  // Skip the packet type.
+    }
+
+    /*@devdoc
+     *  Gets the packet source ID direct from a packet's data.
+     *  @returns {number} The packet source ID.
+     */
+    static sourceIDInHeader(packet: Packet): number {
+        // C++ LocalID sourceIDInHeader(const udt::Packet& packet)
+        const headerOffset = Packet.totalHeaderSize(packet.isPartOfMessage());
+        return packet.getMessageData().data.getUint16(headerOffset + 2, UDT.LITTLE_ENDIAN);  // Skip the packet type & version.
+    }
+
+    /*@devdoc
+     *  Calculates the header size of an NLPacket.
+     *  <p><em>Static</em></p>
+     *  @function NLPacket.totalNLHeaderSize
+     *  @param {PacketType} type - The type of packet.
+     *  @param {boolean} isPartOfMessage=false - <code>true</code> if the packet is part of a message, <code>false</code> if
+     *      it isn't.
+     *  @returns {number} The total header size, in bytes.
+     *  @static
+     */
+    static totalNLHeaderSize(type: PacketTypeValue, isPartOfMessage: boolean): number {
+        // C++  int totalHeaderSize(PacketType type, bool isPartOfMessage)
+        // Cannot use the same name as the Packet member, in TypeScript, because the function signatures are different.
+        return Packet.totalHeaderSize(isPartOfMessage) + NLPacket.#localHeaderSize(type);
+    }
+
 
     static readonly #NUM_BYTES_PACKET_TYPE = 1;
     static readonly #NUM_BYTES_PACKET_VERSION = 1;
@@ -177,7 +223,7 @@ class NLPacket extends Packet {
         // C++  void writeSourceID(LocalID sourceID)
         assert(!PacketType.getNonSourcedPackets().has(this._messageData.type));
         const offset = Packet.totalHeaderSize(this.isPartOfMessage()) + 2;
-        this._messageData.data.setUint16(offset, sourceID, UDT.LITTLE_ENDIAN);  // Yes, different endian-ness from reading!
+        this._messageData.data.setUint16(offset, sourceID, UDT.LITTLE_ENDIAN);
         this._messageData.sourceID = sourceID;
     }
 

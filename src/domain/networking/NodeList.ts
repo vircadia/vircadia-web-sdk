@@ -105,6 +105,24 @@ class NodeList extends LimitedNodeList {
     }
 
 
+    // JSDoc is in LimitedNodeList.
+    override isDomainServer(): boolean {  // eslint-disable-line class-methods-use-this
+        // C++  bool isDomainServer()
+        return false;
+    }
+
+    // JSDoc is in LimitedNodeList.
+    override getDomainLocalID(): number {
+        // C++  LocalID getDomainLocalID()
+        return this.#_domainHandler.getLocalID();
+    }
+
+    // JSDoc is in LimitedNodeList.
+    override getDomainSockAddr(): SockAddr {
+        // C++  SockAddr getDomainSockAddr()
+        return this.#_domainHandler.getSockAddr();
+    }
+
     /*@devdoc
      *  Gets the domain handler used by the NodeList.
      *  @function NodeList.getDomainHandler
@@ -206,9 +224,9 @@ class NodeList extends LimitedNodeList {
      *  @param {ReceivedMessage} message - The Ping message.
      *  @param {Node} sendingNode - The assignment client that sent the ping.
      */
-    processPingPacket = (message: ReceivedMessage, sendingNode?: Node): void => {
+    processPingPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {
         // C++  void processPingPacket(ReceivedMessage* message, Node* sendingNode)
-        assert(sendingNode !== undefined);
+        assert(sendingNode !== null);
 
         const MS_TO_USEC = 1000n;
 

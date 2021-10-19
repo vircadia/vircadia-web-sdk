@@ -391,7 +391,7 @@ class AudioClient {
     // Listener
     // eslint-disable-next-line
     // @ts-ignore
-    #processStreamStatsPacket = (message: ReceivedMessage, sendingNode?: Node): void => {  // eslint-disable-line
+    #processStreamStatsPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {  // eslint-disable-line
         // C++  void AudioIOStats::processStreamStatsPacket(ReceivedMessage*, Node* sendingNode)
 
         console.warn("AudioClient: AudioStreamStats packet not processed.");

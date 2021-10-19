@@ -70,8 +70,9 @@ const UDT = new class {
     readonly RELIABILITY_BIT_MASK = 0x40000000;
     readonly MESSAGE_BIT_MASK = 0x20000000;
     readonly OBFUSCATION_LEVEL_BIT_MASK = 0x18000000;
-    readonly SEQUENCE_NUMBER_BIT_MASK = 0x7fffff;
+    readonly SEQUENCE_NUMBER_BIT_MASK = 0x7ffffff;
     readonly BIT_FIELD_MASK = 0xF8000000;
+    readonly MESSAGE_NUMBER_MASK = 0x3fffffff;
 
 }();
 

@@ -284,11 +284,15 @@ class Packet extends BasePacket {
         this._messageData.dataPosition += 4;
 
         if (this._messageData.isPartOfMessage) {
-            console.warn("Multi-packet messages not yet implemented!");
+            const messageNumberAndBitField = this._messageData.data.getUint32(this._messageData.dataPosition,
+                UDT.LITTLE_ENDIAN);
+            this._messageData.dataPosition += 4;
+            this._messageData.messageNumber = messageNumberAndBitField & UDT.MESSAGE_NUMBER_MASK;
+            this._messageData.packetPosition = messageNumberAndBitField >> UDT.PACKET_POSITION_OFFSET;
 
-            // WEBRTC TODO: Address further C++ code.
-
-            this._messageData.dataPosition += 8;
+            this._messageData.messagePartNumber = this._messageData.data.getUint32(this._messageData.dataPosition,
+                UDT.LITTLE_ENDIAN);
+            this._messageData.dataPosition += 4;
         } else {
             this._messageData.messageNumber = 0;
             this._messageData.packetPosition = Packet.PacketPosition.ONLY;

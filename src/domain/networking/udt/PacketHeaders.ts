@@ -449,10 +449,38 @@ const PacketType = new class {
         PacketTypeValue.WebRTCSignaling
     ]);
 
+    readonly #_domainSourcedPackets = new Set([
+        PacketTypeValue.AssetMappingOperation,
+        PacketTypeValue.AssetGet,
+        PacketTypeValue.AssetUpload
+    ]);
+
+    // Mapping between packets and their replicated versions.
+    readonly #_replicatedPacketMapping = new Map([
+        [PacketTypeValue.MicrophoneAudioNoEcho, PacketTypeValue.ReplicatedMicrophoneAudioNoEcho],
+        [PacketTypeValue.MicrophoneAudioWithEcho, PacketTypeValue.ReplicatedMicrophoneAudioWithEcho],
+        [PacketTypeValue.InjectAudio, PacketTypeValue.ReplicatedInjectAudio],
+        [PacketTypeValue.SilentAudioFrame, PacketTypeValue.ReplicatedSilentAudioFrame],
+        [PacketTypeValue.AvatarIdentity, PacketTypeValue.ReplicatedAvatarIdentity],
+        [PacketTypeValue.KillAvatar, PacketTypeValue.ReplicatedKillAvatar],
+        [PacketTypeValue.BulkAvatarData, PacketTypeValue.ReplicatedBulkAvatarData]
+    ]);
+
+
     readonly #_DomainListVersion = {
         // C++  DomainListVersion
         HasConnectReason: 24,
         SocketTypes: 25
+    };
+
+    readonly #_PingVersion = {
+        IncludeConnectionID: 18
+    };
+
+    readonly #_DomainListRequestVersion = {
+        // C++  DomainListRequestVersion
+        PreSocketTypes: 22,
+        SocketTypes: 23
     };
 
     readonly #_DomainConnectionDeniedVersion = {
@@ -460,16 +488,15 @@ const PacketType = new class {
         IncludesExtraInfo: 19
     };
 
+    readonly #_DomainServerAddedNodeVersion = {
+        // C++  DomainServerAddedNodeVersion
+        SocketTypes: 19
+    };
+
     readonly #_DomainConnectRequestVersion = {
         // C++  DomainConnectRequestVersion
         HasCompressedSystemInfo: 26,
         SocketTypes: 27
-    };
-
-    readonly #_DomainListRequestVersion = {
-        // C++  DomainListRequestVersion
-        PreSocketTypes: 22,
-        SocketTypes: 23
     };
 
     readonly #_AudioVersion = {
@@ -504,17 +531,28 @@ const PacketType = new class {
         switch (packetType) {
             case this.DomainList:
                 return this.#_DomainListVersion.SocketTypes;
+            case this.Ping:
+                return this.#_PingVersion.IncludeConnectionID;
             case this.PingReply:
                 return DEFAULT_VERSION;
-            case this.SilentAudioFrame:
+            case this.MixedAudio:
+                return this.#_AudioVersion.StopInjectors;
             case this.MicrophoneAudioNoEcho:
+                return this.#_AudioVersion.StopInjectors;
+            case this.SilentAudioFrame:
                 return this.#_AudioVersion.StopInjectors;
             case this.DomainListRequest:
                 return this.#_DomainListRequestVersion.SocketTypes;
             case this.DomainConnectionDenied:
                 return this.#_DomainConnectionDeniedVersion.IncludesExtraInfo;
+            case this.AudioStreamStats:
+                return this.#_AudioVersion.StopInjectors;
+            case this.DomainServerAddedNode:
+                return this.#_DomainServerAddedNodeVersion.SocketTypes;
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
+            case this.AudioEnvironment:
+                return DEFAULT_VERSION;
             case this.DomainDisconnectRequest:
                 return DEFAULT_VERSION;
             case this.DomainServerRemovedNode:
@@ -558,6 +596,26 @@ const PacketType = new class {
     getNonSourcedPackets() {
         // C++  getNonSourcedPackets()
         return this.#_nonSourcedPackets;
+    }
+
+    /*@devdoc
+     *  Gets the set of domain-sourced packets.
+     *  @function PacketType(1).getDomainSourcedPackets
+     *  @returns {Set<PacketType>} The set of domain-sourced packets.
+     */
+    getDomainSourcedPackets() {
+        // C++  getDomainSourcedPackets()
+        return this.#_domainSourcedPackets;
+    }
+
+    /*@devdoc
+     * Gets the mapping between packets and their replicated versions.
+     * @function PacketType(1).getReplicatedPacketMapping
+     * @returns {Map<PacketType,PacketType>} The mapping between packets and their replicated versions.
+     */
+    getReplicatedPacketMapping() {
+        // C++  QHash<PacketTypeEnum::Value, PacketTypeEnum::Value> getReplicatedPacketMapping()
+        return this.#_replicatedPacketMapping;
     }
 
 }();

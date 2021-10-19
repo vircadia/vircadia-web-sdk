@@ -24,7 +24,10 @@ import assert from "../../shared/assert";
 
 
 type PacketHandlerCallback = (packet: Packet) => void;
+type MessageHandlerCallback = (packet: Packet) => void;
+type MessageFailureHandlerCallback = (sockaAddr: SockAddr, messageNumber: number) => void;
 type ConnectionCreationFilterOperator = (sockAddr: SockAddr) => boolean;
+type PacketFilterOperator = (packet: Packet) => boolean;
 
 
 /*@devdoc
@@ -72,14 +75,13 @@ class Socket {
 
     // Use WebRTCSocket directly without going through an intermediary NetworkSocket as is done in C++.
     #_webrtcSocket: WebRTCSocket;
+    #_packetFilterOperator: PacketFilterOperator | null = null;
 
     // WEBRTC TODO: Address further C++ code.
 
     #_packetHandler: PacketHandlerCallback | null = null;
-    /* Not used at present.
-    #_messageHandler: ((packet: Packet) => void) | null = null;
-    #_messageFailureHandler: ((connectionAddress: SockAddr, messageNumber: number) => void) | null = null;
-    */
+    #_messageHandler: MessageHandlerCallback | null = null;
+    #_messageFailureHandler: MessageFailureHandlerCallback | null = null;
 
     // WEBRTC TODO: Address further C++ code.
 
@@ -236,6 +238,22 @@ class Socket {
         return bytesWritten;
     }
 
+
+    /*@devdoc
+     *  Called to filter the handling of a received packet.
+     *  @callback Socket~packetFilterOperator
+     *  @param {Packet} packet - The packet to filter.
+     *  @returns {boolean} <code>true</code> if the packet should be handled, <code>false</code> if it should be discarded.
+     */
+    /*@devdoc
+     *  Sets the function called to filter a received packet.
+     *  @param {Socket~handlePacketCallback} handler - The function to call to filter the received packet.
+     */
+    setPacketFilterOperator(filterOperator: PacketFilterOperator): void {
+        // C++  void setPacketFilterOperator(PacketFilterOperator filterOperator)
+        this.#_packetFilterOperator = filterOperator;
+    }
+
     /*@devdoc
      *  Called to handle a received packet.
      *  @callback Socket~handlePacketCallback
@@ -250,6 +268,35 @@ class Socket {
         this.#_packetHandler = (packet: Packet) => {
             handler(packet);
         };
+    }
+
+    /*@devdoc
+     *  Called to handle a received packet.
+     *  @callback Socket~handleMessageCallback
+     *  @param {Packet} message - The received message to handle.
+     */
+    /*@devdoc
+     *  Sets the function called to handle a received multi-packet message.
+     *  @param {Socket~handleMessageCallback} handler - The function to call to handle the received message.
+     */
+    setMessageHandler(handler: MessageHandlerCallback): void {
+        // C++  void setMessageHandler(MessageHandler handler)
+        this.#_messageHandler = handler;
+    }
+
+    /*@devdoc
+     *  Called to handle the failure to receive a multi-packet message.
+     *  @callback Socket~handleMessageFailureCallback
+     *  @param {SockAddr} sockAddr - The message sender.
+     *  @param {number} messageNumber - The message number.
+     */
+    /*@devdoc
+     *  Sets the function called to handle the failure to receive a multi-packet message.
+     *  @param {Socket~handleMessageFailureCallback} handler - The function to call to handle the failure to receive a message.
+     */
+    setMessageFailureHandler(handler: MessageFailureHandlerCallback): void {
+        // C++  void setMessageFailureHandler(MessageFailureHandler handler)
+        this.#_messageFailureHandler = handler;
     }
 
     /*@devdoc
@@ -295,22 +342,6 @@ class Socket {
         }
         return totalBytesSent;
     }
-
-    /* Not used at present.
-    messageReceived(packet: Packet): void {
-        // C++  void messageReceived(Packet* packet)
-        if (this.#_messageHandler) {
-            this.#_messageHandler(packet);
-        }
-    }
-
-    messageFailed(connection: Connection, messageNumber: number): void {
-        // C++  void messageFailed(Connection* connection, MessageNumber messageNumber)
-        if (this.#_messageFailureHandler) {
-            this.#_messageFailureHandler(connection.getDestination(), messageNumber);
-        }
-    }
-    */
 
 
     /*@devdoc
@@ -360,10 +391,17 @@ class Socket {
 
         while (this.#_webrtcSocket.hasPendingDatagrams()) {  // WEBRTC TODO: Further C++ code in condition.
 
-            // WEBRRTC TODO: Address further C++ code.
+            // WEBRRTC TODO: Address further C++ code. - Processing timeout.
+
+            // WEBRRTC TODO: Address further C++ code. - readyRead() backup.
+
+            const receiveTime = Date.now();
 
             const datagram: WebRTCSocketDatagram = { buffer: undefined, sender: undefined };
             const sizeRead = this.#_webrtcSocket.readDatagram(datagram);
+
+            // WEBRTC TODO: Address further C++ code. - readyRead() backup.
+
             if (sizeRead <= 0) {
                 continue;  // eslint-disable-line no-continue
             }
@@ -371,9 +409,7 @@ class Socket {
 
             const dataView = new DataView(<ArrayBuffer>datagram.buffer);
 
-            // WEBRTC TODO: Address further C++ code.
-
-            const receiveTime = Date.now();
+            // WEBRTC TODO: Address further C++ code. - Unfiltered handlers.
 
             const isControlPacket = dataView.getUint32(0, UDT.LITTLE_ENDIAN) & UDT.CONTROL_BIT_MASK;
             if (isControlPacket) {
@@ -394,36 +430,71 @@ class Socket {
                 const messageData = packet.getMessageData();
                 messageData.receiveTime = receiveTime;
 
-                // WEBRTC TODO: Address further C++ code.
+                // WEBRRTC TODO: Address further C++ code. - readyRead() backup.
 
-                if (packet.isReliable()) {
-                    console.warn("Reliable packets not yet implemented!");
+                // Call our verification operator to see if this packet is verified.
+                if (!this.#_packetFilterOperator || this.#_packetFilterOperator(packet)) {
+                    let connection = this.#findOrCreateConnection(datagram.sender, true);
 
-                    // WEBRTC TODO: Address further C++ code.
+                    if (packet.isReliable()) {
+                        // If this is a reliable packet then signal the matching connection with the sequence number.
 
-                    return;
-                }
+                        if (!connection
+                            || !connection.processReceivedSequenceNumber(new SequenceNumber(messageData.sequenceNumber)
+                            /* , packet.getDataSize(), packet.getPayloadSize() */)) {
+                            // The connection could not be created or indicated that we should not continue processing packet.
+                            if (Socket.UDT_CONNECTION_DEBUG) {
+                                console.log("[networking] Can't process packet: type", NLPacket.typeInHeader(packet),
+                                    ", version", NLPacket.versionInHeader(packet));
 
-                // WEBRTC TODO: Address further C++ code.
+                            }
+                            // eslint-disable-next-line no-continue
+                            continue;
+                        }
 
-                if (messageData.isPartOfMessage) {
-                    console.warn("Multi-packet messages not yet implemented!");
+                        // WEBRTC TODO: Address further C++ code. - Connection stats.
 
-                    // WEBRTC TODO: Address further C++ code.
-                    /* Not used at present.
-                    const connection = this.findOrCreateConnection(datagram.sender, true);
-                    if (connection) {
-                        connection.queueReceivedMessagePacket(packet);
                     }
-                    */
 
-                } else if (this.#_packetHandler) {
-                    this.#_packetHandler(packet);
+                    if (messageData.isPartOfMessage) {
+                        // WEBRTC TODO: May no need to find again?
+                        connection = this.#findOrCreateConnection(datagram.sender, true);
+                        if (connection) {
+                            connection.queueReceivedMessagePacket(packet);
+                        }
+
+                    } else if (this.#_packetHandler) {
+                        // Call the verified packet callback to let it handle this packet.
+                        this.#_packetHandler(packet);
+                    }
                 }
-
             }
         }
     };
+
+    /*@devdoc
+     *  Handles a packet from a multi-packet message by calling the message handler that has been set. The packet is assumed to
+     *  be in order relative to its message.
+     *  @param {Packet} packet - The complete multi-packet message received.
+     */
+    messageReceived(packet: Packet): void {
+        // C++  void messageReceived(Packet* packet)
+        if (this.#_messageHandler) {
+            this.#_messageHandler(packet);
+        }
+    }
+
+    /*@devdoc
+     *  Handles the failure to receive a complete multi-packet message.
+     *  @param {Connection} connection - The connection that the message was being received on.
+     *  @param {number} messageNumber - The message number that was being received.
+     */
+    messageFailed(connection: Connection, messageNumber: number): void {
+        // C++  void messageFailed(Connection* connection, MessageNumber messageNumber)
+        if (this.#_messageFailureHandler) {
+            this.#_messageFailureHandler(connection.getDestination(), messageNumber);
+        }
+    }
 
 
     #writeReliablePacketList(packetList: NLPacketList, sockAddr: SockAddr): void {

@@ -12,12 +12,14 @@ import NLPacket from "./NLPacket";
 import Node from "./Node";
 import NodeList from "./NodeList";
 import ReceivedMessage from "./ReceivedMessage";
+import SockAddr from "./SockAddr";
 import Packet from "./udt/Packet";
 import { PacketTypeValue } from "./udt/PacketHeaders";
+import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
 
 
-type Listener = (message: ReceivedMessage, sendingNode?: Node) => void;
+type Listener = (message: ReceivedMessage, sendingNode: Node | null) => void;
 
 type ListenerReference = {
     listener: Listener,
@@ -90,8 +92,12 @@ class PacketReceiver {
 
     #_contextID;
 
-    #_messageListenerMap: Map<PacketTypeValue, ListenerReference> = new Map();
+    #_messageListenerMap: Map<PacketTypeValue, ListenerReference | null> = new Map();    // Use null for a dummy listener.
 
+    #_pendingMessages: Map<string, ReceivedMessage> = new Map();
+    // C++  std::unordered_map<std::pair<SockAddr, udt::Packet::MessageNumber>, QSharedPointer<ReceivedMessage>>
+    //      _pendingMessages;
+    //      In TypeScript, the key is SockAddr.toString() + Number.toString().
 
     constructor(contextID: number) {
         this.#_contextID = contextID;
@@ -115,6 +121,7 @@ class PacketReceiver {
         listener.deliverPending = deliverPending;
 
         this.#_messageListenerMap.set(packetType, listener);
+
         return true;
 
         // WEBRTC TODO: Address further C++ code.
@@ -139,41 +146,78 @@ class PacketReceiver {
         this.#handleVerifiedMessage(receivedMessage, true);
     };
 
+    /*@devdoc
+     *  Invokes the listener registered for an {@link NLPacket} per its PacketType.
+     *  @function PacketReceiver.handleVerifiedMessagePacket
+     *  @type {Slot}
+     *  @param {Packet} packet - The packet. It is treated as an NLPacket.
+     */
+    handleVerifiedMessagePacket = (packet: Packet): void => {
+        // C++  void handleVerifiedMessagePacket(Packet* packet)
+        const nlPacket = NLPacket.fromBase(packet);
+        const messageData = nlPacket.getMessageData();
+        assert(messageData.senderSockAddr !== undefined);
+        const key = messageData.senderSockAddr.toString() + messageData.messageNumber.toString();
+        let message = this.#_pendingMessages.get(key);
 
-    // eslint-disable-next-line
-    // @ts-ignore
-    #handleVerifiedMessage(receivedMessage: ReceivedMessage, justReceived: boolean): void {  // eslint-disable-line
+        if (message === undefined) {
+            // Create message
+            message = new ReceivedMessage(nlPacket);
+
+            if (!message.getMessageData().isComplete) {
+                this.#_pendingMessages.set(key, message);
+            }
+            this.#handleVerifiedMessage(message, true);  // Handler may handle first message packet immediately when it arrives.
+        } else {
+            message.appendPacket(nlPacket);
+
+            if (message.getMessageData().isComplete) {
+                this.#_pendingMessages.delete(key);  // eslint-disable-line @typescript-eslint/dot-notation
+                this.#handleVerifiedMessage(message, false);
+            }
+        }
+    };
+
+    /*@devdoc
+     *  Handles the failure to completely receive a multi-packet message.
+     *  @type {Slot}
+     *  @param {SockAddr} from - The address which the message was being received from.
+     *  @param {number} messgeNumber - The number of the message that was being received.
+     */
+    handleMessageFailure = (from: SockAddr, messageNumber: number): void => {
+        // C++  void handleMessageFailure(SockAddr from, MessageNumber messageNumber)
+        const key = from.toString() + messageNumber.toString();
+        const message = this.#_pendingMessages.get(key);
+        if (message !== undefined) {
+            message.setFailed();
+            this.#_pendingMessages.delete(key);  // eslint-disable-line @typescript-eslint/dot-notation
+        }
+    };
+
+
+    #handleVerifiedMessage(receivedMessage: ReceivedMessage, justReceived: boolean): void {
         // C++  void handleVerifiedMessage(ReceivedMessage* receivedMessage, bool justReceived)
 
-        // WEBRTC TODO: This method is incorrectly named - it handles both verified and unverified packets?
-
-        const messageListener = this.#_messageListenerMap.get(receivedMessage.getType());
-        if (messageListener) {
-
-            // WEBRTC TODO: Address further code.
-
-            if (messageListener.sourced) {
-                let matchingNode = null;
-                if (receivedMessage.getSourceID() !== Node.NULL_LOCAL_ID) {
-                    const nodeList = ContextManager.get(this.#_contextID, NodeList) as NodeList;
-                    matchingNode = nodeList.nodeWithLocalID(receivedMessage.getSourceID());
-                }
-                if (matchingNode) {
-                    messageListener.listener(receivedMessage, matchingNode);
-                } else {
-                    console.error("Could not find node for message type:", receivedMessage.getType());
-                    // WEBRTC TODO: Add string name of packet type to message.
-                }
-            } else {
-                messageListener.listener(receivedMessage);
+        const listener = this.#_messageListenerMap.get(receivedMessage.getType());
+        if (listener) {
+            if (listener.deliverPending && !justReceived
+                || !listener.deliverPending && !receivedMessage.getMessageData().isComplete) {
+                return;
             }
 
-        } else {
-            console.error("Could not find listener for message type:", receivedMessage.getType());
-            // WEBRTC TODO: Add string name of packet type to message.
+            let matchingNode: Node | null = null;
+            if (receivedMessage.getSourceID() !== Node.NULL_LOCAL_ID) {
+                const nodeList = ContextManager.get(this.#_contextID, NodeList) as NodeList;
+                matchingNode = nodeList.nodeWithLocalID(receivedMessage.getSourceID());
+            }
+            listener.listener(receivedMessage, matchingNode);
 
-            // WEBRTC TODO: Address further code.
+        } else if (listener === undefined) {
+            console.error("PacketReceiver.handleVerifiedMessage() : Could not find listener for message type:",
+                receivedMessage.getType());
 
+            // Insert a dummy listener so we don't log this again.
+            this.#_messageListenerMap.set(receivedMessage.getType(), null);
         }
     }
 

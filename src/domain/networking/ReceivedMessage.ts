@@ -8,10 +8,12 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import MessageData from "./MessageData";
 import NLPacket from "./NLPacket";
 import SockAddr from "./SockAddr";
 import Packet from "./udt/Packet";
 import { PacketTypeValue } from "./udt/PacketHeaders";
+import assert from "../shared/assert";
 
 
 /*@devdoc
@@ -44,6 +46,18 @@ class ReceivedMessage {
 
 
     /*@devdoc
+     *  Gets a reference to the {@link MessageData} object used to accumulate and share private packet- and message-related data
+     *  between the {@link BasePacket}, {@link Packet}, and {@link NLPacket} classes and the "friend" {@link ReceivedMessage}
+     *  class plus the packet writing and reading classes provided in {@link Packets}.
+     *  <p><strong>Warning:</strong> Do not use except in these friend classes.</p>
+     *  @returns {MessageData} Private packet- and message-related data.
+     */
+    getMessageData(): MessageData {
+        // C++  N/A
+        return this.#_messageData;
+    }
+
+    /*@devdoc
      *  Gets the type of the message.
      *  @returns {PacketType} The type of the packet(s) used to form the message.
      */
@@ -69,6 +83,59 @@ class ReceivedMessage {
     getSourceID(): number {
         // C++  NLPacket::LocalID getSourceID()
         return this.#_messageData.sourceID;
+    }
+
+    /*@devdoc
+     *  Appends the data from a packet to existing message data.
+     *  @param {NLPaclet} packet - The packet to append.
+     */
+    appendPacket(packet: NLPacket): void {
+        // C++  void appendPacket(NLPacket& packet)
+        assert(!this.#_messageData.isComplete, "ReceivedMessage.appendPacket() : Appending packet to a complete message");
+
+        this.#_messageData.numPackets += 1;
+
+        // Append the packet payload.
+        // WEBRTC TODO: This isn't a very efficient approach in TypeScript because an ArrayBuffer cannot be lengthened. It
+        //              would be better to accumulate individual packets in a list then merge them in one go once the final
+        //              packet has been received.
+
+        const packetMessageData = packet.getMessageData();
+        const packetPayloadStart = NLPacket.totalNLHeaderSize(packet.getType(), true);
+
+        const buffer = new Uint8Array(this.#_messageData.packetSize + packetMessageData.buffer.byteLength - packetPayloadStart);
+
+        // Set the appended packet first then overwrite its header with the original data.
+        buffer.set(packetMessageData.buffer, this.#_messageData.packetSize - packetPayloadStart);
+        buffer.set(this.#_messageData.buffer, 0);
+        this.#_messageData.buffer = buffer;
+        this.#_messageData.packetSize = buffer.byteLength;
+
+        // WEBRTC TODO: Address further C++ code. - Emit progress.
+
+        // Don't need to set the firstPacketReceiveTime because that is set in the constructor.
+
+        const packetPosition = packet.getPacketPosition();
+        if (packetPosition === NLPacket.PacketPosition.LAST) {
+            this.#_messageData.isComplete = true;
+
+            // WEBRTC TODO: Address further C++ code. - Emit completed() for assert server API.
+
+        }
+    }
+
+    /*@devdoc
+     *  Records and notifies that receipt of the received message has failed.
+     */
+    setFailed(): void {
+    // C++  void setFailed()
+
+        // WEBRTC TODO: Address further C++ code. - Failure state for asset server API.
+
+        this.#_messageData.isComplete = true;
+
+        // WEBRTC TODO: Address further C++ code. - Completed signal state for asset server API.
+
     }
 
     /*@devdoc
