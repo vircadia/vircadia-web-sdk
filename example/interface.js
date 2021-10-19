@@ -28,6 +28,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         ipAddress.value = DEFAULT_URL;
         const connectButton = document.getElementById("domainConnectButton");
         const disconnectButton = document.getElementById("domainDisconnectButton");
+        const domainSessionUUID = document.getElementById("domainSessionUUID");
 
         function onStateChanged(state, info) {
             statusText.value = DomainServer.stateToString(state);
@@ -45,6 +46,11 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
             domainServer.disconnect();
         }
         disconnectButton.addEventListener("click", onDisconnectButtonClick);
+
+        domainSessionUUID.value = domainServer.sessionUUID.stringify();
+        domainServer.sessionUUIDChanged.connect((sessionUUID) => {
+            domainSessionUUID.value = sessionUUID.stringify();
+        });
 
     }());
 
@@ -137,6 +143,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         const messagesTextMessage = document.getElementById("messagesTextMessage");
         const messagesTextSendButton = document.getElementById("messagesTextSendButton");
         const messagesTextReceived = document.getElementById("messagesTextReceived");
+        const messagesSender = document.getElementById("messagesSender");
 
         function onStateChanged(state) {
             statusText.value = MessageMixer.stateToString(state);
@@ -169,10 +176,11 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         }
         messagesTextSendButton.addEventListener("click", onMessagesTextSendButtonClick);
 
-        function onMessageReceived(channel, message /* , senderID, localOnly */) {
+        function onMessageReceived(channel, message, senderID /* , localOnly */) {
             // console.log("$$$$$$$ Interface.onMessageReceived() :", channel, message);
             if (channel === messagesChannel.value) {
                 messagesTextReceived.value = message;
+                messagesSender.value = senderID.stringify();
             }
         }
         messageMixer.messageReceived.connect(onMessageReceived);

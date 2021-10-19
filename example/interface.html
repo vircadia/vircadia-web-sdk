@@ -32,6 +32,11 @@
             <button id="domainConnectButton">Connect</button>
             <button id="domainDisconnectButton">Disconnect</button>
         </div>
+
+        <div class="row">
+            <span>Session:</span>
+            <input id="domainSessionUUID" type="text" readonly="readonly" class="medium" />
+        </div>
     </div>
 
     <h2>Audio Mixer</h2>
@@ -75,7 +80,8 @@
         </div>
 
         <div class="row">
-            <span>Received:</span> <input id="messagesTextReceived" type="text" readonly />
+            <span>Received:</span> <input id="messagesTextReceived" type="text" readonly class="medium" />
+            from <input id="messagesSender" type="text" readonly="readonly" class="medium" />
         </div>
     </div>
 
