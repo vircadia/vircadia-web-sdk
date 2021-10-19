@@ -77,8 +77,7 @@ class SendQueue {
 
     #_lastPacketSentAt = BigInt(0);
 
-    // Not used at present.
-    /*
+    /* Not used at present.
     #_packetSent = new SignalEmitter();
     #_packetRetransmitted = new SignalEmitter();
     */
@@ -282,8 +281,7 @@ class SendQueue {
     };
 
 
-    // Not used at present.
-    /*
+    /* Not used at present.
     get packetSent(): Signal {
         return this.#_packetSent.signal();
     }
@@ -397,12 +395,11 @@ class SendQueue {
                         // Send it off.
                         this.#sendPacket(packet);
                     } else {
-                        // send it off
+                        // Send it off.
                         this.#sendPacket(resendPacket);
                     }
 
-                    // Not used at present.
-                    /*
+                    /* Not used at present.
                     this.#_packetRetransmitted.emit(wireSize, payloadSize, sequenceNumber, HighResolutionClock.now());
                     */
 
@@ -430,8 +427,7 @@ class SendQueue {
         // Write the sequence number and send the packet.
         newPacket.writeSequenceNumber(sequenceNumber);
 
-        // Not used at present.
-        /*
+        /* Not used at present.
         // Save the packet and payload sizes.
         const packetSize = newPacket.getWireSize();
         const payloadSize = newPacket.getPayloadSize();
@@ -439,8 +435,7 @@ class SendQueue {
 
         const bytesWritten = this.#sendPacket(newPacket);
 
-        // Not used at present.
-        /*
+        /* Not used at present.
         this.#_packetSent.emit(packetSize, payloadSize, sequenceNumber, HighResolutionClock.now());
         */
 

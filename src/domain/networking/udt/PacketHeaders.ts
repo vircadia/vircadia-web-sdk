@@ -221,7 +221,10 @@ const enum PacketTypeValue {
  *      removed.<br />
  *      <em>Reliable.</em>
  *      {@link PacketScribe.DomainServerRemovedNodeDetails}.
- *  @property {PacketType} MessagesData - <code>57</code>
+ *  @property {PacketType} MessagesData - <code>57</code> - The user client sends and receives this packet to and from the
+ *      message mixer.<br />
+ *      <em>Reliable. Ordered.</em>
+ *      {@link PacketScribe.MessagesDataDetails}.
  *  @property {PacketType} MessagesSubscribe - <code>58</code> - The user client sends this to the message mixer to subscribe to
  *      a message channel.<br />
  *      <em>Reliable. Ordered.</em>
@@ -229,7 +232,7 @@ const enum PacketTypeValue {
  *  @property {PacketType} MessagesUnsubscribe - <code>59</code> - The user client sends this to the message mixer to
  *      unsubscribe from a message channel.<br />
  *      <em>Reliable. Ordered.</em>
- *      {@link PacketScribe.MessagesSubscribeDetails}.
+ *      {@link PacketScribe.MessagesUnsubscribeDetails}.
  *  @property {PacketType} ICEServerHeartbeatDenied - <code>60</code>
  *  @property {PacketType} AssetMappingOperation - <code>61</code>
  *  @property {PacketType} AssetMappingOperationReply - <code>62</code>
@@ -579,9 +582,9 @@ const PacketType = new class {
     }
 
     /*@devdoc
-     *  Gets the Set of non-verified packets, i.e., packets which are sent without verifying that they are received.
+     *  Gets the set of non-verified packets, i.e., packets which are sent without verifying that they are received.
      *  @function PacketType(1).getNonVerifiedPackets
-     *  @returns {Set<PacketType>} The Set of non-verified packets.
+     *  @returns {Set<PacketType>} The set of non-verified packets.
      */
     getNonVerifiedPackets() {
         // C++  getNonSourcedPackets()
@@ -589,9 +592,9 @@ const PacketType = new class {
     }
 
     /*@devdoc
-     *  Gets the Set of non-sourced packets, i.e., packets which don't include the local node ID of the sending node.
+     *  Gets the set of non-sourced packets, i.e., packets which don't include the local node ID of the sending node.
      *  @function PacketType(1).getNonSourcedPackets
-     *  @returns {Set<PacketType>} The Set of non-sourced packets.
+     *  @returns {Set<PacketType>} The set of non-sourced packets.
      */
     getNonSourcedPackets() {
         // C++  getNonSourcedPackets()

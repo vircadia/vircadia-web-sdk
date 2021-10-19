@@ -13,8 +13,8 @@ import assert from "../../shared/assert";
 
 
 /*@devdoc
- *  The <code>PendingReceivedMessage</code> class manages the grouping of the packets in a multi-packet message into an ordered
- *  list.
+ *  The <code>PendingReceivedMessage</code> class manages the ordering of the packets in a multi-packet message so that they can
+ *  be processed in order.
  *  <p>C++: <code>PendingReceivedMessage</code></p>
  */
 class PendingReceivedMessage {

@@ -168,6 +168,7 @@ class NLPacketList {
      *  @param {number} messageNumber - The number of the message that the packets in the list together form.
      */
     preparePackets(messageNumber: number): void {
+        // C++  void PacketList::preparePackets(MessageNumber messageNumber)
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         assert(this.#_packets.length > 0);
         if (this.#_packets.length === 1) {

@@ -128,7 +128,7 @@ class Packet extends BasePacket {
      *  @function Packet.totalHeaderSize
      *  @param {boolean} [isPartOfMessage=false] - <code>true</code> if the packet is part of a message, <code>false</code> if
      *      it isn't.
-     *  @returns {number} The calculated total header size, in bytes.
+     *  @returns {number} The total header size, in bytes.
      *  @static
      */
     static totalHeaderSize(isPartOfMessage = false): number {
@@ -274,7 +274,9 @@ class Packet extends BasePacket {
     // Reads the packet header information from the data.
     #readHeader(): void {
         // C++  void readHeader()
+
         const seqNumBitField = this._messageData.data.getUint32(this._messageData.dataPosition, UDT.LITTLE_ENDIAN);
+
         assert((seqNumBitField & UDT.CONTROL_BIT_MASK) === 0, "Packet.readHeader()", "This should be a data packet!");
         this._messageData.isReliable = (seqNumBitField & UDT.RELIABILITY_BIT_MASK) > 0;
         this._messageData.isPartOfMessage = (seqNumBitField & UDT.MESSAGE_BIT_MASK) > 0;

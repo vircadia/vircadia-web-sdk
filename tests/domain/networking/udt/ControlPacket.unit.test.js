@@ -32,13 +32,10 @@ describe("ControlPacket - unit tests", () => {
         const initialSequenceNumber = new SequenceNumber(7);
         const handshakePacket = ControlPacket.create(ControlPacket.Handshake, HANDSHAKE_PAYLOAD_BYTES);
         handshakePacket.writeSequenceNumber(initialSequenceNumber);
+
         expect(handshakePacket.getType()).toBe(ControlPacket.Handshake);
-
-        console.log("$$$$$$$ Handshake packet:", buffer2hex(handshakePacket.getMessageData().buffer));
-
         expect(handshakePacket.getMessageData().data.byteLength).toBe(EXPECTED_PACKET.length / 2);
         expect(buffer2hex(handshakePacket.getMessageData().buffer)).toBe(EXPECTED_PACKET);
-
     });
 
     test("Can read a Handshake packet", () => {
