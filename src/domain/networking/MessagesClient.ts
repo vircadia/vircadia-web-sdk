@@ -12,6 +12,7 @@ import Node from "./Node";
 import NodeList from "./NodeList";
 import NodeType from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
+import ReceivedMessage from "./ReceivedMessage";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType from "./udt/PacketHeaders";
 import ContextManager from "../shared/ContextManager";
@@ -56,13 +57,13 @@ class MessagesClient {
     /*@devdoc
      *  Sends a text message on a channel.
      *  <p>Note: The sender will also receive the message if subscribed to the channel.</p>
-     *  @function MessageMixer.sendMessage
+     *  @function MessagesClient.sendMessage
      *  @param {string} channel - The channel to send the message on.
      *  @param {string} message - The message to send.
      *  @param {boolean} [localOnly=false] - If <code>false</code> then the message is sent to all user client, client entity,
      *      server entity, and assignment client scripts in the domain.
-     *      <p>If <code>true</code> then the message is sent to all user client scripts that are running in the MessageMixer's
-     *      domain context.</p>
+     *      <p>If <code>true</code> then the message is sent to all user client scripts that are running in the domain
+     *      context.</p>
      */
     sendMessage(channel: string, message: string, localOnly: boolean): void {
         // C++  void sendMessage(QString channel, QString message, bool localOnly)
@@ -87,13 +88,13 @@ class MessagesClient {
     /*@devdoc
      *  Sends a data message on a channel.
      *  <p>Note: The sender will also receive the message if subscribed to the channel.</p>
-     *  @function MessageMixer.sendData
+     *  @function MessagesClient.sendData
      *  @param {string} channel - The channel to send the data on.
      *  @param {ArrayBuffer} data - The data to send.
      *  @param {boolean} [localOnly=false] - If <code>false</code> then the data are sent to all user client, client entity,
      *      server entity, and assignment client scripts in the domain.
-     *      <p>If <code>true</code> then the data are sent to all user client scripts that are running in the MessageMixer's
-     *      domain context.</p>
+     *      <p>If <code>true</code> then the data are sent to all user client scripts that are running in the domain
+     *      context.</p>
      */
     sendData(channel: string, data: ArrayBuffer, localOnly: boolean): void {
         // C++  void sendData(QString channel, QByteArray data, bool localOnly)
@@ -154,21 +155,35 @@ class MessagesClient {
         }
     }
 
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|MessagesData} message that has been received.
+     *  @function MessagesClient.handleMessagesPacket
+     *  @type {Slot}
+     *  @param {ReceivedMessage} receivedMessage - The received {@link PacketType(1)|MessagesData} message.
+     *  @param {Node} sendingNode - The sending node.
+     */
     // Listener
-    handleMessagesPacket = (/* receivedMessage: ReceivedMessage, sendingNode?: Node */): void => {
+    handleMessagesPacket = (receivedMessage: ReceivedMessage /* , sendingNode: Node | null */): void => {
         // C++  void handleMessagesPacket(ReceivedMessage* receivedMessage, Node* senderNode)
 
-        // WEBRTC TODO: Address further C++ code.
-
+        const info = PacketScribe.MessagesData.read(receivedMessage.getMessage());
+        if (typeof info.message === "string") {
+            this.#_messageReceivedSignal.emit(info.channel, info.message, info.senderID, false);
+        } else {
+            this.#_dataReceivedSignal.emit(info.channel, info.message, info.senderID, false);
+        }
     };
+
 
     /*@devdoc
      *  Handles a network node being activated (network connection established). If it is a {@link MessageMixer} node then it is
      *  sent the message channels that have been subscribed to.
      *  @function MessagesClient.handleNodeActivated
+     *  @type {Slot}
      *  @param {Node} node - The node that activated.
-     *  @returns {Slot}
      */
+    // Slot
     handleNodeActivated = (node: Node): void => {
         // C++  void handleNodeActivated(SharedNodePointer node)
 
