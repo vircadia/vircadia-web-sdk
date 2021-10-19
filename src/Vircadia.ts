@@ -35,3 +35,4 @@ export { default as AvatarMixer } from "./AvatarMixer";
 export { default as MessageMixer } from "./MessageMixer";
 
 export { Signal } from "./domain/shared/SignalEmitter";
+export { default as Uuid } from "./domain/shared/Uuid";

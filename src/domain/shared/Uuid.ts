@@ -13,7 +13,7 @@
 // @ts-nocheck
 
 
-/*@devdoc
+/*@sdkdoc
  *  The <code>Uuid</code> class provides a UUID (Universally Unique IDentifier) used to uniquely identify an item such as an
  *  entity or avatar. Internally, a {@link Uuid} value is a <code>bigint</code> value.
  *  <p>Note: In the user scripting API, UUIDs are represented as formatted strings.</p>
@@ -51,14 +51,14 @@ class Uuid extends BigInt {
     }
 
 
-    /*@devdoc
+    /*@sdkdoc
      *  UUIDs (Universally Unique IDentifiers) are used to uniquely identify items such as entities and avatars. They are
      *  represented as {@link Uuid(1)|Uuid} objects encapsulating BigInt values in the SDK, and 16-byte (128-bit) numbers in the
      *  protocol packets.
      *  <p>Note: In the user scripting API, UUIDs are represented as formatted hexadecimal strings.</p>
      *  @typedef {bigint} Uuid
      */
-    /*@devdoc
+    /*@sdkdoc
      *  Gets the UUID's underlying <code>bigint</code> primitive value.
      *  @function Uuid(1).value
      *  @returns {bigint} The underlying <code>bigint</code> primitive value
@@ -67,7 +67,7 @@ class Uuid extends BigInt {
         return this.valueOf().valueOf();
     }
 
-    /*@devdoc
+    /*@sdkdoc
      *  Gets the UUID value formatted as a hexadecimal string with <code>-</code> separators.
      *  @function Uuid(1).stringify
      *  @returns {string} The UUID value formatted as <code>nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn</code>.
