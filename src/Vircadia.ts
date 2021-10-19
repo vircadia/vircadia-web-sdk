@@ -29,6 +29,9 @@ const Vircadia = new class {
 export default Vircadia;
 export { Vircadia };
 export { default as DomainServer } from "./DomainServer";
+
 export { default as AudioMixer } from "./AudioMixer";
 export { default as AvatarMixer } from "./AvatarMixer";
 export { default as MessageMixer } from "./MessageMixer";
+
+export { Signal } from "./domain/shared/SignalEmitter";

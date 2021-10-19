@@ -124,6 +124,7 @@ class LimitedNodeList {
 
     #_nodeHash: Map<bigint, Node> = new Map();  // Map<Uuid, Node>
 
+    #_uuidChanged = new SignalEmitter();
     #_nodeAdded = new SignalEmitter();
     #_nodeActivated = new SignalEmitter();
     #_nodeSocketUpdated = new SignalEmitter();
@@ -479,7 +480,8 @@ class LimitedNodeList {
 
 
     /*@devdoc
-     *  Gets the node's UUID as assigned by the domain server for the connection session.
+     *  Gets the node's UUID as assigned by the domain server for the connection session. {@link Uuid(1)|Uuid.NULL} when not
+     *      connected to a domain.
      *  @returns {Uuid} The node's session UUID.
      */
     getSessionUUID(): Uuid {
@@ -488,16 +490,24 @@ class LimitedNodeList {
     }
 
     /*@devdoc
-     *  Sets the node's UUID as assigned by the domain server for the connection session.
-     *  @param {Uuid} sessionUUID - The node's session UUID.
+     *  Sets the node's UUID as assigned by the domain server for the connection session. Set to {@link Uuid(1)|Uuid.NULL} when
+     *      not connected to a domain.
+     *  @param {Uuid} sessionUUID - The user client's session UUID.
      */
     setSessionUUID(sessionUUID: Uuid): void {
         // C++  void setSessionUUID(const QUuid& sessionUUID);
+        const oldUUID = this.#_sessionUUID;
         this.#_sessionUUID = sessionUUID;
+
+        if (sessionUUID.value() !== oldUUID.value()) {
+            console.log("[networking] NodeList UUID changed from", oldUUID.stringify(), "to", sessionUUID.stringify());
+            this.#_uuidChanged.emit(sessionUUID, oldUUID);
+        }
     }
 
     /*@devdoc
-     *  Gets the node's local ID as assigned by the domain server for the connection session.
+     *  Gets the node's local ID as assigned by the domain server for the connection session. <code>0</code> when not connected
+     *      to a domain.
      *  @returns {LocalID} The node's session local ID.
      */
     getSessionLocalID(): LocalID {
@@ -506,7 +516,8 @@ class LimitedNodeList {
     }
 
     /*@devdoc
-     *  Sets the node's local ID as assigned by the domain server for the connection session.
+     *  Sets the node's local ID as assigned by the domain server for the connection session. Set to <code>0</code> when not
+     *      connected to a domain.
      *  @param {LocalID} sessionLocalID - The node's session local ID.
      */
     setSessionLocalID(sessionLocalID: LocalID): void {
@@ -603,6 +614,18 @@ class LimitedNodeList {
 
 
     /*@devdoc
+     *  Triggered when the user client's session UUID changes.
+     *  @function LimitedNodeList.uuidChanged
+     *  @param {Uuid} newUUID - The new session UUID. {@link Uuid(1)|Uuid.NULL} if not connected to a domain.
+     *  @param {Uuid} oldUUID - The old session UUID.
+     *  @returns {Signal}
+     */
+    get uuidChanged(): Signal {
+        // C++  void uuidChanged(const QUuid& ownerUUID, const QUuid& oldUUID)
+        return this.#_uuidChanged.signal();
+    }
+
+    /*@devdoc
      *  Triggered when a new node is added.
      *  @function LimitedNodeList.nodeAdded
      *  @param {Node} node - The node added.
@@ -649,7 +672,7 @@ class LimitedNodeList {
     /*@devdoc
      *  Triggered when there's a packet version mismatch in a packet received.
      *  @function LimitedNodeList.packetVersionMismatch
-     *  @param {PacketTypeValue} pacektType - The type of packet received.
+     *  @param {PacketTypeValue} packetType - The type of packet received.
      *  @param {SockAddr} senderSockAddr - The address of the packet sender.
      *  @param {Uuid} senderUUID - The session ID of the sender.
      *  @returns {Signal}

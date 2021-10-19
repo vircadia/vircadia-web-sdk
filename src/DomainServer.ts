@@ -15,6 +15,8 @@ import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
+import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
+import Uuid from "./domain/shared/Uuid";
 
 
 /*@sdkdoc
@@ -66,6 +68,12 @@ type OnStateChanged = (state: ConnectionState, info: string) => void;
  *  @property {string} location - The current location that the DomainServer is connected to or trying to connect to.
  *      <code>""</code> if no location has been set.
  *      <em>Read-only.</em>
+ *  @property {Uuid} sessionUUID - Unique ID assigned to the user client in the domain. {@link Uuid(1)|Uuid.NULL} if not
+ *      connected to a domain.
+ *      <em>Read-only.</em>
+ *  @property {Signal<DomainServer~OnSessionUuidChanged>} sessionUUIDChanged - Triggered when the <code>sessionUUID</code>
+ *      changes.
+ *      <em>Read-only.</em>
  *  @property {DomainServer.State} state - The current state of the connection to the domain server.
  *      <em>Read-only.</em>
  *  @property {string} refusalInfo - A description of the reason if <code>state == DomainServer.REFUSED</code>, otherwise
@@ -82,13 +90,6 @@ class DomainServer {
     // C++  Application.cpp
     //      The Web SDK differs from the C++ in that a "disconnect" command is explicitly provided to disconnect from the
     //      current domain and stop the check-ins from being sent; the C++ never stops sending check-ins.
-
-    /*@sdkdoc
-     *  Called when the state of the connection to the domain changes.
-     *  @callback DomainServer~onStateChanged
-     *  @param {DomainServer.State} state - The state of the connection to the domain server connection.
-     *  @param {string} info - Refusal or error information if the state is <code>REFUSAL</code> or <code>ERROR</code>.
-     */
 
     static get DISCONNECTED(): ConnectionState {
         return ConnectionState.DISCONNECTED;
@@ -138,6 +139,9 @@ class DomainServer {
     #_nodeList: NodeList;
     #_addressManager: AddressManager;
 
+    #_sessionUUID = new Uuid();
+    #_sessionUUIDChanged = new SignalEmitter();
+
     #_DEBUG = false;
 
 
@@ -171,6 +175,7 @@ class DomainServer {
         this.#_nodeList.nodeAdded.connect(this.#nodeAdded);
         this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
         this.#_nodeList.nodeKilled.connect(this.#nodeKilled);
+        this.#_nodeList.uuidChanged.connect(this.#setSessionUUID);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -204,6 +209,12 @@ class DomainServer {
         return this.#_errorInfo;
     }
 
+    /*@sdkdoc
+     *  Called when the state of the connection to the domain changes.
+     *  @callback DomainServer~onStateChanged
+     *  @param {DomainServer.State} state - The state of the connection to the domain server connection.
+     *  @param {string} info - Refusal or error information if the state is <code>REFUSAL</code> or <code>ERROR</code>.
+     */
     set onStateChanged(callback: OnStateChanged) {
         if (typeof callback === "function" || callback === null) {
             this.#_onStateChanged = callback;
@@ -215,6 +226,20 @@ class DomainServer {
 
     get contextID(): number {
         return this.#_contextID;
+    }
+
+    get sessionUUID(): Uuid {
+        return this.#_sessionUUID;
+    }
+
+    /*@sdkdoc
+     *  Called when the when the <code>sessionUUID</code> property value changes.
+     *  @callback DomainServer~OnSessionUuidChanged
+     *  @param {Uuid} sessionUUID - Unique ID assigned to the user client in the domain. {@lnk Uuid|Uuid.NULL} if not connected
+     *      to a domain.
+     */
+    get sessionUUIDChanged(): Signal {
+        return this.#_sessionUUIDChanged.signal();
     }
 
 
@@ -393,6 +418,18 @@ class DomainServer {
             // WEBRTC TODO: Address further code - for AssetServer node.
 
         }
+    };
+
+    // Slot
+    #setSessionUUID = (sessionUUID: Uuid /* , oldUUID: Uuid */): void => {
+        // C++  void setSessionUUID(const QUuid& sessionUUID)
+        //      void LimitedNodeList::uuidChanged(const QUuid& ownerUUID, const QUuid& oldUUID);
+
+        // WEBRTC TODO: Address further C++ code. - Physics session UUID.
+
+        // WebRTC: Handle the session UUID directly in DomainServer rather than going through Avatar and AvatarData.
+        this.#_sessionUUID = sessionUUID;
+        this.#_sessionUUIDChanged.emit(sessionUUID);
     };
 
 }
