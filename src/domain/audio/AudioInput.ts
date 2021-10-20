@@ -258,8 +258,14 @@ class AudioInput {
         });
 
         try {
+            // Firefox throws an exception here
+            // Uncaught (in promise) DOMException: AudioContext.createMediaStreamSource:
+            // Connecting AudioNodes from AudioContexts with different sample-rate is currently not supported.
+            //
+            // Which is likely a bug and not an actual missing implementation.
             this.#_audioStreamSource = this.#_audioContext.createMediaStreamSource(this.#_audioInput);
         } catch {
+            // We work around by using a context without sample rate requirement and handling re-sampling in the input worklet.
             this.#_audioContext = new AudioContext();
             this.#_audioStreamSource = this.#_audioContext.createMediaStreamSource(this.#_audioInput);
         }
