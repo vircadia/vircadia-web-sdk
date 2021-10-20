@@ -10,9 +10,7 @@
 
 import AudioConstants from "../audio/AudioConstants";
 
-/*@devdoc
- *  see: https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletGlobalScope
- */
+// see: https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletGlobalScope
 declare const sampleRate: number;
 
 /*@devdoc
