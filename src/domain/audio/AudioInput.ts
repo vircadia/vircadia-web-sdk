@@ -46,6 +46,7 @@ class AudioInput {
 
     #_readyRead = new Signal();
 
+
     set audioInput(audioInput: MediaStream | null) {
         // C++  N/A
         if (audioInput && this.#_isStarted) {
