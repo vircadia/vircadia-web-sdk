@@ -31,6 +31,8 @@ declare const sampleRate: number;
 class AudioInputProcessor extends AudioWorkletProcessor {
 
     // FIXME: All these fields should be private (#s) but Firefox is handling transpiled code with them (Sep 2021).
+    readonly FLOAT_TO_INT = 32767;
+    readonly LITTLE_ENDIAN = true;
 
     _channelCount;
     _lastInput: Array<number>;
@@ -126,7 +128,16 @@ class AudioInputProcessor extends AudioWorkletProcessor {
             return true;
         }
 
-        const input = inputList[0];
+        if (this._sourceSampleRate !== AudioConstants.SAMPLE_RATE) {
+            this._resample(inputList[0]);
+        } else {
+            this._convert(inputList[0]);
+        }
+
+        return true;
+    }
+
+    _resample(input: Array<Float32Array>) {
         const inputSize = (input[0] as Float32Array).length;
 
         this._inputRange.end += inputSize;
@@ -134,14 +145,11 @@ class AudioInputProcessor extends AudioWorkletProcessor {
         let inputPosition = this._outputTotalIndex / this._resampleRatio;
         while (Math.ceil(inputPosition) < this._inputRange.end) {
 
-            const FLOAT_TO_INT = 32767;
-            const LITTLE_ENDIAN = true;
-
             const rawIndex = this._outputIndex * Int16Array.BYTES_PER_ELEMENT * this._channelCount;
             for (let channel = 0; channel < this._channelCount; ++channel) {
                 const resampled = this._getResampled(channel, inputPosition, input);
                 const rawChannel = channel * Int16Array.BYTES_PER_ELEMENT;
-                this._outputView.setInt16(rawIndex + rawChannel, resampled * FLOAT_TO_INT, LITTLE_ENDIAN);
+                this._outputView.setInt16(rawIndex + rawChannel, resampled * this.FLOAT_TO_INT, this.LITTLE_ENDIAN);
             }
 
             this._outputTotalIndex += 1;
@@ -165,8 +173,27 @@ class AudioInputProcessor extends AudioWorkletProcessor {
             this._lastInput[i] = channel[channel.length - 1] || 0;
         }
         this._inputRange.begin += inputSize;
+    }
 
-        return true;
+    _convert(input: Array<Float32Array>) {
+        const inputSize = (input[0] as Float32Array).length;
+        for (let i = 0; i < inputSize; ++i) {
+
+            const rawIndex = this._outputIndex * Int16Array.BYTES_PER_ELEMENT * this._channelCount;
+            for (let channel = 0; channel < this._channelCount; ++channel) {
+                const inputSample = (input[channel] as Float32Array)[i] as number;
+                const rawChannel = channel * Int16Array.BYTES_PER_ELEMENT;
+                this._outputView.setInt16(rawIndex + rawChannel, inputSample * this.FLOAT_TO_INT, this.LITTLE_ENDIAN);
+            }
+
+            this._outputIndex += 1;
+            if (this._outputIndex === this._output.length / this._channelCount) {
+                this.port.postMessage(this._output.buffer, [this._output.buffer]);
+                this._resetOutput();
+            }
+
+        }
+
     }
 
 }
