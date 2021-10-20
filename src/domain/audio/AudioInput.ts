@@ -226,6 +226,7 @@ class AudioInput {
         return this.#_readyRead;
     }
 
+
     /*@devdoc
      *  Receives the next network frame of data from the audio input from the {@link AudioInputProcessor} used, triggering a
      *  {@link AudioInput.readyRead} signal.
@@ -243,6 +244,7 @@ class AudioInput {
         // processed by the method connected to the signal.
         this.#_readyRead.emit();
     };
+
 
     // Sets up the AudioContext etc.
     async #setUpAudioContext(): Promise<boolean> {
