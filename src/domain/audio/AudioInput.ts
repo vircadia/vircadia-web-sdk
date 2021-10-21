@@ -273,7 +273,7 @@ class AudioInput {
 
         this.#_audioStreamSource.channelInterpretation = "discrete";
 
-        const channelCount = Math.min(this.#_audioStreamSource.mediaStream.getAudioTracks().length, 2);  // Mono or stereo.
+        const channelCount = Math.min(this.#_audioStreamSource.channelCount, 2);  // Mono or stereo.
         assert(channelCount > 0);
         // The channel count has already been checked in AudioClient.#switchInputToAudioDevice().
 
