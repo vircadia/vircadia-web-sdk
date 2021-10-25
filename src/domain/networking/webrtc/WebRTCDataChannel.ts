@@ -102,7 +102,16 @@ class WebRTCDataChannel {
 
     static readonly #CONFIGURATION = {
         // WEBRTC TODO: Make configurable in the API.
-        iceServers: [{ urls: "stun:ice.vircadia.com:7337" }]
+        // FIXME: stun:ice.vircadia.com:7337 doesn't work for WebRTC.
+        iceServers: [
+            {
+                urls: [
+                    "stun:stun1.l.google.com:19302",
+                    "stun:stun4.l.google.com:19302",
+                    "stun:stun.schlund.de"
+                ]
+            }
+        ]
     };
 
 
