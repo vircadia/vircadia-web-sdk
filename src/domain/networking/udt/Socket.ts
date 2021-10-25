@@ -59,7 +59,7 @@ class Socket {
 
     static readonly #WEBRTCSOCKET_TO_SOCKET_STATES = [
         Socket.UNCONNECTED,
-        Socket.UNCONNECTED,
+        Socket.CONNECTING,
         Socket.CONNECTING,
         Socket.CONNECTED
     ];
