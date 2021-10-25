@@ -10,6 +10,7 @@
 
 import NodeType, { NodeTypeValue } from "../NodeType";
 import WebRTCSignalingChannel, { SignalingMessage } from "./WebRTCSignalingChannel";
+import assert from "../../shared/assert";
 
 
 type OnOpenCallback = () => void;
@@ -236,7 +237,9 @@ class WebRTCDataChannel {
 
 
     // Starts making a WebRTC connection.
-    #start(): void {
+    async #start(): Promise<void> {
+
+        assert(this.#_signalingChannel !== null);
 
         // Create new peer connection object.
         this.#_peerConnection = new RTCPeerConnection(WebRTCDataChannel.#CONFIGURATION);
@@ -246,47 +249,12 @@ class WebRTCDataChannel {
             if (this.#_DEBUG) {
                 console.debug(`[webrtc] [${this.#_nodeTypeName}] Obtained ICE candidate.`);
             }
-            if (candidate  // The candidate is sometimes null for unknown reasons; don't send this.
+            if (candidate  // The candidate is sometimes null for unknown reasons; don't send this but do send empty string.
                 && this.#_signalingChannel && this.#_signalingChannel.readyState === WebRTCSignalingChannel.OPEN) {
                 if (this.#_DEBUG) {
                     console.debug(`[webrtc] [${this.#_nodeTypeName}] Send ICE candidate.`);
                 }
                 this.#_signalingChannel.send({ to: this.#_nodeType, data: candidate });
-            }
-        };
-
-        // Generate an offer.
-        this.#_peerConnection.onnegotiationneeded = async () => {
-            if (!this.#_peerConnection || !this.#_signalingChannel
-                || this.#_signalingChannel.readyState !== WebRTCSignalingChannel.OPEN) {
-                return;
-            }
-            try {
-                // Create offer.
-                if (this.#_DEBUG) {
-                    console.debug(`[webrtc] [${this.#_nodeTypeName}] Create offer.`);
-                }
-                const rtcOfferOptions = {
-                    offerToReceiveAudio: false,
-                    offerToReceiveVideo: false
-                };
-                const offer = await this.#_peerConnection.createOffer(rtcOfferOptions);
-                await this.#_peerConnection.setLocalDescription(offer);
-
-                // Send offer to domain server.
-                if (this.#_DEBUG) {
-                    console.debug(`[webrtc] [${this.#_nodeTypeName}] Send offer.`);
-                }
-                this.#_signalingChannel.send({
-                    to: this.#_nodeType,
-                    data: { description: this.#_peerConnection.localDescription }
-                });
-            } catch (err) {
-                const errorMessage = "WebRTCDataChannel: Error during offer negotiation: " + <string>err;
-                console.error(errorMessage);
-                if (this.#_onerrorCallback) {
-                    this.#_onerrorCallback(errorMessage);
-                }
             }
         };
 
@@ -305,7 +273,7 @@ class WebRTCDataChannel {
                     break;
                 case "connected":
                     // The connection has become fully connected.
-                    // However, _readyState isn't set to OPEN until the data channel has been connected.
+                    // However, #_readyState isn't set to OPEN until the data channel has been connected.
                     break;
                 case "disconnected":
                 case "failed":
@@ -362,6 +330,26 @@ class WebRTCDataChannel {
             }
         };
 
+        // Create offer.
+        if (this.#_DEBUG) {
+            console.debug(`[webrtc] [${this.#_nodeTypeName}] Create offer.`);
+        }
+        const rtcOfferOptions = {
+            offerToReceiveAudio: false,
+            offerToReceiveVideo: false
+        };
+        const offer = await this.#_peerConnection.createOffer(rtcOfferOptions);
+        await this.#_peerConnection.setLocalDescription(offer);
+
+        // Send offer to domain server.
+        if (this.#_DEBUG) {
+            console.debug(`[webrtc] [${this.#_nodeTypeName}] Send offer.`);
+        }
+        this.#_signalingChannel.send({
+            to: this.#_nodeType,
+            data: { description: offer }
+        });
+
     }  // start
 
     // Instigates the WebRTC connection process.
@@ -387,11 +375,6 @@ class WebRTCDataChannel {
                 // Ignore messages not directed at this data channel.
                 if (from !== this.#_nodeType) {
                     return;
-                }
-
-                // Start a new peer connection if necessary.
-                if (!this.#_peerConnection && (description || candidate)) {
-                    this.#start();
                 }
 
                 try {
@@ -455,7 +438,7 @@ class WebRTCDataChannel {
         });
 
         // Start the WebRTC connection process.
-        this.#start();
+        void this.#start();
 
     }  // #connect
 
