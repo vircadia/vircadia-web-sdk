@@ -107,6 +107,7 @@ class WebRTCDataChannel {
 
 
     #_nodeType = NodeType.Unassigned;
+    #_nodeTypeName = "";
     #_signalingChannel: WebRTCSignalingChannel | null = null;
 
     #_peerConnection: RTCPeerConnection | null = null;
@@ -119,9 +120,12 @@ class WebRTCDataChannel {
     #_oncloseCallback: OnCloseCallback | null = null;
     #_onerrorCallback: OnErrorCallback | null = null;
 
+    #_DEBUG = false;
+
 
     constructor(nodeType: NodeTypeValue, signalingChannel: WebRTCSignalingChannel) {
         this.#_nodeType = nodeType;
+        this.#_nodeTypeName = NodeType.getNodeTypeName(nodeType);
         this.#_signalingChannel = signalingChannel;
         this.#_readyState = WebRTCDataChannel.CONNECTING;
         setTimeout(() => {
@@ -230,8 +234,14 @@ class WebRTCDataChannel {
 
         // Send ICE candidates to the domain server.
         this.#_peerConnection.onicecandidate = ({ candidate }) => {
+            if (this.#_DEBUG) {
+                console.debug(`[webrtc] [${this.#_nodeTypeName}] Obtained ICE candidate.`);
+            }
             if (candidate  // The candidate is sometimes null for unknown reasons; don't send this.
                 && this.#_signalingChannel && this.#_signalingChannel.readyState === WebRTCSignalingChannel.OPEN) {
+                if (this.#_DEBUG) {
+                    console.debug(`[webrtc] [${this.#_nodeTypeName}] Send ICE candidate.`);
+                }
                 this.#_signalingChannel.send({ to: this.#_nodeType, data: candidate });
             }
         };
@@ -244,10 +254,16 @@ class WebRTCDataChannel {
             }
             try {
                 // Create offer.
+                if (this.#_DEBUG) {
+                    console.debug(`[webrtc] [${this.#_nodeTypeName}] Create offer.`);
+                }
                 const offer = await this.#_peerConnection.createOffer();
                 await this.#_peerConnection.setLocalDescription(offer);
 
                 // Send offer to domain server.
+                if (this.#_DEBUG) {
+                    console.debug(`[webrtc] [${this.#_nodeTypeName}] Send offer.`);
+                }
                 this.#_signalingChannel.send({
                     to: this.#_nodeType,
                     data: { description: this.#_peerConnection.localDescription }
@@ -263,6 +279,10 @@ class WebRTCDataChannel {
 
         // Observe connection state changes.
         this.#_peerConnection.onconnectionstatechange = () => {
+            if (this.#_DEBUG) {
+                console.debug(`[webrtc] [${this.#_nodeTypeName}] Connection state changed:`,
+                    this.#_peerConnection?.connectionState);
+            }
             let errorMessage = "";
             switch (this.#_peerConnection ? this.#_peerConnection.connectionState : "") {
                 case "new":
@@ -363,6 +383,10 @@ class WebRTCDataChannel {
 
                 try {
                     if (description) {
+                        if (this.#_DEBUG) {
+                            console.debug(`[webrtc] [${this.#_nodeTypeName}] Received description.`);
+                        }
+
                         if (!this.#_peerConnection) {
                             const errorMessage = "WebRTCDataChannel: Peer connection is closed!";
                             console.error(errorMessage);
@@ -376,14 +400,23 @@ class WebRTCDataChannel {
                         await this.#_peerConnection.setRemoteDescription(description);
 
                         // We got an offer; reply with an answer.
+                        if (this.#_DEBUG) {
+                            console.debug(`[webrtc] [${this.#_nodeTypeName}] Description is offer.`);
+                        }
                         if (description.type === "offer" && this.#_signalingChannel) {
                             await this.#_peerConnection.setLocalDescription(description);
+                            if (this.#_DEBUG) {
+                                console.debug(`[webrtc] [${this.#_nodeTypeName}] Send local description.`);
+                            }
                             this.#_signalingChannel.send({
                                 description: this.#_peerConnection.localDescription
                             });
                         }
                     } else if (candidate) {
                         // Add ICE candidate to peer connection.
+                        if (this.#_DEBUG) {
+                            console.debug(`[webrtc] [${this.#_nodeTypeName}] Received ICE candidate.`);
+                        }
                         if (this.#_peerConnection) {
                             await this.#_peerConnection.addIceCandidate(candidate);
                         }
