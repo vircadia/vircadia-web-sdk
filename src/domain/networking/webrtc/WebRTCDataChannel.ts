@@ -257,7 +257,11 @@ class WebRTCDataChannel {
                 if (this.#_DEBUG) {
                     console.debug(`[webrtc] [${this.#_nodeTypeName}] Create offer.`);
                 }
-                const offer = await this.#_peerConnection.createOffer();
+                const rtcOfferOptions = {
+                    offerToReceiveAudio: false,
+                    offerToReceiveVideo: false
+                };
+                const offer = await this.#_peerConnection.createOffer(rtcOfferOptions);
                 await this.#_peerConnection.setLocalDescription(offer);
 
                 // Send offer to domain server.
