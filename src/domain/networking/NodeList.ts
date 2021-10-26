@@ -423,7 +423,7 @@ class NodeList extends LimitedNodeList {
     #startNodeHolePunch = (node: Node): void => {
         // C++  void startNodeHolePunch(const Node* node);
         // While we don't need to do hole punching per se because WebRTC handles this, we initiate opening the WebRTC data
-        // channel and adopt the native client's use of pings and replys to coordinate setting up communications with the
+        // channel and adopt the native client's use of pings and replies to coordinate setting up communications with the
         // assignment client.
 
         // WebRTC: Initiate opening the WebRTC data channel.
