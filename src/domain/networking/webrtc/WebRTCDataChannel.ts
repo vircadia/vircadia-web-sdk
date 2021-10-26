@@ -121,6 +121,8 @@ class WebRTCDataChannel {
     #_signalingChannel: WebRTCSignalingChannel | null = null;
 
     #_peerConnection: RTCPeerConnection | null = null;
+    #_offer: RTCSessionDescriptionInit | null = null;
+    #_haveSetRemoteDescription = false;
     #_dataChannel: RTCDataChannel | null = null;
     #_dataChannelID = 0;
     #_readyState = WebRTCDataChannel.CLOSED;
@@ -249,12 +251,12 @@ class WebRTCDataChannel {
             if (this.#_DEBUG) {
                 console.debug(`[webrtc] [${this.#_nodeTypeName}] Obtained ICE candidate.`);
             }
-            if (candidate  // The candidate is sometimes null for unknown reasons; don't send this but do send empty string.
+            if (candidate  // The candidate is sometimes null; don't send this but do send empty string.
                 && this.#_signalingChannel && this.#_signalingChannel.readyState === WebRTCSignalingChannel.OPEN) {
                 if (this.#_DEBUG) {
                     console.debug(`[webrtc] [${this.#_nodeTypeName}] Send ICE candidate.`);
                 }
-                this.#_signalingChannel.send({ to: this.#_nodeType, data: candidate });
+                this.#_signalingChannel.send({ to: this.#_nodeType, data: { candidate } });
             }
         };
 
@@ -338,8 +340,10 @@ class WebRTCDataChannel {
             offerToReceiveAudio: false,
             offerToReceiveVideo: false
         };
-        const offer = await this.#_peerConnection.createOffer(rtcOfferOptions);
-        await this.#_peerConnection.setLocalDescription(offer);
+        this.#_offer = await this.#_peerConnection.createOffer(rtcOfferOptions);
+        // Don't set the local description until we have the remote answer because setting the local description triggers ICE
+        // candidate gathering and the remote isn't ready to handle them yet.
+        this.#_haveSetRemoteDescription = false;
 
         // Send offer to domain server.
         if (this.#_DEBUG) {
@@ -347,7 +351,7 @@ class WebRTCDataChannel {
         }
         this.#_signalingChannel.send({
             to: this.#_nodeType,
-            data: { description: offer }
+            data: { description: this.#_offer }
         });
 
     }  // start
@@ -392,29 +396,37 @@ class WebRTCDataChannel {
                             return;
                         }
 
-                        // Add remote connection information to peer connection.
-                        await this.#_peerConnection.setRemoteDescription(description);
-
-                        // We got an offer; reply with an answer.
+                        // We got an answer.
                         if (this.#_DEBUG) {
-                            console.debug(`[webrtc] [${this.#_nodeTypeName}] Description is offer.`);
+                            console.debug(`[webrtc] [${this.#_nodeTypeName}] Description is ${description.type}.`);
                         }
-                        if (description.type === "offer" && this.#_signalingChannel) {
-                            await this.#_peerConnection.setLocalDescription(description);
-                            if (this.#_DEBUG) {
-                                console.debug(`[webrtc] [${this.#_nodeTypeName}] Send local description.`);
+                        if (description.type === "answer" && this.#_signalingChannel) {
+                            assert(this.#_offer !== null);
+
+                            // The server is ready to handle ICE candidates so set we can set the local description now.
+                            await this.#_peerConnection.setLocalDescription(this.#_offer);
+
+                            await this.#_peerConnection.setRemoteDescription(description);
+                            this.#_haveSetRemoteDescription = true;
+                        } else {
+                            const errorMessage = `WebRTCDataChannel: Unexpected answer! ${description.type}`;
+                            console.error(errorMessage);
+                            if (this.#_onerrorCallback) {
+                                this.#_onerrorCallback(errorMessage);
                             }
-                            this.#_signalingChannel.send({
-                                description: this.#_peerConnection.localDescription
-                            });
                         }
                     } else if (candidate) {
-                        // Add ICE candidate to peer connection.
+                        // Add ICE candidate to the peer connection.
+                        // Don't set unless the remote description has been set, otherwise an error is generated. The first ICE
+                        // candidate from the server may arrive before the remote description has been set because of the delay
+                        // introduced by setting the local description just before setting the remote description.
                         if (this.#_DEBUG) {
                             console.debug(`[webrtc] [${this.#_nodeTypeName}] Received ICE candidate.`);
                         }
-                        if (this.#_peerConnection) {
+                        if (this.#_peerConnection && this.#_haveSetRemoteDescription) {
                             await this.#_peerConnection.addIceCandidate(candidate);
+                        } else if (this.#_DEBUG) {
+                            console.debug(`[webrtc] [${this.#_nodeTypeName}] Skipped adding ICE candidate.`);
                         }
                     } else if (echo) {
                         // Ignore signaling channel "echo" messages.
