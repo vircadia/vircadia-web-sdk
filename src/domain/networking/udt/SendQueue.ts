@@ -18,7 +18,7 @@ import NLPacketList from "../NLPacketList";
 import SockAddr from "../SockAddr";
 import assert from "../../shared/assert";
 import ConditionVariable from "../../shared/ConditionVariable";
-import HighResolutionClock from "../../shared/highResolutionClock";
+import HighResolutionClock from "../../shared/HighResolutionClock";
 import SignalEmitter, { Signal } from "../../shared/SignalEmitter";
 
 
