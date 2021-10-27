@@ -104,11 +104,11 @@ class WebRTCDataChannel {
     static readonly #CONFIGURATION = {
         // WEBRTC TODO: Make configurable in the API.
         // FIXME: stun:ice.vircadia.com:7337 doesn't work for WebRTC.
+        // Firefox warns: "WebRTC: Using more than two STUN/TURN servers slows down discovery"
         iceServers: [
             {
                 urls: [
                     "stun:stun1.l.google.com:19302",
-                    "stun:stun4.l.google.com:19302",
                     "stun:stun.schlund.de"
                 ]
             }
