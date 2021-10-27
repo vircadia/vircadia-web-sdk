@@ -15,11 +15,6 @@
         "useDefineForClassFields": true
     },
     "include": [
-        "./src/**/*",
-        "./typings/**/*"
-    ],
-    "exclude": [
-        "./node_modules/**/*",
-        "./src/domain/worklets/**/*"
+        "./src/Vircadia.ts"
     ]
 }
