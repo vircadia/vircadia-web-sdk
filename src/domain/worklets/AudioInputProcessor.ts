@@ -40,6 +40,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     _output: Int16Array;
     _outputView: DataView;
     _outputSize: number;
+    _outputSampleSize: number;
     _outputIndex = 0;
     _outputTotalIndex = 0;
     _sourceSampleRate: number;
@@ -58,6 +59,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
         this._outputSize = this._channelCount === 1
             ? AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL
             : AudioConstants.NETWORK_FRAME_SAMPLES_STEREO;
+        this._outputSampleSize = this._outputSize / this._channelCount;
         this._output = new Int16Array(this._outputSize);
         this._outputView = new DataView(this._output.buffer);
 
@@ -134,7 +136,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
             second = channel[secondIndex] as number;
         }
 
-        return first * (1 - ratio) + second * ratio;
+        return first + (second - first) * ratio;
     }
 
     _resample(input: Array<Float32Array>) {
@@ -155,7 +157,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
             this._outputTotalIndex += 1;
             this._outputIndex += 1;
 
-            if (this._outputIndex === this._output.length / this._channelCount) {
+            if (this._outputIndex === this._outputSampleSize) {
                 this.port.postMessage(this._output.buffer, [this._output.buffer]);
                 this._resetOutput();
             }
@@ -187,7 +189,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
             }
 
             this._outputIndex += 1;
-            if (this._outputIndex === this._output.length / this._channelCount) {
+            if (this._outputIndex === this._outputSampleSize) {
                 this.port.postMessage(this._output.buffer, [this._output.buffer]);
                 this._resetOutput();
             }
