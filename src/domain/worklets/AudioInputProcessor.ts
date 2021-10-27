@@ -67,39 +67,6 @@ class AudioInputProcessor extends AudioWorkletProcessor {
         this.port.onmessage = this.onMessage;
     }
 
-    _resetOutput() {
-        this._output = new Int16Array(this._outputSize);
-        this._outputView = new DataView(this._output.buffer);
-        this._outputIndex = 0;
-    }
-
-    _resetInput(end: number) {
-        this._lastInput = [0, 0];
-        this._inputRange = { begin: 0, end };
-    }
-
-    _getResampled(channelIndex: number, inputPosition: number, input: Array<Float32Array>): number {
-        const channel = input[channelIndex] as Float32Array;
-        const localPosition = inputPosition - this._inputRange.begin;
-
-        let first = 0;
-        let second = 0;
-        let ratio = 0;
-        if (localPosition < 0) {
-            ratio = 1 - localPosition;
-            first = this._lastInput[channelIndex] as number;
-            second = channel[0] as number;
-        } else {
-            const firstIndex = Math.floor(localPosition);
-            const secondIndex = Math.ceil(localPosition);
-            ratio = localPosition - firstIndex;
-            first = channel[firstIndex] as number;
-            second = channel[secondIndex] as number;
-        }
-
-        return first * (1 - ratio) + second * ratio;
-    }
-
     /*@devdoc
      *  Acts upon commands posted to the audio worklet's message port.
      *  @function AudioInputProcessor.onMessage
@@ -135,6 +102,39 @@ class AudioInputProcessor extends AudioWorkletProcessor {
         }
 
         return true;
+    }
+
+    _resetOutput() {
+        this._output = new Int16Array(this._outputSize);
+        this._outputView = new DataView(this._output.buffer);
+        this._outputIndex = 0;
+    }
+
+    _resetInput(end: number) {
+        this._lastInput = [0, 0];
+        this._inputRange = { begin: 0, end };
+    }
+
+    _getResampled(channelIndex: number, inputPosition: number, input: Array<Float32Array>): number {
+        const channel = input[channelIndex] as Float32Array;
+        const localPosition = inputPosition - this._inputRange.begin;
+
+        let first = 0;
+        let second = 0;
+        let ratio = 0;
+        if (localPosition < 0) {
+            ratio = 1 - localPosition;
+            first = this._lastInput[channelIndex] as number;
+            second = channel[0] as number;
+        } else {
+            const firstIndex = Math.floor(localPosition);
+            const secondIndex = Math.ceil(localPosition);
+            ratio = localPosition - firstIndex;
+            first = channel[firstIndex] as number;
+            second = channel[secondIndex] as number;
+        }
+
+        return first * (1 - ratio) + second * ratio;
     }
 
     _resample(input: Array<Float32Array>) {
