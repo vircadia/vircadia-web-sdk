@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "outFile": "./dist/Vircadia.js",
+        "declaration": true,
+        "declarationMap": true,
+        "emitDeclarationOnly": true,
+        "allowJs": true,
+        "target": "ESNext",
+        "lib": [ "ES2020", "DOM" ],
+        "sourceMap": false,
+        "esModuleInterop": true,
+        "moduleResolution": "Node",
+        "skipLibCheck": true,
+        "preserveConstEnums": true,
+        "useDefineForClassFields": true
+    },
+    "include": [
+        "./src/**/*",
+        "./typings/**/*"
+    ],
+    "exclude": [
+        "./node_modules/**/*",
+        "./src/domain/worklets/**/*"
+    ]
+}
