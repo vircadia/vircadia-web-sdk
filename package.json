@@ -16,6 +16,7 @@
     ],
     "scripts": {
         "build": "webpack --mode production",
+        "build:types": "tsc -d --out dist/Vircadia.js --declarationMap --emitDeclarationOnly",
         "watch": "webpack --watch --mode development",
         "clean": "tsc --build --clean",
         "lint": "eslint .",
