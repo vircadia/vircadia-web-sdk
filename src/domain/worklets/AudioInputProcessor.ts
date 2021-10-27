@@ -142,6 +142,10 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     _resample(input: Array<Float32Array>) {
         const inputSize = (input[0] as Float32Array).length;
 
+        if (inputSize === 0) {
+            return;
+        }
+
         this._inputRange.end += inputSize;
 
         let inputPosition = this._outputTotalIndex / this._resampleRatio;
@@ -172,7 +176,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
 
         for (let i = 0; i < this._channelCount; ++i) {
             const channel = input[i] as Float32Array;
-            this._lastInput[i] = channel[channel.length - 1] || 0;
+            this._lastInput[i] = channel[channel.length - 1] as number;
         }
         this._inputRange.begin += inputSize;
     }
