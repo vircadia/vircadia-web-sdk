@@ -822,7 +822,7 @@ class LimitedNodeList {
                     hasBeenOutput = LimitedNodeList.#sourcedVersionDebugSuppressMap.has(item);
                     if (!hasBeenOutput) {
                         LimitedNodeList.#sourcedVersionDebugSuppressMap.add(item);
-                        senderString = sourceID.toString();
+                        senderString = sourceID.stringify();
                     }
                 }
             }
