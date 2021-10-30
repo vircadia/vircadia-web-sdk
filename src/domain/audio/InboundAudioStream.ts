@@ -16,6 +16,7 @@ import { SilentAudioFrameDetails } from "../networking/packets/SilentAudioFrame"
 import PacketType from "../networking/udt/PacketHeaders";
 import UDT from "../networking/udt/UDT";
 import ContextManager from "../shared/ContextManager";
+import Log, {LogLevel} from "../shared/Log";
 
 
 /*@devdoc
@@ -124,7 +125,7 @@ class InboundAudioStream {
         // C++  int writeDroppableSilentFrames(int silentFrames)
 
         // WEBRTC TODO: Address further C++ code.
-        console.warn("InboundAudioStream.#writeDroppableSilentFrames() not implemented. Frames:", silentFrames);
+        Log.once(LogLevel.WARNING, `InboundAudioStream.#writeDroppableSilentFrames() not implemented. Frames: ${silentFrames}`);
 
     }
 
