@@ -87,7 +87,7 @@ class InboundAudioStream {
             } else {
 
                 // WEBRTC TODO: Address further C++ code.
-                console.warn("Codec mismatch not handled.");
+                Log.warning("Codec mismatch not handled.", "audio");
 
             }
         }
@@ -125,7 +125,8 @@ class InboundAudioStream {
         // C++  int writeDroppableSilentFrames(int silentFrames)
 
         // WEBRTC TODO: Address further C++ code.
-        Log.once(LogLevel.WARNING, `InboundAudioStream.#writeDroppableSilentFrames() not implemented. Frames: ${silentFrames}`);
+        Log.once(LogLevel.WARNING, `InboundAudioStream.#writeDroppableSilentFrames() not implemented. Frames: ${silentFrames}`,
+            "audio");
 
     }
 
@@ -137,7 +138,7 @@ class InboundAudioStream {
         if (this.#_decoder) {
 
             // WEBRTC TODO: Address further C++ code.
-            console.warn("Codec support not implemented.", this.#_selectedCodecName);
+            Log.once(LogLevel.WARNING, `Codec support not implemented. ${this.#_selectedCodecName}`, "audio");
             decodedBuffer = new Int16Array();
 
         } else {

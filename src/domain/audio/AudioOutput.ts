@@ -10,6 +10,7 @@
 
 import assert from "../shared/assert";
 import AudioConstants from "../audio/AudioConstants";
+import Log from "../shared/Log";
 
 // eslint-disable-next-line
 // @ts-ignore
@@ -159,7 +160,7 @@ class AudioOutput {
 
         // Audio worklet.
         if (!this.#_audioContext.audioWorklet) {
-            console.error("Cannot set up audio output stream. App may not be being served via HTTPS or from localhost.");
+            Log.error("Cannot set up audio output stream. App may not be being served via HTTPS or from localhost.", "audio");
             return;
         }
         await this.#_audioContext.audioWorklet.addModule(audioOutputProcessorURL);

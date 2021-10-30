@@ -8,6 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import Log from "../shared/Log";
 
 /*@devdoc
  *  The <code>AudioInputProcessor</code> class implements a Web Audio
@@ -75,7 +76,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     // @ts-ignore
     process(inputList: Float32Array[][] /* , outputList: Float32Array[][], parameters: Record<string, Float32Array> */) {
         if (!inputList || !inputList[0] || !inputList[0][0] || this._channelCount === 2 && !inputList[0][1]) {
-            console.log("Early return!");
+            Log.message("Early return!", "audioworklet");
             return true;
         }
 

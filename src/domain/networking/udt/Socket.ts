@@ -14,6 +14,7 @@ import { NodeTypeValue } from "../NodeType";
 import SockAddr from "../SockAddr";
 import { default as WebRTCSocket, WebRTCSocketDatagram } from "../webrtc/WebRTCSocket";
 import assert from "../../shared/assert";
+import Log from "../../shared/Log";
 
 
 /*@devdoc
@@ -204,8 +205,9 @@ class Socket {
     handleRemoteAddressChange = (previousAddress: SockAddr, currentAddress: SockAddr): void => {
         // C++  void handleRemoteAddressChange(SockAddr previousAddress, SockAddr currentAddress)
 
-        console.log("[networking] Remote address changes from", previousAddress.toString(), "to", currentAddress.toString());
-        console.warn("handleRemoteAddressChange() : Not implemented!");
+        Log.message(`Remote address changes from ${previousAddress.toString()} "to" ${currentAddress.toString()}`,
+            "networking");
+        Log.warning("handleRemoteAddressChange() : Not implemented!", "networking");
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -242,7 +244,7 @@ class Socket {
 
                 // WEBRTC TODO: Address further C++ code.
 
-                console.warn("Control packets not yet implemented!");
+                Log.warning("Control packets not yet implemented!", "networking");
 
             } else {
 
@@ -253,7 +255,7 @@ class Socket {
                 // WEBRTC TODO: Address further C++ code.
 
                 if (packet.isReliable()) {
-                    console.warn("Reliable packets not yet implemented!");
+                    Log.warning("Reliable packets not yet implemented!", "networking");
 
                     // WEBRTC TODO: Address further C++ code.
 
@@ -263,7 +265,7 @@ class Socket {
                 // WEBRTC TODO: Address further C++ code.
 
                 if (messageData.isPartOfMessage) {
-                    console.warn("Multi-packet messages not yet implemented!");
+                    Log.warning("Multi-packet messages not yet implemented!", "networking");
 
                     // WEBRTC TODO: Address further C++ code.
 

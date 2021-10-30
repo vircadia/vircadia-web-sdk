@@ -15,6 +15,7 @@ import ReceivedMessage from "./ReceivedMessage";
 import Packet from "./udt/Packet";
 import { PacketTypeValue } from "./udt/PacketHeaders";
 import ContextManager from "../shared/ContextManager";
+import Log from "../shared/Log";
 
 
 type Listener = (message: ReceivedMessage, sendingNode?: Node) => void;
@@ -160,7 +161,7 @@ class PacketReceiver {
                 if (matchingNode) {
                     messageListener.listener(receivedMessage, matchingNode);
                 } else {
-                    console.error("Could not find node for message type:", receivedMessage.getType());
+                    Log.error(`Could not find node for message type: ${receivedMessage.getType()}`);
                     // WEBRTC TODO: Add string name of packet type to message.
                 }
             } else {
@@ -168,7 +169,7 @@ class PacketReceiver {
             }
 
         } else {
-            console.error("Could not find listener for message type:", receivedMessage.getType());
+            Log.error(`Could not find listener for message type: ${receivedMessage.getType()}`);
             // WEBRTC TODO: Add string name of packet type to message.
 
             // WEBRTC TODO: Address further code.

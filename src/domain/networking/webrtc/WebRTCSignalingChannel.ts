@@ -9,6 +9,7 @@
 //
 
 import { NodeTypeValue } from "../NodeType";
+import Log from "../../shared/Log";
 
 
 type EventCallback = (event: Event) => void;
@@ -124,7 +125,7 @@ class WebRTCSignalingChannel {
 
     constructor(websocketURL: string) {
         if (typeof websocketURL !== "string" || websocketURL === "") {
-            console.error("WebRTCSignalingChannel: Invalid WebSocket URL!");
+            Log.error("WebRTCSignalingChannel: Invalid WebSocket URL!");
         }
         try {
             this.#_websocket = new WebSocket(websocketURL);
@@ -211,7 +212,7 @@ class WebRTCSignalingChannel {
             return true;
         }
 
-        console.error("WebRTCSignalingChannel: Channel not open for sending!");
+        Log.error("WebRTCSignalingChannel: Channel not open for sending!");
         if (this.#_websocket && this.#_websocket.onerror) {
             this.#_websocket.onerror(<Event><unknown>"Channel not open for sending!");
         }
@@ -243,7 +244,7 @@ class WebRTCSignalingChannel {
             }
         }
         if (!success) {
-            console.error("WebRTCSignalingChannel: Invalid message received!");
+            Log.error("WebRTCSignalingChannel: Invalid message received!");
         }
     }
 

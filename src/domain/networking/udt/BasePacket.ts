@@ -12,6 +12,7 @@ import UDT from "./UDT";
 import MessageData from "../MessageData";
 import SockAddr from "../SockAddr";
 import assert from "../../shared/assert";
+import Log from "../../shared/Log";
 
 
 /*@devdoc
@@ -81,7 +82,7 @@ class BasePacket {
             this._messageData.packetSize = size;
             this._messageData.senderSockAddr = senderSockAddr;
             if (data.byteLength !== size) {
-                console.error("Invalid size parameter in BasePacket constructor!", size);
+                Log.error(`Invalid size parameter in BasePacket constructor! ${size}`);
             }
 
         } else if (param0 instanceof BasePacket) {
@@ -94,7 +95,7 @@ class BasePacket {
         } else {
             // Invalid call.
             this._messageData = new MessageData();
-            console.error("Invalid parameters in BasePacket constructor!", typeof param0, typeof param1, typeof param2);
+            Log.error(`Invalid parameters in BasePacket constructor! ${typeof param0} ${typeof param1} ${typeof param2}`);
         }
 
     }

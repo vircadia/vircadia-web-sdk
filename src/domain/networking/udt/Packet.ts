@@ -12,6 +12,7 @@ import BasePacket from "./BasePacket";
 import UDT from "./UDT";
 import SockAddr from "../SockAddr";
 import assert from "../../shared/assert";
+import Log from "../../shared/Log";
 
 
 /*@devdoc
@@ -154,7 +155,7 @@ class Packet extends BasePacket {
             this.#readHeader();
             // adjustPayloadStartAndCapacity();  N/A
             if (this._messageData.obfuscationLevel !== Packet.ObfuscationLevel.NoObfuscation) {
-                console.warn("Packet() : Undo obfuscation : Not implemented!");
+                Log.warning("Packet() : Undo obfuscation : Not implemented!");
 
                 // WEBRTC TODO: Address further C++ code.
 
@@ -168,7 +169,7 @@ class Packet extends BasePacket {
             this._messageData.dataPosition = Packet.totalHeaderSize(this._messageData.isPartOfMessage);
 
         } else {
-            console.error("Invalid parameters in Packet constructor!", typeof param0, typeof param1, typeof param2);
+            Log.error(`Invalid parameters in Packet constructor! ${typeof param0} ${typeof param1} ${typeof param2}`);
             super(0);
         }
     }
@@ -206,7 +207,7 @@ class Packet extends BasePacket {
         this._messageData.dataPosition += 4;
 
         if (this._messageData.isPartOfMessage) {
-            console.warn("Multi-packet messages not yet implemented!");
+            Log.warning("Multi-packet messages not yet implemented!");
 
             // WEBRTC TODO: Address further C++ code.
 

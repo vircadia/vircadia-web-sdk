@@ -15,6 +15,7 @@ import AudioOutput from "./domain/audio/AudioOutput";
 import AudioClient from "./domain/audio-client/AudioClient";
 import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
+import Log from "./domain/shared/Log";
 
 
 /*@sdkdoc
@@ -109,13 +110,13 @@ class AudioMixer extends AssignmentClient {
 
     set audioInput(audioInput: MediaStream | null) {
         if (audioInput !== null && !(audioInput instanceof MediaStream)) {
-            console.error("Tried to set an invalid AudioMixer.audioInput value!");
+            Log.error("Tried to set an invalid AudioMixer.audioInput value!", "audio");
             return;
         }
 
         void this.#_audioClient.switchInputDevice(audioInput).then((success) => {
             if (!success) {
-                console.warn("Could not set the audio input.");
+                Log.warning("Could not set the audio input.", "audio");
             }
         });
     }
@@ -126,7 +127,7 @@ class AudioMixer extends AssignmentClient {
 
     set inputMuted(inputMuted: boolean) {
         if (typeof inputMuted !== "boolean") {
-            console.error("Tried to set an invalid AudioMixer.inputMuted value!");
+            Log.error("Tried to set an invalid AudioMixer.inputMuted value!", "audio");
             return;
         }
         this.#_audioClient.setMuted(inputMuted);

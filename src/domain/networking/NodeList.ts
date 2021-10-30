@@ -23,6 +23,7 @@ import Socket from "./udt/Socket";
 import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
 import Uuid from "../shared/Uuid";
+import Log from "../shared/Log";
 
 
 /*@devdoc
@@ -194,7 +195,7 @@ class NodeList extends LimitedNodeList {
         // C++  void processDomainServerRemovedNode(ReceivedMessage* message)
         const info = PacketScribe.DomainServerRemovedNode.read(message.getMessage());
         const nodeUUID = info.nodeUUID;
-        console.log("[networking] Received packet from domain-server to remove node with UUID", nodeUUID.stringify());
+        Log.message(`Received packet from domain-server to remove node with UUID ${nodeUUID.stringify()}`, "networking");
         this.killNodeWithUUID(nodeUUID);
 
         // WEBRTC TODO: Address further C++ code.
@@ -298,7 +299,7 @@ class NodeList extends LimitedNodeList {
         // Open a WebRTC data channel to the domain server if not already open.
         const domainServerSocketState = this._nodeSocket.getSocketState(domainURL, NodeType.DomainServer);
         if (domainServerSocketState !== Socket.CONNECTED) {
-            console.log("[networking] Opening domain server connection. Will not send domain server check-in.");
+            Log.message("Opening domain server connection. Will not send domain server check-in.", "networking");
             if (domainServerSocketState === Socket.UNCONNECTED) {
                 this._nodeSocket.openSocket(domainURL, NodeType.DomainServer, (socketID: number) => {
                     this.#_domainHandler.setPort(socketID);
@@ -444,7 +445,7 @@ class NodeList extends LimitedNodeList {
             });
 
         } else {
-            console.error("Unexpected socket state for", NodeType.getNodeTypeName(node.getType()));
+            Log.error(`Unexpected socket state for ${NodeType.getNodeTypeName(node.getType())}`, "networking");
         }
 
         // Vircadia clients can never have upstream nodes or downstream nodes so we don't need to cater for these.

@@ -186,10 +186,10 @@ class AudioClient {
                 ? inputDeviceAudioSettings.echoCancellation
                 : false;
         }
-        console.log("[audioclient] Input device info:", inputDeviceAudioSettings
+        Log.message("Input device info:" + (inputDeviceAudioSettings
             ? `${deviceName}, ${channelCount} channels, ${sampleRate}Hz, ${sampleSize} bits, `
                 + `echo cancellation ${echoCancellation ? "on" : "off"}`
-            : null);
+            : ""), "audioclient");
 
         let supportedFormat = false;
 
@@ -211,7 +211,7 @@ class AudioClient {
         // WEBRTC TODO: Address further C++.
 
         if (isShutdownRequest) {
-            console.log("[audioclient] The audio input device has shut down.");
+            Log.message("The audio input device has shut down.", "audioclient");
             return true;
         }
 
@@ -232,12 +232,12 @@ class AudioClient {
                 this.#_audioInput.readyRead.connect(this.#handleMicAudioInput);
                 supportedFormat = true;
             } else {
-                console.error("[audioclient] Error starting audio input -", this.#_audioInput.errorString());
+                Log.error(`Error starting audio input - ${this.#_audioInput.errorString()}`, "audioclient");
             }
         }
 
         if (!supportedFormat) {
-            console.log("[audioclient] Audio input device is not available, using dummy input.");
+            Log.message("Audio input device is not available, using dummy input.", "audioclient");
 
             // WEBRTC TODO: Address further C++.
 
@@ -369,7 +369,8 @@ class AudioClient {
 
         this.#_selectedCodecName = selectedCodecName;
 
-        console.log("[audioclient] Selected codec:", this.#_selectedCodecName, "; Is stereo input:", this.#_isStereoInput);
+        Log.message(`Selected codec: ${this.#_selectedCodecName} ; Is stereo input: ${this.#_isStereoInput.toString()}`,
+            "audioclient");
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -406,7 +407,7 @@ class AudioClient {
     #processStreamStatsPacket = (message: ReceivedMessage, sendingNode?: Node): void => {  // eslint-disable-line
         // C++  void AudioIOStats::processStreamStatsPacket(ReceivedMessage*, Node* sendingNode)
 
-        Log.once(LogLevel.WARNING, "AudioClient: AudioStreamStats packet not processed.");
+        Log.once(LogLevel.WARNING, "AudioClient: AudioStreamStats packet not processed.", "audioclient");
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -418,7 +419,7 @@ class AudioClient {
     #handleAudioEnvironmentDataPacket = (message: ReceivedMessage): void => {  // eslint-disable-line
         // C++  void handleAudioEnvironmentDataPacket(ReceivedMessage* message)
 
-        Log.once(LogLevel.WARNING, "AudioClient: AudioEnvironment packet not processed.");
+        Log.once(LogLevel.WARNING, "AudioClient: AudioEnvironment packet not processed.", "audioclient");
 
         // WEBRTC TODO: Address further C++ code.
 

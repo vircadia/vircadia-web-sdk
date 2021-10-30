@@ -11,6 +11,7 @@
 import AudioConstants from "../audio/AudioConstants";
 import assert from "../shared/assert";
 import Signal from "../shared/Signal";
+import Log from "../shared/Log";
 
 // eslint-disable-next-line
 // @ts-ignore
@@ -50,7 +51,7 @@ class AudioInput {
     set audioInput(audioInput: MediaStream | null) {
         // C++  N/A
         if (audioInput && this.#_isStarted) {
-            console.error("Cannot set the audio input while it is running!");
+            Log.error("Cannot set the audio input while it is running!", "audio");
             return;
         }
 
@@ -200,7 +201,7 @@ class AudioInput {
         }
         if (frame === undefined) {
             this.#_errorString = "Unexpected read of empty audio input buffer!";
-            console.error(this.#_errorString);
+            Log.error(this.#_errorString, "audio");
             return null;
         }
         return frame;
@@ -268,7 +269,7 @@ class AudioInput {
         // Audio worklet.
         if (!this.#_audioContext.audioWorklet) {
             this.#_errorString = "Cannot set up audio input stream. App may not be being served via HTTPS or from localhost.";
-            console.error(this.#_errorString);
+            Log.error(this.#_errorString, "audio");
             return false;
         }
         await this.#_audioContext.audioWorklet.addModule(audioInputProcessorURL);

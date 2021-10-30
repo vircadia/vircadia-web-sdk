@@ -9,6 +9,7 @@
 //
 
 import assert from "../../shared/assert";
+import Log from "../../shared/Log";
 
 
 /*@devdoc
@@ -518,7 +519,7 @@ const PacketType = new class {
             // C++ default for remainder of packets is 22 but we want to report packets we haven't implemented, so explicitly
             // list those packets we know about.
             default:
-                console.error("ERROR - Unknown packet type in versionForPacketType() :", packetType);
+                Log.error(`ERROR - Unknown packet type in versionForPacketType() : ${packetType}`);
         }
         return 0;
     }

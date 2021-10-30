@@ -15,6 +15,7 @@ import Signal from "../shared/Signal";
 import Uuid from "../shared/Uuid";
 import PacketScribe from "./packets/PacketScribe";
 import ReceivedMessage from "./ReceivedMessage";
+import Log from "../shared/Log";
 
 
 /*@devdoc
@@ -253,8 +254,8 @@ class DomainHandler {
         // WEBRTC TODO: Should C++ clear _domainConnectionRefusals also?
         this.#_domainConnectionRefusals.clear();  // Re-report any refusals if retry connecting to the same domain.
 
-        console.log("[networking] Disconnecting from domain server.");
-        console.log("[networking] REASON:", reason);
+        Log.message("Disconnecting from domain server.", "networking");
+        Log.message(`REASON: ${reason}`, "networking");
         this.setIsConnected(false, forceDisconnect);
     }
 
@@ -279,7 +280,7 @@ class DomainHandler {
      */
     softReset(reason: string): void {
         // C++  void softReset(QString reason) {
-        console.log("[networking] Resetting current domain connection information.");
+        Log.message("Resetting current domain connection information.", "networking");
         this.disconnect(reason);
 
         // WEBRTC TODO: Address further C++ code.
@@ -298,8 +299,8 @@ class DomainHandler {
 
         const info = PacketScribe.DomainConnectionDenied.read(message.getMessage());
         const sanitizedExtraInfo = info.extraInfo.toLowerCase().startsWith("http") ? "" : info.extraInfo;
-        console.warn("[networking] The domain-server denied a connection request: ", info.reasonMessage, "extraInfo:",
-            sanitizedExtraInfo);
+        Log.warning(`The domain-server denied a connection request: ${info.reasonMessage} extraInfo: ${sanitizedExtraInfo}`,
+            "networking");
 
         if (!this.#_domainConnectionRefusals.has(info.reasonMessage)) {
             this.#_domainConnectionRefusals.add(info.reasonMessage);

@@ -12,6 +12,7 @@
 import SockAddr from "./SockAddr";
 import Signal from "../shared/Signal";
 import Uuid from "../shared/Uuid";
+import Log from "../shared/Log";
 
 
 type LocalID = number;
@@ -124,8 +125,8 @@ class NetworkPeer {
             this._publicSocket.setObjectName(previousSocket.objectName());
 
             if (!wasOldSocketNull) {
-                console.log("[networking] Public socket change for node", this.#toString(),
-                    "; previously", previousSocket.toString());
+                Log.message(`Public socket change for node", ${this.#toString()}; `
+                            + `previously ${previousSocket.toString()}`, "networking");
                 this.socketUpdated.emit(previousSocket, this._publicSocket);
             }
         }
@@ -160,8 +161,8 @@ class NetworkPeer {
             this._localSocket.setObjectName(previousSocket.objectName());
 
             if (!wasOldSocketNull) {
-                console.log("[networking] Local socket change for node", this.#toString(),
-                    "; previously", previousSocket.toString());
+                Log.message(`Local socket change for node ${this.#toString()}; `
+                            + `previously ${previousSocket.toString()}`, "networking");
                 this.socketUpdated.emit(previousSocket, this._localSocket);
             }
         }
@@ -173,7 +174,7 @@ class NetworkPeer {
     activateLocalSocket(): void {
         // C++  void activateLocalSocket()
         if (this.#_activeSocket !== this._localSocket) {
-            console.log("[networking] Activating local socket for network peer with ID", this.#_uuid.stringify());
+            Log.message(`Activating local socket for network peer with ID ${this.#_uuid.stringify()}`, "networking");
             this.#setActiveSocket(this._localSocket);
         }
     }
@@ -184,7 +185,7 @@ class NetworkPeer {
     activatePublicSocket(): void {
         // C++  void activatePublicSocket()
         if (this.#_activeSocket !== this._publicSocket) {
-            console.log("[networking] Activating public socket for network peer with ID", this.#_uuid.stringify());
+            Log.message(`Activating public socket for network peer with ID ${this.#_uuid.stringify()}`, "networking");
             this.#setActiveSocket(this._publicSocket);
         }
     }

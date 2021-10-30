@@ -11,6 +11,7 @@
 import Uuid from "../shared/Uuid";
 import UDT from "./udt/UDT";
 import "../shared/DataViewExtensions";
+import Log from "../shared/Log";
 
 import CryptoJS from "crypto-js";
 
@@ -85,7 +86,7 @@ class HMACAuth {
 
         // Vircadia only uses MD5.
         if (authMethod !== HMACAuth.MD5) {
-            console.error("HMACAuth method not supported:", authMethod);
+            Log.error(`HMACAuth method not supported: ${authMethod}`);
         }
 
         this.#_keyWordArray = CryptoJS.lib.WordArray.create([]);

@@ -12,6 +12,7 @@ import Node from "./networking/Node";
 import NodeList from "./networking/NodeList";
 import { NodeTypeValue } from "./networking/NodeType";
 import ContextManager from "./shared/ContextManager";
+import Log from "./shared/Log";
 
 
 /*@devdoc
@@ -152,7 +153,7 @@ class AssignmentClient {
         if (typeof callback === "function" || callback === null) {
             this.#_onStateChanged = callback;
         } else {
-            console.error("ERROR: AssignmentClient.onStateChanged callback not a function or null!");
+            Log.error("AssignmentClient.onStateChanged callback not a function or null!");
             this.#_onStateChanged = null;
         }
     }

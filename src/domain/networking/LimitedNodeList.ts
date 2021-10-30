@@ -22,6 +22,7 @@ import Socket from "./udt/Socket";
 import assert from "../shared/assert";
 import Signal from "../shared/Signal";
 import Uuid from "../shared/Uuid";
+import Log from "../shared/Log";
 
 
 type NewNodeInfo = {
@@ -179,7 +180,7 @@ class LimitedNodeList {
 
             if (packet.isReliable()) {
 
-                console.warn("sendPacket() : isReliable : Not implemented!");
+                Log.warning("sendPacket() : isReliable : Not implemented!");
 
                 // WEBRTC TODO: Address further C++ code.
 
@@ -203,8 +204,8 @@ class LimitedNodeList {
                 return this.sendPacket(packet, activeSocket, destinationNode.getAuthenticateHash());
             }
 
-            console.log("[networking] LimitedNodeList.sendPacket called without active socket for node",
-                NodeType.getNodeTypeName(destinationNode.getType()), "- not sending");
+            Log.message(`LimitedNodeList.sendPacket called without active socket for node `
+                + `${NodeType.getNodeTypeName(destinationNode.getType())} - not sending`, "networking");
             return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
         }
 
@@ -213,8 +214,8 @@ class LimitedNodeList {
             const overridenSockAddr = param2;
 
             if (overridenSockAddr.isNull() && !destinationNode.getActiveSocket()) {
-                console.log("[networking] LimitedNodeList.sendPacket called without active socket for node",
-                    destinationNode.getUUID(), ". Not sending.");
+                Log.message(`LimitedNodeList.sendPacket called without active socket for node `
+                    + `${destinationNode.getUUID().stringify()} . Not sending.`, "networking");
                 return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
             }
 
@@ -228,7 +229,8 @@ class LimitedNodeList {
 
         }
 
-        console.error("Invalid parameters in LimiteNodeList.sendPacket()!", typeof packet, typeof param1, typeof param2);
+        Log.error(`Invalid parameters in LimiteNodeList.sendPacket()! `
+            + `${typeof packet} ${typeof param1} ${typeof param2}`, "networking");
         return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
     }
 
@@ -336,7 +338,7 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        console.log("[networking] Added", NodeType.getNodeTypeName(newNode.getType()));
+        Log.message(`Added ${NodeType.getNodeTypeName(newNode.getType())}`, "networking");
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -569,8 +571,8 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        console.log("[networking] Killed", NodeType.getNodeTypeName(node.getType()), node.getUUID().stringify(),
-            node.getPublicSocket().toString(), "/", node.getLocalSocket().toString());
+        Log.message(`Killed ${NodeType.getNodeTypeName(node.getType())} ${node.getUUID().stringify()} `
+            + `${node.getPublicSocket().toString()} / ${node.getLocalSocket().toString()}`, "networking");
 
         // Ping timer N/A.
 
@@ -630,7 +632,7 @@ class LimitedNodeList {
         const killedNodes = [];
 
         if (this.#_nodeHash.size > 0) {
-            console.log("[networking] Removing all nodes from nodes list:", reason);
+            Log.message(`Removing all nodes from nodes list: ${reason}`, "networking");
             for (const node of this.#_nodeHash.values()) {
                 killedNodes.push(node);
             }

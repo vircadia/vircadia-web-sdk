@@ -15,6 +15,7 @@ import UDT from "./udt/UDT";
 import { LocalID } from "../networking/NetworkPeer";
 import Node from "../networking/Node";
 import assert from "../shared/assert";
+import Log from "../shared/Log";
 
 
 /*@devdoc
@@ -133,8 +134,8 @@ class NLPacket extends Packet {
             this.adjustPayloadStartAndCapacity(NLPacket.#localHeaderSize(this._messageData.type));
 
         } else {
-            console.error("Invalid parameters in Packet constructor!", typeof param0, typeof param1, typeof param2,
-                typeof param3, typeof param4);
+            Log.error(`Invalid parameters in Packet constructor! `
+                      + `${typeof param0} ${typeof param1} ${typeof param2} ${typeof param3} ${typeof param4}`, "networking");
             super(0, false, false);
         }
     }

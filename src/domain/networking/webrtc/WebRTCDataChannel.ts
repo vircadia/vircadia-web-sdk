@@ -10,6 +10,7 @@
 
 import NodeType, { NodeTypeValue } from "../NodeType";
 import WebRTCSignalingChannel, { SignalingMessage } from "./WebRTCSignalingChannel";
+import Log from "../../shared/Log";
 
 
 type OnOpenCallback = () => void;
@@ -176,7 +177,7 @@ class WebRTCDataChannel {
     // eslint-disable-next-line
     addEventListener(event: string, callback: OnOpenCallback | OnMessageCallback | OnCloseCallback | OnErrorCallback): void {
         const errorMessage = "WebRTCDataChannel.addEventListener(): Not implemented!";
-        console.error(errorMessage);
+        Log.error(errorMessage);
         if (this.#_onerrorCallback) {
             this.#_onerrorCallback(errorMessage);
         }
@@ -197,7 +198,7 @@ class WebRTCDataChannel {
         }
 
         const errorMessage = "WebRTCDataChannel: Data channel not open for sending!";
-        console.error(errorMessage);
+        Log.error(errorMessage);
         if (this.#_onerrorCallback) {
             this.#_onerrorCallback(errorMessage);
         }
@@ -254,7 +255,7 @@ class WebRTCDataChannel {
                 });
             } catch (err) {
                 const errorMessage = "WebRTCDataChannel: Error during offer negotiation: " + <string>err;
-                console.error(errorMessage);
+                Log.error(errorMessage);
                 if (this.#_onerrorCallback) {
                     this.#_onerrorCallback(errorMessage);
                 }
@@ -288,7 +289,7 @@ class WebRTCDataChannel {
                     // Unexpected condition.
                     errorMessage = "WebRTCDataChannel: Unexpected connection state: "
                         + (this.#_peerConnection ? this.#_peerConnection.connectionState : "undefined");
-                    console.error(errorMessage);
+                    Log.error(errorMessage);
                     if (this.#_onerrorCallback) {
                         this.#_onerrorCallback(errorMessage);
                     }
@@ -338,7 +339,7 @@ class WebRTCDataChannel {
         if (!this.#_signalingChannel || this.#_signalingChannel.readyState !== WebRTCSignalingChannel.OPEN) {
             this.#_readyState = WebRTCDataChannel.CLOSED;
             const errorMessage = "WebRTCDataChannel: Signaling channel not open!";
-            console.error(errorMessage);
+            Log.error(errorMessage);
             if (this.#_onerrorCallback) {
                 this.#_onerrorCallback(errorMessage);
             }
@@ -365,7 +366,7 @@ class WebRTCDataChannel {
                     if (description) {
                         if (!this.#_peerConnection) {
                             const errorMessage = "WebRTCDataChannel: Peer connection is closed!";
-                            console.error(errorMessage);
+                            Log.error(errorMessage);
                             if (this.#_onerrorCallback) {
                                 this.#_onerrorCallback(errorMessage);
                             }
@@ -393,14 +394,14 @@ class WebRTCDataChannel {
                     } else {
                         // Unexpected message.
                         const errorMessage = "WebRTCDataChannel: Unexpected signaling channel message!";
-                        console.error(errorMessage);
+                        Log.error(errorMessage);
                         if (this.#_onerrorCallback) {
                             this.#_onerrorCallback(errorMessage);
                         }
                     }
                 } catch (err) {
                     const errorMessage = "WebRTCDataChannel: Error processing signaling channel message!";
-                    console.error(errorMessage);
+                    Log.error(errorMessage);
                     if (this.#_onerrorCallback) {
                         this.#_onerrorCallback(errorMessage);
                     }

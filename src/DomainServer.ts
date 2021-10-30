@@ -15,6 +15,7 @@ import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
+import Log from "./domain/shared/Log";
 
 
 /*@sdkdoc
@@ -208,7 +209,7 @@ class DomainServer {
         if (typeof callback === "function" || callback === null) {
             this.#_onStateChanged = callback;
         } else {
-            console.error("ERROR: DomainServer.onStateChanged callback not a function or null!");
+            Log.error("ERROR: DomainServer.onStateChanged callback not a function or null!");
             this.#_onStateChanged = null;
         }
     }
@@ -239,7 +240,7 @@ class DomainServer {
         if (typeof location === "string") {
             this.#_location = location.trim();
         } else {
-            console.error("ERROR: DomainServer.connect() location parameter not a string!");
+            Log.error("ERROR: DomainServer.connect() location parameter not a string!");
             this.#_location = "";
         }
 
@@ -291,7 +292,7 @@ class DomainServer {
     #setState(state: ConnectionState, info = ""): void {
         const hasStateChanged = state !== this.#_state;
         if (this.#_DEBUG && !hasStateChanged) {
-            console.warn("DomainServer: State hasn't changed.");
+            Log.warning("DomainServer: State hasn't changed.");
         }
 
         this.#_state = state;
@@ -341,7 +342,7 @@ class DomainServer {
     #nodeAdded = (node: Node): void => {
         // C++  void Application:: nodeAdded(Node* node)
         if (node.getType() === NodeType.EntityServer) {
-            console.warn("DomainServer: EntityServer support implemented!");
+            Log.warning("DomainServer: EntityServer support implemented!");
 
             // WEBRTC TODO: Address further code - for EntityServer node.
 
@@ -356,17 +357,17 @@ class DomainServer {
         // AudioMixer node is handled in AudioMixer.ts.
 
         if (nodeType === NodeType.AssetServer) {
-            console.warn("DomainServer: AssetServer support not implemented!");
+            Log.warning("DomainServer: AssetServer support not implemented!");
 
             // WEBRTC TODO: Address further code - for AssetServer node.
 
         } else if (nodeType === NodeType.EntityServer) {
-            console.warn("DomainServer: EntityServer support not implemented!");
+            Log.warning("DomainServer: EntityServer support not implemented!");
 
             // WEBRTC TODO: Address further code - for EntityServer node.
 
         } else if (nodeType === NodeType.AvatarMixer) {
-            console.warn("DomainServer: AvatarMixer support not implemented!");
+            Log.warning("DomainServer: AvatarMixer support not implemented!");
 
             // WEBRTC TODO: Address further code - for AvatarMixer node.
 
@@ -383,12 +384,12 @@ class DomainServer {
         // AudioMixer node is handled in AudioMixer.ts.
 
         if (nodeType === NodeType.EntityServer) {
-            console.warn("DomainServer: EntityServer support not implemented!");
+            Log.warning("DomainServer: EntityServer support not implemented!");
 
             // WEBRTC TODO: Address further code - for EntityServer node.
 
         } else if (nodeType === NodeType.AssetServer) {
-            console.warn("DomainServer: AssetServer support not implemented!");
+            Log.warning("DomainServer: AssetServer support not implemented!");
 
             // WEBRTC TODO: Address further code - for AssetServer node.
 
