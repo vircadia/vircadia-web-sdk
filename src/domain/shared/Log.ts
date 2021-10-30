@@ -14,7 +14,7 @@ export enum LogLevel {
     DEFAULT,
     INFO,
     WARNING,
-    ERROR,
+    ERROR
 }
 
 export const allLogLevels = [
@@ -22,7 +22,7 @@ export const allLogLevels = [
     LogLevel.DEFAULT,
     LogLevel.INFO,
     LogLevel.WARNING,
-    LogLevel.ERROR,
+    LogLevel.ERROR
 ] as const;
 
 type LogFunction = (message: string, messageType?: string) => void;
@@ -44,23 +44,32 @@ export interface LoggerContext {
  */
 export class ConsoleLoggerContext implements LoggerContext {
 
-    static #_typeFirst(func: (fisrs:string, second?:string) => void) {
-        return (message: string, messageType?: string) =>  messageType ? func(`[${messageType}]`, message) : func(message); ;
+    static #_typeFirst(func: (fisrs: string, second?: string) => void): LogFunction {
+        return (message: string, messageType?: string) => {
+            if (messageType) {
+                return func(`[${messageType}]`, message);
+            }
+            return func(message);
+        };
     }
+
     // it is necessary to capture the console object here, for things like jest's mocks to work,
     // hence the no-op looking lambda wrappers
     static #_functions = new Map<LogLevel, LogFunction>([
+        /* eslint-disable @typescript-eslint/no-explicit-any */
         [LogLevel.DEFAULT, ConsoleLoggerContext.#_typeFirst((...params: any[]) => console.log(...params))],
         [LogLevel.DEBUG, ConsoleLoggerContext.#_typeFirst((...params: any[]) => console.debug(...params))],
         [LogLevel.INFO, ConsoleLoggerContext.#_typeFirst((...params: any[]) => console.info(...params))],
         [LogLevel.WARNING, ConsoleLoggerContext.#_typeFirst((...params: any[]) => console.warn(...params))],
         [LogLevel.ERROR, ConsoleLoggerContext.#_typeFirst((...params: any[]) => console.error(...params))]
+        /* eslint-enable @typescript-eslint/no-explicit-any */
     ]);
 
-    getFunction(level: LogLevel)
-    {
+    /* eslint-disable class-methods-use-this */
+    getFunction(level: LogLevel): LogFunction | undefined {
         return ConsoleLoggerContext.#_functions.get(level);
     }
+    /* eslint-enable class-methods-use-this */
 }
 
 /*@devdoc
@@ -69,40 +78,39 @@ export class ConsoleLoggerContext implements LoggerContext {
  *  @class Logger
  */
 export class StringLoggerContext implements LoggerContext {
-    buffer: string = "";
+    buffer = "";
     #_functions = new Map<LogLevel, LogFunction>();
 
     constructor() {
-        for(let level of allLogLevels) {
+        for (const level of allLogLevels) {
             this.#_functions.set(level, (message: string, messageType?: string) => {
                 if (messageType) {
-                   this.buffer += `[${messageType}]`;
+                    this.buffer += `[${messageType}]`;
                 }
-                this.buffer += `[${LogLevel[level]}] ${message}\n`;
+                this.buffer += `[${LogLevel[level] as string}] ${message}\n`;
             });
         }
     }
 
-    getFunction(level: LogLevel) {
+    getFunction(level: LogLevel): LogFunction | undefined {
         return this.#_functions.get(level);
     }
 
-};
+}
 
 /*@devdoc
  *  The <code>Logger</code> class serves as a convenience utility and a centralized configuration point for logging.
  *
  *  @class Logger
  */
-export class Logger
-{
+export class Logger {
     #_context: LoggerContext;
-    #_activeFunctions =  new Map<LogLevel, LogFunction>();
+    #_activeFunctions = new Map<LogLevel, LogFunction>();
     #_typeFilter?: Array<string | undefined>;
 
-    #_messageIds = new Map<string, Object>();
-    #_typedMessageIds = new Map<string, Object>();
-    #_messageFlags = new Map<Object, boolean>();
+    #_messageIds = new Map<string, unknown>();
+    #_typedMessageIds = new Map<string, unknown>();
+    #_messageFlags = new Map<unknown, boolean>();
 
     /*@devdoc
      *  Creates a logger instance with a specified context.
@@ -120,9 +128,9 @@ export class Logger
      *  @param {message} string - the message to log
      *  @param {messageType} string - optional user defined message type
      */
-    level(level: LogLevel, message: string, messageType?: string) {
+    level(level: LogLevel, message: string, messageType?: string): void {
         const log = this.#_activeFunctions.get(level);
-        if (log && this.#_isTypeAllowed(messageType) ) {
+        if (log && this.#_isTypeAllowed(messageType)) {
             log(message, messageType);
         }
     }
@@ -133,19 +141,12 @@ export class Logger
      *  @param {message} string - the message to log
      *  @param {messageType} string - optional user defined message type
      */
-    once(level: LogLevel, message: string, messageType?: string) {
+    once(level: LogLevel, message: string, messageType?: string): void {
         const idMap = messageType ? this.#_typedMessageIds : this.#_messageIds;
 
-        const key = `${messageType} | ${level} | ${message}`;
+        const key = `${messageType || "undefined"} | ${level} | ${message}`;
 
-        let id: Object;
-
-        if(!idMap.has(key)) {
-            id = new Object();
-            idMap.set(key, id);
-        } else{
-            id = idMap.get(key) as Object;
-        }
+        const id = Logger.#_getMessageId(idMap, key);
 
         if (!this.#_messageFlags.get(id)) {
             this.#_messageFlags.set(id, true);
@@ -158,7 +159,7 @@ export class Logger
      *  @param {message} string - the message to log
      *  @param {messageType} string - optional user defined message type
      */
-    default(message: string, messageType?: string) {
+    message(message: string, messageType?: string): void {
         this.level(LogLevel.DEFAULT, message, messageType);
     }
 
@@ -167,7 +168,7 @@ export class Logger
      *  @param {message} string - the message to log
      *  @param {messageType} string - optional user defined message type
      */
-    info(message: string, messageType?: string) {
+    info(message: string, messageType?: string): void {
         this.level(LogLevel.INFO, message, messageType);
     }
 
@@ -176,7 +177,7 @@ export class Logger
      *  @param {message} string - the message to log
      *  @param {messageType} string - optional user defined message type
      */
-    debug(message: string, messageType?: string) {
+    debug(message: string, messageType?: string): void {
         this.level(LogLevel.DEBUG, message, messageType);
     }
 
@@ -185,7 +186,7 @@ export class Logger
      *  @param {message} string - the message to log
      *  @param {messageType} string - optional user defined message type
      */
-    warning(message: string, messageType?: string) {
+    warning(message: string, messageType?: string): void {
         this.level(LogLevel.WARNING, message, messageType);
     }
 
@@ -194,7 +195,7 @@ export class Logger
      *  @param {message} string - the message to log
      *  @param {messageType} string - optional user defined message type
      */
-    error(message: string, messageType?: string) {
+    error(message: string, messageType?: string): void {
         this.level(LogLevel.ERROR, message, messageType);
     }
 
@@ -202,12 +203,12 @@ export class Logger
      *  Applies a filer to all subsequently logged messages, based on level.
      *  @param {pred} (level: LogLevel) => boolean - the filtering condition
      */
-    filterLevels(pred: (level: LogLevel) => boolean) {
+    filterLevels(pred: (level: LogLevel) => boolean): void {
         this.#_activeFunctions = new Map<LogLevel, LogFunction>();
-        for (var level of allLogLevels) {
+        for (const level of allLogLevels) {
             const func = this.#_context.getFunction(level);
             if (func && pred(level)) {
-               this.#_activeFunctions.set(level, func);
+                this.#_activeFunctions.set(level, func);
             }
         }
     }
@@ -217,12 +218,21 @@ export class Logger
      *  @param {filter} Array<string | undefined> - the collection of types to allow,
      *  presence or presence of undefined value will determine whether to show or hide messages with no type specified.
      */
-    setTypeFilter(filter?: Array<string | undefined>) {
+    setTypeFilter(filter?: Array<string | undefined>): void {
         this.#_typeFilter = filter;
     }
 
-    #_isTypeAllowed(messageType?: string) {
+    #_isTypeAllowed(messageType?: string): boolean {
         return !this.#_typeFilter || this.#_typeFilter.includes(messageType);
+    }
+
+    static #_getMessageId(idMap: Map<string, unknown>, key: string): unknown {
+        if (!idMap.has(key)) {
+            const id = {};
+            idMap.set(key, id);
+            return id;
+        }
+        return idMap.get(key);
     }
 
 }

@@ -22,7 +22,7 @@ import PacketScribe from "../networking/packets/PacketScribe";
 import PacketType, { PacketTypeValue } from "../networking/udt/PacketHeaders";
 import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
-import Log, {LogLevel} from "../shared/Log";
+import Log, { LogLevel } from "../shared/Log";
 
 
 /*@devdoc

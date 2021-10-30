@@ -16,7 +16,7 @@ import { SilentAudioFrameDetails } from "../networking/packets/SilentAudioFrame"
 import PacketType from "../networking/udt/PacketHeaders";
 import UDT from "../networking/udt/UDT";
 import ContextManager from "../shared/ContextManager";
-import Log, {LogLevel} from "../shared/Log";
+import Log, { LogLevel } from "../shared/Log";
 
 
 /*@devdoc
