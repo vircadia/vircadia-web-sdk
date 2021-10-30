@@ -273,7 +273,18 @@ class AudioInput {
 
         this.#_audioStreamSource.channelInterpretation = "discrete";
 
-        const channelCount = Math.min(this.#_audioStreamSource.channelCount, 2);  // Mono or stereo.
+        const inputDeviceAudioInfo = this.#_audioInput ? this.#_audioInput.getAudioTracks()[0] : null;
+        const inputDeviceAudioSettings = inputDeviceAudioInfo ? inputDeviceAudioInfo.getSettings() : null;
+        let channelCount = 0;
+        if (inputDeviceAudioSettings) {
+            // FIXME: Typings currently don't include channelCount doesn't exist on MediaTrackSettings (Sep 2021).
+            /* eslint-disable */
+            // @ts-ignore
+            channelCount = inputDeviceAudioSettings.channelCount ? inputDeviceAudioSettings.channelCount : 0;
+            /* eslint-enable */
+        }
+
+        channelCount = Math.min(channelCount, 2);  // Mono or stereo.
         assert(channelCount > 0);
         // The channel count has already been checked in AudioClient.#switchInputToAudioDevice().
 
