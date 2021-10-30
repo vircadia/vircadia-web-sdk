@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Logger, LogLevel, ConsoleLoggerContext, StringLoggerContext } from "../src/domain/shared/Log";
+import { Logger, LogLevel, ConsoleLoggerContext, StringLoggerContext } from "../../../src/domain/shared/Log";
 
 describe("Logger - unit tests", () => {
 
