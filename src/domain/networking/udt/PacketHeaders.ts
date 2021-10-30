@@ -186,7 +186,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} InjectorGainSet - <code>26</code>
  *  @property {PacketType} AssignmentClientStatus - <code>27</code>
  *  @property {PacketType} NoisyMute - <code>28</code>
- *  @property {PacketType} AvatarIdentity - <code>29</code>
+ *  @property {PacketType} AvatarIdentity - <code>29</code> - The user client sends this to the Avatar Mixer to update it with
+ *      current user avatar identity information.
+ *      {@link PacketScribe.AvatarIdentityDetails}.
  *  @property {PacketType} NodeIgnoreRequest - <code>30</code>
  *  @property {PacketType} DomainConnectRequest - <code>31</code> - The user client sends this to the Domain Server to initiate
  *      connection to the domain. The Domain Server responds with a DomainList or DomainConnectionDenied packet.<br />
@@ -559,6 +561,8 @@ const PacketType = new class {
                 return this.#_AudioVersion.StopInjectors;
             case this.DomainServerAddedNode:
                 return this.#_DomainServerAddedNodeVersion.SocketTypes;
+            case this.AvatarIdentity:
+                return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
             case this.AudioEnvironment:

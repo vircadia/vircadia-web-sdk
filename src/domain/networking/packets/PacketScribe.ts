@@ -17,6 +17,7 @@ import MicrophoneAudioNoEcho from "./MicrophoneAudioNoEcho";
 import SilentAudioFrame from "./SilentAudioFrame";
 import DomainListRequest from "./DomainListRequest";
 import DomainConnectionDenied from "./DomainConnectionDenied";
+import AvatarIdentity from "./AvatarIdentity";
 import DomainConnectRequest from "./DomainConnectRequest";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
 import DomainServerRemovedNode from "./DomainServerRemovedNode";
@@ -49,6 +50,8 @@ import SelectedAudioFormat from "./SelectedAudioFormat";
  *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
  *  @property {function} DomainConnectionDenied.read -
  *      {@link PacketScribe.DomainConnectionDenied&period;read|DomainConnectionDenied&period;read}
+ *  @property {function} AvatarIdentity.write -
+ *      {@link PacketScribe.AvatarIdentity&period;write|AvatarIdentity&period;write}
  *  @property {function} DomainConnectRequest.write -
  *      {@link PacketScribe.DomainConnectRequest&period;write|DomainConnectRequest&period;write}
  *  @property {function} DomainDisconnectRequest.write -
@@ -82,6 +85,7 @@ const PacketScribe = {
     SilentAudioFrame,
     DomainListRequest,
     DomainConnectionDenied,
+    AvatarIdentity,
     DomainConnectRequest,
     DomainDisconnectRequest,
     DomainServerRemovedNode,
