@@ -38,6 +38,9 @@ type NewNodeInfo = {
     connectionSecretUUID: Uuid
 };
 
+type NodePredicate = (node: Node) => boolean;
+type NodeFunctor = (node: Node) => void;
+
 
 /*@devdoc
  *  The <code>LimitedNodeList</code> class manages all the network nodes (assignment clients) that the client is connected to.
@@ -64,6 +67,19 @@ class LimitedNodeList {
      *  @property {boolean} isReplicated - <code>true</code> if the node is replicated, <code>false</code> if it isn't.
      *  @property {LocalID} sessionLocalID - The local ID of the node at the domain server.
      *  @property {Uuid} connectionSecretUUID - The secret for the client connection to the node.
+     */
+
+    /*@devdoc
+     *  A function that tests if a {@link Node} satisfies some condition.
+     *  @callback NodePredicate
+     *  @param {Node} node - The node to test.
+     *  @returns {boolean} <code>true</code> if the node passes the test, <code>false</code> if it doesn't.
+     */
+
+    /*@devdoc
+     *  A function that operates on a {@link Node}.
+     *  @callback NodeFunctor
+     *  @param {Node} node - The node to operate on.
      */
 
 
@@ -442,6 +458,20 @@ class LimitedNodeList {
             }
         }
         return null;
+    }
+
+    /*@devdoc
+     *  Applies a function to each node that satisfies a predicate.
+     *  @param {NodePredicate} predicate - The predicate to test each node with.
+     *  @param {NodeFunctor} functor - The function to apply to each node that passes the test.
+     */
+    eachMatchingNode(predicate: NodePredicate, functor: NodeFunctor): void {
+        // C++  void eachMatchingNode(PredLambda predicate, NodeLambda functor) {
+        for (const node of this.#_nodeHash.values()) {
+            if (predicate(node)) {
+                functor(node);
+            }
+        }
     }
 
 
@@ -932,4 +962,4 @@ class LimitedNodeList {
 }
 
 export default LimitedNodeList;
-export type { NewNodeInfo };
+export type { NewNodeInfo, NodeFunctor, NodePredicate };

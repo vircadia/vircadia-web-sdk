@@ -237,6 +237,23 @@ class NLPacketList {
         return this.#_packets.length + (this.#_currentPacket ? 1 : 0);
     }
 
+
+    /*@devdoc
+     *  Gets the total number of bytes in the packets in the list.
+     *  @returns {number} The total number of bytes in the packets in the list.
+     */
+    getDataSize(): number {
+        // C++  size_t getDataSize()
+        let totalBytes = 0;
+        for (const packet of this.#_packets) {
+            totalBytes += packet.getDataSize();
+        }
+        if (this.#_currentPacket) {
+            totalBytes += this.#_currentPacket.getDataSize();
+        }
+        return totalBytes;
+    }
+
     /*@devdoc
      *  Gets the type of packets in the list.
      *  @returns {PacketTypeValue} The type of packets in the list.
