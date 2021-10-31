@@ -11,6 +11,7 @@
 //
 
 import AssignmentClient from "./domain/AssignmentClient";
+import MyAvatarInterface from "./domain/interfaces/MyAvatarInterface";
 import NodeType from "./domain/networking/NodeType";
 
 
@@ -33,6 +34,9 @@ import NodeType from "./domain/networking/NodeType";
  *  @property {AvatarMixer~onStateChanged|null} onStateChanged - Sets a single function to be called when the state of the
  *      avatar mixer changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
+ *
+ *  @property {MyAvatarInterface} myAvatar - Properties and methods for using the user client's avatar.
+ *      <em>Read-only.</em>
  */
 class AvatarMixer extends AssignmentClient {
     // C++  Application.cpp
@@ -69,8 +73,24 @@ class AvatarMixer extends AssignmentClient {
      *      state.
      */
 
+    /*@sdkdoc
+     *  Properties and methods for retrieving and updating the local avatar's data.
+     *  @typedef {object} MessageMixer.MyAvatar
+     */
+
+
+    #_myAvatarInterface;
+
+
     constructor(contextID: number) {
         super(contextID, NodeType.AvatarMixer);
+
+        this.#_myAvatarInterface = new MyAvatarInterface(contextID);
+    }
+
+
+    get myAvatar(): MyAvatarInterface {
+        return this.#_myAvatarInterface;
     }
 
 }
