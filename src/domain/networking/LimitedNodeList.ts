@@ -624,15 +624,14 @@ class LimitedNodeList {
         return false;
     };
 
+
     /*@devdoc
      *  Resets the NodeList, closing all connections and deleting all node data.
      *  @function LimitedNodeList.reset
      *  @type {Slot}
      *  @param {string} reason - The reason for resetting.
      */
-    // eslint-disable-next-line
-    // @ts-ignore
-    reset(reason: string): void {  // eslint-disable-line @typescript-eslint/no-unused-vars
+    reset(reason: string): void {
         // C++  void reset(QString reason)
         // Cannot declare this Slot function as an arrow function because derived NodeList class calls this function.
         this.#eraseAllNodes(reason);

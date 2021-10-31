@@ -54,7 +54,7 @@ class AvatarManager extends AvatarHashMap {
 
 
     /*@devdoc
-     *  Updates the avatar mixer with the latest local avatar data, if it is time to do so.
+     *  Updates the avatar mixer with the latest user client avatar data, if at least 20ms has elapsed since the last update.
      */
     updateMyAvatar(/* deltaTime: number */): void {
         // C++  void AvatarManager::updateMyAvatar(float deltaTime)

@@ -270,7 +270,7 @@ class NodeList extends LimitedNodeList {
 
     /*@devdoc
      *  Checks whether an address is belongs to the domain or a node. Used as a {@link Socket~connectionCreationFilterOperator}.
-     *  @function LimitedNodeList.sockAddrBelongsToNode
+     *  @function NodeList.sockAddrBelongsToNode
      *  @param {SockAddr} sockAddr - The address to check.
      *  @returns {boolean} <code>true</code> if the address belongs to the domain or a node, <code>false</code> if it doesn't.
      */
