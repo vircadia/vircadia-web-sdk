@@ -378,7 +378,8 @@ class DomainServer {
         // C++  void Application::nodeActivated(Node* node)
         const nodeType = node.getType();
 
-        // AudioMixer node is handled in AudioMixer.ts.
+        // AudioMixer node is handled in AudioClient.ts.
+        // AvatarMixer node is handled in AvatarManager.ts.
 
         if (nodeType === NodeType.AssetServer) {
             console.warn("DomainServer: AssetServer support not implemented!");
@@ -389,11 +390,6 @@ class DomainServer {
             console.warn("DomainServer: EntityServer support not implemented!");
 
             // WEBRTC TODO: Address further code - for EntityServer node.
-
-        } else if (nodeType === NodeType.AvatarMixer) {
-            console.warn("DomainServer: AvatarMixer support not implemented!");
-
-            // WEBRTC TODO: Address further code - for AvatarMixer node.
 
         }
 
