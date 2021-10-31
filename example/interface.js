@@ -17,9 +17,16 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
     // Shared context.
     let contextID = -1;
 
+    // API objects.
+    let domainServer = null;
+    let audioMixer = null;
+    let avatarMixer = null;
+    let messageMixer = null;
+
+
     // Domain Server.
     (function () {
-        const domainServer = new DomainServer();
+        domainServer = new DomainServer();
         contextID = domainServer.contextID;
 
         const statusText = document.getElementById("domainStatus");
@@ -56,7 +63,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
 
     // Audio Mixer.
     (function () {
-        const audioMixer = new AudioMixer(contextID);
+        audioMixer = new AudioMixer(contextID);
 
         const statusText = document.getElementById("audioMixerStatus");
         const audioElement = document.getElementById("audioElement");
@@ -117,7 +124,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
 
     // Avatar Mixer.
     (function () {
-        const avatarMixer = new AvatarMixer(contextID);
+        avatarMixer = new AvatarMixer(contextID);
 
         const statusText = document.getElementById("avatarMixerStatus");
 
@@ -131,7 +138,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
 
     // Message Mixer.
     (function () {
-        const messageMixer = new MessageMixer(contextID);
+        messageMixer = new MessageMixer(contextID);
 
         const statusText = document.getElementById("messageMixerStatus");
         const messagesChannel = document.getElementById("messagesChannel");
@@ -171,6 +178,48 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
             }
         }
         messageMixer.messageReceived.connect(onMessageReceived);
+
+    }());
+
+    // Game loop.
+    (function () {
+        const MS_PER_S = 1000;
+        const TARGET_GAME_RATE = 10;  // FPS
+        const TARGET_INTERVAL = MS_PER_S / TARGET_GAME_RATE;  // ms
+        const MIN_TIMEOUT = 5;  // ms
+        let gameRate = 0;  // FPS
+        let gameLoopStart = Date.now();
+        const gameRateValue = document.getElementById("gameRateValue");
+        let gameLoopTimer = null;
+
+        const gameLoop = () => {
+            const now = Date.now();
+            gameRate = MS_PER_S / (now - gameLoopStart);
+            gameLoopStart = now;
+            gameRateValue.value = gameRate.toFixed(1);
+
+            // Update avatar data.
+            avatarMixer.myAvatar.update();
+
+            const timeout = Math.max(TARGET_INTERVAL - (Date.now() - gameLoopStart), MIN_TIMEOUT);
+            gameLoopTimer = setTimeout(gameLoop, timeout);
+        };
+
+        const connectButton = document.getElementById("domainConnectButton");
+        connectButton.addEventListener("click", () => {
+            if (gameLoopTimer === null) {
+                gameLoopTimer = setTimeout(gameLoop, 0);
+            }
+        });
+
+        const disconnectButton = document.getElementById("domainDisconnectButton");
+        disconnectButton.addEventListener("click", () => {
+            if (gameLoopTimer !== null) {
+                clearTimeout(gameLoopTimer);
+                gameLoopTimer = null;
+                gameRateValue.value = "";
+            }
+        });
 
     }());
 

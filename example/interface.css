@@ -37,12 +37,20 @@ input {
     width: 160px;
 }
 
+    input.narrow {
+        width: 60px;
+    }
+
     input.medium {
         width: 250px;
     }
 
     input.wide {
         width: 480px;
+    }
+
+    input.align-right {
+        text-align: right;
     }
 
     input:read-only {
