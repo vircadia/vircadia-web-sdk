@@ -22,9 +22,14 @@ import ContextManager from "./shared/ContextManager";
  *  <p>C++: <code>AvatarManager</code></p>
  *  @class AvatarManager
  *  @param {number} contextID - The {@link ContextManager} context ID.
+ *  @property {string} contextItemType="AvatarManager" - The type name for use with the {@link ContextManager}.
+ *      <p><em>Static. Read-only.</em></p>
  */
 class AvatarManager extends AvatarHashMap {
     // C++  class AvatarManager : public AvatarHashMap
+
+    static readonly contextItemType = "AvatarManager";
+
 
     // Context.
     #_nodeList;

@@ -9,6 +9,7 @@
 //
 
 import AvatarManager from "../AvatarManager";
+import ContextManager from "../shared/ContextManager";
 
 
 /*@sdkdoc
@@ -20,21 +21,14 @@ import AvatarManager from "../AvatarManager";
 class MyAvatarInterface {
     // C++  The user scripting interface for the MyAvatar class.
 
+    // @ts-ignore
     #_avatarManager;
 
 
     constructor(contextID: number) {
-        this.#_avatarManager = new AvatarManager(contextID);
+        this.#_avatarManager = ContextManager.get(contextID, AvatarManager) as AvatarManager;
     }
 
-
-    /*@sdkdoc
-     *  Updates the avatar mixer with the latest user client avatar data, if at least 20ms has elapsed since the last update.
-     *  <p>Call this method periodically to keep the avatar mixer up to date.</p>
-     */
-    update(): void {
-        this.#_avatarManager.updateMyAvatar();
-    }
 
 }
 

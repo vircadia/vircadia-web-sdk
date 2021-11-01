@@ -198,8 +198,8 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
             gameLoopStart = now;
             gameRateValue.value = gameRate.toFixed(1);
 
-            // Update avatar data.
-            avatarMixer.myAvatar.update();
+            // Update the audio mixer with latest user client avatar data.
+            avatarMixer.update();
 
             const timeout = Math.max(TARGET_INTERVAL - (Date.now() - gameLoopStart), MIN_TIMEOUT);
             gameLoopTimer = setTimeout(gameLoop, timeout);

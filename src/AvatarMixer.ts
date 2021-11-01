@@ -11,8 +11,10 @@
 //
 
 import AssignmentClient from "./domain/AssignmentClient";
+import AvatarManager from "./domain/AvatarManager";
 import MyAvatarInterface from "./domain/interfaces/MyAvatarInterface";
 import NodeType from "./domain/networking/NodeType";
+import ContextManager from "./domain/shared/ContextManager";
 
 
 /*@sdkdoc
@@ -79,11 +81,19 @@ class AvatarMixer extends AssignmentClient {
      */
 
 
+    #_avatarManager;
     #_myAvatarInterface;
 
 
     constructor(contextID: number) {
         super(contextID, NodeType.AvatarMixer);
+
+        // Context
+        ContextManager.set(contextID, AvatarManager, contextID);
+        this.#_avatarManager = ContextManager.get(contextID, AvatarManager) as AvatarManager;
+
+        // C++  void Application::init()
+        this.#_avatarManager.init();
 
         this.#_myAvatarInterface = new MyAvatarInterface(contextID);
     }
@@ -91,6 +101,19 @@ class AvatarMixer extends AssignmentClient {
 
     get myAvatar(): MyAvatarInterface {
         return this.#_myAvatarInterface;
+    }
+
+    get avatarList(): AvatarListInterface {
+        return this.#_avatarListInterface;
+    }
+
+
+    /*@sdkdoc
+     *  Game loop update method that should be called multiple times per second to keep the avatar mixer up to date with user
+     *  client avatar state.
+     */
+    update(): void {
+        this.#_avatarManager.updateMyAvatar();
     }
 
 }
