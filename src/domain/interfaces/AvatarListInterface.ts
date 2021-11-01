@@ -15,10 +15,10 @@ import Uuid from "../shared/Uuid";
 
 
 /*@sdkdoc
- *  The <code>AvatarListInterface</code> namespace provides facilities for interacting with other avatars in the domain (i.e.,
- *  avatars other than the user client's). It is provided as the <code>avatarList</code> property of the {@link AvatarMixer}
- *  class.
+ *  The <code>AvatarListInterface</code> namespace provides facilities for interacting with avatars in the domain. It is
+ *  provided as the <code>avatarList</code> property of the {@link AvatarMixer} class.
  *  @namespace AvatarListInterface
+ *  @property {number} count - The number of avatars the user client knows about in the domain, including the user client's.
  *  @property {Signal<AvatarListInterface~avatarAdded>} avatarAdded - Triggered when an avatar is added.
  *  @property {Signal<AvatarListInterface~avatarRemoved>} avatarRemoved - Triggered when an avatar is removed.
  */
@@ -31,6 +31,21 @@ class AvatarListInterface {
 
     constructor(contextID: number) {
         this.#_avatarManager = ContextManager.get(contextID, AvatarManager) as AvatarManager;
+    }
+
+
+    get count(): number {
+        return this.#_avatarManager.getAvatarCount();
+    }
+
+
+    /*@sdkdoc
+     * Gets the IDs of all avatars the use client knows about in the domain. The user client's avatar is included as a
+     * <code>null</code> value.
+     * @returns {Array<Uuid|null>} The IDs of all avatars in the domain.
+     */
+    getAvatarIDs(): Array<Uuid | null> {
+        return this.#_avatarManager.getAvatarIdentifiers();
     }
 
 
@@ -52,16 +67,6 @@ class AvatarListInterface {
      */
     get avatarRemoved(): Signal {
         return this.#_avatarManager.avatarRemoved;
-    }
-
-
-    /*@sdkdoc
-     * Gets the IDs of all avatars the use client knows about in the domain. The user client's avatar is included as a
-     * <code>null</code> value.
-     * @returns {Array<Uuid|null>} The IDs of all avatars in the domain.
-     */
-    getAvatarIdentitifiers(): Array<Uuid | null> {
-        return this.#_avatarManager.getAvatarIdentifiers();
     }
 
 }

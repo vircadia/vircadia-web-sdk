@@ -98,6 +98,15 @@ class AvatarHashMap {
     }
 
     /*@devdoc
+     *  Gets the number of avatars the user client knows about in the domain, including the user client's.
+     *  @returns {number} The number of avatars the user client knows about in the domain.
+     */
+    getAvatarCount(): number {
+        // C++  N/A
+        return this._avatarHash.size;
+    }
+
+    /*@devdoc
      * Gets the IDs of all avatars the user client knows about in the domain. The user client's avatar is included as a
      * <code>null</code> value.
      * @returns {Uuid[]} The IDs of all avatars in the domain.
