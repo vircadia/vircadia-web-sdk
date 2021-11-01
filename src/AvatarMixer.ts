@@ -12,6 +12,7 @@
 
 import AssignmentClient from "./domain/AssignmentClient";
 import AvatarManager from "./domain/AvatarManager";
+import AvatarListInterface from "./domain/interfaces/AvatarListInterface";
 import MyAvatarInterface from "./domain/interfaces/MyAvatarInterface";
 import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
@@ -38,6 +39,9 @@ import ContextManager from "./domain/shared/ContextManager";
  *      <em>Write-only.</em>
  *
  *  @property {MyAvatarInterface} myAvatar - Properties and methods for using the user client's avatar.
+ *      <em>Read-only.</em>
+ *  @property {AvatarListInterface} avatarList - Properties and methods for using the other of avatars in the domain (i.e.,
+ *      avatars other than the user client's).
  *      <em>Read-only.</em>
  */
 class AvatarMixer extends AssignmentClient {
@@ -83,6 +87,7 @@ class AvatarMixer extends AssignmentClient {
 
     #_avatarManager;
     #_myAvatarInterface;
+    #_avatarListInterface;
 
 
     constructor(contextID: number) {
@@ -96,6 +101,7 @@ class AvatarMixer extends AssignmentClient {
         this.#_avatarManager.init();
 
         this.#_myAvatarInterface = new MyAvatarInterface(contextID);
+        this.#_avatarListInterface = new AvatarListInterface(contextID);
     }
 
 
