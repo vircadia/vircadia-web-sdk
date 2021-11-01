@@ -9,11 +9,13 @@
 //
 
 import MyAvatar from "./avatar/MyAvatar";
+import AvatarData, { KillAvatarReason } from "./avatars/AvatarData";
 import AvatarHashMap from "./avatars/AvatarHashMap";
 import Node from "./networking/Node";
 import NodeList from "./networking/NodeList";
 import NodeType from "./networking/NodeType";
 import ContextManager from "./shared/ContextManager";
+import Uuid from "./shared/Uuid";
 
 
 /*@devdoc
@@ -32,6 +34,7 @@ class AvatarManager extends AvatarHashMap {
 
 
     // Context.
+    #_contextID;
     #_nodeList;
 
 
@@ -46,7 +49,8 @@ class AvatarManager extends AvatarHashMap {
 
     constructor(contextID: number) {
         // C++  AvatarManager(QObject* parent = 0);
-        super();
+        super(contextID);
+        this.#_contextID = contextID;
 
         // Context
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
@@ -57,6 +61,18 @@ class AvatarManager extends AvatarHashMap {
         this.#_nodeList.uuidChanged.connect(this.#_myAvatar.setSessionUUID);
     }
 
+
+    /*@devdoc
+     *  Initializes the <code>AvatarManager</code>.
+     */
+    init(): void {
+        // void init()
+        this.#_myAvatar.init();
+        const MY_AVATAR_KEY = new Uuid(Uuid.NULL);
+        this._avatarHash.set(MY_AVATAR_KEY, this.#_myAvatar);
+
+        // C++ rendering code not relevant.
+    }
 
     /*@devdoc
      *  Updates the avatar mixer with the latest user client avatar data, if at least 20ms has elapsed since the last update.
@@ -113,6 +129,55 @@ class AvatarManager extends AvatarHashMap {
         // Transmit a "sendAll" packet to the AvatarMixer we just connected to.
         this.#_myAvatar.sendAvatarDataPacket(true);
     };
+
+    /*@devdoc
+     *  Clears out the data on avatars other than the user client's.
+     */
+    override clearOtherAvatars(): void {
+        // C++  void clearOtherAvatars()
+
+        // WEBRTC TODO: Address further C++ code - Clear look-at target avatar.
+
+        for (const [key, value] of this._avatarHash.entries()) {
+            if (value !== this.#_myAvatar) {
+                this._avatarHash.delete(key);  // eslint-disable-line @typescript-eslint/dot-notation
+                this.handleRemovedAvatar(value);
+            }
+        }
+    }
+
+
+    protected override newSharedAvatar(sessionUUID: Uuid): AvatarData {
+        // C++  AvatarData* newSharedAvatar(const QUuid& sessionUUID)
+        const otherAvatar = new AvatarData(this.#_contextID);
+        otherAvatar.setSessionUUID(sessionUUID);
+
+        // C++ rendering code not relevant.
+
+        return otherAvatar;
+    }
+
+    protected override addAvatar(sessionUUID: Uuid /* , mixerWeakPointer: Node */): AvatarData {
+        // C++  Avatar* addAvatar(const QUuid& sessionUUID, const Node* mixerWeakPointer)
+        const avatar = super.addAvatar(sessionUUID /* , mixerWeakPointer */);
+
+        // C++ rendering code not relevant.
+
+        return avatar;
+    }
+
+    protected override handleRemovedAvatar(removedAvatar: AvatarData, removalReason = KillAvatarReason.NoReason): void {
+        // C++  void handleRemovedAvatar(const Avatar* removedAvatar,
+        //          KillAvatarReason removalReason = KillAvatarReason::NoReason);
+
+        super.handleRemovedAvatar(removedAvatar, removalReason);
+
+        // WEBRTC TODO: Address further C++ code - grabs, die, physics, orb.
+
+        // WEBRTC TODO: Address further C++ code - remove avatar entities from tree and scene.
+
+    }
+
 
 }
 

@@ -22,6 +22,27 @@ import AvatarData from "../avatars/AvatarData";
 class Avatar extends AvatarData {
     // C++  class Avatar : public AvatarData, public ModelProvider, public MetaModelPayload
 
+    #_initialized = false;
+
+
+    /*@devdoc
+     *  Marks the avatar as having been initialized.
+     */
+    init(): void {
+        // C++  void init()
+        // No call to getHead().init() because it is an empty method.
+        this.#_initialized = true;
+    }
+
+    /*@devdoc
+     *  Gets whether the avatar has been initialized.
+     *  @returns {boolean} <code>true</code> if the avatar has been initialized, <code>false</code> if it hasn't.
+     */
+    isInitialized(): boolean {
+        // C++  bool isInitialized()
+        return this.#_initialized;
+    }
+
 }
 
 export default Avatar;

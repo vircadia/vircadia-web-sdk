@@ -34,6 +34,23 @@ enum IdentityFlag {
     verificationFailed = 0x4
 }
 
+/*@devdoc
+ *  The <code>KillAvatarReason</code> namespace provides reasons that an avatar is killed.
+ *  @namespace IdentityFlag
+ *  @property {number} NoReason=0 - No reason. <em>Read-only.</em>
+ *  @property {number} AvatarDisconnected=1 - Disconnected.<em>Read-only.</em>
+ *  @property {number} AvatarIgnored=2 - Avatar is being ignored.<em>Read-only.</em>
+ *  @property {number} TheirAvatarEnteredYourBubble=3 - Their avatar entered your bubble.<em>Read-only.</em>
+ *  @property {number} YourAvatarEnteredTheirBubble=4 - Your avatar entered their bubble.<em>Read-only.</em>
+ */
+enum KillAvatarReason {
+    NoReason = 0,
+    AvatarDisconnected,
+    AvatarIgnored,
+    TheirAvatarEnteredYourBubble,
+    YourAvatarEnteredTheirBubble
+}
+
 
 /*@devdoc
  *  The <code>AvatarData</code> class handles the avatar data that is written to and read from Vircadia protocol packets.
@@ -179,4 +196,4 @@ class AvatarData extends SpatiallyNestable {
 }
 
 export default AvatarData;
-export { IdentityFlag };
+export { IdentityFlag, KillAvatarReason };
