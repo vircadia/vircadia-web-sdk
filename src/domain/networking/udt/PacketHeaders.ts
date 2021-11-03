@@ -187,7 +187,8 @@ const enum PacketTypeValue {
  *  @property {PacketType} AssignmentClientStatus - <code>27</code>
  *  @property {PacketType} NoisyMute - <code>28</code>
  *  @property {PacketType} AvatarIdentity - <code>29</code> - The user client sends this to the Avatar Mixer to update it with
- *      current user avatar identity information.
+ *      current user avatar identity information. The Avatar Mixer sends this to the user client to update it with identify
+ *      information for avatars in the domain.
  *      {@link PacketScribe.AvatarIdentityDetails}.
  *  @property {PacketType} NodeIgnoreRequest - <code>30</code>
  *  @property {PacketType} DomainConnectRequest - <code>31</code> - The user client sends this to the Domain Server to initiate

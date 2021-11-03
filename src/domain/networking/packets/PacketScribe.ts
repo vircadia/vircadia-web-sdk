@@ -50,6 +50,8 @@ import SelectedAudioFormat from "./SelectedAudioFormat";
  *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
  *  @property {function} DomainConnectionDenied.read -
  *      {@link PacketScribe.DomainConnectionDenied&period;read|DomainConnectionDenied&period;read}
+ *  @property {function} AvatarIdentity.read -
+ *      {@link PacketScribe.AvatarIdentity&period;read|AvatarIdentity&period;read}
  *  @property {function} AvatarIdentity.write -
  *      {@link PacketScribe.AvatarIdentity&period;write|AvatarIdentity&period;write}
  *  @property {function} DomainConnectRequest.write -

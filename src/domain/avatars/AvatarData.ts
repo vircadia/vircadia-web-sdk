@@ -70,7 +70,6 @@ class AvatarData extends SpatiallyNestable {
     // @ts-ignore
     #_lastToByteArray = 0;
 
-    #_attachmentData = [];  // WEBRTC TODO: Address further C++ code - avatar attachments.
     #_displayName = "";
     #_sessionDisplayName = "";
     #_lookAtSnappingEnabled = true;
@@ -149,7 +148,6 @@ class AvatarData extends SpatiallyNestable {
         const packetList = PacketScribe.AvatarIdentity.write({
             sessionUUID: this.getSessionUUID(),
             identitySequenceNumber: this.#_identitySequenceNumber.value,
-            attachmentData: this.#_attachmentData,
             displayName: this.#_displayName,
             sessionDisplayName: this.#_sessionDisplayName,
             isReplicated: this.#_isReplicated,

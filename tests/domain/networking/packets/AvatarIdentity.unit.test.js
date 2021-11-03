@@ -28,7 +28,6 @@ describe("AvatarIdentity - unit tests", () => {
         const packetList = AvatarIdentity.write({
             sessionUUID: new Uuid(217897985291723272451165858623432009288n),
             identitySequenceNumber: 2,
-            attachmentData: [],
             displayName: "mydisplayname",
             sessionDisplayName: null,
             isReplicated: false,
@@ -49,6 +48,66 @@ describe("AvatarIdentity - unit tests", () => {
 
         expect(buffer2hex(packet.getMessageData().buffer.slice(0, packet.getMessageData().dataPosition))).toBe(EXPECTED_PACKET);
         expect(packet.getMessageData().dataPosition).toBe(EXPECTED_PACKET.length / 2);
+    });
+
+    test("Can read a single-avatar AvatarIdentity  message", () => {
+        // eslint-disable-next-line max-len
+        const RECEIVED_MESSAGE = "7d980fa83d7d43b5808c9e5883d89ba900000003000000000000001a006d00790064006900730070006c00610079006e0061006d00650000001a006d00790064006900730070006c00610079006e0061006d006500000002";
+        const MESSAGE_START = 0;
+
+        const arrayBuffer = new ArrayBuffer(RECEIVED_MESSAGE.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(RECEIVED_MESSAGE.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer, MESSAGE_START);
+
+        const avatarIdentityDetails = AvatarIdentity.read(dataView);
+        expect(avatarIdentityDetails).toHaveLength(1);
+
+        const avatarIdentity = avatarIdentityDetails[0];
+        expect(avatarIdentity.sessionUUID.stringify()).toBe("7d980fa8-3d7d-43b5-808c-9e5883d89ba9");
+        expect(avatarIdentity.identitySequenceNumber).toBe(3);
+        expect(avatarIdentity.displayName).toBe("mydisplayname");
+        expect(avatarIdentity.sessionDisplayName).toBe("mydisplayname");
+        expect(avatarIdentity.isReplicated).toBe(false);
+        expect(avatarIdentity.lookAtSnapping).toBe(true);
+        expect(avatarIdentity.verificationFailed).toBe(false);
+    });
+
+    // "Can read a multi-avatar AvatarIdentity packet"
+    test("Can read a multi-avatar AvatarIdentity  message", () => {
+        // eslint-disable-next-line max-len
+        const RECEIVED_MESSAGE = "7d980fa83d7d43b5808c9e5883d89ba900000003000000000000001a006d00790064006900730070006c00610079006e0061006d00650000001a006d00790064006900730070006c00610079006e0061006d00650000000252973cdb8afd40168c4c7ff7d4dc9988000000050000000000000020006f00740068006500720064006900730070006c00610079006e0061006d006500000020006f00740068006500720064006900730070006c00610079006e0061006d006500000002";
+        const MESSAGE_START = 0;
+
+        const arrayBuffer = new ArrayBuffer(RECEIVED_MESSAGE.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(RECEIVED_MESSAGE.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer, MESSAGE_START);
+
+        const avatarIdentityDetails = AvatarIdentity.read(dataView);
+        expect(avatarIdentityDetails).toHaveLength(2);
+
+        let avatarIdentity = avatarIdentityDetails[0];
+        expect(avatarIdentity.sessionUUID.stringify()).toBe("7d980fa8-3d7d-43b5-808c-9e5883d89ba9");
+        expect(avatarIdentity.identitySequenceNumber).toBe(3);
+        expect(avatarIdentity.displayName).toBe("mydisplayname");
+        expect(avatarIdentity.sessionDisplayName).toBe("mydisplayname");
+        expect(avatarIdentity.isReplicated).toBe(false);
+        expect(avatarIdentity.lookAtSnapping).toBe(true);
+        expect(avatarIdentity.verificationFailed).toBe(false);
+
+        avatarIdentity = avatarIdentityDetails[1];
+        expect(avatarIdentity.sessionUUID.stringify()).toBe("52973cdb-8afd-4016-8c4c-7ff7d4dc9988");
+        expect(avatarIdentity.identitySequenceNumber).toBe(5);
+        expect(avatarIdentity.displayName).toBe("otherdisplayname");
+        expect(avatarIdentity.sessionDisplayName).toBe("otherdisplayname");
+        expect(avatarIdentity.isReplicated).toBe(false);
+        expect(avatarIdentity.lookAtSnapping).toBe(true);
+        expect(avatarIdentity.verificationFailed).toBe(false);
     });
 
 });
