@@ -11,6 +11,7 @@
 import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
 import NodeType from "../networking/NodeType";
+import { AvatarIdentityDetails } from "../networking/packets/AvatarIdentity";
 import PacketScribe from "../networking/packets/PacketScribe";
 import SequenceNumber from "../networking/udt/SequenceNumber";
 import ContextManager from "../shared/ContextManager";
@@ -166,6 +167,24 @@ class AvatarData extends SpatiallyNestable {
 
         this.#_identityDataChanged = false;
         return packetList.getDataSize();
+    }
+
+    /*@devdoc
+     *  Processes the information that has been read from an AvatarIdentity packet.
+     *  @param {AvatarIdentityDetails} info - The information that has been ready from the AvatarIDentity packet.
+     *  @param {Object<boolean>} identifyChanged - Return value that is set to <code>true</code> if identity data has changed,
+     *      <code>false</code> if it hasn't.
+     *  @param {Object<boolean>} displayNameChanged - Return value that is set to <code>true</code> if the avatar's display name
+     *      has changed, <code>false</code> if it hasn't.
+     */
+    // @ts-ignore
+    processAvatarIdentity(info: AvatarIdentityDetails, identityChanged: { value: boolean },  // eslint-disable-line
+        // @ts-ignore
+            displayNameChanged: { value: boolean }): void {  // eslint-disable-line
+        // C++  void processAvatarIdentity(QDataStream & packetStream, bool& identityChanged, bool& displayNameChanged)
+
+        // WEBRTC TODO: Address further C++ code.
+
     }
 
     /*@devdoc

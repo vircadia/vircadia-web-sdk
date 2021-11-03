@@ -162,6 +162,26 @@ class NodeList extends LimitedNodeList {
         return this.#_nodeTypesOfInterest;
     }
 
+    // eslint-disable-next-line
+    // @ts-ignore
+    isIgnoringNode(nodeID: Uuid): boolean {  // eslint-disable-line
+        //  C++ bool isIgnoringNode(const QUuid& nodeID)
+
+        // WEBRTC TODO: Address further C++ code - ignore specified nodes.
+
+        return false;
+    }
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    getRequestsDomainListData(): boolean {  // eslint-disable-line
+        // C++  bool getRequestsDomainListData()
+
+        // WEBRTC TODO: Address further C++ code - request domain list data.
+
+        return false;
+    }
+
 
     /*@devdoc
      *  Processes a {@link PacketType(1)|DomainList} message received from the domain server.

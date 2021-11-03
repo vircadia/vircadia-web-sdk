@@ -12,9 +12,13 @@ import AvatarData, { KillAvatarReason } from "./AvatarData";
 import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
 import { NodeTypeValue } from "../networking/NodeType";
+import PacketReceiver from "../networking/PacketReceiver";
+import ReceivedMessage from "../networking/ReceivedMessage";
+import { PacketTypeValue } from "../networking/udt/PacketHeaders";
 import ContextManager from "../shared/ContextManager";
 import Uuid from "../shared/Uuid";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
+import PacketScribe from "../networking/packets/PacketScribe";
 
 
 /*@devdoc
@@ -34,7 +38,7 @@ class AvatarHashMap {
         / AvatarHashMap.#CLIENT_TO_AVATAR_MIXER_BROADCAST_FRAMES_PER_SECOND;
 
 
-    protected _avatarHash = new Map<Uuid | null, AvatarData>();
+    protected _avatarHash = new Map<bigint, AvatarData>();  // Map<Uuid.value(), AvatarData>
 
 
     // Context.
@@ -54,7 +58,15 @@ class AvatarHashMap {
         this.#_contextID = contextID;
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
 
-        // WEBRTC TODO: Address further C++ code - packet handling.
+        const packetReceiver = this.#_nodeList.getPacketReceiver();
+
+        // WEBRTC TODO: Address further C++ code - BulkAvatarData packet.
+        // WEBRTC TODO: Address further C++ code - KillAvatar packet.
+
+        packetReceiver.registerListener(PacketTypeValue.AvatarIdentity,
+            PacketReceiver.makeSourcedListenerReference(this.processAvatarIdentityPacket));
+
+        // WEBRTC TODO: Address further C++ code - BulkAvatarTraits packet.
 
         // WEBRTC TODO: Address further C++ code - NodeList.uuidChanged().
 
@@ -108,44 +120,113 @@ class AvatarHashMap {
 
     /*@devdoc
      * Gets the IDs of all avatars the user client knows about in the domain. The user client's avatar is included as a
-     * <code>null</code> value.
+     * <code>Uuid.NULL</code> value.
      * @returns {Uuid[]} The IDs of all avatars in the domain.
      */
-    getAvatarIdentifiers(): Array<Uuid | null> {
+    getAvatarIdentifiers(): Array<Uuid> {
         // C++  QVector<QUuid> getAvatarIdentifiers()
-        return [...this._avatarHash.keys()];
+        return [...this._avatarHash.keys()].map((uuid) => {
+            return new Uuid(uuid);
+        });
     }
+
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|AvatarIdentity} message that has been received.
+     *  @function AvatarHashMap.processAvatarIdentityPacket
+     *  @type {Slot}
+     *  @param {ReceivedMessage} receivedMessage - The received {@link PacketType(1)|AvatarIdentity} message.
+     *  @param {Node} sendingNode - The sending node.
+     */
+    // Listener
+    processAvatarIdentityPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {
+        // C++  void processAvatarIdentityPacket(ReceivedMessage* message, node* sendingNode)
+
+        const avatarIdentityDetailsList = PacketScribe.AvatarIdentity.read(message.getMessage());
+        for (const avatarIdentityDetails of avatarIdentityDetailsList) {
+            let identityUUID = avatarIdentityDetails.sessionUUID;
+            if (identityUUID.value() !== Uuid.NULL) {
+
+                // Replace MyAvatar's UUID with null.
+                const me = this._avatarHash.get(Uuid.NULL);
+                if (me !== undefined && identityUUID.value() === me.getSessionUUID().value()) {
+                    identityUUID = new Uuid(Uuid.NULL);
+                }
+
+                // Process if not an ignored avatar or have requested domain list data.
+                if (identityUUID !== null && (!this.#_nodeList.isIgnoringNode(identityUUID)
+                        || this.#_nodeList.getRequestsDomainListData())) {
+                    const isNewAvatar = false;
+                    const avatar: AvatarData = this.newOrExistingAvatar(identityUUID, sendingNode, { value: isNewAvatar });
+                    const identityChanged = false;
+                    const displayNameChanged = false;
+                    avatar.processAvatarIdentity(avatarIdentityDetails, { value: identityChanged },
+                        { value: displayNameChanged });
+                    // AvatarReplicas per the C++ is not implemented because that is for load testing.
+                }
+
+            } else {
+                console.log("[avatars] Refusing to process identity packet with null avatar ID.");
+            }
+        }
+    };
 
 
     protected findAvatar(sessionUUID: Uuid): AvatarData | null {
         // C++  AvatarData* findAvatar(const QUuid& sessionUUID)
-        const avatar = this._avatarHash.get(sessionUUID);
+        const avatar = this._avatarHash.get(sessionUUID.value());
         return avatar ? avatar : null;
     }
 
     protected newSharedAvatar(sessionUUID: Uuid): AvatarData {
         // C++  AvatarData* newSharedAvatar(const QUuid& sessionUUID)
+        console.debug("$$$$$$$ AvatarHashMap.newSharedAvatar()");
         const avatarData = new AvatarData(this.#_contextID);
         avatarData.setSessionUUID(sessionUUID);
         return avatarData;
     }
 
-    protected addAvatar(sessionUUID: Uuid /* , mixerWeakPointer: Node */): AvatarData {
+    // eslint-disable-next-line
+    // @ts-ignore
+    protected addAvatar(sessionUUID: Uuid, mixerWeakPointer: Node | null): AvatarData {    // eslint-disable-line
         // C++  Avatar* addAvatar(const QUuid& sessionUUID, const Node* mixerWeakPointer)
+        console.debug("$$$$$$$ AvatarHashMap.addAvatar()");
         console.log("[avatars] Adding avatar with sessionUUID", sessionUUID.stringify(), "to AvatarHashMap.");
 
         const avatar = this.newSharedAvatar(sessionUUID);
         // setOwningAvatarMixer() not called because it doesn't do anything.
         // WEBRTC TODO: Address further C++ code - remove owningAvatarMixer.
 
-        this._avatarHash.set(sessionUUID, avatar);
+        this._avatarHash.set(sessionUUID.value(), avatar);
         this.#_avatarAddedEvent.emit(sessionUUID);
+        return avatar;
+    }
+
+    newOrExistingAvatar(sessionUUID: Uuid, mixerWeakPointer: Node | null, isNew: { value: boolean }): AvatarData {
+        // C++  AvatarSharedPointer newOrExistingAvatar(const QUuid& sessionUUID, const Node* mixerWeakPointer, bool& isNew)
+        console.debug("$$$$$$$ AvatarHashMap.newOrExistingAvatar() :", sessionUUID, sessionUUID.stringify());
+        console.debug("$$$$... Num avatars in hash =", this._avatarHash.size);
+        console.debug("$$$$... Avatar IDs in hash = ...");
+        for (const key of this._avatarHash.keys()) {
+            console.debug("$$.....", key);
+        }
+        let avatar = this.findAvatar(sessionUUID);
+        console.debug("$$$$... avatar =", avatar);
+        if (!avatar) {
+            avatar = this.addAvatar(sessionUUID, mixerWeakPointer);
+            console.debug("$$$$... new");
+            isNew.value = true;
+        } else {
+            console.debug("$$$$... existing");
+            isNew.value = false;
+        }
         return avatar;
     }
 
     protected handleRemovedAvatar(removedAvatar: AvatarData, removalReason = KillAvatarReason.NoReason): void {
         // C++  void handleRemovedAvatar(const Avatar* removedAvatar,
         //          KillAvatarReason removalReason = KillAvatarReason:: NoReason);
+        console.debug("$$$$$$$ AvatarHashMap.handleRemovedAvatar()");
 
         // WEBRTC TODO: Address further C++ code - avatar traits;
 
@@ -157,9 +238,9 @@ class AvatarHashMap {
 
     protected removeAvatar(sessionUUID: Uuid, removalReason: KillAvatarReason): void {
         // C++  void removeAvatar(const QUuid& sessionUUID, KillAvatarReason removalReason)
-        const removedAvatar = this._avatarHash.get(sessionUUID);
+        const removedAvatar = this._avatarHash.get(sessionUUID.value());
         if (removedAvatar) {
-            this._avatarHash.delete(sessionUUID);  // eslint-disable-line @typescript-eslint/dot-notation
+            this._avatarHash.delete(sessionUUID.value());  // eslint-disable-line @typescript-eslint/dot-notation
             this.handleRemovedAvatar(removedAvatar, removalReason);
         }
     }

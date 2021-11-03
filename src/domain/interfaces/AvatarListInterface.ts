@@ -40,11 +40,11 @@ class AvatarListInterface {
 
 
     /*@sdkdoc
-     * Gets the IDs of all avatars the use client knows about in the domain. The user client's avatar is included as a
-     * <code>null</code> value.
-     * @returns {Array<Uuid|null>} The IDs of all avatars in the domain.
+     * Gets the IDs of all avatars the use client knows about in the domain. The user client's avatar is included as the
+     * <code>Uuid.NULL</code> value.
+     * @returns {Array<Uuid>} The IDs of all avatars in the domain.
      */
-    getAvatarIDs(): Array<Uuid | null> {
+    getAvatarIDs(): Array<Uuid> {
         return this.#_avatarManager.getAvatarIdentifiers();
     }
 
