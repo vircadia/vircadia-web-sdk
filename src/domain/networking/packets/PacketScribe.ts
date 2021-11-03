@@ -12,6 +12,7 @@
 import DomainList from "./DomainList";
 import Ping from "./Ping";
 import PingReply from "./PingReply";
+import KillAvatar from "./KillAvatar";
 import MixedAudio from "./MixedAudio";
 import MicrophoneAudioNoEcho from "./MicrophoneAudioNoEcho";
 import SilentAudioFrame from "./SilentAudioFrame";
@@ -38,6 +39,8 @@ import SelectedAudioFormat from "./SelectedAudioFormat";
  *      {@link PacketScribe.Ping&period;read|Ping&period;read}
  *  @property {function} PingReply.write -
  *      {@link PacketScribe.PingReply&period;write|PingReply&period;write}
+ *  @property {function} KillAvatar.read -
+ *      {@link PacketScribe.KillAvatar&period;read|KillAvatar&period;read}
  *  @property {function} MixedAudio.read -
  *      {@link PacketScribe.MixedAudio&period;read|MixedAudio&period;read}
  *  @property {function} MicrophoneAudioNoEcho.write -
@@ -84,6 +87,7 @@ const PacketScribe = {
     DomainList,
     Ping,
     PingReply,
+    KillAvatar,
     MixedAudio,
     MicrophoneAudioNoEcho,
     SilentAudioFrame,

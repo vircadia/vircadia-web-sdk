@@ -37,7 +37,7 @@ enum IdentityFlag {
 
 /*@devdoc
  *  The <code>KillAvatarReason</code> namespace provides reasons that an avatar is killed.
- *  @namespace IdentityFlag
+ *  @namespace KillAvatarReason
  *  @property {number} NoReason=0 - No reason. <em>Read-only.</em>
  *  @property {number} AvatarDisconnected=1 - Disconnected.<em>Read-only.</em>
  *  @property {number} AvatarIgnored=2 - Avatar is being ignored.<em>Read-only.</em>

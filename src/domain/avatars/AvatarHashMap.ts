@@ -61,8 +61,9 @@ class AvatarHashMap {
         const packetReceiver = this.#_nodeList.getPacketReceiver();
 
         // WEBRTC TODO: Address further C++ code - BulkAvatarData packet.
-        // WEBRTC TODO: Address further C++ code - KillAvatar packet.
 
+        packetReceiver.registerListener(PacketTypeValue.KillAvatar,
+            PacketReceiver.makeSourcedListenerReference(this.processKillAvatar));
         packetReceiver.registerListener(PacketTypeValue.AvatarIdentity,
             PacketReceiver.makeSourcedListenerReference(this.processAvatarIdentityPacket));
 
@@ -130,6 +131,22 @@ class AvatarHashMap {
         });
     }
 
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|KillAvatar} message that has been received.
+     *  @function AvatarHashMap.processKillAvatar
+     *  @type {Slot}
+     *  @param {ReceivedMessage} receivedMessage - The received {@link PacketType(1)|KillAvatar} message.
+     *  @param {Node} sendingNode - The sending node.
+     */
+    // Listener
+    processKillAvatar = (message: ReceivedMessage /* , sendingNode: Node | null */): void => {
+        // C++  void processKillAvatar(ReceivedMessage* message, Node* sendingNode)
+
+        const killAvatarDetals = PacketScribe.KillAvatar.read(message.getMessage());
+        this.removeAvatar(killAvatarDetals.sessionUUID, killAvatarDetals.reason);
+        // AvatarReplicas per the C++ is not implemented because that is for load testing.
+    };
 
     /*@devdoc
      *  Processes a {@link PacketType(1)|AvatarIdentity} message that has been received.
