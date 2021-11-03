@@ -517,6 +517,7 @@ const PacketType = new class {
 
     readonly #_AvatarMixerPacketVersion = {
         // C++  AvatarMixerPacketVersion
+        AvatarTraitsAck: 48,
         ARKitBlendshapes: 54
     };
 
@@ -552,6 +553,8 @@ const PacketType = new class {
                 return this.#_AudioVersion.StopInjectors;
             case this.MicrophoneAudioNoEcho:
                 return this.#_AudioVersion.StopInjectors;
+            case this.BulkAvatarData:
+                return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.SilentAudioFrame:
                 return this.#_AudioVersion.StopInjectors;
             case this.DomainListRequest:
@@ -582,6 +585,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.SelectedAudioFormat:
                 return DEFAULT_VERSION;
+            case this.BulkAvatarTraits:
+                return this.#_AvatarMixerPacketVersion.AvatarTraitsAck;
 
                 // WebRTC TODO: Add other packets.
 

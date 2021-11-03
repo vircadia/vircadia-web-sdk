@@ -42,6 +42,7 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.DomainServerRemovedNode).toBe("object");
         expect(typeof PacketScribe.DomainServerRemovedNode.read).toBe("function");
         expect(typeof PacketScribe.MessagesData).toBe("object");
+        expect(typeof PacketScribe.MessagesData.read).toBe("function");
         expect(typeof PacketScribe.MessagesData.write).toBe("function");
         expect(typeof PacketScribe.MessagesSubscribe).toBe("object");
         expect(typeof PacketScribe.MessagesSubscribe.write).toBe("function");

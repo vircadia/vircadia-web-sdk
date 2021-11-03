@@ -35,7 +35,9 @@ const MessagesData = new class {
 
     /*@devdoc
      *  Reads a {@link PacketType(1)|MessagesData} multi-packet message.
-     *  returns {PacketScribe.MessagesDataDetails} The information obtained from reading the message.
+     *  @function PacketScribe.MessagesData&period;read
+     *  @read {DataView} data - The MessagesData message data to read.
+     *  @returns {PacketScribe.MessagesDataDetails} The information obtained from reading the message.
      */
     read(data: DataView): MessagesDataDetails {  /* eslint-disable-line class-methods-use-this */
         // C++  void MessagesClient::decodeMessagesPacket(ReceivedMessage* receivedMessage, QString& channel, bool& isText,

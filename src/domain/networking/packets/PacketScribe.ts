@@ -60,6 +60,8 @@ import SelectedAudioFormat from "./SelectedAudioFormat";
  *      {@link PacketScribe.DomainDisconnectRequest&period;write|DomainDisconnectRequest&period;write}
  *  @property {function} DomainServerRemovedNode.read -
  *      {@link PacketScribe.DomainServerRemovedNode&period;read|DomainServerRemovedNode&period;read}
+ *  @property {function} MessagesData.read -
+ *      {@link PacketScribe.MessagesData&period;read|MessagesData&period;read}
  *  @property {function} MessagesData.write -
  *      {@link PacketScribe.MessagesData&period;write|MessagesData&period;write}
  *  @property {function} MessagesSubscribe.write -

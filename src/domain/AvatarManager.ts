@@ -23,6 +23,7 @@ import Uuid from "./shared/Uuid";
  *  been sent data on by the avatar mixer).
  *  <p>C++: <code>AvatarManager</code></p>
  *  @class AvatarManager
+ *  @extends AvatarHashMap
  *  @param {number} contextID - The {@link ContextManager} context ID.
  *  @property {string} contextItemType="AvatarManager" - The type name for use with the {@link ContextManager}.
  *      <p><em>Static. Read-only.</em></p>
@@ -68,7 +69,7 @@ class AvatarManager extends AvatarHashMap {
     init(): void {
         // void init()
         this.#_myAvatar.init();
-        const MY_AVATAR_KEY = new Uuid(Uuid.NULL);
+        const MY_AVATAR_KEY = Uuid.NULL;
         this._avatarHash.set(MY_AVATAR_KEY, this.#_myAvatar);
 
         // C++ rendering code not relevant.
@@ -157,9 +158,9 @@ class AvatarManager extends AvatarHashMap {
         return otherAvatar;
     }
 
-    protected override addAvatar(sessionUUID: Uuid /* , mixerWeakPointer: Node */): AvatarData {
+    protected override addAvatar(sessionUUID: Uuid, mixerWeakPointer: Node): AvatarData {
         // C++  Avatar* addAvatar(const QUuid& sessionUUID, const Node* mixerWeakPointer)
-        const avatar = super.addAvatar(sessionUUID /* , mixerWeakPointer */);
+        const avatar = super.addAvatar(sessionUUID, mixerWeakPointer);
 
         // C++ rendering code not relevant.
 

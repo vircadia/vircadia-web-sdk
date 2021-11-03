@@ -19,7 +19,7 @@ import ContextManager from "./domain/shared/ContextManager";
 
 /*@sdkdoc
  *  The <code>AudioMixer</code> class provides the interface for working with audio mixer assignment clients.
- *  <p>Prerequisite: A {@link DomainServer} object must be created first in order to create the domain context.</p>
+ *  <p>Prerequisite: A {@link DomainServer} object must be created in order to set up the domain context.</p>
  *  <p>Environment: A web app using the <code>AudioMixer</code> must be served via HTTPS or from <code<localhost</code> in order
  *  for the audio to work.</p>
  *
