@@ -42,11 +42,11 @@ input {
     }
 
     input.medium {
-        width: 250px;
+        width: 260px;
     }
 
     input.wide {
-        width: 480px;
+        width: 520px;
     }
 
     input.align-right {

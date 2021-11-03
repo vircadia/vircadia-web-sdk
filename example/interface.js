@@ -127,12 +127,26 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         avatarMixer = new AvatarMixer(contextID);
 
         const statusText = document.getElementById("avatarMixerStatus");
+        const avatarsCount = document.getElementById("avatarsCount");
+        const avatarIDs = document.getElementById("avatarIDs");
 
         function onStateChanged(state) {
             statusText.value = AvatarMixer.stateToString(state);
         }
         onStateChanged(avatarMixer.state);
         avatarMixer.onStateChanged = onStateChanged;
+
+        function onAvatarsChanged() {
+            avatarsCount.value = avatarMixer.avatarList.count;
+            avatarIDs.value = avatarMixer.avatarList.getAvatarIDs()
+                .map((uuid) => {
+                    return uuid.stringify();  // eslint-disable-line @typescript-eslint/no-unsafe-return
+                })
+                .join(" ");
+        }
+        onAvatarsChanged();  // Display initial data.
+        avatarMixer.avatarList.avatarAdded.connect(onAvatarsChanged);
+        avatarMixer.avatarList.avatarRemoved.connect(onAvatarsChanged);
 
     }());
 
