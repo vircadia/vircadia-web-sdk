@@ -76,6 +76,15 @@ class AvatarManager extends AvatarHashMap {
     }
 
     /*@devdoc
+     *  Gets the user client's avatar.
+     *  @returns {MyAvatar} The user client's avatar.
+     */
+    getMyAvatar(): MyAvatar {
+        // C++  MyAvatar* getMyAvatar()
+        return this.#_myAvatar;
+    }
+
+    /*@devdoc
      *  Updates the avatar mixer with the latest user client avatar data, if at least 20ms has elapsed since the last update.
      */
     updateMyAvatar(/* deltaTime: number */): void {

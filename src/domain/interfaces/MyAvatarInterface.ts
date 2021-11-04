@@ -10,18 +10,24 @@
 
 import AvatarManager from "../AvatarManager";
 import ContextManager from "../shared/ContextManager";
+import { Signal } from "../shared/SignalEmitter";
 
 
 /*@sdkdoc
  *  The <code>MyAvatarInterface</code> namespace provides facilities for using the user client's avatar. It is provided as the
  *  <code>myAvatar</code> property of the {@link AvatarMixer} class.
  *  @namespace MyAvatarInterface
+ *
+ *  @property {string} displayName - The user client's avatar display name.
+ *  @property {Signal} displayNameChanged - Triggered when the display name changes.
+ *  @property {string} sessionDisplayName - The user client's session display name, assigned by the domain server based on the
+ *      avatar display name. It is unique among all avatars present in the domain. <em>Read-only.</em>
+ *  @property {Signal} sessionDisplayNameChanged - Triggered when the session display name changes.
  */
 // Don't document the constructor because it shouldn't be used in the SDK.
 class MyAvatarInterface {
     // C++  The user scripting interface for the MyAvatar class.
 
-    // @ts-ignore
     #_avatarManager;
 
 
@@ -29,6 +35,32 @@ class MyAvatarInterface {
         this.#_avatarManager = ContextManager.get(contextID, AvatarManager) as AvatarManager;
     }
 
+
+    get displayName(): string {
+        const displayName = this.#_avatarManager.getMyAvatar().displayName;
+        return displayName !== null ? displayName : "";
+    }
+
+    set displayName(displayName: string) {
+        if (typeof displayName !== "string") {
+            console.error("[AvatarMixer] [MyAvatar] Tried to set invalid display name!");
+            return;
+        }
+        this.#_avatarManager.getMyAvatar().displayName = displayName;
+    }
+
+    get displayNameChanged(): Signal {
+        return this.#_avatarManager.getMyAvatar().displayNameChanged;
+    }
+
+    get sessionDisplayName(): string {
+        const sessionDisplayName = this.#_avatarManager.getMyAvatar().sessionDisplayName;
+        return sessionDisplayName !== null ? sessionDisplayName : "";
+    }
+
+    get sessionDisplayNameChanged(): Signal {
+        return this.#_avatarManager.getMyAvatar().sessionDisplayNameChanged;
+    }
 
 }
 

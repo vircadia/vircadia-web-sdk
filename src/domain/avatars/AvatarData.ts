@@ -60,6 +60,12 @@ enum KillAvatarReason {
  *  @class AvatarData
  *  @extends SpatiallyNestable
  *  @param {number} contextID - The {@link ContextManager} context ID.
+ *
+ *  @property {string|null} displayName - The avatar's display name.
+ *  @property {Signal} displayNameChanged - Triggered when the avatar's display name changes.
+ *  @property {string|null} sessionDisplayName - The avatar's session display name as assigned by the avatar mixer. It is based
+ *      on the display name and is unique among all avatars present in the domain. <em>Read-only.</em>
+ *  @property {Signal} sessionDisplayNameChanged - Triggered when the avatar's session display name changes.
  */
 class AvatarData extends SpatiallyNestable {
     // C++  class AvatarData : public QObject, public SpatiallyNestable
@@ -92,8 +98,29 @@ class AvatarData extends SpatiallyNestable {
     }
 
 
+    get displayName(): string {
+        return this.#_displayName !== null ? this.#_displayName : "";
+    }
+
+    set displayName(displayName: string) {
+        this.setDisplayName(displayName);
+    }
+
+    get displayNameChanged(): Signal {
+        return this.#_displayNameChanged.signal();
+    }
+
+    get sessionDisplayName(): string {
+        return this._sessionDisplayName !== null ? this._sessionDisplayName : "";
+    }
+
+    get sessionDisplayNameChanged(): Signal {
+        return this._sessionDisplayNameChanged.signal();
+    }
+
+
     /*@devdoc
-     *  Gets the client's (avatar's) session UUID.
+     *  Gets the avatar's session UUID.
      *  @returns {Uuid} The session UUID. {@link Uuid|Uuid.AVATAR_SELF_ID} if not connected.
      */
     getSessionUUID(): Uuid {
@@ -102,7 +129,7 @@ class AvatarData extends SpatiallyNestable {
     }
 
     /*@devdoc
-     *  Sets the user client's (avatar's) session UUID.
+     *  Sets the user avatar's session UUID.
      *  @param {Uuid} sessionUUID - The session UUID. If {@link Uuid|Uuid.NULL} then the session UUID is set to
      *      {@link Uuid|Uuid.AVATAR_SELF_ID}.
      */
@@ -119,6 +146,51 @@ class AvatarData extends SpatiallyNestable {
 
         }
     }
+
+    /*@devdoc
+     *  Gets the avatar's display name.
+     *  @returns {string|null} - The avatar's display name.
+     */
+    getDisplayName(): string | null {
+        // C++  QString& getDisplayName()
+        return this.#_displayName;
+    }
+
+    /*@devdoc
+     *  Sets the avatar's display name.
+     *  @returns {string|null} - The avatar's display name.
+     */
+    setDisplayName(displayName: string | null): void {
+        // C++  void setDisplayName(const QString& displayName)
+        this.#_displayName = displayName;
+        this.#_displayNameChanged.emit();
+        this._sessionDisplayName = "";
+        this._sessionDisplayNameChanged.emit();
+
+        console.log("[avatars] Changing display name for avatar to", displayName);
+        this.markIdentityDataChanged();
+    }
+
+    /*@devdoc
+     *  Gets the avatar's session display name.
+     *  @returns {string|null} - The avatar's display name.
+     */
+    getSessionDisplayName(): string | null {
+        // C++  QString& getSessionDisplayName()
+        return this._sessionDisplayName;
+    }
+
+    /*@devdoc
+     *  Sets the avatar's session display name.
+     *  @returns {string|null} - The avatar's session display name.
+     */
+    setSessionDisplayName(sessionDisplayName: string | null): void {
+        // C++  void setSessionDisplayName(const QString& sessionDisplayName)
+        this._sessionDisplayName = sessionDisplayName;
+        this._sessionDisplayNameChanged.emit();
+        this.markIdentityDataChanged();
+    }
+
 
     /*@devdoc
      *  Sets a flag that avatar identity data has changed since the last time an AvatarIdentity packet was sent.
