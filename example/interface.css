@@ -24,7 +24,7 @@ div {
         div.row span {
             display: table-cell;
             vertical-align: top;
-            width: 80px;
+            width: 120px;
         }
 
         div.row span input {
@@ -36,6 +36,10 @@ div {
 input {
     width: 160px;
 }
+
+    input.checkbox {
+        width: 12px;
+    }
 
     input.narrow {
         width: 60px;
