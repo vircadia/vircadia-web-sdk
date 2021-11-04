@@ -197,7 +197,6 @@ class AvatarHashMap {
 
     protected newSharedAvatar(sessionUUID: Uuid): AvatarData {
         // C++  AvatarData* newSharedAvatar(const QUuid& sessionUUID)
-        console.debug("$$$$$$$ AvatarHashMap.newSharedAvatar()");
         const avatarData = new AvatarData(this.#_contextID);
         avatarData.setSessionUUID(sessionUUID);
         return avatarData;
@@ -207,7 +206,6 @@ class AvatarHashMap {
     // @ts-ignore
     protected addAvatar(sessionUUID: Uuid, mixerWeakPointer: Node | null): AvatarData {    // eslint-disable-line
         // C++  Avatar* addAvatar(const QUuid& sessionUUID, const Node* mixerWeakPointer)
-        console.debug("$$$$$$$ AvatarHashMap.addAvatar()");
         console.log("[avatars] Adding avatar with sessionUUID", sessionUUID.stringify(), "to AvatarHashMap.");
 
         const avatar = this.newSharedAvatar(sessionUUID);
@@ -221,20 +219,11 @@ class AvatarHashMap {
 
     newOrExistingAvatar(sessionUUID: Uuid, mixerWeakPointer: Node | null, isNew: { value: boolean }): AvatarData {
         // C++  AvatarSharedPointer newOrExistingAvatar(const QUuid& sessionUUID, const Node* mixerWeakPointer, bool& isNew)
-        console.debug("$$$$$$$ AvatarHashMap.newOrExistingAvatar() :", sessionUUID, sessionUUID.stringify());
-        console.debug("$$$$... Num avatars in hash =", this._avatarHash.size);
-        console.debug("$$$$... Avatar IDs in hash = ...");
-        for (const key of this._avatarHash.keys()) {
-            console.debug("$$.....", key);
-        }
         let avatar = this.findAvatar(sessionUUID);
-        console.debug("$$$$... avatar =", avatar);
         if (!avatar) {
             avatar = this.addAvatar(sessionUUID, mixerWeakPointer);
-            console.debug("$$$$... new");
             isNew.value = true;
         } else {
-            console.debug("$$$$... existing");
             isNew.value = false;
         }
         return avatar;
@@ -243,7 +232,6 @@ class AvatarHashMap {
     protected handleRemovedAvatar(removedAvatar: AvatarData, removalReason = KillAvatarReason.NoReason): void {
         // C++  void handleRemovedAvatar(const Avatar* removedAvatar,
         //          KillAvatarReason removalReason = KillAvatarReason:: NoReason);
-        console.debug("$$$$$$$ AvatarHashMap.handleRemovedAvatar()");
 
         // WEBRTC TODO: Address further C++ code - avatar traits;
 
