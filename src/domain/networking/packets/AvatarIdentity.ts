@@ -10,6 +10,7 @@
 
 import NLPacketList from "../NLPacketList";
 import PacketType from "../udt/PacketHeaders";
+import SequenceNumber from "../udt/SequenceNumber";
 import UDT from "../udt/UDT";
 import { IdentityFlag } from "../../avatars/AvatarData";
 import Uuid from "../../shared/Uuid";
@@ -17,7 +18,7 @@ import Uuid from "../../shared/Uuid";
 
 type AvatarIdentityDetails = {
     sessionUUID: Uuid,
-    identitySequenceNumber: number,
+    identitySequenceNumber: SequenceNumber,
     // No attachment data - attachments are deprecated in favor of avatar entities.
     displayName: string | null,
     sessionDisplayName: string | null,
@@ -34,7 +35,7 @@ const AvatarIdentity = new class {
      *  Information needed for {@link PacketScribe|writing} an {@link PacketType(1)|AvatarIdentity} packet.
      *  @typedef {object} PacketScribe.AvatarIdentityDetails
      *  @property {Uuid} sessionUUID - The session UUID assigned to the avatar by the domain server.
-     *  @property {number} identitySequenceNumber - The sequence number of the avatar identity. Increments each time the
+     *  @property {SequenceNumber} identitySequenceNumber - The sequence number of the avatar identity. Increments each time the
      *      AvatarIdentity data changes.
      *  @property {string|null} displayName - The avatar's display name.
      *  @property {string|null} sessionDisplayName - The avatar's session display name, assigned by the domain server. It is
@@ -60,7 +61,7 @@ const AvatarIdentity = new class {
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
         packetList.writePrimitive(info.sessionUUID);
-        packetList.writePrimitive(info.identitySequenceNumber, 4, UDT.BIG_ENDIAN);
+        packetList.writePrimitive(info.identitySequenceNumber.value, 4, UDT.BIG_ENDIAN);
 
         // AttachmentData is deprecated; just write the number of attachments as 0.
         packetList.writePrimitive(0, 4);
@@ -110,7 +111,7 @@ const AvatarIdentity = new class {
             const sessionUUID = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
             dataPosition += 16;
 
-            const identitySequenceNumber = data.getUint32(dataPosition, UDT.BIG_ENDIAN);
+            const identitySequenceNumber = new SequenceNumber(data.getUint32(dataPosition, UDT.BIG_ENDIAN));
             dataPosition += 4;
 
             // AttachmentData is deprecated, however we need to read over it in case it is sent.

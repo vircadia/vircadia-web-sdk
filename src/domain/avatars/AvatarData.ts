@@ -15,6 +15,7 @@ import { AvatarIdentityDetails } from "../networking/packets/AvatarIdentity";
 import PacketScribe from "../networking/packets/PacketScribe";
 import SequenceNumber from "../networking/udt/SequenceNumber";
 import ContextManager from "../shared/ContextManager";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import SpatiallyNestable, { NestableType } from "../shared/SpatiallyNestable";
 import Uuid from "../shared/Uuid";
 
@@ -63,16 +64,20 @@ enum KillAvatarReason {
 class AvatarData extends SpatiallyNestable {
     // C++  class AvatarData : public QObject, public SpatiallyNestable
 
+    protected _sessionDisplayName: string | null = null;
+    protected _sessionDisplayNameChanged = new SignalEmitter();
+
     // Context
     #_nodeList;
 
+    #_hasProcessedFirstIdentity = false;
     #_identitySequenceNumber = new SequenceNumber(0);  // Avatar identity sequence number.
     #_identityDataChanged = false;
     // @ts-ignore
     #_lastToByteArray = 0;
 
-    #_displayName = "";
-    #_sessionDisplayName = "";
+    #_displayName: string | null = null;
+    #_displayNameChanged = new SignalEmitter();
     #_lookAtSnappingEnabled = true;
     #_verificationFailed = false;
     #_isReplicated = false;
@@ -148,9 +153,9 @@ class AvatarData extends SpatiallyNestable {
 
         const packetList = PacketScribe.AvatarIdentity.write({
             sessionUUID: this.getSessionUUID(),
-            identitySequenceNumber: this.#_identitySequenceNumber.value,
+            identitySequenceNumber: this.#_identitySequenceNumber,
             displayName: this.#_displayName,
-            sessionDisplayName: this.#_sessionDisplayName,
+            sessionDisplayName: this._sessionDisplayName,
             isReplicated: this.#_isReplicated,
             lookAtSnapping: this.#_lookAtSnappingEnabled,
             verificationFailed: this.#_verificationFailed
@@ -177,14 +182,54 @@ class AvatarData extends SpatiallyNestable {
      *  @param {Object<boolean>} displayNameChanged - Return value that is set to <code>true</code> if the avatar's display name
      *      has changed, <code>false</code> if it hasn't.
      */
-    // @ts-ignore
-    processAvatarIdentity(info: AvatarIdentityDetails, identityChanged: { value: boolean },  // eslint-disable-line
-        // @ts-ignore
+    processAvatarIdentity(info: AvatarIdentityDetails, identityChanged: { value: boolean },
             displayNameChanged: { value: boolean }): void {  // eslint-disable-line
         // C++  void processAvatarIdentity(QDataStream & packetStream, bool& identityChanged, bool& displayNameChanged)
 
-        // WEBRTC TODO: Address further C++ code.
+        if (!this.#_hasProcessedFirstIdentity) {
+            this.#_identitySequenceNumber.value = info.identitySequenceNumber.value;
+            this.#_identitySequenceNumber.decrement();
+            this.#_hasProcessedFirstIdentity = true;
+            console.log("[avatars] Processing first identity packet for", info.sessionUUID.stringify(), "-",
+                info.identitySequenceNumber.value);
+        }
 
+        if (info.identitySequenceNumber.isGreaterThan(this.#_identitySequenceNumber)) {
+            this.#_identitySequenceNumber = info.identitySequenceNumber;
+
+            if (info.displayName !== this.#_displayName) {
+                this.#_displayName = info.displayName;
+                this.#_displayNameChanged.emit();
+                identityChanged.value = true;
+                displayNameChanged.value = true;
+            }
+            this.maybeUpdateSessionDisplayNameFromTransport(info.sessionDisplayName);
+
+            if (info.isReplicated !== this.#_isReplicated) {
+                this.#_isReplicated = info.isReplicated;
+                identityChanged.value = true;
+            }
+
+            if (info.lookAtSnapping !== this.#_lookAtSnappingEnabled) {
+                this.#_lookAtSnappingEnabled = info.lookAtSnapping;
+                // WEBRTC TODO: Address further C++ code - lookAtSnappingEnabledChanged signal.
+                identityChanged.value = true;
+            }
+
+            if (info.verificationFailed !== this.#_verificationFailed) {
+                this.#_verificationFailed = info.verificationFailed;
+                identityChanged.value = true;
+
+                // WEBRTC TODO: Address further C++ code - skeletonModelURL for verification failed.
+
+                if (this.#_verificationFailed) {
+                    console.log("[avatars] Avatar", this._sessionDisplayName, "marked as VERIFY-FAILED");
+                }
+            }
+
+            // AttachmentData is deprecated, don't handle.
+
+        }
     }
 
     /*@devdoc
@@ -209,6 +254,14 @@ class AvatarData extends SpatiallyNestable {
 
         this.#_lastToByteArray = Date.now();
         return 0;
+    }
+
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    protected maybeUpdateSessionDisplayNameFromTransport(sessionDisplayName: string | null): void {  // eslint-disable-line
+        // C++  void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName)
+        // No-op.
     }
 }
 

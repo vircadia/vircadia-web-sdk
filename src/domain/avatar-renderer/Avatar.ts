@@ -43,6 +43,15 @@ class Avatar extends AvatarData {
         return this.#_initialized;
     }
 
+
+    // eslint-disable-next-line class-methods-use-this
+    protected override maybeUpdateSessionDisplayNameFromTransport(sessionDisplayName: string | null): void {
+        // C++  void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName)
+        this._sessionDisplayName = sessionDisplayName;
+        this._sessionDisplayNameChanged.emit();
+        // WEBRTC TODO: Address further C++ code - sessionDisplayNameChanged signal.
+    }
+
 }
 
 export default Avatar;

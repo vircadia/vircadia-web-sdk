@@ -157,7 +157,7 @@ class AvatarHashMap {
      */
     // Listener
     processAvatarIdentityPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {
-        // C++  void processAvatarIdentityPacket(ReceivedMessage* message, node* sendingNode)
+        // C++  void processAvatarIdentityPacket(ReceivedMessage* message, Node* sendingNode)
 
         const avatarIdentityDetailsList = PacketScribe.AvatarIdentity.read(message.getMessage());
         for (const avatarIdentityDetails of avatarIdentityDetailsList) {

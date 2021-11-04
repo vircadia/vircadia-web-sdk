@@ -11,6 +11,7 @@
 import NLPacketList from "../../../../src/domain/networking/NLPacketList";
 import AvatarIdentity from "../../../../src/domain/networking/packets/AvatarIdentity";
 import PacketType from "../../../../src/domain/networking/udt/PacketHeaders";
+import SequenceNumber from "../../../../src/domain/networking/udt/SequenceNumber";
 import UDT from "../../../../src/domain/networking/udt/UDT";
 import Uuid from "../../../../src/domain/shared/Uuid";
 
@@ -27,7 +28,7 @@ describe("AvatarIdentity - unit tests", () => {
         const EXPECTED_PACKET = "0000006000000000000000001d36000000000000000000000000000000000000a3eda01ec4de456dbf07858a26c5a64800000002000000000000001a006d00790064006900730070006c00610079006e0061006d0065ffffffff00000002";
         const packetList = AvatarIdentity.write({
             sessionUUID: new Uuid(217897985291723272451165858623432009288n),
-            identitySequenceNumber: 2,
+            identitySequenceNumber: new SequenceNumber(2),
             displayName: "mydisplayname",
             sessionDisplayName: null,
             isReplicated: false,
@@ -67,7 +68,7 @@ describe("AvatarIdentity - unit tests", () => {
 
         const avatarIdentity = avatarIdentityDetails[0];
         expect(avatarIdentity.sessionUUID.stringify()).toBe("7d980fa8-3d7d-43b5-808c-9e5883d89ba9");
-        expect(avatarIdentity.identitySequenceNumber).toBe(3);
+        expect(avatarIdentity.identitySequenceNumber.value).toBe(3);
         expect(avatarIdentity.displayName).toBe("mydisplayname");
         expect(avatarIdentity.sessionDisplayName).toBe("mydisplayname");
         expect(avatarIdentity.isReplicated).toBe(false);
@@ -93,7 +94,7 @@ describe("AvatarIdentity - unit tests", () => {
 
         let avatarIdentity = avatarIdentityDetails[0];
         expect(avatarIdentity.sessionUUID.stringify()).toBe("7d980fa8-3d7d-43b5-808c-9e5883d89ba9");
-        expect(avatarIdentity.identitySequenceNumber).toBe(3);
+        expect(avatarIdentity.identitySequenceNumber.value).toBe(3);
         expect(avatarIdentity.displayName).toBe("mydisplayname");
         expect(avatarIdentity.sessionDisplayName).toBe("mydisplayname");
         expect(avatarIdentity.isReplicated).toBe(false);
@@ -102,7 +103,7 @@ describe("AvatarIdentity - unit tests", () => {
 
         avatarIdentity = avatarIdentityDetails[1];
         expect(avatarIdentity.sessionUUID.stringify()).toBe("52973cdb-8afd-4016-8c4c-7ff7d4dc9988");
-        expect(avatarIdentity.identitySequenceNumber).toBe(5);
+        expect(avatarIdentity.identitySequenceNumber.value).toBe(5);
         expect(avatarIdentity.displayName).toBe("otherdisplayname");
         expect(avatarIdentity.sessionDisplayName).toBe("otherdisplayname");
         expect(avatarIdentity.isReplicated).toBe(false);
