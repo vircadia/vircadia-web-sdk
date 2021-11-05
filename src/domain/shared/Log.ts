@@ -57,11 +57,31 @@ export class ConsoleLoggerContext implements LoggerContext {
     // hence the no-op looking lambda wrappers
     static #_functions = new Map<LogLevel, LogFunction>([
         /* eslint-disable @typescript-eslint/no-explicit-any */
-        [LogLevel.DEFAULT, ConsoleLoggerContext.#_typeFirst((...params: any[]) => console.log(...params))],
-        [LogLevel.DEBUG, ConsoleLoggerContext.#_typeFirst((...params: any[]) => console.debug(...params))],
-        [LogLevel.INFO, ConsoleLoggerContext.#_typeFirst((...params: any[]) => console.info(...params))],
-        [LogLevel.WARNING, ConsoleLoggerContext.#_typeFirst((...params: any[]) => console.warn(...params))],
-        [LogLevel.ERROR, ConsoleLoggerContext.#_typeFirst((...params: any[]) => console.error(...params))]
+        [
+            LogLevel.DEFAULT, ConsoleLoggerContext.#_typeFirst((...params: any[]) => {
+                return console.log(...params);
+            })
+        ],
+        [
+            LogLevel.DEBUG, ConsoleLoggerContext.#_typeFirst((...params: any[]) => {
+                return console.debug(...params);
+            })
+        ],
+        [
+            LogLevel.INFO, ConsoleLoggerContext.#_typeFirst((...params: any[]) => {
+                return console.info(...params);
+            })
+        ],
+        [
+            LogLevel.WARNING, ConsoleLoggerContext.#_typeFirst((...params: any[]) => {
+                return console.warn(...params);
+            })
+        ],
+        [
+            LogLevel.ERROR, ConsoleLoggerContext.#_typeFirst((...params: any[]) => {
+                return console.error(...params);
+            })
+        ]
         /* eslint-enable @typescript-eslint/no-explicit-any */
     ]);
 
@@ -119,7 +139,9 @@ export class Logger {
      */
     constructor(context: LoggerContext) {
         this.#_context = context;
-        this.filterLevels(() => true);
+        this.filterLevels(() => {
+            return true;
+        });
     }
 
     /*@devdoc

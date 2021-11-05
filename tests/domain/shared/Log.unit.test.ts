@@ -98,7 +98,9 @@ describe("Logger - unit tests", () => {
         const context = new StringLoggerContext();
         const logger = new Logger(context);
 
-        logger.filterLevels((level) => level >= LogLevel.INFO);
+        logger.filterLevels((level) => {
+            return level >= LogLevel.INFO;
+        });
 
         logger.debug("Debug message");
         logger.message("Default message");
@@ -113,7 +115,9 @@ describe("Logger - unit tests", () => {
         );
         context.buffer = "";
 
-        logger.filterLevels((level) => level <= LogLevel.DEFAULT);
+        logger.filterLevels((level) => {
+            return level <= LogLevel.DEFAULT;
+        });
 
         logger.debug("Debug message");
         logger.message("Default message");
@@ -127,7 +131,9 @@ describe("Logger - unit tests", () => {
         );
         context.buffer = "";
 
-        logger.filterLevels((level) => [LogLevel.DEBUG, LogLevel.ERROR].includes(level));
+        logger.filterLevels((level) => {
+            return [LogLevel.DEBUG, LogLevel.ERROR].includes(level);
+        });
 
         logger.debug("Debug message");
         logger.message("Default message");
@@ -216,7 +222,9 @@ describe("Logger - unit tests", () => {
         const context = new StringLoggerContext();
         const logger = new Logger(context);
 
-        logger.filterLevels((level) => level <= LogLevel.DEFAULT);
+        logger.filterLevels((level) => {
+            return level <= LogLevel.DEFAULT;
+        });
         logger.setTypeFilter(["Type 2"]);
 
         logger.message("message");
