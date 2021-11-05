@@ -14,6 +14,7 @@ import AssignmentClient from "./domain/AssignmentClient";
 import MessagesClient from "./domain/networking/MessagesClient";
 import NodeType from "./domain/networking/NodeType";
 import { Signal } from "./domain/shared/SignalEmitter";
+import Log from "./domain/shared/Log";
 
 
 /*@sdkdoc
@@ -97,7 +98,7 @@ class MessageMixer extends AssignmentClient {
      */
     subscribe(channel: string): void {
         if (typeof channel !== "string" || channel.length === 0) {
-            console.error("[MessageMixer] subscribe() called with invalid channel value!");
+            Log.error("subscribe() called with invalid channel value!", "MessageMixer");
             return;
         }
 
@@ -111,7 +112,7 @@ class MessageMixer extends AssignmentClient {
      */
     unsubscribe(channel: string): void {
         if (typeof channel !== "string" || channel.length === 0) {
-            console.error("[MessageMixer] unsubscribe() called with invalid channel value!");
+            Log.error("unsubscribe() called with invalid channel value!", "MessageMixer");
             return;
         }
 
@@ -133,7 +134,7 @@ class MessageMixer extends AssignmentClient {
     // @ts-ignore
     sendMessage(channel: string, message: string, localOnly = false): void {  // eslint-disable-line
         if (typeof channel !== "string" || typeof message !== "string" || typeof localOnly !== "boolean") {
-            console.error("[MessageMixer] sendMessage() called with invalid channel parameters!");
+            Log.error("sendMessage() called with invalid channel parameters!", "MessageMixer");
             return;
         }
 
@@ -156,7 +157,7 @@ class MessageMixer extends AssignmentClient {
     // @ts-ignore
     sendData(channel: string, data: ArrayBuffer, localOnly = false): void {  // eslint-disable-line
         if (typeof channel !== "string" || !(data instanceof ArrayBuffer) || typeof localOnly !== "boolean") {
-            console.error("[MessageMixer] sendData() called with invalid channel parameters!");
+            Log.error("sendData() called with invalid channel parameters!", "MessageMixer");
             return;
         }
 

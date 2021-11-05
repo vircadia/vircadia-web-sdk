@@ -20,6 +20,7 @@ import NLPacketList from "../NLPacketList";
 import SockAddr from "../SockAddr";
 import assert from "../../shared/assert";
 import SignalEmitter, { Signal } from "../../shared/SignalEmitter";
+import Log from "../../shared/Log";
 
 
 /*@devdoc
@@ -141,7 +142,7 @@ class Connection {
             // Refuse to process any packets until we've received the handshake.
             // Send handshake request to re-request a handshake.
             if (Socket.UDT_CONNECTION_DEBUG) {
-                console.log("[networking] Received packet before receiving handshake, sending HandshakeRequest.");
+                Log.message("Received packet before receiving handshake, sending HandshakeRequest.", "networking");
             }
             this.#sendHandshakeRequest();
             return false;
@@ -203,14 +204,14 @@ class Connection {
                     // We're already in a state where we've received a handshake ACK, so we are likely in a state where the
                     // other end expired our connection. Let's reset.
 
-                    console.log("[networking] Got HandshakeRequest from", this.#_destination.toString(),
-                        "while active. Stopping SendQueue");
+                    Log.message(`Got HandshakeRequest from ${this.#_destination.toString()}`
+                                + "while active. Stopping SendQueue", "networking");
                     this.#_hasReceivedHandshakeACK = false;
                     this.#stopSendQueue();
                 }
                 break;
             default:
-                console.error("[networking] Invalid control packet type!");
+                Log.error("Invalid control packet type!", "networking");
         }
     }
 
@@ -265,7 +266,7 @@ class Connection {
         this.#stopSendQueue();
 
         if (Socket.UDT_CONNECTION_DEBUG) {
-            console.log("[networking] Connection to", this.#_destination.toString(), "has stopped its SendQueue.");
+            Log.message(`Connection to ${this.#_destination.toString()} has stopped its SendQueue.`, "networking");
         }
     };
 
@@ -333,7 +334,7 @@ class Connection {
         // Validate that this isn't a BS ACK.
         if (ack.isGreaterThan(this.#getSendQueue().getCurrentSequenceNumber())) {
             // In UDT they specifically break the connection here - do we want to do anything?
-            console.error("[networking] Connection.processACK()", "ACK received higher than largest sent sequence number.");
+            Log.error("Connection.processACK() ACK received higher than largest sent sequence number.", "networking");
             return;
         }
 
@@ -384,7 +385,7 @@ class Connection {
 
             if (Socket.UDT_CONNECTION_DEBUG) {
                 if (initialSequenceNumber.isNotEqualTo(this.#_initialReceiveSequenceNumber)) {
-                    console.log("[networking] Resetting receive state, received a new initial sequence number in handshake.");
+                    Log.message("Resetting receive state, received a new initial sequence number in handshake.", "networking");
                 }
             }
 
@@ -463,7 +464,7 @@ class Connection {
             }
 
             if (Socket.UDT_CONNECTION_DEBUG) {
-                console.log("[networking] Created SendQueue for connection to", this.#_destination.toString());
+                Log.message(`Created SendQueue for connection to ${this.#_destination.toString()}`, "networking");
             }
 
             // WEBRTC TODO: Address further C++ code. - Stats and congestion control.

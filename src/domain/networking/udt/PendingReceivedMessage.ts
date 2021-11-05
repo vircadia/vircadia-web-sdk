@@ -10,6 +10,7 @@
 
 import Packet from "./Packet";
 import assert from "../../shared/assert";
+import Log from "../../shared/Log";
 
 
 /*@devdoc
@@ -45,7 +46,7 @@ class PendingReceivedMessage {
         index += 1;
 
         if (index < this.#_packets.length && this.#_packets[index]!.getMessagePartNumber() === messagePartNumber) {
-            console.log("[networking] PendingReceivedMessage.enqueuePacket(): Duplicate packet.");
+            Log.message("PendingReceivedMessage.enqueuePacket(): Duplicate packet.", "networking");
             return;
         }
 

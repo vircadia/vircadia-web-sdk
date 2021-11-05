@@ -502,7 +502,7 @@ class LimitedNodeList {
         this.#_sessionUUID = sessionUUID;
 
         if (sessionUUID.value() !== oldUUID.value()) {
-            console.log("[networking] NodeList UUID changed from", oldUUID.stringify(), "to", sessionUUID.stringify());
+            Log.message(`[networking] NodeList UUID changed from ${oldUUID.stringify()} to ${sessionUUID.stringify()}`);
             this.#_uuidChanged.emit(sessionUUID, oldUUID);
         }
     }
@@ -570,8 +570,8 @@ class LimitedNodeList {
             return this._nodeSocket.writePacketList(packetList, activeSocket);
         }
 
-        console.log(`[networking] LimitedNodeList.sendPacketList called without active socket for node
-            ${destinationNode.getUUID().stringify()}. Not sending.`);
+        Log.message(`LimitedNodeList.sendPacketList called without active socket for node
+            ${destinationNode.getUUID().stringify()}. Not sending.`, "networking");
         return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
     }
 
@@ -830,8 +830,8 @@ class LimitedNodeList {
             }
 
             if (!hasBeenOutput) {
-                console.log("[networking]  Packet version mismatch on", headerType, "- Sender", senderString, "sent",
-                    headerVersion, "but", PacketType.versionForPacketType(headerType), "expected.");
+                Log.message(`Packet version mismatch on ${headerType} - Sender ${senderString}, sent `
+                        + `${headerVersion} but ${PacketType.versionForPacketType(headerType)} expected.`, "networking");
                 this.#_packetVersionMismatch.emit(headerType, senderSockAddr, sourceID);
             }
 
@@ -870,8 +870,8 @@ class LimitedNodeList {
                 if (sendingNodeType !== NodeType.Unassigned) {
                     return true;
                 }
-                console.log("[networking] Replicated packet of type", headerType, "received from unknown upstream",
-                    senderSockAddr?.toString());
+                Log.message(`Replicated packet of type ${headerType} received from unknown upstream `
+                            + (senderSockAddr ? senderSockAddr.toString() : ""), "networking");
                 return false;
 
             }
@@ -908,8 +908,8 @@ class LimitedNodeList {
         }
 
         if (!this.#isDelayedNode(sourceID)) {
-            console.log("[networking] Packet of type", headerType, "received from unknown node with Local ID",
-                sourceLocalID);
+            Log.message(` Packet of type ${headerType} received from unknown node with Local ID `
+                        + sourceLocalID.toString(), "networking");
         }
 
         return false;

@@ -13,6 +13,7 @@ import SequenceNumber from "./SequenceNumber";
 import UDT from "./UDT";
 import SockAddr from "../../networking/SockAddr";
 import assert from "../../shared/assert";
+import Log from "../../shared/Log";
 
 enum ControlPacketType {
     ACK,
@@ -177,7 +178,7 @@ class ControlPacket extends BasePacket {
 
             this.#_type = other.getType();
         } else {
-            console.error("Invalid parameters in ControlPacket constructor!", typeof param0, typeof param1, typeof param2);
+            Log.error(`Invalid parameters in ControlPacket constructor! ${typeof param0} ${typeof param1} ${typeof param2}`);
             super(0);
         }
     }

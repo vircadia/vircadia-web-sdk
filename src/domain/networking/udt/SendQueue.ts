@@ -20,6 +20,7 @@ import assert from "../../shared/assert";
 import ConditionVariable from "../../shared/ConditionVariable";
 import HighResolutionClock from "../../shared/HighResolutionClock";
 import SignalEmitter, { Signal } from "../../shared/SignalEmitter";
+import Log from "../../shared/Log";
 
 
 type PacketResendPair = { first: number, second: Packet };  // Number of resends for a packet.
@@ -383,7 +384,7 @@ class SendQueue {
                                 debugString += `\n    Message Number: ${messageData.messageNumber} `;
                                 debugString += `Part Number: ${messageData.messagePartNumber}.`;
                             }
-                            console.log(debugString);
+                            Log.message(debugString);
                         }
 
                         // Create copy of the packet
@@ -491,9 +492,9 @@ class SendQueue {
                     if (!notified && (this.#_packets.isEmpty() || this.#isFlowWindowFull()) && this.#_naks.isEmpty()) {
                         if (Socket.UDT_CONNECTION_DEBUG) {
                             const S_TO_MS = 1000;
-                            console.log("[networking] SendQueue to", this.#_destination.toString(), "has been empty for",
-                                EMPTY_QUEUES_INACTIVE_TIMEOUT_MS / S_TO_MS, "seconds and receiver has ACKed all packets.",
-                                "The queue is now inactive and will be stopped.");
+                            Log.message(`SendQueue to ${this.#_destination.toString()} has been empty for `
+                                + `${EMPTY_QUEUES_INACTIVE_TIMEOUT_MS / S_TO_MS} seconds and receiver has ACKed all packets.`
+                                + "The queue is now inactive and will be stopped.", "networking");
                         }
 
                         // Deactivate the queue.
@@ -582,14 +583,14 @@ class SendQueue {
         if (this.#_state === SendQueue.#State.Stopped) {
             // We've already been asked to stop before we even got a chance to start; don't start now.
             if (Socket.UDT_CONNECTION_DEBUG) {
-                console.log("[networking] SendQueue asked to run after being told to stop. Will not run.");
+                Log.message("SendQueue asked to run after being told to stop. Will not run.", "networking");
             }
             return;
         }
         if (this.#_state === SendQueue.#State.Running) {
             // We're already running; don't start another run.
             if (Socket.UDT_CONNECTION_DEBUG) {
-                console.log("[networking] SendQueue asked to run but is already running. Will not re-run.");
+                Log.message("SendQueue asked to run but is already running. Will not re-run.", "networking");
             }
             return;
         }
@@ -658,10 +659,10 @@ class SendQueue {
 
                 const MAX_SEND_QUEUE_SLEEP_USECS = 2000000n;
                 if (timeToSleep > MAX_SEND_QUEUE_SLEEP_USECS) {
-                    console.warn("SendQueue wanted to sleep for", timeToSleep, "microseconds");
-                    console.warn("Capping sleep to", MAX_SEND_QUEUE_SLEEP_USECS);
-                    console.warn("PSP:", this.#_packetSendPeriod, "NPD:", nextPacketDelta, "NPT:", nextPacketTimestamp,
-                        "NOW:", now);
+                    Log.warning(`SendQueue wanted to sleep for ${timeToSleep} microseconds`);
+                    Log.warning(`Capping sleep to ${MAX_SEND_QUEUE_SLEEP_USECS}`);
+                    Log.warning(`PSP: ${this.#_packetSendPeriod} NPD: ${nextPacketDelta} NPT: ${nextPacketTimestamp} `
+                                + `NOW: ${now}`);
 
                     // WEBRTC TODO: Address further C++ code. - UserActivityLogger.
 

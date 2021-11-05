@@ -14,6 +14,7 @@ import { PacketTypeValue } from "./udt/PacketHeaders";
 import UDT from "./udt/UDT";
 import assert from "../shared/assert";
 import Uuid from "../shared/Uuid";
+import Log from "../shared/Log";
 
 
 /*@devdoc
@@ -96,7 +97,7 @@ class NLPacketList {
         assert(!(!isReliable && isOrdered), "PacketList: Unreliable ordered PacketLists are not supported.");
 
         if (this.#_extendedHeader !== null) {
-            console.error("PacketList extended header not implemented.");
+            Log.error("PacketList extended header not implemented.");
         }
     }
 
@@ -138,10 +139,10 @@ class NLPacketList {
                     this.#_uuidData.setBigUint128(0, value.value(), UDT.BIG_ENDIAN);
                     return this.#writeData(this.#_uuidArray, this.#UUID_LENGTH);
                 }
-                console.error("NLPacketList.writePrimitive() - Unhandled type:", typeof value);
+                Log.error(`NLPacketList.writePrimitive() - Unhandled type: ${typeof value}`);
                 return 0;
             default:
-                console.error("NLPacketList.writePrimitive() - Unhandled type:", typeof value);
+                Log.error(`NLPacketList.writePrimitive() - Unhandled type: ${typeof value}`);
                 return 0;
         }
     }
@@ -273,8 +274,8 @@ class NLPacketList {
                 messageData.buffer.set(new Uint8Array(this.#_extendedHeader), messageData.dataPosition);
                 messageData.dataPosition += this.#_extendedHeader.byteLength;
             } else {
-                console.log("[networking] Could not write extendedHeader in NLPacketList.createPacketWithExtendedHeader",
-                    "- make sure the extendedHeader is not larger than the payload capacity.");
+                Log.message("Could not write extendedHeader in NLPacketList.createPacketWithExtendedHeader"
+                            + "- make sure the extendedHeader is not larger than the payload capacity.", "networking");
             }
         }
 
@@ -320,8 +321,9 @@ class NLPacketList {
                         if (segmentSize + sizeRemaining > messageData.buffer.byteLength - messageData.dataPosition) {
                             // This is an unsupported case - the segment is bigger than the size of an individual packet
                             // but the PacketList is not going to be sent ordered.
-                            console.error("[networking] Error in PacketList.writeData()",
-                                "Attempted to write a segment to an unordered packet that is larger than the payload size.");
+                            Log.error("Error in PacketList.writeData() "
+                                + "Attempted to write a segment to an unordered packet that is larger than the payload size.",
+                            "networking");
 
                             // We won't be writing this new data to the packet.
                             // Go back before the current segment and return -1 to indicate error.
@@ -342,8 +344,9 @@ class NLPacketList {
                     if (sizeRemaining > newMessageData.buffer.byteLength - newMessageData.dataPosition) {
                         // This is an unsupported case - attempting to write a block of data larger than the capacity of a new
                         // packet in an unordered PacketList.
-                        console.error("[networking] Error in PacketList.writeData()",
-                            "Attempted to write data to an unordered packet that is larger than the payload size.");
+                        Log.error("Error in PacketList.writeData() "
+                            + "Attempted to write data to an unordered packet that is larger than the payload size.",
+                        "networking");
 
                         return NLPacketList.#PACKET_LIST_WRITE_ERROR;
                     }
