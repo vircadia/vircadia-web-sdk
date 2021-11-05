@@ -512,6 +512,11 @@ const PacketType = new class {
         TextOrBinaryData: 18
     };
 
+    readonly #_AvatarMixerPacketVersion = {
+        // C++  AvatarMixerPacketVersion
+        ARKitBlendshapes: 54
+    };
+
 
     constructor() {
         assert(PacketTypeValue.NUM_PACKETS - 1 === this.WebRTCSignaling, "Inconsistent packet data in PacketHeaders!");
@@ -538,6 +543,8 @@ const PacketType = new class {
                 return this.#_PingVersion.IncludeConnectionID;
             case this.PingReply:
                 return DEFAULT_VERSION;
+            case this.KillAvatar:
+                return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.MixedAudio:
                 return this.#_AudioVersion.StopInjectors;
             case this.MicrophoneAudioNoEcho:
