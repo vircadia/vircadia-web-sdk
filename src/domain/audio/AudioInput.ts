@@ -10,8 +10,8 @@
 
 import AudioConstants from "../audio/AudioConstants";
 import assert from "../shared/assert";
-import Signal from "../shared/Signal";
 import Log from "../shared/Log";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 
 // eslint-disable-next-line
 // @ts-ignore
@@ -45,7 +45,7 @@ class AudioInput {
     #_errorString = "";
     #_frameBuffer: Array<Int16Array> = [];
 
-    #_readyRead = new Signal();
+    #_readyRead = new SignalEmitter();
 
 
     set audioInput(audioInput: MediaStream | null) {
@@ -225,7 +225,7 @@ class AudioInput {
      */
     get readyRead(): Signal {
         // C++  QIODevice::readyRead()
-        return this.#_readyRead;
+        return this.#_readyRead.signal();
     }
 
 

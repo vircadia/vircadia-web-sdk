@@ -10,7 +10,7 @@
 
 
 import SockAddr from "./SockAddr";
-import Signal from "../shared/Signal";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Uuid from "../shared/Uuid";
 import Log from "../shared/Log";
 
@@ -45,8 +45,8 @@ class NetworkPeer {
     #_uuid;
     #_localID: LocalID = 0;
     #_activeSocket: SockAddr | null = null;  // References the active socket.
-    #_socketUpdated = new Signal();
-    #_socketActivated = new Signal();
+    #_socketUpdated = new SignalEmitter();
+    #_socketActivated = new SignalEmitter();
     // Ping timer N/A: It is used in C++ for UDP hole punching to assignment clients.
 
 
@@ -127,7 +127,7 @@ class NetworkPeer {
             if (!wasOldSocketNull) {
                 Log.message(`Public socket change for node", ${this.#toString()}; `
                             + `previously ${previousSocket.toString()}`, "networking");
-                this.socketUpdated.emit(previousSocket, this._publicSocket);
+                this.#_socketUpdated.emit(previousSocket, this._publicSocket);
             }
         }
     }
@@ -163,7 +163,7 @@ class NetworkPeer {
             if (!wasOldSocketNull) {
                 Log.message(`Local socket change for node ${this.#toString()}; `
                             + `previously ${previousSocket.toString()}`, "networking");
-                this.socketUpdated.emit(previousSocket, this._localSocket);
+                this.#_socketUpdated.emit(previousSocket, this._localSocket);
             }
         }
     }
@@ -209,7 +209,7 @@ class NetworkPeer {
      */
     get socketUpdated(): Signal {
         // C++  void socketUpdated(SockAddr previousAddress, SockAddr currentAddress)
-        return this.#_socketUpdated;
+        return this.#_socketUpdated.signal();
     }
 
     /*@devdoc
@@ -220,7 +220,7 @@ class NetworkPeer {
      */
     get socketActivated(): Signal {
         // C++  void socketActivated(const SockAddr& sockAddr)
-        return this.#_socketActivated;
+        return this.#_socketActivated.signal();
     }
 
 
@@ -232,7 +232,7 @@ class NetworkPeer {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.socketActivated.emit(this.#_activeSocket);
+        this.#_socketActivated.emit(this.#_activeSocket);
     }
 
     #toString(): string {

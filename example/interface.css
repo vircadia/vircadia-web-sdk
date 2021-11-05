@@ -37,6 +37,10 @@ input {
     width: 160px;
 }
 
+    input.medium {
+        width: 250px;
+    }
+
     input.wide {
         width: 480px;
     }
@@ -46,5 +50,5 @@ input {
     }
 
 button {
-    width: 80px;
+    width: 88px;
 }

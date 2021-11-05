@@ -11,7 +11,7 @@
 import { LocalID } from "./NetworkPeer";
 import NodeList from "./NodeList";
 import SockAddr from "./SockAddr";
-import Signal from "../shared/Signal";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Uuid from "../shared/Uuid";
 import PacketScribe from "./packets/PacketScribe";
 import ReceivedMessage from "./ReceivedMessage";
@@ -99,9 +99,9 @@ class DomainHandler {
     #_errorDomainURL = "";
     #_domainConnectionRefusals: Set<string> = new Set();
 
-    #_connectedToDomain = new Signal();
-    #_disconnectedFromDomain = new Signal();
-    #_domainConnectionRefused = new Signal();
+    #_connectedToDomain = new SignalEmitter();
+    #_disconnectedFromDomain = new SignalEmitter();
+    #_domainConnectionRefused = new SignalEmitter();
 
     // Context objects.
     #_nodeList;
@@ -220,16 +220,16 @@ class DomainHandler {
 
                 // WEBRTC TODO: Address further C++ code.
 
-                this.connectedToDomain.emit(this.#_domainURL);
+                this.#_connectedToDomain.emit(this.#_domainURL);
 
                 // WEBRTC TODO: Address further C++ code.
 
             } else {
-                this.disconnectedFromDomain.emit();
+                this.#_disconnectedFromDomain.emit();
             }
         } else if (!this.#_isConnected && forceDisconnect) {
             // Close the WebRTC communications channel.
-            this.disconnectedFromDomain.emit();
+            this.#_disconnectedFromDomain.emit();
         }
     }
 
@@ -370,7 +370,7 @@ class DomainHandler {
      */
     get connectedToDomain(): Signal {
         // C++  void connectedToDomain(QUrl domainURL)
-        return this.#_connectedToDomain;
+        return this.#_connectedToDomain.signal();
     }
 
     /*@devdoc
@@ -380,7 +380,7 @@ class DomainHandler {
      */
     get disconnectedFromDomain(): Signal {
         // C++  void disconnectedFromDomain()
-        return this.#_disconnectedFromDomain;
+        return this.#_disconnectedFromDomain.signal();
     }
 
     /*@devdoc
@@ -393,7 +393,7 @@ class DomainHandler {
      */
     get domainConnectionRefused(): Signal {
         // C++  void domainConnectionRefused(QString reasonMessage, int reasonCode, const QString& extraInfo);
-        return this.#_domainConnectionRefused;
+        return this.#_domainConnectionRefused.signal();
     }
 
 

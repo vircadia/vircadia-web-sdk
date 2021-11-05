@@ -11,6 +11,7 @@
 import NodeType, { NodeTypeValue } from "../NodeType";
 import WebRTCSignalingChannel, { SignalingMessage } from "./WebRTCSignalingChannel";
 import Log from "../../shared/Log";
+import assert from "../../shared/assert";
 
 
 type OnOpenCallback = () => void;
@@ -103,14 +104,26 @@ class WebRTCDataChannel {
 
     static readonly #CONFIGURATION = {
         // WEBRTC TODO: Make configurable in the API.
-        iceServers: [{ urls: "stun:ice.vircadia.com:7337" }]
+        // FIXME: stun:ice.vircadia.com:7337 doesn't work for WebRTC.
+        // Firefox warns: "WebRTC: Using more than two STUN/TURN servers slows down discovery"
+        iceServers: [
+            {
+                urls: [
+                    "stun:stun1.l.google.com:19302",
+                    "stun:stun.schlund.de"
+                ]
+            }
+        ]
     };
 
 
     #_nodeType = NodeType.Unassigned;
+    #_nodeTypeName = "";
     #_signalingChannel: WebRTCSignalingChannel | null = null;
 
     #_peerConnection: RTCPeerConnection | null = null;
+    #_offer: RTCSessionDescriptionInit | null = null;
+    #_haveSetRemoteDescription = false;
     #_dataChannel: RTCDataChannel | null = null;
     #_dataChannelID = 0;
     #_readyState = WebRTCDataChannel.CLOSED;
@@ -120,9 +133,12 @@ class WebRTCDataChannel {
     #_oncloseCallback: OnCloseCallback | null = null;
     #_onerrorCallback: OnErrorCallback | null = null;
 
+    #_DEBUG = false;
+
 
     constructor(nodeType: NodeTypeValue, signalingChannel: WebRTCSignalingChannel) {
         this.#_nodeType = nodeType;
+        this.#_nodeTypeName = NodeType.getNodeTypeName(nodeType);
         this.#_signalingChannel = signalingChannel;
         this.#_readyState = WebRTCDataChannel.CONNECTING;
         setTimeout(() => {
@@ -224,46 +240,33 @@ class WebRTCDataChannel {
 
 
     // Starts making a WebRTC connection.
-    #start(): void {
+    async #start(): Promise<void> {
+
+        assert(this.#_signalingChannel !== null);
 
         // Create new peer connection object.
         this.#_peerConnection = new RTCPeerConnection(WebRTCDataChannel.#CONFIGURATION);
 
         // Send ICE candidates to the domain server.
         this.#_peerConnection.onicecandidate = ({ candidate }) => {
-            if (candidate  // The candidate is sometimes null for unknown reasons; don't send this.
+            if (this.#_DEBUG) {
+                Log.debug(` [${this.#_nodeTypeName}] Obtained ICE candidate.`, "webrtc");
+            }
+            if (candidate  // The candidate is sometimes null; don't send this but do send empty string.
                 && this.#_signalingChannel && this.#_signalingChannel.readyState === WebRTCSignalingChannel.OPEN) {
-                this.#_signalingChannel.send({ to: this.#_nodeType, data: candidate });
-            }
-        };
-
-        // Generate an offer.
-        this.#_peerConnection.onnegotiationneeded = async () => {
-            if (!this.#_peerConnection || !this.#_signalingChannel
-                || this.#_signalingChannel.readyState !== WebRTCSignalingChannel.OPEN) {
-                return;
-            }
-            try {
-                // Create offer.
-                const offer = await this.#_peerConnection.createOffer();
-                await this.#_peerConnection.setLocalDescription(offer);
-
-                // Send offer to domain server.
-                this.#_signalingChannel.send({
-                    to: this.#_nodeType,
-                    data: { description: this.#_peerConnection.localDescription }
-                });
-            } catch (err) {
-                const errorMessage = "WebRTCDataChannel: Error during offer negotiation: " + <string>err;
-                Log.error(errorMessage);
-                if (this.#_onerrorCallback) {
-                    this.#_onerrorCallback(errorMessage);
+                if (this.#_DEBUG) {
+                    Log.debug(` [${this.#_nodeTypeName}] Send ICE candidate.`, "webrtc");
                 }
+                this.#_signalingChannel.send({ to: this.#_nodeType, data: { candidate } });
             }
         };
 
         // Observe connection state changes.
         this.#_peerConnection.onconnectionstatechange = () => {
+            if (this.#_DEBUG) {
+                Log.debug(`[webrtc] [${this.#_nodeTypeName}] Connection state changed:`,
+                    this.#_peerConnection?.connectionState);
+            }
             let errorMessage = "";
             switch (this.#_peerConnection ? this.#_peerConnection.connectionState : "") {
                 case "new":
@@ -273,7 +276,7 @@ class WebRTCDataChannel {
                     break;
                 case "connected":
                     // The connection has become fully connected.
-                    // However, _readyState isn't set to OPEN until the data channel has been connected.
+                    // However, #_readyState isn't set to OPEN until the data channel has been connected.
                     break;
                 case "disconnected":
                 case "failed":
@@ -330,6 +333,28 @@ class WebRTCDataChannel {
             }
         };
 
+        // Create offer.
+        if (this.#_DEBUG) {
+            Log.debug(` [${this.#_nodeTypeName}] Create offer.`, "webrtc");
+        }
+        const rtcOfferOptions = {
+            offerToReceiveAudio: false,
+            offerToReceiveVideo: false
+        };
+        this.#_offer = await this.#_peerConnection.createOffer(rtcOfferOptions);
+        // Don't set the local description until we have the remote answer because setting the local description triggers ICE
+        // candidate gathering and the remote isn't ready to handle them yet.
+        this.#_haveSetRemoteDescription = false;
+
+        // Send offer to domain server.
+        if (this.#_DEBUG) {
+            Log.debug(` [${this.#_nodeTypeName}] Send offer.`, "webrtc");
+        }
+        this.#_signalingChannel.send({
+            to: this.#_nodeType,
+            data: { description: this.#_offer }
+        });
+
     }  // start
 
     // Instigates the WebRTC connection process.
@@ -357,13 +382,12 @@ class WebRTCDataChannel {
                     return;
                 }
 
-                // Start a new peer connection if necessary.
-                if (!this.#_peerConnection && (description || candidate)) {
-                    this.#start();
-                }
-
                 try {
                     if (description) {
+                        if (this.#_DEBUG) {
+                            Log.debug(` [${this.#_nodeTypeName}] Received description.`, "webrtc");
+                        }
+
                         if (!this.#_peerConnection) {
                             const errorMessage = "WebRTCDataChannel: Peer connection is closed!";
                             Log.error(errorMessage);
@@ -373,20 +397,37 @@ class WebRTCDataChannel {
                             return;
                         }
 
-                        // Add remote connection information to peer connection.
-                        await this.#_peerConnection.setRemoteDescription(description);
+                        // We got an answer.
+                        if (this.#_DEBUG) {
+                            Log.debug(` [${this.#_nodeTypeName}] Description is ${description.type}.`, "webrtc");
+                        }
+                        if (description.type === "answer" && this.#_signalingChannel) {
+                            assert(this.#_offer !== null);
 
-                        // We got an offer; reply with an answer.
-                        if (description.type === "offer" && this.#_signalingChannel) {
-                            await this.#_peerConnection.setLocalDescription(description);
-                            this.#_signalingChannel.send({
-                                description: this.#_peerConnection.localDescription
-                            });
+                            // The server is ready to handle ICE candidates so set we can set the local description now.
+                            await this.#_peerConnection.setLocalDescription(this.#_offer);
+
+                            await this.#_peerConnection.setRemoteDescription(description);
+                            this.#_haveSetRemoteDescription = true;
+                        } else {
+                            const errorMessage = `WebRTCDataChannel: Unexpected answer! ${description.type}`;
+                            Log.error(errorMessage, "webrtc");
+                            if (this.#_onerrorCallback) {
+                                this.#_onerrorCallback(errorMessage);
+                            }
                         }
                     } else if (candidate) {
-                        // Add ICE candidate to peer connection.
-                        if (this.#_peerConnection) {
+                        // Add ICE candidate to the peer connection.
+                        // Don't set unless the remote description has been set, otherwise an error is generated. The first ICE
+                        // candidate from the server may arrive before the remote description has been set because of the delay
+                        // introduced by setting the local description just before setting the remote description.
+                        if (this.#_DEBUG) {
+                            Log.debug(` [${this.#_nodeTypeName}] Received ICE candidate.`, "webrtc");
+                        }
+                        if (this.#_peerConnection && this.#_haveSetRemoteDescription) {
                             await this.#_peerConnection.addIceCandidate(candidate);
+                        } else if (this.#_DEBUG) {
+                            Log.debug(`[] [${this.#_nodeTypeName}] Skipped adding ICE candidate.`, "webrtc");
                         }
                     } else if (echo) {
                         // Ignore signaling channel "echo" messages.
@@ -394,14 +435,14 @@ class WebRTCDataChannel {
                     } else {
                         // Unexpected message.
                         const errorMessage = "WebRTCDataChannel: Unexpected signaling channel message!";
-                        Log.error(errorMessage);
+                        Log.error(errorMessage, "webrtc");
                         if (this.#_onerrorCallback) {
                             this.#_onerrorCallback(errorMessage);
                         }
                     }
                 } catch (err) {
                     const errorMessage = "WebRTCDataChannel: Error processing signaling channel message!";
-                    Log.error(errorMessage);
+                    Log.error(errorMessage, "webrtc");
                     if (this.#_onerrorCallback) {
                         this.#_onerrorCallback(errorMessage);
                     }
@@ -410,7 +451,7 @@ class WebRTCDataChannel {
         });
 
         // Start the WebRTC connection process.
-        this.#start();
+        void this.#start();
 
     }  // #connect
 

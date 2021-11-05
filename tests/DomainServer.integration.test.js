@@ -9,6 +9,7 @@
 //
 
 import DomainServer from "../src/DomainServer";
+import Uuid from "../src/domain/shared/Uuid";
 
 import TestConfig from "./test.config.json";
 
@@ -210,6 +211,34 @@ describe("DomainServer - integration tests", () => {
                 protocolVersionsSignature = originalProtocolVersionsSignature;
                 domainServer.onStateChanged = null;
                 waitUntilDone(done);
+            }
+        };
+        domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+    });
+
+    test("Session UUID values change as expected", (done) => {
+        const domainServer = new DomainServer();
+        expect(domainServer.sessionUUID.value()).toBe(Uuid.NULL);
+        let haveSeenConnecting = false;
+        let haveRequestedDisconnect = false;
+        domainServer.onStateChanged = (state, info) => {
+            expect(state === DomainServer.DISCONNECTED
+                || state === DomainServer.CONNECTING
+                || state === DomainServer.CONNECTED).toBe(true);
+            expect(info).toBe("");
+            haveSeenConnecting = haveSeenConnecting || state === DomainServer.CONNECTING;
+            if (state === DomainServer.CONNECTED) {
+                expect(domainServer.sessionUUID.value()).not.toBe(Uuid.NULL);  // eslint-disable-line jest/no-conditional-expect
+                setTimeout(() => {
+                    haveRequestedDisconnect = true;
+                    domainServer.disconnect();
+                }, 2500);  // Sufficient for a couple of sendDomainServerCheckin()s.
+            } else if (state === DomainServer.DISCONNECTED && haveRequestedDisconnect) {
+                setTimeout(() => {
+                    expect(domainServer.sessionUUID.value()).toBe(Uuid.NULL);  // eslint-disable-line jest/no-conditional-expect
+                    domainServer.onStateChanged = null;
+                    waitUntilDone(done);
+                }, 100);
             }
         };
         domainServer.connect(TestConfig.SERVER_SIGNALING_SOCKET_URL);

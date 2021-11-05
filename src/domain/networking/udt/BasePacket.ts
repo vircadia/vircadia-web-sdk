@@ -17,7 +17,7 @@ import Log from "../../shared/Log";
 
 /*@devdoc
  *  The <code>BasePacket</code> class implements the base data and information on a Vircadia protocol packet.
- *  <p>See also: {@link Packet} and {@link NLPacket}.
+ *  <p>See also: {@link Packet}, {@link NLPacket}, and {@link ControlPacket}.
  *  <p>C++: <code>BasePacket: public ExtendedIODevice : public QIODevice</code>
  *  @class BasePacket
  *  @param {number|DataView|BasePacket} size|data|packet - The size of the packet to create, in bytes. If <code>-1</code>, a
@@ -35,18 +35,19 @@ import Log from "../../shared/Log";
 class BasePacket {
     // C++  BasePacket: public ExtendedIODevice : public QIODevice
 
+
     /*@devdoc
      *  Gets the maximum size of a BasePacket's Vircadia protocol payload.
+     *  <p><em>Static</em></p>
      *  @function BasePacket.maxPayloadSize
-     *  @returns {number} The maximum Vircadia protocol payload size, in bytes.
+     *  @static
+     *  @returns {number} The maximum BasePacket payload size, in bytes.
      */
     static maxPayloadSize(): number {
         // C++  int maxPayloadSize()
         return UDT.MAX_PACKET_SIZE;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    static #NUM_BYTES_HEADER = 4;  // Control bits and sequence number.
 
     protected _messageData: MessageData;
 
@@ -114,6 +115,20 @@ class BasePacket {
     }
 
     /*@devdoc
+     *  Resets the packet ready for overwriting with new data (excluding the header).
+     *  @returns {boolean} <code>true</code> always, to indicate that the reset was successful.
+     */
+    reset(): boolean {
+        // C++  bool reset()
+
+        // #_payloadSize isn't used.
+
+        this._messageData.dataPosition = 4;
+
+        return true;
+    }
+
+    /*@devdoc
      *  Gets the size of the packet including the header.
      *  @returns {number} The size of the packet including the header, in bytes.
      */
@@ -140,13 +155,22 @@ class BasePacket {
         return this._messageData.receiveTime;
     }
 
+    /*@devdoc
+     *  Gets the number of bytes in the packet that remain available for writing to.
+     *  @returns {number} The number of bytes that remain available for writing to.
+     */
+    bytesAvailableForWrite(): number {
+        // C++  qint64 bytesAvailableForWrite()
+        return this._messageData.buffer.byteLength - this._messageData.dataPosition;
+    }
+
 
     protected adjustPayloadStartAndCapacity(headerSize: number): void {
         // C++ void adjustPayloadStartAndCapacity(qint64 headerSize, bool shouldDecreasePayloadSize = false)
 
         // We don't use C++'s _payloadStart or _payloadCapacity members. Instead, we just need to reserve space for the header,
         // taking into account the base packet's header.
-        this._messageData.dataPosition = BasePacket.#NUM_BYTES_HEADER + headerSize;
+        this._messageData.dataPosition += headerSize;
     }
 }
 

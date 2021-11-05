@@ -9,6 +9,7 @@
 //
 
 import DomainServer from "../src/DomainServer";
+import Uuid from "../src/domain/shared/Uuid";
 
 
 describe("DomainServer - unit tests", () => {
@@ -149,6 +150,11 @@ describe("DomainServer - unit tests", () => {
         expect(domainServer.refusalInfo).toBe("");
         expect(error).toHaveBeenCalledTimes(0);
         error.mockReset();
+    });
+
+    test("Session UUID defaults to null", () => {
+        const domainServer = new DomainServer();
+        expect(domainServer.sessionUUID.value()).toBe(Uuid.NULL);
     });
 
 

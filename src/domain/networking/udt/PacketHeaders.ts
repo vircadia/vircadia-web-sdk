@@ -222,9 +222,18 @@ const enum PacketTypeValue {
  *      removed.<br />
  *      <em>Reliable.</em>
  *      {@link PacketScribe.DomainServerRemovedNodeDetails}.
- *  @property {PacketType} MessagesData - <code>57</code>
- *  @property {PacketType} MessagesSubscribe - <code>58</code>
- *  @property {PacketType} MessagesUnsubscribe - <code>59</code>
+ *  @property {PacketType} MessagesData - <code>57</code> - The user client sends and receives this packet to and from the
+ *      message mixer.<br />
+ *      <em>Reliable. Ordered.</em>
+ *      {@link PacketScribe.MessagesDataDetails}.
+ *  @property {PacketType} MessagesSubscribe - <code>58</code> - The user client sends this to the message mixer to subscribe to
+ *      a message channel.<br />
+ *      <em>Reliable. Ordered.</em>
+ *      {@link PacketScribe.MessagesSubscribeDetails}.
+ *  @property {PacketType} MessagesUnsubscribe - <code>59</code> - The user client sends this to the message mixer to
+ *      unsubscribe from a message channel.<br />
+ *      <em>Reliable. Ordered.</em>
+ *      {@link PacketScribe.MessagesUnsubscribeDetails}.
  *  @property {PacketType} ICEServerHeartbeatDenied - <code>60</code>
  *  @property {PacketType} AssetMappingOperation - <code>61</code>
  *  @property {PacketType} AssetMappingOperationReply - <code>62</code>
@@ -444,21 +453,32 @@ const PacketType = new class {
         PacketTypeValue.WebRTCSignaling
     ]);
 
+    readonly #_domainSourcedPackets = new Set([
+        PacketTypeValue.AssetMappingOperation,
+        PacketTypeValue.AssetGet,
+        PacketTypeValue.AssetUpload
+    ]);
+
+    // Mapping between packets and their replicated versions.
+    readonly #_replicatedPacketMapping = new Map([
+        [PacketTypeValue.MicrophoneAudioNoEcho, PacketTypeValue.ReplicatedMicrophoneAudioNoEcho],
+        [PacketTypeValue.MicrophoneAudioWithEcho, PacketTypeValue.ReplicatedMicrophoneAudioWithEcho],
+        [PacketTypeValue.InjectAudio, PacketTypeValue.ReplicatedInjectAudio],
+        [PacketTypeValue.SilentAudioFrame, PacketTypeValue.ReplicatedSilentAudioFrame],
+        [PacketTypeValue.AvatarIdentity, PacketTypeValue.ReplicatedAvatarIdentity],
+        [PacketTypeValue.KillAvatar, PacketTypeValue.ReplicatedKillAvatar],
+        [PacketTypeValue.BulkAvatarData, PacketTypeValue.ReplicatedBulkAvatarData]
+    ]);
+
+
     readonly #_DomainListVersion = {
         // C++  DomainListVersion
         HasConnectReason: 24,
         SocketTypes: 25
     };
 
-    readonly #_DomainConnectionDeniedVersion = {
-        // C++ DomainConnectionDeniedVersion
-        IncludesExtraInfo: 19
-    };
-
-    readonly #_DomainConnectRequestVersion = {
-        // C++  DomainConnectRequestVersion
-        HasCompressedSystemInfo: 26,
-        SocketTypes: 27
+    readonly #_PingVersion = {
+        IncludeConnectionID: 18
     };
 
     readonly #_DomainListRequestVersion = {
@@ -467,9 +487,35 @@ const PacketType = new class {
         SocketTypes: 23
     };
 
+    readonly #_DomainConnectionDeniedVersion = {
+        // C++ DomainConnectionDeniedVersion
+        IncludesExtraInfo: 19
+    };
+
+    readonly #_DomainServerAddedNodeVersion = {
+        // C++  DomainServerAddedNodeVersion
+        SocketTypes: 19
+    };
+
+    readonly #_DomainConnectRequestVersion = {
+        // C++  DomainConnectRequestVersion
+        HasCompressedSystemInfo: 26,
+        SocketTypes: 27
+    };
+
     readonly #_AudioVersion = {
         // C++  AudioVersion
         StopInjectors: 24
+    };
+
+    readonly #_MessageDataVersion = {
+        // C++  MessageDataVersion
+        TextOrBinaryData: 18
+    };
+
+    readonly #_AvatarMixerPacketVersion = {
+        // C++  AvatarMixerPacketVersion
+        ARKitBlendshapes: 54
     };
 
 
@@ -494,20 +540,39 @@ const PacketType = new class {
         switch (packetType) {
             case this.DomainList:
                 return this.#_DomainListVersion.SocketTypes;
+            case this.Ping:
+                return this.#_PingVersion.IncludeConnectionID;
             case this.PingReply:
                 return DEFAULT_VERSION;
-            case this.SilentAudioFrame:
+            case this.KillAvatar:
+                return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
+            case this.MixedAudio:
+                return this.#_AudioVersion.StopInjectors;
             case this.MicrophoneAudioNoEcho:
+                return this.#_AudioVersion.StopInjectors;
+            case this.SilentAudioFrame:
                 return this.#_AudioVersion.StopInjectors;
             case this.DomainListRequest:
                 return this.#_DomainListRequestVersion.SocketTypes;
             case this.DomainConnectionDenied:
                 return this.#_DomainConnectionDeniedVersion.IncludesExtraInfo;
+            case this.AudioStreamStats:
+                return this.#_AudioVersion.StopInjectors;
+            case this.DomainServerAddedNode:
+                return this.#_DomainServerAddedNodeVersion.SocketTypes;
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
+            case this.AudioEnvironment:
+                return DEFAULT_VERSION;
             case this.DomainDisconnectRequest:
                 return DEFAULT_VERSION;
             case this.DomainServerRemovedNode:
+                return DEFAULT_VERSION;
+            case this.MessagesData:
+                return this.#_MessageDataVersion.TextOrBinaryData;
+            case this.MessagesSubscribe:
+                return DEFAULT_VERSION;
+            case this.MessagesUnsubscribe:
                 return DEFAULT_VERSION;
             case this.NegotiateAudioFormat:
                 return DEFAULT_VERSION;
@@ -525,9 +590,9 @@ const PacketType = new class {
     }
 
     /*@devdoc
-     *  Gets the Set of non-verified packets, i.e., packets which are sent without verifying that they are received.
+     *  Gets the set of non-verified packets, i.e., packets which are sent without verifying that they are received.
      *  @function PacketType(1).getNonVerifiedPackets
-     *  @returns {Set<PacketType>} The Set of non-verified packets.
+     *  @returns {Set<PacketType>} The set of non-verified packets.
      */
     getNonVerifiedPackets() {
         // C++  getNonSourcedPackets()
@@ -535,13 +600,33 @@ const PacketType = new class {
     }
 
     /*@devdoc
-     *  Gets the Set of non-sourced packets, i.e., packets which don't include the local node ID of the sending node.
+     *  Gets the set of non-sourced packets, i.e., packets which don't include the local node ID of the sending node.
      *  @function PacketType(1).getNonSourcedPackets
-     *  @returns {Set<PacketType>} The Set of non-sourced packets.
+     *  @returns {Set<PacketType>} The set of non-sourced packets.
      */
     getNonSourcedPackets() {
         // C++  getNonSourcedPackets()
         return this.#_nonSourcedPackets;
+    }
+
+    /*@devdoc
+     *  Gets the set of domain-sourced packets.
+     *  @function PacketType(1).getDomainSourcedPackets
+     *  @returns {Set<PacketType>} The set of domain-sourced packets.
+     */
+    getDomainSourcedPackets() {
+        // C++  getDomainSourcedPackets()
+        return this.#_domainSourcedPackets;
+    }
+
+    /*@devdoc
+     * Gets the mapping between packets and their replicated versions.
+     * @function PacketType(1).getReplicatedPacketMapping
+     * @returns {Map<PacketType,PacketType>} The mapping between packets and their replicated versions.
+     */
+    getReplicatedPacketMapping() {
+        // C++  QHash<PacketTypeEnum::Value, PacketTypeEnum::Value> getReplicatedPacketMapping()
+        return this.#_replicatedPacketMapping;
     }
 
 }();

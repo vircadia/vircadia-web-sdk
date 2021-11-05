@@ -327,7 +327,8 @@ class AudioClient {
 
         assert(packetType === PacketType.SilentAudioFrame || packetType === PacketType.MicrophoneAudioNoEcho);
 
-        this.#_outgoingAvatarAudioSequenceNumber += 1;
+        const AUDIO_SEQUENCE_MODULUS = 65536;
+        this.#_outgoingAvatarAudioSequenceNumber = (this.#_outgoingAvatarAudioSequenceNumber + 1) % AUDIO_SEQUENCE_MODULUS;
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -404,7 +405,7 @@ class AudioClient {
     // Listener
     // eslint-disable-next-line
     // @ts-ignore
-    #processStreamStatsPacket = (message: ReceivedMessage, sendingNode?: Node): void => {  // eslint-disable-line
+    #processStreamStatsPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {  // eslint-disable-line
         // C++  void AudioIOStats::processStreamStatsPacket(ReceivedMessage*, Node* sendingNode)
 
         Log.once(LogLevel.WARNING, "AudioClient: AudioStreamStats packet not processed.", "audioclient");

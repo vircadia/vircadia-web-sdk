@@ -12,7 +12,9 @@
 
 function buffer2hex(buffer) {
     return [...new Uint8Array(buffer)]
-        .map((x) => x.toString(16).padStart(2, "0"))  // eslint-disable-line @typescript-eslint/no-magic-numbers
+        .map((x) => {
+            return x.toString(16).padStart(2, "0");  // eslint-disable-line @typescript-eslint/no-magic-numbers
+        })
         .join("");
 }
 

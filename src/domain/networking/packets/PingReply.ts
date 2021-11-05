@@ -61,7 +61,6 @@ const PingReply = new class {
         messageData.packetSize = dataPosition;
 
         return packet;
-
     }
 
 }();

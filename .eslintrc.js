@@ -317,7 +317,7 @@ module.exports = {
         "wrap-regex": "error",
 
         // ECMAScript 6
-        "arrow-body-style": ["error", "as-needed"],
+        "arrow-body-style": ["error", "always"],
         "arrow-parens": "error",
         "arrow-spacing": "error",
         "generator-star-spacing": "error",
