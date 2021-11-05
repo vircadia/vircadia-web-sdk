@@ -12,7 +12,7 @@ import WebRTCDataChannel from "./WebRTCDataChannel";
 import WebRTCSignalingChannel from "./WebRTCSignalingChannel";
 import { NodeTypeValue } from "../NodeType";
 import SockAddr from "../SockAddr";
-import Signal from "../../shared/Signal";
+import SignalEmitter, { Signal } from "../../shared/SignalEmitter";
 
 
 type WebRTCSocketDatagram = { buffer: ArrayBuffer | undefined, sender: SockAddr | undefined };
@@ -86,7 +86,7 @@ class WebRTCSocket {
 
     #_receivedQueue: Array<{ channelID: number, message: ArrayBuffer }> = [];
 
-    #_readyRead = new Signal();
+    #_readyRead = new SignalEmitter();
 
 
     constructor() {  // eslint-disable-line @typescript-eslint/no-useless-constructor
@@ -198,8 +198,8 @@ class WebRTCSocket {
     /*@devdoc
      *  Reads the next datagram, up to a maximum number of bytes.
      *  Any remaining data in the datagram is lost.
-     *  @param {WebRTCSocket.Datagram} datagram The destination object to read the datagram into.
-     *  @param {number} [maxSize=-1] The maximum number of bytes to read. <code>-1</code> to read all bytes in the datagram.
+     *  @param {WebRTCSocket.Datagram} datagram - The destination object to read the datagram into.
+     *  @param {number} [maxSize=-1] - The maximum number of bytes to read. <code>-1</code> to read all bytes in the datagram.
      *  @returns {number} The number of bytes read on success; <code>-1</code> if reading unsuccessful.
      */
     readDatagram(datagram: WebRTCSocketDatagram, maxSize = -1): number {
@@ -230,8 +230,8 @@ class WebRTCSocket {
 
     /*@devdoc
      *  Sends a datagram on a data channel.
-     *  @param {ArrayBuffer} datagram The datagram to send.
-     *  @param {number} port The data channel ID.
+     *  @param {ArrayBuffer} datagram - The datagram to send.
+     *  @param {number} port - The data channel ID.
      *  @returns {number} The number of bytes if successfully sent, otherwise <code>-1</code>.
      */
     writeDatagram(datagram: ArrayBuffer, port: number): number {
@@ -257,7 +257,7 @@ class WebRTCSocket {
      */
     get readyRead(): Signal {
         // C++  void readyRead()
-        return this.#_readyRead;
+        return this.#_readyRead.signal();
     }
 
 

@@ -28,6 +28,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         ipAddress.value = DEFAULT_URL;
         const connectButton = document.getElementById("domainConnectButton");
         const disconnectButton = document.getElementById("domainDisconnectButton");
+        const domainSessionUUID = document.getElementById("domainSessionUUID");
 
         function onStateChanged(state, info) {
             statusText.value = DomainServer.stateToString(state);
@@ -45,6 +46,11 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
             domainServer.disconnect();
         }
         disconnectButton.addEventListener("click", onDisconnectButtonClick);
+
+        domainSessionUUID.value = domainServer.sessionUUID.stringify();
+        domainServer.sessionUUIDChanged.connect((sessionUUID) => {
+            domainSessionUUID.value = sessionUUID.stringify();
+        });
 
     }());
 
@@ -102,6 +108,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         }
         disconnectButton.addEventListener("click", onDisconnectButtonClick);
 
+        audioMixer.inputMuted = micMutedCheckbox.checked;
         function onMicMutecCheckboxClick() {
             audioMixer.inputMuted = micMutedCheckbox.checked;
         }
@@ -127,12 +134,43 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         const messageMixer = new MessageMixer(contextID);
 
         const statusText = document.getElementById("messageMixerStatus");
+        const messagesChannel = document.getElementById("messagesChannel");
+        messagesChannel.value = "example-message-channel";
+        const messagesSubscribeButton = document.getElementById("messagesSubscribeButton");
+        const messagesUnsubscribeButton = document.getElementById("messagesUnsubscribeButton");
+        const messagesTextMessage = document.getElementById("messagesTextMessage");
+        const messagesTextSendButton = document.getElementById("messagesTextSendButton");
+        const messagesTextReceived = document.getElementById("messagesTextReceived");
+        const messagesSender = document.getElementById("messagesSender");
 
         function onStateChanged(state) {
             statusText.value = MessageMixer.stateToString(state);
         }
         onStateChanged(messageMixer.state);
         messageMixer.onStateChanged = onStateChanged;
+
+        function onMessagesSubscribeButtonClick() {
+            messageMixer.subscribe(messagesChannel.value);
+        }
+        messagesSubscribeButton.addEventListener("click", onMessagesSubscribeButtonClick);
+
+        function onMessagesUnsubscribeButtonClick() {
+            messageMixer.unsubscribe(messagesChannel.value);
+        }
+        messagesUnsubscribeButton.addEventListener("click", onMessagesUnsubscribeButtonClick);
+
+        function onMessagesTextSendButtonClick() {
+            messageMixer.sendMessage(messagesChannel.value, messagesTextMessage.value);
+        }
+        messagesTextSendButton.addEventListener("click", onMessagesTextSendButtonClick);
+
+        function onMessageReceived(channel, message, senderID /* , localOnly */) {
+            if (channel === messagesChannel.value) {
+                messagesTextReceived.value = message;
+                messagesSender.value = senderID.stringify();
+            }
+        }
+        messageMixer.messageReceived.connect(onMessageReceived);
 
     }());
 

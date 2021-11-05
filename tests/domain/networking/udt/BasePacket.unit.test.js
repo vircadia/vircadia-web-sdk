@@ -23,8 +23,8 @@ describe("BasePacket - unit tests", () => {
         console.log(a);
     });
 
-    function createPacketOfSize() {
-        return new BasePacket(14);
+    function createPacketOfSize(size) {
+        return new BasePacket(size);
     }
 
     function createPacketFromDataView() {
@@ -43,7 +43,7 @@ describe("BasePacket - unit tests", () => {
     });
 
     test("Can create an empty packet", () => {
-        const packet = createPacketOfSize();
+        const packet = createPacketOfSize(14);
         expect(packet.getDataSize()).toBe(14);
         const messageData = packet.getMessageData();
         expect(messageData.packetSize).toBe(14);
@@ -86,6 +86,15 @@ describe("BasePacket - unit tests", () => {
         const timeReceived = packet.getReceiveTime();
         expect(timeReceived).toBe(time);
         expect(error).toHaveBeenCalledTimes(0);
+    });
+
+    test("Can reset a packet for rewriting its contents", () => {
+        const packet = createPacketOfSize(8);
+        expect(packet.getDataSize()).toBe(8);
+        expect(packet.getMessageData().dataPosition).toBe(0);
+        packet.getMessageData().dataPosition = 8;  // Simulate writing the packet.
+        packet.reset();
+        expect(packet.getMessageData().dataPosition).toBe(4);
     });
 
 

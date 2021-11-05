@@ -20,6 +20,9 @@ import DomainConnectionDenied from "./DomainConnectionDenied";
 import DomainConnectRequest from "./DomainConnectRequest";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
 import DomainServerRemovedNode from "./DomainServerRemovedNode";
+import MessagesData from "./MessagesData";
+import MessagesSubscribe from "../packets/MessagesSubscribe";
+import MessagesUnsubscribe from "../packets/MessagesUnsubscribe";
 import NegotiateAudioFormat from "./NegotiateAudioFormat";
 import SelectedAudioFormat from "./SelectedAudioFormat";
 
@@ -52,6 +55,12 @@ import SelectedAudioFormat from "./SelectedAudioFormat";
  *      {@link PacketScribe.DomainDisconnectRequest&period;write|DomainDisconnectRequest&period;write}
  *  @property {function} DomainServerRemovedNode.read -
  *      {@link PacketScribe.DomainServerRemovedNode&period;read|DomainServerRemovedNode&period;read}
+ *  @property {function} MessagesData.write -
+ *      {@link PacketScribe.MessagesData&period;write|MessagesData&period;write}
+ *  @property {function} MessagesSubscribe.write -
+ *      {@link PacketScribe.MessagesSubscribe&period;write|MessagesSubscribe&period;write}
+ *  @property {function} MessagesUnsubscribe.write -
+ *      {@link PacketScribe.MessagesUnsubscribe&period;write|MessagesUnsubscribe&period;write}
  *  @property {function} NegotiateAudioFormat.write -
  *      {@link PacketScribe.NegotiateAudioFormat&period;write|NegotiateAudioFormat&period;write}
  *  @property {function} SelectedAudioFormat.read -
@@ -76,6 +85,9 @@ const PacketScribe = {
     DomainConnectRequest,
     DomainDisconnectRequest,
     DomainServerRemovedNode,
+    MessagesData,
+    MessagesSubscribe,
+    MessagesUnsubscribe,
     NegotiateAudioFormat,
     SelectedAudioFormat
 };

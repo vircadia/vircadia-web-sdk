@@ -55,8 +55,17 @@ describe("NodeList - integration tests", () => {
     const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
 
 
+    test("Reports that it is not being used for the domain server connection", () => {
+        expect(nodeList.isDomainServer()).toBe(false);
+    });
+
     test("Can get the DomainHandler", () => {
         expect(nodeList.getDomainHandler() instanceof DomainHandler).toBe(true);
+    });
+
+    test("Can get the domain server's local ID and SockAddr", () => {
+        expect(nodeList.getDomainLocalID()).toBe(0);
+        expect(nodeList.getDomainSockAddr() instanceof SockAddr).toBe(true);
     });
 
     test("Can set and get the nodes interest set", () => {
