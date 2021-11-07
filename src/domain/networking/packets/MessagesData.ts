@@ -80,7 +80,7 @@ const MessagesData = new class {
      *  Writes a {@link PacketType(1)|MessagesData} packet list, ready for sending.
      *  @function PacketScribe.MessagesData&period;write
      *  @param {PacketScribe.MessagesDataDetails} info - The information needed for writing the packet list.
-     *  @returns {NLPacketList}
+     *  @returns {NLPacketList} The packet list, ready for sending.
      */
     write(info: MessagesDataDetails): NLPacketList {  /* eslint-disable-line class-methods-use-this */
         // C++  NLPacketList* MessagesClient::encodeMessagesPacket(QString channel, QString message, QUuid senderID)

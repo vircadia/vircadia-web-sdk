@@ -30,7 +30,7 @@ const MessagesUnsubscribe = new class {
      *  Writes a {@link PacketType(1)|MessagesUnsubscribe} packet list, ready for sending.
      *  @function PacketScribe.MessagesUnsubscribe&period;write
      *  @param {PacketScribe.MessagesUnsubscribeDetails} info - The information needed for writing the packet list.
-     *  @returns {NLPacketList}
+     *  @returns {NLPacketList} The packet list, ready for sending.
      */
     write(info: MessagesUnsubscribeDetails): NLPacketList {  /* eslint-disable-line class-methods-use-this */
         // C++  void MessagesClient::unsubscribe(QString channel)

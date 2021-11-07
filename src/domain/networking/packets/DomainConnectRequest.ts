@@ -76,7 +76,7 @@ const DomainConnectRequest = new class {
      *  Writes a {@link PacketType(1)|DomainConnectRequest} packet, ready for sending.
      *  @function PacketScribe.DomainConnectRequest&period;write
      *  @param {PacketScribe.DomainConnectRequestDetails} info - The information needed for writing the packet.
-     *  @returns {NLPacket}
+     *  @returns {NLPacket} The packet, ready for sending.
      */
     write(info: DomainConnectRequestDetails): NLPacket {  /* eslint-disable-line class-methods-use-this */
         // C++  NodeList::sendDomainServerCheckIn()

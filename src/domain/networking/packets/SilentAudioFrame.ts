@@ -99,7 +99,7 @@ const SilentAudioFrame = new class {
      *  Writes a {@link PacketType(1)|SilentAudioFrame} packet, ready for sending.
      *  @function PacketScribe.SilentAudioFrame&period;write
      *  @param {PacketScribe.SilentAudioFrameDetails} info - The information needed for writing the packet.
-     *  @returns {NLPacket}
+     *  @returns {NLPacket} The packet, ready for sending.
      */
     write(info: SilentAudioFrameDetails): NLPacket {  /* eslint-disable-line class-methods-use-this */
         // C++  void AbstractAudioInterface::emitAudioPacket(const void* audioData, size_t bytes, quint16& sequenceNumber,

@@ -44,9 +44,6 @@ class AvatarManager extends AvatarHashMap {
     #_lastSendAvatarDataTime = 0;
     #_myAvatarDataPacketsPaused = false;
 
-    // @ts-ignore
-    #_queryExpiry = 0;
-
 
     constructor(contextID: number) {
         // C++  AvatarManager(QObject* parent = 0);
@@ -121,7 +118,8 @@ class AvatarManager extends AvatarHashMap {
         }
 
         // C++  void Application::nodeActivated(Node* node)
-        this.#_queryExpiry = Date.now();
+
+        // WEBRTC TODO: Address further C++ code. - Query octree and avatars.
 
         // New avatar mixer, send off our identity packet on next update loop,
         // Reset skeletonModelUrl if the last server modified our choice.

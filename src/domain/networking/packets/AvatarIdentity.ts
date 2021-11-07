@@ -50,7 +50,7 @@ const AvatarIdentity = new class {
      *  Writes an {@link PacketType(1)|AvatarIdentity} packet list, ready for sending.
      *  @function PacketScribe.AvatarIdentity&period;write
      *  @param {PacketScribe.AvatarIdentityDetails} info - The information needed for writing the packet list.
-     *  @returns {NLPacketList}
+     *  @returns {NLPacketList} The packet list, ready for sending.
      */
     write(info: AvatarIdentityDetails): NLPacketList {  /* eslint-disable-line class-methods-use-this */
         // C++  int AvatarData::sendIdentityPacket()

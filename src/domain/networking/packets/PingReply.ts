@@ -36,7 +36,7 @@ const PingReply = new class {
      *  Writes a {@link PacketType(1)|PingReply} packet, ready for sending.
      *  @function PacketScribe.PingReply&period;write
      *  @param {PacketScribe.PingReplyDetails} info - The information needed for writing the packet.
-     *  @returns {NLPacket}
+     *  @returns {NLPacket} The packet, ready for sending.
      */
     write(info: PingReplyDetails): NLPacket {  /* eslint-disable-line class-methods-use-this */
         // C++  NLPacket* LimitedNodeList::constructPingReplyPacket(ReceivedMessage& message)
