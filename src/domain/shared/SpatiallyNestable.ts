@@ -8,7 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import Quat, { quat } from "./Quat";
 import Uuid from "./Uuid";
+import Vec3, { vec3 } from "./Vec3";
 
 
 /*@devdoc
@@ -42,6 +44,13 @@ class SpatiallyNestable {
 
     #_nestableType;
     #_id;
+
+    // WEBRTC TODO: Address further C++ code - Nested transforms instead of world position and orientation.
+    #_worldPosition = { x: 0, y: 0, z: 0 };
+    #_worldOrientation = { x: 0, y: 0, z: 0, w: 1 };
+
+    #_translationChanged = 0;
+    #_rotationChanged = 0;
 
 
     constructor(nestableType: NestableType, id: Uuid) {
@@ -79,6 +88,94 @@ class SpatiallyNestable {
         // WEBRTC TODO: Address further code. - Update children's parent ID links.
 
         this.#_id = id;
+    }
+
+    /*@devdoc
+     *  Gets the world position of the entity or avatar.
+     *  @returns {vec3} The world position of the entity or avatar.
+     */
+    getWorldPosition(): vec3 {
+        // C++  glm::vec3 getWorldPosition()
+
+        // WEBRTC TODO: Address further C++ code - Nestable transforms.
+
+        return this.#_worldPosition;
+    }
+
+    /*@devdoc
+     *  Sets the world position of the entity or avatar.
+     *  @param {vec3} The world position of the entity or avatar.
+     */
+    setWorldPosition(position: vec3): void {
+        // C++  void setWorldPosition(const glm::vec3& position)
+
+        // WEBRTC TODO: Address further C++ code - Nestable transforms.
+
+        if (!Vec3.equal(position, this.#_worldPosition)) {
+            this.#_worldPosition = position;
+            this.#_translationChanged = Date.now();
+        }
+    }
+
+    /*@devdoc
+     *  Gets the world orientation of the entity or avatar.
+     *  @returns {vec3} The world orientation of the entity or avatar.
+     */
+    getWorldOrientation(): quat {
+        // C++  glm::vec3 getWorldPosition()
+
+        // WEBRTC TODO: Address further C++ code - Nestable transforms.
+
+        return this.#_worldOrientation;
+    }
+
+    /*@devdoc
+     *  Sets the world orientation of the entity or avatar.
+     *  @param {quaat} The world orientation of the entity or avatar.
+     */
+    setWorldOrientation(orientation: quat): void {
+        // C++  void setWorldOrientation(const glm::quat& orientation)
+
+        // WEBRTC TODO: Address further C++ code - Nestable transforms.
+
+        if (!Quat.equal(orientation, this.#_worldOrientation)) {
+            this.#_worldOrientation = orientation;
+            this.#_rotationChanged = Date.now();
+        }
+    }
+
+    /*@devdoc
+     *  Gets the local orientation of the entity or avatar.
+     *  @returns {quat} The local orientation of the entity or avatar.
+     */
+    getLocalOrientation(): quat {
+        // C++  glm::quat getLocalOrientation()
+
+        // WEBRTC TODO: Address further C++ code - Nestable transforms.
+
+        return this.#_worldOrientation;
+    }
+
+    /*@devdoc
+     *  Gets whether the entity or avatar's translation has changed since a given time.
+     *  @param {number} time - The time in milliseconds elapsed since 1 Jan 1970 00:00:00 UTC.
+     *  @returns {boolean} <code>true</code> if the translation has changed since the given time, <code>false</code> if it
+     *      hasn't.
+     */
+    translationChangedSince(time: number): boolean {
+        // C++  bool tranlationChangedSince(quint64 time)
+        return this.#_translationChanged > time;
+    }
+
+    /*@devdoc
+     *  Gets whether the entity or avatar's rotation has changed since a given time.
+     *  @param {number} time - The time in milliseconds elapsed since 1 Jan 1970 00:00:00 UTC.
+     *  @returns {boolean} <code>true</code> if the rotation has changed since the given time, <code>false</code> if it
+     *      hasn't.
+     */
+    rotationChangedSince(time: number): boolean {
+        // C++  bool rotationChangedSince(quint64 time)
+        return this.#_rotationChanged > time;
     }
 
 }

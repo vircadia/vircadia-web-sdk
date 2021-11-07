@@ -550,6 +550,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.KillAvatar:
                 return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
+            case this.AvatarData:
+                return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.MixedAudio:
                 return this.#_AudioVersion.StopInjectors;
             case this.MicrophoneAudioNoEcho:

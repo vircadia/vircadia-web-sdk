@@ -211,15 +211,31 @@ class LimitedNodeList {
     /*@devdoc
      *  Sends a a solitary packet to an address, unreliably. The packet cannot be part of a multi-packet message.
      *  @param {NLPacket} packet - The packet to send.
-     *  @param {SockAddr} sockAddr - The address to send it to.
-     *  @param {HMACAuth} [hmacAuth=null] - The hash-based message authentication code.
+     *  @param {SockAddr|Node} sockAddr - The address to send it to.
+     *      <p>The node to send it to. Not sent if the node doesn't have an active socket.</p>
+     *  @param {HMACAuth|undefined} [hmacAuth=null] - The hash-based message authentication code.
+     *      <p>Not used.</p>
      *  @returns {number} The number of bytes sent.
      */
-    sendUnreliablePacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth: HMACAuth | null = null): number {
+    sendUnreliablePacket(packet: NLPacket, param1: SockAddr | Node, hmacAuth: HMACAuth | null = null): number {
         // C++  qint64 sendUnreliablePacket(const NLPacket& packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
+        //      qint64 sendUnreliablePacket(const NLPacket& packet, const Node& destinationNode)
 
         assert(!packet.isPartOfMessage(), "Cannot send a part-message packet unreliably!");
         assert(!packet.isReliable(), "Cannot send a reliable packet unreliably!");
+
+        if (param1 instanceof Node) {
+            const destinationNode = param1;
+
+            const destinationAddress = destinationNode.getActiveSocket();
+            if (!destinationAddress) {
+                return 0;
+            }
+
+            return this.sendUnreliablePacket(packet, destinationAddress, destinationNode.getAuthenticateHash());
+        }
+
+        const sockAddr = param1;
         assert(sockAddr.getType() === SocketType.WebRTC, "Destination is not a WebRTC socket!");
 
         // WEBRTC TODO: Address further C++ code.
@@ -301,6 +317,30 @@ class LimitedNodeList {
         return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
     }
 
+    /*@devdoc
+     *  Broadcasts a packet to all nodes of specified types.
+     *  @param {NLPacket} packet - The packet to broadcast.
+     *  @param {Set<NodeTypeValue>} destinationNodeTypes - The types of nodes to broadcast the packet to.
+     *  @returns {number} The number of nodes broadcast to.
+     */
+    broadcastToNodes(packet: NLPacket, destinationNodeTypes: Set<NodeTypeValue>): number {
+        // C++  unsigned int broadcastToNodes(NLPacket* packet, const NodeSet& destinationNodeTypes)
+        let n = 0;
+
+        for (const node of this.#_nodeHash.values()) {
+            if (destinationNodeTypes.has(node.getType())) {
+                if (packet.isReliable()) {
+                    const packetCopy = NLPacket.createCopy(packet);
+                    this.sendPacket(packetCopy as NLPacket, node);
+                } else {
+                    this.sendUnreliablePacket(packet, node);
+                }
+                n += 1;
+            }
+        }
+
+        return n;
+    }
 
     /*@devdoc
      *  Gets the assignment client node of a specified type, if present.

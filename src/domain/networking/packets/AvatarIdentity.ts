@@ -12,7 +12,7 @@ import NLPacketList from "../NLPacketList";
 import PacketType from "../udt/PacketHeaders";
 import SequenceNumber from "../udt/SequenceNumber";
 import UDT from "../udt/UDT";
-import { IdentityFlag } from "../../avatars/AvatarData";
+import { IdentityFlag } from "../../avatars/AvatarDataPacket";
 import Uuid from "../../shared/Uuid";
 
 

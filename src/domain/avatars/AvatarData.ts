@@ -17,24 +17,10 @@ import SequenceNumber from "../networking/udt/SequenceNumber";
 import ContextManager from "../shared/ContextManager";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import SpatiallyNestable, { NestableType } from "../shared/SpatiallyNestable";
+import { quat } from "../shared/Quat";
 import Uuid from "../shared/Uuid";
+import { vec3 } from "../shared/Vec3";
 
-
-/*@devdoc
- *  The <code>IdentifyFlag</code> namespace provides avatar identity data bit flags.
- *  @namespace IdentityFlag
- *  @property {number} none=0 - No flag bits are set. <em>Read-only.</em>
- *  @property {number} isReplicated=1 - Legacy. <em>Read-only.</em>
- *  @property {number} lookAtSnapping=2 - Enables the avatar's eyes to snap to look at another avatar's eyes when the other
- *      avatar is in line of sight. <em>Read-only.</em>
- *  @property {number} verificationFailed=4 - Legacy. <em>Read-only.</em>
- */
-enum IdentityFlag {
-    none = 0,
-    isReplicated = 0x1,
-    lookAtSnapping = 0x2,
-    verificationFailed = 0x4
-}
 
 /*@devdoc
  *  The <code>KillAvatarReason</code> namespace provides reasons that an avatar is killed.
@@ -46,11 +32,33 @@ enum IdentityFlag {
  *  @property {number} YourAvatarEnteredTheirBubble=4 - Your avatar entered their bubble.<em>Read-only.</em>
  */
 enum KillAvatarReason {
+    // C++  KillAvatarReason
     NoReason = 0,
     AvatarDisconnected,
     AvatarIgnored,
     TheirAvatarEnteredYourBubble,
     YourAvatarEnteredTheirBubble
+}
+
+/*@devdoc
+ *  The <code>AvatarDataDetail</code> namespace provides level of detail options for an {@link PacketTypeValue|AvatarData}
+ *  packet.
+ *  @namespace AvatarDataDetail
+ *  @property {number} NoData=0 - No data.
+ *  @property {number} PALMinimum=1 - Minimum data for "People" appL.
+ *  @property {number} MinimumData=2 - Minimum data.
+ *  @property {number} CullSmallData=3 - Cull small data.
+ *  @property {number} IncludeSmallData=4 - Include small data.
+ *  @property {number} SendAllData=5 - Send all data.
+ */
+enum AvatarDataDetail {
+    // C++  AvatarDataDetail
+    NoData = 0,
+    PALMinimum,
+    MinimumData,
+    CullSmallData,
+    IncludeSmallData,
+    SendAllData
 }
 
 
@@ -73,13 +81,15 @@ class AvatarData extends SpatiallyNestable {
     protected _sessionDisplayName: string | null = null;
     protected _sessionDisplayNameChanged = new SignalEmitter();
 
+    protected _globalPosition = { x: 0, y: 0, z: 0 };
+
+
     // Context
     #_nodeList;
 
     #_hasProcessedFirstIdentity = false;
     #_identitySequenceNumber = new SequenceNumber(0);  // Avatar identity sequence number.
     #_identityDataChanged = false;
-    // @ts-ignore
     #_lastToByteArray = 0;
 
     #_displayName: string | null = null;
@@ -87,6 +97,11 @@ class AvatarData extends SpatiallyNestable {
     #_lookAtSnappingEnabled = true;
     #_verificationFailed = false;
     #_isReplicated = false;
+
+    #_sequenceNumber = 0;  // Avatar data sequence number is a uint16 value.
+    readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
+
+    readonly #AVATAR_MIXER_NODE_SET = new Set([NodeType.AvatarMixer]);
 
 
     constructor(contextID: number) {
@@ -318,14 +333,107 @@ class AvatarData extends SpatiallyNestable {
      *  @param {boolean} sendAll - <code>true</code> to send a full update even if nothing has changed, <code>false</code> to
      *      exclude certain data that hasn't changed since the last send.
      */
-    // @ts-ignore
     sendAvatarDataPacket(sendAll = false): number {
-        // C++  int sendAvatarDataPacket(bool sendAll) {
+        // C++  int sendAvatarDataPacket(bool sendAll)
+        //      QByteArray MyAvatar::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
+        //      QByteArray AvatarData::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
 
-        // WEBRTC TODO: Address further C++ code.
+        // About 2% of the time we send a full update (in particular, we transmit all the joint data) even if nothing has
+        // changed. this is to guard against a joint moving once, the packet getting lost, and the joint never moving again.
 
+        const AVATAR_SEND_FULL_UPDATE_RATIO = 0.02;
+        const cullSmallData = !sendAll && Math.random() < AVATAR_SEND_FULL_UPDATE_RATIO;
+        const dataDetail = cullSmallData ? AvatarDataDetail.SendAllData : AvatarDataDetail.CullSmallData;
+
+        // C++  QByteArray MyAvatar::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
+        this._globalPosition = this.getWorldPosition();
+        //
+        // WEBRTC TODO: Address further C++ code - avatar bounding box.
+        //
+        // WEBRTC TODO: Address further C++ code - camera mode.
+        //
+
+        // C++  QByteArray AvatarData::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
+        const lastSentTime = this.#_lastToByteArray;
         this.#_lastToByteArray = Date.now();
-        return 0;
+        // SendStatus - Not used in user client.
+
+        // C++  From AvatarData::toByteArray()
+        this.#lazyInitHeadData();
+
+
+        const avatarDataDetails = {
+            sequenceNumber: this.#_sequenceNumber,
+
+            dataDetail,
+            lastSentTime,
+            // WEBRTC TODO: Address further C++ code - JointData.
+            // sendStatus, - Not used in user client.
+            dropFaceTracking: false,
+            distanceAdjust: false,
+            viewerPosition: { x: 0, y: 0, z: 0 },
+            // sentJointDataOut: null, - Not used in user client.
+            // maxDataSize: 0, - Not used in user client.
+            // WEBRTC TODO: Address further C+ code - AvatarDataRate.
+
+            avatarData: this
+        };
+
+
+        // WEBRTC TODO: It appears that the following retries are not needed because the AvatarData writing code only writes
+        // what fits. (Perhaps writing only what fits wasn't always the case, or perhaps it's only applicable on the server.)
+        //
+        // Not all avatar data can necessarily fit in a single packet so we try three times with a decreasing amount of data
+        // each time. The packet writer returns a 0-sized packet if writing overflowed.
+        let avatarPacket = PacketScribe.AvatarData.write(avatarDataDetails);
+
+        if (avatarPacket.getDataSize() === 0) {
+            // Try excluding face tracking.
+            avatarDataDetails.lastSentTime = this.#_lastToByteArray;
+            avatarDataDetails.dropFaceTracking = true;
+            this.#_lastToByteArray = Date.now();
+            avatarPacket = PacketScribe.AvatarData.write(avatarDataDetails);
+        }
+
+        if (avatarPacket.getDataSize() === 0) {
+            // Try minimum data detail.
+            avatarDataDetails.lastSentTime = this.#_lastToByteArray;
+            avatarDataDetails.dataDetail = AvatarDataDetail.MinimumData;
+            this.#_lastToByteArray = Date.now();
+            avatarPacket = PacketScribe.AvatarData.write(avatarDataDetails);
+        }
+
+        if (avatarPacket.getDataSize() === 0) {
+            console.warn("[avatars] Data overflow in PacketScribe.AvatarDetail.write()!");
+            return 0;
+        }
+
+        this.#_sequenceNumber = (this.#_sequenceNumber + 1) % this.#SEQUENCE_NUMBER_MODULO;
+
+        this.#doneEncoding(cullSmallData);
+
+        this.#_nodeList.broadcastToNodes(avatarPacket, this.#AVATAR_MIXER_NODE_SET);
+
+        return avatarPacket.getWireSize();
+    }
+
+
+    /*@devdoc
+     *  Gets the avatar's world position.
+     *  @returns {vec3} The avatar's world position.
+     */
+    getPositionOutbound(): vec3 {
+        // C++  N/A
+        return this._globalPosition;
+    }
+
+    /*@devdoc
+     *  Gets the avatar's world orientation.
+     *  @returns {quat} The avatar's world orientation.
+     */
+    getOrientationOutbound(): quat {
+        // C++  glm::quat getOrientationOutbound()
+        return this.getLocalOrientation();
     }
 
 
@@ -335,7 +443,27 @@ class AvatarData extends SpatiallyNestable {
         // C++  void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName)
         // No-op.
     }
+
+
+    // eslint-disable-next-line class-methods-use-this
+    #lazyInitHeadData(): void {
+        // C++  void AvatarData::lazyInitHeadData()
+        // Lazily allocate memory for HeadData in case we're not an Avatar instance.
+
+        // WEBRTC TODO: Address further C++ code - Head data.
+
+    }
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    #doneEncoding(cullSmallChanges: boolean): void {  // eslint-disable-line
+        // C++  void doneEncoding(bool cullSmallChanges)
+
+        // WEBRTC TODO: Address further C++ code - Joint data.
+
+    }
+
 }
 
 export default AvatarData;
-export { IdentityFlag, KillAvatarReason };
+export { KillAvatarReason, AvatarDataDetail };

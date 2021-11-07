@@ -23,6 +23,8 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.PingReply.write).toBe("function");
         expect(typeof PacketScribe.KillAvatar).toBe("object");
         expect(typeof PacketScribe.KillAvatar.read).toBe("function");
+        expect(typeof PacketScribe.AvatarData).toBe("object");
+        expect(typeof PacketScribe.AvatarData.write).toBe("function");
         expect(typeof PacketScribe.MixedAudio).toBe("object");
         expect(typeof PacketScribe.MixedAudio.read).toBe("function");
         expect(typeof PacketScribe.MicrophoneAudioNoEcho).toBe("object");
