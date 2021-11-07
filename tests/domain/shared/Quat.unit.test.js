@@ -17,4 +17,14 @@ describe("Quat - unit tests", () => {
         expect(Quat.IDENTITY).toStrictEqual({ x: 0, y: 0, z: 0, w: 1 });
     });
 
+    test("Quat.equal() tests equality", () => {
+        const q1 = { x: 0.1, y: 0, z: 0, w: 0.949 };
+        const q2 = { x: 0.1, y: 0, z: 0, w: 0.949 };
+        const q3 = { x: 0, y: 0.1, z: 0, w: 0.949 };
+
+        expect(Quat.equal(q1, q1)).toBe(true);
+        expect(Quat.equal(q1, q2)).toBe(true);
+        expect(Quat.equal(q2, q3)).toBe(false);
+    });
+
 });

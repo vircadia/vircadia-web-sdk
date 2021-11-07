@@ -17,4 +17,14 @@ describe("Vec3 - unit tests", () => {
         expect(Vec3.ZERO).toStrictEqual({ x: 0, y: 0, z: 0 });
     });
 
+    test("Vec3.equal() tests equality", () => {
+        const v1 = { x: 1, y: 2, z: 3 };
+        const v2 = { x: 1, y: 2, z: 3 };
+        const v3 = { x: 10, y: 2, z: 3 };
+
+        expect(Vec3.equal(v1, v1)).toBe(true);
+        expect(Vec3.equal(v1, v2)).toBe(true);
+        expect(Vec3.equal(v2, v3)).toBe(false);
+    });
+
 });
