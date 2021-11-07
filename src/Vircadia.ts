@@ -18,7 +18,7 @@
  */
 const Vircadia = new class {
 
-    readonly #_version = "0.0.3";  // Version number is also in package.json.
+    readonly #_version = "0.0.4";  // Version number is also in package.json.
 
     get version() {
         return this.#_version;
