@@ -17,6 +17,23 @@ describe("Vec3 - unit tests", () => {
         expect(Vec3.ZERO).toStrictEqual({ x: 0, y: 0, z: 0 });
     });
 
+    test("Vec3.isValid() checks that values are valid", () => {
+        expect(Vec3.isValid()).toBe(false);
+        expect(Vec3.isValid(undefined)).toBe(false);
+        expect(Vec3.isValid(null)).toBe(false);
+        expect(Vec3.isValid("")).toBe(false);
+        expect(Vec3.isValid(1)).toBe(false);
+        expect(Vec3.isValid({})).toBe(false);
+        expect(Vec3.isValid({ x: null, y: null, z: null })).toBe(false);
+        expect(Vec3.isValid({ x: undefined, y: undefined, z: undefined })).toBe(false);
+        expect(Vec3.isValid({ x: {}, y: {}, z: {} })).toBe(false);
+        expect(Vec3.isValid({ x: 0, y: 1, z: null })).toBe(false);
+        expect(Vec3.isValid({ x: "0", y: "1", z: "2" })).toBe(false);
+        expect(Vec3.isValid({ x: 0, y: 1, z: 2, w: 3 })).toBe(false);
+        expect(Vec3.isValid({ x: 0, y: 1 })).toBe(false);
+        expect(Vec3.isValid({ x: 0, y: 1, z: 2 })).toBe(true);
+    });
+
     test("Vec3.equal() tests equality", () => {
         const v1 = { x: 1, y: 2, z: 3 };
         const v2 = { x: 1, y: 2, z: 3 };

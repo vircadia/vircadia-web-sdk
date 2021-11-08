@@ -25,6 +25,8 @@ type vec3 = {
  */
 const Vec3 = new class {
 
+    /* eslint-disable class-methods-use-this */
+
     /*@sdkdoc
      *  A 3-dimensional vector value.
      *  @typedef {object} vec3
@@ -34,8 +36,24 @@ const Vec3 = new class {
      */
 
 
-    get ZERO(): vec3 {  // eslint-disable-line class-methods-use-this
+    get ZERO(): vec3 {
         return { x: 0, y: 0, z: 0 };
+    }
+
+
+    /*@sdkdoc
+     *  Checks whether a value is a valid <code>vec3</code> value: is an object with only x, y, z keys that have number values.
+     *  @param {any} value - The value to check.
+     *  @returns {boolean} <code>true</code> if the value is a valid <code>vec3</code> value, <code>false</code> if it isn't.
+     */
+    isValid(value: any): boolean {
+        return value !== null
+            && value !== undefined
+            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+            && Object.keys(value).length === 3
+            && "x" in value && "y" in value && "z" in value
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            && typeof value.x === "number" && typeof value.y === "number" && typeof value.z === "number";
     }
 
 
@@ -46,9 +64,12 @@ const Vec3 = new class {
      *  @param {vec3} v2 - The second vector.
      *  @returns {boolean} <vode>true</code> if the two vectors are exactly equal, <code>false</code> if they aren't.
      */
-    equal(v1: vec3, v2: vec3): boolean {  // eslint-disable-line class-methods-use-this
+    equal(v1: vec3, v2: vec3): boolean {
         return v1.x === v2.x && v1.y === v2.y && v1.z === v2.z;
     }
+
+
+    /* eslint-enable class-methods-use-this */
 
 }();
 
