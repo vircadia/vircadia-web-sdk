@@ -173,12 +173,15 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         posY.value = avatarPosition.y;
         posZ.value = avatarPosition.z;
 
-        function onPositionBlur() {
+        function onPositionChange() {
             avatarMixer.myAvatar.position = { x: parseFloat(posX.value), y: parseFloat(posY.value), z: parseFloat(posZ.value) };
         }
-        posX.addEventListener("blur", onPositionBlur);
-        posY.addEventListener("blur", onPositionBlur);
-        posZ.addEventListener("blur", onPositionBlur);
+        posX.addEventListener("blur", onPositionChange);
+        posY.addEventListener("blur", onPositionChange);
+        posZ.addEventListener("blur", onPositionChange);
+        posX.addEventListener("change", onPositionChange);
+        posY.addEventListener("change", onPositionChange);
+        posZ.addEventListener("change", onPositionChange);
 
     }());
 
