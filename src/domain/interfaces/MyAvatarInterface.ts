@@ -11,6 +11,7 @@
 import AvatarManager from "../AvatarManager";
 import ContextManager from "../shared/ContextManager";
 import { Signal } from "../shared/SignalEmitter";
+import Vec3, { vec3 } from "../shared/Vec3";
 
 
 /*@sdkdoc
@@ -23,6 +24,7 @@ import { Signal } from "../shared/SignalEmitter";
  *  @property {string} sessionDisplayName - The user client's session display name, assigned by the domain server based on the
  *      avatar display name. It is unique among all avatars present in the domain. <em>Read-only.</em>
  *  @property {Signal} sessionDisplayNameChanged - Triggered when the session display name changes.
+ *  @property {vec3} position - The position of the avatar.
  */
 // Don't document the constructor because it shouldn't be used in the SDK.
 class MyAvatarInterface {
@@ -43,7 +45,7 @@ class MyAvatarInterface {
 
     set displayName(displayName: string) {
         if (typeof displayName !== "string") {
-            console.error("[AvatarMixer] [MyAvatar] Tried to set invalid display name!");
+            console.error("[AvatarMixer] [MyAvatar] Tried to set invalid display name!", JSON.stringify(displayName));
             return;
         }
         this.#_avatarManager.getMyAvatar().displayName = displayName;
@@ -60,6 +62,18 @@ class MyAvatarInterface {
 
     get sessionDisplayNameChanged(): Signal {
         return this.#_avatarManager.getMyAvatar().sessionDisplayNameChanged;
+    }
+
+    get position(): vec3 {
+        return this.#_avatarManager.getMyAvatar().position;
+    }
+
+    set position(position: vec3) {
+        if (!Vec3.valid(position)) {
+            console.error("[AvatarMixer] [MyAvatar] Tried to set an invalid position value!", JSON.stringify(position));
+            return;
+        }
+        this.#_avatarManager.getMyAvatar().position = position;
     }
 
 }

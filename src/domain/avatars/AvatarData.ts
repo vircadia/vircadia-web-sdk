@@ -74,6 +74,7 @@ enum AvatarDataDetail {
  *  @property {string|null} sessionDisplayName - The avatar's session display name as assigned by the avatar mixer. It is based
  *      on the display name and is unique among all avatars present in the domain. <em>Read-only.</em>
  *  @property {Signal} sessionDisplayNameChanged - Triggered when the avatar's session display name changes.
+ *  @property {vec3} position - The position of the avatar.
  */
 class AvatarData extends SpatiallyNestable {
     // C++  class AvatarData : public QObject, public SpatiallyNestable
@@ -131,6 +132,14 @@ class AvatarData extends SpatiallyNestable {
 
     get sessionDisplayNameChanged(): Signal {
         return this._sessionDisplayNameChanged.signal();
+    }
+
+    get position(): vec3 {
+        return this.getWorldPosition();
+    }
+
+    set position(position: vec3) {
+        this.setWorldPosition(position);
     }
 
 
