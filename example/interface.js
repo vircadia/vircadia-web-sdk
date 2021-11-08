@@ -129,6 +129,10 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         const statusText = document.getElementById("avatarMixerStatus");
         const myAvatarDisplayName = document.getElementById("myAvatarDisplayName");
         const myAvatarSessionDisplayName = document.getElementById("myAvatarSessionDisplayName");
+        const posX = document.getElementById("avatarMixerPosX");
+        const posY = document.getElementById("avatarMixerPosY");
+        const posZ = document.getElementById("avatarMixerPosZ");
+
         myAvatarDisplayName.value = avatarMixer.myAvatar.displayName;
         avatarMixer.myAvatar.displayNameChanged.connect(() => {
             myAvatarDisplayName.value = avatarMixer.myAvatar.displayName;
@@ -163,6 +167,18 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         onAvatarsChanged();  // Display initial data.
         avatarMixer.avatarList.avatarAdded.connect(onAvatarsChanged);
         avatarMixer.avatarList.avatarRemoved.connect(onAvatarsChanged);
+
+        const avatarPosition = avatarMixer.myAvatar.position;
+        posX.value = avatarPosition.x;
+        posY.value = avatarPosition.y;
+        posZ.value = avatarPosition.z;
+
+        function onPositionBlur() {
+            avatarMixer.myAvatar.position = { x: parseFloat(posX.value), y: parseFloat(posY.value), z: parseFloat(posZ.value) };
+        }
+        posX.addEventListener("blur", onPositionBlur);
+        posY.addEventListener("blur", onPositionBlur);
+        posZ.addEventListener("blur", onPositionBlur);
 
     }());
 
