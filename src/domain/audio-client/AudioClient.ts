@@ -259,8 +259,11 @@ class AudioClient {
             }
         }
 
-        if (!supportedFormat) {
-            console.log("[audioclient] Audio input device is not available, using dummy input.");
+        if (!inputDevice || !supportedFormat) {
+            // The SDK uses a null inputDevice when the mic is muted.
+            if (inputDevice) {
+                console.log("[audioclient] Audio input device is not available, using dummy input.");
+            }
 
             // WEBRTC TODO: Address further C++.
 
