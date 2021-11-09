@@ -46,6 +46,7 @@ const Vec3 = new class {
      *  @param {any} value - The value to check.
      *  @returns {boolean} <code>true</code> if the value is a valid <code>vec3</code> value, <code>false</code> if it isn't.
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     valid(value: any): boolean {
         return value !== null
             && value !== undefined
