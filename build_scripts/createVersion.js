@@ -13,7 +13,7 @@ const fse = require('fs-extra');
 var gitVer = require('child_process').execSync('git rev-parse --short HEAD').toString().trim();
 var gitVerFull = require('child_process').execSync('git rev-parse HEAD').toString().trim();
 var packageVersion = process.env.npm_package_version;
-const filePath = './dist/VERSION.json';
+const filePath = './VERSION.json';
 
 console.log('Found package version', packageVersion);
 console.log('Found Git commit short hash', gitVer);
