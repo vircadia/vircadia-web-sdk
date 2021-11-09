@@ -10,6 +10,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import versionInfo from "../dist/VERSION.json";
+
 /*@sdkdoc
  *  The <code>Vircadia</code> API provides information on the Vircadia SDK.
  *
@@ -18,10 +20,11 @@
  */
 const Vircadia = new class {
 
-    readonly #_version = "0.0.4";  // Version number is also in package.json.
-
     get version() {
-        return this.#_version;
+        return versionInfo["npm-package-version"];
+    }
+    get verboseVersion() {
+        return versionInfo["version-tag"];
     }
 
 }();
