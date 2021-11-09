@@ -120,10 +120,9 @@ class WebRTCSocket {
                     // Fall through.
             }
         }
-        if (this.#_webrtcSignalingChannel !== null) {
+        if (nodeType === NodeTypeValue.DomainServer && this.#_webrtcSignalingChannel !== null) {
             switch (this.#_webrtcSignalingChannel.readyState) {
                 case WebRTCSignalingChannel.OPEN:
-                    return WebRTCSocket.SIGNALING;
                 case WebRTCSignalingChannel.CONNECTING:
                     return WebRTCSocket.SIGNALING;
                 default:
