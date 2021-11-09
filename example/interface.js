@@ -230,6 +230,12 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
 
     }());
 
+    // Wire up mixers.
+    audioMixer.positionGetter = () => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return avatarMixer.myAvatar.position;
+    };
+
     // Game loop.
     (function () {
         const MS_PER_S = 1000;

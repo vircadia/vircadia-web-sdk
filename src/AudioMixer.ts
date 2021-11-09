@@ -15,6 +15,8 @@ import AudioOutput from "./domain/audio/AudioOutput";
 import AudioClient from "./domain/audio-client/AudioClient";
 import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
+import Vec3 from "./domain/shared/Vec3";
+import type { AudioPositionGetter } from "./domain/audio-client/AudioClient";
 
 
 /*@sdkdoc
@@ -51,6 +53,9 @@ import ContextManager from "./domain/shared/ContextManager";
  *  @property {boolean} inputMuted=false - <code>true</code> to mute the <code>audioInput</code> so that it is not sent to the
  *      audio mixer, <code>false</code> to let it be sent.
  *      <p>When muted, processing of audio input is suspended. This halts hardware processing, reducing CPU/battery usage.</p>
+ *  @property {AudioPositionGetter} positionGetter - The function to call in order to get the position of the user client's
+ *      audio.
+ *      <em>Read-only.</em>
  */
 class AudioMixer extends AssignmentClient {
     // C++  Application.cpp
@@ -130,6 +135,24 @@ class AudioMixer extends AssignmentClient {
             return;
         }
         this.#_audioClient.setMuted(inputMuted);
+    }
+
+    set positionGetter(positionGetter: AudioPositionGetter) {
+        if (typeof positionGetter !== "function") {
+            console.error("Tried to set an invalid AudioMixer.positionGetter value! Getter is not a function.");
+            this.#_audioClient.setPositionGetter(() => {
+                return Vec3.ZERO;
+            });
+            return;
+        }
+        if (!Vec3.valid(positionGetter())) {
+            console.error("Tried to set an invalid AudioMixer.positionGetter value! Getter doesn't return a vec3.");
+            this.#_audioClient.setPositionGetter(() => {
+                return Vec3.ZERO;
+            });
+            return;
+        }
+        this.#_audioClient.setPositionGetter(positionGetter);
     }
 
 
