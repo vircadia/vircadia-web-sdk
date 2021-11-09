@@ -10,7 +10,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import versionInfo from "../dist/VERSION.json";
+import versionInfo from "../VERSION.json";
 
 /*@sdkdoc
  *  The <code>Vircadia</code> API provides information on the Vircadia SDK.
