@@ -149,7 +149,8 @@ const enum PacketTypeValue {
  *      {@link PacketScribe.PingReplyDetails}.
  *  @property {PacketType} KillAvatar - <code>5</code> - The avatar mixer sends this to the user client when another user client
  *      disconnects from the domain.
- *  @property {PacketType} AvatarData - <code>6</code>
+ *  @property {PacketType} AvatarData - <code>6</code> - The user client sends this to the avatar mixer with details of the user
+ *      client's avatar.
  *  @property {PacketType} InjectAudio - <code>7</code>
  *  @property {PacketType} MixedAudio - <code>8</code> - The audio mixer repeatedly sends this to the user client when there is
  *      audio to play at the user client's audio position.

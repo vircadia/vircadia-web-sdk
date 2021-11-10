@@ -8,14 +8,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { default as AvatarDataObject } from "../../../../src/domain/avatars/AvatarData";
-import AddressManager from "../../../../src/domain/networking/AddressManager";
 import NLPacket from "../../../../src/domain/networking/NLPacket";
-import NodeList from "../../../../src/domain/networking/NodeList";
 import AvatarData from "../../../../src/domain/networking/packets/AvatarData";
 import PacketType from "../../../../src/domain/networking/udt/PacketHeaders";
 import UDT from "../../../../src/domain/networking/udt/UDT";
-import ContextManager from "../../../../src/domain/shared/ContextManager";
 
 import { buffer2hex } from "../../../testUtils";
 
@@ -28,12 +24,6 @@ describe("AvatarData - unit tests", () => {
     test("Can write an AvatarData packet - global position only", () => {
         // eslint-disable-next-line max-len
 
-        const contextID = ContextManager.createContext();
-        ContextManager.set(contextID, AddressManager);  // Required by NodeList.
-        ContextManager.set(contextID, NodeList, contextID);
-        const avatarData = new AvatarDataObject(contextID);
-        avatarData._globalPosition = { x: 3.5, y: 7.0, z: -1.0 };
-
         const EXPECTED_PACKET = "000000000636000000000000000000000000000000000000d4070100000060400000e040000080bf";
         const packet = AvatarData.write({
             sequenceNumber: 2004,
@@ -42,7 +32,7 @@ describe("AvatarData - unit tests", () => {
             dropFaceTracking: false,
             distanceAdjust: false,
             viewerPosition: { x: 0, y: 0, z: 0 },
-            avatarData
+            globalPosition: { x: 3.5, y: 7.0, z: -1.0 }
         });
         expect(packet instanceof NLPacket).toBe(true);
         expect(packet.getType()).toBe(PacketType.AvatarData);

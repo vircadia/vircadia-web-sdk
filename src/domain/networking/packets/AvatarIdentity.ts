@@ -13,6 +13,7 @@ import PacketType from "../udt/PacketHeaders";
 import SequenceNumber from "../udt/SequenceNumber";
 import UDT from "../udt/UDT";
 import { IdentityFlag } from "../../avatars/AvatarDataPacket";
+import assert from "../../shared/assert";
 import Uuid from "../../shared/Uuid";
 
 
@@ -32,7 +33,8 @@ const AvatarIdentity = new class {
     // C++  N/A
 
     /*@devdoc
-     *  Information needed for {@link PacketScribe|writing} an {@link PacketType(1)|AvatarIdentity} packet.
+     *  Information provided by {@link PacketScribe|reading} or needed for {@link PacketScribe|writing} an
+     *  {@link PacketType(1)|AvatarIdentity} packet.
      *  @typedef {object} PacketScribe.AvatarIdentityDetails
      *  @property {Uuid} sessionUUID - The session UUID assigned to the avatar by the domain server.
      *  @property {SequenceNumber} identitySequenceNumber - The sequence number of the avatar identity. Increments each time the
@@ -87,7 +89,7 @@ const AvatarIdentity = new class {
     }
 
     /*@devdoc
-     *  Reads a {@link PacketType(1)|AvatarIdentity} multi-packet message containing the identity details of one or more
+     *  Reads an {@link PacketType(1)|AvatarIdentity} multi-packet message containing the identity details of one or more
      *  avatars.
      *  @function PacketScribe.AvatarIdentity&period;read
      *  @param {DataView} data - The AvatarIdentity message data to read.
@@ -171,6 +173,10 @@ const AvatarIdentity = new class {
                 verificationFailed
             });
         }
+
+        /* eslint-enable @typescript-eslint/no-magic-numbers */
+
+        assert(dataPosition === data.byteLength);
 
         return avatarIdentityDetailsList;
     }

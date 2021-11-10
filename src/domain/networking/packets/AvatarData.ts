@@ -11,15 +11,16 @@
 import NLPacket from "../NLPacket";
 import PacketType from "../udt/PacketHeaders";
 import UDT from "../udt/UDT";
-import { default as AvatarDataObject, AvatarDataDetail } from "../../avatars/AvatarData";
+import { AvatarDataDetail } from "../../avatars/AvatarData";
 import AvatarDataPacket from "../../avatars/AvatarDataPacket";
+import assert from "../../shared/assert";
 import { vec3 } from "../../shared/Vec3";
 
 
 type AvatarDataDetails = {
-    sequenceNumber: number,  // C++  AvatarDataSequenceNumber = uint16_t
 
-    // C++ toByteArray() parameters.
+    // Packet writing.
+    sequenceNumber: number,  // C++  AvatarDataSequenceNumber = uint16_t
     dataDetail: AvatarDataDetail,
     lastSentTime: number,
     // WEBRTC TODO: Address further C++ code - JointData.
@@ -31,8 +32,8 @@ type AvatarDataDetails = {
     // maxDataSize: number, - Always 0 in user client.
     // WEBRTC TODO: Address further C++ code - AvatarDataRate.
 
-    // Other data.
-    avatarData: AvatarDataObject
+    // Avatar data.
+    globalPosition: vec3 | undefined
 };
 
 
@@ -40,22 +41,24 @@ const AvatarData = new class {
     // C++  N/A
 
     /*@devdoc
-     *  Information needed for {@link PacketScribe|writing} a {@link PacketType(1)|AvatarData} packet.
+     *  Information needed for {@link PacketScribe|writing} an {@link PacketType(1)|AvatarData} packet. Not all properties are
+     *  necessarily needed &mdash; those not needed may be <code>undefined</code>.
      *  @typedef {object} PacketScribe.AvatarDataDetails
      *  @param {SequenceNumber} sequenceNumber - The 2-byte sequence number of the avatar data. This increments each time an
      *      AvatarData packet is sent.
-     *  @property {AcatarDataDetail} dataDetail - The level of detail to send.
+     *  @property {AvatarDataDetail} dataDetail - The level of detail to send.
      *  @property {number} lastSentTime - The last time that an AvatarData packet was sent, as the number of milliseconds since
      *      1 Jan 1970.
      *  @property {boolean} dropFaceTracking
      *  @property {boolean} distanceAdjust
      *  @property {vec3} viewerPosition
-     *  @property {AvatarData} avatarData: The AvatarData object as the source for avatar data to send.
+     *
+     *  @property {vec3} globalPosition - The avatar's position in the domain.
      */
 
 
     /*@devdoc
-     *  Writes a {@link PacketType(1)|AvatarData} packet, ready for sending.
+     *  Writes an {@link PacketType(1)|AvatarData} packet, ready for sending.
      *  @function PacketScribe.AvatarData&period;write
      *  @param {PacketScribe.AvatarDataDetails} info - The information needed for writing the packet.
      *  @returns {NLPacket} The  packet, ready for sending, or a 0-sized packet if the requested data couldn't fit into a single
@@ -208,7 +211,8 @@ const AvatarData = new class {
 
 
             if (avatarSpace(AvatarDataPacket.PACKET_HAS_AVATAR_GLOBAL_POSITION, 12)) {
-                const globalPosition = info.avatarData.getPositionOutbound();
+                const globalPosition = info.globalPosition;
+                assert(globalPosition !== undefined);
                 data.setFloat32(dataPosition, globalPosition.x, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
                 data.setFloat32(dataPosition, globalPosition.y, UDT.LITTLE_ENDIAN);

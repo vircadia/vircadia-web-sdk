@@ -25,7 +25,7 @@ const MessagesData = new class {
     // C++  N/A
 
     /*@devdoc
-     *  Information needed for {@link PacketScribe|reading} or {@link PacketScribe|writing} a
+     *  Information returned by {@link PacketScribe|reading} or needed for {@link PacketScribe|writing} a
      *  {@link PacketType(1)|MessagesData} packet list.
      *  @typedef {object} PacketScribe.MessagesDataDetails
      *  @property {string} channel - The message channel to send on.
