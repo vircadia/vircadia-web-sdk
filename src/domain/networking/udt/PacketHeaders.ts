@@ -158,7 +158,8 @@ const enum PacketTypeValue {
  *      audio to play at the user client's audio position. The audio mixer should not echo the audio back to the user client.
  *  @property {PacketType} MicrophoneAudioWithEcho - <code>10</code> - The user client sends this to the audio mixer with user
  *      audio to play at the user client's audio position. The audio mixer should echo the audio back to the user client.
- *  @property {PacketType} BulkAvatarData - <code>11</code>
+ *  @property {PacketType} BulkAvatarData - <code>11</code> - The avatar mixer sends this to the user client to keep it up to
+ *      date with the details of avatars in the domain, including the user client's avatar.
  *  @property {PacketType} SilentAudioFrame - <code>12</code> - The user client repeatedly sends this to the audio mixer when
  *      there isn't any audio (microphone) input from the user. The user client's audio position is included. The audio mixer
  *      repeatedly sends this to the user client when there isn't any audio to play at the user client's audio position.

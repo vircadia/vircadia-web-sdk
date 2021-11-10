@@ -82,8 +82,6 @@ class AvatarData extends SpatiallyNestable {
     protected _sessionDisplayName: string | null = null;
     protected _sessionDisplayNameChanged = new SignalEmitter();
 
-    protected _globalPosition = { x: 0, y: 0, z: 0 };
-
 
     // Context
     #_nodeList;
@@ -355,7 +353,8 @@ class AvatarData extends SpatiallyNestable {
         const dataDetail = cullSmallData ? AvatarDataDetail.SendAllData : AvatarDataDetail.CullSmallData;
 
         // C++  QByteArray MyAvatar::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
-        this._globalPosition = this.getWorldPosition();
+        //
+        // WEBRTC TODO: Address further C++ code - avatar transits.
         //
         // WEBRTC TODO: Address further C++ code - avatar bounding box.
         //
@@ -385,7 +384,7 @@ class AvatarData extends SpatiallyNestable {
             // maxDataSize: 0, - Not used in user client.
             // WEBRTC TODO: Address further C+ code - AvatarDataRate.
 
-            avatarData: this
+            globalPosition: this.getPositionOutbound()
         };
 
 
@@ -433,7 +432,7 @@ class AvatarData extends SpatiallyNestable {
      */
     getPositionOutbound(): vec3 {
         // C++  N/A
-        return this._globalPosition;
+        return this.getWorldPosition();
     }
 
     /*@devdoc

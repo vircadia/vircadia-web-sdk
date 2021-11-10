@@ -16,6 +16,7 @@ import KillAvatar from "./KillAvatar";
 import AvatarData from "./AvatarData";
 import MixedAudio from "./MixedAudio";
 import MicrophoneAudioNoEcho from "./MicrophoneAudioNoEcho";
+import BulkAvatarData from "./BulkAvatarData";
 import SilentAudioFrame from "./SilentAudioFrame";
 import DomainListRequest from "./DomainListRequest";
 import DomainConnectionDenied from "./DomainConnectionDenied";
@@ -48,6 +49,8 @@ import SelectedAudioFormat from "./SelectedAudioFormat";
  *      {@link PacketScribe.MixedAudio&period;read|MixedAudio&period;read}
  *  @property {function} MicrophoneAudioNoEcho.write -
  *      {@link PacketScribe.MicrophoneAudioNoEcho&period;write|MixedAudio&period;write}
+ *  @property {function} BulkAvatarData.read -
+ *      {@link PacketScribe.BulkAvatarData&period;read|BulkAvatarData&period;read}
  *  @property {function} SilentAudioFrame.read -
  *      {@link PacketScribe.SilentAudioFrame&period;read|SilentAudioFrame&period;read}
  *  @property {function} SilentAudioFrame.write -
@@ -94,6 +97,7 @@ const PacketScribe = {
     AvatarData,
     MixedAudio,
     MicrophoneAudioNoEcho,
+    BulkAvatarData,
     SilentAudioFrame,
     DomainListRequest,
     DomainConnectionDenied,

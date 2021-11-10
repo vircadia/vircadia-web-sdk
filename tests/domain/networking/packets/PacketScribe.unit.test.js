@@ -29,6 +29,8 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.MixedAudio.read).toBe("function");
         expect(typeof PacketScribe.MicrophoneAudioNoEcho).toBe("object");
         expect(typeof PacketScribe.MicrophoneAudioNoEcho.write).toBe("function");
+        expect(typeof PacketScribe.BulkAvatarData).toBe("object");
+        expect(typeof PacketScribe.BulkAvatarData.read).toBe("function");
         expect(typeof PacketScribe.SilentAudioFrame).toBe("object");
         expect(typeof PacketScribe.SilentAudioFrame.read).toBe("function");
         expect(typeof PacketScribe.SilentAudioFrame.write).toBe("function");
