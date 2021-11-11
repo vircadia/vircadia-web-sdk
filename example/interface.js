@@ -233,6 +233,9 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
         }
         avatarMixer.avatarList.avatarRemoved.connect(onAvatarRemoved);
 
+        // Special first entry for own avatar.
+        // This uses AVATAR_SELF_ID instead of the NULL value returned by AvatarMixer.avatarList.getAvatarIDs() so that the
+        // value can be used retrieve avatar details.
         onAvatarAdded(new Uuid(Uuid.AVATAR_SELF_ID));
 
 
