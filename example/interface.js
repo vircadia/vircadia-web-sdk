@@ -207,12 +207,15 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
             tr.appendChild(td);
             const position = avatar.position;
             td = document.createElement("td");
+            td.className = "number";
             td.innerHTML = position.x.toFixed(NUM_DECIMAL_PLACES);
             tr.appendChild(td);
             td = document.createElement("td");
+            td.className = "number";
             td.innerHTML = position.y.toFixed(NUM_DECIMAL_PLACES);
             tr.appendChild(td);
             td = document.createElement("td");
+            td.className = "number";
             td.innerHTML = position.z.toFixed(NUM_DECIMAL_PLACES);
             tr.appendChild(td);
             avatarListBody.appendChild(tr);

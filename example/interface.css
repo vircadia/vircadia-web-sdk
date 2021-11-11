@@ -73,3 +73,7 @@ th {
     border-bottom: 1px solid #808080;
     font-weight: normal;
 }
+
+td.number {
+    text-align: right;
+}
