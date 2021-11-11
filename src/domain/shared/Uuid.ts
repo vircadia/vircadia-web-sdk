@@ -79,14 +79,12 @@ class Uuid extends BigInt {
      */
     stringify(): string {
         /* eslint-disable @typescript-eslint/no-magic-numbers */
-        if (this.value() !== 0n) {
-            const hexadecimal = this.value().toString(16);
-            return hexadecimal.slice(0, 8) + "-" + hexadecimal.slice(8, 12) + "-" + hexadecimal.slice(12, 16) + "-"
-                + hexadecimal.slice(16, 20) + "-" + hexadecimal.slice(20);
-        }
+        const hexadecimal = this.value()
+            .toString(16)
+            .padStart(32, "0");
+        return hexadecimal.slice(0, 8) + "-" + hexadecimal.slice(8, 12) + "-" + hexadecimal.slice(12, 16) + "-"
+            + hexadecimal.slice(16, 20) + "-" + hexadecimal.slice(20);
         /* eslint-enable @typescript-eslint/no-magic-numbers */
-
-        return "00000000-0000-0000-0000-000000000000";
     }
 
 }

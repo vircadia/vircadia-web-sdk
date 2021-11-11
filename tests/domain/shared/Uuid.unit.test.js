@@ -47,4 +47,9 @@ describe("Uuid - unit tests", () => {
         expect(uuid.stringify()).toBe("00000000-0000-0000-0000-000000000000");
     });
 
+    test("Can stringify a Uuid with leading 0s", () => {
+        const uuid = new Uuid(1n);
+        expect(uuid.stringify()).toBe("00000000-0000-0000-0000-000000000001");
+    });
+
 });
