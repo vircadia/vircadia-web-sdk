@@ -9,13 +9,14 @@
 //
 
 import AvatarManager from "../AvatarManager";
+import ScriptAvatar from "../avatar-renderer/ScriptAvatar";
 import ContextManager from "../shared/ContextManager";
 import { Signal } from "../shared/SignalEmitter";
 import Uuid from "../shared/Uuid";
 
 
 /*@sdkdoc
- *  The <code>AvatarListInterface</code> namespace provides facilities for interacting with avatars in the domain. It is
+ *  The <code>AvatarListInterface</code> namespace provides facilities for working with avatars in the domain. It is
  *  provided as the <code>avatarList</code> property of the {@link AvatarMixer} class.
  *  @namespace AvatarListInterface
  *  @property {number} count - The number of avatars the user client knows about in the domain, including the user client's.
@@ -40,12 +41,25 @@ class AvatarListInterface {
 
 
     /*@sdkdoc
-     * Gets the IDs of all avatars the use client knows about in the domain. The user client's avatar is included as the
-     * <code>Uuid.NULL</code> value.
-     * @returns {Array<Uuid>} The IDs of all avatars in the domain.
+     *  Gets the session IDs of all avatars the use client knows about in the domain. The user client's avatar is included as
+     *  the <code>Uuid.AVATAR_SELF_ID</code> value.
+     *  @returns {Array<Uuid>} The IDs of all avatars in the domain.
      */
     getAvatarIDs(): Array<Uuid> {
+        // C++  AvatarManager::getAvatarIdentifiers()
         return this.#_avatarManager.getAvatarIdentifiers();
+    }
+
+    /*@sdkdoc
+     *  Gets an object for working with an avatar in the domain.
+     *  @param {Uuid} id - The session ID of the avatar.
+     *      <p>The user client's avatar may be retrieved using its session ID or {@link Uuid|Uuid.AVATAR_SELF_ID} &mdash; this
+     *      is an alternative to using the more capable {@link AvatarMixer|AvatarMixer.myAvatar} interface.</p>
+     *  @returns {ScriptAvatar} A new object for working with the specified avatar.
+     */
+    getAvatar(id: Uuid): ScriptAvatar {
+        // C++  ScriptAvatar* AvatarManager::getAvatar(QUuid avatarID)
+        return this.#_avatarManager.getAvatar(id);
     }
 
 

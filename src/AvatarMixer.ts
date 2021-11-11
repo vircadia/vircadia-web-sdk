@@ -40,8 +40,7 @@ import ContextManager from "./domain/shared/ContextManager";
  *
  *  @property {MyAvatarInterface} myAvatar - Properties and methods for using the user client's avatar.
  *      <em>Read-only.</em>
- *  @property {AvatarListInterface} avatarList - Properties and methods for using the other of avatars in the domain (i.e.,
- *      avatars other than the user client's).
+ *  @property {AvatarListInterface} avatarList - Properties and methods for working with all avatars in the domain.
  *      <em>Read-only.</em>
  */
 class AvatarMixer extends AssignmentClient {

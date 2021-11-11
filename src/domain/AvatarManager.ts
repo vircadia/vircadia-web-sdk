@@ -9,6 +9,8 @@
 //
 
 import MyAvatar from "./avatar/MyAvatar";
+import Avatar from "./avatar-renderer/Avatar";
+import ScriptAvatar from "./avatar-renderer/ScriptAvatar";
 import AvatarData, { KillAvatarReason } from "./avatars/AvatarData";
 import AvatarHashMap from "./avatars/AvatarHashMap";
 import Node from "./networking/Node";
@@ -103,6 +105,31 @@ class AvatarManager extends AvatarHashMap {
 
     }
 
+    /*@devdoc
+     *  Gets an object for working with a specified avatar.
+     *  @param {Uuid} avatarID - The session ID of the avatar.
+     *      <p>The user client's avatar may be retrieved using its session ID or {@link Uuid|Uuid.AVATAR_SELF_ID} &mdash; this
+     *      is an alternative to using the more capable {@link AvatarMixer|AvatarMixer.myAvatar} interface.</p>
+     *  @returns {ScriptAvatar} A new object for working with a specified avatar.
+     */
+    getAvatar(avatarID: Uuid): ScriptAvatar {
+        // C++  ScriptAvatarData* getAvatar(QUuid avatarID)
+        return new ScriptAvatar(this.getAvatarBySessionID(avatarID));
+    }
+
+    /*@devdoc
+     *  Gets the avatar data for an avatar with a specified session ID.
+     *  @param {Uuid} sessionID - The session ID of the avatar.
+     *  @returns {AvatarData|null} The avatar data if there is an avatar with the session ID, <code>null</code> if there isn't.
+     */
+    getAvatarBySessionID(sessionID: Uuid): AvatarData | null {
+        // C++  AvatarData* getAvatarBySessionID(const QUuid& sessionID)
+        if (sessionID.value() === Uuid.AVATAR_SELF_ID || sessionID.value() === this.#_myAvatar.getSessionUUID().value()) {
+            return this.#_myAvatar;
+        }
+        return this.findAvatar(sessionID);
+    }
+
 
     /*@devdoc
      *  Acts upon an {@link NodeType(1)|AvatarMixer} node being activated.
@@ -157,7 +184,10 @@ class AvatarManager extends AvatarHashMap {
 
     protected override newSharedAvatar(sessionUUID: Uuid): AvatarData {
         // C++  AvatarData* newSharedAvatar(const QUuid& sessionUUID)
-        const otherAvatar = new AvatarData(this.#_contextID);
+
+        // WEBRTC TODO: Address further C++ code - use OtherAvatar instead of Avatar?
+
+        const otherAvatar = new Avatar(this.#_contextID);
         otherAvatar.setSessionUUID(sessionUUID);
 
         // C++ rendering code not relevant.
