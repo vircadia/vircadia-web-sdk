@@ -25,7 +25,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
     let messageMixer = null;
 
 
-    // Domain Server.
+    // Domain Server
     (function () {
         domainServer = new DomainServer();
         contextID = domainServer.contextID;
@@ -62,7 +62,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
 
     }());
 
-    // Audio Mixer.
+    // Audio Mixer
     (function () {
         audioMixer = new AudioMixer(contextID);
 
@@ -101,6 +101,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
 
         function onConnectButtonClick() {
             // Assign (or reassign) the audio mixer stream now that we have user input on the page.
+            console.log("[interface] Connect");
             audioElement.srcObject = audioMixer.audioOuput;
 
             setInputStream();
@@ -111,6 +112,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
         connectButton.addEventListener("click", onConnectButtonClick);
 
         function onDisconnectButtonClick() {
+            console.log("[interface] Disconnect");
             audioMixer.pause();
             audioElement.pause();
         }
@@ -123,7 +125,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
         micMutedCheckbox.addEventListener("click", onMicMutecCheckboxClick);
     }());
 
-    // Avatar Mixer.
+    // Avatar Mixer
     (function () {
         avatarMixer = new AvatarMixer(contextID);
 
@@ -248,7 +250,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
 
     }());
 
-    // Message Mixer.
+    // Message Mixer
     (function () {
         messageMixer = new MessageMixer(contextID);
 
@@ -299,7 +301,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
         return avatarMixer.myAvatar.position;
     };
 
-    // Game loop.
+    // Game Loop
     (function () {
         const MS_PER_S = 1000;
         const TARGET_GAME_RATE = 10;  // FPS

@@ -90,6 +90,7 @@ class AvatarHashMap {
      *  @returns {Signal}
      */
     get avatarAdded(): Signal {
+        // C++  void avatarAddedEvent(const QUuid& sessionUUID)
         return this.#_avatarAddedEvent.signal();
     }
 
@@ -100,6 +101,7 @@ class AvatarHashMap {
      *  @returns {Signal}
      */
     get avatarRemoved(): Signal {
+        // C++  void avatarRemovedEvent(const QUuid& sessionUUID)
         return this.#_avatarRemovedEvent.signal();
     }
 

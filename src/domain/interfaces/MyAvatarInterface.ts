@@ -21,9 +21,11 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *
  *  @property {string} displayName - The user client's avatar display name.
  *  @property {Signal} displayNameChanged - Triggered when the display name changes.
+ *      <em>Read-only.</em>
  *  @property {string} sessionDisplayName - The user client's session display name, assigned by the domain server based on the
  *      avatar display name. It is unique among all avatars present in the domain. <em>Read-only.</em>
  *  @property {Signal} sessionDisplayNameChanged - Triggered when the session display name changes.
+ *      <em>Read-only.</em>
  *  @property {vec3} position - The position of the avatar in the domain.
  */
 // Don't document the constructor because it shouldn't be used in the SDK.

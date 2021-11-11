@@ -36,6 +36,7 @@ class AvatarListInterface {
 
 
     get count(): number {
+        // C++  N/A
         return this.#_avatarManager.getAvatarCount();
     }
 
@@ -70,6 +71,7 @@ class AvatarListInterface {
      *  @param {Uuid} sessionUUID - The UUID of the avatar that was added.
      */
     get avatarAdded(): Signal {
+        // C++  void AvatarManager::avatarAddedEvent(const QUuid& sessionUUID)
         return this.#_avatarManager.avatarAdded;
     }
 
@@ -80,6 +82,7 @@ class AvatarListInterface {
      *  @param {Uuid} sessionUUID - The UUID of the avatar that was removed.
      */
     get avatarRemoved(): Signal {
+        // C++  void AvatarManager::avatarRemovedEvent(const QUuid& sessionUUID)
         return this.#_avatarManager.avatarRemoved;
     }
 
