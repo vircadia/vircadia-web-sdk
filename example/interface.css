@@ -64,3 +64,12 @@ input {
 button {
     width: 88px;
 }
+
+table {
+    margin-left: 120px;
+}
+
+th {
+    border-bottom: 1px solid #808080;
+    font-weight: normal;
+}

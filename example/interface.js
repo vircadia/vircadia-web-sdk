@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from "../dist/Vircadia.js";
+import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } from "../dist/Vircadia.js";
 
 (function () {
 
@@ -21,6 +21,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
     let domainServer = null;
     let audioMixer = null;
     let avatarMixer = null;
+    let avatarMixerGameLoop = null;
     let messageMixer = null;
 
 
@@ -126,7 +127,25 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
     (function () {
         avatarMixer = new AvatarMixer(contextID);
 
+        const NUM_DECIMAL_PLACES = 3;
+        const X_INDEX = 2;
+        const Y_INDEX = 3;
+        const Z_INDEX = 4;
+
+
+        // Status
+
         const statusText = document.getElementById("avatarMixerStatus");
+
+        function onStateChanged(state) {
+            statusText.value = AvatarMixer.stateToString(state);
+        }
+        onStateChanged(avatarMixer.state);
+        avatarMixer.onStateChanged = onStateChanged;
+
+
+        // MyAvatar
+
         const myAvatarDisplayName = document.getElementById("myAvatarDisplayName");
         const myAvatarSessionDisplayName = document.getElementById("myAvatarSessionDisplayName");
         const posX = document.getElementById("avatarMixerPosX");
@@ -146,28 +165,6 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
             myAvatarSessionDisplayName.value = avatarMixer.myAvatar.sessionDisplayName;
         });
 
-
-        const avatarsCount = document.getElementById("avatarsCount");
-        const avatarIDs = document.getElementById("avatarIDs");
-
-        function onStateChanged(state) {
-            statusText.value = AvatarMixer.stateToString(state);
-        }
-        onStateChanged(avatarMixer.state);
-        avatarMixer.onStateChanged = onStateChanged;
-
-        function onAvatarsChanged() {
-            avatarsCount.value = avatarMixer.avatarList.count;
-            avatarIDs.value = avatarMixer.avatarList.getAvatarIDs()
-                .map((uuid) => {
-                    return uuid.stringify();  // eslint-disable-line @typescript-eslint/no-unsafe-return
-                })
-                .join(" ");
-        }
-        onAvatarsChanged();  // Display initial data.
-        avatarMixer.avatarList.avatarAdded.connect(onAvatarsChanged);
-        avatarMixer.avatarList.avatarRemoved.connect(onAvatarsChanged);
-
         const avatarPosition = avatarMixer.myAvatar.position;
         posX.value = avatarPosition.x;
         posY.value = avatarPosition.y;
@@ -182,6 +179,72 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
         posX.addEventListener("change", onPositionChange);
         posY.addEventListener("change", onPositionChange);
         posZ.addEventListener("change", onPositionChange);
+
+
+        // Avatar List
+
+        const avatarsCount = document.getElementById("avatarsCount");
+        avatarsCount.value = avatarMixer.avatarList.count;
+
+        const avatarListBody = document.querySelector("#avatarList > tbody");
+
+        const avatars = new Map();  // <sessionID, { avatar, tr }>
+
+        function onAvatarAdded(sessionID) {
+
+            avatarsCount.value = avatarMixer.avatarList.count;
+
+            const avatar = avatarMixer.avatarList.getAvatar(sessionID);
+
+            const tr = document.createElement("tr");
+            let td = document.createElement("td");
+            td.innerHTML = sessionID.stringify();
+            tr.appendChild(td);
+            td = document.createElement("td");
+            td.innerHTML = avatar.sessionDisplayName;
+            tr.appendChild(td);
+            const position = avatar.position;
+            td = document.createElement("td");
+            td.innerHTML = position.x.toFixed(NUM_DECIMAL_PLACES);
+            tr.appendChild(td);
+            td = document.createElement("td");
+            td.innerHTML = position.y.toFixed(NUM_DECIMAL_PLACES);
+            tr.appendChild(td);
+            td = document.createElement("td");
+            td.innerHTML = position.z.toFixed(NUM_DECIMAL_PLACES);
+            tr.appendChild(td);
+            avatarListBody.appendChild(tr);
+
+            avatars.set(sessionID, { avatar, tr });
+
+            avatar.sessionDisplayNameChanged.connect(() => {
+                tr.childNodes[1].innerHTML = avatar.sessionDisplayName;
+            });
+        }
+        avatarMixer.avatarList.avatarAdded.connect(onAvatarAdded);
+
+        function onAvatarRemoved(sessionID) {
+            avatarsCount.value = avatarMixer.avatarList.count;
+            const avatarListItem = avatars.get(sessionID);
+            avatarListBody.removeChild(avatarListItem.tr);
+            avatars.delete(sessionID);  // eslint-disable-line @typescript-eslint/dot-notation
+        }
+        avatarMixer.avatarList.avatarRemoved.connect(onAvatarRemoved);
+
+        onAvatarAdded(new Uuid(Uuid.AVATAR_SELF_ID));
+
+
+        // Game Loop
+
+        avatarMixerGameLoop = () => {
+            avatarMixer.update();
+            for (const value of avatars.values()) {
+                const position = value.avatar.position;
+                value.tr.childNodes[X_INDEX].innerHTML = position.x.toFixed(NUM_DECIMAL_PLACES);
+                value.tr.childNodes[Y_INDEX].innerHTML = position.y.toFixed(NUM_DECIMAL_PLACES);
+                value.tr.childNodes[Z_INDEX].innerHTML = position.z.toFixed(NUM_DECIMAL_PLACES);
+            }
+        };
 
     }());
 
@@ -253,8 +316,8 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer } from ".
             gameLoopStart = now;
             gameRateValue.value = gameRate.toFixed(1);
 
-            // Update the audio mixer with latest user client avatar data.
-            avatarMixer.update();
+            // Update the avatar mixer with latest user client avatar data.
+            avatarMixerGameLoop();
 
             const timeout = Math.max(TARGET_INTERVAL - (Date.now() - gameLoopStart), MIN_TIMEOUT);
             gameLoopTimer = setTimeout(gameLoop, timeout);
