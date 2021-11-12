@@ -21,6 +21,8 @@ type BulkAvatarDataDetails = {
     sessionUUID: Uuid,
     globalPosition: vec3 | undefined
 };
+
+
 const BulkAvatarData = new class {
     // C++  N/A
 

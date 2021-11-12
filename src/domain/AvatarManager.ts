@@ -102,7 +102,6 @@ class AvatarManager extends AvatarHashMap {
             // WEBRTC TODO: Address further C++ code. - Send rate.
 
         }
-
     }
 
     /*@devdoc
@@ -215,7 +214,6 @@ class AvatarManager extends AvatarHashMap {
         // WEBRTC TODO: Address further C++ code - remove avatar entities from tree and scene.
 
     }
-
 
 }
 

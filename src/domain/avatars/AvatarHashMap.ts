@@ -335,7 +335,6 @@ class AvatarHashMap {
             // Create a dummy AvatarData class to ignore this avatar.
             avatar = new AvatarData(this.#_contextID);
         }
-
     }
 
 }
