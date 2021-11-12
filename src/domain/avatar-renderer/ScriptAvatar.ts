@@ -26,12 +26,13 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *      <em>Read-only.</em>
  *  @property {string} displayName - The avatar's display name. <code>""</code> if the avatar doesn't exist.
  *      <em>Read-only.</em>
- *  @property {Signal} displayNameChanged - Triggered when the display name changes.
+ *  @property {Signal<ScriptAvatar~displayNameChanged>} displayNameChanged - Triggered when the display name changes.
  *      <em>Read-only.</em>
  *  @property {string} sessionDisplayName - The avatar's session display name, assigned by the domain server based on the
  *      avatar display name. It is unique among all avatars present in the domain. <code>""</code> if the avatar doesn't exist.
  *      <em>Read-only.</em>
- *  @property {Signal} sessionDisplayNameChanged - Triggered when the session display name changes.
+ *  @property {Signal<ScriptAvatar~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the session display
+ *      name changes.
  *      <em>Read-only.</em>
  *  @property {vec3} position - The position of the avatar in the domain. {@link Vec3|Vec3.ZERO} if the avatar doesn't exist.
  *      <em>Read-only.</em>
@@ -67,6 +68,10 @@ class ScriptAvatar {
         return "";
     }
 
+    /*@sdkdoc
+     *  Triggered when the avatar's display name changes.
+     *  @callback ScriptAvatar~displayNameChanged
+     */
     get displayNameChanged(): Signal {
         // C++  void ScriptAvatarData::displayNameChanged();
         if (this.#_avatarData) {
@@ -89,6 +94,10 @@ class ScriptAvatar {
         return "";
     }
 
+    /*@sdkdoc
+     *  Triggered when the avatar's session display name changes.
+     *  @callback ScriptAvatar~sessionDisplayNameChanged
+     */
     get sessionDisplayNameChanged(): Signal {
         // C++  void ScriptAvatarData::sessionDisplayNameChanged();
         if (this.#_avatarData) {

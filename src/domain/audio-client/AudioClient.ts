@@ -44,7 +44,8 @@ class AudioClient {
     //      AbstractAudioInterface : public QObject
 
     /*@sdkdoc
-     *  @typedef {function} AudioPositionGetter
+     *  A callback that returns the user client's current audio position in the domain.
+     *  @callback AudioPositionGetter
      *  @returns {vec3} The position of the user client's audio.
      */
 

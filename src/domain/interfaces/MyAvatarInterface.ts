@@ -20,11 +20,12 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *  @namespace MyAvatarInterface
  *
  *  @property {string} displayName - The user client's avatar display name.
- *  @property {Signal} displayNameChanged - Triggered when the display name changes.
+ *  @property {Signal<MyAvatarInterface~displayNameChanged>} displayNameChanged - Triggered when the display name changes.
  *      <em>Read-only.</em>
  *  @property {string} sessionDisplayName - The user client's session display name, assigned by the domain server based on the
  *      avatar display name. It is unique among all avatars present in the domain. <em>Read-only.</em>
- *  @property {Signal} sessionDisplayNameChanged - Triggered when the session display name changes.
+ *  @property {Signal<MyAvatarInterface~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the session
+ *      display name changes.
  *      <em>Read-only.</em>
  *  @property {vec3} position - The position of the avatar in the domain.
  */
@@ -53,6 +54,10 @@ class MyAvatarInterface {
         this.#_avatarManager.getMyAvatar().displayName = displayName;
     }
 
+    /*@sdkdoc
+     *  Triggered when the avatar's display name changes.
+     *  @callback MyAvatarInterface~displayNameChanged
+     */
     get displayNameChanged(): Signal {
         return this.#_avatarManager.getMyAvatar().displayNameChanged;
     }
@@ -62,6 +67,10 @@ class MyAvatarInterface {
         return sessionDisplayName !== null ? sessionDisplayName : "";
     }
 
+    /*@sdkdoc
+     *  Triggered when the avatar's session display name changes.
+     *  @callback MyAvatarInterface~sessionDisplayNameChanged
+     */
     get sessionDisplayNameChanged(): Signal {
         return this.#_avatarManager.getMyAvatar().sessionDisplayNameChanged;
     }

@@ -43,6 +43,7 @@ const Vec3 = new class {
 
     /*@sdkdoc
      *  Checks whether a value is a valid <code>vec3</code> value: is an object with only x, y, z keys that have number values.
+     *  @function Vec3.valid
      *  @param {any} value - The value to check.
      *  @returns {boolean} <code>true</code> if the value is a valid <code>vec3</code> value, <code>false</code> if it isn't.
      */

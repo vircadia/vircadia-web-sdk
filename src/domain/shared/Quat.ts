@@ -46,6 +46,7 @@ const Quat = new class {
     /*@sdkdoc
      *  Checks whether a value is a valid <code>quat</code> value: is an object with only x, y, z, and w keys that have number
      *  values.
+     *  @function Quat.valid
      *  @param {any} value - The value to check.
      *  @returns {boolean} <code>true</code> if the value is a valid <code>quat</code> value, <code>false</code> if it isn't.
      */

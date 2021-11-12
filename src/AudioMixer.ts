@@ -53,9 +53,9 @@ import type { AudioPositionGetter } from "./domain/audio-client/AudioClient";
  *  @property {boolean} inputMuted=false - <code>true</code> to mute the <code>audioInput</code> so that it is not sent to the
  *      audio mixer, <code>false</code> to let it be sent.
  *      <p>When muted, processing of audio input is suspended. This halts hardware processing, reducing CPU/battery usage.</p>
- *  @property {AudioPositionGetter} positionGetter - The function to call in order to get the position of the user client's
- *      audio.
- *      <em>Read-only.</em>
+ *  @property {AudioPositionGetter} positionGetter - The function the <code>AudioMixer</code> code should call in order to get
+ *      the current position of the user client's audio.
+ *      <em>Write-only.</em>
  */
 class AudioMixer extends AssignmentClient {
     // C++  Application.cpp
