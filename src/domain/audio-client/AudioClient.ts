@@ -22,7 +22,7 @@ import PacketScribe from "../networking/packets/PacketScribe";
 import PacketType, { PacketTypeValue } from "../networking/udt/PacketHeaders";
 import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
-import Log, { LogLevel } from "../shared/Log";
+import Log from "../shared/Log";
 import Vec3, { vec3 } from "../shared/Vec3";
 
 
@@ -435,7 +435,7 @@ class AudioClient {
     #processStreamStatsPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {  // eslint-disable-line
         // C++  void AudioIOStats::processStreamStatsPacket(ReceivedMessage*, Node* sendingNode)
 
-        Log.once(LogLevel.WARNING, "AudioClient: AudioStreamStats packet not processed.");
+        Log.once(Log.WARNING, "AudioClient: AudioStreamStats packet not processed.");
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -447,7 +447,7 @@ class AudioClient {
     #handleAudioEnvironmentDataPacket = (message: ReceivedMessage): void => {  // eslint-disable-line
         // C++  void handleAudioEnvironmentDataPacket(ReceivedMessage* message)
 
-        Log.once(LogLevel.WARNING, "AudioClient: AudioEnvironment packet not processed.");
+        Log.once(Log.WARNING, "AudioClient: AudioEnvironment packet not processed.");
 
         // WEBRTC TODO: Address further C++ code.
 

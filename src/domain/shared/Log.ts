@@ -124,6 +124,13 @@ export class StringLoggerContext implements LoggerContext {
  *  @class Logger
  */
 export class Logger {
+
+    readonly DEBUG = LogLevel.DEBUG;
+    readonly DEFAULT = LogLevel.DEFAULT;
+    readonly INFO = LogLevel.INFO;
+    readonly WARNING = LogLevel.WARNING;
+    readonly ERROR = LogLevel.ERROR;
+
     #_context: LoggerContext;
     #_activeFunctions = new Map<LogLevel, LogFunction>();
     #_typeFilter?: Array<string | undefined>;
