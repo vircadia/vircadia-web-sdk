@@ -68,6 +68,8 @@ describe("NLPacket - unit tests", () => {
         expect(messageData.version).toBe(24);
         expect(messageData.senderSockAddr.getPort()).toBe(7);
         expect(error).toHaveBeenCalledTimes(0);
+        expect(NLPacket.typeInHeader(nlPacket)).toBe(PacketType.DomainList);
+        expect(NLPacket.versionInHeader(nlPacket)).toBe(24);
     });
 
     test("Can get NLPacket field values", () => {
@@ -84,6 +86,7 @@ describe("NLPacket - unit tests", () => {
         expect(messageData.data.getUint16(6, UDT.LITTLE_ENDIAN)).toBe(0);
         nlPacket.writeSourceID(37);
         expect(messageData.data.getUint16(6, UDT.LITTLE_ENDIAN)).toBe(37);
+        expect(NLPacket.sourceIDInHeader(nlPacket)).toBe(37);
     });
 
     test("Can write a verification hash into a packet", () => {

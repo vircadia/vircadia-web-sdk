@@ -32,7 +32,7 @@ describe("WebRTCSocket - integration tests", () => {
             expect(webrtcSocket.state(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.DomainServer))
                 .toBe(WebRTCSocket.CONNECTED);
             expect(webrtcSocket.state(TestConfig.SERVER_SIGNALING_SOCKET_URL, NodeType.AudioMixer))
-                .toBe(WebRTCSocket.SIGNALING);
+                .toBe(WebRTCSocket.UNCONNECTED);
             expect(webrtcSocket.state(TestConfig.SERVER_SIGNALING_SOCKET_URL + "1", NodeType.DomainServer))
                 .toBe(WebRTCSocket.UNCONNECTED);
             webrtcSocket.abort();

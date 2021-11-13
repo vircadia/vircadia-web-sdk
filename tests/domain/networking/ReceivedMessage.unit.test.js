@@ -39,11 +39,16 @@ describe("ReceivedMessage - unit tests", () => {
         expect(receivedMessage.getSenderSockAddr().getPort()).toBe(7);
         expect(receivedMessage.getSourceID()).toBe(Node.NULL_LOCAL_ID);
         expect(receivedMessage.getType()).toBe(PacketType.DomainList);
+        const messageData = receivedMessage.getMessageData();
+        expect(messageData).toBe(nlPacket.getMessageData());
+        expect(messageData.isComplete).toBe(true);
         const message = receivedMessage.getMessage();
         expect(message instanceof DataView).toBe(true);
+
         const NUM_NLPACKET_HEADER_BYTES = 2;  // WEBRTC TODO: This is just type and version. Should generalize per sourced and
         // verified packets.
         const numHeaderBytes = Packet.totalHeaderSize(nlPacket.getMessageData().isPartOfMessage) + NUM_NLPACKET_HEADER_BYTES;
+
         expect(message.byteLength).toBe(arrayBuffer.byteLength - numHeaderBytes);
     });
 

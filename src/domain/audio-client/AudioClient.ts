@@ -23,6 +23,10 @@ import PacketType, { PacketTypeValue } from "../networking/udt/PacketHeaders";
 import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
 import Log, { LogLevel } from "../shared/Log";
+import Vec3, { vec3 } from "../shared/Vec3";
+
+
+type AudioPositionGetter = () => vec3;
 
 
 /*@devdoc
@@ -39,6 +43,13 @@ import Log, { LogLevel } from "../shared/Log";
 class AudioClient {
     // C++  AudioClient : public AbstractAudioInterface, public Dependency
     //      AbstractAudioInterface : public QObject
+
+    /*@sdkdoc
+     *  A callback that returns the user client's current audio position in the domain.
+     *  @callback AudioPositionGetter
+     *  @returns {vec3} The position of the user client's audio.
+     */
+
 
     static readonly contextItemType = "AudioClient";
 
@@ -61,8 +72,9 @@ class AudioClient {
 
     #_receivedAudioStream;
 
+    #_positionGetter: AudioPositionGetter;
+
     // WEBRTC TODO: Set these via the API.
-    #_audioPosition = { x: 0, y: 1, z: 0 };
     #_audioOrientation = { x: 0, y: 0, z: 0, w: 1.0 };
     #_avatarBoundingBoxCorner = { x: -0.5, y: 0.0, z: -0.5 };
     #_avatarBoundingBoxScale = { x: 1, y: 2, z: 1 };
@@ -75,6 +87,9 @@ class AudioClient {
         this.#_packetReceiver = this.#_nodeList.getPacketReceiver();
 
         this.#_audioInput = new AudioInput();
+        this.#_positionGetter = () => {
+            return Vec3.ZERO;
+        };
 
         // This field is not a MixedProcessedAudioStream in the Web SDK version of AudioClient because the features of
         // MixedProcessedAudioStream haven't been needed so far.
@@ -152,6 +167,16 @@ class AudioClient {
     isMuted(): boolean {
         // C++  bool isMuted()
         return this.#_isMuted;
+    }
+
+    /*@devdoc
+     *  Sets the function that the AudioClient should call in order to get the position of the user client's audio.
+     *  @param {AudioPositionGetter} positionGetter - The function to call in order to obtain the position of the user client's
+     *      audio.
+     */
+    setPositionGetter(positionGetter: AudioPositionGetter): void {
+        // C++  void setPositionGetter(AudioPositionGetter positionGetter)
+        this.#_positionGetter = positionGetter;
     }
 
 
@@ -236,8 +261,11 @@ class AudioClient {
             }
         }
 
-        if (!supportedFormat) {
-            console.log("[audioclient] Audio input device is not available, using dummy input.");
+        if (!inputDevice || !supportedFormat) {
+            // The SDK uses a null inputDevice when the mic is muted.
+            if (inputDevice) {
+                console.log("[audioclient] Audio input device is not available, using dummy input.");
+            }
 
             // WEBRTC TODO: Address further C++.
 
@@ -327,7 +355,8 @@ class AudioClient {
 
         assert(packetType === PacketType.SilentAudioFrame || packetType === PacketType.MicrophoneAudioNoEcho);
 
-        this.#_outgoingAvatarAudioSequenceNumber += 1;
+        const AUDIO_SEQUENCE_MODULUS = 65536;
+        this.#_outgoingAvatarAudioSequenceNumber = (this.#_outgoingAvatarAudioSequenceNumber + 1) % AUDIO_SEQUENCE_MODULUS;
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -339,7 +368,7 @@ class AudioClient {
                 numSilentSamples: this.#_isStereoInput
                     ? AudioConstants.NETWORK_FRAME_SAMPLES_STEREO
                     : AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL,
-                audioPosition: this.#_audioPosition,
+                audioPosition: this.#_positionGetter(),
                 audioOrientation: this.#_audioOrientation,
                 avatarBoundingBoxCorner: this.#_avatarBoundingBoxCorner,
                 avatarBoundingBoxScale: this.#_avatarBoundingBoxScale
@@ -350,7 +379,7 @@ class AudioClient {
                 sequenceNumber: this.#_outgoingAvatarAudioSequenceNumber,
                 codecName: this.#_selectedCodecName,
                 isStereo: this.#_isStereoInput,
-                audioPosition: this.#_audioPosition,
+                audioPosition: this.#_positionGetter(),
                 audioOrientation: this.#_audioOrientation,
                 avatarBoundingBoxCorner: this.#_avatarBoundingBoxCorner,
                 avatarBoundingBoxScale: this.#_avatarBoundingBoxScale,
@@ -403,7 +432,7 @@ class AudioClient {
     // Listener
     // eslint-disable-next-line
     // @ts-ignore
-    #processStreamStatsPacket = (message: ReceivedMessage, sendingNode?: Node): void => {  // eslint-disable-line
+    #processStreamStatsPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {  // eslint-disable-line
         // C++  void AudioIOStats::processStreamStatsPacket(ReceivedMessage*, Node* sendingNode)
 
         Log.once(LogLevel.WARNING, "AudioClient: AudioStreamStats packet not processed.");
@@ -469,3 +498,4 @@ class AudioClient {
 }
 
 export default AudioClient;
+export type { AudioPositionGetter };

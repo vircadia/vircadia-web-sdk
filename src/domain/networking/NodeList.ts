@@ -17,6 +17,7 @@ import Node from "./Node";
 import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import ReceivedMessage from "./ReceivedMessage";
+import SockAddr from "./SockAddr";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
 import Socket from "./udt/Socket";
@@ -87,6 +88,10 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        this._nodeSocket.setConnectionCreationFilterOperator(this.sockAddrBelongsToDomainOrNode);
+
+        // WEBRTC TODO: Address further C++ code.
+
         this._packetReceiver.registerListener(PacketType.DomainList,
             PacketReceiver.makeUnsourcedListenerReference(this.processDomainList));
         this._packetReceiver.registerListener(PacketType.Ping,
@@ -106,6 +111,24 @@ class NodeList extends LimitedNodeList {
 
     }
 
+
+    // JSDoc is in LimitedNodeList.
+    override isDomainServer(): boolean {  // eslint-disable-line class-methods-use-this
+        // C++  bool isDomainServer()
+        return false;
+    }
+
+    // JSDoc is in LimitedNodeList.
+    override getDomainLocalID(): number {
+        // C++  LocalID getDomainLocalID()
+        return this.#_domainHandler.getLocalID();
+    }
+
+    // JSDoc is in LimitedNodeList.
+    override getDomainSockAddr(): SockAddr {
+        // C++  SockAddr getDomainSockAddr()
+        return this.#_domainHandler.getSockAddr();
+    }
 
     /*@devdoc
      *  Gets the domain handler used by the NodeList.
@@ -137,6 +160,26 @@ class NodeList extends LimitedNodeList {
     getNodeInterestSet(): Set<NodeTypeValue> {
         // C++  NodeSet& getNodeInterestSet() const { return _nodeTypesOfInterest; }
         return this.#_nodeTypesOfInterest;
+    }
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    isIgnoringNode(nodeID: Uuid): boolean {  // eslint-disable-line
+        //  C++ bool isIgnoringNode(const QUuid& nodeID)
+
+        // WEBRTC TODO: Address further C++ code - ignore specified nodes.
+
+        return false;
+    }
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    getRequestsDomainListData(): boolean {  // eslint-disable-line
+        // C++  bool getRequestsDomainListData()
+
+        // WEBRTC TODO: Address further C++ code - request domain list data.
+
+        return false;
     }
 
 
@@ -208,9 +251,9 @@ class NodeList extends LimitedNodeList {
      *  @param {ReceivedMessage} message - The Ping message.
      *  @param {Node} sendingNode - The assignment client that sent the ping.
      */
-    processPingPacket = (message: ReceivedMessage, sendingNode?: Node): void => {
+    processPingPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {
         // C++  void processPingPacket(ReceivedMessage* message, Node* sendingNode)
-        assert(sendingNode !== undefined);
+        assert(sendingNode !== null);
 
         const MS_TO_USEC = 1000n;
 
@@ -244,6 +287,21 @@ class NodeList extends LimitedNodeList {
 
     };
 
+
+    /*@devdoc
+     *  Checks whether an address is belongs to the domain or a node. Used as a {@link Socket~connectionCreationFilterOperator}.
+     *  @function NodeList.sockAddrBelongsToNode
+     *  @param {SockAddr} sockAddr - The address to check.
+     *  @returns {boolean} <code>true</code> if the address belongs to the domain or a node, <code>false</code> if it doesn't.
+     */
+    sockAddrBelongsToDomainOrNode = (sockAddr: SockAddr): boolean => {
+        // C++  bool sockAddrBelongsToDomainOrNode(const SockAddr& sockAddr)
+
+        // Compare just the port numbers / WebRTC data channels because the Socket where this method is used doesn't know
+        // the actual IP address.
+
+        return this.#_domainHandler.getSockAddr().getPort() === sockAddr.getPort() || this.sockAddrBelongsToNode(sockAddr);
+    };
 
     /*@devdoc
      *  Resets the LimitedNodeList, closing all connections and deleting all node data.
@@ -423,7 +481,7 @@ class NodeList extends LimitedNodeList {
     #startNodeHolePunch = (node: Node): void => {
         // C++  void startNodeHolePunch(const Node* node);
         // While we don't need to do hole punching per se because WebRTC handles this, we initiate opening the WebRTC data
-        // channel and adopt the native client's use of pings and replys to coordinate setting up communications with the
+        // channel and adopt the native client's use of pings and replies to coordinate setting up communications with the
         // assignment client.
 
         // WebRTC: Initiate opening the WebRTC data channel.

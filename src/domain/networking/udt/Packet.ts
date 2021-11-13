@@ -9,6 +9,7 @@
 //
 
 import BasePacket from "./BasePacket";
+import SequenceNumber from "./SequenceNumber";
 import UDT from "./UDT";
 import SockAddr from "../SockAddr";
 import assert from "../../shared/assert";
@@ -16,11 +17,11 @@ import assert from "../../shared/assert";
 
 /*@devdoc
  *  The <code>Packet</code> class implements a basic Vircadia protocol packet.
- *  <p>See also: {@link BasePacket} and {@link NLPacket}.
+ *  <p>See also: {@link BasePacket}, {@link NLPacket}, and {@link ControlPacket}.
  *  <p>C++ <code>Packet : public BasePacket</code></p>
  *  @class Packet
  *  @extends BasePacket
- *  @param {number|DataView|Packet} size|data|packet - The size of the packet to create, in bytes.  If <code>-1</code>, a packet
+ *  @param {number|DataView|Packet} size|data|packet - The size of the packet to create, in bytes. If <code>-1</code>, a packet
  *      of the maximum size is created (though not all of it need be sent).
  *      <p>The raw byte data for a new packet.</p>
  *      <p>Another packet to reuse the packet data from. In this case, the packet's internal {@link MessageData} is reused by
@@ -94,7 +95,7 @@ class Packet extends BasePacket {
 
 
     /*@devdoc
-     *  Creates a new Packet &mdash; an alternative to using <code>new Packet(...)</code>.
+     *  Creates a new Packet from received data &mdash; an alternative to using <code>new Packet(...)</code>.
      *  <p><em>Static</em></p>
      *  @function Packet.fromReceivedPacket
      *  @param {DataView} data - The raw byte data of a new packet.
@@ -109,12 +110,25 @@ class Packet extends BasePacket {
     }
 
     /*@devdoc
+     *  Creates a copy of a Packet.
+     *  <p><em>Static</em></p>
+     *  @function Packet.createCopy
+     *  @param {Packet} packet - The packet to copy.
+     *  @returns {Packet} A copy of the packet.
+     *  @static
+     */
+    static createCopy(other: Packet): Packet {
+        // C++  Packet* createCopy(const Packet& other)
+        return new Packet(other);
+    }
+
+    /*@devdoc
      *  Calculates the header size of a Packet.
      *  <p><em>Static</em></p>
      *  @function Packet.totalHeaderSize
      *  @param {boolean} [isPartOfMessage=false] - <code>true</code> if the packet is part of a message, <code>false</code> if
      *      it isn't.
-     *  @returns {number} The calculated total header size, in bytes.
+     *  @returns {number} The total header size, in bytes.
      *  @static
      */
     static totalHeaderSize(isPartOfMessage = false): number {
@@ -141,8 +155,8 @@ class Packet extends BasePacket {
             super(size === -1 ? -1 : Packet.totalHeaderSize(isPartOfMessage) + size);
             this._messageData.isReliable = isReliable;
             this._messageData.isPartOfMessage = isPartOfMessage;
-            // adjustPayloadStartAndCapacity();  N/A
             this.#writeHeader();
+            // adjustPayloadStartAndCapacity();  N/A
 
         } else if (param0 instanceof DataView && typeof param1 === "number" && param2 instanceof SockAddr) {
             // C++  Packet(std::unique_ptr<char[]> data, qint64 size, const SockAddr& senderSockAddr)
@@ -192,11 +206,77 @@ class Packet extends BasePacket {
         return this._messageData.isReliable;
     }
 
+    /*@devdoc
+     *  Gets the message number of the packet.
+     *  @returns {number} The message number of the packet
+     */
+    getMessageNumber(): number {
+        // C++  MessageNumber getMessageNumber()
+        return this._messageData.messageNumber;
+    }
+
+    /*@devdoc
+     *  Gets the message part number of the packet.
+     *  @returns {number} Gets the message part number of the packet.
+     */
+    getMessagePartNumber(): number {
+        // C++  MessagePartNumber getMessagePartNumber()
+        return this._messageData.messagePartNumber;
+    }
+
+    /*@devdoc
+     *  Gets the position of the packet.
+     *  @returns {Packet.PacketPosition} The position of the packet.
+     */
+    getPacketPosition(): number {
+        // C++  PacketPosition getPacketPosition()
+        return this._messageData.packetPosition;
+    }
+
+    /*@devdoc
+     *  Writes a message number, position, and message part number into the packet.
+     *  @param {number} messageNumber - The message number to write.
+     *  @param {Packet.PacketPosition} position - The packet position to write.
+     *  @param {number} messagePartNumber - The message part number to write.
+     */
+    writeMessageNumber(messageNumber: number, position: number, messagePartNumber: number): void {
+        this._messageData.isPartOfMessage = true;
+        this._messageData.messageNumber = messageNumber;
+        this._messageData.packetPosition = position;
+        this._messageData.messagePartNumber = messagePartNumber;
+        this.#writeHeader(true);
+    }
+
+    /*@devdoc
+     *  Writes a sequence number value into the packet.
+     *  @param {SequenceNumber} sequenceNumber = The sequence number to write.
+     */
+    writeSequenceNumber(sequenceNumber: SequenceNumber): void {
+        // C++ void writeSequenceNumber(SequenceNumber sequenceNumber)
+        this._messageData.sequenceNumber = sequenceNumber.value;
+        this.#writeHeader(true);
+    }
+
+    /*@devdoc
+     *  Obfuscates a packet's contents in an attempt to get the packet through any packet filtering done on the network.
+     *  @param {Packet.ObfuscationLevel} level - The obfuscation level.
+     */
+    // eslint-disable-next-line class-methods-use-this
+    obfuscate(level: number): void {
+        // C++  void obfuscate(ObfuscationLevel level)
+
+        // WEBRTC TODO: Address further C++ code. - Obfuscate packet.
+
+        console.warn("Packet.obfuscate() not implemented. Level:", level);
+    }
+
 
     // Reads the packet header information from the data.
     #readHeader(): void {
         // C++  void readHeader()
+
         const seqNumBitField = this._messageData.data.getUint32(this._messageData.dataPosition, UDT.LITTLE_ENDIAN);
+
         assert((seqNumBitField & UDT.CONTROL_BIT_MASK) === 0, "Packet.readHeader()", "This should be a data packet!");
         this._messageData.isReliable = (seqNumBitField & UDT.RELIABILITY_BIT_MASK) > 0;
         this._messageData.isPartOfMessage = (seqNumBitField & UDT.MESSAGE_BIT_MASK) > 0;
@@ -206,11 +286,15 @@ class Packet extends BasePacket {
         this._messageData.dataPosition += 4;
 
         if (this._messageData.isPartOfMessage) {
-            console.warn("Multi-packet messages not yet implemented!");
+            const messageNumberAndBitField = this._messageData.data.getUint32(this._messageData.dataPosition,
+                UDT.LITTLE_ENDIAN);
+            this._messageData.dataPosition += 4;
+            this._messageData.messageNumber = messageNumberAndBitField & UDT.MESSAGE_NUMBER_MASK;
+            this._messageData.packetPosition = messageNumberAndBitField >> UDT.PACKET_POSITION_OFFSET;
 
-            // WEBRTC TODO: Address further C++ code.
-
-            this._messageData.dataPosition += 8;
+            this._messageData.messagePartNumber = this._messageData.data.getUint32(this._messageData.dataPosition,
+                UDT.LITTLE_ENDIAN);
+            this._messageData.dataPosition += 4;
         } else {
             this._messageData.messageNumber = 0;
             this._messageData.packetPosition = Packet.PacketPosition.ONLY;
@@ -219,8 +303,19 @@ class Packet extends BasePacket {
     }
 
     // Writes the packet header information to the data.
-    #writeHeader(): void {
+    #writeHeader(isOverwriting = false): void {
         // C++  void writeHeader()
+
+        assert((this._messageData.sequenceNumber & UDT.BIT_FIELD_MASK) === 0, "Packet.writeHeader()",
+            "Sequence number is overflowing into bit field");
+
+        // If overwriting in a prepared packet, save the original dataPosition and reset the working value.
+        const originalDataPosition = this._messageData.dataPosition;
+
+        if (isOverwriting) {
+            this._messageData.dataPosition = 0;
+        }
+
         let seqNumBitField = this._messageData.sequenceNumber;
         if (this._messageData.isReliable) {
             seqNumBitField |= UDT.RELIABILITY_BIT_MASK;
@@ -244,6 +339,12 @@ class Packet extends BasePacket {
                 UDT.LITTLE_ENDIAN);
             this._messageData.dataPosition += 4;
         }
+
+        // If overwriting in a prepared packet, restore the original dataPosition.
+        if (isOverwriting) {
+            this._messageData.dataPosition = originalDataPosition;
+        }
+
     }
 
 }

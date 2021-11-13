@@ -24,7 +24,7 @@ div {
         div.row span {
             display: table-cell;
             vertical-align: top;
-            width: 80px;
+            width: 120px;
         }
 
         div.row span input {
@@ -37,8 +37,24 @@ input {
     width: 160px;
 }
 
+    input.checkbox {
+        width: 12px;
+    }
+
+    input.narrow {
+        width: 60px;
+    }
+
+    input.medium {
+        width: 260px;
+    }
+
     input.wide {
-        width: 480px;
+        width: 520px;
+    }
+
+    input.align-right {
+        text-align: right;
     }
 
     input:read-only {
@@ -46,5 +62,18 @@ input {
     }
 
 button {
-    width: 80px;
+    width: 88px;
+}
+
+table {
+    margin-left: 120px;
+}
+
+th {
+    border-bottom: 1px solid #808080;
+    font-weight: normal;
+}
+
+td.number {
+    text-align: right;
 }

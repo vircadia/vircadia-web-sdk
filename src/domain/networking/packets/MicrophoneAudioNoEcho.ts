@@ -63,7 +63,7 @@ const MicrophoneAudioNoEcho = new class {
      *  Writes a {@link PacketType(1)|MicrophoneAudioNoEcho} packet, ready for sending.
      *  @function PacketScribe.MicrophoneAudioNoEcho&period;write
      *  @param {PacketScribe.MicrophoneAudioNoEchoDetails} info - The information needed for writing the packet.
-     *  @returns {NLPacket}
+     *  @returns {NLPacket} The packet, ready for sending.
      */
     write(info: MicrophoneAudioNoEchoDetails): NLPacket {  /* eslint-disable-line class-methods-use-this */
         // C++  void AbstractAudioInterface::emitAudioPacket(const void* audioData, size_t bytes, quint16& sequenceNumber,

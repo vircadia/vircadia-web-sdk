@@ -60,8 +60,23 @@ describe("LimitedNodeList - integration tests", () => {
         expect(LimitedNodeList.ConnectReason.Awake).toBe(2);
     });
 
+    test("Trying to get the domain server's local ID and SockAddr throw errors", () => {
+        const limitedNodeList = new LimitedNodeList(contextID);
+        expect(() => {
+            limitedNodeList.getDomainLocalID();
+        }).toThrow();
+        expect(() => {
+            limitedNodeList.getDomainSockAddr();
+        }).toThrow();
+    });
+
     test("Can access INVALID_PORT", () => {
         expect(LimitedNodeList.INVALID_PORT).toBe(-1);
+    });
+
+    test("Reports that it is not being used for the domain server connection", () => {
+        const limitedNodeList = new LimitedNodeList(contextID);
+        expect(limitedNodeList.isDomainServer()).toBe(true);
     });
 
     test("Can get the local and public network addresses", () => {
