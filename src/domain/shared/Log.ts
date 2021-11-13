@@ -8,8 +8,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
-
 /*@devdoc
  *  The levels of the <code>Logger</code> class.
  *  @enum {number}
@@ -19,7 +17,7 @@
  *  @property {number} WARNING
  *  @property {number} ERROR
  */
-export enum LogLevel {
+enum LogLevel {
     DEBUG,
     DEFAULT,
     INFO,
@@ -31,7 +29,7 @@ export enum LogLevel {
  *  An array containing all values of <Code>LogLevel</code> enum in ascending order.
  *  @type {Array<LogLevel>}
  */
-export const allLogLevels = [
+const allLogLevels = [
     LogLevel.DEBUG,
     LogLevel.DEFAULT,
     LogLevel.INFO,
@@ -51,7 +49,7 @@ type LogFunction = (message: string, messageType?: string) => void;
  *  The <code>LoggerContext</code> is an interface for configuration of the output of the <code>Logger</code> class.
  *  @interface LoggerContext
  */
-export interface LoggerContext {
+interface LoggerContext {
     /*@devdoc
      *  Returns a function that the <code>Logger</code> class would use to log messages at a given level.
      *  @param {LogLevel} level - The level associated with the log function returned.
@@ -66,7 +64,7 @@ export interface LoggerContext {
  *  @class ConsoleLoggerContext
  *  @implements LoggerContext
  */
-export class ConsoleLoggerContext implements LoggerContext {
+class ConsoleLoggerContext implements LoggerContext {
 
     static #_typeFirst(func: (first: string, second?: string) => void): LogFunction {
         return (message: string, messageType?: string) => {
@@ -123,7 +121,7 @@ export class ConsoleLoggerContext implements LoggerContext {
  *  @implements LoggerContext
  *  @property {string} buffer - The buffer to which all the log messages will be written.
  */
-export class StringLoggerContext implements LoggerContext {
+class StringLoggerContext implements LoggerContext {
 
     buffer = "";
 
@@ -158,7 +156,7 @@ export class StringLoggerContext implements LoggerContext {
  *  @property {number} WARNING - Alias for <code>LogLevel.WARNING</code>.
  *  @property {number} ERROR - Alias for <code>LogLevel.ERROR</code>.
  */
-export class Logger {
+class Logger {
 
     readonly DEBUG = LogLevel.DEBUG;
     readonly DEFAULT = LogLevel.DEFAULT;
@@ -310,3 +308,4 @@ export class Logger {
 const Log = new Logger(new ConsoleLoggerContext());
 
 export default Log;
+export { LogLevel, allLogLevels, LoggerContext, ConsoleLoggerContext, StringLoggerContext, Logger };
