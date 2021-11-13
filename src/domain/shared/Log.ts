@@ -29,7 +29,7 @@ enum LogLevel {
  *  An array containing all values of <Code>LogLevel</code> enum in ascending order.
  *  @type {Array<LogLevel>}
  */
-const allLogLevels = [
+const AllLogLevels = [
     LogLevel.DEBUG,
     LogLevel.DEFAULT,
     LogLevel.INFO,
@@ -128,7 +128,7 @@ class StringLoggerContext implements LoggerContext {
     #_functions = new Map<LogLevel, LogFunction>();
 
     constructor() {
-        for (const level of allLogLevels) {
+        for (const level of AllLogLevels) {
             this.#_functions.set(level, (message: string, messageType?: string) => {
                 if (messageType) {
                     this.buffer += `[${messageType}]`;
@@ -269,7 +269,7 @@ class Logger {
      */
     filterLevels(pred: (level: LogLevel) => boolean): void {
         this.#_activeFunctions = new Map<LogLevel, LogFunction>();
-        for (const level of allLogLevels) {
+        for (const level of AllLogLevels) {
             const func = this.#_context.getFunction(level);
             if (func && pred(level)) {
                 this.#_activeFunctions.set(level, func);
@@ -308,4 +308,4 @@ class Logger {
 const Log = new Logger(new ConsoleLoggerContext());
 
 export default Log;
-export { LogLevel, allLogLevels, LoggerContext, ConsoleLoggerContext, StringLoggerContext, Logger };
+export { LogLevel, AllLogLevels, LoggerContext, ConsoleLoggerContext, StringLoggerContext, Logger };
