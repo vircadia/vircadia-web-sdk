@@ -17,4 +17,31 @@ describe("Quat - unit tests", () => {
         expect(Quat.IDENTITY).toStrictEqual({ x: 0, y: 0, z: 0, w: 1 });
     });
 
+    test("Quat.valid() checks that values are valid", () => {
+        expect(Quat.valid()).toBe(false);
+        expect(Quat.valid(undefined)).toBe(false);
+        expect(Quat.valid(null)).toBe(false);
+        expect(Quat.valid("")).toBe(false);
+        expect(Quat.valid(1)).toBe(false);
+        expect(Quat.valid({})).toBe(false);
+        expect(Quat.valid({ x: null, y: null, z: null, w: null })).toBe(false);
+        expect(Quat.valid({ x: undefined, y: undefined, z: undefined, w: undefined })).toBe(false);
+        expect(Quat.valid({ x: {}, y: {}, z: {}, w: {} })).toBe(false);
+        expect(Quat.valid({ x: 0, y: 1, z: 2, w: null })).toBe(false);
+        expect(Quat.valid({ x: "0", y: "1", z: "2", w: "3" })).toBe(false);
+        expect(Quat.valid({ x: 0, y: 1, z: 2, w: 3, v: 4 })).toBe(false);
+        expect(Quat.valid({ x: 0, y: 1, z: 2 })).toBe(false);
+        expect(Quat.valid({ x: 0, y: 1, z: 2, w: 3 })).toBe(true);
+    });
+
+    test("Quat.equal() tests equality", () => {
+        const q1 = { x: 0.1, y: 0, z: 0, w: 0.949 };
+        const q2 = { x: 0.1, y: 0, z: 0, w: 0.949 };
+        const q3 = { x: 0, y: 0.1, z: 0, w: 0.949 };
+
+        expect(Quat.equal(q1, q1)).toBe(true);
+        expect(Quat.equal(q1, q2)).toBe(true);
+        expect(Quat.equal(q2, q3)).toBe(false);
+    });
+
 });

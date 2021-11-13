@@ -18,7 +18,7 @@ import { Signal } from "./domain/shared/SignalEmitter";
 
 /*@sdkdoc
  *  The <code>MessageMixer</code> class provides the interface for working with message mixer assignment clients.
- *  <p>Prerequisite: A {@link DomainServer} object must be created first in order to create the domain context.</p>
+ *  <p>Prerequisite: A {@link DomainServer} object must be created in order to set up the domain context.</p>
  *  @class MessageMixer
  *  @extends AssignmentClient
  *  @param {number} contextID - The domain context to use. See {@link DomainServer|DomainServer.contextID}.

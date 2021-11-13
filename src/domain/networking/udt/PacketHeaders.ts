@@ -147,8 +147,10 @@ const enum PacketTypeValue {
  *      {@link PacketScribe.PingDetails}.
  *  @property {PacketType} PingReply - <code>4</code> - Sent in response to a Ping packet.
  *      {@link PacketScribe.PingReplyDetails}.
- *  @property {PacketType} KillAvatar - <code>5</code>
- *  @property {PacketType} AvatarData - <code>6</code>
+ *  @property {PacketType} KillAvatar - <code>5</code> - The avatar mixer sends this to the user client when another user client
+ *      disconnects from the domain.
+ *  @property {PacketType} AvatarData - <code>6</code> - The user client sends this to the avatar mixer with details of the user
+ *      client's avatar.
  *  @property {PacketType} InjectAudio - <code>7</code>
  *  @property {PacketType} MixedAudio - <code>8</code> - The audio mixer repeatedly sends this to the user client when there is
  *      audio to play at the user client's audio position.
@@ -157,7 +159,8 @@ const enum PacketTypeValue {
  *      audio to play at the user client's audio position. The audio mixer should not echo the audio back to the user client.
  *  @property {PacketType} MicrophoneAudioWithEcho - <code>10</code> - The user client sends this to the audio mixer with user
  *      audio to play at the user client's audio position. The audio mixer should echo the audio back to the user client.
- *  @property {PacketType} BulkAvatarData - <code>11</code>
+ *  @property {PacketType} BulkAvatarData - <code>11</code> - The avatar mixer sends this to the user client to keep it up to
+ *      date with the details of avatars in the domain, including the user client's avatar.
  *  @property {PacketType} SilentAudioFrame - <code>12</code> - The user client repeatedly sends this to the audio mixer when
  *      there isn't any audio (microphone) input from the user. The user client's audio position is included. The audio mixer
  *      repeatedly sends this to the user client when there isn't any audio to play at the user client's audio position.
@@ -186,7 +189,10 @@ const enum PacketTypeValue {
  *  @property {PacketType} InjectorGainSet - <code>26</code>
  *  @property {PacketType} AssignmentClientStatus - <code>27</code>
  *  @property {PacketType} NoisyMute - <code>28</code>
- *  @property {PacketType} AvatarIdentity - <code>29</code>
+ *  @property {PacketType} AvatarIdentity - <code>29</code> - The user client sends this to the Avatar Mixer to update it with
+ *      current user avatar identity information. The Avatar Mixer sends this to the user client to update it with identify
+ *      information for avatars in the domain.
+ *      {@link PacketScribe.AvatarIdentityDetails}.
  *  @property {PacketType} NodeIgnoreRequest - <code>30</code>
  *  @property {PacketType} DomainConnectRequest - <code>31</code> - The user client sends this to the Domain Server to initiate
  *      connection to the domain. The Domain Server responds with a DomainList or DomainConnectionDenied packet.<br />
@@ -514,6 +520,7 @@ const PacketType = new class {
 
     readonly #_AvatarMixerPacketVersion = {
         // C++  AvatarMixerPacketVersion
+        AvatarTraitsAck: 48,
         ARKitBlendshapes: 54
     };
 
@@ -545,10 +552,14 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.KillAvatar:
                 return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
+            case this.AvatarData:
+                return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.MixedAudio:
                 return this.#_AudioVersion.StopInjectors;
             case this.MicrophoneAudioNoEcho:
                 return this.#_AudioVersion.StopInjectors;
+            case this.BulkAvatarData:
+                return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.SilentAudioFrame:
                 return this.#_AudioVersion.StopInjectors;
             case this.DomainListRequest:
@@ -559,6 +570,8 @@ const PacketType = new class {
                 return this.#_AudioVersion.StopInjectors;
             case this.DomainServerAddedNode:
                 return this.#_DomainServerAddedNodeVersion.SocketTypes;
+            case this.AvatarIdentity:
+                return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
             case this.AudioEnvironment:
@@ -577,6 +590,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.SelectedAudioFormat:
                 return DEFAULT_VERSION;
+            case this.BulkAvatarTraits:
+                return this.#_AvatarMixerPacketVersion.AvatarTraitsAck;
 
                 // WebRTC TODO: Add other packets.
 

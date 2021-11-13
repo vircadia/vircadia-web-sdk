@@ -162,6 +162,26 @@ class NodeList extends LimitedNodeList {
         return this.#_nodeTypesOfInterest;
     }
 
+    // eslint-disable-next-line
+    // @ts-ignore
+    isIgnoringNode(nodeID: Uuid): boolean {  // eslint-disable-line
+        //  C++ bool isIgnoringNode(const QUuid& nodeID)
+
+        // WEBRTC TODO: Address further C++ code - ignore specified nodes.
+
+        return false;
+    }
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    getRequestsDomainListData(): boolean {  // eslint-disable-line
+        // C++  bool getRequestsDomainListData()
+
+        // WEBRTC TODO: Address further C++ code - request domain list data.
+
+        return false;
+    }
+
 
     /*@devdoc
      *  Processes a {@link PacketType(1)|DomainList} message received from the domain server.
@@ -270,7 +290,7 @@ class NodeList extends LimitedNodeList {
 
     /*@devdoc
      *  Checks whether an address is belongs to the domain or a node. Used as a {@link Socket~connectionCreationFilterOperator}.
-     *  @function LimitedNodeList.sockAddrBelongsToNode
+     *  @function NodeList.sockAddrBelongsToNode
      *  @param {SockAddr} sockAddr - The address to check.
      *  @returns {boolean} <code>true</code> if the address belongs to the domain or a node, <code>false</code> if it doesn't.
      */

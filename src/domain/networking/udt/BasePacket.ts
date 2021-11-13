@@ -137,6 +137,15 @@ class BasePacket {
     }
 
     /*@devdoc
+     *  Gets the size of the packet including the header and the UDP/IP header.
+     *  @returns {number} The size of the packet including the header, in bytes.
+     */
+    getWireSize(): number {
+        // C++  qint64 getWireSize()
+        return this._messageData.packetSize + UDT.UDP_IPV4_HEADER_SIZE;
+    }
+
+    /*@devdoc
      *  Sets the time that the packet was received.
      *  @param {number} time - The time stamp at which the packet was received.
      */

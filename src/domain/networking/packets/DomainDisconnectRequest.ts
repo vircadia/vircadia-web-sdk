@@ -17,7 +17,7 @@ const DomainDisconnectRequest = new class {
     /*@devdoc
      *  Writes a {@link PacketType(1)|DomainDisconnectRequest} packet, ready for sending.
      *  @function PacketScribe.DomainDisconnectRequest&period;write
-     *  @returns {NLPacket}
+     *  @returns {NLPacket} The packet, ready for sending.
      */
     write(): NLPacket {  /* eslint-disable-line class-methods-use-this */
         // C++  DomainHandler::sendDisconnectPacket()

@@ -32,8 +32,7 @@ import Uuid from "../shared/Uuid";
  *      it isn't.
  */
 class NLPacketList {
-    // C++  class PacketList : public ExtendedIODevice
-    //      The ExtendedIODevice function is included in the PacketList implementation.
+    // C++  class NLPacketList : public PacketList : public ExtendedIODevice : public QIODevice
 
     /*@devdoc
      *  Creates a new NLPacketList &mdash; an alternative to using <code>new NLPacketList(...)</code>.
@@ -114,22 +113,27 @@ class NLPacketList {
      *  Writes a "primitive" value to the current packet.
      *  @param {number|boolean|Uuid} value - The value to write.
      *  @param {number|undefined|undefined} bytes=4 - The number of bytes to write the number value into.
+     *  @param {boolean|undefined|undefined} littleEndian=true - Whether to write the number in little- or big-endian format.
      *  @returns {number} The number of bytes written.
      */
-    writePrimitive(value: number | boolean | Uuid, bytes?: number): number {
+    writePrimitive(value: number | boolean | Uuid, bytes?: number, littleEndian?: boolean): number {
         // C++  qint64 ExtendedIODevice::writePrimitive(const T& data)
         const DEFAULT_NUM_BYTES = 4;
+        const isLittleEndian = littleEndian === undefined || littleEndian;
         switch (typeof value) {
             case "number":
                 if (value > 0) {
-                    this.#_uint32Data.setUint32(0, value, UDT.LITTLE_ENDIAN);
+                    this.#_uint32Data.setUint32(0, value, isLittleEndian);
                 } else {
-                    this.#_uint32Data.setInt32(0, value, UDT.LITTLE_ENDIAN);
+                    this.#_uint32Data.setInt32(0, value, isLittleEndian);
                 }
                 if (!bytes || bytes === DEFAULT_NUM_BYTES) {
                     return this.#writeData(this.#_uint32Array, this.#UINT32_LENGTH);
                 }
-                return this.#writeData(this.#_uint32Array.slice(0, bytes), bytes);
+                if (isLittleEndian) {
+                    return this.#writeData(this.#_uint32Array.slice(0, bytes), bytes);
+                }
+                return this.#writeData(this.#_uint32Array.slice(-bytes), bytes);
             case "boolean":
                 this.#_booleanData.setUint8(0, value ? 1 : 0);
                 return this.#writeData(this.#_booleanArray, this.#BOOLEAN_LENGTH);
@@ -144,6 +148,27 @@ class NLPacketList {
                 console.error("NLPacketList.writePrimitive() - Unhandled type:", typeof value);
                 return 0;
         }
+    }
+
+    /*@devdoc
+     *  Writes a string to the current packet.
+     *  @param {string|null} string - The string to write.
+     *  @param {boolean} [littleEndian=true] - Whether to write the number of bytes in the string in little- or big-endian
+     *      format.
+     *  @returns {number} The number of bytes written.
+     */
+    writeString(string: string | null, littleEndian?: boolean): number {
+        // C++  qint64 PacketList::writeString(const QString& string)
+        const UINT32_BYTES = 4;
+        if (string === null) {
+            this.writePrimitive(-1, UINT32_BYTES);  // ffffffff
+            return UINT32_BYTES;
+        }
+        this.writePrimitive(2 * string.length, UINT32_BYTES, littleEndian === undefined || littleEndian);
+        for (let i = 0; i < string.length; i++) {
+            this.writePrimitive(string.charCodeAt(i), 2, UDT.BIG_ENDIAN);
+        }
+        return UINT32_BYTES + 2 * string.length;
     }
 
     /*@devdoc
@@ -210,6 +235,23 @@ class NLPacketList {
     getNumPackets(): number {
         // C++  size_t getNumPackets()
         return this.#_packets.length + (this.#_currentPacket ? 1 : 0);
+    }
+
+
+    /*@devdoc
+     *  Gets the total number of bytes in the packets in the list.
+     *  @returns {number} The total number of bytes in the packets in the list.
+     */
+    getDataSize(): number {
+        // C++  size_t getDataSize()
+        let totalBytes = 0;
+        for (const packet of this.#_packets) {
+            totalBytes += packet.getDataSize();
+        }
+        if (this.#_currentPacket) {
+            totalBytes += this.#_currentPacket.getDataSize();
+        }
+        return totalBytes;
     }
 
     /*@devdoc

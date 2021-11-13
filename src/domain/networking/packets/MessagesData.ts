@@ -25,7 +25,7 @@ const MessagesData = new class {
     // C++  N/A
 
     /*@devdoc
-     *  Information needed for {@link PacketScribe|reading} or {@link PacketScribe|writing} a
+     *  Information returned by {@link PacketScribe|reading} or needed for {@link PacketScribe|writing} a
      *  {@link PacketType(1)|MessagesData} packet list.
      *  @typedef {object} PacketScribe.MessagesDataDetails
      *  @property {string} channel - The message channel to send on.
@@ -35,7 +35,9 @@ const MessagesData = new class {
 
     /*@devdoc
      *  Reads a {@link PacketType(1)|MessagesData} multi-packet message.
-     *  returns {PacketScribe.MessagesDataDetails} The information obtained from reading the message.
+     *  @function PacketScribe.MessagesData&period;read
+     *  @read {DataView} data - The MessagesData message data to read.
+     *  @returns {PacketScribe.MessagesDataDetails} The information obtained from reading the message.
      */
     read(data: DataView): MessagesDataDetails {  /* eslint-disable-line class-methods-use-this */
         // C++  void MessagesClient::decodeMessagesPacket(ReceivedMessage* receivedMessage, QString& channel, bool& isText,
@@ -78,7 +80,7 @@ const MessagesData = new class {
      *  Writes a {@link PacketType(1)|MessagesData} packet list, ready for sending.
      *  @function PacketScribe.MessagesData&period;write
      *  @param {PacketScribe.MessagesDataDetails} info - The information needed for writing the packet list.
-     *  @returns {NLPacketList}
+     *  @returns {NLPacketList} The packet list, ready for sending.
      */
     write(info: MessagesDataDetails): NLPacketList {  /* eslint-disable-line class-methods-use-this */
         // C++  NLPacketList* MessagesClient::encodeMessagesPacket(QString channel, QString message, QUuid senderID)

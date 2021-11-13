@@ -31,6 +31,10 @@
  *      <em>Read-only.</em>
  *      <p><em>Static</em></p>
  *      @static
+ *  @property {Uuid} AVATAR_SELF_ID=1 - The null UUID, <code>{00000000-0000-0000-0000-000000000001}</code>.
+ *      <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
  */
 class Uuid extends BigInt {
     // C++  Uuid.h
@@ -39,6 +43,7 @@ class Uuid extends BigInt {
 
     static readonly NUM_BYTES_RFC4122_UUID = 16;
     static readonly NULL = BigInt(0);
+    static readonly AVATAR_SELF_ID = BigInt(1);
 
 
     constructor(value: bigint = 0) {
@@ -74,14 +79,12 @@ class Uuid extends BigInt {
      */
     stringify(): string {
         /* eslint-disable @typescript-eslint/no-magic-numbers */
-        if (this.value() !== 0n) {
-            const hexadecimal = this.value().toString(16);
-            return hexadecimal.slice(0, 8) + "-" + hexadecimal.slice(8, 12) + "-" + hexadecimal.slice(12, 16) + "-"
-                + hexadecimal.slice(16, 20) + "-" + hexadecimal.slice(20);
-        }
+        const hexadecimal = this.value()
+            .toString(16)
+            .padStart(32, "0");
+        return hexadecimal.slice(0, 8) + "-" + hexadecimal.slice(8, 12) + "-" + hexadecimal.slice(12, 16) + "-"
+            + hexadecimal.slice(16, 20) + "-" + hexadecimal.slice(20);
         /* eslint-enable @typescript-eslint/no-magic-numbers */
-
-        return "00000000-0000-0000-0000-000000000000";
     }
 
 }

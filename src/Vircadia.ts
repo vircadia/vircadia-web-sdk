@@ -33,7 +33,8 @@ export { default as DomainServer } from "./DomainServer";
 export type { ConnectionState } from "./DomainServer";
 
 export { default as AudioMixer } from "./AudioMixer";
-export { default as AvatarMixer } from "./AvatarMixer";
+export type { AudioPositionGetter } from "./domain/audio-client/AudioClient";
+export { default as AvatarMixer, MyAvatarInterface, AvatarListInterface } from "./AvatarMixer";
 export { default as MessageMixer } from "./MessageMixer";
 export type { AssignmentClientState } from "./domain/AssignmentClient";
 
@@ -41,3 +42,9 @@ export { default as SignalEmitter } from "./domain/shared/SignalEmitter";
 export type { Signal, Slot } from "./domain/shared/SignalEmitter";
 
 export { default as Uuid } from "./domain/shared/Uuid";
+
+export { default as Vec3 } from "./domain/shared/Vec3";
+export type { vec3 } from "./domain/shared/Vec3";
+
+export { default as Quat } from "./domain/shared/Quat";
+export type { quat } from "./domain/shared/Quat";

@@ -30,7 +30,7 @@ const MessagesSubscribe = new class {
      *  Writes a {@link PacketType(1)|MessagesSubscribe} packet list, ready for sending.
      *  @function PacketScribe.MessagesSubscribe&period;write
      *  @param {PacketScribe.MessagesSubscribeDetails} info - The information needed for writing the packet list.
-     *  @returns {NLPacketList}
+     *  @returns {NLPacketList} The packet list, ready for sending.
      */
     write(info: MessagesSubscribeDetails): NLPacketList {  /* eslint-disable-line class-methods-use-this */
         // C++  void MessagesClient::subscribe(QString channel)

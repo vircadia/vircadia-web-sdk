@@ -47,8 +47,8 @@
         </div>
 
         <div class="row">
-            <span><input id="micMuted" type="checkbox" checked /></span>
-            <span><label for="micMuted">Mic muted.</label></span>
+            <span><label for="micMuted">Mic muted:</label></span>
+            <input id="micMuted" type="checkbox" class="checkbox" checked />
         </div>
         <audio id="audioElement" />
     </div>
@@ -82,6 +82,49 @@
         <div class="row">
             <span>Status:</span>
             <input id="avatarMixerStatus" type="text" readonly="readonly" />
+        </div>
+
+
+        <h3>My Avatar</h3>
+
+        <div class="row">
+            <span>Display name:</span>
+            <input id="myAvatarDisplayName" type="text" class="medium" />
+        </div>
+
+        <div class="row">
+            <span>Session name:</span>
+            <input id="myAvatarSessionDisplayName" type="text" readonly="readonly" class="medium" />
+        </div>
+
+        <div class="row">
+            <span>Position:</span>
+            x: <input id="avatarMixerPosX" type="number" class="narrow" />
+            y: <input id="avatarMixerPosY" type="number" class="narrow" />
+            z: <input id="avatarMixerPosZ" type="number" class="narrow" />
+        </div>
+
+        <h3>Avatar List</h3>
+
+        <div class="row">
+            <span>Avatars:</span>
+            <input id="avatarsCount" type="number" class="narrow" readonly="readonly" />
+        </div>
+
+        <table id="avatarList">
+            <thead>
+                <tr><th>Session ID</th><th>Session name</th><th colspan="3">Position</th></tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Game Loop</h2>
+    <div>
+        <div class="row">
+            <span>Game rate:</span>
+            <input id="gameRateValue" type="text" class="narrow align-right" readonly="readonly" />
         </div>
     </div>
 

@@ -268,7 +268,6 @@ class SendQueue {
     }
 
 
-    // Slot
     /*@devdoc
      *  Updates the destination address.
      *  @function SendQueue.updateDestinationAddress

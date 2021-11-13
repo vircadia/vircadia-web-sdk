@@ -15,6 +15,11 @@ import Uuid from "../../../src/domain/shared/Uuid";
 
 describe("Uuid - unit tests", () => {
 
+    test("The static values are provided", () => {
+        expect(Uuid.NULL).toBe(0n);
+        expect(Uuid.AVATAR_SELF_ID).toBe(1n);
+    });
+
     test("The default UUID value is Uuid.NULL", () => {
         expect(new Uuid().valueOf()).toBe(Uuid.NULL);
     });
@@ -37,9 +42,14 @@ describe("Uuid - unit tests", () => {
         expect(uuid.stringify()).toBe("a3eda01e-c4de-456d-bf07-858a26c5a648");
     });
 
-    test("Can stringigy a null Uuid", () => {
+    test("Can stringify a null Uuid", () => {
         const uuid = new Uuid(0n);
         expect(uuid.stringify()).toBe("00000000-0000-0000-0000-000000000000");
+    });
+
+    test("Can stringify a Uuid with leading 0s", () => {
+        const uuid = new Uuid(1n);
+        expect(uuid.stringify()).toBe("00000000-0000-0000-0000-000000000001");
     });
 
 });

@@ -38,6 +38,9 @@ type NewNodeInfo = {
     connectionSecretUUID: Uuid
 };
 
+type NodePredicate = (node: Node) => boolean;
+type NodeFunctor = (node: Node) => void;
+
 
 /*@devdoc
  *  The <code>LimitedNodeList</code> class manages all the network nodes (assignment clients) that the client is connected to.
@@ -64,6 +67,19 @@ class LimitedNodeList {
      *  @property {boolean} isReplicated - <code>true</code> if the node is replicated, <code>false</code> if it isn't.
      *  @property {LocalID} sessionLocalID - The local ID of the node at the domain server.
      *  @property {Uuid} connectionSecretUUID - The secret for the client connection to the node.
+     */
+
+    /*@devdoc
+     *  A function that tests if a {@link Node} satisfies some condition.
+     *  @callback NodePredicate
+     *  @param {Node} node - The node to test.
+     *  @returns {boolean} <code>true</code> if the node passes the test, <code>false</code> if it doesn't.
+     */
+
+    /*@devdoc
+     *  A function that operates on a {@link Node}.
+     *  @callback NodeFunctor
+     *  @param {Node} node - The node to operate on.
      */
 
 
@@ -195,15 +211,31 @@ class LimitedNodeList {
     /*@devdoc
      *  Sends a a solitary packet to an address, unreliably. The packet cannot be part of a multi-packet message.
      *  @param {NLPacket} packet - The packet to send.
-     *  @param {SockAddr} sockAddr - The address to send it to.
-     *  @param {HMACAuth} [hmacAuth=null] - The hash-based message authentication code.
+     *  @param {SockAddr|Node} sockAddr - The address to send it to.
+     *      <p>The node to send it to. Not sent if the node doesn't have an active socket.</p>
+     *  @param {HMACAuth|undefined} [hmacAuth=null] - The hash-based message authentication code.
+     *      <p>Not used.</p>
      *  @returns {number} The number of bytes sent.
      */
-    sendUnreliablePacket(packet: NLPacket, sockAddr: SockAddr, hmacAuth: HMACAuth | null = null): number {
+    sendUnreliablePacket(packet: NLPacket, param1: SockAddr | Node, hmacAuth: HMACAuth | null = null): number {
         // C++  qint64 sendUnreliablePacket(const NLPacket& packet, const SockAddr& sockAddr, HMACAuth* hmacAuth = nullptr)
+        //      qint64 sendUnreliablePacket(const NLPacket& packet, const Node& destinationNode)
 
         assert(!packet.isPartOfMessage(), "Cannot send a part-message packet unreliably!");
         assert(!packet.isReliable(), "Cannot send a reliable packet unreliably!");
+
+        if (param1 instanceof Node) {
+            const destinationNode = param1;
+
+            const destinationAddress = destinationNode.getActiveSocket();
+            if (!destinationAddress) {
+                return 0;
+            }
+
+            return this.sendUnreliablePacket(packet, destinationAddress, destinationNode.getAuthenticateHash());
+        }
+
+        const sockAddr = param1;
         assert(sockAddr.getType() === SocketType.WebRTC, "Destination is not a WebRTC socket!");
 
         // WEBRTC TODO: Address further C++ code.
@@ -285,6 +317,30 @@ class LimitedNodeList {
         return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
     }
 
+    /*@devdoc
+     *  Broadcasts a packet to all nodes of specified types.
+     *  @param {NLPacket} packet - The packet to broadcast.
+     *  @param {Set<NodeTypeValue>} destinationNodeTypes - The types of nodes to broadcast the packet to.
+     *  @returns {number} The number of nodes broadcast to.
+     */
+    broadcastToNodes(packet: NLPacket, destinationNodeTypes: Set<NodeTypeValue>): number {
+        // C++  unsigned int broadcastToNodes(NLPacket* packet, const NodeSet& destinationNodeTypes)
+        let n = 0;
+
+        for (const node of this.#_nodeHash.values()) {
+            if (destinationNodeTypes.has(node.getType())) {
+                if (packet.isReliable()) {
+                    const packetCopy = NLPacket.createCopy(packet);
+                    this.sendPacket(packetCopy as NLPacket, node);
+                } else {
+                    this.sendUnreliablePacket(packet, node);
+                }
+                n += 1;
+            }
+        }
+
+        return n;
+    }
 
     /*@devdoc
      *  Gets the assignment client node of a specified type, if present.
@@ -444,6 +500,20 @@ class LimitedNodeList {
         return null;
     }
 
+    /*@devdoc
+     *  Applies a function to each node that satisfies a predicate.
+     *  @param {NodePredicate} predicate - The predicate to test each node with.
+     *  @param {NodeFunctor} functor - The function to apply to each node that passes the test.
+     */
+    eachMatchingNode(predicate: NodePredicate, functor: NodeFunctor): void {
+        // C++  void eachMatchingNode(PredLambda predicate, NodeLambda functor) {
+        for (const node of this.#_nodeHash.values()) {
+            if (predicate(node)) {
+                functor(node);
+            }
+        }
+    }
+
 
     /*@devdoc
      *  Gets the client's local socket network address.
@@ -594,15 +664,14 @@ class LimitedNodeList {
         return false;
     };
 
+
     /*@devdoc
      *  Resets the NodeList, closing all connections and deleting all node data.
      *  @function LimitedNodeList.reset
      *  @type {Slot}
      *  @param {string} reason - The reason for resetting.
      */
-    // eslint-disable-next-line
-    // @ts-ignore
-    reset(reason: string): void {  // eslint-disable-line @typescript-eslint/no-unused-vars
+    reset(reason: string): void {
         // C++  void reset(QString reason)
         // Cannot declare this Slot function as an arrow function because derived NodeList class calls this function.
         this.#eraseAllNodes(reason);
@@ -932,4 +1001,4 @@ class LimitedNodeList {
 }
 
 export default LimitedNodeList;
-export type { NewNodeInfo };
+export type { NewNodeInfo, NodeFunctor, NodePredicate };
