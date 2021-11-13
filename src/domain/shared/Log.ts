@@ -44,7 +44,7 @@ export interface LoggerContext {
  */
 export class ConsoleLoggerContext implements LoggerContext {
 
-    static #_typeFirst(func: (fisrs: string, second?: string) => void): LogFunction {
+    static #_typeFirst(func: (first: string, second?: string) => void): LogFunction {
         return (message: string, messageType?: string) => {
             if (messageType) {
                 return func(`[${messageType}]`, message);

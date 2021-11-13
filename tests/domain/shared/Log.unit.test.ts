@@ -1,5 +1,5 @@
 //
-//  DomainServer.unit.test.js
+//  Log.unit.test.js
 //
 //  Created by Nshan G. on 30 Oct 2021.
 //  Copyright 2021 Vircadia contributors.
