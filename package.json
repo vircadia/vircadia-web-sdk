@@ -15,10 +15,10 @@
         "dist"
     ],
     "scripts": {
-        "build": "npm-run-all -s \"clean-dist\" \"create-version\" \"build:web-sdk\"",
-        "build:web-sdk": "webpack --mode production",
-        "watch": "npm-run-all -s \"clean-dist\" \"create-version\" \"watch:web-sdk\"",
-        "watch:web-sdk": "webpack --watch --mode production",
+        "build": "npm-run-all -s \"clean-dist\" \"create-version\" \"build-sdk\"",
+        "build-sdk": "webpack --mode production",
+        "watch": "npm-run-all -s \"clean-dist\" \"create-version\" \"watch-sdk\"",
+        "watch-sdk": "webpack --watch --mode development",
         "create-version": "node build_scripts/createVersion.js",
         "clean-dist": "node build_scripts/cleanDist.js",
         "clean": "tsc --build --clean",
@@ -27,8 +27,8 @@
         "test": "jest",
         "test-watch": "jest --watch",
         "test-debug": "jest --detectOpenHandles",
-        "sdkdoc": "rimraf ./docs/sdk && rimraf ./docs/build && tsc --project tsconfig.jsdoc.json && jsdoc ./jsdoc/sdk-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-sdk.json --destination docs/sdk",
-        "devdoc": "rimraf ./docs/dev && rimraf ./docs/build && tsc --project tsconfig.jsdoc.json && jsdoc ./jsdoc/dev-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-dev.json --destination docs/dev"
+        "sdkdoc": "rimraf ./docs/sdk && rimraf ./docs/build && tsc --resolveJsonModule --project tsconfig.jsdoc.json && jsdoc ./jsdoc/sdk-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-sdk.json --destination docs/sdk",
+        "devdoc": "rimraf ./docs/dev && rimraf ./docs/build && tsc --resolveJsonModule --project tsconfig.jsdoc.json && jsdoc ./jsdoc/dev-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-dev.json --destination docs/dev"
     },
     "devDependencies": {
         "@types/crypto-js": "^4.0.2",
