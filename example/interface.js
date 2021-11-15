@@ -351,4 +351,8 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
 
     document.getElementById("sdkVersion").innerText = Vircadia.version;
 
+    window.addEventListener("beforeunload", function () {
+        domainServer.disconnect();
+    });
+
 }());
