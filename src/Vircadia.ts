@@ -20,9 +20,23 @@ import versionInfo from "../VERSION.json";
  */
 const Vircadia = new class {
 
+    /*@sdkdoc
+     *  Gets the NPM package version for the SDK.
+     *  @returns {string} A string version of the NPM package version from the `package.json` file formatted "1.3.4".
+     */
     get version() {
         return versionInfo["npm-package-version"];
     }
+    /*@sdkdoc
+     *  Gets a version build dependent version for the SDK.
+     *  <p>
+     *  The build version string is created from the NPM package version, build date, and the Git commit of this particular
+     *  SDK build formatted as "PackageVersion-Date-Commit".
+     *  For example: "1.2.3-20220214-ef4873bc" saying SDK NPM package version "1.2.3" was built on February 14, 2022 and
+     *  was checked in as commit "ef4873bc">
+     *  </p>
+     *  @returns {string} Build version information.
+     */
     get verboseVersion() {
         return versionInfo["version-tag"];
     }
