@@ -435,7 +435,7 @@ class AudioClient {
     #processStreamStatsPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {  // eslint-disable-line
         // C++  void AudioIOStats::processStreamStatsPacket(ReceivedMessage*, Node* sendingNode)
 
-        Log.once(Log.WARNING, "AudioClient: AudioStreamStats packet not processed.");
+        Log.one.warning("AudioClient: AudioStreamStats packet not processed.");
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -447,7 +447,7 @@ class AudioClient {
     #handleAudioEnvironmentDataPacket = (message: ReceivedMessage): void => {  // eslint-disable-line
         // C++  void handleAudioEnvironmentDataPacket(ReceivedMessage* message)
 
-        Log.once(Log.WARNING, "AudioClient: AudioEnvironment packet not processed.");
+        Log.one.warning("AudioClient: AudioEnvironment packet not processed.");
 
         // WEBRTC TODO: Address further C++ code.
 

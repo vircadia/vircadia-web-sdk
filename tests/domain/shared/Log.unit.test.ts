@@ -8,13 +8,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Logger, LogLevel, ConsoleLoggerContext, StringLoggerContext } from "../../../src/domain/shared/Log";
+import { Logger, LogLevel, LoggerConfiguration, ConsoleLoggerContext, StringLoggerContext } from "../../../src/domain/shared/Log";
 
 describe("Logger - unit tests", () => {
 
     test("Console context", () => {
 
-        const logger = new Logger(new ConsoleLoggerContext());
+        const logger = new Logger({context: new ConsoleLoggerContext()});
 
         const debug = jest.spyOn(console, "debug").mockImplementation(() => { /* no-op */ });
         const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
@@ -40,11 +40,11 @@ describe("Logger - unit tests", () => {
         warn.mockClear();
         error.mockClear();
 
-        logger.debug("Console debug message", "Type 1");
-        logger.message("Console log message", "Type 2");
-        logger.info("Console info message", "Type 3");
-        logger.warning("Console warning message", "Type 4");
-        logger.error("Console error message", "Type 5");
+        logger.tag("Type 1").debug("Console debug message");
+        logger.tag("Type 2").message("Console log message");
+        logger.tag("Type 3").info("Console info message");
+        logger.tag("Type 4").warning("Console warning message");
+        logger.tag("Type 5").error("Console error message");
 
         expect(debug).toHaveBeenCalledWith("[Type 1]", "Console debug message");
         expect(log).toHaveBeenCalledWith("[Type 2]", "Console log message");
@@ -62,7 +62,7 @@ describe("Logger - unit tests", () => {
 
     test("String context", () => {
         const context = new StringLoggerContext();
-        const logger = new Logger(context);
+        const logger = new Logger({context});
 
         logger.debug("Debug message");
         logger.message("Default message");
@@ -79,11 +79,11 @@ describe("Logger - unit tests", () => {
         );
         context.buffer = "";
 
-        logger.debug("Debug message", "Type 1");
-        logger.message("Default message", "Type 2");
-        logger.info("Info message", "Type 3");
-        logger.warning("Warning message", "Type 4");
-        logger.error("Error message", "Type 5");
+        logger.tag("Type 1").debug("Debug message");
+        logger.tag("Type 2").message("Default message");
+        logger.tag("Type 3").info("Info message");
+        logger.tag("Type 4").warning("Warning message");
+        logger.tag("Type 5").error("Error message");
 
         expect(context.buffer).toBe(""
             + "[Type 1][DEBUG] Debug message\n"
@@ -96,11 +96,12 @@ describe("Logger - unit tests", () => {
 
     test("Filtering by level", () => {
         const context = new StringLoggerContext();
-        const logger = new Logger(context);
+        const config = {context} as LoggerConfiguration;
+        const logger = new Logger(config);
 
-        logger.filterLevels((level) => {
+        config.levelFilter = (level) => {
             return level >= LogLevel.INFO;
-        });
+        };
 
         logger.debug("Debug message");
         logger.message("Default message");
@@ -115,9 +116,9 @@ describe("Logger - unit tests", () => {
         );
         context.buffer = "";
 
-        logger.filterLevels((level) => {
+        config.levelFilter = (level) => {
             return level <= LogLevel.DEFAULT;
-        });
+        };
 
         logger.debug("Debug message");
         logger.message("Default message");
@@ -131,9 +132,9 @@ describe("Logger - unit tests", () => {
         );
         context.buffer = "";
 
-        logger.filterLevels((level) => {
+        config.levelFilter = (level) => {
             return [LogLevel.DEBUG, LogLevel.ERROR].includes(level);
-        });
+        };
 
         logger.debug("Debug message");
         logger.message("Default message");
@@ -150,16 +151,17 @@ describe("Logger - unit tests", () => {
 
     test("Filtering by type", () => {
         const context = new StringLoggerContext();
-        const logger = new Logger(context);
+        const config = {context} as LoggerConfiguration;
+        const logger = new Logger(config);
 
-        logger.setTypeFilter(["Type 2", "Type 4"]);
+        config.tagFilter = ["Type 2", "Type 4"];
 
         logger.message("message");
-        logger.message("message 1", "Type 1");
-        logger.message("message 2", "Type 2");
-        logger.message("message 3", "Type 3");
-        logger.message("message 4", "Type 4");
-        logger.message("message 5", "Type 5");
+        logger.tag("Type 1").message("message 1");
+        logger.tag("Type 2").message("message 2");
+        logger.tag("Type 3").message("message 3");
+        logger.tag("Type 4").message("message 4");
+        logger.tag("Type 5").message("message 5");
 
         expect(context.buffer).toBe(""
             + "[Type 2][DEFAULT] message 2\n"
@@ -167,14 +169,14 @@ describe("Logger - unit tests", () => {
         );
         context.buffer = "";
 
-        logger.setTypeFilter(["Type 1", "Type 3", undefined]);
+        config.tagFilter = ["Type 1", "Type 3", undefined];
 
         logger.message("message");
-        logger.message("message 1", "Type 1");
-        logger.message("message 2", "Type 2");
-        logger.message("message 3", "Type 3");
-        logger.message("message 4", "Type 4");
-        logger.message("message 5", "Type 5");
+        logger.tag("Type 1").message("message 1");
+        logger.tag("Type 2").message("message 2");
+        logger.tag("Type 3").message("message 3");
+        logger.tag("Type 4").message("message 4");
+        logger.tag("Type 5").message("message 5");
 
         expect(context.buffer).toBe(""
             + "[DEFAULT] message\n"
@@ -183,28 +185,28 @@ describe("Logger - unit tests", () => {
         );
         context.buffer = "";
 
-        logger.setTypeFilter([undefined]);
+        config.tagFilter = [undefined];
 
         logger.message("message");
-        logger.message("message 1", "Type 1");
-        logger.message("message 2", "Type 2");
-        logger.message("message 3", "Type 3");
-        logger.message("message 4", "Type 4");
-        logger.message("message 5", "Type 5");
+        logger.tag("Type 1").message("message 1");
+        logger.tag("Type 2").message("message 2");
+        logger.tag("Type 3").message("message 3");
+        logger.tag("Type 4").message("message 4");
+        logger.tag("Type 5").message("message 5");
 
         expect(context.buffer).toBe(""
             + "[DEFAULT] message\n"
         );
         context.buffer = "";
 
-        logger.setTypeFilter();
+        config.tagFilter = undefined;
 
         logger.message("message");
-        logger.message("message 1", "Type 1");
-        logger.message("message 2", "Type 2");
-        logger.message("message 3", "Type 3");
-        logger.message("message 4", "Type 4");
-        logger.message("message 5", "Type 5");
+        logger.tag("Type 1").message("message 1");
+        logger.tag("Type 2").message("message 2");
+        logger.tag("Type 3").message("message 3");
+        logger.tag("Type 4").message("message 4");
+        logger.tag("Type 5").message("message 5");
 
         expect(context.buffer).toBe(""
             + "[DEFAULT] message\n"
@@ -220,19 +222,20 @@ describe("Logger - unit tests", () => {
 
     test("Mixed filtering", () => {
         const context = new StringLoggerContext();
-        const logger = new Logger(context);
+        const config = {context} as LoggerConfiguration;
+        const logger = new Logger(config);
 
-        logger.filterLevels((level) => {
+        config.levelFilter = (level) => {
             return level <= LogLevel.DEFAULT;
-        });
-        logger.setTypeFilter(["Type 2"]);
+        };
+        config.tagFilter = ["Type 2"];
 
         logger.message("message");
-        logger.debug("Debug message 1", "Type 1");
-        logger.message("Default message 2", "Type 2");
-        logger.info("Info message 1", "Type 1");
-        logger.warning("message 2", "Type 2");
-        logger.error("message 1", "Type 1");
+        logger.tag("Type 1").debug("Debug message 1");
+        logger.tag("Type 2").message("Default message 2");
+        logger.tag("Type 3").info("Info message 1");
+        logger.tag("Type 4").warning("message 2");
+        logger.tag("Type 5").error("message 1");
 
         expect(context.buffer).toBe(""
             + "[Type 2][DEFAULT] Default message 2\n"
@@ -240,29 +243,30 @@ describe("Logger - unit tests", () => {
         context.buffer = "";
     });
 
-    test("Logger.once", () => {
+    test("Log a message only once", () => {
         const context = new StringLoggerContext();
-        const logger = new Logger(context);
+        const config = {context} as LoggerConfiguration;
+        const logger = new Logger(config);
 
-        logger.once(LogLevel.DEBUG, "message");
-        logger.once(LogLevel.DEBUG, "message");
-        logger.once(LogLevel.DEBUG, "message");
+        logger.one.debug("message");
+        logger.one.debug("message");
+        logger.one.debug("message");
 
-        logger.once(LogLevel.DEBUG, "message", "Type");
-        logger.once(LogLevel.DEBUG, "message", "Type");
-        logger.once(LogLevel.DEBUG, "message", "Type");
+        logger.tag("Type").one.debug("message");
+        logger.tag("Type").one.debug("message");
+        logger.tag("Type").one.debug("message");
 
-        logger.once(LogLevel.DEBUG, "message", "undefined");
-        logger.once(LogLevel.DEBUG, "message", "undefined");
-        logger.once(LogLevel.DEBUG, "message", "undefined");
+        logger.tag("undefined").one.debug("message");
+        logger.tag("undefined").one.debug("message");
+        logger.tag("undefined").one.debug("message");
 
-        logger.once(LogLevel.INFO, "message");
-        logger.once(LogLevel.INFO, "message");
-        logger.once(LogLevel.INFO, "message");
+        logger.one.info("message");
+        logger.one.info("message");
+        logger.one.info("message");
 
-        logger.once(LogLevel.DEBUG, "another message");
-        logger.once(LogLevel.DEBUG, "another message");
-        logger.once(LogLevel.DEBUG, "another message");
+        logger.one.debug("another message");
+        logger.one.debug("another message");
+        logger.one.debug("another message");
 
         expect(context.buffer).toBe(""
             + "[DEBUG] message\n"
@@ -270,6 +274,36 @@ describe("Logger - unit tests", () => {
             + "[undefined][DEBUG] message\n"
             + "[INFO] message\n"
             + "[DEBUG] another message\n"
+        );
+        context.buffer = "";
+    });
+
+    test("Log a record", () => {
+        const context = new StringLoggerContext();
+        const logger = new Logger({context});
+
+        const big = BigInt("9999999999999999999999999999999999999999999999");
+
+        logger.message("a record is:", {
+            str: "str",
+            sym: Symbol("sym"),
+            num: 2,
+            bnum: big,
+            bool: true,
+            und: undefined,
+            nil: null
+        });
+
+        expect(context.buffer).toBe(""
+            + "[DEFAULT] a record is: \n"
+            + "  str: str\n"
+            + "  sym: Symbol(sym)\n"
+            + "  num: 2\n"
+            + `  bnum: ${big.toLocaleString()}\n`
+            + "  bool: true\n"
+            + "  und: undefined\n"
+            + "  nil: null\n"
+            + "\n"
         );
         context.buffer = "";
     });

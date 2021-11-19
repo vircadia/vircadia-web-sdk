@@ -38,84 +38,162 @@ const AllLogLevels = [
 ] as const;
 
 /*@devdoc
- *  The log function type used by in <code>LoggerContext</code> interface.
- *  @callback LogFunction
- *  @param {string} message - The main body of the message.
- *  @param {string} [messageType] - The message type.
+ *  @typedef {string | symbol | number | bigint | boolean | undefined | null} LoggablePrimitive
  */
-type LogFunction = (message: string, messageType?: string) => void;
+type LoggablePrimitive = string | symbol | number | bigint | boolean | undefined | null;
 
 /*@devdoc
- *  The <code>LoggerContext</code> is an interface for configuration of the output of the <code>Logger</code> class.
+ *  @typedef {LoggablePrimitive | Record<string, LoggablePrimitive>} LoggableRecord
+ */
+type LoggableRecord = LoggablePrimitive | Record<string, LoggablePrimitive>;
+
+/*@devdoc
+ *  Implementing this interface will allow passing the objects of the class to the {@linkcode Logger}
+ *  @interface Loggable
+ */
+interface Loggable {
+    /*@devdoc
+     *  Converts the object to a loggable representation
+     *  @return {LoggableRecord} - a representation of the object based on loggable primitives
+     */
+    toLoggable(): LoggableRecord;
+}
+
+/*@devdoc
+ *  @typedef {LoggablePrimitive | Loggable} LoggableObject
+ */
+type LoggableObject = LoggablePrimitive | Loggable;
+
+/*@devdoc
+ *  @typedef {LoggablePrimitive | Loggable} LoggableObjectRecord
+ */
+type LoggableObjectRecord = LoggableObject | Record<string, LoggableObject>
+
+/*@devdoc
+ *  A predicate for filtering log messages based
+ *  @callback LogMessagePredicate
+ *  @param {LogLevel} level - The logging level of the message.
+ *  @param {string} [messageType] - The message type.
+ *  @return {boolean} - Whether to include/allow the message.
+ */
+type LogMessagePredicate = (level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]) => boolean;
+
+/*@devdoc
+ *  Predicate function for filtering log messages based on log level.
+ *  @callback LogLevelPredicate
+ *  @param {LogLevel} level - The level in question.
+ *  @return {boolean} Whether to show messages of the specified level.
+ */
+
+/*@devdoc
+ *  The <code>LoggerContext</code> is an interface used in {@linkcode LoggerConfiguration} to specify the output of the {@linkcode Logger} class.
  *  @interface LoggerContext
  */
 interface LoggerContext {
     /*@devdoc
-     *  Returns a function that the <code>Logger</code> class would use to log messages at a given level.
-     *  @param {LogLevel} level - The level associated with the log function returned.
-     *  @return {LogFunction | undefined}
+     *  Outputs the log message.
+     *  @param {LogLevel} level - The level to log the message at
+     *  @param {Set<string>} tags - The tags associated with the message
+     *  @param {LoggableObject[]} loggables - (@linkcode LoggableObject) list that comprises the message body.
      */
-    getFunction(level: LogLevel): LogFunction | undefined;
+    log(level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]): void;
 }
 
 /*@devdoc
- *  The <code>ConsoleLoggerContext</code> is a logger configuration for logging to the dev console.
+ *  The <code>LoggerContext</code> is an interface for configuration of the {@linkcode Logger} class.
+ *  @interface LoggerContext
+ */
+type LoggerConfiguration = {
+
+    /*@devdoc
+     *  A full message filter that is applied to log input, before it is passed to the context.
+     *  @type {LogMessagePredicate}
+     */
+    filter?: LogMessagePredicate;
+
+
+    /*@devdoc
+     *  A level filter that is applied to log input, before the {@linkcode LoggerConfiguration#filter}
+     *  @type {LogLevelPredicate}
+     */
+    levelFilter?: (level: LogLevel) => boolean;
+
+
+    /*@devdoc
+     *  A log message tag specific filter that is applied to log input, before the {@linkcode LoggerConfiguration#filter}
+     *  A given message will be included if it has any of the specified tags. <code>undefined</code> value in the array specifies to include messages without any tags.
+     *  @type {Set<string>}
+     */
+    tagFilter?: Array<string | undefined>;
+
+    /*@devdoc
+     *  The context that specifies the logger output.
+     *  @type {LoggerContext}
+     */
+    context: LoggerContext;
+
+}
+
+function loggablePrimitiveToString(loggable: LoggablePrimitive): string | undefined {
+    if (loggable == null) {
+        return "" + loggable;
+    } else {
+        switch(typeof loggable) {
+            case "string":
+                return loggable;
+
+            case "number":
+            case "boolean":
+            case "symbol":
+                return loggable.toLocaleString();
+
+            case "bigint":
+                return BigInt(loggable).toLocaleString();
+
+            case "undefined":
+                return "" + loggable;
+
+            default:
+                return undefined;
+        }
+    }
+}
+
+function loggableRecordToString(loggable: Record<string, LoggablePrimitive>): string {
+    let str = "\n"
+    for (const i in loggable) {
+        str += `  ${i}: ${loggablePrimitiveToString(loggable[i])}\n`;
+    }
+    return str;
+}
+
+function loggableToString(loggable: LoggableRecord) {
+    return loggablePrimitiveToString(loggable as LoggablePrimitive) ||
+        loggableRecordToString(loggable as Record<string, LoggablePrimitive>);
+}
+
+/*@devdoc
+ *  The <code>ConsoleLoggerContext</code> is a logger output configuration for logging to the dev console.
  *
  *  @class ConsoleLoggerContext
  *  @implements LoggerContext
  */
 class ConsoleLoggerContext implements LoggerContext {
-
-    static #_typeFirst(func: (first: string, second?: string) => void): LogFunction {
-        return (message: string, messageType?: string) => {
-            if (messageType) {
-                return func(`[${messageType}]`, message);
+    log(level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]): void {
+        const logFunction = [console.debug, console.log, console.info, console.warn, console.error].at(level);
+        if (logFunction) {
+            if (tags.size === 0) {
+                logFunction(...loggables);
+            } else {
+                logFunction(`[${[...tags].join("][")}]`, ...loggables);
             }
-            return func(message);
-        };
-    }
 
-    // it is necessary to capture the console object here, for things like jest's mocks to work,
-    // hence the no-op looking lambda wrappers
-    static #_functions = new Map<LogLevel, LogFunction>([
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-        [
-            LogLevel.DEFAULT, ConsoleLoggerContext.#_typeFirst((...params: any[]) => {
-                return console.log(...params);
-            })
-        ],
-        [
-            LogLevel.DEBUG, ConsoleLoggerContext.#_typeFirst((...params: any[]) => {
-                return console.debug(...params);
-            })
-        ],
-        [
-            LogLevel.INFO, ConsoleLoggerContext.#_typeFirst((...params: any[]) => {
-                return console.info(...params);
-            })
-        ],
-        [
-            LogLevel.WARNING, ConsoleLoggerContext.#_typeFirst((...params: any[]) => {
-                return console.warn(...params);
-            })
-        ],
-        [
-            LogLevel.ERROR, ConsoleLoggerContext.#_typeFirst((...params: any[]) => {
-                return console.error(...params);
-            })
-        ]
-        /* eslint-enable @typescript-eslint/no-explicit-any */
-    ]);
-
-    /* eslint-disable class-methods-use-this */
-    getFunction(level: LogLevel): LogFunction | undefined {
-        return ConsoleLoggerContext.#_functions.get(level);
+        }
     }
-    /* eslint-enable class-methods-use-this */
 }
 
 /*@devdoc
- *  The <code>StringLoggerContext</code> is a configuration for logging to a string.
+ *  The <code>StringLoggerContext</code> is a output configuration for logging to a string.
  *
  *  @class StringLoggerContext
  *  @implements LoggerContext
@@ -125,31 +203,54 @@ class StringLoggerContext implements LoggerContext {
 
     buffer = "";
 
-    #_functions = new Map<LogLevel, LogFunction>();
-
-    constructor() {
-        for (const level of AllLogLevels) {
-            this.#_functions.set(level, (message: string, messageType?: string) => {
-                if (messageType) {
-                    this.buffer += `[${messageType}]`;
-                }
-                this.buffer += `[${LogLevel[level] as string}] ${message}\n`;
-            });
+    log(level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]): void {
+        if (tags.size !== 0) {
+            this.buffer += `[${[...tags].join("][")}]`;
         }
-    }
-
-    getFunction(level: LogLevel): LogFunction | undefined {
-        return this.#_functions.get(level);
+        this.buffer += `[${LogLevel[level] as string}]`;
+        this.buffer += ` ${loggables.map(loggableToString).join(" ")}\n`;
     }
 
 }
+
+class FilteredContext implements LoggerContext
+{
+    #_context: LoggerContext;
+    #_filter: LogMessagePredicate;
+
+    constructor(context: LoggerContext, filter: LogMessagePredicate) {
+        this.#_context = context;
+        this.#_filter = filter;
+    }
+
+    log(level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]): void {
+        if (this.#_filter(level, tags, ...loggables)) {
+            this.#_context.log(level, tags, ...loggables);
+        }
+    }
+}
+
+class LoggerContextCombination implements LoggerContext {
+
+
+    #_contexts: [LoggerContext];
+
+    constructor(...contexts: [LoggerContext]) {
+        this.#_contexts = contexts;
+    }
+
+    log(level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]): void {
+        for (const context of this.#_contexts) {
+            context.log(level, tags, ...loggables);
+        }
+    }
+};
 
 /*@devdoc
  *  The <code>Logger</code> class serves as a convenience utility and a centralized configuration point for logging.
  *
  *  @class Logger
- *  @param {LoggerContext} context - The context this instance will use for output,
- *  which can also store any addition state, like an output buffer.
+ *  @param {LoggerContext} configuration - The configuration this instance will use for output and filtering.
  *  @property {number} DEBUG - Alias for <code>LogLevel.DEBUG</code>.
  *  @property {number} DEFAULT - Alias for <code>LogLevel.DEFAULT</code>.
  *  @property {number} INFO - Alias for <code>LogLevel.INFO</code>.
@@ -164,19 +265,37 @@ class Logger {
     readonly WARNING = LogLevel.WARNING;
     readonly ERROR = LogLevel.ERROR;
 
-    #_context: LoggerContext;
-    #_activeFunctions = new Map<LogLevel, LogFunction>();
-    #_typeFilter?: Array<string | undefined>;
+    #_configuration: LoggerConfiguration;
+    #_tags = new Set<string>();
+    #_tagsKey: string = "";
+    #_once = false;
+    #_messageFlags = new Map<string, boolean>();
 
-    #_messageIds = new Map<string, unknown>();
-    #_typedMessageIds = new Map<string, unknown>();
-    #_messageFlags = new Map<unknown, boolean>();
+    constructor(configuration: LoggerConfiguration) {
+        this.#_configuration = configuration;
+        this.#_updateTagsKey();
+    }
 
-    constructor(context: LoggerContext) {
-        this.#_context = context;
-        this.filterLevels(() => {
-            return true;
-        });
+    tag(...tags: [string]): Logger {
+        const tagged = new Logger(this.#_configuration);
+        tagged.#_tags = new Set([...this.#_tags, ...tags]);
+        tagged.#_updateTagsKey();
+        tagged.#_once = this.#_once;
+        tagged.#_messageFlags = this.#_messageFlags;
+        return tagged;
+    }
+
+    once(enabled: boolean): Logger {
+        const onced = new Logger(this.#_configuration);
+        onced.#_tags = this.#_tags;
+        onced.#_tagsKey = this.#_tagsKey;
+        onced.#_once = enabled;
+        onced.#_messageFlags = this.#_messageFlags;
+        return onced;
+    }
+
+    get one(): Logger {
+        return this.once(true);
     }
 
     /*@devdoc
@@ -185,29 +304,34 @@ class Logger {
      *  @param {string} message - The message to log.
      *  @param {string} [messageType] - User defined message type.
      */
-    level(level: LogLevel, message: string, messageType?: string): void {
-        const log = this.#_activeFunctions.get(level);
-        if (log && this.#_isTypeAllowed(messageType)) {
-            log(message, messageType);
+    level(level: LogLevel, ...loggableObjects: LoggableObjectRecord[]): void {
+        const loggables = loggableObjects.map((obj) => {
+            const loggable = obj as Loggable;
+            if (loggable && loggable.toLoggable) {
+                return loggable.toLoggable();
+            } else {
+                return obj as LoggableRecord;
+            }
+        }) as LoggableRecord[];
+
+        if (this.#_once) {
+
+            const id = `${this.#_tagsKey} | ${level} | ${loggables.map(loggableToString).join(" | ")}`;
+
+            if (!this.#_messageFlags.get(id)) {
+                this.#_messageFlags.set(id, true);
+            } else {
+                return;
+            }
         }
-    }
 
-    /*@devdoc
-     *  Logs a message at an appropriate level, with optional type, only once.
-     *  @param {LogLevel} level - The level to log at.
-     *  @param {string} message - The message to log.
-     *  @param {string} [messageType] - User defined message type.
-     */
-    once(level: LogLevel, message: string, messageType?: string): void {
-        const idMap = messageType ? this.#_typedMessageIds : this.#_messageIds;
-
-        const key = `${messageType || "undefined"} | ${level} | ${message}`;
-
-        const id = Logger.#_getMessageId(idMap, key);
-
-        if (!this.#_messageFlags.get(id)) {
-            this.#_messageFlags.set(id, true);
-            this.level(level, message, messageType);
+        const levelFilter = this.#_configuration.levelFilter;
+        const tagFilter = this.#_configuration.tagFilter;
+        const filter = this.#_configuration.filter;
+        if ((!levelFilter || levelFilter(level)) &&
+            (!tagFilter || tagFilter.filter((tag) => tag === undefined && this.#_tags.size == 0 || this.#_tags.has(tag as string)).length > 0) &&
+            (!filter || filter(level, this.#_tags, ...loggables))) {
+            this.#_configuration.context.log(level, this.#_tags, ...loggables);
         }
     }
 
@@ -216,8 +340,8 @@ class Logger {
      *  @param {string} message - The message to log.
      *  @param {string} [messageType] - User defined message type.
      */
-    message(message: string, messageType?: string): void {
-        this.level(LogLevel.DEFAULT, message, messageType);
+    message(...loggables: LoggableObjectRecord[]): void {
+        this.level(LogLevel.DEFAULT, ...loggables);
     }
 
     /*@devdoc
@@ -225,8 +349,8 @@ class Logger {
      *  @param {string} message - The message to log.
      *  @param {string} [messageType] - User defined message type.
      */
-    info(message: string, messageType?: string): void {
-        this.level(LogLevel.INFO, message, messageType);
+    info(...loggables: LoggableObjectRecord[]): void {
+        this.level(LogLevel.INFO, ...loggables);
     }
 
     /*@devdoc
@@ -234,8 +358,8 @@ class Logger {
      *  @param {string} message - The message to log.
      *  @param {string} [messageType] - User defined message type.
      */
-    debug(message: string, messageType?: string): void {
-        this.level(LogLevel.DEBUG, message, messageType);
+    debug(...loggables: LoggableObjectRecord[]): void {
+        this.level(LogLevel.DEBUG, ...loggables);
     }
 
     /*@devdoc
@@ -243,8 +367,8 @@ class Logger {
      *  @param {string} message - The message to log.
      *  @param {string} [messageType] - User defined message type.
      */
-    warning(message: string, messageType?: string): void {
-        this.level(LogLevel.WARNING, message, messageType);
+    warning(...loggables: LoggableObjectRecord[]): void {
+        this.level(LogLevel.WARNING, ...loggables);
     }
 
     /*@devdoc
@@ -252,60 +376,50 @@ class Logger {
      *  @param {string} message - The message to log.
      *  @param {string} [messageType] - User defined message type.
      */
-    error(message: string, messageType?: string): void {
-        this.level(LogLevel.ERROR, message, messageType);
+    error(...loggables: LoggableObjectRecord[]): void {
+        this.level(LogLevel.ERROR, ...loggables);
     }
 
-    /*@devdoc
-     *  Predicate function for filtering log messages based on log level.
-     *  @callback LogLevelPredicate
-     *  @param {LogLevel} level - The level in question.
-     *  @return {boolean} Whether to show messages of the specified level.
-     */
-
-    /*@devdoc
-     *  Applies a filer to all subsequently logged messages, based on level.
-     *  @param {LogLevelPredicate} pred - The filtering condition.
-     */
-    filterLevels(pred: (level: LogLevel) => boolean): void {
-        this.#_activeFunctions = new Map<LogLevel, LogFunction>();
-        for (const level of AllLogLevels) {
-            const func = this.#_context.getFunction(level);
-            if (func && pred(level)) {
-                this.#_activeFunctions.set(level, func);
-            }
-        }
-    }
-
-    /*@devdoc
-     *  Sets a filter for all subsequently logged messages, based on user defined types.
-     *  @param {Array<string | undefined>} filter - The collection of types to allow,
-     *  presence or presence of undefined value will determine whether to show or hide messages with no type specified.
-     */
-    setTypeFilter(filter?: Array<string | undefined>): void {
-        this.#_typeFilter = filter;
-    }
-
-    #_isTypeAllowed(messageType?: string): boolean {
-        return !this.#_typeFilter || this.#_typeFilter.includes(messageType);
-    }
-
-    static #_getMessageId(idMap: Map<string, unknown>, key: string): unknown {
-        if (!idMap.has(key)) {
-            const id = {};
-            idMap.set(key, id);
-            return id;
-        }
-        return idMap.get(key);
+    #_updateTagsKey()
+    {
+        const tagSizes = [...this.#_tags].map(tag => tag.length).join(",");
+        const tagsString = [...this.#_tags].join();
+        this.#_tagsKey = `${tagSizes} | ${tagsString}`;
     }
 
 }
+
+/*@sdkdoc
+ *  The <code>DefaultLogConfiguration</code> provides a configuration point for SDK logger.
+ *
+ *  @namespace DefaultLogConfiguration
+ *  @property {LoggerContext} context - The context that specifies the output destination for the logs.
+ *  @property {LogMessagePredicate} [filter] - A full message filter that is applied to log input, before it is passed to the context.
+ */
+const DefaultLogConfiguration = {
+    context: new ConsoleLoggerContext(),
+    levelFilter: (level: LogLevel) => level >= LogLevel.WARNING
+} as LoggerConfiguration;
 
 /*@devdoc
  *  The <code>Log</code> is the main <code>Logger</code> instance used in the SDK.
  *  @type {Logger}
  */
-const Log = new Logger(new ConsoleLoggerContext());
+const Log = new Logger(DefaultLogConfiguration);
+
+process.env
 
 export default Log;
-export { LogLevel, AllLogLevels, LoggerContext, ConsoleLoggerContext, StringLoggerContext, Logger };
+export {
+    LogLevel,
+    AllLogLevels,
+    Loggable,
+    LoggerContext,
+    LoggerConfiguration,
+    ConsoleLoggerContext,
+    StringLoggerContext,
+    FilteredContext,
+    LoggerContextCombination,
+    Logger,
+    DefaultLogConfiguration
+};

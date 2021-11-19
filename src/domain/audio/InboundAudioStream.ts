@@ -125,7 +125,7 @@ class InboundAudioStream {
         // C++  int writeDroppableSilentFrames(int silentFrames)
 
         // WEBRTC TODO: Address further C++ code.
-        Log.once(Log.WARNING, `InboundAudioStream.#writeDroppableSilentFrames() not implemented. Frames: ${silentFrames}`);
+        Log.one.warning("InboundAudioStream.#writeDroppableSilentFrames() not implemented. Frames:", silentFrames);
 
     }
 
