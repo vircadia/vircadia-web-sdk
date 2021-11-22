@@ -52,7 +52,7 @@ type LoggableRecord = LoggablePrimitive | Record<string, LoggablePrimitive>;
  *  @interface Loggable
  */
 interface Loggable {
-    /*devdoc
+    /*@devdoc
      *  Converts the object to a loggable representation
      *  @return {LoggableRecord} - a representation of the object based on loggable primitives
      */
@@ -519,7 +519,7 @@ const DefaultLogConfiguration = {
  *  The <code>Log</code> is the main {@linkcode Logger} instance used in the SDK.
  *  @type {Logger}
  */
-const Log = new Logger(DefaultLogConfiguration);
+const Log = new Logger(DefaultLogConfiguration).tag("vircadia-sdk");
 
 export default Log;
 export {

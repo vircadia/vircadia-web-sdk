@@ -8,6 +8,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+
 import {
     Logger,
     LogLevel,
@@ -357,8 +359,9 @@ describe("Logger - unit tests", () => {
             context: new LoggerContextCombination(
                 context1,
                 context2,
-                new LogFilterContext(filtered,
-                    (level: LogLevel) => level === LogLevel.INFO),
+                new LogFilterContext(filtered, (level: LogLevel) => {
+                    return level === LogLevel.INFO;
+                }),
                 new LogReportContext(buglog, 3)
             )
         });
