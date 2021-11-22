@@ -510,7 +510,7 @@ class Logger {
  */
 const DefaultLogConfiguration = {
     context: new ConsoleLoggerContext(),
-    levelFilter: (level: LogLevel) => {
+    filter: (level: LogLevel) => {
         return level >= LogLevel.WARNING;
     }
 } as LoggerConfiguration;

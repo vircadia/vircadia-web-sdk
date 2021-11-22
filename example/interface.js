@@ -8,9 +8,18 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } from "../dist/Vircadia.js";
+import {
+    Vircadia,
+    DefaultLogConfiguration,
+    DomainServer, AudioMixer,
+    AvatarMixer,
+    MessageMixer,
+    Uuid
+} from "../dist/Vircadia.js";
 
 (function () {
+
+    DefaultLogConfiguration.filter = undefined;
 
     const DEFAULT_URL = "ws://127.0.0.1:40102";
 
