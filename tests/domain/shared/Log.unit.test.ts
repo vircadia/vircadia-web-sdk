@@ -8,13 +8,22 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Logger, LogLevel, LoggerConfiguration, ConsoleLoggerContext, StringLoggerContext } from "../../../src/domain/shared/Log";
+import {
+    Logger,
+    LogLevel,
+    LoggerConfiguration,
+    ConsoleLoggerContext,
+    StringLoggerContext,
+    LoggerContextCombination,
+    LogFilterContext,
+    LogReportContext
+} from "../../../src/domain/shared/Log";
 
 describe("Logger - unit tests", () => {
 
     test("Console context", () => {
 
-        const logger = new Logger({context: new ConsoleLoggerContext()});
+        const logger = new Logger({ context: new ConsoleLoggerContext() });
 
         const debug = jest.spyOn(console, "debug").mockImplementation(() => { /* no-op */ });
         const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
@@ -62,7 +71,7 @@ describe("Logger - unit tests", () => {
 
     test("String context", () => {
         const context = new StringLoggerContext();
-        const logger = new Logger({context});
+        const logger = new Logger({ context });
 
         logger.debug("Debug message");
         logger.message("Default message");
@@ -96,7 +105,7 @@ describe("Logger - unit tests", () => {
 
     test("Filtering by level", () => {
         const context = new StringLoggerContext();
-        const config = {context} as LoggerConfiguration;
+        const config = { context } as LoggerConfiguration;
         const logger = new Logger(config);
 
         config.levelFilter = (level) => {
@@ -149,9 +158,9 @@ describe("Logger - unit tests", () => {
 
     });
 
-    test("Filtering by type", () => {
+    test("Filtering by tags", () => {
         const context = new StringLoggerContext();
-        const config = {context} as LoggerConfiguration;
+        const config = { context } as LoggerConfiguration;
         const logger = new Logger(config);
 
         config.tagFilter = ["Type 2", "Type 4"];
@@ -222,7 +231,7 @@ describe("Logger - unit tests", () => {
 
     test("Mixed filtering", () => {
         const context = new StringLoggerContext();
-        const config = {context} as LoggerConfiguration;
+        const config = { context } as LoggerConfiguration;
         const logger = new Logger(config);
 
         config.levelFilter = (level) => {
@@ -245,7 +254,7 @@ describe("Logger - unit tests", () => {
 
     test("Log a message only once", () => {
         const context = new StringLoggerContext();
-        const config = {context} as LoggerConfiguration;
+        const config = { context } as LoggerConfiguration;
         const logger = new Logger(config);
 
         logger.one.debug("message");
@@ -280,7 +289,7 @@ describe("Logger - unit tests", () => {
 
     test("Log a record", () => {
         const context = new StringLoggerContext();
-        const logger = new Logger({context});
+        const logger = new Logger({ context });
 
         const big = BigInt("9999999999999999999999999999999999999999999999");
 
@@ -306,6 +315,129 @@ describe("Logger - unit tests", () => {
             + "\n"
         );
         context.buffer = "";
+    });
+
+    test("Multiple tags", () => {
+        const context = new StringLoggerContext();
+        const config = { context } as LoggerConfiguration;
+        const logger = new Logger(config).tag("toplevel");
+
+        logger.tag("one", "two").message("message");
+        logger.tag("two", "three").message("message");
+        logger.tag("four", "five").message("message");
+
+        expect(context.buffer).toBe(""
+            + "[toplevel][one][two][DEFAULT] message\n"
+            + "[toplevel][two][three][DEFAULT] message\n"
+            + "[toplevel][four][five][DEFAULT] message\n"
+        );
+        context.buffer = "";
+
+        config.tagFilter = ["one"];
+
+        logger.tag("one", "two").message("message");
+        logger.tag("two", "three").message("message");
+        logger.tag("four", "one").message("message");
+
+        expect(context.buffer).toBe(""
+            + "[toplevel][one][two][DEFAULT] message\n"
+            + "[toplevel][four][one][DEFAULT] message\n"
+        );
+
+    });
+
+    test("Contexts composition", () => {
+        const context1 = new StringLoggerContext();
+        const context2 = new StringLoggerContext();
+        const filtered = new StringLoggerContext();
+        const buglog = new StringLoggerContext();
+
+
+        const logger = new Logger({
+            context: new LoggerContextCombination(
+                context1,
+                context2,
+                new LogFilterContext(filtered,
+                    (level: LogLevel) => level === LogLevel.INFO),
+                new LogReportContext(buglog, 3)
+            )
+        });
+
+        logger.message("message 1");
+        logger.message("message 2");
+        logger.message("message 3");
+
+        expect(context1.buffer).toBe(""
+            + "[DEFAULT] message 1\n"
+            + "[DEFAULT] message 2\n"
+            + "[DEFAULT] message 3\n"
+        );
+
+        expect(context2.buffer).toBe(""
+            + "[DEFAULT] message 1\n"
+            + "[DEFAULT] message 2\n"
+            + "[DEFAULT] message 3\n"
+        );
+
+        expect(filtered.buffer).toBe("");
+        expect(buglog.buffer).toBe("");
+
+        logger.info("message 4");
+        logger.warning("minor");
+
+        expect(context1.buffer).toBe(""
+            + "[DEFAULT] message 1\n"
+            + "[DEFAULT] message 2\n"
+            + "[DEFAULT] message 3\n"
+            + "[INFO] message 4\n"
+            + "[WARNING] minor\n"
+        );
+
+        expect(context2.buffer).toBe(""
+            + "[DEFAULT] message 1\n"
+            + "[DEFAULT] message 2\n"
+            + "[DEFAULT] message 3\n"
+            + "[INFO] message 4\n"
+            + "[WARNING] minor\n"
+        );
+
+        expect(filtered.buffer).toBe(""
+            + "[INFO] message 4\n"
+        );
+        expect(buglog.buffer).toBe("");
+
+        logger.error("fatal");
+
+        expect(context1.buffer).toBe(""
+            + "[DEFAULT] message 1\n"
+            + "[DEFAULT] message 2\n"
+            + "[DEFAULT] message 3\n"
+            + "[INFO] message 4\n"
+            + "[WARNING] minor\n"
+            + "[ERROR] fatal\n"
+        );
+
+        expect(context2.buffer).toBe(""
+            + "[DEFAULT] message 1\n"
+            + "[DEFAULT] message 2\n"
+            + "[DEFAULT] message 3\n"
+            + "[INFO] message 4\n"
+            + "[WARNING] minor\n"
+            + "[ERROR] fatal\n"
+        );
+
+        expect(filtered.buffer).toBe(""
+            + "[INFO] message 4\n"
+        );
+
+        expect(buglog.buffer).toBe(""
+            + "[INFO] message 4\n"
+            + "[WARNING] minor\n"
+            + "[ERROR] fatal\n"
+        );
+
+        context1.buffer = "";
+
     });
 
 });
