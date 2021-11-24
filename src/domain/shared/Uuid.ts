@@ -13,7 +13,7 @@
 // @ts-nocheck
 
 
-/*@devdoc
+/*@sdkdoc
  *  The <code>Uuid</code> class provides a UUID (Universally Unique IDentifier) used to uniquely identify an item such as an
  *  entity or avatar. Internally, a {@link Uuid} value is a <code>bigint</code> value.
  *  <p>Note: In the user scripting API, UUIDs are represented as formatted strings.</p>
@@ -31,6 +31,10 @@
  *      <em>Read-only.</em>
  *      <p><em>Static</em></p>
  *      @static
+ *  @property {Uuid} AVATAR_SELF_ID=1 - The null UUID, <code>{00000000-0000-0000-0000-000000000001}</code>.
+ *      <em>Read-only.</em>
+ *      <p><em>Static</em></p>
+ *      @static
  */
 class Uuid extends BigInt {
     // C++  Uuid.h
@@ -39,6 +43,7 @@ class Uuid extends BigInt {
 
     static readonly NUM_BYTES_RFC4122_UUID = 16;
     static readonly NULL = BigInt(0);
+    static readonly AVATAR_SELF_ID = BigInt(1);
 
 
     constructor(value: bigint = 0) {
@@ -51,14 +56,14 @@ class Uuid extends BigInt {
     }
 
 
-    /*@devdoc
+    /*@sdkdoc
      *  UUIDs (Universally Unique IDentifiers) are used to uniquely identify items such as entities and avatars. They are
      *  represented as {@link Uuid(1)|Uuid} objects encapsulating BigInt values in the SDK, and 16-byte (128-bit) numbers in the
      *  protocol packets.
      *  <p>Note: In the user scripting API, UUIDs are represented as formatted hexadecimal strings.</p>
      *  @typedef {bigint} Uuid
      */
-    /*@devdoc
+    /*@sdkdoc
      *  Gets the UUID's underlying <code>bigint</code> primitive value.
      *  @function Uuid(1).value
      *  @returns {bigint} The underlying <code>bigint</code> primitive value
@@ -67,14 +72,16 @@ class Uuid extends BigInt {
         return this.valueOf().valueOf();
     }
 
-    /*@devdoc
+    /*@sdkdoc
      *  Gets the UUID value formatted as a hexadecimal string with <code>-</code> separators.
      *  @function Uuid(1).stringify
      *  @returns {string} The UUID value formatted as <code>nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn</code>.
      */
     stringify(): string {
         /* eslint-disable @typescript-eslint/no-magic-numbers */
-        const hexadecimal = this.value().toString(16);
+        const hexadecimal = this.value()
+            .toString(16)
+            .padStart(32, "0");
         return hexadecimal.slice(0, 8) + "-" + hexadecimal.slice(8, 12) + "-" + hexadecimal.slice(12, 16) + "-"
             + hexadecimal.slice(16, 20) + "-" + hexadecimal.slice(20);
         /* eslint-enable @typescript-eslint/no-magic-numbers */

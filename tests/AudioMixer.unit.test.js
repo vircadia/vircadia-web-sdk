@@ -16,6 +16,7 @@ describe("AudioMixer - unit tests", () => {
 
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
+
     test("Can create an AudioMixer with a DomainServer", () => {
         const domainServer = new DomainServer();
         const audioMixer = new AudioMixer(domainServer.contextID);
@@ -23,6 +24,31 @@ describe("AudioMixer - unit tests", () => {
 
         expect(audioMixer.state).toBe(AudioMixer.UNAVAILABLE);
     });
+
+    test("Can set an audio getter function", () => {
+        const domainServer = new DomainServer();
+        const audioMixer = new AudioMixer(domainServer.contextID);
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+
+        // Not a function.
+        audioMixer.positionGetter = {};
+        expect(error).toHaveBeenCalledTimes(1);
+
+        // Invalid function.
+        audioMixer.positionGetter = () => {
+            return { x: 1, y: 2, z: 3, w: 4 };
+        };
+        expect(error).toHaveBeenCalledTimes(2);
+
+        // Valid function.
+        audioMixer.positionGetter = () => {
+            return { x: 1, y: 2, z: 3 };
+        };
+        expect(error).toHaveBeenCalledTimes(2);
+
+        error.mockReset();
+    });
+
 
     log.mockReset();
 });

@@ -12,14 +12,21 @@
 import DomainList from "./DomainList";
 import Ping from "./Ping";
 import PingReply from "./PingReply";
+import KillAvatar from "./KillAvatar";
+import AvatarData from "./AvatarData";
 import MixedAudio from "./MixedAudio";
 import MicrophoneAudioNoEcho from "./MicrophoneAudioNoEcho";
+import BulkAvatarData from "./BulkAvatarData";
 import SilentAudioFrame from "./SilentAudioFrame";
 import DomainListRequest from "./DomainListRequest";
 import DomainConnectionDenied from "./DomainConnectionDenied";
+import AvatarIdentity from "./AvatarIdentity";
 import DomainConnectRequest from "./DomainConnectRequest";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
 import DomainServerRemovedNode from "./DomainServerRemovedNode";
+import MessagesData from "./MessagesData";
+import MessagesSubscribe from "../packets/MessagesSubscribe";
+import MessagesUnsubscribe from "../packets/MessagesUnsubscribe";
 import NegotiateAudioFormat from "./NegotiateAudioFormat";
 import SelectedAudioFormat from "./SelectedAudioFormat";
 
@@ -34,10 +41,16 @@ import SelectedAudioFormat from "./SelectedAudioFormat";
  *      {@link PacketScribe.Ping&period;read|Ping&period;read}
  *  @property {function} PingReply.write -
  *      {@link PacketScribe.PingReply&period;write|PingReply&period;write}
+ *  @property {function} KillAvatar.read -
+ *      {@link PacketScribe.KillAvatar&period;read|KillAvatar&period;read}
+ *  @property {function} AvatarData.write -
+ *      {@link PacketScribe.AvatarData&period;write|AvatarData&period;write}
  *  @property {function} MixedAudio.read -
  *      {@link PacketScribe.MixedAudio&period;read|MixedAudio&period;read}
  *  @property {function} MicrophoneAudioNoEcho.write -
  *      {@link PacketScribe.MicrophoneAudioNoEcho&period;write|MixedAudio&period;write}
+ *  @property {function} BulkAvatarData.read -
+ *      {@link PacketScribe.BulkAvatarData&period;read|BulkAvatarData&period;read}
  *  @property {function} SilentAudioFrame.read -
  *      {@link PacketScribe.SilentAudioFrame&period;read|SilentAudioFrame&period;read}
  *  @property {function} SilentAudioFrame.write -
@@ -46,12 +59,24 @@ import SelectedAudioFormat from "./SelectedAudioFormat";
  *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
  *  @property {function} DomainConnectionDenied.read -
  *      {@link PacketScribe.DomainConnectionDenied&period;read|DomainConnectionDenied&period;read}
+ *  @property {function} AvatarIdentity.read -
+ *      {@link PacketScribe.AvatarIdentity&period;read|AvatarIdentity&period;read}
+ *  @property {function} AvatarIdentity.write -
+ *      {@link PacketScribe.AvatarIdentity&period;write|AvatarIdentity&period;write}
  *  @property {function} DomainConnectRequest.write -
  *      {@link PacketScribe.DomainConnectRequest&period;write|DomainConnectRequest&period;write}
  *  @property {function} DomainDisconnectRequest.write -
  *      {@link PacketScribe.DomainDisconnectRequest&period;write|DomainDisconnectRequest&period;write}
  *  @property {function} DomainServerRemovedNode.read -
  *      {@link PacketScribe.DomainServerRemovedNode&period;read|DomainServerRemovedNode&period;read}
+ *  @property {function} MessagesData.read -
+ *      {@link PacketScribe.MessagesData&period;read|MessagesData&period;read}
+ *  @property {function} MessagesData.write -
+ *      {@link PacketScribe.MessagesData&period;write|MessagesData&period;write}
+ *  @property {function} MessagesSubscribe.write -
+ *      {@link PacketScribe.MessagesSubscribe&period;write|MessagesSubscribe&period;write}
+ *  @property {function} MessagesUnsubscribe.write -
+ *      {@link PacketScribe.MessagesUnsubscribe&period;write|MessagesUnsubscribe&period;write}
  *  @property {function} NegotiateAudioFormat.write -
  *      {@link PacketScribe.NegotiateAudioFormat&period;write|NegotiateAudioFormat&period;write}
  *  @property {function} SelectedAudioFormat.read -
@@ -68,14 +93,21 @@ const PacketScribe = {
     DomainList,
     Ping,
     PingReply,
+    KillAvatar,
+    AvatarData,
     MixedAudio,
     MicrophoneAudioNoEcho,
+    BulkAvatarData,
     SilentAudioFrame,
     DomainListRequest,
     DomainConnectionDenied,
+    AvatarIdentity,
     DomainConnectRequest,
     DomainDisconnectRequest,
     DomainServerRemovedNode,
+    MessagesData,
+    MessagesSubscribe,
+    MessagesUnsubscribe,
     NegotiateAudioFormat,
     SelectedAudioFormat
 };

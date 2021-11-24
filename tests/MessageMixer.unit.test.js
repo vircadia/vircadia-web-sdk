@@ -77,4 +77,53 @@ describe("MessageMixer - unit tests", () => {
         error.mockReset();
     });
 
+    test("Can connect to and disconnect from message signals", () => {
+        const domainServer = new DomainServer();
+        const messageMixer = new MessageMixer(domainServer.contextID);
+
+        function messageFunction() { /* no-op */ }
+        function dataFunction() { /* no-op */ }
+
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+        messageMixer.messageReceived.connect(messageFunction);
+        messageMixer.messageReceived.disconnect(messageFunction);
+        messageMixer.dataReceived.connect(dataFunction);
+        messageMixer.dataReceived.disconnect(dataFunction);
+        expect(error).toHaveBeenCalledTimes(0);
+        error.mockReset();
+    });
+
+    test("Can subscribe to and unsubscribe from a channel", () => {
+        const domainServer = new DomainServer();
+        const messageMixer = new MessageMixer(domainServer.contextID);
+
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+        messageMixer.subscribe("com.vircadia.test.unit");
+        messageMixer.unsubscribe("com.vircadia.test.unit");
+        expect(error).toHaveBeenCalledTimes(0);
+        error.mockReset();
+    });
+
+    test("Error if try to subscribe to an invalid channel value", () => {
+        const domainServer = new DomainServer();
+        const messageMixer = new MessageMixer(domainServer.contextID);
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+        messageMixer.subscribe(undefined);
+        messageMixer.subscribe({});
+        messageMixer.subscribe("");
+        expect(error).toHaveBeenCalledTimes(3);
+        error.mockReset();
+    });
+
+    test("Error if try to unsubscribe to an invalid channel value", () => {
+        const domainServer = new DomainServer();
+        const messageMixer = new MessageMixer(domainServer.contextID);
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+        messageMixer.unsubscribe(undefined);
+        messageMixer.unsubscribe({});
+        messageMixer.unsubscribe("");
+        expect(error).toHaveBeenCalledTimes(3);
+        error.mockReset();
+    });
+
 });

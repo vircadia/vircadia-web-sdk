@@ -11,12 +11,16 @@
 //
 
 import AssignmentClient from "./domain/AssignmentClient";
+import AvatarManager from "./domain/AvatarManager";
+import AvatarListInterface from "./domain/interfaces/AvatarListInterface";
+import MyAvatarInterface from "./domain/interfaces/MyAvatarInterface";
 import NodeType from "./domain/networking/NodeType";
+import ContextManager from "./domain/shared/ContextManager";
 
 
 /*@sdkdoc
  *  The <code>AvatarMixer</code> class provides the interface for working with avatar mixer assignment clients.
- *  <p>Prerequisite: A {@link DomainServer} object must be created first in order to create the domain context.</p>
+ *  <p>Prerequisite: A {@link DomainServer} object must be created in order to set up the domain context.</p>
  *  @class AvatarMixer
  *  @extends AssignmentClient
  *  @param {number} contextID - The domain context to use. See {@link DomainServer|DomainServer.contextID}.
@@ -33,6 +37,11 @@ import NodeType from "./domain/networking/NodeType";
  *  @property {AvatarMixer~onStateChanged|null} onStateChanged - Sets a single function to be called when the state of the
  *      avatar mixer changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
+ *
+ *  @property {MyAvatarInterface} myAvatar - Properties and methods for using the user client's avatar.
+ *      <em>Read-only.</em>
+ *  @property {AvatarListInterface} avatarList - Properties and methods for working with all avatars in the domain.
+ *      <em>Read-only.</em>
  */
 class AvatarMixer extends AssignmentClient {
     // C++  Application.cpp
@@ -69,10 +78,51 @@ class AvatarMixer extends AssignmentClient {
      *      state.
      */
 
+    /*@sdkdoc
+     *  Properties and methods for retrieving and updating the local avatar's data.
+     *  @typedef {object} MessageMixer.MyAvatar
+     */
+
+
+    #_avatarManager;
+    #_myAvatarInterface;
+    #_avatarListInterface;
+
+
     constructor(contextID: number) {
         super(contextID, NodeType.AvatarMixer);
+
+        // Context
+        ContextManager.set(contextID, AvatarManager, contextID);
+        this.#_avatarManager = ContextManager.get(contextID, AvatarManager) as AvatarManager;
+
+        // C++  void Application::init()
+        this.#_avatarManager.init();
+
+        this.#_myAvatarInterface = new MyAvatarInterface(contextID);
+        this.#_avatarListInterface = new AvatarListInterface(contextID);
+    }
+
+
+    get myAvatar(): MyAvatarInterface {
+        return this.#_myAvatarInterface;
+    }
+
+    get avatarList(): AvatarListInterface {
+        return this.#_avatarListInterface;
+    }
+
+
+    /*@sdkdoc
+     *  Game loop update method that should be called multiple times per second to keep the avatar mixer up to date with user
+     *  client avatar state.
+     */
+    update(): void {
+        this.#_avatarManager.updateMyAvatar();
     }
 
 }
 
 export default AvatarMixer;
+export { default as MyAvatarInterface } from "./domain/interfaces/MyAvatarInterface";
+export { default as AvatarListInterface } from "./domain/interfaces/AvatarListInterface";

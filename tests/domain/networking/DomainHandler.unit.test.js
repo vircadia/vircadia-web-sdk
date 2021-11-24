@@ -11,7 +11,7 @@
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodeList from "../../../src/domain/networking/NodeList";
 import ContextManager from "../../../src/domain/shared/ContextManager";
-import Signal from "../../../src/domain/shared/Signal";
+import SignalEmitter from "../../../src/domain/shared/SignalEmitter";
 import Uuid from "../../../src/domain/shared/Uuid";
 import DomainHandler from "../../../src/domain/networking/DomainHandler";
 
@@ -42,7 +42,7 @@ describe("DomainHandler - integration tests", () => {
         expect.assertions(2);
         expect(domainHandler.getURL()).toBe("");
 
-        const signal = new Signal();
+        const signal = new SignalEmitter();
         signal.connect(domainHandler.setURLAndID);  // eslint-disable-line @typescript-eslint/unbound-method
         signal.emit(TestConfig.SERVER_SIGNALING_SOCKET_URL, null);
         setTimeout(function () {
@@ -78,7 +78,7 @@ describe("DomainHandler - integration tests", () => {
         expect.assertions(4);
         expect(domainHandler.isConnected()).toBe(false);
 
-        const signal = new Signal();
+        const signal = new SignalEmitter();
         signal.connect(domainHandler.setURLAndID);  // eslint-disable-line @typescript-eslint/unbound-method
         signal.emit(TestConfig.SERVER_SIGNALING_SOCKET_URL, null);
 

@@ -32,7 +32,8 @@ exports.handlers = {
         }
 
         if (e.doclet.kind === "function" && e.doclet.returns && e.doclet.returns[0].type
-                && e.doclet.returns[0].type.names[0] === "Signal") {
+                && e.doclet.returns[0].type.names[0] === "Signal"
+                && e.doclet.name !== "signal") {  // Don't treat SignalEmitter.signal as a Signal.
             e.doclet.kind = "signal";
         }
     }
