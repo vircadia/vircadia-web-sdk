@@ -45,6 +45,7 @@
         "./*.json"
     ],
     "exclude": [
+        "./build_scripts/**/*",
         "./node_modules/**/*"
     ]
 }

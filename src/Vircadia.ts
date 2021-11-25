@@ -24,9 +24,11 @@ const Vircadia = new class {
      *  Gets the NPM package version for the SDK.
      *  @returns {string} A string version of the NPM package version from the `package.json` file formatted "1.3.4".
      */
+    // eslint-disable-next-line class-methods-use-this
     get version() {
         return versionInfo["npm-package-version"];
     }
+
     /*@sdkdoc
      *  Gets a version build dependent version for the SDK.
      *  <p>
@@ -37,6 +39,7 @@ const Vircadia = new class {
      *  </p>
      *  @returns {string} Build version information.
      */
+    // eslint-disable-next-line class-methods-use-this
     get verboseVersion() {
         return versionInfo["version-tag"];
     }
