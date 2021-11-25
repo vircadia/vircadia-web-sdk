@@ -10,15 +10,15 @@
 
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-import {
+import Log, {
     Logger,
     LogLevel,
-    LoggerConfiguration,
     ConsoleLoggerContext,
     StringLoggerContext,
     LoggerContextCombination,
     LogFilterContext,
-    LogReportContext
+    LogReportContext,
+    DefaultLogConfiguration
 } from "../../src/shared/Log";
 
 describe("Logger - unit tests", () => {
@@ -440,6 +440,100 @@ describe("Logger - unit tests", () => {
         );
 
         context1.buffer = "";
+
+    });
+
+    test("Default behavior and configuration of the main SDK Logger instance", () => {
+
+        const debug = jest.spyOn(console, "debug").mockImplementation(() => { /* no-op */ });
+        const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
+        const info = jest.spyOn(console, "info").mockImplementation(() => { /* no-op */ });
+        const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+
+        Log.debug("Console debug message");
+        Log.message("Console log message");
+        Log.info("Console info message");
+        Log.warning("Console warning message");
+        Log.error("Console error message");
+
+        expect(warn).toHaveBeenCalledWith("[vircadia-sdk]", "Console warning message");
+        expect(error).toHaveBeenCalledWith("[vircadia-sdk]", "Console error message");
+
+        debug.mockClear();
+        log.mockClear();
+        info.mockClear();
+        warn.mockClear();
+        error.mockClear();
+
+        Log.tag("Type 1").debug("Console debug message");
+        Log.tag("Type 2").message("Console log message");
+        Log.tag("Type 3").info("Console info message");
+        Log.tag("Type 4").warning("Console warning message");
+        Log.tag("Type 5").error("Console error message");
+
+        expect(warn).toHaveBeenCalledWith("[vircadia-sdk][Type 4]", "Console warning message");
+        expect(error).toHaveBeenCalledWith("[vircadia-sdk][Type 5]", "Console error message");
+
+        debug.mockClear();
+        log.mockClear();
+        info.mockClear();
+        warn.mockClear();
+        error.mockClear();
+
+        DefaultLogConfiguration.filter = undefined;
+
+        Log.debug("Console debug message");
+        Log.message("Console log message");
+        Log.info("Console info message");
+        Log.warning("Console warning message");
+        Log.error("Console error message");
+
+        expect(debug).toHaveBeenCalledWith("[vircadia-sdk]", "Console debug message");
+        expect(log).toHaveBeenCalledWith("[vircadia-sdk]", "Console log message");
+        expect(info).toHaveBeenCalledWith("[vircadia-sdk]", "Console info message");
+        expect(warn).toHaveBeenCalledWith("[vircadia-sdk]", "Console warning message");
+        expect(error).toHaveBeenCalledWith("[vircadia-sdk]", "Console error message");
+
+        debug.mockClear();
+        log.mockClear();
+        info.mockClear();
+        warn.mockClear();
+        error.mockClear();
+
+        Log.tag("Type 1").debug("Console debug message");
+        Log.tag("Type 2").message("Console log message");
+        Log.tag("Type 3").info("Console info message");
+        Log.tag("Type 4").warning("Console warning message");
+        Log.tag("Type 5").error("Console error message");
+
+        expect(debug).toHaveBeenCalledWith("[vircadia-sdk][Type 1]", "Console debug message");
+        expect(log).toHaveBeenCalledWith("[vircadia-sdk][Type 2]", "Console log message");
+        expect(info).toHaveBeenCalledWith("[vircadia-sdk][Type 3]", "Console info message");
+        expect(warn).toHaveBeenCalledWith("[vircadia-sdk][Type 4]", "Console warning message");
+        expect(error).toHaveBeenCalledWith("[vircadia-sdk][Type 5]", "Console error message");
+
+        debug.mockRestore();
+        log.mockRestore();
+        info.mockRestore();
+        warn.mockRestore();
+        error.mockRestore();
+
+        DefaultLogConfiguration.context = new StringLoggerContext();
+
+        Log.tag("Type 1").debug("String debug message");
+        Log.tag("Type 2").message("String log message");
+        Log.tag("Type 3").info("String info message");
+        Log.tag("Type 4").warning("String warning message");
+        Log.tag("Type 5").error("String error message");
+
+        expect(DefaultLogConfiguration.context.buffer).toBe(""
+            + "[vircadia-sdk][Type 1][DEBUG] String debug message\n"
+            + "[vircadia-sdk][Type 2][DEFAULT] String log message\n"
+            + "[vircadia-sdk][Type 3][INFO] String info message\n"
+            + "[vircadia-sdk][Type 4][WARNING] String warning message\n"
+            + "[vircadia-sdk][Type 5][ERROR] String error message\n"
+        );
 
     });
 
