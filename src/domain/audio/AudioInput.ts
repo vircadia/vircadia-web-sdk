@@ -273,18 +273,9 @@ class AudioInput {
 
         this.#_audioStreamSource.channelInterpretation = "discrete";
 
-        const inputDeviceAudioInfo = this.#_audioInput ? this.#_audioInput.getAudioTracks()[0] : null;
-        const inputDeviceAudioSettings = inputDeviceAudioInfo ? inputDeviceAudioInfo.getSettings() : null;
-        let channelCount = 0;
-        if (inputDeviceAudioSettings) {
-            // FIXME: Typings currently don't include channelCount doesn't exist on MediaTrackSettings (Sep 2021).
-            /* eslint-disable */
-            // @ts-ignore
-            channelCount = inputDeviceAudioSettings.channelCount ? inputDeviceAudioSettings.channelCount : 0;
-            /* eslint-enable */
-        }
-
-        channelCount = Math.min(channelCount, 2);  // Mono or stereo.
+        // TODO: The SDK should just use the number of channels that the input device has, up to a maximum of 2 (stereo).
+        // due to lack reliable ways to retrieve channel count across browsers, we are hard coding mono input for now.
+        const channelCount = 1;
         assert(channelCount > 0);
         // The channel count has already been checked in AudioClient.#switchInputToAudioDevice().
 
