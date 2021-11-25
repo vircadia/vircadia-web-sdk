@@ -22,7 +22,7 @@ import PacketScribe from "../networking/packets/PacketScribe";
 import PacketType, { PacketTypeValue } from "../networking/udt/PacketHeaders";
 import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
-import Log from "../shared/Log";
+import Log from "../../shared/Log";
 import Vec3, { vec3 } from "../shared/Vec3";
 
 

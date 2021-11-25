@@ -19,7 +19,7 @@ import {
     LoggerContextCombination,
     LogFilterContext,
     LogReportContext
-} from "../../../src/domain/shared/Log";
+} from "../../src/shared/Log";
 
 describe("Logger - unit tests", () => {
 
@@ -107,7 +107,7 @@ describe("Logger - unit tests", () => {
 
     test("Filtering by level", () => {
         const context = new StringLoggerContext();
-        const config = { context } as LoggerConfiguration;
+        const config = { context };
         const logger = new Logger(config);
 
         config.levelFilter = (level) => {
@@ -162,7 +162,7 @@ describe("Logger - unit tests", () => {
 
     test("Filtering by tags", () => {
         const context = new StringLoggerContext();
-        const config = { context } as LoggerConfiguration;
+        const config = { context };
         const logger = new Logger(config);
 
         config.tagFilter = ["Type 2", "Type 4"];
@@ -233,7 +233,7 @@ describe("Logger - unit tests", () => {
 
     test("Mixed filtering", () => {
         const context = new StringLoggerContext();
-        const config = { context } as LoggerConfiguration;
+        const config = { context };
         const logger = new Logger(config);
 
         config.levelFilter = (level) => {
@@ -256,7 +256,7 @@ describe("Logger - unit tests", () => {
 
     test("Log a message only once", () => {
         const context = new StringLoggerContext();
-        const config = { context } as LoggerConfiguration;
+        const config = { context };
         const logger = new Logger(config);
 
         logger.one.debug("message");
@@ -321,7 +321,7 @@ describe("Logger - unit tests", () => {
 
     test("Multiple tags", () => {
         const context = new StringLoggerContext();
-        const config = { context } as LoggerConfiguration;
+        const config = { context };
         const logger = new Logger(config).tag("toplevel");
 
         logger.tag("one", "two").message("message");
