@@ -267,6 +267,7 @@ class AudioInput {
             this.#_audioStreamSource = this.#_audioContext.createMediaStreamSource(this.#_audioInput);
         } catch {
             // We work around by using a context without sample rate requirement and handling re-sampling in the input worklet.
+            console.log("Audio input will be resampled linearly to match the expected sample rate.");
             this.#_audioContext = new AudioContext();
             this.#_audioStreamSource = this.#_audioContext.createMediaStreamSource(this.#_audioInput);
         }
