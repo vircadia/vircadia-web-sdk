@@ -45,7 +45,7 @@ Does a development compile and packages the SDK into the `dist/` directory.
 ```
 npm run build-sdk
 ```
-Does a clean production compile and packages a releasable version of the SDK into the `dist/` directory.
+Does a clean production compile and packages a releasable version of the SDK into the `dist` directory.
 
 ### Hot-recompile for development
 ```
