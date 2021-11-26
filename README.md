@@ -39,7 +39,7 @@ Loads all the supporting NPM packages as defined in `package.json` into the `nod
 ```
 npm run build
 ```
-Does a development compile and packages the SDK into the `dist/` directory.
+Does a development compile and packages the SDK into the `dist` directory.
 
 ### Compile and minify for production
 ```
