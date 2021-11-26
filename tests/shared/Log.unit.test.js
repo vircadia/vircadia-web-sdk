@@ -359,7 +359,7 @@ describe("Logger - unit tests", () => {
             context: new LoggerContextCombination(
                 context1,
                 context2,
-                new LogFilterContext(filtered, (level: LogLevel) => {
+                new LogFilterContext(filtered, (level) => {
                     return level === LogLevel.INFO;
                 }),
                 new LogReportContext(buglog, 3)
@@ -534,6 +534,37 @@ describe("Logger - unit tests", () => {
             + "[vircadia-sdk][Type 4][WARNING] String warning message\n"
             + "[vircadia-sdk][Type 5][ERROR] String error message\n"
         );
+
+    });
+
+    test("Custom loggable object", () => {
+
+        const customLoggable = new class {
+            toLoggable() {
+                return "this is a custom loggable";
+            }
+        };
+
+        const context = new StringLoggerContext();
+        const logger = new Logger({ context });
+
+        logger.message(customLoggable);
+
+        expect(context.buffer).toBe(""
+            + "[DEFAULT] this is a custom loggable\n"
+        );
+        context.buffer = "";
+
+        logger.message({
+            toLoggable: "but this is not"
+        });
+
+        expect(context.buffer).toBe(""
+            + "[DEFAULT] \n"
+            + "  toLoggable: but this is not\n"
+            + "\n"
+        );
+        context.buffer = "";
 
     });
 
