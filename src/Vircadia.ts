@@ -30,16 +30,6 @@ const Vircadia = new class {
         return versionInfo["npm-package-version"];
     }
 
-    /*@sdkdoc
-     *  Gets a version build dependent version for the SDK.
-     *  <p>
-     *  The build version string is created from the NPM package version, build date, and the Git commit of this particular
-     *  SDK build formatted as "PackageVersion-Date-Commit".
-     *  For example: "1.2.3-20220214-ef4873bc" saying SDK NPM package version "1.2.3" was built on February 14, 2022 and
-     *  was checked in as commit "ef4873bc">
-     *  </p>
-     *  @returns {string} Build version information.
-     */
     // eslint-disable-next-line class-methods-use-this
     get verboseVersion() {
         return versionInfo["version-tag"];
