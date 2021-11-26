@@ -25,10 +25,6 @@ import versionInfo from "../VERSION.json";
  */
 const Vircadia = new class {
 
-    /*@sdkdoc
-     *  Gets the NPM package version for the SDK.
-     *  @returns {string} A string version of the NPM package version from the `package.json` file formatted "1.3.4".
-     */
     // eslint-disable-next-line class-methods-use-this
     get version() {
         return versionInfo["npm-package-version"];
