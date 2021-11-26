@@ -540,10 +540,11 @@ describe("Logger - unit tests", () => {
     test("Custom loggable object", () => {
 
         const customLoggable = new class {
+            // eslint-disable-next-line class-methods-use-this
             toLoggable() {
                 return "this is a custom loggable";
             }
-        };
+        }();
 
         const context = new StringLoggerContext();
         const logger = new Logger({ context });
