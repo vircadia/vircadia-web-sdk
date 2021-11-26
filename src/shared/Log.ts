@@ -37,109 +37,30 @@ const AllLogLevels = [
     LogLevel.ERROR
 ] as const;
 
-/*@devdoc
- *  @typedef {string | symbol | number | bigint | boolean | undefined | null} LoggablePrimitive
- */
 type LoggablePrimitive = string | symbol | number | bigint | boolean | undefined | null;
 
-/*@devdoc
- *  @typedef {LoggablePrimitive | Record<string, LoggablePrimitive>} LoggableRecord
- */
 type LoggableRecord = LoggablePrimitive | Record<string, LoggablePrimitive>;
 
-/*@devdoc
- *  Implementing this interface will allow passing the objects of the class to the {@linkcode Logger}
- *  @interface Loggable
- */
 interface Loggable {
-    /*@devdoc
-     *  Converts the object to a loggable representation
-     *  @return {LoggableRecord} - a representation of the object based on loggable primitives
-     */
     toLoggable(): LoggableRecord;
 }
 
-/*@devdoc
- *  @typedef {LoggablePrimitive | Loggable} LoggableObject
- */
 type LoggableObject = LoggablePrimitive | Loggable;
 
-/*@devdoc
- *  @typedef {LoggablePrimitive | Loggable} LoggableObjectRecord
- */
 type LoggableObjectRecord = LoggableObject | Record<string, LoggableObject>;
 
-/*@devdoc
- *  A predicate for filtering log messages
- *  @callback LogMessagePredicate
- *  @param {LogLevel} level - The logging level of the message.
- *  @param {Set<string>} tags - The tags associated with the message.
- *  @return {...LoggableRecord} loggables - the objects that comprise the message body
- *  @return {boolean} - Whether to include/allow the message.
- */
 type LogMessagePredicate = (level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]) => boolean;
 
-/*@devdoc
- *  Predicate function for filtering log messages based on log level.
- *  @callback LogLevelPredicate
- *  @param {LogLevel} level - The level in question.
- *  @return {boolean} Whether to show messages of the specified level.
- */
-
-/*@devdoc
- *  The <code>LoggerContext</code> is an interface used in {@linkcode LoggerConfiguration}
- *  to specify the output of the {@linkcode Logger} class.
- *  @interface LoggerContext
- */
 interface LoggerContext {
-    /*@devdoc
-     *  Outputs the log message.
-     *  @function
-     *  @name LoggerContext#log
-     *  @param {LogLevel} level - The level to log the message at.
-     *  @param {Set<string>} tags - The tags associated with the message.
-     *  @param {LoggableObject[]} loggables - (@linkcode LoggableObject) list that comprises the message body.
-     */
     log(level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]): void;
 }
 
-/*@devdoc
- *  The <code>LoggerConfiguration</code> is an interface for configuration of the {@linkcode Logger} class.
- *  @interface LoggerConfiguration
- */
 type LoggerConfiguration = {
 
-    /*@devdoc
-     *  A full message filter that is applied to log input, before it is passed to the context.
-     *  @type {LogMessagePredicate}
-     *  @name [LoggerConfiguration#filter]
-     */
-    filter?: LogMessagePredicate;
-
-
-    /*@devdoc
-     *  A level filter that is applied to log input, before the {@linkcode LoggerConfiguration#filter}
-     *  @type {LogLevelPredicate}
-     *  @name [LoggerConfiguration#levelFilter]
-     */
-    levelFilter?: (level: LogLevel) => boolean;
-
-
-    /*@devdoc
-     *  A log message tag specific filter that is applied to log input, before the {@linkcode LoggerConfiguration#filter}
-     *  A given message will be included if it has any of the specified tags.
-     *  <code>undefined</code> value in the array specifies to include messages without any tags.
-     *  @type {Array<string | undefined>}
-     *  @name [LoggerConfiguration#tagFilter]
-     */
-    tagFilter?: Array<string | undefined>;
-
-    /*@devdoc
-     *  The context that specifies the logger output.
-     *  @type {LoggerContext}
-     *  @name LoggerConfiguration#context
-     */
     context: LoggerContext;
+    filter?: LogMessagePredicate;
+    levelFilter?: (level: LogLevel) => boolean;
+    tagFilter?: Array<string | undefined>;
 
 };
 
@@ -186,19 +107,45 @@ function loggableToString(loggable: LoggableRecord) {
         || loggableRecordToString(loggable as Record<string, LoggablePrimitive>);
 }
 
-/*@devdoc
+/*@sdkdoc
  *  The <code>ConsoleLoggerContext</code> is a logger output configuration for logging to the dev console.
  *
  *  @class ConsoleLoggerContext
  *  @implements LoggerContext
  */
 class ConsoleLoggerContext implements LoggerContext {
+
+    /*@sdkdoc
+     *  The basic types that should be possible to log.
+     *  @typedef {string | symbol | number | bigint | boolean | undefined | null} LoggablePrimitive
+     */
+
+    /*@sdkdoc
+     *  The message body structure that every implementation of {@linkcode LoggerContext} must support logging.
+     *  @typedef {LoggablePrimitive | Record<string, LoggablePrimitive>} LoggableRecord
+     */
+
+    /*@sdkdoc
+     *  The <code>LoggerContext</code> is an interface used in {@linkcode LoggerConfiguration}
+     *  to specify the output of the {@linkcode Logger} class.
+     *  @interface LoggerContext
+     */
+
+    /*@sdkdoc
+     *  Outputs the log message.
+     *  @function
+     *  @name LoggerContext#log
+     *  @param {LogLevel} level - The level to log the message at.
+     *  @param {Set<string>} tags - The tags associated with the message.
+     *  @param {...LoggableRecord} loggables - A list of objects that comprise the message body.
+     */
+
     /* eslint-disable class-methods-use-this */
-    /*@devdoc
+    /*@sdkdoc
      *  Outputs the log to the developer console.
      *  @param {LogLevel} level - The level to log the message at.
      *  @param {Set<string>} tags - The tags associated with the message.
-     *  @param {LoggableObject[]} loggables - (@linkcode LoggableObject) list that comprises the message body.
+     *  @param {...LoggableRecord} loggables - A list of objects that comprise the message body.
      */
     log(level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]): void {
         const logFunction = [console.debug, console.log, console.info, console.warn, console.error].at(level);
@@ -213,7 +160,7 @@ class ConsoleLoggerContext implements LoggerContext {
     /* eslint-enable class-methods-use-this */
 }
 
-/*@devdoc
+/*@sdkdoc
  *  The <code>StringLoggerContext</code> is a output configuration for logging to a string.
  *
  *  @class StringLoggerContext
@@ -224,11 +171,11 @@ class StringLoggerContext implements LoggerContext {
 
     buffer = "";
 
-    /*@devdoc
+    /*@sdkdoc
      *  Outputs the log to the string buffer.
      *  @param {LogLevel} level - The level to log the message at.
      *  @param {Set<string>} tags - The tags associated with the message.
-     *  @param {LoggableObject[]} loggables - (@linkcode LoggableObject) list that comprises the message body.
+     *  @param {...LoggableRecord} loggables - A list of objects that comprise the message body.
      */
     log(level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]): void {
         if (tags.size !== 0) {
@@ -240,7 +187,7 @@ class StringLoggerContext implements LoggerContext {
 
 }
 
-/*@devdoc
+/*@sdkdoc
  *  The <code>LogFilterContext</code> is a logger context wrapper for filtering messages.
  *
  *  @class LogFilterContext
@@ -249,6 +196,15 @@ class StringLoggerContext implements LoggerContext {
  *  @param {LogMessagePredicate} filter - The filter to apply to the messages.
  */
 class LogFilterContext implements LoggerContext {
+
+    /*@sdkdoc
+     *  A predicate for filtering log messages.
+     *  @callback LogMessagePredicate
+     *  @param {LogLevel} level - The logging level of the message.
+     *  @param {Set<string>} tags - The tags associated with the message.
+     *  @param {...LoggableRecord} loggables - A list of objects that comprise the message body.
+     *  @return {boolean} - Whether to include/allow the message.
+     */
 
     #_context: LoggerContext;
     #_filter: LogMessagePredicate;
@@ -262,7 +218,7 @@ class LogFilterContext implements LoggerContext {
      *  Passes logs that satisfy the specified filter to the specified context.
      *  @param {LogLevel} level - The level to log the message at.
      *  @param {Set<string>} tags - The tags associated with the message.
-     *  @param {LoggableObject[]} loggables - (@linkcode LoggableObject) list that comprises the message body.
+     *  @param {...LoggableRecord} loggables - A list of objects that comprise the message body.
      */
     log(level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]): void {
         if (this.#_filter(level, tags, ...loggables)) {
@@ -271,7 +227,7 @@ class LogFilterContext implements LoggerContext {
     }
 }
 
-/*@devdoc
+/*@sdkdoc
  *  The <code>LoggerContextCombination</code> combines several logger contexts into one.
  *
  *  @class LoggerContextCombination
@@ -286,11 +242,11 @@ class LoggerContextCombination implements LoggerContext {
         this.#_contexts = contexts;
     }
 
-    /*@devdoc
+    /*@sdkdoc
      *  Passes log message to all specified contexts.
      *  @param {LogLevel} level - The level to log the message at.
      *  @param {Set<string>} tags - The tags associated with the message.
-     *  @param {LoggableObject[]} loggables - (@linkcode LoggableObject) list that comprises the message body.
+     *  @param {...LoggableRecord} loggables - A list of objects that comprise the message body.
      */
     log(level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]): void {
         for (const context of this.#_contexts) {
@@ -299,7 +255,7 @@ class LoggerContextCombination implements LoggerContext {
     }
 }
 
-/*@devdoc
+/*@sdkdoc
  *  The <code>LogReportContext</code> buffers log messages and passes them to specified context
  *  when a message is logged at the <code>ERROR</code> level or above.
  *
@@ -320,11 +276,11 @@ class LogReportContext implements LoggerContext {
         this.#_logCount = logCount;
     }
 
-    /*@devdoc
+    /*@sdkdoc
      *  Buffers the logs and passes them to the specified context.
      *  @param {LogLevel} level - The level to log the message at.
      *  @param {Set<string>} tags - The tags associated with the message.
-     *  @param {LoggableObject[]} loggables - (@linkcode LoggableObject) list that comprises the message body.
+     *  @param {...LoggableRecord} loggables - A list of objects that comprise the message body.
      */
     log(level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]): void {
 
@@ -356,6 +312,50 @@ class LogReportContext implements LoggerContext {
  *  @property {Logger} one - Equivalent to calling {@linkcode Logger#once} with <code>true</code>
  */
 class Logger {
+
+    /*@devdoc
+     *  Implementing this interface will allow passing the objects of the class to the {@linkcode Logger}.
+     *  @interface Loggable
+     */
+
+    /*@devdoc
+     *  Converts the object to a loggable representation.
+     *  @function
+     *  @name Loggable#toLoggable
+     *  @return {LoggableRecord} - a representation of the object based on loggable primitives.
+     */
+
+    /*@devdoc
+     *  Basic type of objects that can be passed to the {@linkcode Logger} for logging.
+     *  @typedef {LoggablePrimitive | Loggable} LoggableObject
+     */
+
+    /*@devdoc
+     *  The message body structure that {@linkcode Logger} supports.
+     *
+     *  @typedef {LoggableObject | Record<string, LoggableObject>} LoggableObjectRecord
+     */
+
+    /*@devdoc
+     *  Predicate function for filtering log messages based on log level.
+     *  @callback LogLevelPredicate
+     *  @param {LogLevel} level - The level in question.
+     *  @return {boolean} Whether to show messages of the given level.
+     */
+
+    /*@sdkdoc
+     *  The <code>LoggerConfiguration</code> is an interface for configuration of the {@linkcode Logger} class.
+     *  @typedef {object} LoggerConfiguration
+     *  @property {LoggerContext} context - The context that specifies the logger output.
+     *  @property {LogMessagePredicate} [filter] - A full message filter that is applied to log input,
+     *  before it is passed to the context.
+     *  @property {LogLevelPredicate} [levelFilter] - A level filter that is applied to log input,
+     *  before the {@linkcode LoggerConfiguration#filter}.
+     *  @property {Array<string | undefined>} [tagFilter] - A tag specific filter that is applied to log input,
+     *  before the {@linkcode LoggerConfiguration#filter}.
+     *  A given message will be included if it has any of the specified tags.
+     *  <code>undefined</code> value in the array specifies to include messages without any tags.
+     */
 
     readonly DEBUG = LogLevel.DEBUG;
     readonly DEFAULT = LogLevel.DEFAULT;
@@ -414,14 +414,13 @@ class Logger {
     level(level: LogLevel, ...loggableObjects: LoggableObjectRecord[]): void {
         const loggables = loggableObjects.map((obj) => {
             const loggable = obj as Loggable;
-            if (loggable && loggable.toLoggable) {
+            if (loggable && typeof loggable.toLoggable === "function") {
                 return loggable.toLoggable();
             }
             return obj as LoggableRecord;
         });
 
         if (this.#_once) {
-
             const id = `${this.#_tagsKey} | ${level} | ${loggables.map(loggableToString).join(" | ")}`;
 
             if (!this.#_messageFlags.get(id)) {
@@ -495,18 +494,9 @@ class Logger {
 }
 
 /*@sdkdoc
- *  The <code>DefaultLogConfiguration</code> is the main {@linkcode LoggerConfiguration} object used by the SDK.
- *
- *  @namespace DefaultLogConfiguration
- *  @property {LoggerContext} context - The context that specifies the output destination for the logs.
- *  @property {LogMessagePredicate} [filter] - A full message filter that is applied to log input,
- *  before it is passed to the context.
- *  @property {LogLevelPredicate} [levelFilter] - A level filter that is applied to log input,
- *  before the {@linkcode DefaultLogConfiguration#filter}
- *  @property {Array<string | undefined>} [tagFilter] - A log message tag specific filter that is applied to log input,
- *  before the {@linkcode DefaultLogConfiguration#filter}.
- *  A given message will be included if it has any of the specified tags.
- *  <code>undefined</code> value in the array specifies to include messages without any tags.
+ *  The <code>DefaultLogConfiguration</code> allows the customization of the SDK logger output.
+ *  By default the context is {@linkcode ConsoleLoggerContext}, and filter is set to allow warning and error messages only.
+ *  @type {LoggerConfiguration}
  */
 const DefaultLogConfiguration = {
     context: new ConsoleLoggerContext(),
@@ -516,7 +506,8 @@ const DefaultLogConfiguration = {
 } as LoggerConfiguration;
 
 /*@devdoc
- *  The <code>Log</code> is the main {@linkcode Logger} instance used in the SDK.
+ *  The <code>Log</code> is the main {@linkcode Logger} instance used in the SDK,
+ *  initialized with {@linkcode DefaultLogConfiguration} and a "vircadia-sdk" tag.
  *  @type {Logger}
  */
 const Log = new Logger(DefaultLogConfiguration).tag("vircadia-sdk");
