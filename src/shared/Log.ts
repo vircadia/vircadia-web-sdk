@@ -148,7 +148,7 @@ class ConsoleLoggerContext implements LoggerContext {
      *  @param {...LoggableRecord} loggables - A list of objects that comprise the message body.
      */
     log(level: LogLevel, tags: Set<string>, ...loggables: LoggableRecord[]): void {
-        const logFunction = [console.debug, console.log, console.info, console.warn, console.error].at(level);
+        const logFunction = [console.debug, console.log, console.info, console.warn, console.error][level];
         if (logFunction) {
             if (tags.size === 0) {
                 logFunction(...loggables);
