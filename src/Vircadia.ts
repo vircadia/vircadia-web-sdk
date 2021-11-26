@@ -17,6 +17,11 @@ import versionInfo from "../VERSION.json";
  *
  *  @namespace Vircadia
  *  @property {string} version - The version number of the SDK. <em>Read-only.</em>
+ *  @property {string} version - The version number of the SDK. For example, <code>"2021.2.3"</code>.
+ *      <em>Read-only.</em>
+ *  @property {string} verboseVersion - The verbose version number of the SDK. For example,
+ *      <code>"2021.2.3-20210714-ef4873bc"</code> for an SDK built on 14 Feb 2021 as at Git commit "ef4873bc".
+ *      <em>Read-only.</em>
  */
 const Vircadia = new class {
 
