@@ -58,6 +58,8 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.NegotiateAudioFormat.write).toBe("function");
         expect(typeof PacketScribe.SelectedAudioFormat).toBe("object");
         expect(typeof PacketScribe.SelectedAudioFormat.read).toBe("function");
+        expect(typeof PacketScribe.BulkAvatarTraits).toBe("object");
+        expect(typeof PacketScribe.BulkAvatarTraits.read).toBe("function");
     });
 
 });

@@ -11,7 +11,7 @@
 import AvatarData, { KillAvatarReason } from "./AvatarData";
 import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
-import { NodeTypeValue } from "../networking/NodeType";
+import NodeType, { NodeTypeValue } from "../networking/NodeType";
 import PacketReceiver from "../networking/PacketReceiver";
 import ReceivedMessage from "../networking/ReceivedMessage";
 import { BulkAvatarDataDetails } from "../networking/packets/BulkAvatarData";
@@ -69,8 +69,8 @@ class AvatarHashMap {
             PacketReceiver.makeSourcedListenerReference(this.processKillAvatar));
         packetReceiver.registerListener(PacketTypeValue.AvatarIdentity,
             PacketReceiver.makeSourcedListenerReference(this.processAvatarIdentityPacket));
-
-        // WEBRTC TODO: Address further C++ code - BulkAvatarTraits packet.
+        packetReceiver.registerListener(PacketTypeValue.BulkAvatarTraits,
+            PacketReceiver.makeSourcedListenerReference(this.processBulkAvatarTraits));
 
         this.#_nodeList.uuidChanged.connect(this.sessionUUIDChanged);
 
@@ -208,6 +208,34 @@ class AvatarHashMap {
         for (const avatarData of avatarDataDetails) {
             this.#parseAvatarData(avatarData, sendingNode);
         }
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|BulkAvatarTraits} message that has been received.
+     *  @function AvatarHashMap.processAvatarTraits
+     *  @type {Slot}
+     *  @param {ReceivedMessage} receivedMessage - The received {@link PacketType(1)|BuilkAvatarTraits} message.
+     *  @param {Node} sendingNode - The sending node.
+     */
+    //  Listener
+    // eslint-disable-next-line
+    // @ts-ignore
+    processBulkAvatarTraits = (message: ReceivedMessage, sendingNode: Node | null): void => {  // eslint-disable-line
+        // C++  void processBulkAvatarTraits(ReceivedMessage* message, Node* sendingNode)
+
+        const bulkAvatarTraitsDetails = PacketScribe.BulkAvatarTraits.read(message.getMessage());
+
+        const traitsAckPacket = PacketScribe.BulkAvatarTraitsAck.write({
+            traitSequenceNumber: bulkAvatarTraitsDetails.traitSequenceNumber
+        });
+
+        const avatarMixer = this.#_nodeList.soloNodeOfType(NodeType.AvatarMixer);
+        if (avatarMixer) {
+            this.#_nodeList.sendPacket(traitsAckPacket, avatarMixer);
+        }
+
+        // WEBRTC TODO: Read and process the avatar traits data.
+
     };
 
 
