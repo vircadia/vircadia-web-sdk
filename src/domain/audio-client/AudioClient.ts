@@ -217,8 +217,9 @@ class AudioClient {
 
         let supportedFormat = false;
 
-        // The SDK just uses the number of channels that the input device has, up to a maximum of 2 (stereo).
-        this.#_isStereoInput = channelCount >= 2;
+        // TODO: The SDK should just use the number of channels that the input device has, up to a maximum of 2 (stereo).
+        // due to lack reliable ways to retrieve channel count across browsers, we are hard coding mono input for now.
+        this.#_isStereoInput = false;
 
         if (this.#_audioInput.isStarted()) {
             this.#_audioInput.readyRead.disconnect(this.#handleMicAudioInput);

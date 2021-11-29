@@ -258,10 +258,25 @@ class AudioInput {
             sampleRate: AudioConstants.SAMPLE_RATE
         });
 
-        this.#_audioStreamSource = this.#_audioContext.createMediaStreamSource(this.#_audioInput);
+        try {
+            // Firefox throws an exception here
+            // Uncaught (in promise) DOMException: AudioContext.createMediaStreamSource:
+            // Connecting AudioNodes from AudioContexts with different sample-rate is currently not supported.
+            //
+            // Which is likely a bug and not an actual missing implementation.
+            this.#_audioStreamSource = this.#_audioContext.createMediaStreamSource(this.#_audioInput);
+        } catch {
+            // We work around by using a context without sample rate requirement and handling re-sampling in the input worklet.
+            console.log("Audio input will be resampled linearly to match the expected sample rate.");
+            this.#_audioContext = new AudioContext();
+            this.#_audioStreamSource = this.#_audioContext.createMediaStreamSource(this.#_audioInput);
+        }
+
         this.#_audioStreamSource.channelInterpretation = "discrete";
 
-        const channelCount = Math.min(this.#_audioStreamSource.mediaStream.getAudioTracks().length, 2);  // Mono or stereo.
+        // TODO: The SDK should just use the number of channels that the input device has, up to a maximum of 2 (stereo).
+        // due to lack reliable ways to retrieve channel count across browsers, we are hard coding mono input for now.
+        const channelCount = 1;
         assert(channelCount > 0);
         // The channel count has already been checked in AudioClient.#switchInputToAudioDevice().
 

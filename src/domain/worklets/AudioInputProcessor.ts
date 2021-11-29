@@ -8,6 +8,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AudioConstants from "../audio/AudioConstants";
+
+// see: https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletGlobalScope
+declare const sampleRate: number;
 
 /*@devdoc
  *  The <code>AudioInputProcessor</code> class implements a Web Audio
@@ -27,26 +31,40 @@
 class AudioInputProcessor extends AudioWorkletProcessor {
 
     // FIXME: All these fields should be private (#s) but Firefox is handling transpiled code with them (Sep 2021).
-    readonly SDK_MONO_BUFFER_SAMPLES = 240;
-    readonly SDK_MONO_BUFFER_BYTES = 480;
-    readonly SDK_STEREO_BUFFER_SAMPLES = 480;
-    readonly SDK_STEREO_BUFFER_BYTES = 960;
+    readonly FLOAT_TO_INT = 32767;
+    readonly LITTLE_ENDIAN = true;
 
     _channelCount;
-    _samplesSize;
-    _bufferSize;
-    _buffer: Int16Array;
-    _bufferView: DataView;
-    _bufferIndex = 0;  // The next write position.
+    _lastInput: Array<number>;
+    _inputRange: { begin: number, end: number };
+    _output: Int16Array;
+    _outputView: DataView;
+    _outputSize: number;
+    _outputSampleSize: number;
+    _outputIndex = 0;
+    _outputTotalIndex = 0;
+    _sourceSampleRate: number;
+    _resampleRatio = 1;
 
     constructor(options?: AudioWorkletNodeOptions) {
         super(options);  // eslint-disable-line
 
         this._channelCount = options?.channelCount ? options.channelCount : 1;  // Default to mono.
-        this._samplesSize = this._channelCount === 1 ? this.SDK_MONO_BUFFER_SAMPLES : this.SDK_STEREO_BUFFER_SAMPLES;
-        this._buffer = new Int16Array(this._samplesSize);
-        this._bufferView = new DataView(this._buffer.buffer);
-        this._bufferSize = this._channelCount === 1 ? this.SDK_MONO_BUFFER_BYTES : this.SDK_STEREO_BUFFER_BYTES;
+        this._sourceSampleRate = sampleRate;
+
+        if (this._sourceSampleRate !== AudioConstants.SAMPLE_RATE) {
+            this._resampleRatio = AudioConstants.SAMPLE_RATE / this._sourceSampleRate;
+        }
+
+        this._outputSize = this._channelCount === 1
+            ? AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL
+            : AudioConstants.NETWORK_FRAME_SAMPLES_STEREO;
+        this._outputSampleSize = this._outputSize / this._channelCount;
+        this._output = new Int16Array(this._outputSize);
+        this._outputView = new DataView(this._output.buffer);
+
+        this._lastInput = [0, 0];
+        this._inputRange = { begin: 0, end: 0 };
 
         this.port.onmessage = this.onMessage;
     }
@@ -60,8 +78,8 @@ class AudioInputProcessor extends AudioWorkletProcessor {
      */
     onMessage = (message: MessageEvent) => {
         if (message.data === "clear") {
-            this._buffer = new Int16Array(this._samplesSize);
-            this._bufferView = new DataView(this._buffer.buffer);
+            this._resetInput(0);
+            this._resetOutput();
         }
     };
 
@@ -79,54 +97,109 @@ class AudioInputProcessor extends AudioWorkletProcessor {
             return true;
         }
 
-        const FLOAT_TO_INT = 32767;
-        const LITTLE_ENDIAN = true;
-
-        let index = this._bufferIndex;
-
-        const inputSamplesCount = inputList[0][0].length;
-        const bufferSize = this._bufferSize;
-
-        if (this._channelCount === 2) {
-            // Stereo.
-            const leftInput = inputList[0][0];
-            const rightInput = inputList[0][1] as Float32Array;
-            let bufferView = this._bufferView;
-            for (let i = 0; i < inputSamplesCount; i++) {
-                bufferView.setInt16(index, leftInput[i] as number * FLOAT_TO_INT, LITTLE_ENDIAN);
-                bufferView.setInt16(index + 2, rightInput[i] as number * FLOAT_TO_INT, LITTLE_ENDIAN);
-                index += 4;  // eslint-disable-line @typescript-eslint/no-magic-numbers
-                if (index === this._bufferSize) {
-                    // The output buffer is full; send it off.
-                    this.port.postMessage(this._buffer.buffer, [this._buffer.buffer]);
-                    this._buffer = new Int16Array(this._samplesSize);
-                    this._bufferView = new DataView(this._buffer.buffer);
-                    bufferView = this._bufferView;
-                    index = 0;
-                }
-            }
+        if (this._sourceSampleRate !== AudioConstants.SAMPLE_RATE) {
+            this._resample(inputList[0]);
         } else {
-            // Mono.
-            const monoInput = inputList[0][0];
-            let bufferView = this._bufferView;
-            for (let i = 0; i < inputSamplesCount; i++) {
-                bufferView.setInt16(index, monoInput[i] as number * FLOAT_TO_INT, LITTLE_ENDIAN);
-                index += 2;
-                if (index === bufferSize) {
-                    // The output buffer is full; send it off.
-                    this.port.postMessage(this._buffer.buffer, [this._buffer.buffer]);
-                    this._buffer = new Int16Array(this._samplesSize);
-                    this._bufferView = new DataView(this._buffer.buffer);
-                    bufferView = this._bufferView;
-                    index = 0;
-                }
+            this._convert(inputList[0]);
+        }
+
+        return true;
+    }
+
+    _resetOutput() {
+        this._output = new Int16Array(this._outputSize);
+        this._outputView = new DataView(this._output.buffer);
+        this._outputIndex = 0;
+    }
+
+    _resetInput(end: number) {
+        this._lastInput = [0, 0];
+        this._inputRange = { begin: 0, end };
+    }
+
+    _getResampled(channelIndex: number, inputPosition: number, input: Array<Float32Array>): number {
+        const channel = input[channelIndex] as Float32Array;
+        const localPosition = inputPosition - this._inputRange.begin;
+
+        let first = 0;
+        let second = 0;
+        let ratio = 0;
+        if (localPosition < 0) {
+            ratio = 1 - localPosition;
+            first = this._lastInput[channelIndex] as number;
+            second = channel[0] as number;
+        } else {
+            const firstIndex = Math.floor(localPosition);
+            const secondIndex = Math.ceil(localPosition);
+            ratio = localPosition - firstIndex;
+            first = channel[firstIndex] as number;
+            second = channel[secondIndex] as number;
+        }
+
+        return first + (second - first) * ratio;
+    }
+
+    _resample(input: Array<Float32Array>) {
+        const inputSize = (input[0] as Float32Array).length;
+
+        if (inputSize === 0) {
+            return;
+        }
+
+        this._inputRange.end += inputSize;
+
+        let inputPosition = this._outputTotalIndex / this._resampleRatio;
+        while (Math.ceil(inputPosition) < this._inputRange.end) {
+
+            const rawIndex = this._outputIndex * Int16Array.BYTES_PER_ELEMENT * this._channelCount;
+            for (let channel = 0; channel < this._channelCount; ++channel) {
+                const resampled = this._getResampled(channel, inputPosition, input);
+                const rawChannel = channel * Int16Array.BYTES_PER_ELEMENT;
+                this._outputView.setInt16(rawIndex + rawChannel, resampled * this.FLOAT_TO_INT, this.LITTLE_ENDIAN);
+            }
+
+            this._outputTotalIndex += 1;
+            this._outputIndex += 1;
+
+            if (this._outputIndex === this._outputSampleSize) {
+                this.port.postMessage(this._output.buffer, [this._output.buffer]);
+                this._resetOutput();
+            }
+
+            if (this._outputTotalIndex === AudioConstants.SAMPLE_RATE) {
+                this._outputTotalIndex = 0;
+                this._resetInput(inputSize);
+            }
+
+            inputPosition = this._outputTotalIndex / this._resampleRatio;
+        }
+
+        for (let i = 0; i < this._channelCount; ++i) {
+            const channel = input[i] as Float32Array;
+            this._lastInput[i] = channel[channel.length - 1] as number;
+        }
+        this._inputRange.begin += inputSize;
+    }
+
+    _convert(input: Array<Float32Array>) {
+        const inputSize = (input[0] as Float32Array).length;
+        for (let i = 0; i < inputSize; ++i) {
+
+            const rawIndex = this._outputIndex * Int16Array.BYTES_PER_ELEMENT * this._channelCount;
+            for (let channel = 0; channel < this._channelCount; ++channel) {
+                const inputSample = (input[channel] as Float32Array)[i] as number;
+                const rawChannel = channel * Int16Array.BYTES_PER_ELEMENT;
+                this._outputView.setInt16(rawIndex + rawChannel, inputSample * this.FLOAT_TO_INT, this.LITTLE_ENDIAN);
+            }
+
+            this._outputIndex += 1;
+            if (this._outputIndex === this._outputSampleSize) {
+                this.port.postMessage(this._output.buffer, [this._output.buffer]);
+                this._resetOutput();
             }
 
         }
 
-        this._bufferIndex = index;
-
-        return true;
     }
 
 }
