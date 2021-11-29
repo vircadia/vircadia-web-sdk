@@ -180,6 +180,12 @@ const BulkAvatarData = new class {
                     }
                 }
                 dataPosition += 4 + numValidTranslations * 6;
+
+                if (hasGrabJoints) {
+                    // WEBRTC TODO: Address further code - avatar grab joints.
+                    dataPosition += 84;
+                }
+
             }
 
             if (hasJointDefaultPoseFlags) {
@@ -188,11 +194,6 @@ const BulkAvatarData = new class {
                 dataPosition += 1;
                 const numJointPoseBytes = Math.ceil(numJoints / 8);
                 dataPosition += 2 * numJointPoseBytes;
-            }
-
-            if (hasGrabJoints) {
-                // WEBRTC TODO: Address further code - avatar grab joints.
-                dataPosition += 84;
             }
 
             /* eslint-enable @typescript-eslint/no-magic-numbers */

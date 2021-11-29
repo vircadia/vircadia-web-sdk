@@ -65,6 +65,25 @@ describe("BulkAvatarData - unit tests", () => {
         expect(bulkAvatarDetail.globalPosition.z).toBeCloseTo(13.732, 3);
     });
 
+    test("Can read a BulkAvatarData message that has joint data", () => {
+        // eslint-disable-next-line max-len
+        const RECEIVED_MESSAGE = "41571a4d7dd34fa1bf57922549e7b4b1117030e75ac0ffec9cc2ec9e10c0fc69cc46c4329cc2590f9a46b000000000000080808000300260000000000000000000ef45b69b6526ed93ae3767bcc90294c46b3ef03ab60e6369ea57ac2b6a21d0a58e796915ca8793c36a4fcc5c8d7269fd0c0000000000000000000000000000000000000000000dff213f1401ff3f34e71401004034e70000000000000000000000000000803f0000000000000000000000000000000000000000000000000000803f000000000000000000000000ee43b5434ac9b93f52531ec49c4a333f951956be8222293fa53a2f3eb0f3070000000000000000000000000000000000000000f3ffffffffffffffffffffffffffffffffffffffffff";
+        const MESSAGE_START = 0;
+
+        const arrayBuffer = new ArrayBuffer(RECEIVED_MESSAGE.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(RECEIVED_MESSAGE.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer, MESSAGE_START);
+
+        const bulkAvatarDetails = BulkAvatarData.read(dataView);
+        expect(bulkAvatarDetails).toHaveLength(1);
+
+        const bulkAvatarDetail = bulkAvatarDetails[0];
+        expect(bulkAvatarDetail.sessionUUID.stringify()).toBe("41571a4d-7dd3-4fa1-bf57-922549e7b4b1");
+    });
+
     /* eslint-enable @typescript-eslint/no-magic-numbers */
 
 });
