@@ -194,10 +194,14 @@ class Socket {
      */
     writePacket(packet: Packet, sockAddr: SockAddr): number {
         // C++  qint64 writePacket(const Packet& packet, const SockAddr& sockAddr)
+        //      qint64 writePacket(Packet* packet, const SockAddr& sockAddr)
 
         // WEBRTC TODO: Address further C++ code. - Handle sending reliable packets. (There are two variants of this method.)
 
-        assert(!packet.isReliable(), "Sending a reliable packet is not implemented.");
+        if (packet.isReliable()) {
+            this.#writeReliablePacket(packet, sockAddr);
+            return 0;
+        }
 
         let sequenceNumber = this.#_unreliableSequenceNumbers.get(sockAddr.getPort());
         if (sequenceNumber === undefined) {
@@ -496,6 +500,16 @@ class Socket {
         }
     }
 
+
+    #writeReliablePacket(packet: Packet, sockAddr: SockAddr): void {
+        // C++  void writeReliablePacket(Packet* packet, const SockAddr& sockAddr)
+        const connection = this.#findOrCreateConnection(sockAddr);
+        if (connection) {
+            connection.sendReliablePacket(packet);
+        } else if (Socket.UDT_CONNECTION_DEBUG) {
+            console.log("[networking] Socket.writeReliablePacket refusing to send packet list - no connection was created");
+        }
+    }
 
     #writeReliablePacketList(packetList: NLPacketList, sockAddr: SockAddr): void {
         // C++  void writeReliablePacketList(PacketList* packetList, const SockAddr& sockAddr)

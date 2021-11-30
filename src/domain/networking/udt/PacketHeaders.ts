@@ -283,9 +283,13 @@ const enum PacketTypeValue {
  *  @property {PacketType} OctreeDataPersist - <code>97</code>
  *  @property {PacketType} EntityClone - <code>98</code>
  *  @property {PacketType} EntityQueryInitialResultsComplete - <code>99</code>
- *  @property {PacketType} BulkAvatarTraits - <code>100</code>
+ *  @property {PacketType} BulkAvatarTraits - <code>100</code> - The avatar mixer sends this to the user client to keep it up to
+ *      date with the traits of other avatars in the domain.
+ *      {@link PacketScribe.BulkAvatarTraitsDetails}.
  *  @property {PacketType} AudioSoloRequest - <code>101</code>
- *  @property {PacketType} BulkAvatarTraitsAck - <code>102</code>
+ *  @property {PacketType} BulkAvatarTraitsAck - <code>102</code> - The user client sends this to the avatar mixer to
+ *      acknowledge the receipt of a <code>BulkAvatarTraits</code> message.
+ *      {@link PacketScribe.BulkAvatarTraitsAckDetails}.
  *  @property {PacketType} StopInjector - <code>103</code>
  *  @property {PacketType} AvatarZonePresence - <code>104</code>
  *  @property {PacketType} WebRTCSignaling - <code>104</code> - Used between the domain server and assignment clients to
@@ -591,6 +595,8 @@ const PacketType = new class {
             case this.SelectedAudioFormat:
                 return DEFAULT_VERSION;
             case this.BulkAvatarTraits:
+                return this.#_AvatarMixerPacketVersion.AvatarTraitsAck;
+            case this.BulkAvatarTraitsAck:
                 return this.#_AvatarMixerPacketVersion.AvatarTraitsAck;
 
                 // WebRTC TODO: Add other packets.

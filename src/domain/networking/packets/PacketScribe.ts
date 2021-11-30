@@ -29,6 +29,8 @@ import MessagesSubscribe from "../packets/MessagesSubscribe";
 import MessagesUnsubscribe from "../packets/MessagesUnsubscribe";
 import NegotiateAudioFormat from "./NegotiateAudioFormat";
 import SelectedAudioFormat from "./SelectedAudioFormat";
+import BulkAvatarTraits from "./BulkAvatarTraits";
+import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
 
 
 /*@devdoc
@@ -81,6 +83,10 @@ import SelectedAudioFormat from "./SelectedAudioFormat";
  *      {@link PacketScribe.NegotiateAudioFormat&period;write|NegotiateAudioFormat&period;write}
  *  @property {function} SelectedAudioFormat.read -
  *      {@link PacketScribe.SelectedAudioFormat&period;read|SelectedAudioFormat&period;read}
+ *  @property {function} BulkAvatarTraits.read -
+ *      {@link PacketScribe.BulkAvatarTraits&period;read|BulkAvatarTraits&period;read}
+ *  @property {function} BulkAvatarTraitsAck.write  -
+ *      {@link PacketScribe.BulkAvatarTraitsAck&period;write|BulkAvatarTraitsAck&period;write}
  */
 
 // WEBRTC TODO: Implement similar in C++ to collect all packet reading/writing into the networking library code (and revise this
@@ -109,7 +115,9 @@ const PacketScribe = {
     MessagesSubscribe,
     MessagesUnsubscribe,
     NegotiateAudioFormat,
-    SelectedAudioFormat
+    SelectedAudioFormat,
+    BulkAvatarTraits,
+    BulkAvatarTraitsAck
 };
 
 export default PacketScribe;

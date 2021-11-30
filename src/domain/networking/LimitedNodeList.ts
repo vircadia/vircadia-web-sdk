@@ -266,12 +266,10 @@ class LimitedNodeList {
             const hmacAuth = param2 as HMACAuth | null;  // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
 
             if (packet.isReliable()) {
-
-                console.warn("sendPacket() : isReliable : Not implemented!");
-
-                // WEBRTC TODO: Address further C++ code.
-
-                return 0;
+                this.#fillPacketHeader(packet, hmacAuth);
+                const size = packet.getDataSize();
+                this._nodeSocket.writePacket(packet, sockAddr);
+                return size;
             }
 
             const size = this.sendUnreliablePacket(packet, sockAddr, hmacAuth);
