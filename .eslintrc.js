@@ -236,7 +236,7 @@ module.exports = {
         "require-unicode-regexp": "error",
         "vars-on-top": "error",
         "wrap-iife": ["error", "outside"],
-        "yoda": "error",
+        // "yoda": "error",  // Want to use ranges without needing extra parentheses.
 
         // Strict mode.
         "strict": ["error", "safe"],

@@ -70,8 +70,6 @@ class Socket {
         Socket.CONNECTED
     ];
 
-    static UDT_CONNECTION_DEBUG = false;
-
 
     // Use WebRTCSocket directly without going through an intermediary NetworkSocket as is done in C++.
     #_webrtcSocket: WebRTCSocket;
@@ -165,7 +163,7 @@ class Socket {
 
         // eslint-disable-next-line @typescript-eslint/dot-notation
         const connectionErased = this.#_connectionsHash.delete(sockAddr.getPort());
-        if (connectionErased && Socket.UDT_CONNECTION_DEBUG) {
+        if (connectionErased && UDT.UDT_CONNECTION_DEBUG) {
             console.log("[networking] Socket.cleanupConnection called for connection to", sockAddr.toString());
         }
     }
@@ -447,7 +445,7 @@ class Socket {
                             || !connection.processReceivedSequenceNumber(new SequenceNumber(messageData.sequenceNumber)
                             /* , packet.getDataSize(), packet.getPayloadSize() */)) {
                             // The connection could not be created or indicated that we should not continue processing packet.
-                            if (Socket.UDT_CONNECTION_DEBUG) {
+                            if (UDT.UDT_CONNECTION_DEBUG) {
                                 console.log("[networking] Can't process packet: type", NLPacket.typeInHeader(packet),
                                     ", version", NLPacket.versionInHeader(packet));
 
@@ -516,7 +514,7 @@ class Socket {
         const connection = this.#findOrCreateConnection(sockAddr);
         if (connection) {
             connection.sendReliablePacketList(packetList);
-        } else if (Socket.UDT_CONNECTION_DEBUG) {
+        } else if (UDT.UDT_CONNECTION_DEBUG) {
             console.log("[networking] Socket.writeReliablePacketList refusing to send packet list - no connection was created");
         }
     }
@@ -531,7 +529,7 @@ class Socket {
 
             if (filterCreate && this.#_connectionCreationFilterOperator && !this.#_connectionCreationFilterOperator(sockAddr)) {
                 // The connection creation filter did not allow us to create a new connection.
-                if (Socket.UDT_CONNECTION_DEBUG) {
+                if (UDT.UDT_CONNECTION_DEBUG) {
                     console.log("[networking] Socket.findOrCreateConnection refusing to create Connection class for",
                         sockAddr.toString(), "due to connection creation filter");
                 }

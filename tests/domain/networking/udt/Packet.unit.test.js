@@ -11,6 +11,7 @@
 import SockAddr from "../../../../src/domain/networking/SockAddr";
 import BasePacket from "../../../../src/domain/networking/udt/BasePacket";
 import Packet from "../../../../src/domain/networking/udt/Packet";
+import { buffer2hex } from "../../../testUtils";
 
 
 describe("Packet - unit tests", () => {
@@ -133,6 +134,66 @@ describe("Packet - unit tests", () => {
         expect(packet.getMessageNumber()).toBe(9);
         expect(packet.getMessagePartNumber()).toBe(2);
         expect(packet.getPacketPosition()).toBe(Packet.PacketPosition.LAST);
+    });
+
+    test("Can obfuscate and unobfuscate packets", () => {
+        // AvatarIdentity packet.
+        /* eslint-disable max-len */
+        const LEVEL_0_HEX = "d96f496402000000000000001d36508bdbc45b8a0d7ae7e0ba3908565df404a42a002623f37b4a2ba31e7d4a6e3273490000000200000000ffffffff000000120061006e006f006e0079006d006f0075007300000002";
+        const LEVEL_1_HEX = "d96f496c0200000000000000695323f8b2b639e9791f9493d34b6a35299177d743724440871e3958ca6c1f291a57003a6972626174657373968d9d9c746573616913620d740a731d690b620e740a7306690162637467";
+        const LEVEL_2_HEX = "d96f497402000000000000007c5222eaa9ad39f96c1e9581c8506a253c9076c558694450921f384ad1771f390f56012872696271616472618d969d8c616472737208621d610b720f7210621e610b7214721a62736166";
+        const LEVEL_3_HEX = "d96f497c020000000000000073573dedbdb133f8631b8a86dc4c6024339569c24c754e519d1a274dc56b153800531e2f667568706e616d66998a978d6e616d746614681c6e0e6d08660c681f6e0e6d13660668726e63";
+        /* eslint-enable max-len */
+
+        const arrayBuffer = new ArrayBuffer(LEVEL_0_HEX.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(LEVEL_0_HEX.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer, 0);
+        let level0Packet = new Packet(dataView, dataView.byteLength, sockAddr);
+
+        const messageData = level0Packet.getMessageData();
+        messageData.isPartOfMessage = true;
+        messageData.sequenceNumber = 71921625;
+        messageData.isReliable = true;
+        messageData.obfuscationLevel = 0;
+
+        // 0 => 1
+        const level1Packet = new Packet(level0Packet);
+        level1Packet.obfuscate(1);
+        const level1PacketHex = buffer2hex(level1Packet.getMessageData().buffer);
+        expect(level1PacketHex).toBe(LEVEL_1_HEX);
+
+        // 1 => 0
+        level0Packet = new Packet(level1Packet);
+        level0Packet.obfuscate(0);
+        let level0PacketHex = buffer2hex(level0Packet.getMessageData().buffer);
+        expect(level0PacketHex).toBe(LEVEL_0_HEX);
+
+        // 0 => 2
+        const level2Packet = new Packet(level0Packet);
+        level2Packet.obfuscate(2);
+        const level2PacketHex = buffer2hex(level2Packet.getMessageData().buffer);
+        expect(level2PacketHex).toBe(LEVEL_2_HEX);
+
+        // 2 => 0
+        level0Packet = new Packet(level2Packet);
+        level0Packet.obfuscate(0);
+        level0PacketHex = buffer2hex(level0Packet.getMessageData().buffer);
+        expect(level0PacketHex).toBe(LEVEL_0_HEX);
+
+        // 0 => 3
+        const level3Packet = new Packet(level0Packet);
+        level3Packet.obfuscate(3);
+        const level3PacketHex = buffer2hex(level3Packet.getMessageData().buffer);
+        expect(level3PacketHex).toBe(LEVEL_3_HEX);
+
+        // 3 => 0
+        level0Packet = new Packet(level3Packet);
+        level0Packet.obfuscate(0);
+        level0PacketHex = buffer2hex(level0Packet.getMessageData().buffer);
+        expect(level0PacketHex).toBe(LEVEL_0_HEX);
     });
 
     // WEBRTC TODO: Test isPartOfMessage() and isReliable() for packets where their values are true.

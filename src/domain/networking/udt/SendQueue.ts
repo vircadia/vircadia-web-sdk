@@ -14,6 +14,7 @@ import Packet from "./Packet";
 import PacketQueue from "./PacketQueue";
 import SequenceNumber, { SequenceNumberValue } from "./SequenceNumber";
 import Socket from "./Socket";
+import UDT from "./UDT";
 import NLPacketList from "../NLPacketList";
 import SockAddr from "../SockAddr";
 import assert from "../../shared/assert";
@@ -375,7 +376,7 @@ class SendQueue {
                     const level = entry.first < 2 ? 0 : (entry.first - 2) % 4;
 
                     if (level !== Packet.ObfuscationLevel.NoObfuscation) {
-                        if (Socket.UDT_CONNECTION_DEBUG) {
+                        if (UDT.UDT_CONNECTION_DEBUG) {
                             const messageData = resendPacket.getMessageData();
                             let debugString = `Obfuscating packet ${messageData.sequenceNumber} with level ${level}`;
                             if (resendPacket.isPartOfMessage()) {
@@ -488,7 +489,7 @@ class SendQueue {
                     const notified = await this.#_emptyCondition.waitFor(EMPTY_QUEUES_INACTIVE_TIMEOUT_MS);
 
                     if (!notified && (this.#_packets.isEmpty() || this.#isFlowWindowFull()) && this.#_naks.isEmpty()) {
-                        if (Socket.UDT_CONNECTION_DEBUG) {
+                        if (UDT.UDT_CONNECTION_DEBUG) {
                             const S_TO_MS = 1000;
                             console.log("[networking] SendQueue to", this.#_destination.toString(), "has been empty for",
                                 EMPTY_QUEUES_INACTIVE_TIMEOUT_MS / S_TO_MS, "seconds and receiver has ACKed all packets.",
@@ -580,14 +581,14 @@ class SendQueue {
 
         if (this.#_state === SendQueue.#State.Stopped) {
             // We've already been asked to stop before we even got a chance to start; don't start now.
-            if (Socket.UDT_CONNECTION_DEBUG) {
+            if (UDT.UDT_CONNECTION_DEBUG) {
                 console.log("[networking] SendQueue asked to run after being told to stop. Will not run.");
             }
             return;
         }
         if (this.#_state === SendQueue.#State.Running) {
             // We're already running; don't start another run.
-            if (Socket.UDT_CONNECTION_DEBUG) {
+            if (UDT.UDT_CONNECTION_DEBUG) {
                 console.log("[networking] SendQueue asked to run but is already running. Will not re-run.");
             }
             return;

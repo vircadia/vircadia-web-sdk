@@ -16,6 +16,7 @@ import PendingReceivedMessage from "./PendingReceivedMessage";
 import SendQueue from "./SendQueue";
 import SequenceNumber from "./SequenceNumber";
 import Socket from "./Socket";
+import UDT from "./UDT";
 import NLPacketList from "../NLPacketList";
 import SockAddr from "../SockAddr";
 import assert from "../../shared/assert";
@@ -140,7 +141,7 @@ class Connection {
         if (!this.#_hasReceivedHandshake) {
             // Refuse to process any packets until we've received the handshake.
             // Send handshake request to re-request a handshake.
-            if (Socket.UDT_CONNECTION_DEBUG) {
+            if (UDT.UDT_CONNECTION_DEBUG) {
                 console.log("[networking] Received packet before receiving handshake, sending HandshakeRequest.");
             }
             this.#sendHandshakeRequest();
@@ -264,7 +265,7 @@ class Connection {
         // tell our current send queue to go down and reset our ptr to it to null
         this.#stopSendQueue();
 
-        if (Socket.UDT_CONNECTION_DEBUG) {
+        if (UDT.UDT_CONNECTION_DEBUG) {
             console.log("[networking] Connection to", this.#_destination.toString(), "has stopped its SendQueue.");
         }
     };
@@ -382,7 +383,7 @@ class Connection {
             // The server sent us a handshake. We assume this means that state should be reset as long as we haven't received
             // a handshake yet, or we have and we've received some data.
 
-            if (Socket.UDT_CONNECTION_DEBUG) {
+            if (UDT.UDT_CONNECTION_DEBUG) {
                 if (initialSequenceNumber.isNotEqualTo(this.#_initialReceiveSequenceNumber)) {
                     console.log("[networking] Resetting receive state, received a new initial sequence number in handshake.");
                 }
@@ -462,7 +463,7 @@ class Connection {
                     this.#_lastMessageNumber, this.#_hasReceivedHandshakeACK);
             }
 
-            if (Socket.UDT_CONNECTION_DEBUG) {
+            if (UDT.UDT_CONNECTION_DEBUG) {
                 console.log("[networking] Created SendQueue for connection to", this.#_destination.toString());
             }
 

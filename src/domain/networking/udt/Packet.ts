@@ -141,6 +141,34 @@ class Packet extends BasePacket {
     }
 
 
+    static readonly #KEYS = [
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+        0x0n,
+        0x7465737369726263n,
+        0x6164726172696273n,
+        0x6e616d6666756872n
+        /* eslint-enable @typescript-eslint/no-magic-numbers */
+    ];
+
+    static #xorHelper(data: DataView, start: number, key: bigint): void {
+        const HEXADECIMAL = 16;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const keyBytes = key.toString(HEXADECIMAL)
+            .match(/../ug)!
+            .map((hex) => {
+                return parseInt(hex, HEXADECIMAL);
+            });
+        const keyBytesSize = keyBytes.length;
+
+        let index = start;
+        for (let i = 0, length = data.byteLength - start; i < length; i++) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            data.setUint8(index, data.getUint8(index) ^ keyBytes[i % keyBytesSize]!);
+            index += 1;
+        }
+    }
+
+
     constructor(
         param0: number | DataView | Packet,
         param1: boolean | number | undefined = undefined,
@@ -168,10 +196,19 @@ class Packet extends BasePacket {
             this.#readHeader();
             // adjustPayloadStartAndCapacity();  N/A
             if (this._messageData.obfuscationLevel !== Packet.ObfuscationLevel.NoObfuscation) {
-                console.warn("Packet() : Undo obfuscation : Not implemented!");
 
-                // WEBRTC TODO: Address further C++ code.
+                if (UDT.UDT_CONNECTION_DEBUG) {
+                    let debugString = `Unobfuscating packet ${this._messageData.sequenceNumber} `;
+                    debugString += `with level ${this._messageData.obfuscationLevel}`;
+                    if (this._messageData.isPartOfMessage) {
+                        debugString += `\n    Message Number: ${this._messageData.messageNumber}, `;
+                        debugString += `Part Number: ${this._messageData.messagePartNumber}.`;
+                    }
+                    console.log("[networking]", debugString);
+                }
 
+                // Undo obfuscation.
+                this.obfuscate(Packet.ObfuscationLevel.NoObfuscation);
             }
 
         } else if (param0 instanceof Packet) {
@@ -258,16 +295,29 @@ class Packet extends BasePacket {
     }
 
     /*@devdoc
-     *  Obfuscates a packet's contents in an attempt to get the packet through any packet filtering done on the network.
-     *  @param {Packet.ObfuscationLevel} level - The obfuscation level.
+     *  Obfuscates or unobfuscates a packet's contents in an attempt to get the packet through any packet filtering done on the
+     *  network.
+     *  @param {Packet.ObfuscationLevel} level - The obfuscation level to apply.
      */
     // eslint-disable-next-line class-methods-use-this
     obfuscate(level: number): void {
         // C++  void obfuscate(ObfuscationLevel level)
 
-        // WEBRTC TODO: Address further C++ code. - Obfuscate packet.
+        const messageLevel = this._messageData.obfuscationLevel;
+        assert(0 <= level && level < Packet.#KEYS.length && 0 <= messageLevel && messageLevel < Packet.#KEYS.length);
 
-        console.warn("Packet.obfuscate() not implemented. Level:", level);
+        // Undo old and apply new one.
+        const obfuscationKey = Packet.#KEYS[this._messageData.obfuscationLevel] as bigint ^ Packet.#KEYS[level] as bigint;
+        const OBFUSCATION_NO_OP = 0n;
+        if (obfuscationKey !== OBFUSCATION_NO_OP) {
+            Packet.#xorHelper(this._messageData.data, Packet.totalHeaderSize(this._messageData.isPartOfMessage),
+                obfuscationKey);
+            // Local header size is the same as total header size so we can use the latter.
+
+            // Update members and header.
+            this._messageData.obfuscationLevel = level;
+            this.#writeHeader(true);
+        }
     }
 
 
