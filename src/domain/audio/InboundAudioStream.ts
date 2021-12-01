@@ -38,6 +38,9 @@ class InboundAudioStream {
     #_selectedCodecName = "";
     #_decoder = null;
 
+    // WEBRTC TODO: Remove when have logger with "once" function.
+    #_haveWarnedWriteDroppableSilentFrames = false;;
+
 
     /* eslint-disable */
     // @ts-ignore
@@ -124,7 +127,10 @@ class InboundAudioStream {
         // C++  int writeDroppableSilentFrames(int silentFrames)
 
         // WEBRTC TODO: Address further C++ code.
-        console.warn("InboundAudioStream.#writeDroppableSilentFrames() not implemented. Frames:", silentFrames);
+        if (!this.#_haveWarnedWriteDroppableSilentFrames) {
+            console.warn("InboundAudioStream.#writeDroppableSilentFrames() not implemented. Frames:", silentFrames);
+            this.#_haveWarnedWriteDroppableSilentFrames = true;
+        }
 
     }
 

@@ -78,6 +78,10 @@ class AudioClient {
     #_avatarBoundingBoxCorner = { x: -0.5, y: 0.0, z: -0.5 };
     #_avatarBoundingBoxScale = { x: 1, y: 2, z: 1 };
 
+    // WEBRTC TODO: Remove when have logger with "once" function.
+    #_haveWarnedAudioEnvironment = false;
+    #_haveWarnedAudioStreamStats = false;
+
 
     constructor(contextID: number) {
 
@@ -435,7 +439,10 @@ class AudioClient {
     #processStreamStatsPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {  // eslint-disable-line
         // C++  void AudioIOStats::processStreamStatsPacket(ReceivedMessage*, Node* sendingNode)
 
-        console.warn("AudioClient: AudioStreamStats packet not processed.");
+        if (!this.#_haveWarnedAudioStreamStats) {
+            console.warn("AudioClient: AudioStreamStats packet not processed.");
+            this.#_haveWarnedAudioStreamStats = true;
+        }
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -447,7 +454,10 @@ class AudioClient {
     #handleAudioEnvironmentDataPacket = (message: ReceivedMessage): void => {  // eslint-disable-line
         // C++  void handleAudioEnvironmentDataPacket(ReceivedMessage* message)
 
-        console.warn("AudioClient: AudioEnvironment packet not processed.");
+        if (!this.#_haveWarnedAudioEnvironment) {
+            console.warn("AudioClient: AudioEnvironment packet not processed.");
+            this.#_haveWarnedAudioEnvironment = true;
+        }
 
         // WEBRTC TODO: Address further C++ code.
 
