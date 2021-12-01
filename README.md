@@ -43,7 +43,7 @@ Does a development compile and packages the SDK into the `dist` directory.
 
 ### Compile and minify for production
 ```
-npm run build-sdk
+npm run build-prod
 ```
 Does a clean production compile and packages a releasable version of the SDK into the `dist` directory.
 
@@ -56,7 +56,7 @@ This is often useful when testing SDK development using the `example` tool.
 
 ### Hot-recompile for production
 ```
-npm run watch-sdk
+npm run watch-prod
 ```
 Does a clean production compile and enables webpack to watch the sources and recompile when the source files change.
 
