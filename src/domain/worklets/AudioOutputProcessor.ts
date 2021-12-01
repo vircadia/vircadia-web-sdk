@@ -33,15 +33,13 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
     readonly MIN_AUDIO_BUFFER_LENGTH = 4;  // The minimum number of audio blocks to have before starting to play them.
     _isPlaying = false;  // Is playing audio blocks from the buffer.
 
-    // _lastAudioBufferLength = 0;
-
-    // The typings aren't complete for the Web Audio API (Sep 2021), hence the ESlint and TypeScript disablings.
 
     constructor(options?: AudioWorkletNodeOptions) {
         super(options);
 
         this.port.onmessage = this.onMessage;
     }
+
 
     /*@devdoc
      *  Takes incoming audio blocks posted to the audio worklet's message port and queues them in a ring buffer for playing.
@@ -58,8 +56,6 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
 
         // If we've reached the maximum buffer size, skip some of the audio blocks.
         if (this._audioBuffer.length > this.MAX_AUDIO_BUFFER_LENGTH) {
-            // console.log("AudioOutputProcessor: Discard", this._audioBuffer.length - this.MIN_AUDIO_BUFFER_LENGTH,
-            //     "blocks");
             while (this._audioBuffer.length > this.MIN_AUDIO_BUFFER_LENGTH) {
                 this._audioBuffer.shift();
             }
@@ -89,11 +85,6 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
 
         const FLOAT_TO_INT = 32767;
 
-        // if (this._audioBuffer.length !== this._lastAudioBufferLength) {
-        //     console.log("Buffer length =", this._audioBuffer.length);
-        //     this._lastAudioBufferLength = this._audioBuffer.length;
-        // }
-
         // Grab the next block of audio to play.
         let audioBlock: Int16Array | undefined = undefined;
         if (this._isPlaying) {
@@ -105,7 +96,6 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
         }
 
         if (!outputList || !outputList[0] || !outputList[0][0] || !outputList[0][1]) {
-            // console.log("Early return!");
             return true;
         }
 
