@@ -504,7 +504,7 @@ class Socket {
         const connection = this.#findOrCreateConnection(sockAddr);
         if (connection) {
             connection.sendReliablePacket(packet);
-        } else if (Socket.UDT_CONNECTION_DEBUG) {
+        } else if (UDT.UDT_CONNECTION_DEBUG) {
             console.log("[networking] Socket.writeReliablePacket refusing to send packet list - no connection was created");
         }
     }
