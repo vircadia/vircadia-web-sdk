@@ -48,3 +48,11 @@ export type { vec3 } from "./domain/shared/Vec3";
 
 export { default as Quat } from "./domain/shared/Quat";
 export type { quat } from "./domain/shared/Quat";
+
+export {
+    DefaultLogConfiguration,
+    ConsoleLoggerContext,
+    LogFilterContext,
+    LoggerContextCombination,
+    LogReportContext
+} from "./shared/Log";
