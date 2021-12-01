@@ -15,7 +15,7 @@ import SignalEmitter from "../../../src/domain/shared/SignalEmitter";
 import Uuid from "../../../src/domain/shared/Uuid";
 import DomainHandler from "../../../src/domain/networking/DomainHandler";
 
-import TestConfig from "../../test.config.json";
+import TestConfig from "../../test.config.js";
 
 
 describe("DomainHandler - integration tests", () => {

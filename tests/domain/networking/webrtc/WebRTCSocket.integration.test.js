@@ -11,7 +11,7 @@
 import NodeType from "../../../../src/domain/networking/NodeType";
 import WebRTCSocket from "../../../../src/domain/networking/webrtc/WebRTCSocket";
 
-import TestConfig from "../../../test.config.json";
+import TestConfig from "../../../test.config.js";
 
 import "wrtc";  // WebRTC Node.js package.
 

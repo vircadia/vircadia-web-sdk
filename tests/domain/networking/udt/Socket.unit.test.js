@@ -11,7 +11,7 @@
 import NodeType from "../../../../src/domain/networking/NodeType";
 import Socket from "../../../../src/domain/networking/udt/Socket";
 
-import TestConfig from "../../../test.config.json";
+import TestConfig from "../../../test.config.js";
 
 
 describe("Socket - unit tests", () => {
