@@ -33,16 +33,32 @@ to. https://jestjs.io/.
 ```
 npm install
 ```
+Loads all the supporting NPM packages as defined in `package.json` into the `node_modules` directory.
 
-### Compile and minify for production
+### Compile and minify for development
 ```
 npm run build
 ```
+Does a development compile and packages the SDK into the `dist` directory.
+
+### Compile and minify for production
+```
+npm run build-prod
+```
+Does a clean production compile and packages a releasable version of the SDK into the `dist` directory.
 
 ### Hot-recompile for development
 ```
 npm run watch
 ```
+Does a development compile and enables webpack to watch the sources and recomile when source files change.
+This is often useful when testing SDK development using the `example` tool.
+
+### Hot-recompile for production
+```
+npm run watch-prod
+```
+Does a clean production compile and enables webpack to watch the sources and recompile when the source files change.
 
 ### Clean the build directory
 ```

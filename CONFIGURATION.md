@@ -55,7 +55,7 @@ References:
 WebPack is used to configured to process TypeScript and JavaScript files, with TypeScript files handled by `ts-loader` and JavaScript
 files having any source maps reprocessed by `source-map-loader`.
 
-"build", "watch", and "clean" commands are configured in `package.json`.
+"build", "build-prod", "watch", "watch-prod", and "clean" commands are configured in `package.json`.
 
 References:
 - https://webpack.js.org/guides/getting-started/
@@ -76,7 +76,7 @@ References:
 
 `tests/tsconfig.json` customizes TypeScript processing of test files.
 
-"test" and test-watch" commands are configured in `package.json`.
+"test" and "test-watch" commands are configured in `package.json`.
 
 References:
 - https://jestjs.io/docs/getting-started#using-typescript

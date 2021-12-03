@@ -1,6 +1,7 @@
 /dist
 /docs
 /node_modules
+VERSION.json
 
 # Editor directories and files
 .idea
