@@ -93,7 +93,6 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     // @ts-ignore
     process(inputList: Float32Array[][] /* , outputList: Float32Array[][], parameters: Record<string, Float32Array> */) {
         if (!inputList || !inputList[0] || !inputList[0][0] || this._channelCount === 2 && !inputList[0][1]) {
-            console.log("Early return!");
             return true;
         }
 
