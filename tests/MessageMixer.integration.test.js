@@ -11,7 +11,7 @@
 import DomainServer from "../src/DomainServer";
 import MessageMixer from "../src/MessageMixer";
 
-import TestConfig from "./test.config.json";
+import TestConfig from "./test.config.js";
 
 import "wrtc";  // WebRTC Node.js package.
 

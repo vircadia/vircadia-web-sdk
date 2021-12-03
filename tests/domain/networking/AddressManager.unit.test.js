@@ -11,7 +11,7 @@
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 
-import TestConfig from "../../test.config.json";
+import TestConfig from "../../test.config.js";
 
 
 describe("AddressManager - unit tests", () => {

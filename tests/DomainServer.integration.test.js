@@ -11,7 +11,7 @@
 import DomainServer from "../src/DomainServer";
 import Uuid from "../src/domain/shared/Uuid";
 
-import TestConfig from "./test.config.json";
+import TestConfig from "./test.config.js";
 
 import "wrtc";  // WebRTC Node.js package.
 import { protocolVersionsSignature } from "../src/domain/networking/udt/PacketHeaders";

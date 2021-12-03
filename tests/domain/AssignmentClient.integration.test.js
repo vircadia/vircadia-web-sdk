@@ -12,7 +12,7 @@ import DomainServer from "../../src/DomainServer";
 import AssignmentClient from "../../src/domain/AssignmentClient";
 import NodeType from "../../src/domain/networking/NodeType";
 
-import TestConfig from "../test.config.json";
+import TestConfig from "../test.config.js";
 
 import "wrtc";  // WebRTC Node.js package.
 

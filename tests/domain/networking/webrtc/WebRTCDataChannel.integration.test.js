@@ -12,7 +12,7 @@ import WebRTCDataChannel from "../../../../src/domain/networking/webrtc/WebRTCDa
 import WebRTCSignalingChannel from "../../../../src/domain/networking/webrtc/WebRTCSignalingChannel";
 import NodeType from "../../../../src/domain/networking/NodeType";
 
-import TestConfig from "../../../test.config.json";
+import TestConfig from "../../../test.config.js";
 
 import "wrtc";  // WebRTC Node.js package.
 
