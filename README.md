@@ -64,7 +64,9 @@ npm run lint-path <path>
 ### Run tests
 
 Unit tests can be run without any external dependencies but integration tests require a domain server to be running on
-`localhost` or other location specified in `./tests/test.config.json`. The location and other values of the config JSON can be overridden with environment variables, using the same property names, but prefixed with "VIRCADIA_".
+`localhost` or other location specified in `./tests/test.config.json`. The location and other values of the config JSON can be
+overridden with environment variables, using the same property names, but prefixed with "VIRCADIA_".
+
 
 All tests:
 ```
