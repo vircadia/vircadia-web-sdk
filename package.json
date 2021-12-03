@@ -17,7 +17,6 @@
     "scripts": {
         "build": "npm-run-all -s \"create-version\" \"build-wp-dev\"",
         "build-prod": "npm-run-all -s \"clean-dist\" \"create-version\" \"build-wp-prod\"",
-        "build-sdk": "npm-run-all -s \"clean-dist\" \"create-version\" \"build-wp-prod\"",
         "build-wp-prod": "webpack --mode production",
         "build-wp-dev": "webpack --mode development",
 
