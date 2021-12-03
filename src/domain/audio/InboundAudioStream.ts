@@ -39,7 +39,7 @@ class InboundAudioStream {
     #_decoder = null;
 
     // WEBRTC TODO: Remove when have logger with "once" function.
-    #_haveWarnedWriteDroppableSilentFrames = false;;
+    #_haveWarnedWriteDroppableSilentFrames = false;
 
 
     /* eslint-disable */
