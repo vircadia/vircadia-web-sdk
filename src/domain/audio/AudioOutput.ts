@@ -11,9 +11,7 @@
 import assert from "../shared/assert";
 import AudioConstants from "../audio/AudioConstants";
 
-// eslint-disable-next-line
-// @ts-ignore
-import audioOutputProcessorURL from "worklet-loader!../worklets/AudioOutputProcessor";
+import { WorkerUrl } from "worker-url";
 
 
 /*@devdoc
@@ -51,6 +49,10 @@ class AudioOutput {
     #_outputArray = new Int16Array(this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE);
     #_outputArrayLength = this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE;
     #_outputOffset = 0;  // The next write position.
+
+    #_audioOutputProcessorURL = new WorkerUrl(new URL("../worklets/AudioOutputProcessor.ts", import.meta.url), {
+        name: "AudioOutputProcessor"
+    });
 
 
     get audioOutput(): MediaStream {
@@ -162,7 +164,9 @@ class AudioOutput {
             console.error("Cannot set up audio output stream. App may not be being served via HTTPS or from localhost.");
             return;
         }
-        await this.#_audioContext.audioWorklet.addModule(audioOutputProcessorURL);
+        // eslint-disable-next-line
+        // @ts-ignore
+        await this.#_audioContext.audioWorklet.addModule(this.#_audioOutputProcessorURL);
         this.#_audioWorkletNode = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-output-processor", {
             // FIXME: Chrome/Edge requires number of inputs > 0 in order for the worklet to generate output (Sep 2021).
             numberOfInputs: 1,

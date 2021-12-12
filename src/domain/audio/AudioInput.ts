@@ -12,9 +12,7 @@ import AudioConstants from "../audio/AudioConstants";
 import assert from "../shared/assert";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 
-// eslint-disable-next-line
-// @ts-ignore
-import audioInputProcessorURL from "worklet-loader!../worklets/AudioInputProcessor";
+import { WorkerUrl } from "worker-url";
 
 
 /*@devdoc
@@ -45,6 +43,10 @@ class AudioInput {
     #_frameBuffer: Array<Int16Array> = [];
 
     #_readyRead = new SignalEmitter();
+
+    #_audioInputProcessorURL = new WorkerUrl(new URL("../worklets/AudioInputProcessor.ts", import.meta.url), {
+        name: "AudioInputProcessor"
+    });
 
 
     set audioInput(audioInput: MediaStream | null) {
@@ -286,7 +288,9 @@ class AudioInput {
             console.error(this.#_errorString);
             return false;
         }
-        await this.#_audioContext.audioWorklet.addModule(audioInputProcessorURL);
+        // eslint-disable-next-line
+        // @ts-ignore
+        await this.#_audioContext.audioWorklet.addModule(this.#_audioInputProcessorURL);
         this.#_audioInputProcessor = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-input-processor", {
             numberOfInputs: 1,
             numberOfOutputs: 0,
