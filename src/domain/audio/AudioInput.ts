@@ -25,6 +25,11 @@ import { WorkerUrl } from "worker-url";
  *      <em>Write-only.</em>
  *      <p>This must be set to a non-null value only when the audio input isn't running (hasn't been started or has been
  *      stopped). Setting to <code>null</code> stops the audio input if it is running.</p>
+ *  @property {string} audioWorkletRelativePath="" - The relative path to the SDK's audio worklet JavaScript files,
+ *      <code>vircadia-audio-input.js</code> and <code>vircadia-audio-output.js</code>.
+ *      <p>The URLs used to load these files are reported in the log. Depending on where these files are deployed, their URLs
+ *      may need to be adjusted. If used, must start with a <code>"."</code> and end with a <code>"/"</code>.</p>
+ *      <p><em>Write-only.</em></p>
  */
 class AudioInput {
     // C++  QAudioInput, QIODevice
@@ -44,9 +49,7 @@ class AudioInput {
 
     #_readyRead = new SignalEmitter();
 
-    #_audioInputProcessorURL = new WorkerUrl(new URL("../worklets/AudioInputProcessor.ts", import.meta.url), {
-        name: "AudioInputProcessor"
-    });
+    #_audioWorkletRelativePath = "";
 
 
     set audioInput(audioInput: MediaStream | null) {
@@ -61,6 +64,10 @@ class AudioInput {
         }
 
         this.#_audioInput = audioInput;
+    }
+
+    set audioWorkletRelativePath(relativePath: string) {
+        this.#_audioWorkletRelativePath = relativePath;
     }
 
 
@@ -288,9 +295,16 @@ class AudioInput {
             console.error(this.#_errorString);
             return false;
         }
+        const audioInputProcessorURL = new WorkerUrl(new URL("../worklets/AudioInputProcessor.ts", import.meta.url), {
+            name: "vircadia-audio-input",  // The filename (sans ".js") of the audio worklet that is built.
+            customPath: () => {
+                return new URL(`${this.#_audioWorkletRelativePath}vircadia-audio-input.js`, window.location.href);
+            }
+        });
+        console.log("Audio input worklet:", audioInputProcessorURL.href);
         // eslint-disable-next-line
         // @ts-ignore
-        await this.#_audioContext.audioWorklet.addModule(this.#_audioInputProcessorURL);
+        await this.#_audioContext.audioWorklet.addModule(audioInputProcessorURL);
         this.#_audioInputProcessor = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-input-processor", {
             numberOfInputs: 1,
             numberOfOutputs: 0,

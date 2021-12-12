@@ -4,6 +4,7 @@
         "allowJs": true,
         "target": "ESNext",
         "lib": [ "ES2021", "DOM" ],
+        "module": "ES2020",
         "sourceMap": false,
         "esModuleInterop": true,
         "moduleResolution": "Node",

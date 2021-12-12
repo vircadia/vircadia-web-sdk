@@ -65,6 +65,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
     // Audio Mixer
     (function () {
         audioMixer = new AudioMixer(contextID);
+        audioMixer.audioWorkletRelativePath = "../dist/";
 
         const statusText = document.getElementById("audioMixerStatus");
         const audioElement = document.getElementById("audioElement");

@@ -49,6 +49,23 @@ describe("AudioMixer - unit tests", () => {
         error.mockReset();
     });
 
+    test("Can set a relative path to the audio worklets", () => {
+        const domainServer = new DomainServer();
+        const audioMixer = new AudioMixer(domainServer.contextID);
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+
+        expect(audioMixer.audioWorkletRelativePath).toBe("");
+        audioMixer.audioWorkletRelativePath = "./somepath/";
+        expect(audioMixer.audioWorkletRelativePath).toBe("./somepath/");
+        audioMixer.audioWorkletRelativePath = "invalidpath";
+        expect(audioMixer.audioWorkletRelativePath).toBe("./somepath/");
+        audioMixer.audioWorkletRelativePath = "";
+        expect(audioMixer.audioWorkletRelativePath).toBe("");
+        expect(error).toHaveBeenCalledTimes(1);
+
+        error.mockReset();
+    });
+
 
     log.mockReset();
 });
