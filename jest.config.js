@@ -5,7 +5,7 @@ module.exports = {
     maxWorkers: 1,  // Counter-intuitively, this speeds up running multiple tests.
 
     moduleNameMapper: {
-        "^worklet-loader!.*$": "<rootDir>/mocks/worklet-loader.mock.js"
+        "worker-url": "<rootDir>/mocks/worker-url.mock.js"
     }
 
 };

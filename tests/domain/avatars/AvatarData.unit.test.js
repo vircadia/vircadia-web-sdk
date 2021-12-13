@@ -8,7 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* eslint-disable @typescript-eslint/no-magic-numbers */
+import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
+AudioWorkletsMock.mock();
+
 
 import AvatarData from "../../../src/domain/avatars/AvatarData";
 import AddressManager from "../../../src/domain/networking/AddressManager";
@@ -18,6 +20,8 @@ import { Uuid } from "../../../src/Vircadia";
 
 
 describe("AvatarData - unit tests", () => {
+
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     const contextID = ContextManager.createContext();
     ContextManager.set(contextID, AddressManager);

@@ -8,11 +8,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AudioWorklets from "./AudioWorklets";
 import AudioConstants from "../audio/AudioConstants";
 import assert from "../shared/assert";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
-
-import { WorkerUrl } from "worker-url";
 
 
 /*@devdoc
@@ -295,16 +294,7 @@ class AudioInput {
             console.error(this.#_errorString);
             return false;
         }
-        const audioInputProcessorURL = new WorkerUrl(new URL("../worklets/AudioInputProcessor.ts", import.meta.url), {
-            name: "vircadia-audio-input",  // The filename (sans ".js") of the audio worklet that is built.
-            customPath: () => {
-                return new URL(`${this.#_audioWorkletRelativePath}vircadia-audio-input.js`, window.location.href);
-            }
-        });
-        console.log("Audio input worklet:", audioInputProcessorURL.href);
-        // eslint-disable-next-line
-        // @ts-ignore
-        await this.#_audioContext.audioWorklet.addModule(audioInputProcessorURL);
+        await AudioWorklets.loadInputProcessor(this.#_audioWorkletRelativePath, this.#_audioContext);
         this.#_audioInputProcessor = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-input-processor", {
             numberOfInputs: 1,
             numberOfOutputs: 0,

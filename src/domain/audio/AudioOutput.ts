@@ -8,10 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import assert from "../shared/assert";
+import AudioWorklets from "./AudioWorklets";
 import AudioConstants from "../audio/AudioConstants";
-
-import { WorkerUrl } from "worker-url";
+import assert from "../shared/assert";
 
 
 /*@devdoc
@@ -171,16 +170,7 @@ class AudioOutput {
             console.error("Cannot set up audio output stream. App may not be being served via HTTPS or from localhost.");
             return;
         }
-        const audioOutputProcessorURL = new WorkerUrl(new URL("../worklets/AudioOutputProcessor.ts", import.meta.url), {
-            name: "vircadia-audio-output",  // The filename (sans ".js") of the audio worklet that is built.
-            customPath: () => {
-                return new URL(`${this.#_audioWorkletRelativePath}vircadia-audio-output.js`, window.location.href);
-            }
-        });
-        console.log("Audio output worklet:", audioOutputProcessorURL.href);
-        // eslint-disable-next-line
-        // @ts-ignore
-        await this.#_audioContext.audioWorklet.addModule(audioOutputProcessorURL);
+        await AudioWorklets.loadOutputProcessor(this.#_audioWorkletRelativePath, this.#_audioContext);
         this.#_audioWorkletNode = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-output-processor", {
             // FIXME: Chrome/Edge requires number of inputs > 0 in order for the worklet to generate output (Sep 2021).
             numberOfInputs: 1,
