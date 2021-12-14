@@ -84,6 +84,33 @@ describe("BulkAvatarData - unit tests", () => {
         expect(bulkAvatarDetail.sessionUUID.stringify()).toBe("41571a4d-7dd3-4fa1-bf57-922549e7b4b1");
     });
 
+    test("Can read a BulkAvatarData message that has orientation data", () => {
+        // eslint-disable-next-line max-len
+        const RECEIVED_MESSAGE = "000000000b36000000000000000000000000000000000000ba351668ba234dd9b45356207632381615304181d2c0948c823faf3ee140bfffb7c43fff531982c44eabd23fbdd1ffc62a00feffffff03c365baed40983b35a6e13c5a5234c11547554a039f433efdc91601023af5c91601023af53aaec23745863526eb48429531b6caae3bec30fba57c425130fba57c4251bc9bc5863effbe10c55c3e9cbe7fc6ca3e1d157af1e320550d45d9e23e570394c9ee335a023ac4dc2c2c37b100e435a2225505d44d9118160be05a1f18160be05a1f15246c6c16b939c86d222c6055ab642c23a85fd959431e80661353a928f768ef461f46ba67fe3ec555d467fe3ec555d4bea1c5fb3df0c219c2183f9ec219c2183f9e00020200000059c4c5422c0000405efe00004f1b00002aff0100000000fffdfdffff03";
+        const MESSAGE_START = 24;
+
+        const arrayBuffer = new ArrayBuffer(RECEIVED_MESSAGE.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(RECEIVED_MESSAGE.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer, MESSAGE_START);
+
+        const bulkAvatarDetails = BulkAvatarData.read(dataView);
+        expect(bulkAvatarDetails).toHaveLength(1);
+
+        const bulkAvatarDetail = bulkAvatarDetails[0];
+        expect(bulkAvatarDetail.sessionUUID.stringify()).toBe("ba351668-ba23-4dd9-b453-562076323816");
+        expect(bulkAvatarDetail.globalPosition.x).toBeCloseTo(-6.57828, 3);
+        expect(bulkAvatarDetail.globalPosition.y).toBeCloseTo(1.01992, 3);
+        expect(bulkAvatarDetail.globalPosition.z).toBeCloseTo(7.03890, 3);
+
+        expect(bulkAvatarDetail.globalOrientation.x).toBeCloseTo(-0.00002157, 3);
+        expect(bulkAvatarDetail.globalOrientation.y).toBeCloseTo(-0.0909159, 3);
+        expect(bulkAvatarDetail.globalOrientation.z).toBeCloseTo(-0.00002157, 3);
+        expect(bulkAvatarDetail.globalOrientation.w).toBeCloseTo(-0.995859, 3);
+    });
+
     /* eslint-enable @typescript-eslint/no-magic-numbers */
 
 });
