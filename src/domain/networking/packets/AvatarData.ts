@@ -14,7 +14,9 @@ import UDT from "../udt/UDT";
 import { AvatarDataDetail } from "../../avatars/AvatarData";
 import AvatarDataPacket from "../../avatars/AvatarDataPacket";
 import assert from "../../shared/assert";
+import { quat } from "../../shared/Quat";
 import { vec3 } from "../../shared/Vec3";
+import GLMHelpers from "../../shared/GLMHelpers";
 
 
 type AvatarDataDetails = {
@@ -33,7 +35,8 @@ type AvatarDataDetails = {
     // WEBRTC TODO: Address further C++ code - AvatarDataRate.
 
     // Avatar data.
-    globalPosition: vec3 | undefined
+    globalPosition: vec3 | undefined,
+    globalOrientation: quat | undefined
 };
 
 
@@ -53,7 +56,8 @@ const AvatarData = new class {
      *  @property {boolean} distanceAdjust
      *  @property {vec3} viewerPosition
      *
-     *  @property {vec3} globalPosition - The avatar's position in the domain.
+     *  @property {vec3|undefined} globalPosition - The avatar's position in the domain.
+     *  @property {quat|undefined} globalOrientation - The avatar's orientation in the domain.
      */
 
 
@@ -115,8 +119,8 @@ const AvatarData = new class {
 
             if (sendStatus.itemFlags === 0) {
                 // New avatar...
-                const hasAvatarGlobalPosition = true;  // Always include global position.
-                const hasAvatarOrientation = false;
+                const hasAvatarGlobalPosition = info.globalPosition !== undefined;
+                const hasAvatarOrientation = info.globalOrientation !== undefined;
                 const hasAvatarBoundingBox = false;
                 const hasAvatarScale = false;
                 const hasLookAtPosition = false;
@@ -219,10 +223,18 @@ const AvatarData = new class {
                 dataPosition += 4;
                 data.setFloat32(dataPosition, globalPosition.z, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
+                // WEBRTC TODO: Address further C++ code - Outbound data rate.
             }
 
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_AVATAR_BOUNDING_BOX.
+
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_AVATAR_ORIENTATION.
+            if (avatarSpace(AvatarDataPacket.PACKET_HAS_AVATAR_ORIENTATION, 6)) {
+                GLMHelpers.packOrientationQuatToSixBytes(data, dataPosition, info.globalOrientation!);
+                dataPosition += 6;
+                // WEBRTC TODO: Address further C++ code - Outbound data rate.
+            }
+
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_AVATAR_SCALE.
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_LOOK_AT_POSITION.
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_AUDIO_LOUDNESS.
