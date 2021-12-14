@@ -344,6 +344,10 @@ class AvatarData extends SpatiallyNestable {
         // C++  int sendAvatarDataPacket(bool sendAll)
         //      QByteArray MyAvatar::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
         //      QByteArray AvatarData::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
+        //      QByteArray AvatarData::toByteArray(AvatarDataDetail dataDetail, quint64 lastSentTime,
+        //          const QVector<JointData>& lastSentJointData, AvatarDataPacket::SendStatus & sendStatus,
+        //          bool dropFaceTracking, bool distanceAdjust, glm::vec3 viewerPosition, QVector<JointData>* sentJointDataOut,
+        //          int maxDataSize, AvatarDataRate * outboundDataRateOut
 
         // About 2% of the time we send a full update (in particular, we transmit all the joint data) even if nothing has
         // changed. this is to guard against a joint moving once, the packet getting lost, and the joint never moving again.
@@ -361,12 +365,13 @@ class AvatarData extends SpatiallyNestable {
         // WEBRTC TODO: Address further C++ code - camera mode.
         //
 
-        // C++  QByteArray AvatarData::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
+        // C++  QByteArray AvatarData::toByteArrayStateful(...)
         const lastSentTime = this.#_lastToByteArray;
         this.#_lastToByteArray = Date.now();
         // SendStatus - Not used in user client.
 
-        // C++  From AvatarData::toByteArray()
+
+        // C++  QByteArray AvatarData::toByteArray(...)
         this.#lazyInitHeadData();
 
 
@@ -384,7 +389,8 @@ class AvatarData extends SpatiallyNestable {
             // maxDataSize: 0, - Not used in user client.
             // WEBRTC TODO: Address further C+ code - AvatarDataRate.
 
-            globalPosition: this.getPositionOutbound()
+            globalPosition: this.getPositionOutbound(),
+            globalOrientation: this.rotationChangedSince(lastSentTime) ? this.getOrientationOutbound() : undefined
         };
 
 
