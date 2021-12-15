@@ -138,6 +138,23 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
 
         const RAD_TO_DEG = 180.0 / Math.PI;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
+        function quatToYaw(orientation) {
+            const x = orientation.x;
+            const y = orientation.y;
+            const z = orientation.z;
+            const w = orientation.w;
+            return RAD_TO_DEG * Math.atan2(2.0 * (w * y + x * z), 1.0 - 2.0 * (y * y + z * z));
+        }
+
+        function yawToQuat(yaw) {
+            return {
+                x: 0,
+                y: Math.sin(yaw / RAD_TO_DEG / 2.0),
+                z: 0,
+                w: Math.cos(yaw / RAD_TO_DEG / 2.0)
+            };
+        }
+
 
         // Status
 
@@ -154,9 +171,10 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
 
         const myAvatarDisplayName = document.getElementById("myAvatarDisplayName");
         const myAvatarSessionDisplayName = document.getElementById("myAvatarSessionDisplayName");
-        const posX = document.getElementById("avatarMixerPosX");
-        const posY = document.getElementById("avatarMixerPosY");
-        const posZ = document.getElementById("avatarMixerPosZ");
+        const avatarMixerPosX = document.getElementById("avatarMixerPosX");
+        const avatarMixerPosY = document.getElementById("avatarMixerPosY");
+        const avatarMixerPosZ = document.getElementById("avatarMixerPosZ");
+        const avatarMixerYaw = document.getElementById("avatarMixerYaw");
 
         myAvatarDisplayName.value = avatarMixer.myAvatar.displayName;
         avatarMixer.myAvatar.displayNameChanged.connect(() => {
@@ -172,19 +190,32 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
         });
 
         const avatarPosition = avatarMixer.myAvatar.position;
-        posX.value = avatarPosition.x;
-        posY.value = avatarPosition.y;
-        posZ.value = avatarPosition.z;
+        avatarMixerPosX.value = avatarPosition.x;
+        avatarMixerPosY.value = avatarPosition.y;
+        avatarMixerPosZ.value = avatarPosition.z;
 
         function onPositionChange() {
-            avatarMixer.myAvatar.position = { x: parseFloat(posX.value), y: parseFloat(posY.value), z: parseFloat(posZ.value) };
+            avatarMixer.myAvatar.position = {
+                x: parseFloat(avatarMixerPosX.value),
+                y: parseFloat(avatarMixerPosY.value),
+                z: parseFloat(avatarMixerPosZ.value)
+            };
         }
-        posX.addEventListener("blur", onPositionChange);
-        posY.addEventListener("blur", onPositionChange);
-        posZ.addEventListener("blur", onPositionChange);
-        posX.addEventListener("change", onPositionChange);
-        posY.addEventListener("change", onPositionChange);
-        posZ.addEventListener("change", onPositionChange);
+        avatarMixerPosX.addEventListener("blur", onPositionChange);
+        avatarMixerPosY.addEventListener("blur", onPositionChange);
+        avatarMixerPosZ.addEventListener("blur", onPositionChange);
+        avatarMixerPosX.addEventListener("change", onPositionChange);
+        avatarMixerPosY.addEventListener("change", onPositionChange);
+        avatarMixerPosZ.addEventListener("change", onPositionChange);
+
+        const avatarYaw = quatToYaw(avatarMixer.myAvatar.orientation);
+        avatarMixerYaw.value = avatarYaw;
+
+        function onYawChange() {
+            avatarMixer.myAvatar.orientation = yawToQuat(parseFloat(avatarMixerYaw.value));
+        }
+        avatarMixerYaw.addEventListener("blur", onYawChange);
+        avatarMixerYaw.addEventListener("change", onYawChange);
 
 
         // Avatar List
@@ -195,14 +226,6 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
         const avatarListBody = document.querySelector("#avatarList > tbody");
 
         const avatars = new Map();  // <sessionID, { avatar, tr }>
-
-        function quatToYaw(orientation) {
-            const x = orientation.x;
-            const y = orientation.y;
-            const z = orientation.z;
-            const w = orientation.w;
-            return RAD_TO_DEG * Math.atan2(2.0 * (w * y + x * z), 1.0 - 2.0 * (y * y + z * z));
-        }
 
         function onAvatarAdded(sessionID) {
 

@@ -10,6 +10,7 @@
 
 import AvatarManager from "../AvatarManager";
 import ContextManager from "../shared/ContextManager";
+import Quat, { quat } from "../shared/Quat";
 import { Signal } from "../shared/SignalEmitter";
 import Vec3, { vec3 } from "../shared/Vec3";
 
@@ -28,6 +29,7 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *      display name changes.
  *      <em>Read-only.</em>
  *  @property {vec3} position - The position of the avatar in the domain.
+ *  @property {quat} orientation - The orientation of the avatar in the domain.
  */
 // Don't document the constructor because it shouldn't be used in the SDK.
 class MyAvatarInterface {
@@ -86,6 +88,19 @@ class MyAvatarInterface {
         }
         this.#_avatarManager.getMyAvatar().position = position;
     }
+
+    get orientation(): quat {
+        return this.#_avatarManager.getMyAvatar().orientation;
+    }
+
+    set orientation(orientation: quat) {
+        if (!Quat.valid(orientation)) {
+            console.error("[AvatarMixer] [MyAvatar] Tried to set an invalid orientation value!", JSON.stringify(orientation));
+            return;
+        }
+        this.#_avatarManager.getMyAvatar().orientation = orientation;
+    }
+
 
 }
 
