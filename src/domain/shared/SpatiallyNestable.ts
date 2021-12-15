@@ -74,7 +74,7 @@ class SpatiallyNestable {
      *  @returns {Uuid} The UUID of the entity or avatar.
      */
     getID(): Uuid {
-        // C++  QUuid SpatiallyNestable::getID()
+        // C++  QUuid getID()
         return this.#_id;
     }
 
@@ -83,7 +83,7 @@ class SpatiallyNestable {
      *  @returns {Uuid} The UUID of the entity or avatar.
      */
     setID(id: Uuid): void {
-        // C++  void SpatiallyNestable::setID(const QUuid& id) {
+        // C++  void setID(const QUuid& id) {
 
         // WEBRTC TODO: Address further code. - Update children's parent ID links.
 
@@ -119,7 +119,7 @@ class SpatiallyNestable {
 
     /*@devdoc
      *  Sets the world position of the entity or avatar.
-     *  @param {vec3} The world position of the entity or avatar.
+     *  @param {vec3} position - The world position of the entity or avatar.
      */
     setWorldPosition(position: vec3): void {
         // C++  void setWorldPosition(const glm::vec3& position)
@@ -146,7 +146,7 @@ class SpatiallyNestable {
 
     /*@devdoc
      *  Sets the world orientation of the entity or avatar.
-     *  @param {quaat} The world orientation of the entity or avatar.
+     *  @param {quat} orientation - The world orientation of the entity or avatar.
      */
     setWorldOrientation(orientation: quat): void {
         // C++  void setWorldOrientation(const glm::quat& orientation)

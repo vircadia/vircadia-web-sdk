@@ -218,7 +218,8 @@ class AvatarData extends SpatiallyNestable {
 
 
     /*@devdoc
-     *  Sets a flag that avatar identity data has changed since the last time an AvatarIdentity packet was sent.
+     *  Sets a flag that avatar identity data has changed since the last time an {@link PacketType(1)|AvatarIdentity} packet was
+     *  sent.
      */
     markIdentityDataChanged(): void {
         // C++  void markIdentityDataChanged()
@@ -272,8 +273,9 @@ class AvatarData extends SpatiallyNestable {
     }
 
     /*@devdoc
-     *  Processes the information that has been read from an AvatarIdentity packet.
-     *  @param {AvatarIdentityDetails} info - The information that has been ready from the AvatarIDentity packet.
+     *  Processes the information that has been read from an {@link PacketType(1)|AvatarIdentity} packet.
+     *  @param {PacketScribe.AvatarIdentityDetails} info - The information that has been read from the
+     *      {@link PacketType(1)|AvatarIdentity} packet.
      *  @param {Object<boolean>} identifyChanged - Return value that is set to <code>true</code> if identity data has changed,
      *      <code>false</code> if it hasn't.
      *  @param {Object<boolean>} displayNameChanged - Return value that is set to <code>true</code> if the avatar's display name
@@ -330,7 +332,7 @@ class AvatarData extends SpatiallyNestable {
     }
 
     /*@devdoc
-     *  Resets the time that the last AvatarData packet was sent to <code>0</code>.
+     *  Resets the time that the last {@link PacketType(1)|AvatarData} packet was sent to <code>0</code>.
      */
     // eslint-disable-next-line class-methods-use-this
     resetLastSent(): void {
