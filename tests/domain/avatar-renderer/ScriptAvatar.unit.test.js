@@ -15,6 +15,7 @@ import AvatarManager from "../../../src/domain/AvatarManager";
 import ScriptAvatar from "../../../src/domain/avatar-renderer/ScriptAvatar";
 import MyAvatarInterface from "../../../src/domain/interfaces/MyAvatarInterface";
 import ContextManager from "../../../src/domain/shared/ContextManager";
+import Quat from "../../../src/domain/shared/Quat";
 import Uuid from "../../../src/domain/shared/Uuid";
 import Vec3 from "../../../src/domain/shared/Vec3";
 
@@ -30,6 +31,7 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
         expect(scriptAvatar.position).toEqual(Vec3.ZERO);
+        expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
         // Can still access signals.
         expect(typeof scriptAvatar.displayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.displayNameChanged.disconnect).toBe("function");
@@ -50,6 +52,7 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
         expect(scriptAvatar.position).toEqual(Vec3.ZERO);
+        expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
         // Can still access signals.
         expect(typeof scriptAvatar.displayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.displayNameChanged.disconnect).toBe("function");

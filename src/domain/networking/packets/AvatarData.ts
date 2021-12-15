@@ -36,7 +36,7 @@ type AvatarDataDetails = {
 
     // Avatar data.
     globalPosition: vec3 | undefined,
-    globalOrientation: quat | undefined
+    localOrientation: quat | undefined
 };
 
 
@@ -57,7 +57,7 @@ const AvatarData = new class {
      *  @property {vec3} viewerPosition
      *
      *  @property {vec3|undefined} globalPosition - The avatar's position in the domain.
-     *  @property {quat|undefined} globalOrientation - The avatar's orientation in the domain.
+     *  @property {quat|undefined} localOrientation - The avatar's orientation.
      */
 
 
@@ -120,7 +120,7 @@ const AvatarData = new class {
             if (sendStatus.itemFlags === 0) {
                 // New avatar...
                 const hasAvatarGlobalPosition = info.globalPosition !== undefined;
-                const hasAvatarOrientation = info.globalOrientation !== undefined;
+                const hasAvatarOrientation = info.localOrientation !== undefined;
                 const hasAvatarBoundingBox = false;
                 const hasAvatarScale = false;
                 const hasLookAtPosition = false;
@@ -230,7 +230,8 @@ const AvatarData = new class {
 
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_AVATAR_ORIENTATION.
             if (avatarSpace(AvatarDataPacket.PACKET_HAS_AVATAR_ORIENTATION, 6)) {
-                GLMHelpers.packOrientationQuatToSixBytes(data, dataPosition, info.globalOrientation!);
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                GLMHelpers.packOrientationQuatToSixBytes(data, dataPosition, info.localOrientation!);
                 dataPosition += 6;
                 // WEBRTC TODO: Address further C++ code - Outbound data rate.
             }

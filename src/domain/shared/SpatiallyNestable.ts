@@ -91,6 +91,21 @@ class SpatiallyNestable {
     }
 
     /*@devdoc
+     *  Gets the UUID of the entity or avatar that the entity or avatar is parented to.
+     *  @returns {Uuid} The UUID of the entity or avatar that the entity or avatar is parented to. <code>Uuid.NULL</code> if not
+     *      parented.
+     */
+    // eslint-disable-next-line class-methods-use-this
+    getParentID(): Uuid {
+        // C++  QUuid getParentID() {
+
+        // WEBRTC TODO: Address further code - Parent ID.
+
+        return new Uuid(Uuid.NULL);
+    }
+
+
+    /*@devdoc
      *  Gets the world position of the entity or avatar.
      *  @returns {vec3} The world position of the entity or avatar.
      */
@@ -144,6 +159,33 @@ class SpatiallyNestable {
         }
     }
 
+
+    /*@devdoc
+     *  Sets the local position of the entity or avatar.
+     *  @param {vec3} position - The local position of the entity or avatar.
+     *  @param {boolean} [tellPhysics=true] - <code>true</code> if physics should be updated, <code>false</code> if it
+     *      shouldn't.
+     */
+    // eslint-disable-next-line
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    setLocalPosition(position: vec3, tellPhysics = true): void {
+        // C++  void setLocalPosition(const glm::vec3& position, bool tellPhysics = true)
+
+        // WEBRTC TODO: Address further C++ code - Guard against NaN values.
+
+        // WEBRTC TODO: Address further C++ code - Nestable transforms.
+
+        if (!Vec3.equal(position, this.#_worldPosition)) {
+            this.#_worldPosition = position;
+            this.#_translationChanged = Date.now();
+        }
+
+        // WEBRTC TODO: Address further C++ code - Location changed notifications.
+
+    }
+
+
     /*@devdoc
      *  Gets the local orientation of the entity or avatar.
      *  @returns {quat} The local orientation of the entity or avatar.
@@ -154,6 +196,22 @@ class SpatiallyNestable {
         // WEBRTC TODO: Address further C++ code - Nestable transforms.
 
         return this.#_worldOrientation;
+    }
+
+    setLocalOrientation(orientation: quat): void {
+        // C++  void setLocalOrientation(const glm::quat& orientation)
+
+        // WEBRTC TODO: Address further C++ code - Guard against NaN values.
+
+        // WEBRTC TODO: Address further C++ code - Nestable transforms.
+
+        if (!Quat.equal(orientation, this.#_worldOrientation)) {
+            this.#_worldOrientation = orientation;
+            this.#_rotationChanged = Date.now();
+        }
+
+        // WEBRTC TODO: Address further C++ code - Location changed notifications.
+
     }
 
     /*@devdoc

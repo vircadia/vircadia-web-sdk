@@ -12,14 +12,15 @@ import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
 import NodeType from "../networking/NodeType";
 import { AvatarIdentityDetails } from "../networking/packets/AvatarIdentity";
+import { BulkAvatarDataDetails } from "../networking/packets/BulkAvatarData";
 import PacketScribe from "../networking/packets/PacketScribe";
 import SequenceNumber from "../networking/udt/SequenceNumber";
 import ContextManager from "../shared/ContextManager";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import SpatiallyNestable, { NestableType } from "../shared/SpatiallyNestable";
-import { quat } from "../shared/Quat";
+import Quat, { quat } from "../shared/Quat";
 import Uuid from "../shared/Uuid";
-import { vec3 } from "../shared/Vec3";
+import Vec3, { vec3 } from "../shared/Vec3";
 
 
 /*@devdoc
@@ -81,6 +82,8 @@ class AvatarData extends SpatiallyNestable {
 
     protected _sessionDisplayName: string | null = null;
     protected _sessionDisplayNameChanged = new SignalEmitter();
+
+    protected _globalPosition = Vec3.ZERO;
 
 
     // Context
@@ -357,8 +360,7 @@ class AvatarData extends SpatiallyNestable {
         const dataDetail = cullSmallData ? AvatarDataDetail.SendAllData : AvatarDataDetail.CullSmallData;
 
         // C++  QByteArray MyAvatar::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
-        //
-        // WEBRTC TODO: Address further C++ code - avatar transits.
+        this._globalPosition = this.getWorldPosition();
         //
         // WEBRTC TODO: Address further C++ code - avatar bounding box.
         //
@@ -389,8 +391,8 @@ class AvatarData extends SpatiallyNestable {
             // maxDataSize: 0, - Not used in user client.
             // WEBRTC TODO: Address further C+ code - AvatarDataRate.
 
-            globalPosition: this.getPositionOutbound(),
-            globalOrientation: this.rotationChangedSince(lastSentTime) ? this.getOrientationOutbound() : undefined
+            globalPosition: this._globalPosition,
+            localOrientation: this.rotationChangedSince(lastSentTime) ? this.getOrientationOutbound() : undefined
         };
 
 
@@ -431,14 +433,45 @@ class AvatarData extends SpatiallyNestable {
         return avatarPacket.getWireSize();
     }
 
-
     /*@devdoc
-     *  Gets the avatar's world position.
-     *  @returns {vec3} The avatar's world position.
+     *  Processes the data for an avatar that has been read from a {@link PacketType(1)|BulkAvatarData} packet.
+     *  @param {PacketScribe.BulkAvatarDataDetails} avatarData - The data that has been read from the
+     *      {@link PacketType(1)|BulkAvatarData} packet.
      */
-    getPositionOutbound(): vec3 {
-        // C++  N/A
-        return this.getWorldPosition();
+    parseDataFromBuffer(avatarData: BulkAvatarDataDetails): void {
+        // C++  int parseDataFromBuffer(const QByteArray& buffer)
+
+        // The data have already been read by PacketScribe, we now just need to process them.
+
+        if (avatarData.globalPosition) {
+            // AvatarReplicas per the C++ is not implemented because that is for load testing.
+
+            // WEBRTC TODO: Address further C++ code - avatar transits.
+
+            // WEBRTC TODO: Address further C++ code - client vs non-client avatar.
+
+            this._globalPosition = avatarData.globalPosition;
+            if (!this.hasParent()) {
+                this.setLocalPosition(avatarData.globalPosition);
+            }
+        }
+
+        // WEBRTC TODO: Address further C++ code - further avatar properties.
+
+        if (avatarData.localOrientation) {
+            if (!Quat.equal(avatarData.localOrientation, this.getLocalOrientation())) {
+
+                // WEBRTC TODO: Address further C++ code - Joint data.
+
+                this.setLocalOrientation(avatarData.localOrientation);
+            }
+
+            // WEBRTC TODO: Address further C++ code - avatar orientation update rate.
+
+        }
+
+        // WEBRTC TODO: Address further C++ code - further avatar properties.
+
     }
 
     /*@devdoc
@@ -456,6 +489,11 @@ class AvatarData extends SpatiallyNestable {
     protected maybeUpdateSessionDisplayNameFromTransport(sessionDisplayName: string | null): void {  // eslint-disable-line
         // C++  void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName)
         // No-op.
+    }
+
+    protected hasParent(): boolean {
+        // C++  bool hasParent()
+        return this.getParentID().value() !== Uuid.NULL;
     }
 
 

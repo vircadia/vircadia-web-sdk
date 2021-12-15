@@ -55,7 +55,7 @@ describe("AvatarData - unit tests", () => {
             distanceAdjust: false,
             viewerPosition: { x: 0, y: 0, z: 0 },
             globalPosition: { x: -10, y: 100, z: 20 },
-            globalOrientation: { x: 0, y: 0.866025, z: 0, w: -0.5 }
+            localOrientation: { x: 0, y: 0.866025, z: 0, w: -0.5 }
         });
         expect(packet instanceof NLPacket).toBe(true);
         expect(packet.getType()).toBe(PacketType.AvatarData);

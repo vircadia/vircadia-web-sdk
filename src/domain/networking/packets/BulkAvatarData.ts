@@ -22,7 +22,7 @@ import "../../shared/DataViewExtensions";
 type BulkAvatarDataDetails = {
     sessionUUID: Uuid,
     globalPosition: vec3 | undefined,
-    globalOrientation: quat | undefined
+    localOrientation: quat | undefined
 };
 
 
@@ -37,7 +37,7 @@ const BulkAvatarData = new class {
      *  @property {Uuid} sessionUUID - The avatar's session UUID.
      *  @property {vec3|undefined} globalPosition - The avatar's position in the domain.
      *      <code>undefined</code> if not included in the packet.
-     *  @property {quat|undefined} globalOrientation - The avatar's orientation in the domain.
+     *  @property {quat|undefined} localOrientation - The avatar's orientation.
      *      <code>undefined</code> if not included in the packet.
      */
 
@@ -99,10 +99,10 @@ const BulkAvatarData = new class {
                 dataPosition += 24;
             }
 
-            let globalOrientation: quat | undefined = undefined;
+            let localOrientation: quat | undefined = undefined;
             if (hasAvatarOrientation) {
-                globalOrientation = { x: 0, y: 0, z: 0, w: 0 };
-                GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition, globalOrientation);
+                localOrientation = { x: 0, y: 0, z: 0, w: 0 };
+                GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition, localOrientation);
                 dataPosition += 6;
             }
 
@@ -209,7 +209,7 @@ const BulkAvatarData = new class {
             avatarDataDetailsList.push({
                 sessionUUID,
                 globalPosition,
-                globalOrientation
+                localOrientation
             });
 
         }

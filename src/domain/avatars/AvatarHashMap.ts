@@ -334,25 +334,9 @@ class AvatarHashMap {
             const isNewAvatar = false;
             avatar = this.#newOrExistingAvatar(sessionUUID, sendingNode, { value: isNewAvatar });
 
-            // WEBRTC TODO: Address further C++ code - avatar transits.
+            avatar.parseDataFromBuffer(avatarData);
 
             // AvatarReplicas per the C++ is not implemented because that is for load testing.
-
-
-            // C++  int AvatarData::parseDataFromBuffer(const QByteArray& buffer)
-
-            if (avatarData.globalPosition) {
-                // AvatarReplicas per the C++ is not implemented because that is for load testing.
-
-                avatar.setWorldPosition(avatarData.globalPosition);
-
-                // WEBRTC TODO: Address further C++ code - avatar parented to entity.
-
-                // WEBRTC TODO: Address further C++ code - avatar transits.
-
-            }
-
-            // WEBRTC TODO: Address further C++ code - further avatar properties.
 
         } else {
             // This shouldn't happen if the avatar mixer is functioning correctly.

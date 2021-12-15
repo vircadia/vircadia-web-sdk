@@ -105,10 +105,10 @@ describe("BulkAvatarData - unit tests", () => {
         expect(bulkAvatarDetail.globalPosition.y).toBeCloseTo(1.01992, 3);
         expect(bulkAvatarDetail.globalPosition.z).toBeCloseTo(7.03890, 3);
 
-        expect(bulkAvatarDetail.globalOrientation.x).toBeCloseTo(-0.00002157, 3);
-        expect(bulkAvatarDetail.globalOrientation.y).toBeCloseTo(-0.0909159, 3);
-        expect(bulkAvatarDetail.globalOrientation.z).toBeCloseTo(-0.00002157, 3);
-        expect(bulkAvatarDetail.globalOrientation.w).toBeCloseTo(-0.995859, 3);
+        expect(bulkAvatarDetail.localOrientation.x).toBeCloseTo(-0.00002157, 3);
+        expect(bulkAvatarDetail.localOrientation.y).toBeCloseTo(-0.0909159, 3);
+        expect(bulkAvatarDetail.localOrientation.z).toBeCloseTo(-0.00002157, 3);
+        expect(bulkAvatarDetail.localOrientation.w).toBeCloseTo(-0.995859, 3);
     });
 
     /* eslint-enable @typescript-eslint/no-magic-numbers */
