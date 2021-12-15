@@ -25,7 +25,7 @@ import audioOutputProcessorURL from "worklet-loader!../worklets/AudioOutputProce
  *  @property {string} contextItemType="AudioOutput" - The type name for use with the {@link ContextManager}.
  *      <p><em>Static. Read-only.</em></p>
  *
- *  @property {MediaStream} audioOuput - The audio output stream to be played in the user client.
+ *  @property {MediaStream} audioOutput - The audio output stream to be played in the user client.
  *      <em>Read-only.</em>
  *      <p>This should be accessed after the user has interacted with the web page in some manner, otherwise a warning will be
  *      generated in the console log because Web Audio requires user input on the page in order for audio to play. See:
@@ -150,7 +150,7 @@ class AudioOutput {
         });
 
         // AudioStream output.
-        // Create this before async operations so that audioOutput property can be retrieved via audioOuput while setting up.
+        // Create this before async operations so that audioOutput property can be retrieved via audioOutput while setting up.
         this.#_streamDestination = this.#_audioContext.createMediaStreamDestination();
 
         // Use an oscillator node to trigger output generation.

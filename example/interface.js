@@ -82,7 +82,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
         // console.log because Web Audio requires user input on the page in order for audio to play.
         // https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide
         /*
-        audioElement.srcObject = audioMixer.audioOuput;
+        audioElement.srcObject = audioMixer.audioOutput;
         */
 
         function setInputStream() {
@@ -102,7 +102,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
         function onConnectButtonClick() {
             // Assign (or reassign) the audio mixer stream now that we have user input on the page.
             console.log("[interface] Connect");
-            audioElement.srcObject = audioMixer.audioOuput;
+            audioElement.srcObject = audioMixer.audioOutput;
 
             setInputStream();
 
