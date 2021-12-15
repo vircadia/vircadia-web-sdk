@@ -129,10 +129,14 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
     (function () {
         avatarMixer = new AvatarMixer(contextID);
 
-        const NUM_DECIMAL_PLACES = 3;
+        const POS_DECIMAL_PLACES = 3;
+        const YAW_DECIMAL_PLACES = 1;
         const X_INDEX = 2;
         const Y_INDEX = 3;
         const Z_INDEX = 4;
+        const YAW_INDEX = 5;
+
+        const RAD_TO_DEG = 180.0 / Math.PI;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
 
         // Status
@@ -192,6 +196,14 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
 
         const avatars = new Map();  // <sessionID, { avatar, tr }>
 
+        function quatToYaw(orientation) {
+            const x = orientation.x;
+            const y = orientation.y;
+            const z = orientation.z;
+            const w = orientation.w;
+            return RAD_TO_DEG * Math.atan2(2.0 * (w * y + x * z), 1.0 - 2.0 * (y * y + z * z));
+        }
+
         function onAvatarAdded(sessionID) {
 
             avatarsCount.value = avatarMixer.avatarList.count;
@@ -208,15 +220,19 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
             const position = avatar.position;
             td = document.createElement("td");
             td.className = "number";
-            td.innerHTML = position.x.toFixed(NUM_DECIMAL_PLACES);
+            td.innerHTML = position.x.toFixed(POS_DECIMAL_PLACES);
             tr.appendChild(td);
             td = document.createElement("td");
             td.className = "number";
-            td.innerHTML = position.y.toFixed(NUM_DECIMAL_PLACES);
+            td.innerHTML = position.y.toFixed(POS_DECIMAL_PLACES);
             tr.appendChild(td);
             td = document.createElement("td");
             td.className = "number";
-            td.innerHTML = position.z.toFixed(NUM_DECIMAL_PLACES);
+            td.innerHTML = position.z.toFixed(POS_DECIMAL_PLACES);
+            tr.appendChild(td);
+            td = document.createElement("td");
+            td.className = "number";
+            td.innerHTML = quatToYaw(avatar.orientation).toFixed(YAW_DECIMAL_PLACES);
             tr.appendChild(td);
             avatarListBody.appendChild(tr);
 
@@ -248,9 +264,10 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
             avatarMixer.update();
             for (const value of avatars.values()) {
                 const position = value.avatar.position;
-                value.tr.childNodes[X_INDEX].innerHTML = position.x.toFixed(NUM_DECIMAL_PLACES);
-                value.tr.childNodes[Y_INDEX].innerHTML = position.y.toFixed(NUM_DECIMAL_PLACES);
-                value.tr.childNodes[Z_INDEX].innerHTML = position.z.toFixed(NUM_DECIMAL_PLACES);
+                value.tr.childNodes[X_INDEX].innerHTML = position.x.toFixed(POS_DECIMAL_PLACES);
+                value.tr.childNodes[Y_INDEX].innerHTML = position.y.toFixed(POS_DECIMAL_PLACES);
+                value.tr.childNodes[Z_INDEX].innerHTML = position.z.toFixed(POS_DECIMAL_PLACES);
+                value.tr.childNodes[YAW_INDEX].innerHTML = quatToYaw(value.avatar.orientation).toFixed(YAW_DECIMAL_PLACES);
             }
         };
 
