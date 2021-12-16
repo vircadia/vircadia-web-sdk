@@ -139,3 +139,12 @@ Developer documentation (includes SDK API documentation):
 ```
 npm run devdoc
 ```
+
+
+### Package for release
+
+```
+npm pack
+```
+
+This creates the SDK package for publishing to https://npmjs.com, `vircadia-web-sdk-vvvv.v.v.tgz`.
