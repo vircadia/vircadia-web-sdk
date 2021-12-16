@@ -8,6 +8,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
+AudioWorkletsMock.mock();
+
+
 import AudioInput from "../../../src/domain/audio/AudioInput";
 
 

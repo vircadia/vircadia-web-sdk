@@ -1,4 +1,5 @@
-const path = require("path");  // eslint-disable-line @typescript-eslint/no-var-requires
+const path = require("path");  // eslint-disable-line
+const WorkerUrlPlugin = require("worker-url/plugin");  // eslint-disable-line
 
 module.exports = {
     entry: {
@@ -26,6 +27,8 @@ module.exports = {
     // Enable sourcemaps for debugging webpack's output.
     devtool: "source-map",
 
+    plugins: [ new WorkerUrlPlugin() ],  // eslint-disable-line
+
     module: {
         rules: [
 
@@ -34,6 +37,7 @@ module.exports = {
 
             // '.js' files have sourcemaps re-processed by 'source-map-loader'.
             { test: /\.js$/u, loader: "source-map-loader" }
+
         ]
     }
 };

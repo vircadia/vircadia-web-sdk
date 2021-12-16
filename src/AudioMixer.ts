@@ -56,6 +56,11 @@ import type { AudioPositionGetter } from "./domain/audio-client/AudioClient";
  *  @property {AudioPositionGetter} positionGetter - The function the <code>AudioMixer</code> code should call in order to get
  *      the current position of the user client's audio.
  *      <em>Write-only.</em>
+ *
+ *  @property {string} audioWorkletRelativePath="" - The relative path to the SDK's audio worklet JavaScript files,
+ *      <code>vircadia-audio-input.js</code> and <code>vircadia-audio-output.js</code>.
+ *      <p>The URLs used to load these files are reported in the log. Depending on where these files are deployed, their URLs
+ *      may need to be adjusted. If used, must start with a <code>"."</code> and end with a <code>"/"</code>.</p>
  */
 class AudioMixer extends AssignmentClient {
     // C++  Application.cpp
@@ -95,6 +100,8 @@ class AudioMixer extends AssignmentClient {
 
     #_audioClient;
     #_audioOutput;
+
+    #_audioWorkletRelativePath = "";
 
 
     constructor(contextID: number) {
@@ -153,6 +160,21 @@ class AudioMixer extends AssignmentClient {
             return;
         }
         this.#_audioClient.setPositionGetter(positionGetter);
+    }
+
+    get audioWorkletRelativePath(): string {
+        return this.#_audioWorkletRelativePath;
+    }
+
+    set audioWorkletRelativePath(relativePath: string) {
+        if (typeof relativePath !== "string"
+            || relativePath !== "" && (!relativePath.startsWith(".") || !relativePath.endsWith("/"))) {
+            console.error("Tried to set an invalid AudioMixer.audioWorkletPath value!");
+            return;
+        }
+        this.#_audioWorkletRelativePath = relativePath;
+        this.#_audioClient.audioWorkletRelativePath = relativePath;
+        this.#_audioOutput.audioWorkletRelativePath = relativePath;
     }
 
 

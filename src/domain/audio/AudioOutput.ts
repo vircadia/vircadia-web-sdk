@@ -8,12 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import assert from "../shared/assert";
+import AudioWorklets from "./AudioWorklets";
 import AudioConstants from "../audio/AudioConstants";
-
-// eslint-disable-next-line
-// @ts-ignore
-import audioOutputProcessorURL from "worklet-loader!../worklets/AudioOutputProcessor";
+import assert from "../shared/assert";
 
 
 /*@devdoc
@@ -30,6 +27,11 @@ import audioOutputProcessorURL from "worklet-loader!../worklets/AudioOutputProce
  *      <p>This should be accessed after the user has interacted with the web page in some manner, otherwise a warning will be
  *      generated in the console log because Web Audio requires user input on the page in order for audio to play. See:
  *      {@link https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide|Autoplay guide for media and Web Audio APIs}.
+ *  @property {string} audioWorkletRelativePath="" - The relative path to the SDK's audio worklet JavaScript files,
+ *      <code>vircadia-audio-input.js</code> and <code>vircadia-audio-output.js</code>.
+ *      <p>The URLs used to load these files are reported in the log. Depending on where these files are deployed, their URLs
+ *      may need to be adjusted.  If used, must start with a <code>"."</code> and end with a <code>"/"</code>.</p>
+ *      <p><em>Write-only.</em></p>
  */
 class AudioOutput {
     //  C++ N/A - This is a Web SDK-specific class.
@@ -52,6 +54,8 @@ class AudioOutput {
     #_outputArrayLength = this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE;
     #_outputOffset = 0;  // The next write position.
 
+    #_audioWorkletRelativePath = "";
+
 
     get audioOutput(): MediaStream {
         // C++  N/A
@@ -60,6 +64,10 @@ class AudioOutput {
         }
         assert(this.#_streamDestination !== null);
         return this.#_streamDestination.stream;
+    }
+
+    set audioWorkletRelativePath(relativePath: string) {
+        this.#_audioWorkletRelativePath = relativePath;
     }
 
 
@@ -162,7 +170,7 @@ class AudioOutput {
             console.error("Cannot set up audio output stream. App may not be being served via HTTPS or from localhost.");
             return;
         }
-        await this.#_audioContext.audioWorklet.addModule(audioOutputProcessorURL);
+        await AudioWorklets.loadOutputProcessor(this.#_audioWorkletRelativePath, this.#_audioContext);
         this.#_audioWorkletNode = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-output-processor", {
             // FIXME: Chrome/Edge requires number of inputs > 0 in order for the worklet to generate output (Sep 2021).
             numberOfInputs: 1,

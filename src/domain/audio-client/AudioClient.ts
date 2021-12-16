@@ -36,6 +36,11 @@ type AudioPositionGetter = () => vec3;
  *  @class AudioClient
  *  @property {string} contextItemType="AudioClient" - The type name for use with the {@link ContextManager}.
  *      <p><em>Static. Read-only.</em></p>
+ *  @property {string} audioWorkletRelativePath="" - The relative path to the SDK's audio worklet JavaScript files,
+ *      <code>vircadia-audio-input.js</code> and <code>vircadia-audio-output.js</code>.
+ *      <p>The URLs used to load these files are reported in the log. Depending on where these files are deployed, their URLs
+ *      may need to be adjusted.  If used, must start with a <code>"."</code> and end with a <code>"/"</code>.</p>
+ *      <p><em>Write-only.</em></p>
  *
  *  @param {number} contextID - The {@link ContextManager} context ID.
  */
@@ -115,6 +120,11 @@ class AudioClient {
             PacketReceiver.makeSourcedListenerReference(this.#processStreamStatsPacket));
         this.#_packetReceiver.registerListener(PacketType.AudioEnvironment,
             PacketReceiver.makeUnsourcedListenerReference(this.#handleAudioEnvironmentDataPacket));
+    }
+
+
+    set audioWorkletRelativePath(relativePath: string) {
+        this.#_audioInput.audioWorkletRelativePath = relativePath;
     }
 
 

@@ -8,13 +8,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AudioWorklets from "./AudioWorklets";
 import AudioConstants from "../audio/AudioConstants";
 import assert from "../shared/assert";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
-
-// eslint-disable-next-line
-// @ts-ignore
-import audioInputProcessorURL from "worklet-loader!../worklets/AudioInputProcessor";
 
 
 /*@devdoc
@@ -27,6 +24,11 @@ import audioInputProcessorURL from "worklet-loader!../worklets/AudioInputProcess
  *      <em>Write-only.</em>
  *      <p>This must be set to a non-null value only when the audio input isn't running (hasn't been started or has been
  *      stopped). Setting to <code>null</code> stops the audio input if it is running.</p>
+ *  @property {string} audioWorkletRelativePath="" - The relative path to the SDK's audio worklet JavaScript files,
+ *      <code>vircadia-audio-input.js</code> and <code>vircadia-audio-output.js</code>.
+ *      <p>The URLs used to load these files are reported in the log. Depending on where these files are deployed, their URLs
+ *      may need to be adjusted. If used, must start with a <code>"."</code> and end with a <code>"/"</code>.</p>
+ *      <p><em>Write-only.</em></p>
  */
 class AudioInput {
     // C++  QAudioInput, QIODevice
@@ -46,6 +48,8 @@ class AudioInput {
 
     #_readyRead = new SignalEmitter();
 
+    #_audioWorkletRelativePath = "";
+
 
     set audioInput(audioInput: MediaStream | null) {
         // C++  N/A
@@ -59,6 +63,10 @@ class AudioInput {
         }
 
         this.#_audioInput = audioInput;
+    }
+
+    set audioWorkletRelativePath(relativePath: string) {
+        this.#_audioWorkletRelativePath = relativePath;
     }
 
 
@@ -286,7 +294,7 @@ class AudioInput {
             console.error(this.#_errorString);
             return false;
         }
-        await this.#_audioContext.audioWorklet.addModule(audioInputProcessorURL);
+        await AudioWorklets.loadInputProcessor(this.#_audioWorkletRelativePath, this.#_audioContext);
         this.#_audioInputProcessor = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-input-processor", {
             numberOfInputs: 1,
             numberOfOutputs: 0,
