@@ -141,40 +141,45 @@ const enum PacketTypeValue {
  *  @property {PacketType} StunResponse - <code>1</code>
  *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to the user client in response to a
  *      DomainConnectRequest or DomainListRequest packet, if the client is authorized to connect to the domain.<br />
- *      {@link PacketScribe.DomainListDetails}.
+ *      {@link PacketScribe.DomainListDetails}
  *  @property {PacketType} Ping - <code>3</code> - Assignment clients periodically send this to the user client to check that it
- *      is still connected.
- *      {@link PacketScribe.PingDetails}.
- *  @property {PacketType} PingReply - <code>4</code> - Sent in response to a Ping packet.
- *      {@link PacketScribe.PingReplyDetails}.
+ *      is still connected.<br />
+ *      {@link PacketScribe.PingDetails}
+ *  @property {PacketType} PingReply - <code>4</code> - Sent in response to a Ping packet.<br />
+ *      {@link PacketScribe.PingReplyDetails}
  *  @property {PacketType} KillAvatar - <code>5</code> - The avatar mixer sends this to the user client when another user client
- *      disconnects from the domain.
+ *      disconnects from the domain.<br />
+ *      {@link PacketScribe.KillAvatarDetails}
  *  @property {PacketType} AvatarData - <code>6</code> - The user client sends this to the avatar mixer with details of the user
- *      client's avatar.
+ *      client's avatar.<br />
+ *      {@link PacketScribe.AvatarDataDetails}
  *  @property {PacketType} InjectAudio - <code>7</code>
  *  @property {PacketType} MixedAudio - <code>8</code> - The audio mixer repeatedly sends this to the user client when there is
- *      audio to play at the user client's audio position.
- *      {@link PacketScribe.MixedAudioDetails}.
+ *      audio to play at the user client's audio position.<br />
+ *      {@link PacketScribe.MixedAudioDetails}
  *  @property {PacketType} MicrophoneAudioNoEcho - <code>9</code> - The user client sends this to the audio mixer with user
- *      audio to play at the user client's audio position. The audio mixer should not echo the audio back to the user client.
+ *      audio to play at the user client's audio position. The audio mixer should not echo the audio back to the user
+ *      client.<br />
+ *      {@link PacketScribe.MicrophoneAudioNoEchoDetails}
  *  @property {PacketType} MicrophoneAudioWithEcho - <code>10</code> - The user client sends this to the audio mixer with user
  *      audio to play at the user client's audio position. The audio mixer should echo the audio back to the user client.
  *  @property {PacketType} BulkAvatarData - <code>11</code> - The avatar mixer sends this to the user client to keep it up to
- *      date with the details of avatars in the domain, including the user client's avatar.
+ *      date with the details of avatars in the domain, including the user client's avatar.<br />
+ *      {@link PacketScribe.BulkAvatarDataDetails}
  *  @property {PacketType} SilentAudioFrame - <code>12</code> - The user client repeatedly sends this to the audio mixer when
  *      there isn't any audio (microphone) input from the user. The user client's audio position is included. The audio mixer
- *      repeatedly sends this to the user client when there isn't any audio to play at the user client's audio position.
+ *      repeatedly sends this to the user client when there isn't any audio to play at the user client's audio position.<br />
  *      {@link PacketScribe.SilentAudioFrameDetails}.
  *  @property {PacketType} DomainListRequest - <code>13</code> - The user client periodically sends this to the Domain Server
  *      to maintain connection to the domain. The Domain Server responds with a DomainList or DomainConnectionDenied
  *      packet.<br />
- *      {@link PacketScribe.DomainListRequestDetails}.
+ *      {@link PacketScribe.DomainListRequestDetails}
  *  @property {PacketType} RequestAssignment - <code>14</code>
  *  @property {PacketType} CreateAssignment - <code>15</code>
  *  @property {PacketType} DomainConnectionDenied - <code>16</code> - The Domain Server sends this to the user client in
  *      response to a DomainConnectRequest or DomainListRequest packet, if the client is not authorized to connect to the
  *      domain.<br />
- *      {@link PacketScribe.DomainConnectionDeniedDetails}.
+ *      {@link PacketScribe.DomainConnectionDeniedDetails}
  *  @property {PacketType} MuteEnvironment - <code>17</code>
  *  @property {PacketType} AudioStreamStats - <code>18</code>
  *  @property {PacketType} DomainServerPathQuery - <code>19</code>
@@ -191,12 +196,13 @@ const enum PacketTypeValue {
  *  @property {PacketType} NoisyMute - <code>28</code>
  *  @property {PacketType} AvatarIdentity - <code>29</code> - The user client sends this to the Avatar Mixer to update it with
  *      current user avatar identity information. The Avatar Mixer sends this to the user client to update it with identify
- *      information for avatars in the domain.
- *      {@link PacketScribe.AvatarIdentityDetails}.
+ *      information for avatars in the domain.<br />
+ *      <em>Reliable. Ordered.</em><br />
+ *      {@link PacketScribe.AvatarIdentityDetails}
  *  @property {PacketType} NodeIgnoreRequest - <code>30</code>
  *  @property {PacketType} DomainConnectRequest - <code>31</code> - The user client sends this to the Domain Server to initiate
  *      connection to the domain. The Domain Server responds with a DomainList or DomainConnectionDenied packet.<br />
- *      {@link PacketScribe.DomainConnectRequestDetails}.
+ *      {@link PacketScribe.DomainConnectRequestDetails}
  *  @property {PacketType} DomainServerRequireDTLS - <code>32</code>
  *  @property {PacketType} NodeJsonStats - <code>33</code>
  *  @property {PacketType} OctreeDataNack - <code>34</code>
@@ -225,30 +231,31 @@ const enum PacketTypeValue {
  *  @property {PacketType} DomainServerRemovedNode - <code>56</code> - The domain server broadcasts this to user clients when an
  *      assignment client has been removed. It is sent only to clients that have registered interest in the node type
  *      removed.<br />
- *      <em>Reliable.</em>
- *      {@link PacketScribe.DomainServerRemovedNodeDetails}.
+ *      <em>Reliable.</em><br />
+ *      {@link PacketScribe.DomainServerRemovedNodeDetails}
  *  @property {PacketType} MessagesData - <code>57</code> - The user client sends and receives this packet to and from the
  *      message mixer.<br />
- *      <em>Reliable. Ordered.</em>
- *      {@link PacketScribe.MessagesDataDetails}.
+ *      <em>Reliable. Ordered.</em><br />
+ *      {@link PacketScribe.MessagesDataDetails}
  *  @property {PacketType} MessagesSubscribe - <code>58</code> - The user client sends this to the message mixer to subscribe to
  *      a message channel.<br />
- *      <em>Reliable. Ordered.</em>
+ *      <em>Reliable. Ordered.</em><br />
  *      {@link PacketScribe.MessagesSubscribeDetails}.
  *  @property {PacketType} MessagesUnsubscribe - <code>59</code> - The user client sends this to the message mixer to
  *      unsubscribe from a message channel.<br />
- *      <em>Reliable. Ordered.</em>
- *      {@link PacketScribe.MessagesUnsubscribeDetails}.
+ *      <em>Reliable. Ordered.</em><br />
+ *      {@link PacketScribe.MessagesUnsubscribeDetails}
  *  @property {PacketType} ICEServerHeartbeatDenied - <code>60</code>
  *  @property {PacketType} AssetMappingOperation - <code>61</code>
  *  @property {PacketType} AssetMappingOperationReply - <code>62</code>
  *  @property {PacketType} ICEServerHeartbeatACK - <code>63</code>
  *  @property {PacketType} NegotiateAudioFormat - <code>64</code> - The user client sends this to the audio mixer to initiate
- *      negotiation of the audio codec to use.
- *      {@link PacketScribe.NegotiateAudioFormatDetails}.
+ *      negotiation of the audio codec to use.<br />
+ *      {@link PacketScribe.NegotiateAudioFormatDetails}
  *  @property {PacketType} SelectedAudioFormat - <code>65</code> - The audio mixer sends this to the user client in response to
- *      the client sending a NegotiateAudioFormat packet. It specifies the audio codec that the audio mixer has selected to use.
- *      {@link PacketScribe.SelectedAudioFormatDetails}.
+ *      the client sending a NegotiateAudioFormat packet. It specifies the audio codec that the audio mixer has selected to
+ *      use.<br />
+ *      {@link PacketScribe.SelectedAudioFormatDetails}
  *  @property {PacketType} MoreEntityShapes - <code>66</code>
  *  @property {PacketType} NodeKickRequest - <code>67</code>
  *  @property {PacketType} NodeMuteRequest - <code>68</code>
@@ -284,16 +291,18 @@ const enum PacketTypeValue {
  *  @property {PacketType} EntityClone - <code>98</code>
  *  @property {PacketType} EntityQueryInitialResultsComplete - <code>99</code>
  *  @property {PacketType} BulkAvatarTraits - <code>100</code> - The avatar mixer sends this to the user client to keep it up to
- *      date with the traits of other avatars in the domain.
- *      {@link PacketScribe.BulkAvatarTraitsDetails}.
+ *      date with the traits of other avatars in the domain.<br />
+ *      <em>Reliable. Ordered.</em><br />
+ *      {@link PacketScribe.BulkAvatarTraitsDetails}
  *  @property {PacketType} AudioSoloRequest - <code>101</code>
  *  @property {PacketType} BulkAvatarTraitsAck - <code>102</code> - The user client sends this to the avatar mixer to
- *      acknowledge the receipt of a <code>BulkAvatarTraits</code> message.
- *      {@link PacketScribe.BulkAvatarTraitsAckDetails}.
+ *      acknowledge the receipt of a BulkAvatarTraits message.<br />
+ *      {@link PacketScribe.BulkAvatarTraitsAckDetails}
  *  @property {PacketType} StopInjector - <code>103</code>
  *  @property {PacketType} AvatarZonePresence - <code>104</code>
  *  @property {PacketType} WebRTCSignaling - <code>104</code> - Used between the domain server and assignment clients to
- *      exchange user client WebRTC signaling messages relayed to assignment clients via the domain server.
+ *      exchange user client WebRTC signaling messages relayed to assignment clients via the domain server.<br />
+ *      <em>Reliable. Ordered.</em>
  */
 const PacketType = new class {
     // C++: PacketType
