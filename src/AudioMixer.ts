@@ -42,7 +42,7 @@ import type { AudioPositionGetter } from "./domain/audio-client/AudioClient";
  *      audio mixer changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  *
- *  @property {MediaStream} audioOuput - The audio output stream to be played in the user client.
+ *  @property {MediaStream} audioOutput - The audio output stream to be played in the user client.
  *      <em>Read-only.</em>
  *      <p>This should be accessed after the user has interacted with the web page in some manner, otherwise a warning will be
  *      generated in the console log because Web Audio requires user input on the page in order for audio to play. See:
@@ -115,7 +115,7 @@ class AudioMixer extends AssignmentClient {
     }
 
 
-    get audioOuput(): MediaStream {
+    get audioOutput(): MediaStream {
         return this.#_audioOutput.audioOutput;
     }
 
