@@ -114,8 +114,8 @@ class AvatarMixer extends AssignmentClient {
 
 
     /*@sdkdoc
-     *  Game loop update method that should be called multiple times per second to keep the avatar mixer up to date with user
-     *  client avatar state.
+     *  Game loop update method that needs to be called multiple times per second to keep the avatar mixer up to date with user
+     *  client avatar state, and so have the user client avatar be "present" in the domain.
      */
     update(): void {
         this.#_avatarManager.updateMyAvatar();
