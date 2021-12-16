@@ -1,3 +1,4 @@
+
 # Vircadia Web SDK
 
 The **Vircadia Web SDK** (codename Ananke) is a JavaScript SDK for developing web-based clients for virtual worlds powered by
@@ -30,10 +31,29 @@ to. https://jestjs.io/.
 
 
 ## Project setup
+
+### Get the source
+
+```
+git clone https://github.com/vircadia/vircadia-web-sdk.git
+```
+
+If you're working on Vircadia protocol code (that in the `\src\domain` directory) it is recommended that you clone the SDK as
+a subdirectory of the main Vircadia repo's source so that both sets of code are accessed when you open the main Vircadia repo's
+source in your IDE. For example, if your clone of the main Vircadia repo's source is in `C:\Workspaces\vircadia` then clone
+the SDK repo's source into `C:\Workspaces\vircadia-web-sdk`. Thus with the main Vircadia's repo loaded in your IDE, when
+you search for code then both C++ and TypeScript results are returned, helping you compare the two codebases and keep them in
+sync.
+
+
+### Install NPM packages
+
 ```
 npm install
 ```
 Loads all the supporting NPM packages as defined in `package.json` into the `node_modules` directory.
+
+## Development and testing
 
 ### Compile and minify for development
 ```
