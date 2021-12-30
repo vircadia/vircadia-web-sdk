@@ -23,7 +23,6 @@ describe("AvatarData - unit tests", () => {
 
     test("Can write an AvatarData packet - global position only", () => {
         // eslint-disable-next-line max-len
-
         const EXPECTED_PACKET = "000000000636000000000000000000000000000000000000d4070100000060400000e040000080bf";
         const packet = AvatarData.write({
             sequenceNumber: 2004,
@@ -33,6 +32,30 @@ describe("AvatarData - unit tests", () => {
             distanceAdjust: false,
             viewerPosition: { x: 0, y: 0, z: 0 },
             globalPosition: { x: 3.5, y: 7.0, z: -1.0 }
+        });
+        expect(packet instanceof NLPacket).toBe(true);
+        expect(packet.getType()).toBe(PacketType.AvatarData);
+        const packetSize = packet.getDataSize();
+        expect(packetSize).toBe(packet.getMessageData().dataPosition);
+        expect(packetSize).toBeGreaterThan(0);
+        expect(packetSize).toBeLessThan(UDT.MAX_PACKET_SIZE);
+
+        expect(packetSize).toBe(EXPECTED_PACKET.length / 2);
+        expect(buffer2hex(packet.getMessageData().buffer.slice(0, packetSize))).toBe(EXPECTED_PACKET);
+    });
+
+    test("Can write an AvatarData packet - global position and orientation", () => {
+        // eslint-disable-next-line max-len
+        const EXPECTED_PACKET = "000000000636000000000000000000000000000000000000d4070500000020c10000c8420000a041bfff3fff6d40";
+        const packet = AvatarData.write({
+            sequenceNumber: 2004,
+            dataDetail: 3,
+            lastSentTime: Date.now(),
+            dropFaceTracking: false,
+            distanceAdjust: false,
+            viewerPosition: { x: 0, y: 0, z: 0 },
+            globalPosition: { x: -10, y: 100, z: 20 },
+            localOrientation: { x: 0, y: 0.866025, z: 0, w: -0.5 }
         });
         expect(packet instanceof NLPacket).toBe(true);
         expect(packet.getType()).toBe(PacketType.AvatarData);

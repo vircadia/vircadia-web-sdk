@@ -75,4 +75,36 @@ describe("SpatiallyNestable - unit tests", () => {
         }, 20);
     });
 
+    test("Can get and set local position", (done) => {
+        const initialUUID = new Uuid(1234n);
+        const spatiallyNestable = new SpatiallyNestable(NestableType.Avatar, initialUUID);
+        expect(spatiallyNestable.getWorldPosition()).toEqual({ x: 0, y: 0, z: 0 });
+        const before = Date.now();
+        expect(spatiallyNestable.translationChangedSince(before)).toBe(false);
+        setTimeout(() => {
+            spatiallyNestable.setLocalPosition({ x: 1, y: 2, z: 3 });
+            expect(spatiallyNestable.getWorldPosition()).toEqual({ x: 1, y: 2, z: 3 });
+            expect(spatiallyNestable.translationChangedSince(before)).toBe(true);
+            expect(spatiallyNestable.translationChangedSince(Date.now())).toBe(false);
+            done();
+        }, 20);
+    });
+
+    test("Can get and set local orientation", (done) => {
+        const initialUUID = new Uuid(1234n);
+        const spatiallyNestable = new SpatiallyNestable(NestableType.Avatar, initialUUID);
+        expect(spatiallyNestable.getWorldOrientation()).toEqual({ x: 0, y: 0, z: 0, w: 1 });
+        expect(spatiallyNestable.getLocalOrientation()).toEqual({ x: 0, y: 0, z: 0, w: 1 });
+        const before = Date.now();
+        expect(spatiallyNestable.rotationChangedSince(before)).toBe(false);
+        setTimeout(() => {
+            spatiallyNestable.setLocalOrientation({ x: 0, y: 0.5, z: 0, w: 0.5 });
+            expect(spatiallyNestable.getWorldOrientation()).toEqual({ x: 0, y: 0.5, z: 0, w: 0.5 });
+            expect(spatiallyNestable.getLocalOrientation()).toEqual({ x: 0, y: 0.5, z: 0, w: 0.5 });
+            expect(spatiallyNestable.rotationChangedSince(before)).toBe(true);
+            expect(spatiallyNestable.rotationChangedSince(Date.now())).toBe(false);
+            done();
+        }, 20);
+    });
+
 });

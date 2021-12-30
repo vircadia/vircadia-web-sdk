@@ -12,14 +12,15 @@ import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
 import NodeType from "../networking/NodeType";
 import { AvatarIdentityDetails } from "../networking/packets/AvatarIdentity";
+import { BulkAvatarDataDetails } from "../networking/packets/BulkAvatarData";
 import PacketScribe from "../networking/packets/PacketScribe";
 import SequenceNumber from "../networking/udt/SequenceNumber";
 import ContextManager from "../shared/ContextManager";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import SpatiallyNestable, { NestableType } from "../shared/SpatiallyNestable";
-import { quat } from "../shared/Quat";
+import Quat, { quat } from "../shared/Quat";
 import Uuid from "../shared/Uuid";
-import { vec3 } from "../shared/Vec3";
+import Vec3, { vec3 } from "../shared/Vec3";
 
 
 /*@devdoc
@@ -75,12 +76,15 @@ enum AvatarDataDetail {
  *      on the display name and is unique among all avatars present in the domain. <em>Read-only.</em>
  *  @property {Signal} sessionDisplayNameChanged - Triggered when the avatar's session display name changes.
  *  @property {vec3} position - The position of the avatar.
+ *  @property {quat} orientation - The orientation of the avatar.
  */
 class AvatarData extends SpatiallyNestable {
     // C++  class AvatarData : public QObject, public SpatiallyNestable
 
     protected _sessionDisplayName: string | null = null;
     protected _sessionDisplayNameChanged = new SignalEmitter();
+
+    protected _globalPosition = Vec3.ZERO;
 
 
     // Context
@@ -138,6 +142,14 @@ class AvatarData extends SpatiallyNestable {
 
     set position(position: vec3) {
         this.setWorldPosition(position);
+    }
+
+    get orientation(): quat {
+        return this.getWorldOrientation();
+    }
+
+    set orientation(orientation: quat) {
+        this.setWorldOrientation(orientation);
     }
 
 
@@ -215,7 +227,8 @@ class AvatarData extends SpatiallyNestable {
 
 
     /*@devdoc
-     *  Sets a flag that avatar identity data has changed since the last time an AvatarIdentity packet was sent.
+     *  Sets a flag that avatar identity data has changed since the last time an {@link PacketType(1)|AvatarIdentity} packet was
+     *  sent.
      */
     markIdentityDataChanged(): void {
         // C++  void markIdentityDataChanged()
@@ -269,8 +282,9 @@ class AvatarData extends SpatiallyNestable {
     }
 
     /*@devdoc
-     *  Processes the information that has been read from an AvatarIdentity packet.
-     *  @param {AvatarIdentityDetails} info - The information that has been ready from the AvatarIDentity packet.
+     *  Processes the information that has been read from an {@link PacketType(1)|AvatarIdentity} packet.
+     *  @param {PacketScribe.AvatarIdentityDetails} info - The information that has been read from the
+     *      {@link PacketType(1)|AvatarIdentity} packet.
      *  @param {Object<boolean>} identifyChanged - Return value that is set to <code>true</code> if identity data has changed,
      *      <code>false</code> if it hasn't.
      *  @param {Object<boolean>} displayNameChanged - Return value that is set to <code>true</code> if the avatar's display name
@@ -327,7 +341,7 @@ class AvatarData extends SpatiallyNestable {
     }
 
     /*@devdoc
-     *  Resets the time that the last AvatarData packet was sent to <code>0</code>.
+     *  Resets the time that the last {@link PacketType(1)|AvatarData} packet was sent to <code>0</code>.
      */
     // eslint-disable-next-line class-methods-use-this
     resetLastSent(): void {
@@ -344,6 +358,10 @@ class AvatarData extends SpatiallyNestable {
         // C++  int sendAvatarDataPacket(bool sendAll)
         //      QByteArray MyAvatar::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
         //      QByteArray AvatarData::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
+        //      QByteArray AvatarData::toByteArray(AvatarDataDetail dataDetail, quint64 lastSentTime,
+        //          const QVector<JointData>& lastSentJointData, AvatarDataPacket::SendStatus & sendStatus,
+        //          bool dropFaceTracking, bool distanceAdjust, glm::vec3 viewerPosition, QVector<JointData>* sentJointDataOut,
+        //          int maxDataSize, AvatarDataRate * outboundDataRateOut
 
         // About 2% of the time we send a full update (in particular, we transmit all the joint data) even if nothing has
         // changed. this is to guard against a joint moving once, the packet getting lost, and the joint never moving again.
@@ -353,20 +371,20 @@ class AvatarData extends SpatiallyNestable {
         const dataDetail = cullSmallData ? AvatarDataDetail.SendAllData : AvatarDataDetail.CullSmallData;
 
         // C++  QByteArray MyAvatar::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
-        //
-        // WEBRTC TODO: Address further C++ code - avatar transits.
+        this._globalPosition = this.getWorldPosition();
         //
         // WEBRTC TODO: Address further C++ code - avatar bounding box.
         //
         // WEBRTC TODO: Address further C++ code - camera mode.
         //
 
-        // C++  QByteArray AvatarData::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
+        // C++  QByteArray AvatarData::toByteArrayStateful(...)
         const lastSentTime = this.#_lastToByteArray;
         this.#_lastToByteArray = Date.now();
         // SendStatus - Not used in user client.
 
-        // C++  From AvatarData::toByteArray()
+
+        // C++  QByteArray AvatarData::toByteArray(...)
         this.#lazyInitHeadData();
 
 
@@ -384,7 +402,8 @@ class AvatarData extends SpatiallyNestable {
             // maxDataSize: 0, - Not used in user client.
             // WEBRTC TODO: Address further C+ code - AvatarDataRate.
 
-            globalPosition: this.getPositionOutbound()
+            globalPosition: this._globalPosition,
+            localOrientation: this.rotationChangedSince(lastSentTime) ? this.getOrientationOutbound() : undefined
         };
 
 
@@ -425,14 +444,45 @@ class AvatarData extends SpatiallyNestable {
         return avatarPacket.getWireSize();
     }
 
-
     /*@devdoc
-     *  Gets the avatar's world position.
-     *  @returns {vec3} The avatar's world position.
+     *  Processes the data for an avatar that has been read from a {@link PacketType(1)|BulkAvatarData} packet.
+     *  @param {PacketScribe.BulkAvatarDataDetails} avatarData - The data that has been read from the
+     *      {@link PacketType(1)|BulkAvatarData} packet.
      */
-    getPositionOutbound(): vec3 {
-        // C++  N/A
-        return this.getWorldPosition();
+    parseDataFromBuffer(avatarData: BulkAvatarDataDetails): void {
+        // C++  int parseDataFromBuffer(const QByteArray& buffer)
+
+        // The data have already been read by PacketScribe, we now just need to process them.
+
+        if (avatarData.globalPosition) {
+            // AvatarReplicas per the C++ is not implemented because that is for load testing.
+
+            // WEBRTC TODO: Address further C++ code - avatar transits.
+
+            // WEBRTC TODO: Address further C++ code - client vs non-client avatar.
+
+            this._globalPosition = avatarData.globalPosition;
+            if (!this.hasParent()) {
+                this.setLocalPosition(avatarData.globalPosition);
+            }
+        }
+
+        // WEBRTC TODO: Address further C++ code - further avatar properties.
+
+        if (avatarData.localOrientation) {
+            if (!Quat.equal(avatarData.localOrientation, this.getLocalOrientation())) {
+
+                // WEBRTC TODO: Address further C++ code - Joint data.
+
+                this.setLocalOrientation(avatarData.localOrientation);
+            }
+
+            // WEBRTC TODO: Address further C++ code - avatar orientation update rate.
+
+        }
+
+        // WEBRTC TODO: Address further C++ code - further avatar properties.
+
     }
 
     /*@devdoc
@@ -450,6 +500,11 @@ class AvatarData extends SpatiallyNestable {
     protected maybeUpdateSessionDisplayNameFromTransport(sessionDisplayName: string | null): void {  // eslint-disable-line
         // C++  void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName)
         // No-op.
+    }
+
+    protected hasParent(): boolean {
+        // C++  bool hasParent()
+        return this.getParentID().value() !== Uuid.NULL;
     }
 
 

@@ -10,6 +10,7 @@
 
 import AvatarData from "../avatars/AvatarData";
 import assert from "../shared/assert";
+import Quat, { quat } from "../shared/Quat";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Vec3, { vec3 } from "../shared/Vec3";
 
@@ -35,6 +36,9 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *      name changes.
  *      <em>Read-only.</em>
  *  @property {vec3} position - The position of the avatar in the domain. {@link Vec3|Vec3.ZERO} if the avatar doesn't exist.
+ *      <em>Read-only.</em>
+ *  @property {quat} orientation - The orientation of the avatar in the domain. {@link Quat|Quat.IDENTITY} if the avatar doesn't
+ *      exist.
  *      <em>Read-only.</em>
  */
 // Don't document the constructor because it shouldn't be used in the SDK.
@@ -114,10 +118,21 @@ class ScriptAvatar {
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
-                return avatar.position;
+                return avatar.getWorldPosition();
             }
         }
         return Vec3.ZERO;
+    }
+
+    get orientation(): quat {
+        // C++  glm::quat ScriptAvatarData::getOrientation()
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                return avatar.getWorldOrientation();
+            }
+        }
+        return Quat.IDENTITY;
     }
 
 }

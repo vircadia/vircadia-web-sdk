@@ -12,6 +12,8 @@ import Uuid from "../../shared/Uuid";
 import UDT from "../udt/UDT";
 import AvatarDataPacket from "../../avatars/AvatarDataPacket";
 import assert from "../../shared/assert";
+import GLMHelpers from "../../shared/GLMHelpers";
+import { quat } from "../../shared/Quat";
 import { vec3 } from "../../shared/Vec3";
 
 import "../../shared/DataViewExtensions";
@@ -19,7 +21,8 @@ import "../../shared/DataViewExtensions";
 
 type BulkAvatarDataDetails = {
     sessionUUID: Uuid,
-    globalPosition: vec3 | undefined
+    globalPosition: vec3 | undefined,
+    localOrientation: quat | undefined
 };
 
 
@@ -32,7 +35,10 @@ const BulkAvatarData = new class {
      *  <code>undefined</code>.
      *  @typedef {object} PacketScribe.BulkAvatarDataDetails
      *  @property {Uuid} sessionUUID - The avatar's session UUID.
-     *  @property {vec3} globalPosition - The avatar's position in the domain.
+     *  @property {vec3|undefined} globalPosition - The avatar's position in the domain.
+     *      <code>undefined</code> if not included in the packet.
+     *  @property {quat|undefined} localOrientation - The avatar's orientation.
+     *      <code>undefined</code> if not included in the packet.
      */
 
 
@@ -93,8 +99,10 @@ const BulkAvatarData = new class {
                 dataPosition += 24;
             }
 
+            let localOrientation: quat | undefined = undefined;
             if (hasAvatarOrientation) {
-                // WEBRTC TODO: Address further code - avatar orientation.
+                localOrientation = { x: 0, y: 0, z: 0, w: 0 };
+                GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition, localOrientation);
                 dataPosition += 6;
             }
 
@@ -200,7 +208,8 @@ const BulkAvatarData = new class {
 
             avatarDataDetailsList.push({
                 sessionUUID,
-                globalPosition
+                globalPosition,
+                localOrientation
             });
 
         }
