@@ -172,7 +172,7 @@ class PacketReceiver {
             message.appendPacket(nlPacket);
 
             if (message.getMessageData().isComplete) {
-                this.#_pendingMessages.delete(key);  // eslint-disable-line @typescript-eslint/dot-notation
+                this.#_pendingMessages.delete(key);
                 this.#handleVerifiedMessage(message, false);
             }
         }
@@ -190,7 +190,7 @@ class PacketReceiver {
         const message = this.#_pendingMessages.get(key);
         if (message !== undefined) {
             message.setFailed();
-            this.#_pendingMessages.delete(key);  // eslint-disable-line @typescript-eslint/dot-notation
+            this.#_pendingMessages.delete(key);
         }
     };
 

@@ -302,7 +302,7 @@ class AvatarHashMap {
         // C++  void removeAvatar(const QUuid& sessionUUID, KillAvatarReason removalReason)
         const removedAvatar = this._avatarHash.get(sessionUUID.value());
         if (removedAvatar) {
-            this._avatarHash.delete(sessionUUID.value());  // eslint-disable-line @typescript-eslint/dot-notation
+            this._avatarHash.delete(sessionUUID.value());
             this.handleRemovedAvatar(removedAvatar, removalReason);
         }
     }

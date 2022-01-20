@@ -798,7 +798,7 @@ class LimitedNodeList {
 
             // WEBRTC TODO: Address further C++ code.
 
-            this.#_nodeHash.delete(matchingNode.getUUID().value());  // eslint-disable-line @typescript-eslint/dot-notation
+            this.#_nodeHash.delete(matchingNode.getUUID().value());
             this.handleNodeKill(matchingNode, newConnectionID);
             return true;
         }
@@ -829,7 +829,7 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.#_nodeHash.delete(node.getUUID().value());  // eslint-disable-line @typescript-eslint/dot-notation
+        this.#_nodeHash.delete(node.getUUID().value());
         this.handleNodeKill(node);
     }
 

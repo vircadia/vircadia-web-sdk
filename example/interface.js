@@ -272,7 +272,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
             avatarsCount.value = avatarMixer.avatarList.count;
             const avatarListItem = avatars.get(sessionID);
             avatarListBody.removeChild(avatarListItem.tr);
-            avatars.delete(sessionID);  // eslint-disable-line @typescript-eslint/dot-notation
+            avatars.delete(sessionID);
         }
         avatarMixer.avatarList.avatarRemoved.connect(onAvatarRemoved);
 

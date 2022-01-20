@@ -161,7 +161,6 @@ class Socket {
     cleanupConnection(sockAddr: SockAddr): void {  // eslint-disable-line
         // C++  void cleanupConnection(SockAddr sockAddr) {
 
-        // eslint-disable-next-line @typescript-eslint/dot-notation
         const connectionErased = this.#_connectionsHash.delete(sockAddr.getPort());
         if (connectionErased && UDT.UDT_CONNECTION_DEBUG) {
             console.log("[networking] Socket.cleanupConnection called for connection to", sockAddr.toString());
@@ -364,7 +363,6 @@ class Socket {
         const connection = this.#_connectionsHash.get(previousAddress.getPort());
         // Don't move values that are unused so far.
         if (connection && connection.hasReceivedHandshake()) {
-            // eslint-disable-next-line @typescript-eslint/dot-notation
             this.#_connectionsHash.delete(previousAddress.getPort());
 
             connection.setDestinationAddress(currentAddress);
@@ -374,7 +372,6 @@ class Socket {
 
             const sequenceNumber = this.#_unreliableSequenceNumbers.get(previousAddress.getPort());
             if (sequenceNumber !== undefined) {
-                // eslint-disable-next-line @typescript-eslint/dot-notation
                 this.#_unreliableSequenceNumbers.delete(previousAddress.getPort());
                 this.#_unreliableSequenceNumbers.set(currentAddress.getPort(), sequenceNumber);
             }
