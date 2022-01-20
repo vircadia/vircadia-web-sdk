@@ -229,7 +229,7 @@ class SendQueue {
         // Remove any ACKed packets from the map of sent packets.
         const seq = new SequenceNumber(this.#_lastACKSequenceNumber);
         while (seq.isLessThanOrEqual(ack)) {
-            this.#_sentPackets.delete(seq.value);  // eslint-disable-line @typescript-eslint/dot-notation
+            this.#_sentPackets.delete(seq.value);
             seq.increment();
         }
 
@@ -530,12 +530,10 @@ class SendQueue {
                     if ((!notified || now - this.#_lastPacketSentAt > estimatedTimeout)
                         && (this.#_packets.isEmpty() || this.#isFlowWindowFull())
                         && this.#_naks.isEmpty()
-                        // eslint-disable-next-line @typescript-eslint/dot-notation
                         && SequenceNumber.new(this.#_lastACKSequenceNumber).isLessThan(this.#_currentSequenceNumber)) {
                         // After a timeout if we still have sent packets that the client hasn't ACKed we add them to the loss
                         // list.
 
-                        // eslint-disable-next-line @typescript-eslint/dot-notation
                         this.#_naks.append(SequenceNumber.new(this.#_lastACKSequenceNumber).increment(),
                             this.#_currentSequenceNumber);
                         this.#_timeout.emit();
@@ -556,7 +554,6 @@ class SendQueue {
 
     #isFlowWindowFull(): boolean {
         // C++ bool isFlowWindowFull()
-        // eslint-disable-next-line @typescript-eslint/dot-notation
         return SequenceNumber.seqlen(SequenceNumber.new(this.#_lastACKSequenceNumber), this.#_currentSequenceNumber)
             > this.#_flowWindowSize;
     }

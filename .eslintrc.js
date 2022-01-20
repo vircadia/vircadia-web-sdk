@@ -62,7 +62,7 @@ module.exports = {
         "default-param-last": "off",
         "@typescript-eslint/default-param-last": ["error"],
         "dot-notation": "off",
-        "@typescript-eslint/dot-notation": ["error", { "allowKeywords": false }],
+        "@typescript-eslint/dot-notation": ["error", { "allowKeywords": true }],
         "func-call-spacing": "off",
         "@typescript-eslint/func-call-spacing": ["error", "never"],
         "indent": "off",
@@ -186,7 +186,7 @@ module.exports = {
         "default-case-last": "error",
         // "default-param-last": "error",  // TypeScript extension overrides.
         "dot-location": ["error", "property"],
-        // "dot-notation": ["error", { "allowKeywords": false }],  // TypeScript extension overrides.
+        // "dot-notation": ["error", { "allowKeywords": true }],  // TypeScript extension overrides.
         "eqeqeq": "error",
         "grouped-accessor-pairs": "error",
         "guard-for-in": "error",

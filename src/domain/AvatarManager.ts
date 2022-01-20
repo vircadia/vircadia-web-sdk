@@ -174,7 +174,7 @@ class AvatarManager extends AvatarHashMap {
 
         for (const [key, value] of this._avatarHash.entries()) {
             if (value !== this.#_myAvatar) {
-                this._avatarHash.delete(key);  // eslint-disable-line @typescript-eslint/dot-notation
+                this._avatarHash.delete(key);
                 this.handleRemovedAvatar(value);
             }
         }

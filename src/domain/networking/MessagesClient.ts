@@ -144,7 +144,7 @@ class MessagesClient {
     unsubscribe(channel: string): void {
         // C++  void unsubscribe(QString channel)
 
-        this.#_subscribedChannels.delete(channel);  // eslint-disable-line @typescript-eslint/dot-notation
+        this.#_subscribedChannels.delete(channel);
 
         const messageMixer = this.#_nodeList.soloNodeOfType(NodeType.MessagesMixer);
         if (messageMixer) {

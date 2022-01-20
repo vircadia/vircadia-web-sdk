@@ -249,7 +249,7 @@ class Connection {
         }
 
         if (processedLastOrOnly) {
-            this.#_pendingReceivedMessages.delete(messageNumber);  // eslint-disable-line @typescript-eslint/dot-notation
+            this.#_pendingReceivedMessages.delete(messageNumber);
         }
     }
 

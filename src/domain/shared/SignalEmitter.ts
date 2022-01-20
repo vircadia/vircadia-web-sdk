@@ -74,7 +74,7 @@ class SignalEmitter {
      */
     disconnect(slot: Slot): void {
         assert(typeof slot === "function");
-        this.#_slots.delete(slot);  // eslint-disable-line @typescript-eslint/dot-notation
+        this.#_slots.delete(slot);
     }
 
     /*@sdkdoc
