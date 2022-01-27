@@ -11,6 +11,7 @@
     },
     "license": "Apache-2.0",
     "main": "dist/Vircadia.js",
+    "types": "dist/src/Vircadia.d.ts",
     "files": [
         "dist"
     ],
