@@ -141,10 +141,18 @@ npm run devdoc
 ```
 
 
-### Package for release
+### Publish
 
+Package for release:
 ```
 npm pack
 ```
 
-This creates the SDK package for publishing to https://npmjs.com, `vircadia-web-sdk-vvvv.v.v.tgz`.
+This creates the SDK package, `vircadia-web-sdk-vvvv.v.v.tgz`.
+
+Publish the package to https://npmjs.com:
+
+```
+npm login
+npm publish --access public
+```
