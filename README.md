@@ -141,7 +141,7 @@ npm run devdoc
 ```
 
 
-### Publish
+### Publish to NPM
 
 Package for release:
 ```
