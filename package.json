@@ -20,24 +20,21 @@
         "build-prod": "npm-run-all -s \"clean-dist\" \"create-version\" \"build-wp-prod\"",
         "build-wp-prod": "webpack --mode production",
         "build-wp-dev": "webpack --mode development",
-
         "watch": "npm-run-all -s \"create-version\" \"watch-wp-dev\"",
         "watch-prod": "npm-run-all -s \"clean-dist\" \"create-version\" \"watch-wp-prod\"",
         "watch-wp-prod": "webpack --watch --mode production",
         "watch-wp-dev": "webpack --watch --mode development",
-
         "create-version": "node build_scripts/createVersion.js",
         "clean-dist": "node build_scripts/cleanDist.js",
         "clean": "tsc --build --clean",
         "lint": "eslint .",
         "lint-path": "eslint",
-
         "test": "jest",
         "test-watch": "jest --watch",
         "test-debug": "jest --detectOpenHandles",
-
         "sdkdoc": "rimraf ./docs/sdk && rimraf ./docs/build && tsc --resolveJsonModule --project tsconfig.jsdoc.json && jsdoc ./jsdoc/sdk-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-sdk.json --destination docs/sdk",
-        "devdoc": "rimraf ./docs/dev && rimraf ./docs/build && tsc --resolveJsonModule --project tsconfig.jsdoc.json && jsdoc ./jsdoc/dev-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-dev.json --destination docs/dev"
+        "devdoc": "rimraf ./docs/dev && rimraf ./docs/build && tsc --resolveJsonModule --project tsconfig.jsdoc.json && jsdoc ./jsdoc/dev-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-dev.json --destination docs/dev",
+        "generate-jsdoc-to-markdown": "node ConvertHtmlTomarkdown.js"
     },
     "devDependencies": {
         "@types/crypto-js": "^4.0.2",
@@ -54,6 +51,7 @@
         "source-map-loader": "^3.0.0",
         "ts-jest": "^27.0.7",
         "ts-loader": "^9.2.6",
+        "turndown": "^7.1.1",
         "typescript": "<4.5.0",
         "webpack": "^5.62.1",
         "webpack-cli": "^4.9.1",

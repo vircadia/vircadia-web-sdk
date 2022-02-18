@@ -140,6 +140,20 @@ Developer documentation (includes SDK API documentation):
 npm run devdoc
 ```
 
+### Generate markdown
+
+SDK API documentation:
+```
+npm run sdkdoc/devdoc
+```
+
+Developer documentation (includes SDK API documentation):
+```
+npm run generate-jsdoc-to-markdown
+```
+
+
+
 
 ### Publish to NPM
 
