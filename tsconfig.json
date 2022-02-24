@@ -35,6 +35,10 @@
         "strictNullChecks": true,
         "strictPropertyInitialization": true
     },
+    "typedocOptions": {
+        "entryPoints": ["src/Vircadia.ts"],
+        "out": "markdown"
+    },
     "include": [
         "./example/**/*",
         "./example/**/.eslintrc.js",

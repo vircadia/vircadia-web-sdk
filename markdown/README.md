@@ -1,3 +1,4 @@
+@vircadia/web-sdk / [Exports](modules.md)
 
 # Vircadia Web SDK
 
@@ -18,7 +19,6 @@ To learn more about using Vircadia and exploring the metaverse, see the [User Do
 
 For scripting API documentation, see the [Vircadia API Reference](https://apidocs.vircadia.dev).
 
-
 ## Prerequisites
 
 **Node.js** version &ge; 10.13 ; LTS version &ge; 14.16 recommended  
@@ -28,7 +28,6 @@ https://nodejs.org/en/download/
 
 Jest is used for unit testing. It is included as an NPM dev dependency, however, you may also install it globally if you want
 to. https://jestjs.io/. 
-
 
 ## Project setup
 
@@ -44,7 +43,6 @@ source in your IDE. For example, if your clone of the main Vircadia repo's sourc
 the SDK repo's source into `C:\Workspaces\vircadia-web-sdk`. Thus with the main Vircadia's repo loaded in your IDE, when
 you search for code then both C++ and TypeScript results are returned, helping you compare the two codebases and keep them in
 sync.
-
 
 ### Install NPM packages
 
@@ -103,7 +101,6 @@ Unit tests can be run without any external dependencies but integration tests re
 `localhost` or other location specified in `./tests/test.config.json`. The location and other values of the config JSON can be
 overridden with environment variables, using the same property names, but prefixed with "VIRCADIA_".
 
-
 All tests:
 ```
 npm run test
@@ -127,7 +124,6 @@ Run tests and report open handles:
 npm run test-debug [<partial-path>]
 ```
 
-
 ### Generate docs
 
 SDK API documentation:
@@ -144,11 +140,13 @@ npm run devdoc
 
 SDK API documentation:
 ```
-npm run markdown-docs
+npm run sdkdoc/devdoc
 ```
 
-
-
+Developer documentation (includes SDK API documentation):
+```
+npm run generate-jsdoc-to-markdown
+```
 
 ### Publish to NPM
 
