@@ -1,6 +1,7 @@
 /dist
 /docs
 /node_modules
+/vircadia-dev-docs
 VERSION.json
 vircadia-web-sdk-*.tgz
 

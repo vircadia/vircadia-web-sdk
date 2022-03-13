@@ -35,7 +35,7 @@
         "sdkdoc": "rimraf ./docs/sdk && rimraf ./docs/build && tsc --resolveJsonModule --project tsconfig.jsdoc.json && jsdoc ./jsdoc/sdk-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-sdk.json --destination docs/sdk",
         "devdoc": "rimraf ./docs/dev && rimraf ./docs/build && tsc --resolveJsonModule --project tsconfig.jsdoc.json && jsdoc ./jsdoc/dev-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-dev.json --destination docs/dev",
         "generate-jsdoc-to-markdown": "node ConvertHtmlTomarkdown.js",
-        "markdown-docs": "rimraf ./markdown  && typedoc --plugin typedoc-plugin-markdown --out markdown"
+        "markdown-docs": "rimraf ./vircadia-dev-docs  && typedoc --plugin typedoc-plugin-markdown  --entryPointStrategy expand ./src --out vircadia-dev-docs"
     },
     "devDependencies": {
         "@types/crypto-js": "^4.0.2",
