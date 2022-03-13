@@ -140,11 +140,12 @@ Developer documentation (includes SDK API documentation):
 npm run devdoc
 ```
 
-### Generate markdown
+### Generate markdown docs
 
 SDK API documentation:
 ```
 npm run markdown-docs
+
 ```
 
 
