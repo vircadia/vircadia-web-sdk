@@ -100,6 +100,7 @@ class AvatarData extends SpatiallyNestable {
     #_lookAtSnappingEnabled = true;
     #_verificationFailed = false;
     #_isReplicated = false;
+    #_skeletonModelURL: string | null = null;
 
     #_sequenceNumber = 0;  // Avatar data sequence number is a uint16 value.
     readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
@@ -150,6 +151,10 @@ class AvatarData extends SpatiallyNestable {
 
     set orientation(orientation: quat) {
         this.setWorldOrientation(orientation);
+    }
+
+    get skeletonModelURL(): string {
+        return this.#_skeletonModelURL !== null ? this.#_skeletonModelURL : "";
     }
 
 

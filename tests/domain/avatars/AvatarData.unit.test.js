@@ -45,4 +45,10 @@ describe("AvatarData - unit tests", () => {
         expect(avatarData.getIdentityDataChanged()).toBe(true);
     });
 
+    test("Can set and get skeleton model url", () => {
+        const avatarData = new AvatarData(contextID);
+        expect(avatarData.skeletonModelURL).toBe("");
+        // TODO: set
+    });
+
 });
