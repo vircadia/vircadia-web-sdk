@@ -101,6 +101,19 @@ class MyAvatarInterface {
         this.#_avatarManager.getMyAvatar().orientation = orientation;
     }
 
+    get skeletonModelURL(): string {
+        const skeletonModelURL = this.#_avatarManager.getMyAvatar().skeletonModelURL;
+        return skeletonModelURL !== null ? skeletonModelURL : "";
+    }
+
+    set skeletonModelURL(skeletonModelURL: string) {
+        if (typeof skeletonModelURL !== "string") {
+            console.error("[AvatarMixer] [MyAvatar] Tried to set invalid skeleton URL!", JSON.stringify(skeletonModelURL));
+            return;
+        }
+        this.#_avatarManager.getMyAvatar().skeletonModelURL = skeletonModelURL;
+    }
+
 
 }
 

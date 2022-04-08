@@ -172,6 +172,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
 
         const myAvatarDisplayName = document.getElementById("myAvatarDisplayName");
         const myAvatarSessionDisplayName = document.getElementById("myAvatarSessionDisplayName");
+        const myAvatarSkeletonModelURL = document.getElementById("myAvatarSkeletonModelURL");
         const avatarMixerPosX = document.getElementById("avatarMixerPosX");
         const avatarMixerPosY = document.getElementById("avatarMixerPosY");
         const avatarMixerPosZ = document.getElementById("avatarMixerPosZ");
@@ -188,6 +189,11 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
         myAvatarSessionDisplayName.value = avatarMixer.myAvatar.sessionDisplayName;
         avatarMixer.myAvatar.sessionDisplayNameChanged.connect(() => {
             myAvatarSessionDisplayName.value = avatarMixer.myAvatar.sessionDisplayName;
+        });
+
+        myAvatarSkeletonModelURL.value = avatarMixer.myAvatar.skeletonModelURL;
+        myAvatarSkeletonModelURL.addEventListener("blur", () => {
+            avatarMixer.myAvatar.skeletonModelURL = myAvatarSkeletonModelURL.value;
         });
 
         const avatarPosition = avatarMixer.myAvatar.position;

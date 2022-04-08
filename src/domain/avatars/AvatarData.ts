@@ -101,6 +101,7 @@ class AvatarData extends SpatiallyNestable {
     #_verificationFailed = false;
     #_isReplicated = false;
     #_skeletonModelURL: string | null = null;
+    #_skeletonModelURLChanged = false;
 
     #_sequenceNumber = 0;  // Avatar data sequence number is a uint16 value.
     readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
@@ -155,6 +156,10 @@ class AvatarData extends SpatiallyNestable {
 
     get skeletonModelURL(): string {
         return this.#_skeletonModelURL !== null ? this.#_skeletonModelURL : "";
+    }
+
+    set skeletonModelURL(skeletonModelURL: string) {
+        this.setSkeletonModelURL(skeletonModelURL);
     }
 
 
@@ -497,6 +502,19 @@ class AvatarData extends SpatiallyNestable {
     getOrientationOutbound(): quat {
         // C++  glm::quat getOrientationOutbound()
         return this.getLocalOrientation();
+    }
+
+    markSkeletonModelURLChanged(): void {
+        this.#_skeletonModelURLChanged = true;
+    }
+
+    getSkeletonModelURLChanged(): boolean {
+        return this.#_skeletonModelURLChanged;
+    }
+
+    setSkeletonModelURL(skeletonModelURL: string | null): void {
+        this.#_skeletonModelURL = skeletonModelURL;
+        this.markSkeletonModelURLChanged();
     }
 
 
