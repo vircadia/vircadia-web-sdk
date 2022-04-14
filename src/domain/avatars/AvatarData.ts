@@ -21,6 +21,7 @@ import SpatiallyNestable, { NestableType } from "../shared/SpatiallyNestable";
 import Quat, { quat } from "../shared/Quat";
 import Uuid from "../shared/Uuid";
 import Vec3, { vec3 } from "../shared/Vec3";
+import ClientTraitsHandler from "./ClientTraitsHandler";
 
 
 /*@devdoc
@@ -85,7 +86,7 @@ class AvatarData extends SpatiallyNestable {
     protected _sessionDisplayNameChanged = new SignalEmitter();
 
     protected _globalPosition = Vec3.ZERO;
-
+    protected _clientTraitsHandler;
 
     // Context
     #_nodeList;
@@ -115,6 +116,8 @@ class AvatarData extends SpatiallyNestable {
 
         // Context
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
+
+        this._clientTraitsHandler = new ClientTraitsHandler(this, contextID);
     }
 
 
@@ -515,6 +518,7 @@ class AvatarData extends SpatiallyNestable {
     setSkeletonModelURL(skeletonModelURL: string | null): void {
         this.#_skeletonModelURL = skeletonModelURL;
         this.markSkeletonModelURLChanged();
+        this._clientTraitsHandler.markTraitUpdated();
     }
 
 

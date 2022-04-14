@@ -31,6 +31,7 @@ import NegotiateAudioFormat from "./NegotiateAudioFormat";
 import SelectedAudioFormat from "./SelectedAudioFormat";
 import BulkAvatarTraits from "./BulkAvatarTraits";
 import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
+import SetAvatarTraits from "./SetAvatarTraits";
 
 
 /*@devdoc
@@ -87,6 +88,7 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.BulkAvatarTraits&period;read|BulkAvatarTraits&period;read}
  *  @property {function} BulkAvatarTraitsAck.write  -
  *      {@link PacketScribe.BulkAvatarTraitsAck&period;write|BulkAvatarTraitsAck&period;write}
+ *  @property {function} // TODO: SetAvatarTraits docs
  */
 
 // WEBRTC TODO: Implement similar in C++ to collect all packet reading/writing into the networking library code (and revise this
@@ -117,7 +119,8 @@ const PacketScribe = {
     NegotiateAudioFormat,
     SelectedAudioFormat,
     BulkAvatarTraits,
-    BulkAvatarTraitsAck
+    BulkAvatarTraitsAck,
+    SetAvatarTraits
 };
 
 export default PacketScribe;

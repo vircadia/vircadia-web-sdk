@@ -607,6 +607,8 @@ const PacketType = new class {
                 return this.#_AvatarMixerPacketVersion.AvatarTraitsAck;
             case this.BulkAvatarTraitsAck:
                 return this.#_AvatarMixerPacketVersion.AvatarTraitsAck;
+            case this.SetAvatarTraits:
+                return DEFAULT_VERSION; // TODO julien: return DEFAULT_VERSION?
 
                 // WebRTC TODO: Add other packets.
 

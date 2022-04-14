@@ -60,6 +60,7 @@ class MyAvatar extends Avatar {
             }
 
             // WEBRTC TODO: Send PacketType.SetAvatarTraits.
+            bytesSent += this._clientTraitsHandler.sendChangedTraitsToMixer();
 
             // Compute the next send window based on how much data we sent and what
             // data rate we're trying to max at.

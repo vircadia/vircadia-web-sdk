@@ -8,11 +8,11 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import AvatarData from "../src/domain/avatars/AvatarData";
-import ClientTraitsHandler from "../src/ClientTraitsHandler";
-import ContextManager from "../src/domain/shared/ContextManager";
-import AddressManager from "../src/domain/networking/AddressManager";
-import NodeList from "../src/domain/networking/NodeList";
+import AvatarData from "../../../src/domain/avatars/AvatarData";
+import ClientTraitsHandler from "../../../src/domain/avatars/ClientTraitsHandler";
+import ContextManager from "../../../src/domain/shared/ContextManager";
+import AddressManager from "../../../src/domain/networking/AddressManager";
+import NodeList from "../../../src/domain/networking/NodeList";
 
 describe("ClientTraitsHandler - unit tests", () => {
     const contextID = ContextManager.createContext();
@@ -23,5 +23,6 @@ describe("ClientTraitsHandler - unit tests", () => {
         const avatarData = new AvatarData(contextID);
         const clientTraitHandler = new ClientTraitsHandler(avatarData);
         expect(clientTraitHandler instanceof ClientTraitsHandler).toBe(true);
+        expect(true).toBe(true);
     });
 });
