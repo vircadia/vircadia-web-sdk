@@ -378,7 +378,7 @@ class NLPacketList {
                         newMessageData.buffer.set(messageData.buffer.slice(this.#_segmentStartIndex,
                             this.#_segmentStartIndex + segmentSize), newMessageData.dataPosition);
                         newMessageData.dataPosition += segmentSize;
-                        messageData.packetSize = messageData.dataPosition;
+                        newMessageData.packetSize = newMessageData.dataPosition;
 
                         // The current segment now starts at the beginning of the new packet.
                         this.#_segmentStartIndex = this.#_extendedHeader ? this.#_extendedHeader.byteLength : 0;
