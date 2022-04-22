@@ -8,17 +8,19 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { TraitType } from "../../avatars/AvatarTraits";
+import { TraitType, ClientTraitStatus } from "../../avatars/AvatarTraits";
 import NLPacketList from "../NLPacketList";
 import PacketTypeValue from "../udt/PacketHeaders";
 
 type SetAvatarTraitsDetails = {
+    // TODO julien: doc
     currentTraitVersion: number;
     skeletonModelURL: string;
+    traitStatuses: Array<ClientTraitStatus>;
 };
 
 const SetAvatarTraits = new class {
-    // TODO julien: doc
+    // C++ N/A
 
     write(_info: SetAvatarTraitsDetails): NLPacketList {  /* eslint-disable-line class-methods-use-this */
         const textEncoder = new TextEncoder();
@@ -29,10 +31,19 @@ const SetAvatarTraits = new class {
 
         packetList.writePrimitive(_info.currentTraitVersion, 4);
 
-        packetList.writePrimitive(TraitType.SkeletonModelURL, 1);
-        const encodedUrl = textEncoder.encode(_info.skeletonModelURL);
-        packetList.writePrimitive(encodedUrl.length, 2);
-        packetList.write(encodedUrl);
+        for (const [index, traitStatus] of _info.traitStatuses.entries()) {
+            if (traitStatus === ClientTraitStatus.Updated) {
+                const traitType = index;
+
+                if (traitType === TraitType.SkeletonModelURL) {
+                    packetList.writePrimitive(TraitType.SkeletonModelURL, 1);
+                    const encodedUrl = textEncoder.encode(_info.skeletonModelURL);
+                    packetList.writePrimitive(encodedUrl.length, 2);
+                    packetList.write(encodedUrl);
+
+                }
+            }
+        }
 
         return packetList;
     }

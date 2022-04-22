@@ -23,6 +23,5 @@ describe("ClientTraitsHandler - unit tests", () => {
         const avatarData = new AvatarData(contextID);
         const clientTraitHandler = new ClientTraitsHandler(avatarData);
         expect(clientTraitHandler instanceof ClientTraitsHandler).toBe(true);
-        expect(true).toBe(true);
     });
 });
