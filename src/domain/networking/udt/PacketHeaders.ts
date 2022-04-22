@@ -583,6 +583,8 @@ const PacketType = new class {
                 return this.#_AudioVersion.StopInjectors;
             case this.DomainServerAddedNode:
                 return this.#_DomainServerAddedNodeVersion.SocketTypes;
+            case this.SetAvatarTraits:
+                return DEFAULT_VERSION;
             case this.AvatarIdentity:
                 return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.DomainConnectRequest:
@@ -607,8 +609,6 @@ const PacketType = new class {
                 return this.#_AvatarMixerPacketVersion.AvatarTraitsAck;
             case this.BulkAvatarTraitsAck:
                 return this.#_AvatarMixerPacketVersion.AvatarTraitsAck;
-            case this.SetAvatarTraits:
-                return DEFAULT_VERSION; // TODO julien: return DEFAULT_VERSION?
 
                 // WebRTC TODO: Add other packets.
 
