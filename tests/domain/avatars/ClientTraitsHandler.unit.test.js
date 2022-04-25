@@ -21,7 +21,7 @@ describe("ClientTraitsHandler - unit tests", () => {
 
     test("Can create a ClientTraitsHandler", () => {
         const avatarData = new AvatarData(contextID);
-        const clientTraitHandler = new ClientTraitsHandler(avatarData);
+        const clientTraitHandler = new ClientTraitsHandler(avatarData, contextID);
         expect(clientTraitHandler instanceof ClientTraitsHandler).toBe(true);
     });
 });
