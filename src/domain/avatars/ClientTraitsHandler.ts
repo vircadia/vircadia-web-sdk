@@ -15,9 +15,10 @@ import NodeList from "../networking/NodeList";
 import NodeType from "../networking/NodeType";
 import { TraitVersion, ClientTraitStatus, NUM_SIMPLE_TRAITS, TraitType } from "./AvatarTraits";
 
-// TODO julien: class description doc
 /*@devdoc
- *  The <code>ClientTraitsHandler</code> class
+ *  The <code>ClientTraitsHandler</code> class manages the avatar traits that are sent to and received from Vircadia protocol packets.
+ *  <p>C++: <code>class ClientTraitsHandler : public QObject</code></p>
+ *  @class ClientTraitsHandler
  */
 class ClientTraitsHandler {
     // C++ class ClientTraitsHandler : public QObject
@@ -29,7 +30,10 @@ class ClientTraitsHandler {
     #_hasChangedTraits;
     #_shouldPerformInitialSend;
     #_currentTraitVersion;
-    // TODO julien: comment why we're using an array instead of AssociatedTraitValues as in the C++
+    // WEBRTC TODO: Use AssociatedTraitValues
+    // Because AssociatedTraitValues is a fairly complex class and that we need to hold only simple traits for now,
+    // we use an array.
+    // C++ AssociatedTraitValues<ClientTraitStatus, Unchanged> _traitStatuses
     #_traitStatuses = new Array<ClientTraitStatus>(NUM_SIMPLE_TRAITS).fill(ClientTraitStatus.Unchanged);
 
     constructor(owningAvatar: AvatarData, contextID: number) {
@@ -45,21 +49,30 @@ class ClientTraitsHandler {
 
     }
 
-    // TODO julien: doc
+    /*@devdoc
+     *  Marks a trait's status as updated.
+     *  @param {TraitType} updatedTrait - The trait has been updated.
+     *      {@link TraitType|AvatarTraits.TraitType}
+     */
     markTraitUpdated(updatedTrait: TraitType): void {
+        // C++ void markTraitUpdated(AvatarTraits::TraitType updatedTrait)
         this.#_traitStatuses[updatedTrait] = ClientTraitStatus.Updated;
         this.#_hasChangedTraits = true;
     }
 
-    // TODO julien: doc
+    /*@devdoc
+     *  Sends the avatar traits that have been updated or deleted.
+     *  @returns {number} - The number of bytes written
+     */
     sendChangedTraitsToMixer(): number {
+        // C++ int sendChangedTraitsToMixer()
         const bytesWritten = 0;
 
         if (this.#_hasChangedTraits || this.#_shouldPerformInitialSend) {
             this.#_currentTraitVersion += 1;
 
             const traitStatusCopy = [...this.#_traitStatuses];
-            // TODO julien: explain why we are not calling #_traitStatuses.reset()
+            // WEBRTC TODO: call #_traitStatuses.reset() once class AssociatedTraitValues is implemented
             this.#_traitStatuses.fill(ClientTraitStatus.Unchanged);
             this.#_hasChangedTraits = false;
 
