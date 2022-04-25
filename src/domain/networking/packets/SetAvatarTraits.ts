@@ -17,6 +17,7 @@ type SetAvatarTraitsDetails = {
     currentTraitVersion: number;
     skeletonModelURL: string;
     traitStatuses: Array<ClientTraitStatus>;
+    initialSend: boolean;
 };
 
 const SetAvatarTraits = new class {
@@ -32,7 +33,7 @@ const SetAvatarTraits = new class {
         packetList.writePrimitive(_info.currentTraitVersion, 4);
 
         for (const [index, traitStatus] of _info.traitStatuses.entries()) {
-            if (traitStatus === ClientTraitStatus.Updated) {
+            if (_info.initialSend || traitStatus === ClientTraitStatus.Updated) {
                 const traitType = index;
 
                 if (traitType === TraitType.SkeletonModelURL) {
