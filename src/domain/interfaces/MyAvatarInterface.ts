@@ -114,6 +114,14 @@ class MyAvatarInterface {
         this.#_avatarManager.getMyAvatar().skeletonModelURL = skeletonModelURL;
     }
 
+    /*@sdkdoc
+     *  Triggered when the avatar's skeleton model url changes.
+     *  @callback MyAvatarInterface~skeletonModelURLChanged
+     */
+    get skeletonModelURLChanged(): Signal {
+        return this.#_avatarManager.getMyAvatar().skeletonModelURLChanged;
+    }
+
 
 }
 

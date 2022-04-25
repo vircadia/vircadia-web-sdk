@@ -22,7 +22,7 @@ import Quat, { quat } from "../shared/Quat";
 import Uuid from "../shared/Uuid";
 import Vec3, { vec3 } from "../shared/Vec3";
 import ClientTraitsHandler from "./ClientTraitsHandler";
-
+import { TraitType } from "./AvatarTraits";
 
 /*@devdoc
  *  The <code>KillAvatarReason</code> namespace provides reasons that an avatar is killed.
@@ -78,6 +78,8 @@ enum AvatarDataDetail {
  *  @property {Signal} sessionDisplayNameChanged - Triggered when the avatar's session display name changes.
  *  @property {vec3} position - The position of the avatar.
  *  @property {quat} orientation - The orientation of the avatar.
+ *  @property {string} skeletonModelURL - The avatar's skeleton model url
+ *  @property {Signal} skeletonModelURLChanged - Triggered when the avatar's skeleton model url changes.
  */
 class AvatarData extends SpatiallyNestable {
     // C++  class AvatarData : public QObject, public SpatiallyNestable
@@ -102,7 +104,7 @@ class AvatarData extends SpatiallyNestable {
     #_verificationFailed = false;
     #_isReplicated = false;
     #_skeletonModelURL: string | null = null;
-    #_skeletonModelURLChanged = false;
+    #_skeletonModelURLChanged = new SignalEmitter();
 
     #_sequenceNumber = 0;  // Avatar data sequence number is a uint16 value.
     readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
@@ -158,11 +160,16 @@ class AvatarData extends SpatiallyNestable {
     }
 
     get skeletonModelURL(): string {
+        // WEBRTC TODO: return the default avatar url if null
         return this.#_skeletonModelURL !== null ? this.#_skeletonModelURL : "";
     }
 
     set skeletonModelURL(skeletonModelURL: string) {
         this.setSkeletonModelURL(skeletonModelURL);
+    }
+
+    get skeletonModelURLChanged(): Signal {
+        return this.#_skeletonModelURLChanged.signal();
     }
 
 
@@ -205,7 +212,7 @@ class AvatarData extends SpatiallyNestable {
 
     /*@devdoc
      *  Sets the avatar's display name.
-     *  @returns {string|null} - The avatar's display name.
+     *  @param {string|null} - The avatar's display name.
      */
     setDisplayName(displayName: string | null): void {
         // C++  void setDisplayName(const QString& displayName)
@@ -507,18 +514,23 @@ class AvatarData extends SpatiallyNestable {
         return this.getLocalOrientation();
     }
 
-    markSkeletonModelURLChanged(): void {
-        this.#_skeletonModelURLChanged = true;
-    }
-
-    getSkeletonModelURLChanged(): boolean {
-        return this.#_skeletonModelURLChanged;
-    }
-
+    /*@devdoc
+     *  Sets the avatar's skeleton model URL.
+     *  @param {string|null} skeletonModelURL - The avatar's FST file.
+     */
     setSkeletonModelURL(skeletonModelURL: string | null): void {
+        // C++  Q_INVOKABLE virtual void setSkeletonModelURL(const QUrl& skeletonModelURL);
+        if (skeletonModelURL === null || skeletonModelURL.length < 1) {
+            console.log("[avatars][setSkeletonModelURL] caller called with empty URL.");
+        }
+
+        // WEBRTC TODO: set #_skeletonModelURL to the default avatar url when skeletonModelURL is an empty url
+
         this.#_skeletonModelURL = skeletonModelURL;
-        this.markSkeletonModelURLChanged();
-        this._clientTraitsHandler.markTraitUpdated();
+        this.#_skeletonModelURLChanged.emit();
+
+        console.log("[avatars] Changing skeleton model URL for avatar to", skeletonModelURL);
+        this._clientTraitsHandler.markTraitUpdated(TraitType.SkeletonModelURL);
     }
 
 

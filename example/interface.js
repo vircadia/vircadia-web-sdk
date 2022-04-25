@@ -192,6 +192,9 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
         });
 
         myAvatarSkeletonModelURL.value = avatarMixer.myAvatar.skeletonModelURL;
+        avatarMixer.myAvatar.skeletonModelURLChanged.connect(() => {
+            myAvatarSkeletonModelURL.value = avatarMixer.myAvatar.skeletonModelURL;
+        });
         myAvatarSkeletonModelURL.addEventListener("blur", () => {
             avatarMixer.myAvatar.skeletonModelURL = myAvatarSkeletonModelURL.value;
         });

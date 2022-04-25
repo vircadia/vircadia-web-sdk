@@ -59,7 +59,6 @@ class MyAvatar extends Avatar {
                 bytesSent += this.sendIdentityPacket();
             }
 
-            // WEBRTC TODO: Send PacketType.SetAvatarTraits.
             bytesSent += this._clientTraitsHandler.sendChangedTraitsToMixer();
 
             // Compute the next send window based on how much data we sent and what

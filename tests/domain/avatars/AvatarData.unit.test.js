@@ -44,14 +44,4 @@ describe("AvatarData - unit tests", () => {
         avatarData.markIdentityDataChanged();
         expect(avatarData.getIdentityDataChanged()).toBe(true);
     });
-
-    test("Can set and get skeleton model url", () => {
-        const avatarData = new AvatarData(contextID);
-        expect(avatarData.skeletonModelURL).toBe("");
-        const skeletonModelURL = "https://cdn-1.vircadia.com/us-e-1/Bazaar/Avatars/Tanya/fbx/Tanya.fst";
-        avatarData.skeletonModelURL = skeletonModelURL;
-        expect(avatarData.skeletonModelURL).toBe(skeletonModelURL);
-        expect(avatarData.getSkeletonModelURLChanged()).toBe(true);
-    });
-
 });
