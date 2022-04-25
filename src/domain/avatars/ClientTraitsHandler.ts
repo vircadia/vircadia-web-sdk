@@ -58,7 +58,7 @@ class ClientTraitsHandler {
         if (this.#_hasChangedTraits || this.#_shouldPerformInitialSend) {
             this.#_currentTraitVersion += 1;
 
-            const traitStatusCopy = this.#_traitStatuses;
+            const traitStatusCopy = [...this.#_traitStatuses];
             // TODO julien: explain why we are not calling #_traitStatuses.reset()
             this.#_traitStatuses.fill(ClientTraitStatus.Unchanged);
             this.#_hasChangedTraits = false;
