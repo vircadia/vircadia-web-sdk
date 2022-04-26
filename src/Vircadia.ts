@@ -48,6 +48,7 @@ export type { AudioPositionGetter } from "./domain/audio-client/AudioClient";
 export { default as AvatarMixer, MyAvatarInterface, AvatarListInterface } from "./AvatarMixer";
 export { default as MessageMixer } from "./MessageMixer";
 export type { AssignmentClientState } from "./domain/AssignmentClient";
+export { default as EntityServer } from "./EntityServer";
 
 export { default as SignalEmitter } from "./domain/shared/SignalEmitter";
 export type { Signal, Slot } from "./domain/shared/SignalEmitter";
