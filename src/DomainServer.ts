@@ -185,7 +185,8 @@ class DomainServer {
 
             NodeType.AudioMixer,
             NodeType.MessagesMixer,
-            NodeType.AvatarMixer
+            NodeType.AvatarMixer,
+            NodeType.EntityServer
         ]));
 
         // WEBRTC TODO: Address further C++ code.
