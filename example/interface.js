@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid, EntityServer } from "../dist/Vircadia.js";
+import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, EntityServer, Uuid } from "../dist/Vircadia.js";
 
 (function () {
 
@@ -343,17 +343,11 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid, En
 
     }());
 
-    // Wire up mixers.
-    audioMixer.positionGetter = () => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return avatarMixer.myAvatar.position;
-    };
-
     // Entity Server
     (function () {
         entityServer = new EntityServer(contextID);
 
-        const statusText = document.getElementById("EntityServerStatus");
+        const statusText = document.getElementById("entityServerStatus");
 
         function onStateChanged(state) {
             statusText.value = EntityServer.stateToString(state);
@@ -362,6 +356,12 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid, En
         entityServer.onStateChanged = onStateChanged;
 
     }());
+
+    // Wire up mixers.
+    audioMixer.positionGetter = () => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return avatarMixer.myAvatar.position;
+    };
 
     // Game Loop
     (function () {

@@ -12,7 +12,7 @@ import AssignmentClient from "./domain/AssignmentClient";
 import NodeType from "./domain/networking/NodeType";
 
 /*@sdkdoc
- *  The <code>EntityServer</code> class  provides the interface for working with entity server assignment clients.
+ *  The <code>EntityServer</code> class provides the interface for working with entity server assignment clients.
  *  <p>Prerequisite: A {@link DomainServer} object must be created in order to set up the domain context.</p>
  *  @class EntityServer
  *  @extends AssignmentClient
