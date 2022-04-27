@@ -288,7 +288,7 @@ class AvatarHashMap {
 
     protected handleRemovedAvatar(removedAvatar: AvatarData, removalReason = KillAvatarReason.NoReason): void {
         // C++  void handleRemovedAvatar(const Avatar* removedAvatar,
-        //          KillAvatarReason removalReason = KillAvatarReason:: NoReason);
+        //          KillAvatarReason removalReason = KillAvatarReason::NoReason);
 
         // WEBRTC TODO: Address further C++ code - avatar traits;
 

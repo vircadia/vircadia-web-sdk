@@ -30,7 +30,7 @@ const GLMHelpers = new class {
      */
     // eslint-disable-next-line class-methods-use-this
     packOrientationQuatToSixBytes(data: DataView, dataPosition: number, quatInput: quat): number {
-        // C++  int packOrientationQuatToSixBytes(unsigned char* buffer, const glm:: quat& quatInput)
+        // C++  int packOrientationQuatToSixBytes(unsigned char* buffer, const glm::quat& quatInput)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers, @typescript-eslint/no-non-null-assertion */
 
@@ -90,7 +90,7 @@ const GLMHelpers = new class {
      */
     // eslint-disable-next-line class-methods-use-this
     unpackOrientationQuatFromSixBytes(data: DataView, dataPosition: number, quatOutput: quat): number {
-        // C++  int unpackOrientationQuatFromSixBytes(const unsigned char* buffer, glm:: quat& quatOutput)
+        // C++  int unpackOrientationQuatFromSixBytes(const unsigned char* buffer, glm::quat& quatOutput)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers, @typescript-eslint/no-non-null-assertion */
 
