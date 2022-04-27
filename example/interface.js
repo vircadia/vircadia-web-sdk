@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } from "../dist/Vircadia.js";
+import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, EntityServer, Uuid } from "../dist/Vircadia.js";
 
 (function () {
 
@@ -23,6 +23,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
     let avatarMixer = null;
     let avatarMixerGameLoop = null;
     let messageMixer = null;
+    let entityServer = null;
 
 
     // Domain Server
@@ -339,6 +340,20 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
             }
         }
         messageMixer.messageReceived.connect(onMessageReceived);
+
+    }());
+
+    // Entity Server
+    (function () {
+        entityServer = new EntityServer(contextID);
+
+        const statusText = document.getElementById("entityServerStatus");
+
+        function onStateChanged(state) {
+            statusText.value = EntityServer.stateToString(state);
+        }
+        onStateChanged(entityServer.state);
+        entityServer.onStateChanged = onStateChanged;
 
     }());
 

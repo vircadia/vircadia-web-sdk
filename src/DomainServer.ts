@@ -185,7 +185,8 @@ class DomainServer {
 
             NodeType.AudioMixer,
             NodeType.MessagesMixer,
-            NodeType.AvatarMixer
+            NodeType.AvatarMixer,
+            NodeType.EntityServer
         ]));
 
         // WEBRTC TODO: Address further C++ code.
@@ -366,10 +367,7 @@ class DomainServer {
     #nodeAdded = (node: Node): void => {
         // C++  void Application:: nodeAdded(Node* node)
         if (node.getType() === NodeType.EntityServer) {
-            console.warn("DomainServer: EntityServer support implemented!");
-
-            // WEBRTC TODO: Address further code - for EntityServer node.
-
+            // Safe landing code not implemented.
         }
     };
 
@@ -387,10 +385,9 @@ class DomainServer {
             // WEBRTC TODO: Address further code - for AssetServer node.
 
         } else if (nodeType === NodeType.EntityServer) {
-            console.warn("DomainServer: EntityServer support not implemented!");
+            // WEBRTC TODO: Address further code.
 
-            // WEBRTC TODO: Address further code - for EntityServer node.
-
+            // Safe landing code not implemented.
         }
 
     };
@@ -404,9 +401,7 @@ class DomainServer {
         // AudioMixer node is handled in AudioMixer.ts.
 
         if (nodeType === NodeType.EntityServer) {
-            console.warn("DomainServer: EntityServer support not implemented!");
-
-            // WEBRTC TODO: Address further code - for EntityServer node.
+            // WEBRTC TODO: Address further code
 
         } else if (nodeType === NodeType.AssetServer) {
             console.warn("DomainServer: AssetServer support not implemented!");
