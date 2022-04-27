@@ -77,7 +77,7 @@ class ControlPacket extends BasePacket {
 
 
     static #localHeaderSize(): number {
-        // C++  int ControlPacket:: localHeaderSize()
+        // C++  int ControlPacket::localHeaderSize()
         return ControlPacket.#ControlBitAndTypeBytes;
     }
 

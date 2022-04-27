@@ -364,7 +364,7 @@ class DomainServer {
 
     // Slot.
     #nodeAdded = (node: Node): void => {
-        // C++  void Application:: nodeAdded(Node* node)
+        // C++  void Application::nodeAdded(Node* node)
         if (node.getType() === NodeType.EntityServer) {
             console.warn("DomainServer: EntityServer support implemented!");
 
