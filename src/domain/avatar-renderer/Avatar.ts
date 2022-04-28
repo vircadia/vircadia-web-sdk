@@ -37,6 +37,14 @@ class Avatar extends AvatarData {
     #_initialized = false;
 
 
+    constructor(contextID: number) {  // eslint-disable-line @typescript-eslint/no-useless-constructor
+        // C++  Avatar()
+        super(contextID);
+
+        // WEBRTC TODO: Address further C++ code.
+    }
+
+
     /*@devdoc
      *  Marks the avatar as having been initialized.
      */
@@ -64,6 +72,15 @@ class Avatar extends AvatarData {
     override setSessionDisplayName(sessionDisplayName: string | null): void {  // eslint-disable-line
         // C++  virtual void setSessionDisplayName(const QString& sessionDisplayName) override
         // No-op.
+    }
+
+    // JSDoc is in AvatarData.
+    override setSkeletonModelURL(skeletonModelURL: string | null): void {
+        // C++  void Avatar::setSkeletonModelURL(const QUrl& skeletonModelURL)
+
+        super.setSkeletonModelURL(skeletonModelURL);
+
+        // WEBRTC TODO: Address further C++ code.
     }
 
 

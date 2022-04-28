@@ -90,7 +90,7 @@ class AvatarData extends SpatiallyNestable {
     protected _sessionDisplayNameChanged = new SignalEmitter();
 
     protected _globalPosition = Vec3.ZERO;
-    protected _clientTraitsHandler;
+    protected _clientTraitsHandler: ClientTraitsHandler | null = null;
 
     // Context
     #_nodeList;
@@ -121,7 +121,7 @@ class AvatarData extends SpatiallyNestable {
         // Context
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
 
-        this._clientTraitsHandler = new ClientTraitsHandler(this, contextID);
+        // WEBRTC TODO: Address further C++ code.
     }
 
 
@@ -533,18 +533,25 @@ class AvatarData extends SpatiallyNestable {
      *  @param {string|null} skeletonModelURL - The avatar's FST file.
      */
     setSkeletonModelURL(skeletonModelURL: string | null): void {
-        // C++  Q_INVOKABLE virtual void setSkeletonModelURL(const QUrl& skeletonModelURL);
-        if (skeletonModelURL === null || skeletonModelURL.length < 1) {
-            console.log("[avatars][setSkeletonModelURL] caller called with empty URL.");
+        // C++  void setSkeletonModelURL(const QUrl& skeletonModelURL)
+
+        if (skeletonModelURL === null || skeletonModelURL.length === 0) {
+            console.log("[avatars] setSkeletonModelURL() called with empty URL.");
         }
 
         // WEBRTC TODO: set #_skeletonModelURL to the default avatar url when skeletonModelURL is an empty url
 
-        this.#_skeletonModelURL = skeletonModelURL;
-        this.#_skeletonModelURLChanged.emit();
+        if (skeletonModelURL === this.#_skeletonModelURL) {
+            return;
+        }
 
-        console.log("[avatars] Changing skeleton model URL for avatar to", skeletonModelURL);
-        this._clientTraitsHandler.markTraitUpdated(TraitType.SkeletonModelURL);
+        this.#_skeletonModelURL = skeletonModelURL;
+
+        if (this._clientTraitsHandler) {
+            this._clientTraitsHandler.markTraitUpdated(TraitType.SkeletonModelURL);
+        }
+
+        this.#_skeletonModelURLChanged.emit();
     }
 
 

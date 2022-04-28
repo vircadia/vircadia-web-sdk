@@ -9,6 +9,8 @@
 //
 
 import Avatar from "../avatar-renderer/Avatar";
+import ClientTraitsHandler from "../avatars/ClientTraitsHandler";
+import assert from "../shared/assert";
 import Uuid from "../shared/Uuid";
 
 
@@ -19,6 +21,7 @@ import Uuid from "../shared/Uuid";
  *  @extends Avatar
  *  @extends AvatarData
  *  @extends SpatiallyNestable
+ *  @param {number} contextID - The {@link ContextManager} context ID.
  *
  *  @property {string|null} displayName - The avatar's display name.
  *  @property {Signal<AvatarData~displayNameChanged>} displayNameChanged - Triggered when the avatar's display name changes.
@@ -49,6 +52,29 @@ class MyAvatar extends Avatar {
     #_nextTraitsSendWindow = 0;
 
 
+    constructor(contextID: number) {
+        // C++  Avatar()
+        super(contextID);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this._clientTraitsHandler = new ClientTraitsHandler(this, contextID);
+
+        // WEBRTC TODO: Address further C++ code.
+    }
+
+
+    // JSDoc is in AvatarData.
+    override setSkeletonModelURL(skeletonModelURL: string | null): void {
+        // C++  void MyAvatar::setSkeletonModelURL(const QUrl& skeletonModelURL)
+
+        // WEBRTC TODO: Address further C++ code.
+
+        super.setSkeletonModelURL(skeletonModelURL);
+
+        // WEBRTC TODO: Address further C++ code.
+    }
+
     /*@devdoc
      *  Sends the avatar data in an {@link PacketType(1)|AvatarData} packet to the avatar mixer.
      *  @param {boolean} sendAll - <code>true</code> to send a full update even if nothing has changed, <code>false</code> to
@@ -65,6 +91,7 @@ class MyAvatar extends Avatar {
                 bytesSent += this.sendIdentityPacket();
             }
 
+            assert(this._clientTraitsHandler !== null);
             bytesSent += this._clientTraitsHandler.sendChangedTraitsToMixer();
 
             // Compute the next send window based on how much data we sent and what
