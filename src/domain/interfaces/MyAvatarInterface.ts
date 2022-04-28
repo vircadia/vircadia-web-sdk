@@ -28,6 +28,9 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *  @property {Signal<MyAvatarInterface~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the session
  *      display name changes.
  *      <em>Read-only.</em>
+ *  @property {string} skeletonModelURL - The avatar's skeleton model URL.
+ *  @property {Signal<MyAvatarInterface~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton
+ *      model URL changes.
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
  */
@@ -77,6 +80,28 @@ class MyAvatarInterface {
         return this.#_avatarManager.getMyAvatar().sessionDisplayNameChanged;
     }
 
+    get skeletonModelURL(): string {
+        const skeletonModelURL = this.#_avatarManager.getMyAvatar().skeletonModelURL;
+        return skeletonModelURL !== null ? skeletonModelURL : "";
+    }
+
+    set skeletonModelURL(skeletonModelURL: string) {
+        if (typeof skeletonModelURL !== "string") {
+            console.error("[AvatarMixer] [MyAvatar] Tried to set invalid skeleton model URL!",
+                JSON.stringify(skeletonModelURL));
+            return;
+        }
+        this.#_avatarManager.getMyAvatar().skeletonModelURL = skeletonModelURL;
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's skeleton model URL changes.
+     *  @callback MyAvatarInterface~skeletonModelURLChanged
+     */
+    get skeletonModelURLChanged(): Signal {
+        return this.#_avatarManager.getMyAvatar().skeletonModelURLChanged;
+    }
+
     get position(): vec3 {
         return this.#_avatarManager.getMyAvatar().position;
     }
@@ -100,28 +125,6 @@ class MyAvatarInterface {
         }
         this.#_avatarManager.getMyAvatar().orientation = orientation;
     }
-
-    get skeletonModelURL(): string {
-        const skeletonModelURL = this.#_avatarManager.getMyAvatar().skeletonModelURL;
-        return skeletonModelURL !== null ? skeletonModelURL : "";
-    }
-
-    set skeletonModelURL(skeletonModelURL: string) {
-        if (typeof skeletonModelURL !== "string") {
-            console.error("[AvatarMixer] [MyAvatar] Tried to set invalid skeleton URL!", JSON.stringify(skeletonModelURL));
-            return;
-        }
-        this.#_avatarManager.getMyAvatar().skeletonModelURL = skeletonModelURL;
-    }
-
-    /*@sdkdoc
-     *  Triggered when the avatar's skeleton model url changes.
-     *  @callback MyAvatarInterface~skeletonModelURLChanged
-     */
-    get skeletonModelURLChanged(): Signal {
-        return this.#_avatarManager.getMyAvatar().skeletonModelURLChanged;
-    }
-
 
 }
 

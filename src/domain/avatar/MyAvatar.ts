@@ -21,10 +21,16 @@ import Uuid from "../shared/Uuid";
  *  @extends SpatiallyNestable
  *
  *  @property {string|null} displayName - The avatar's display name.
- *  @property {Signal} displayNameChanged - Triggered when the avatar's display name changes.
+ *  @property {Signal<AvatarData~displayNameChanged>} displayNameChanged - Triggered when the avatar's display name changes.
  *  @property {string|null} sessionDisplayName - The avatar's session display name as assigned by the avatar mixer. It is based
  *      on the display name and is unique among all avatars present in the domain. <em>Read-only.</em>
- *  @property {Signal} sessionDisplayNameChanged - Triggered when the avatar's session display name changes.
+ *  @property {Signal<AvatarData~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the avatar's session
+ *      display name changes.
+ *  @property {string|null} skeletonModelURL - The avatar's skeleton model URL.
+ *  @property {Signal<AvatarData~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton model
+ *      URL changes.
+ *  @property {vec3} position - The position of the avatar in the domain.
+ *  @property {quat} orientation - The orientation of the avatar in the domain.
  */
 class MyAvatar extends Avatar {
     // C++  class MyAvatar : public Avatar

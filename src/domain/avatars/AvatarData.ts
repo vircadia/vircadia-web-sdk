@@ -72,14 +72,16 @@ enum AvatarDataDetail {
  *  @param {number} contextID - The {@link ContextManager} context ID.
  *
  *  @property {string|null} displayName - The avatar's display name.
- *  @property {Signal} displayNameChanged - Triggered when the avatar's display name changes.
+ *  @property {Signal<AvatarData~displayNameChanged>} displayNameChanged - Triggered when the avatar's display name changes.
  *  @property {string|null} sessionDisplayName - The avatar's session display name as assigned by the avatar mixer. It is based
  *      on the display name and is unique among all avatars present in the domain. <em>Read-only.</em>
- *  @property {Signal} sessionDisplayNameChanged - Triggered when the avatar's session display name changes.
- *  @property {vec3} position - The position of the avatar.
- *  @property {quat} orientation - The orientation of the avatar.
- *  @property {string} skeletonModelURL - The avatar's skeleton model url
- *  @property {Signal} skeletonModelURLChanged - Triggered when the avatar's skeleton model url changes.
+ *  @property {Signal<AvatarData~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the avatar's session
+ *      display name changes.
+ *  @property {string|null} skeletonModelURL - The avatar's skeleton model URL.
+ *  @property {Signal<AvatarData~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton model
+ *      URL changes.
+ *  @property {vec3} position - The position of the avatar in the domain.
+ *  @property {quat} orientation - The orientation of the avatar in the domain.
  */
 class AvatarData extends SpatiallyNestable {
     // C++  class AvatarData : public QObject, public SpatiallyNestable
@@ -123,24 +125,49 @@ class AvatarData extends SpatiallyNestable {
     }
 
 
-    get displayName(): string {
-        return this.#_displayName !== null ? this.#_displayName : "";
+    get displayName(): string | null {
+        return this.#_displayName;
     }
 
-    set displayName(displayName: string) {
+    set displayName(displayName: string | null) {
         this.setDisplayName(displayName);
     }
 
+    /*@sdkdoc
+     *  Triggered when the avatar's display name changes.
+     *  @callback AvatarData~displayNameChanged
+     */
     get displayNameChanged(): Signal {
         return this.#_displayNameChanged.signal();
     }
 
-    get sessionDisplayName(): string {
-        return this._sessionDisplayName !== null ? this._sessionDisplayName : "";
+    get sessionDisplayName(): string | null {
+        return this._sessionDisplayName;
     }
 
+    /*@sdkdoc
+     *  Triggered when the avatar's session display name changes.
+     *  @callback AvatarData~sessionDisplayNameChanged
+     */
     get sessionDisplayNameChanged(): Signal {
         return this._sessionDisplayNameChanged.signal();
+    }
+
+    get skeletonModelURL(): string | null {
+        // WEBRTC TODO: return the default avatar url if null
+        return this.#_skeletonModelURL;
+    }
+
+    set skeletonModelURL(skeletonModelURL: string | null) {
+        this.setSkeletonModelURL(skeletonModelURL);
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's skeleton model URL changes.
+     *  @callback AvatarData~skeletonModelURLChanged
+     */
+    get skeletonModelURLChanged(): Signal {
+        return this.#_skeletonModelURLChanged.signal();
     }
 
     get position(): vec3 {
@@ -157,19 +184,6 @@ class AvatarData extends SpatiallyNestable {
 
     set orientation(orientation: quat) {
         this.setWorldOrientation(orientation);
-    }
-
-    get skeletonModelURL(): string {
-        // WEBRTC TODO: return the default avatar url if null
-        return this.#_skeletonModelURL !== null ? this.#_skeletonModelURL : "";
-    }
-
-    set skeletonModelURL(skeletonModelURL: string) {
-        this.setSkeletonModelURL(skeletonModelURL);
-    }
-
-    get skeletonModelURLChanged(): Signal {
-        return this.#_skeletonModelURLChanged.signal();
     }
 
 
@@ -203,7 +217,7 @@ class AvatarData extends SpatiallyNestable {
 
     /*@devdoc
      *  Gets the avatar's display name.
-     *  @returns {string|null} - The avatar's display name.
+     *  @returns {string|null} The avatar's display name.
      */
     getDisplayName(): string | null {
         // C++  QString& getDisplayName()
@@ -212,7 +226,7 @@ class AvatarData extends SpatiallyNestable {
 
     /*@devdoc
      *  Sets the avatar's display name.
-     *  @param {string|null} - The avatar's display name.
+     *  @param {string|null} displayName - The avatar's display name.
      */
     setDisplayName(displayName: string | null): void {
         // C++  void setDisplayName(const QString& displayName)
@@ -227,7 +241,7 @@ class AvatarData extends SpatiallyNestable {
 
     /*@devdoc
      *  Gets the avatar's session display name.
-     *  @returns {string|null} - The avatar's display name.
+     *  @returns {string|null} The avatar's display name.
      */
     getSessionDisplayName(): string | null {
         // C++  QString& getSessionDisplayName()
@@ -236,7 +250,7 @@ class AvatarData extends SpatiallyNestable {
 
     /*@devdoc
      *  Sets the avatar's session display name.
-     *  @returns {string|null} - The avatar's session display name.
+     *  @param {string|null} sessionDisplayName - The avatar's session display name.
      */
     setSessionDisplayName(sessionDisplayName: string | null): void {
         // C++  void setSessionDisplayName(const QString& sessionDisplayName)
