@@ -90,7 +90,7 @@ class NLPacket extends Packet {
      *  @returns {number} The packet type version.
      */
     static versionInHeader(packet: Packet): number {
-        // C++  PacketVersion versionInHeader(const udt:: Packet& packet)
+        // C++  PacketVersion versionInHeader(const udt::Packet& packet)
         const headerOffset = Packet.totalHeaderSize(packet.isPartOfMessage());
         return packet.getMessageData().data.getUint8(headerOffset + 1);  // Skip the packet type.
     }

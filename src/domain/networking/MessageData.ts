@@ -29,8 +29,8 @@ import { PacketTypeValue } from "./udt/PacketHeaders";
  *  @property {Uint8Array} buffer - The raw packet or message data.
  *  @property {DataView} data - A DataView of the raw packet or message data.
  *      <em>Read-only.</em>
- *  @property {number} dataPosition - The current read/write position in processing the raw data. This is used to simplify the
- *      JavaScript instead of using <code>payloadStart</code>, <code>payloadCapacity</code>, and <code>payloadSize</code>.
+ *  @property {number} dataPosition - The current read/write position in the raw data. This is used to simplify the JavaScript
+ *      instead of using <code>payloadStart</code>, <code>payloadCapacity</code>, and <code>payloadSize</code>.
  *  @property {number} packetSize - The size of the packet.
  *  @property {SockAddr} senderSockAddr - The IP address and port of the sender.
  *  @property {number} receiveTime - The time stamp at which the packet or start of message was received.

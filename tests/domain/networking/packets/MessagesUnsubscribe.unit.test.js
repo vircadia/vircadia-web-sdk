@@ -44,6 +44,7 @@ describe("MessagesUnsubscribe - unit tests", () => {
             expect(packetSize).toBeLessThanOrEqual(UDT.MAX_PACKET_SIZE);
 
             expect(packet.getMessageData().dataPosition).toBe(EXPECTED_PACKET.length / 2);
+            expect(packet.getMessageData().packetSize).toBe(EXPECTED_PACKET.length / 2);
             expect(buffer2hex(packet.getMessageData().buffer.slice(0, EXPECTED_PACKET.length / 2))).toBe(EXPECTED_PACKET);
         });
 

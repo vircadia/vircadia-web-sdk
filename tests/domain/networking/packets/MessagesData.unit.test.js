@@ -44,6 +44,7 @@ describe("MessagesData - unit tests", () => {
         expect(packetSize).toBeLessThanOrEqual(UDT.MAX_PACKET_SIZE);
 
         expect(packet.getMessageData().dataPosition).toBe(EXPECTED_PACKET.length / 2);
+        expect(packet.getMessageData().packetSize).toBe(EXPECTED_PACKET.length / 2);
         expect(buffer2hex(packet.getMessageData().buffer.slice(0, EXPECTED_PACKET.length / 2))).toBe(EXPECTED_PACKET);
     });
 
@@ -69,6 +70,7 @@ describe("MessagesData - unit tests", () => {
         expect(packets[0].getDataSize()).toBe(UDT.MAX_PACKET_SIZE);
         expect(packets[1].getDataSize()).toBe(UDT.MAX_PACKET_SIZE);
         expect(packets[2].getMessageData().dataPosition).toBe(EXPECTED_PACKET_3.length / 2);
+        expect(packets[2].getMessageData().packetSize).toBe(EXPECTED_PACKET_3.length / 2);
 
         expect(buffer2hex(packets[0].getMessageData().buffer)).toBe(EXPECTED_PACKET_1);
         expect(buffer2hex(packets[1].getMessageData().buffer)).toBe(EXPECTED_PACKET_2);

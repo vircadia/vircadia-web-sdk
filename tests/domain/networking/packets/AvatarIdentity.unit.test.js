@@ -49,6 +49,7 @@ describe("AvatarIdentity - unit tests", () => {
 
         expect(buffer2hex(packet.getMessageData().buffer.slice(0, packet.getMessageData().dataPosition))).toBe(EXPECTED_PACKET);
         expect(packet.getMessageData().dataPosition).toBe(EXPECTED_PACKET.length / 2);
+        expect(packet.getMessageData().packetSize).toBe(EXPECTED_PACKET.length / 2);
     });
 
     test("Can read a single-avatar AvatarIdentity  message", () => {
