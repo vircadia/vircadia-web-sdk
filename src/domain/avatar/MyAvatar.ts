@@ -76,7 +76,8 @@ class MyAvatar extends Avatar {
     }
 
     /*@devdoc
-     *  Sends the avatar data in an {@link PacketType(1)|AvatarData} packet to the avatar mixer.
+     *  Sends the avatar data in an {@link PacketType(1)|AvatarData} packet to the avatar mixer. Also sends avatar traits in a
+     *  {@link PacketType(1)|SetAvatarTraits} packet if it is time to.
      *  @param {boolean} sendAll - <code>true</code> to send a full update even if nothing has changed, <code>false</code> to
      *      exclude certain data that hasn't changed since the last send.
      */

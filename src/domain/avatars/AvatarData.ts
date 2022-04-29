@@ -21,8 +21,9 @@ import SpatiallyNestable, { NestableType } from "../shared/SpatiallyNestable";
 import Quat, { quat } from "../shared/Quat";
 import Uuid from "../shared/Uuid";
 import Vec3, { vec3 } from "../shared/Vec3";
+import AvatarTraits from "./AvatarTraits";
 import ClientTraitsHandler from "./ClientTraitsHandler";
-import { TraitType } from "./AvatarTraits";
+
 
 /*@devdoc
  *  The <code>KillAvatarReason</code> namespace provides reasons that an avatar is killed.
@@ -548,7 +549,7 @@ class AvatarData extends SpatiallyNestable {
         this.#_skeletonModelURL = skeletonModelURL;
 
         if (this._clientTraitsHandler) {
-            this._clientTraitsHandler.markTraitUpdated(TraitType.SkeletonModelURL);
+            this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonModelURL);
         }
 
         this.#_skeletonModelURLChanged.emit();

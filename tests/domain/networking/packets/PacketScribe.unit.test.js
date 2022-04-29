@@ -38,6 +38,8 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.DomainListRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainConnectionDenied).toBe("object");
         expect(typeof PacketScribe.DomainConnectionDenied.read).toBe("function");
+        expect(typeof PacketScribe.SetAvatarTraits).toBe("object");
+        expect(typeof PacketScribe.SetAvatarTraits.write).toBe("function");
         expect(typeof PacketScribe.AvatarIdentity).toBe("object");
         expect(typeof PacketScribe.AvatarIdentity.read).toBe("function");
         expect(typeof PacketScribe.AvatarIdentity.write).toBe("function");

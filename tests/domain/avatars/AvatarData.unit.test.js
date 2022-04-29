@@ -44,4 +44,5 @@ describe("AvatarData - unit tests", () => {
         avatarData.markIdentityDataChanged();
         expect(avatarData.getIdentityDataChanged()).toBe(true);
     });
+
 });

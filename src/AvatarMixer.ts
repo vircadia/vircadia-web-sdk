@@ -10,12 +10,14 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import AssignmentClient from "./domain/AssignmentClient";
-import AvatarManager from "./domain/AvatarManager";
 import AvatarListInterface from "./domain/interfaces/AvatarListInterface";
 import MyAvatarInterface from "./domain/interfaces/MyAvatarInterface";
+import Node from "./domain/networking/Node";
+import NodeList from "./domain/networking/NodeList";
 import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
+import AssignmentClient from "./domain/AssignmentClient";
+import AvatarManager from "./domain/AvatarManager";
 
 
 /*@sdkdoc
@@ -84,9 +86,12 @@ class AvatarMixer extends AssignmentClient {
      */
 
 
-    #_avatarManager;
-    #_myAvatarInterface;
-    #_avatarListInterface;
+    // Context.
+    #_nodeList: NodeList;
+    #_avatarManager: AvatarManager;
+
+    #_myAvatarInterface: MyAvatarInterface;
+    #_avatarListInterface: AvatarListInterface;
 
 
     constructor(contextID: number) {
@@ -94,7 +99,11 @@ class AvatarMixer extends AssignmentClient {
 
         // Context
         ContextManager.set(contextID, AvatarManager, contextID);
+        this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
         this.#_avatarManager = ContextManager.get(contextID, AvatarManager) as AvatarManager;
+
+        // C++  Application::Application()
+        this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
 
         // C++  void Application::init()
         this.#_avatarManager.init();
@@ -118,8 +127,32 @@ class AvatarMixer extends AssignmentClient {
      *  client avatar state.
      */
     update(): void {
+        // C++  Application::update()
+
         this.#_avatarManager.updateMyAvatar();
     }
+
+
+    // Slot
+    #nodeActivated = (node: Node): void => {
+        // C++  Various
+        const nodeType = node.getType();
+        if (nodeType !== NodeType.AvatarMixer) {
+            return;
+        }
+
+        // C++  void Application::nodeActivated(Node* node)
+
+        // WEBRTC TODO: Address further C++ code - server skeleton model URL override.
+
+        const myAvatar = this.#_avatarManager.getMyAvatar();
+        myAvatar.markIdentityDataChanged();
+        myAvatar.resetLastSent();
+
+        // WEBRTC TODO: Address further C++ code - interstitial mode.
+
+        myAvatar.sendAvatarDataPacket(true);
+    };
 
 }
 

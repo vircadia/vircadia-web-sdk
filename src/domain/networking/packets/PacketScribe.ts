@@ -20,6 +20,7 @@ import BulkAvatarData from "./BulkAvatarData";
 import SilentAudioFrame from "./SilentAudioFrame";
 import DomainListRequest from "./DomainListRequest";
 import DomainConnectionDenied from "./DomainConnectionDenied";
+import SetAvatarTraits from "./SetAvatarTraits";
 import AvatarIdentity from "./AvatarIdentity";
 import DomainConnectRequest from "./DomainConnectRequest";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
@@ -31,7 +32,6 @@ import NegotiateAudioFormat from "./NegotiateAudioFormat";
 import SelectedAudioFormat from "./SelectedAudioFormat";
 import BulkAvatarTraits from "./BulkAvatarTraits";
 import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
-import SetAvatarTraits from "./SetAvatarTraits";
 
 
 /*@devdoc
@@ -62,6 +62,8 @@ import SetAvatarTraits from "./SetAvatarTraits";
  *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
  *  @property {function} DomainConnectionDenied.read -
  *      {@link PacketScribe.DomainConnectionDenied&period;read|DomainConnectionDenied&period;read}
+ *  @property {function} SetAvatarTraits.write -
+ *      {@link PacketScribe.SetAvatarTraits&period;write|SetAvatarTraits&period;write}
  *  @property {function} AvatarIdentity.read -
  *      {@link PacketScribe.AvatarIdentity&period;read|AvatarIdentity&period;read}
  *  @property {function} AvatarIdentity.write -
@@ -88,8 +90,6 @@ import SetAvatarTraits from "./SetAvatarTraits";
  *      {@link PacketScribe.BulkAvatarTraits&period;read|BulkAvatarTraits&period;read}
  *  @property {function} BulkAvatarTraitsAck.write -
  *      {@link PacketScribe.BulkAvatarTraitsAck&period;write|BulkAvatarTraitsAck&period;write}
- *  @property {function} SetAvatarTraits.write -
- *      {@link PacketScribe.SetAvatarTraits&period;write|SetAvatarTraits&period;write}
  */
 
 // WEBRTC TODO: Implement similar in C++ to collect all packet reading/writing into the networking library code (and revise this
@@ -110,6 +110,7 @@ const PacketScribe = {
     SilentAudioFrame,
     DomainListRequest,
     DomainConnectionDenied,
+    SetAvatarTraits,
     AvatarIdentity,
     DomainConnectRequest,
     DomainDisconnectRequest,
@@ -120,8 +121,7 @@ const PacketScribe = {
     NegotiateAudioFormat,
     SelectedAudioFormat,
     BulkAvatarTraits,
-    BulkAvatarTraitsAck,
-    SetAvatarTraits
+    BulkAvatarTraitsAck
 };
 
 export default PacketScribe;

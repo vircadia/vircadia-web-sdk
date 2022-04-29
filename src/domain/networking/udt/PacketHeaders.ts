@@ -190,7 +190,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} ICEServerPeerInformation - <code>22</code>
  *  @property {PacketType} ICEServerQuery - <code>23</code>
  *  @property {PacketType} OctreeStats - <code>24</code>
- *  @property {PacketType} SetAvatarTraits - <code>25</code>
+ *  @property {PacketType} SetAvatarTraits - <code>25</code> - The user client sends this to the Avatar Mixer to update it with
+ *      avatar traits: skeleton model URL, skeleton data, avatar entities, or avatar grab data.<br />
+ *      {@link PacketScribe.SetAvatarTraitsDetails}
  *  @property {PacketType} InjectorGainSet - <code>26</code>
  *  @property {PacketType} AssignmentClientStatus - <code>27</code>
  *  @property {PacketType} NoisyMute - <code>28</code>
