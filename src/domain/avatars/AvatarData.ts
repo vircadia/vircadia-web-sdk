@@ -78,7 +78,7 @@ enum AvatarDataDetail {
  *      on the display name and is unique among all avatars present in the domain. <em>Read-only.</em>
  *  @property {Signal<AvatarData~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the avatar's session
  *      display name changes.
- *  @property {string|null} skeletonModelURL - The URL of avatar's FST, glTF, or FBX model file.
+ *  @property {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *  @property {Signal<AvatarData~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton model
  *      URL changes.
  *  @property {vec3} position - The position of the avatar in the domain.
@@ -155,7 +155,7 @@ class AvatarData extends SpatiallyNestable {
     }
 
     get skeletonModelURL(): string | null {
-        // WEBRTC TODO: return the default avatar url if null
+        // WEBRTC TODO: return the default avatar URL if null.
         return this.#_skeletonModelURL;
     }
 
@@ -531,7 +531,7 @@ class AvatarData extends SpatiallyNestable {
 
     /*@devdoc
      *  Sets the avatar's skeleton model URL.
-     *  @param {string|null} skeletonModelURL - The URL of avatar's FST, glTF, or FBX model file.
+     *  @param {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
      */
     setSkeletonModelURL(skeletonModelURL: string | null): void {
         // C++  void setSkeletonModelURL(const QUrl& skeletonModelURL)
@@ -540,7 +540,7 @@ class AvatarData extends SpatiallyNestable {
             console.log("[avatars] setSkeletonModelURL() called with empty URL.");
         }
 
-        // WEBRTC TODO: set #_skeletonModelURL to the default avatar url when skeletonModelURL is an empty url
+        // WEBRTC TODO: Set #_skeletonModelURL to the default avatar URL when skeletonModelURL is an empty URL.
 
         if (skeletonModelURL === this.#_skeletonModelURL) {
             return;

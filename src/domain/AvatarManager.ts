@@ -40,7 +40,6 @@ class AvatarManager extends AvatarHashMap {
     #_contextID;
     #_nodeList;
 
-
     #_myAvatar;
 
     #_lastSendAvatarDataTime = 0;

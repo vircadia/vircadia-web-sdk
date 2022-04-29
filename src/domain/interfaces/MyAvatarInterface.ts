@@ -28,7 +28,7 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *  @property {Signal<MyAvatarInterface~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the session
  *      display name changes.
  *      <em>Read-only.</em>
- *  @property {string} skeletonModelURL - The URL of avatar's FST, glTF, or FBX model file.
+ *  @property {string} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *  @property {Signal<MyAvatarInterface~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton
  *      model URL changes.
  *  @property {vec3} position - The position of the avatar in the domain.

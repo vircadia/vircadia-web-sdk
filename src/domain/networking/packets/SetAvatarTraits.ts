@@ -30,7 +30,7 @@ const SetAvatarTraits = new class {
      *  @typedef {object} PacketScribe.SetAvatarTraitsDetails
      *  @property {number} currentTraitVersion - Trait sending sequence number. This should be incremented for each
      *      <code>SetAvatarTraits</code> packet written.
-     *  @property {string} skeletonModelURL - The URL of avatar's FST, glTF, or FBX model file.
+     *  @property {string} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
      *  @property {ClientTraitStatus[]} traitStatuses - The status of each avatar trait.
      *  @property {boolean} initialSend - <code>true</code> to send all traits, <code>false</code> to send only those that have
      *      been updated.

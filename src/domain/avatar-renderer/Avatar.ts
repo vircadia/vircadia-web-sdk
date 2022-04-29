@@ -25,7 +25,7 @@ import AvatarData from "../avatars/AvatarData";
  *      on the display name and is unique among all avatars present in the domain. <em>Read-only.</em>
  *  @property {Signal<AvatarData~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the avatar's session
  *      display name changes.
- *  @property {string|null} skeletonModelURL - The URL of avatar's FST, glTF, or FBX model file.
+ *  @property {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *  @property {Signal<AvatarData~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton model
  *      URL changes.
  *  @property {vec3} position - The position of the avatar in the domain.
