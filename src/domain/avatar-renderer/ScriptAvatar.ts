@@ -66,7 +66,7 @@ class ScriptAvatar {
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
-                return avatar.displayName;
+                return avatar.displayName !== null ? avatar.displayName : "";
             }
         }
         return "";
@@ -92,7 +92,7 @@ class ScriptAvatar {
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
-                return avatar.sessionDisplayName;
+                return avatar.sessionDisplayName !== null ? avatar.sessionDisplayName : "";
             }
         }
         return "";

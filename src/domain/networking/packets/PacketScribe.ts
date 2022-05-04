@@ -20,6 +20,7 @@ import BulkAvatarData from "./BulkAvatarData";
 import SilentAudioFrame from "./SilentAudioFrame";
 import DomainListRequest from "./DomainListRequest";
 import DomainConnectionDenied from "./DomainConnectionDenied";
+import SetAvatarTraits from "./SetAvatarTraits";
 import AvatarIdentity from "./AvatarIdentity";
 import DomainConnectRequest from "./DomainConnectRequest";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
@@ -61,6 +62,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
  *  @property {function} DomainConnectionDenied.read -
  *      {@link PacketScribe.DomainConnectionDenied&period;read|DomainConnectionDenied&period;read}
+ *  @property {function} SetAvatarTraits.write -
+ *      {@link PacketScribe.SetAvatarTraits&period;write|SetAvatarTraits&period;write}
  *  @property {function} AvatarIdentity.read -
  *      {@link PacketScribe.AvatarIdentity&period;read|AvatarIdentity&period;read}
  *  @property {function} AvatarIdentity.write -
@@ -85,7 +88,7 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.SelectedAudioFormat&period;read|SelectedAudioFormat&period;read}
  *  @property {function} BulkAvatarTraits.read -
  *      {@link PacketScribe.BulkAvatarTraits&period;read|BulkAvatarTraits&period;read}
- *  @property {function} BulkAvatarTraitsAck.write  -
+ *  @property {function} BulkAvatarTraitsAck.write -
  *      {@link PacketScribe.BulkAvatarTraitsAck&period;write|BulkAvatarTraitsAck&period;write}
  */
 
@@ -107,6 +110,7 @@ const PacketScribe = {
     SilentAudioFrame,
     DomainListRequest,
     DomainConnectionDenied,
+    SetAvatarTraits,
     AvatarIdentity,
     DomainConnectRequest,
     DomainDisconnectRequest,
