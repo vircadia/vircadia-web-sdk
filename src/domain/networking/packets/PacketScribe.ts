@@ -9,6 +9,7 @@
 //
 
 // In packet number order.
+import EntityQuery from "./EntityQuery";
 import DomainList from "./DomainList";
 import Ping from "./Ping";
 import PingReply from "./PingReply";
@@ -37,6 +38,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *  The <code>PacketScribe</code> namespace provides packet reading and writing functions.
  *  <p>C++: N/A</p>
  *  @namespace PacketScribe
+ *  @property {function} EntityQuery.write -
+ *      {@link PacketScribe.EntityQuery&period;write|EntityQuery&period;write}
  *  @property {function} DomainList.read -
  *      {@link PacketScribe.DomainList&period;read|DomainList&period;read}
  *  @property {function} Ping.read -
@@ -96,6 +99,7 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
 
 const PacketScribe = {
     // In packet number order.
+    EntityQuery,
     DomainList,
     Ping,
     PingReply,

@@ -557,6 +557,8 @@ const PacketType = new class {
         // C++  PacketVersion versionForPacketType(PacketType packetType)
         const DEFAULT_VERSION = 22;
         switch (packetType) {
+            case this.EntityQuery:
+                return DEFAULT_VERSION;
             case this.DomainList:
                 return this.#_DomainListVersion.SocketTypes;
             case this.Ping:
