@@ -11,6 +11,7 @@
 
 import { EntityQueryDetails } from "../networking/packets/EntityQuery";
 import ConicalViewFrustrum from "../shared/ConicalViewFrustrum";
+import OctreeConstants from "./OctreeConstants";
 
 // WEBRTC TODO: Doc.
 enum OctreeQueryFlags {
@@ -29,19 +30,11 @@ enum OctreeQueryFlags {
 class OctreeQuery {
     // C++ class OctreeQuery : public NodeData
 
-    static readonly #DEFAULT_MAX_OCTREE_PPS = 600;
-    // ~20 miles.. This is the number of meters of the 0.0 to 1.0 voxel universe
-    static readonly #TREE_SCALE = 32768;
-    // max distance where a 1x1x1 cube is visible for 20:20 vision
-    static readonly #DEFAULT_VISIBILITY_DISTANCE_FOR_UNIT_ELEMENT = 400.0;
-    // the default maximum PPS we think any octree based server should send to a client
-    static readonly #DEFAULT_OCTREE_SIZE_SCALE = this.#TREE_SCALE * this.#DEFAULT_VISIBILITY_DISTANCE_FOR_UNIT_ELEMENT;
-
     #_connectionID = 0;
     #_conicalViews: Array<ConicalViewFrustrum> = [new ConicalViewFrustrum()];
-    #_maxQueryPPS = OctreeQuery.#DEFAULT_MAX_OCTREE_PPS;
-    #_octreeElementSizeScale = OctreeQuery.#DEFAULT_OCTREE_SIZE_SCALE;
-    #_boundaryLevelAdjust = 0; // / used for LOD calculations
+    #_maxQueryPPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
+    #_octreeElementSizeScale = OctreeConstants.DEFAULT_OCTREE_SIZE_SCALE;
+    #_boundaryLevelAdjust = 0; // used for LOD calculations
     #_jsonParameters: Record<string, unknown> = {};
 
     constructor(randomizeConnectionID: boolean) {
