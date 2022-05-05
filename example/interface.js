@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } from "../dist/Vircadia.js";
+import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer, Uuid } from "../dist/Vircadia.js";
 
 (function () {
 
@@ -19,6 +19,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
 
     // API objects.
     let domainServer = null;
+    let camera = null;
     let audioMixer = null;
     let avatarMixer = null;
     let avatarMixerGameLoop = null;
@@ -60,6 +61,11 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
             domainSessionUUID.value = sessionUUID.stringify();
         });
 
+    }());
+
+    // Camera
+    (function () {
+        camera = new Camera(contextID);
     }());
 
     // Audio Mixer
