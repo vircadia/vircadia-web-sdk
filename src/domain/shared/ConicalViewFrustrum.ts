@@ -44,20 +44,50 @@ class ConicalViewFrustrum {
         return this.#_position;
     }
 
+    // WEBRTC TODO: Original C++ code sets #_position via the method set(const ViewFrustum& viewFrustrum).
+    // An individual setter is provided here until the class ViewFrustum is implemented.
+    set position(position: vec3) {
+        this.#_position = position;
+    }
+
     get direction(): vec3 {
         return this.#_direction;
+    }
+
+    // WEBRTC TODO: Original C++ code sets #_direction via set(const ViewFrustum& viewFrustrum).
+    // An individual setter is provided here until the class ViewFrustum is implemented.
+    set direction(direction: vec3) {
+        this.#_direction = direction;
     }
 
     get angle(): number {
         return this.#_angle;
     }
 
+    // WEBRTC TODO: Original C++ code sets #_angle via set(const ViewFrustum& viewFrustrum).
+    // An individual setter is provided here until the class ViewFrustum is implemented.
+    set angle(angle: number) {
+        this.#_angle = angle;
+    }
+
     get farClip(): number {
         return this.#_farClip;
     }
 
+    // WEBRTC TODO: Original C++ code sets #_farClip via set(const ViewFrustum& viewFrustrum).
+    // An individual setter is provided here until the class ViewFrustum is implemented.
+    set farClip(farClip: number) {
+        this.#_farClip = farClip;
+    }
+
     get radius(): number {
         return this.#_radius;
+    }
+
+    // WEBRTC TODO: Original C++ code sets #_radius via set(const ViewFrustum& viewFrustrum).
+    // An individual setter is provided here until the class ViewFrustum is implemented.
+    set radius(radius: number) {
+        this.#_radius = radius;
     }
 
     // WEBRTC TODO: Address further C++ code.
