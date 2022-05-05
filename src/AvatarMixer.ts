@@ -18,11 +18,13 @@ import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
 import AssignmentClient from "./domain/AssignmentClient";
 import AvatarManager from "./domain/AvatarManager";
+import Camera from "./domain/shared/Camera";
 
 
 /*@sdkdoc
  *  The <code>AvatarMixer</code> class provides the interface for working with avatar mixer assignment clients.
  *  <p>Prerequisite: A {@link DomainServer} object must be created in order to set up the domain context.</p>
+ *  <p>Prerequisite: A {@link Camera} object must be created for this class to use.</p>
  *  @class AvatarMixer
  *  @extends AssignmentClient
  *  @param {number} contextID - The domain context to use. See {@link DomainServer|DomainServer.contextID}.
@@ -86,7 +88,11 @@ class AvatarMixer extends AssignmentClient {
      */
 
 
+    static readonly #_MIN_PERIOD_BETWEEN_QUERIES = 3000;  // 3s.
+
+
     // Context.
+    #_camera: Camera;
     #_nodeList: NodeList;
     #_avatarManager: AvatarManager;
 
@@ -94,11 +100,15 @@ class AvatarMixer extends AssignmentClient {
     #_avatarListInterface: AvatarListInterface;
 
 
+    #_queryExpiry = 0;
+
+
     constructor(contextID: number) {
         super(contextID, NodeType.AvatarMixer);
 
         // Context
         ContextManager.set(contextID, AvatarManager, contextID);
+        this.#_camera = ContextManager.get(contextID, Camera) as Camera;
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
         this.#_avatarManager = ContextManager.get(contextID, AvatarManager) as AvatarManager;
 
@@ -127,9 +137,27 @@ class AvatarMixer extends AssignmentClient {
      *  client avatar state.
      */
     update(): void {
-        // C++  Application::update()
+        // C++  void Application::update(float deltaTime)
 
+        // Update the avatar mixer with user client avatar data.
         this.#_avatarManager.updateMyAvatar();
+
+        // Get updated avatar data from other clients.
+        const viewIsDifferentEnough = this.#_camera.hasViewChanged;
+        const now = Date.now();
+        if (now > this.#_queryExpiry || viewIsDifferentEnough) {
+            this.#queryAvatars();
+            this.#_queryExpiry = now + AvatarMixer.#_MIN_PERIOD_BETWEEN_QUERIES;
+        }
+
+    }
+
+
+    #queryAvatars(): void {
+        // C++  void Application::queryAvatars()
+
+        // $$$$$$$
+
     }
 
 

@@ -16,11 +16,34 @@
  *  @variation 0
  *  @property {string} contextItemType="Camera" - The type name for use with the {@link ContextManager}.
  *      <p><em>Static. Read-only.</em></p>
+ *  @property {boolean} hasViewChanged - <code>true</code> if the camera view has changed significantly since the previous
+ *      {@link update} call, <code>false</code> if it hasn't.
  */
 class Camera {
     // C++  class Camera : public QObject
 
     static readonly contextItemType = "Camera";
+
+
+    // Property values.
+    #_hasViewChanged = false;
+
+
+    get hasViewChanged(): boolean {
+        return this.#_hasViewChanged;
+    }
+
+
+    /*@devdoc
+     *  Game loop update method that updates <code>hasViewChanged</code> ready for use by
+     *  {@link AvatarMixer#update|AvatarMixer.update} and {@link EntityServer#update|EntityServer.update}.
+     *  @method Camera(0).update
+     */
+    update(): void {
+
+        // $$$$$$$ Update hasViewChanged.
+
+    }
 
 }
 

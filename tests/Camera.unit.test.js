@@ -23,6 +23,13 @@ describe("Camera - unit tests", () => {
         expect(camera instanceof Camera).toBe(true);
     });
 
+    test("Can call update method", () => {
+        const domainServer = new DomainServer();
+        const camera = new Camera(domainServer.contextID);
+        camera.update();
+        expect(true).toBe(true);
+    });
+
 
     log.mockReset();
 });

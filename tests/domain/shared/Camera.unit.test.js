@@ -20,8 +20,16 @@ describe("Camera - unit tests", () => {
     test("The Camera can be obtained from the ContextManager", () => {
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, Camera);
-        const addressManager = ContextManager.get(contextID, Camera);
-        expect(addressManager instanceof Camera).toBe(true);
+        const camera = ContextManager.get(contextID, Camera);
+        expect(camera instanceof Camera).toBe(true);
+    });
+
+    test("Default Camera property values", () => {
+        const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, Camera);
+        const camera = ContextManager.get(contextID, Camera);
+
+        expect(camera.hasViewChanged).toBe(false);
     });
 
 

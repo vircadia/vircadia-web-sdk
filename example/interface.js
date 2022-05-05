@@ -380,7 +380,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer, 
             gameLoopStart = now;
             gameRateValue.value = gameRate.toFixed(1);
 
-            // Update the avatar mixer with latest user client avatar data.
+            // Update the camera ready for use by the avatar mixer update.
+            camera.update();
+
+            // Update the avatar mixer with latest user client avatar data and get latest data from avatar mixer.
             avatarMixerGameLoop();
 
             const timeout = Math.max(TARGET_INTERVAL - (Date.now() - gameLoopStart), MIN_TIMEOUT);

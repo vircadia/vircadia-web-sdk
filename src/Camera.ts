@@ -24,9 +24,24 @@ import ContextManager from "./domain/shared/ContextManager";
 class CameraAPI {
     // Named "CameraAPI" to avoid conflict with internal "Camera" class.
 
+    // Context.
+    #_camera: Camera;  // Internal camera object.
+
+
     constructor(contextID: number) {
         // Context
         ContextManager.set(contextID, Camera, contextID);
+        this.#_camera = ContextManager.get(contextID, Camera) as Camera;
+    }
+
+    /*@sdkdoc
+     *  Game loop update method that should be called immediately prior to calling {@link AvatarMixer#update|AvatarMixer.update}
+     *  and {@link EntityServer#update|EntityServer.update} in order to update the camera information ready for these methods to
+     *  use.
+     *  @method Camera.update
+     */
+    update(): void {
+        this.#_camera.update();
     }
 
 }
