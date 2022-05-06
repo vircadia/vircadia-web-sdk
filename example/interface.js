@@ -66,6 +66,91 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer, 
     // Camera
     (function () {
         camera = new Camera(contextID);
+
+        const cameraPosX = document.getElementById("cameraPosX");
+        const cameraPosY = document.getElementById("cameraPosY");
+        const cameraPosZ = document.getElementById("cameraPosZ");
+
+        const cameraPosition = camera.position;
+        cameraPosX.value = cameraPosition.x;
+        cameraPosY.value = cameraPosition.y;
+        cameraPosZ.value = cameraPosition.z;
+
+        function onPositionChange() {
+            camera.position = {
+                x: parseFloat(cameraPosX.value),
+                y: parseFloat(cameraPosY.value),
+                z: parseFloat(cameraPosZ.value)
+            };
+        }
+        cameraPosX.addEventListener("blur", onPositionChange);
+        cameraPosY.addEventListener("blur", onPositionChange);
+        cameraPosZ.addEventListener("blur", onPositionChange);
+        cameraPosX.addEventListener("change", onPositionChange);
+        cameraPosY.addEventListener("change", onPositionChange);
+        cameraPosZ.addEventListener("change", onPositionChange);
+
+        const cameraRotX = document.getElementById("cameraRotX");
+        const cameraRotY = document.getElementById("cameraRotY");
+        const cameraRotZ = document.getElementById("cameraRotZ");
+        const cameraRotW = document.getElementById("cameraRotW");
+
+        const cameraOrientation = camera.orientation;
+        cameraRotX.value = cameraOrientation.x;
+        cameraRotY.value = cameraOrientation.y;
+        cameraRotZ.value = cameraOrientation.z;
+        cameraRotW.value = cameraOrientation.w;
+
+        function onOrientationChange() {
+            camera.orientation = {
+                x: parseFloat(cameraRotX.value),
+                y: parseFloat(cameraRotY.value),
+                z: parseFloat(cameraRotZ.value),
+                w: parseFloat(cameraRotW.value)
+            };
+        }
+
+        cameraRotX.addEventListener("blur", onOrientationChange);
+        cameraRotY.addEventListener("blur", onOrientationChange);
+        cameraRotZ.addEventListener("blur", onOrientationChange);
+        cameraRotW.addEventListener("blur", onOrientationChange);
+        cameraRotX.addEventListener("change", onOrientationChange);
+        cameraRotY.addEventListener("change", onOrientationChange);
+        cameraRotZ.addEventListener("change", onOrientationChange);
+        cameraRotW.addEventListener("change", onOrientationChange);
+
+        const fieldOfView = document.getElementById("fieldOfView");
+        fieldOfView.value = camera.fieldOfView;
+        function onFieldOfViewChange() {
+            camera.fieldOfView = parseFloat(fieldOfView.value);
+        }
+        fieldOfView.addEventListener("blur", onFieldOfViewChange);
+        fieldOfView.addEventListener("change", onFieldOfViewChange);
+
+        const aspectRatio = document.getElementById("aspectRatio");
+        aspectRatio.value = camera.aspectRatio;
+        function onAspectRatioChange() {
+            camera.aspectRatio = parseFloat(aspectRatio.value);
+        }
+        aspectRatio.addEventListener("blur", onAspectRatioChange);
+        aspectRatio.addEventListener("change", onAspectRatioChange);
+
+        const farClip = document.getElementById("farClip");
+        farClip.value = camera.farClip;
+        function onFarClipChange() {
+            camera.farClip = parseFloat(farClip.value);
+        }
+        farClip.addEventListener("blur", onFarClipChange);
+        farClip.addEventListener("change", onFarClipChange);
+
+        const centerRadius = document.getElementById("centerRadius");
+        centerRadius.value = camera.centerRadius;
+        function onCenterRadiusChange() {
+            camera.centerRadius = parseFloat(centerRadius.value);
+        }
+        centerRadius.addEventListener("blur", onCenterRadiusChange);
+        centerRadius.addEventListener("change", onCenterRadiusChange);
+
     }());
 
     // Audio Mixer
