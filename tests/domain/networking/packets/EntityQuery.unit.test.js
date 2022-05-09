@@ -21,7 +21,7 @@ describe("EntityQuery - unit tests", () => {
 
     test("Can write an EntityQuery packet", () => {
         /* eslint-disable max-len */
-        const EXPECTED_PACKET = "000000002a160000416c015bb0a3c1c4f8b8c08ededbc0743c5e3f000000007624fe3e818000c000004040580200000000484b0000000000000000";
+        const EXPECTED_PACKET = "000000002a170000416c015bb0a3c1c4f8b8c08ededbc0743c5e3f000000007624fe3e818000c000004040580200000000484b0000000000000000";
         /* eslint-enable max-len */
 
         const octreeQuery = new OctreeQuery();
