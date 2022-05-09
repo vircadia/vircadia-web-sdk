@@ -89,6 +89,14 @@ class OctreeQuery {
         };
     }
 
+    /*@devdoc
+     *  Increment the connection's ID.
+     */
+    incrementConnectionID(): void {
+        // C++ void incrementConnectionID()
+        this.#_connectionID += 1;
+    }
+
 }
 
 export default OctreeQuery;
