@@ -46,6 +46,22 @@ class OctreeQuery {
         }
     }
 
+    set maxQueryPacketsPerSecond(maxQueryPPS: number) {
+        this.#_maxQueryPPS = maxQueryPPS;
+    }
+
+    set octreeSizeScale(octreeSizeScale: number) {
+        this.#_octreeElementSizeScale = octreeSizeScale;
+    }
+
+    set boundaryLevelAdjust(boundaryLevelAdjust: number) {
+        this.#_boundaryLevelAdjust = boundaryLevelAdjust;
+    }
+
+    set reportInitialCompletion(reportInitialCompletion: boolean) {
+        this.#_reportInitialCompletion = reportInitialCompletion;
+    }
+
     /*@devdoc
      *  Fills in an EntityQueryDetails.
      *  @returns {EntityQueryDetails} An EntityQueryDetails.
