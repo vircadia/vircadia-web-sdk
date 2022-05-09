@@ -24,6 +24,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, EntitySe
     let avatarMixerGameLoop = null;
     let messageMixer = null;
     let entityServer = null;
+    let entityServerGameLoop = null;
 
 
     // Domain Server
@@ -355,6 +356,11 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, EntitySe
         onStateChanged(entityServer.state);
         entityServer.onStateChanged = onStateChanged;
 
+        // Game Loop
+
+        entityServerGameLoop = () => {
+            entityServer.update();
+        };
     }());
 
     // Wire up mixers.
@@ -382,6 +388,8 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, EntitySe
 
             // Update the avatar mixer with latest user client avatar data.
             avatarMixerGameLoop();
+
+            entityServerGameLoop();
 
             const timeout = Math.max(TARGET_INTERVAL - (Date.now() - gameLoopStart), MIN_TIMEOUT);
             gameLoopTimer = setTimeout(gameLoop, timeout);
