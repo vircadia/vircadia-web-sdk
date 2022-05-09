@@ -489,6 +489,16 @@ const PacketType = new class {
     ]);
 
 
+    readonly #_EntityVersion = {
+        // C++ EntityVersion
+        ParticleSpin: 92
+    };
+
+    readonly #_EntityQueryPacketVersion = {
+        // C++ EntityQueryPacketVersion
+        ConicalFrustrums: 23
+    };
+
     readonly #_DomainListVersion = {
         // C++  DomainListVersion
         HasConnectReason: 24,
@@ -557,10 +567,10 @@ const PacketType = new class {
         // C++  PacketVersion versionForPacketType(PacketType packetType)
         const DEFAULT_VERSION = 22;
         switch (packetType) {
-            case this.EntityQuery:
-                return DEFAULT_VERSION;
             case this.DomainList:
                 return this.#_DomainListVersion.SocketTypes;
+            case this.EntityQuery:
+                return this.#_EntityQueryPacketVersion.ConicalFrustrums;
             case this.Ping:
                 return this.#_PingVersion.IncludeConnectionID;
             case this.PingReply:
@@ -605,6 +615,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.SelectedAudioFormat:
                 return DEFAULT_VERSION;
+            case this.EntityQueryInitialResultsComplete:
+                return this.#_EntityVersion.ParticleSpin;
             case this.BulkAvatarTraits:
                 return this.#_AvatarMixerPacketVersion.AvatarTraitsAck;
             case this.BulkAvatarTraitsAck:
