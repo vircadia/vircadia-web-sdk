@@ -36,6 +36,7 @@ class OctreeQuery {
     #_octreeElementSizeScale = OctreeConstants.DEFAULT_OCTREE_SIZE_SCALE;
     #_boundaryLevelAdjust = 0; // used for LOD calculations
     #_jsonParameters: Record<string, unknown> = {};
+    #_reportInitialCompletion = false;
 
     constructor(randomizeConnectionID: boolean) {
         if (randomizeConnectionID) {
@@ -75,7 +76,7 @@ class OctreeQuery {
         const octreeElementSizeScale = this.#_octreeElementSizeScale;
         const boundaryLevelAdjust = this.#_boundaryLevelAdjust;
         const jsonParameters = this.#_jsonParameters;
-        const queryFlags = OctreeQueryFlags.NoFlags;
+        const queryFlags = this.#_reportInitialCompletion ? OctreeQueryFlags.WantInitialCompletion : OctreeQueryFlags.NoFlags;
 
         return {
             connectionID,
