@@ -13,8 +13,15 @@ import { EntityQueryDetails } from "../networking/packets/EntityQuery";
 import ConicalViewFrustrum from "../shared/ConicalViewFrustrum";
 import OctreeConstants from "./OctreeConstants";
 
-// WEBRTC TODO: Doc.
+/*@devdoc
+ *  The <code>OctreeQueryFlags</code> namespace provides flags modifying an octree query.
+ *  @namespace OctreeQueryFlags
+ *  @property {number} NoFlags = 0 - No flag.<em>Read-only.</em>
+ *  @property {number} WantInitialCompletion = 1 - Notify that the initial query is complete.<em>Read-only.</em>
+ *
+ */
 enum OctreeQueryFlags {
+    // C++ OctreeQueryFlags : uint16_t
     NoFlags,
     WantInitialCompletion
 }
@@ -68,6 +75,7 @@ class OctreeQuery {
      *  @returns {EntityQueryDetails} An EntityQueryDetails.
      */
     getBroadcastData(): EntityQueryDetails {
+        // C++ int getBroadcastData(unsigned char* destinationBuffer);
         const connectionID = this.#_connectionID;
 
         const numFrustrums = this.#_conicalViews.length;
