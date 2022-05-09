@@ -13,7 +13,8 @@
  *  The <code>OctreeConstants</code> namespace provides constants for working with octrees.
  *  @namespace OctreeConstants
  *
- *  @property {number} DEFAULT_MAX_OCTREE_PPS - <code>600</code> Default maximum octree packets per second value set to <code>600</code>.
+ *  @property {number} DEFAULT_MAX_OCTREE_PPS - <code>600</code> Default maximum octree packets per second value
+ *  set to <code>600</code>.
  *      <em>Read-only.</em>
  */
 const OctreeConstants = new class {
