@@ -8,8 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { quat } from "./Quat";
 import UDT from "../networking/udt/UDT";
+import assert from "./assert";
+import { quat } from "./Quat";
 
 
 /*@devdoc
@@ -138,6 +139,27 @@ const GLMHelpers = new class {
         /* eslint-enable @typescript-eslint/no-magic-numbers, @typescript-eslint/no-non-null-assertion */
     }
 
+    /*@devdoc
+     *  Checks whether two numbers have very similar values.
+     *  @function.closeEnough
+     *  @param {number} a - The first number.
+     *  @param {number} b - The second number.
+     *  @param {number} relativeError - The acceptable maximum relative error, range <code>0.0 &ndash; 1.0</code>.
+     *  @returns {boolean} <code>true</code> if the absolute difference divided by the absolute average is less than the
+     *      relative error.
+     */
+    // eslint-disable-next-line class-methods-use-this
+    closeEnough(a: number, b: number, relativeError: number): boolean {
+        // C++  bool closeEnough(float a, float b, float relativeError)
+
+        // WEBRTC TODO: Move into GLMHelpers class.
+
+        assert(relativeError >= 0.0);
+        // NOTE: we add EPSILON to the denominator so we can avoid checking for division by zero.
+        // This method works fine when: Math.abs(a + b) >> EPSILON
+        const EPSILON = 0.000001;
+        return Math.abs(a - b) / (Math.abs(a + b) / 2.0 + EPSILON) <= relativeError;
+    }
 
 }();
 

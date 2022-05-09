@@ -8,8 +8,18 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import GLMHelpers from "./GLMHelpers";
 import Quat, { quat } from "./Quat";
 import Vec3, { vec3 } from "./Vec3";
+
+
+type ConicalViewFrustum = {
+    position: vec3,
+    direction: vec3,
+    angle: number,
+    farClip: number,
+    radius: number
+};
 
 
 /*@devdoc
@@ -18,6 +28,7 @@ import Vec3, { vec3 } from "./Vec3";
  *
  *  @class Camera
  *  @variation 0
+ *
  *  @property {string} contextItemType="Camera" - The type name for use with the {@link ContextManager}.
  *      <p><em>Static. Read-only.</em></p>
  *
@@ -44,6 +55,8 @@ import Vec3, { vec3 } from "./Vec3";
 class Camera {
     // C++  class Camera : public QObject
 
+    // WEBRTC TODO: Handle multiple cameras.
+
     static readonly contextItemType = "Camera";
 
     static readonly MIN_FIELD_OF_VIEW = 0;
@@ -63,7 +76,26 @@ class Camera {
     static readonly #_DEFAULT_FAR_CLIP = 16384.0;
     static readonly #_DEFAULT_CENTER_RADIUS = 3.0;
 
+    static readonly #_CAMERA_DIRECTION = { x: 0, y: 0, z: -1 };
+
     /* eslint-enable @typescript-eslint/no-magic-numbers */
+
+
+    static #isVerySimilar(frustumA: ConicalViewFrustum, frustumB: ConicalViewFrustum): boolean {
+        // C++  bool ConicalViewFrustum::isVerySimilar(const ConicalViewFrustum& other)
+
+        // WEBRTC TODO: Move into ConicalViewFrustum class.
+
+        const MIN_POSITION_SLOP_SQUARED = 25.0; // 5 meters squared
+        const MIN_ANGLE_BETWEEN = 0.174533; // radian angle between 2 vectors 10 degrees apart
+        const MIN_RELATIVE_ERROR = 0.01; // 1%
+
+        return Vec3.distance2(frustumA.position, frustumB.position) < MIN_POSITION_SLOP_SQUARED
+            && Vec3.angleBetween(frustumA.direction, frustumB.direction) < MIN_ANGLE_BETWEEN
+            && GLMHelpers.closeEnough(frustumA.angle, frustumB.angle, MIN_RELATIVE_ERROR)
+            && GLMHelpers.closeEnough(frustumA.farClip, frustumB.farClip, MIN_RELATIVE_ERROR)
+            && GLMHelpers.closeEnough(frustumA.radius, frustumB.radius, MIN_RELATIVE_ERROR);
+    }
 
 
     // Property values.
@@ -75,6 +107,23 @@ class Camera {
     #_centerRadius = Camera.#_DEFAULT_CENTER_RADIUS;
     #_hasViewChanged = false;
 
+    // Derived values.
+    #_conicalView: ConicalViewFrustum;
+    #_lastQueriedView: ConicalViewFrustum;
+
+
+    constructor() {
+        this.#_conicalView = {
+            // C++  ConicalViewFrustum
+            position: this.#_position,
+            direction: Vec3.multiplyQbyV(this.#_orientation, Camera.#_CAMERA_DIRECTION),
+            angle: this.#calculateConicalAngle(),
+            farClip: this.#_farClip,
+            radius: this.#_centerRadius
+        };
+        this.#_lastQueriedView = JSON.parse(JSON.stringify(this.#_conicalView)) as ConicalViewFrustum;
+    }
+
 
     get position(): vec3 {
         return this.#_position;
@@ -82,6 +131,7 @@ class Camera {
 
     set position(position: vec3) {
         this.#_position = position;
+        this.#_conicalView.position = Vec3.copy(position);
     }
 
     get orientation(): quat {
@@ -90,6 +140,7 @@ class Camera {
 
     set orientation(orientation: quat) {
         this.#_orientation = orientation;
+        this.#_conicalView.direction = Vec3.multiplyQbyV(this.#_orientation, Camera.#_CAMERA_DIRECTION);
     }
 
     get fieldOfView(): number {
@@ -99,6 +150,7 @@ class Camera {
     set fieldOfView(fieldOfView: number) {
         if (Camera.MIN_FIELD_OF_VIEW <= fieldOfView && fieldOfView <= Camera.MAX_FIELD_OF_VIEW) {
             this.#_fieldOfView = fieldOfView;
+            this.#_conicalView.angle = this.#calculateConicalAngle();
         }
     }
 
@@ -109,6 +161,7 @@ class Camera {
     set aspectRatio(aspectRatio: number) {
         if (Camera.MIN_ASPECT_RATIO <= aspectRatio && aspectRatio <= Camera.MAX_ASPECT_RATIO) {
             this.#_aspectRatio = aspectRatio;
+            this.#_conicalView.angle = this.#calculateConicalAngle();
         }
     }
 
@@ -119,6 +172,7 @@ class Camera {
     set farClip(farClip: number) {
         if (Camera.MIN_FAR_CLIP <= farClip) {
             this.#_farClip = farClip;
+            this.#_conicalView.farClip = farClip;
         }
     }
 
@@ -129,6 +183,7 @@ class Camera {
     set centerRadius(centerRadius: number) {
         if (Camera.MIN_CENTER_RADIUS <= centerRadius) {
             this.#_centerRadius = centerRadius;
+            this.#_conicalView.radius = centerRadius;
         }
     }
 
@@ -143,9 +198,23 @@ class Camera {
      *  @method Camera(0).update
      */
     update(): void {
+        // C++  void Application::update(float deltaTime)
+        this.#_hasViewChanged = !Camera.#isVerySimilar(this.#_conicalView, this.#_lastQueriedView);
+        if (this.#_hasViewChanged) {
+            this.#_lastQueriedView = JSON.parse(JSON.stringify(this.#_conicalView)) as ConicalViewFrustum;
+        }
 
-        // $$$$$$$ Update hasViewChanged.
+    }
 
+
+    #calculateConicalAngle(): number {
+        // Diagonal half angle.
+        const xHalfAngleDistance = Math.atan(this.#_fieldOfView / 2.0);
+        return Vec3.angleBetween(Camera.#_CAMERA_DIRECTION, {
+            x: xHalfAngleDistance,
+            y: xHalfAngleDistance / this.#_aspectRatio,
+            z: 0
+        });
     }
 
 }

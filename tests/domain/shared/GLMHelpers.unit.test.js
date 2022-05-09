@@ -90,4 +90,15 @@ describe("Quat - unit tests", () => {
         expect(bytes).toBe("0000c511460a79f400000000");
     });
 
+    test("Can test with two values are close enough", () => {
+        expect(GLMHelpers.closeEnough(0, 0, 0)).toBe(true);
+        expect(GLMHelpers.closeEnough(0, 0, 0.001)).toBe(true);
+        expect(GLMHelpers.closeEnough(1, 1, 0)).toBe(true);
+        expect(GLMHelpers.closeEnough(1, 1, 1)).toBe(true);
+        expect(GLMHelpers.closeEnough(10, 20, 0.5)).toBe(false);
+        expect(GLMHelpers.closeEnough(10, 20, 0.667)).toBe(true);
+        expect(GLMHelpers.closeEnough(10, 20, 1.0)).toBe(true);
+        expect(GLMHelpers.closeEnough(10, 20, 2.0)).toBe(true);
+    });
+
 });

@@ -41,7 +41,7 @@ class CameraAPI {
 
     constructor(contextID: number) {
         // Context
-        ContextManager.set(contextID, Camera, contextID);
+        ContextManager.set(contextID, Camera);
         this.#_camera = ContextManager.get(contextID, Camera) as Camera;
     }
 
