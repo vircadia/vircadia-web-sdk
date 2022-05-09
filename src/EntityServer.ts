@@ -8,8 +8,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import NodeList from "./domain/networking/NodeList";
+import NodeType, { NodeTypeValue } from "./domain/networking/NodeType";
 import AssignmentClient from "./domain/AssignmentClient";
-import NodeType from "./domain/networking/NodeType";
+import OctreeQuery from "./domain/octree/OctreeQuery";
+import PacketScribe from "./domain/networking/packets/PacketScribe";
+import ContextManager from "./domain/shared/ContextManager";
+import OctreeConstants from "./domain/octree/OctreeConstants";
 
 /*@sdkdoc
  *  The <code>EntityServer</code> class provides the interface for working with entity server assignment clients.
@@ -66,9 +71,76 @@ class EntityServer extends AssignmentClient {
      */
 
 
+    // Context
+    #_nodeList;
+
+
+    #_queryExpiry: number;
+    #_octreeQuery = new OctreeQuery(true);
+    #_physicsEnabled = true;
+    #_maxOctreePPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
+
+    static readonly #MIN_PERIOD_BETWEEN_QUERIES = 3000;
+
     constructor(contextID: number) {
         super(contextID, NodeType.EntityServer);
+
+        // Context
+        this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
+
+        this.#_queryExpiry = Date.now();
     }
+
+    get maxOctreePacketsPerSecond(): number {
+        return this.#_maxOctreePPS;
+    }
+
+    /*@sdkdoc
+     *  Game loop update method that should be called multiple times per second to keep the entity server up to date with user
+     *  client entity state.
+     */
+    update(): void {
+        const now = Date.now();
+
+        // WEBRTC TODO: Add viewIsDifferentEnough in the conditional check.
+        if (now > this.#_queryExpiry) {
+            // WEBRTC TODO: Address further C++ code.
+
+            this.#queryOctree(NodeType.EntityServer);
+
+            this.#_queryExpiry = now + EntityServer.#MIN_PERIOD_BETWEEN_QUERIES;
+        }
+    }
+
+    /*@devdoc
+     *  Sends and Entity Request packet to the Octree Server.
+     *  @param {NodeTypeValue} serverType - The node's type.
+     */
+    #queryOctree(serverType: NodeTypeValue): void {
+        // C++ Application::queryOctree(NodeType_t serverType, PacketType packetType)
+
+        const isModifiedQuery = !this.#_physicsEnabled;
+        if (isModifiedQuery) {
+            // WEBRTC TODO: Address further C++ code.
+            console.error("if-else statement not implemented for isModifiedQuery == true!");
+        } else {
+            // WEBRTC TODO: Get values from the LOD manager
+            this.#_octreeQuery.octreeSizeScale = 13_107_200;
+            this.#_octreeQuery.boundaryLevelAdjust = 0;
+        }
+        this.#_octreeQuery.reportInitialCompletion = isModifiedQuery;
+
+        this.#_octreeQuery.maxQueryPacketsPerSecond = this.maxOctreePacketsPerSecond;
+
+        const data = this.#_octreeQuery.getBroadcastData();
+        const packet = PacketScribe.EntityQuery.write(data);
+
+        const entityServer = this.#_nodeList.soloNodeOfType(serverType);
+        if (entityServer && entityServer.getActiveSocket()) {
+            this.#_nodeList.sendUnreliablePacket(packet, entityServer);
+        }
+    }
+
 }
 
 export default EntityServer;
