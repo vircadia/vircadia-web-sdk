@@ -12,7 +12,7 @@ import GLMHelpers from "../../../src/domain/shared/GLMHelpers";
 import { buffer2hex } from "../../testUtils";
 
 
-describe("Quat - unit tests", () => {
+describe("GLMHelpers - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
@@ -90,6 +90,36 @@ describe("Quat - unit tests", () => {
         expect(bytes).toBe("0000c511460a79f400000000");
     });
 
+    test("Can write an angle into 2 bytes of packet data", () => {
+        const buffer = new ArrayBuffer(4);
+        const data = new DataView(buffer);
+
+        const angle = 45.2;
+        const numBytes = GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
+        expect(numBytes).toBe(2);
+        const bytes = buffer2hex(buffer);
+        expect(bytes).toBe("000023a0");
+    });
+
+    test("Can write a clip value into 2 bytes of packet data", () => {
+        const buffer = new ArrayBuffer(4);
+        const data = new DataView(buffer);
+
+        // ClipValue under ClipLimit.SMALL_LIMIT
+        let clipValue = 8;
+        let numBytes = GLMHelpers.packClipValueToTwoByte(data, 2, clipValue);
+        expect(numBytes).toBe(2);
+        let bytes = buffer2hex(buffer);
+        expect(bytes).toBe("00006566");
+
+        // ClipValue greater than ClipLimit.SMALL_LIMIT
+        clipValue = 14;
+        numBytes = GLMHelpers.packClipValueToTwoByte(data, 2, clipValue);
+        expect(numBytes).toBe(2);
+        bytes = buffer2hex(buffer);
+        expect(bytes).toBe("0000f2ff");
+    });
+
     test("Can test with two values are close enough", () => {
         expect(GLMHelpers.closeEnough(0, 0, 0)).toBe(true);
         expect(GLMHelpers.closeEnough(0, 0, 0.001)).toBe(true);
@@ -100,5 +130,7 @@ describe("Quat - unit tests", () => {
         expect(GLMHelpers.closeEnough(10, 20, 1.0)).toBe(true);
         expect(GLMHelpers.closeEnough(10, 20, 2.0)).toBe(true);
     });
+
+    /* eslint-enable @typescript-eslint/no-magic-numbers */
 
 });
