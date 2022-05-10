@@ -98,11 +98,19 @@ describe("Angle - unit tests", () => {
         const buffer = new ArrayBuffer(4);
         const data = new DataView(buffer);
 
-        const angle = 45.2;
-        const numBytes = GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
+        // 45.2 deg angle.
+        let angle = 45.2;
+        let numBytes = GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
         expect(numBytes).toBe(2);
-        const bytes = buffer2hex(buffer);
+        let bytes = buffer2hex(buffer);
         expect(bytes).toBe("000023a0");
+
+        // -53.2 deg angle.
+        angle = -53.5;
+        numBytes = GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
+        expect(numBytes).toBe(2);
+        bytes = buffer2hex(buffer);
+        expect(bytes).toBe("0000f459");
     });
 });
 

@@ -8,18 +8,19 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import NLPacket from "../NLPacket";
-import PacketTypeValue from "../udt/PacketHeaders";
 import { OctreeQueryFlags } from "../../octree/OctreeQuery";
-import ConicalViewFrustrum from "../../shared/ConicalViewFrustrum";
-import UDT from "../udt/UDT";
+import assert from "../../shared/assert";
+import ConicalViewFrustum from "../../shared/ConicalViewFrustum";
 import GLMHelpers from "../../shared/GLMHelpers";
+import PacketTypeValue from "../udt/PacketHeaders";
+import UDT from "../udt/UDT";
+import NLPacket from "../NLPacket";
 
 
 type EntityQueryDetails = {
     connectionID: number,
-    numFrustrums: number,
-    conicalViews: Array<ConicalViewFrustrum>,
+    numFrustums: number,
+    conicalViews: Array<ConicalViewFrustum>,
     maxQueryPPS: number,
     octreeElementSizeScale: number,
     boundaryLevelAdjust: number,
@@ -34,11 +35,18 @@ const EntityQuery = new class {
     /*@devdoc
      *  Information returned by {@link PacketScribe|writing} a {@link PacketType(1)|EntityQuery} packet.
      *  @typedef {object} PacketScribe.EntityQueryDetails
-     *  WEBRTC TODO: Address further documentation.
+     *  @property {number} connectionID - The octree query connection ID.
+     *  @property {number} numFrustums - The number of frustums.
+     *  @property {Array<ConicalViewFrustum>} conicalViews - An array of conical frustums.
+     *  @property {number} maxQueryPPS - The maximum number of query packets per second.
+     *  @property {number} octreeElementSizeScale - The size scale of the octree elements.
+     *  @property {number} boundaryLevelAdjust - The boundary level adjust factor.
+     *  @property {Record<string, unknown>} jsonParameters - The JSON paremeters (not used client-side).
+     *  @property {OctreeQueryFlags} queryFlags - The query flags.
      */
 
     /*@devdoc
-     *  Writes a {@link PacketType(1)|EntityQuery} packet, ready for sending.
+     *  Writes an {@link PacketType(1)|EntityQuery} packet, ready for sending.
      *  @function PacketScribe.EntityQuery&period;write
      *  @param {PacketScribe.EntityQueryDetails} info - The information needed for writing the packet list.
      *  @return {NLPacket} The packet, ready for sending.
@@ -46,6 +54,8 @@ const EntityQuery = new class {
     write(info: EntityQueryDetails): NLPacket {  /* eslint-disable-line class-methods-use-this */
         // C++ int OctreeQuery::getBroadcastData(unsigned char* destinationBuffer)
         //     int ConicalViewFrustum::serialize(unsigned char* destinationBuffer) const
+
+        assert(Object.keys(info.jsonParameters).length === 0, "ERROR: JSON parameters not empty!");
 
         const packet = NLPacket.create(PacketTypeValue.EntityQuery);
         const messageData = packet.getMessageData();
@@ -56,7 +66,7 @@ const EntityQuery = new class {
 
         data.setUint16(dataPosition, info.connectionID, UDT.LITTLE_ENDIAN);
         dataPosition += 2;
-        data.setUint8(dataPosition, info.numFrustrums);
+        data.setUint8(dataPosition, info.numFrustums);
         dataPosition += 1;
 
         for (const conicalView of info.conicalViews) {
@@ -89,9 +99,6 @@ const EntityQuery = new class {
         dataPosition += 4;
         data.setUint16(dataPosition, Object.keys(info.jsonParameters).length, UDT.LITTLE_ENDIAN);
         dataPosition += 2;
-
-        // WEBRTC TODO: Pack jsonParameters.
-
         data.setUint16(dataPosition, info.queryFlags, UDT.LITTLE_ENDIAN);
         dataPosition += 2;
 

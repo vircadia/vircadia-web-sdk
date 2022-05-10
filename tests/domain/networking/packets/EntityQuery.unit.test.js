@@ -8,10 +8,11 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import NLPacket from "../../../../src/domain/networking/NLPacket";
+import EntityQuery from "../../../../src/domain/networking/packets/EntityQuery";
 import PacketType from "../../../../src/domain/networking/udt/PacketHeaders";
 import UDT from "../../../../src/domain/networking/udt/UDT";
-import EntityQuery from "../../../../src/domain/networking/packets/EntityQuery";
+import ConicalViewFrustum from "../../../../src/domain/shared/ConicalViewFrustum";
+import NLPacket from "../../../../src/domain/networking/NLPacket";
 import OctreeQuery from "../../../../src/domain/octree/OctreeQuery";
 
 import { buffer2hex } from "../../../testUtils";
@@ -20,22 +21,23 @@ import { buffer2hex } from "../../../testUtils";
 describe("EntityQuery - unit tests", () => {
 
     test("Can write an EntityQuery packet", () => {
-        /* eslint-disable max-len */
+        // eslint-disable-next-line
         const EXPECTED_PACKET = "000000002a170000416c015bb0a3c1c4f8b8c08ededbc0743c5e3f000000007624fe3e818000c000004040580200000000484b0000000000000000";
-        /* eslint-enable max-len */
+
+        const conicalViews = new ConicalViewFrustum();
+        conicalViews.position = { x: -20.461111, y: -5.7803667, z: -6.8709172 };
+        conicalViews.direction = { x: 0.86810995, y: 0, z: 0.49637193 };
+        conicalViews.angle = 0.714619;
+        conicalViews.farClip = 16384;
+        conicalViews.radius = 3;
 
         const octreeQuery = new OctreeQuery();
+        octreeQuery.setConicalViews([conicalViews]);
 
         const data = octreeQuery.getBroadcastData();
-
-        /* eslint-disable @typescript-eslint/no-magic-numbers */
+        // connectionID is randomly generated, but here we set it manually because we need a deterministic value for the purpose
+        // of this test.
         data.connectionID = 27713;
-        data.conicalViews.at(0).position = { x: -20.461111, y: -5.7803667, z: -6.8709172 };
-        data.conicalViews.at(0).direction = { x: 0.86810995, y: 0, z: 0.49637193 };
-        data.conicalViews.at(0).angle = 0.714619;
-        data.conicalViews.at(0).farClip = 16384;
-        data.conicalViews.at(0).radius = 3;
-        /* eslint-enable @typescript-eslint/no-magic-numbers */
 
         const packet = EntityQuery.write(data);
         expect(packet instanceof NLPacket).toBe(true);

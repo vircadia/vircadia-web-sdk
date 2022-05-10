@@ -10,14 +10,14 @@
 
 
 import { EntityQueryDetails } from "../networking/packets/EntityQuery";
-import ConicalViewFrustrum from "../shared/ConicalViewFrustrum";
+import ConicalViewFrustum from "../shared/ConicalViewFrustum";
 import OctreeConstants from "./OctreeConstants";
 
 /*@devdoc
  *  The <code>OctreeQueryFlags</code> namespace provides flags modifying an octree query.
  *  @namespace OctreeQueryFlags
- *  @property {number} NoFlags = 0 - No flag.<em>Read-only.</em>
- *  @property {number} WantInitialCompletion = 1 - Notify that the initial query is complete.<em>Read-only.</em>
+ *  @property {number} NoFlags = <code>0</code> - No flag. <em>Read-only.</em>
+ *  @property {number} WantInitialCompletion = <code>1</code> - Notify that the initial query is complete. <em>Read-only.</em>
  *
  */
 enum OctreeQueryFlags {
@@ -38,7 +38,7 @@ class OctreeQuery {
     // C++ class OctreeQuery : public NodeData
 
     #_connectionID = 0;
-    #_conicalViews: Array<ConicalViewFrustrum> = [new ConicalViewFrustrum()];
+    #_conicalViews: Array<ConicalViewFrustum> = [new ConicalViewFrustum()];
     #_maxQueryPPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
     #_octreeElementSizeScale = OctreeConstants.DEFAULT_OCTREE_SIZE_SCALE;
     #_boundaryLevelAdjust = 0; // used for LOD calculations
@@ -54,31 +54,60 @@ class OctreeQuery {
         }
     }
 
-    set maxQueryPacketsPerSecond(maxQueryPPS: number) {
+    /*@devdoc
+     *  Sets the maximum number of query packets per second.
+     *  @param {number} maxQueryPPS - The maximum number of query packets per second.
+     */
+    setMaxQueryPacketsPerSecond(maxQueryPPS: number): void {
+        // C++ void setMaxQueryPacketsPerSecond(int maxQueryPPS)
         this.#_maxQueryPPS = maxQueryPPS;
     }
 
-    set octreeSizeScale(octreeSizeScale: number) {
+    /*@devdoc
+     *  Sets the size scale of the octree elements.
+     *  @param {number} octreeSizeScale - The size scale of the octree elements.
+     */
+    setOctreeSizeScale(octreeSizeScale: number): void {
+        // C++ void setOctreeSizeScale(float octreeSizeScale)
         this.#_octreeElementSizeScale = octreeSizeScale;
     }
 
-    set boundaryLevelAdjust(boundaryLevelAdjust: number) {
+    /*@devdoc
+     *  Sets the boundary level adjust factor.
+     *  @param {number} boundaryLevelAdjust - The boundary level adjust factor.
+     */
+    setBoundaryLevelAdjust(boundaryLevelAdjust: number): void {
+        // C++ void setBoundaryLevelAdjust(int boundaryLevelAdjust)
         this.#_boundaryLevelAdjust = boundaryLevelAdjust;
     }
 
-    set reportInitialCompletion(reportInitialCompletion: boolean) {
+    /*@devdoc
+     *  Sets the report initial completion flag.
+     *  @param {boolean} reportInitialCompletion - The report initial completion flag.
+     */
+    setReportInitialCompletion(reportInitialCompletion: boolean): void {
+        // C++ void setReportInitialCompletion(bool reportInitialCompletion)
         this.#_reportInitialCompletion = reportInitialCompletion;
     }
 
     /*@devdoc
-     *  Fills in an EntityQueryDetails.
-     *  @returns {EntityQueryDetails} An EntityQueryDetails.
+     *  Sets the array of conical frustums.
+     *  @param {Array<ConicalViewFrustum} views - An array of conical frustums.
+     */
+    setConicalViews(views: Array<ConicalViewFrustum>): void {
+        // C++ void setConicalViews(ConicalViewFrustums views)
+        this.#_conicalViews = views;
+    }
+
+    /*@devdoc
+     *  Gets entity query details.
+     *  @returns {EntityQueryDetails} The information needed for writing an {@link PacketType(1)|EntityQuery} packet.
      */
     getBroadcastData(): EntityQueryDetails {
         // C++ int getBroadcastData(unsigned char* destinationBuffer);
         const connectionID = this.#_connectionID;
 
-        const numFrustrums = this.#_conicalViews.length;
+        const numFrustums = this.#_conicalViews.length;
         const conicalViews = this.#_conicalViews;
         const maxQueryPPS = this.#_maxQueryPPS;
         const octreeElementSizeScale = this.#_octreeElementSizeScale;
@@ -88,7 +117,7 @@ class OctreeQuery {
 
         return {
             connectionID,
-            numFrustrums,
+            numFrustums,
             conicalViews,
             maxQueryPPS,
             octreeElementSizeScale,

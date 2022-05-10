@@ -112,10 +112,7 @@ class EntityServer extends AssignmentClient {
         }
     }
 
-    /*@devdoc
-     *  Sends and Entity Request packet to the Octree Server.
-     *  @param {NodeTypeValue} serverType - The node's type.
-     */
+    // Sends an EntityQuery packet to the entity server.
     #queryOctree(serverType: NodeTypeValue): void {
         // C++ Application::queryOctree(NodeType_t serverType, PacketType packetType)
 
@@ -124,20 +121,25 @@ class EntityServer extends AssignmentClient {
             // WEBRTC TODO: Address further C++ code.
             console.error("if-else statement not implemented for isModifiedQuery == true!");
         } else {
+            // WEBRTC TODO: Set conical view.
             // WEBRTC TODO: Get values from the LOD manager
-            this.#_octreeQuery.octreeSizeScale = 13_107_200;
-            this.#_octreeQuery.boundaryLevelAdjust = 0;
-        }
-        this.#_octreeQuery.reportInitialCompletion = isModifiedQuery;
+            /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-        this.#_octreeQuery.maxQueryPacketsPerSecond = this.maxOctreePacketsPerSecond;
+            this.#_octreeQuery.setOctreeSizeScale(13_107_200);
+            this.#_octreeQuery.setBoundaryLevelAdjust(0);
+
+            /* eslint-enable @typescript-eslint/no-magic-numbers */
+        }
+        this.#_octreeQuery.setReportInitialCompletion(isModifiedQuery);
+
+        this.#_octreeQuery.setMaxQueryPacketsPerSecond(this.maxOctreePacketsPerSecond);
 
         const data = this.#_octreeQuery.getBroadcastData();
         const packet = PacketScribe.EntityQuery.write(data);
 
-        const entityServer = this.#_nodeList.soloNodeOfType(serverType);
-        if (entityServer && entityServer.getActiveSocket()) {
-            this.#_nodeList.sendUnreliablePacket(packet, entityServer);
+        const node = this.#_nodeList.soloNodeOfType(serverType);
+        if (node && node.getActiveSocket()) {
+            this.#_nodeList.sendUnreliablePacket(packet, node);
         }
     }
 

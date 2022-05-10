@@ -38,8 +38,6 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *  The <code>PacketScribe</code> namespace provides packet reading and writing functions.
  *  <p>C++: N/A</p>
  *  @namespace PacketScribe
- *  @property {function} EntityQuery.write -
- *      {@link PacketScribe.EntityQuery&period;write|EntityQuery&period;write}
  *  @property {function} DomainList.read -
  *      {@link PacketScribe.DomainList&period;read|DomainList&period;read}
  *  @property {function} Ping.read -
@@ -70,6 +68,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.AvatarIdentity&period;write|AvatarIdentity&period;write}
  *  @property {function} DomainConnectRequest.write -
  *      {@link PacketScribe.DomainConnectRequest&period;write|DomainConnectRequest&period;write}
+ *  @property {function} EntityQuery.write -
+ *      {@link PacketScribe.EntityQuery&period;write|EntityQuery&period;write}
  *  @property {function} DomainDisconnectRequest.write -
  *      {@link PacketScribe.DomainDisconnectRequest&period;write|DomainDisconnectRequest&period;write}
  *  @property {function} DomainServerRemovedNode.read -
@@ -99,7 +99,6 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
 
 const PacketScribe = {
     // In packet number order.
-    EntityQuery,
     DomainList,
     Ping,
     PingReply,
@@ -113,6 +112,7 @@ const PacketScribe = {
     DomainConnectionDenied,
     AvatarIdentity,
     DomainConnectRequest,
+    EntityQuery,
     DomainDisconnectRequest,
     DomainServerRemovedNode,
     MessagesData,

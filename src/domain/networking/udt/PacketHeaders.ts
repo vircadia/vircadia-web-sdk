@@ -569,8 +569,6 @@ const PacketType = new class {
         switch (packetType) {
             case this.DomainList:
                 return this.#_DomainListVersion.SocketTypes;
-            case this.EntityQuery:
-                return this.#_EntityQueryPacketVersion.ConicalFrustrums;
             case this.Ping:
                 return this.#_PingVersion.IncludeConnectionID;
             case this.PingReply:
@@ -599,6 +597,8 @@ const PacketType = new class {
                 return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
+            case this.EntityQuery:
+                return this.#_EntityQueryPacketVersion.ConicalFrustrums;
             case this.AudioEnvironment:
                 return DEFAULT_VERSION;
             case this.DomainDisconnectRequest:
