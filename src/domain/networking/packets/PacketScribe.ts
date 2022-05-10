@@ -30,6 +30,7 @@ import MessagesSubscribe from "../packets/MessagesSubscribe";
 import MessagesUnsubscribe from "../packets/MessagesUnsubscribe";
 import NegotiateAudioFormat from "./NegotiateAudioFormat";
 import SelectedAudioFormat from "./SelectedAudioFormat";
+import AvatarQuery from "./AvatarQuery";
 import BulkAvatarTraits from "./BulkAvatarTraits";
 import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
 
@@ -86,6 +87,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.NegotiateAudioFormat&period;write|NegotiateAudioFormat&period;write}
  *  @property {function} SelectedAudioFormat.read -
  *      {@link PacketScribe.SelectedAudioFormat&period;read|SelectedAudioFormat&period;read}
+ *  @property {function} AvatarQuery.write -
+ *      {@link PacketScribe.AvatarQuery&period;write|AvatarQuery&period;write}
  *  @property {function} BulkAvatarTraits.read -
  *      {@link PacketScribe.BulkAvatarTraits&period;read|BulkAvatarTraits&period;read}
  *  @property {function} BulkAvatarTraitsAck.write -
@@ -120,6 +123,7 @@ const PacketScribe = {
     MessagesUnsubscribe,
     NegotiateAudioFormat,
     SelectedAudioFormat,
+    AvatarQuery,
     BulkAvatarTraits,
     BulkAvatarTraitsAck
 };

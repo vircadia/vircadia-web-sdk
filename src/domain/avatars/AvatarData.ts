@@ -112,7 +112,7 @@ class AvatarData extends SpatiallyNestable {
     #_sequenceNumber = 0;  // Avatar data sequence number is a uint16 value.
     readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
 
-    readonly #AVATAR_MIXER_NODE_SET = new Set([NodeType.AvatarMixer]);
+    readonly #_AVATAR_MIXER_NODE_SET = new Set([NodeType.AvatarMixer]);
 
 
     constructor(contextID: number) {
@@ -474,7 +474,7 @@ class AvatarData extends SpatiallyNestable {
 
         this.#doneEncoding(cullSmallData);
 
-        this.#_nodeList.broadcastToNodes(avatarPacket, this.#AVATAR_MIXER_NODE_SET);
+        this.#_nodeList.broadcastToNodes(avatarPacket, this.#_AVATAR_MIXER_NODE_SET);
 
         return avatarPacket.getWireSize();
     }

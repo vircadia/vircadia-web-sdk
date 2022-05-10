@@ -12,6 +12,7 @@
 
 import AvatarListInterface from "./domain/interfaces/AvatarListInterface";
 import MyAvatarInterface from "./domain/interfaces/MyAvatarInterface";
+import PacketScribe from "./domain/networking/packets/PacketScribe";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType from "./domain/networking/NodeType";
@@ -89,6 +90,7 @@ class AvatarMixer extends AssignmentClient {
 
 
     static readonly #_MIN_PERIOD_BETWEEN_QUERIES = 3000;  // 3s.
+    static readonly #_AVATAR_MIXER_NODE_SET = new Set([NodeType.AvatarMixer]);
 
 
     // Context.
@@ -156,8 +158,15 @@ class AvatarMixer extends AssignmentClient {
     #queryAvatars(): void {
         // C++  void Application::queryAvatars()
 
-        // $$$$$$$
+        // Interstitial mode isn't implemented.
 
+        const avatarQueryDetails = {
+            conicalViews: [this.#_camera.conicalView]
+        };
+
+        const avatarPacket = PacketScribe.AvatarQuery.write(avatarQueryDetails);
+
+        this.#_nodeList.broadcastToNodes(avatarPacket, AvatarMixer.#_AVATAR_MIXER_NODE_SET);
     }
 
 

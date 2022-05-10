@@ -16,9 +16,9 @@ import Vec3, { vec3 } from "./Vec3";
 type ConicalViewFrustum = {
     position: vec3,
     direction: vec3,
-    angle: number,
+    halfAngle: number,
     farClip: number,
-    radius: number
+    centerRadius: number
 };
 
 
@@ -54,6 +54,19 @@ type ConicalViewFrustum = {
  */
 class Camera {
     // C++  class Camera : public QObject
+
+    /*@devdoc
+     *  An approximation of a view frustum where the frustum is represented by a cone that encloses the frustum. The view
+     *  frustum includes a central "keyhole" sphere.
+     *  @typedef {object} ConicalViewFrustum
+     *  @property {vec3} position - The position of the view frustum.
+     *  @property {vec3} direction - The direction of the view frustum.
+     *  @property {number} halfAngle - The half angle of the conical view that encloses the view frustum, i.e, the diagonal
+     *      half angle, in radians.
+     *  @property {number} farClip - The distance of the far clipping plane.
+     *  @property {number} centerRrdius - The radius of the center keyhole sphere.
+     */
+
 
     // WEBRTC TODO: Handle multiple cameras.
 
@@ -92,9 +105,9 @@ class Camera {
 
         return Vec3.distance2(frustumA.position, frustumB.position) < MIN_POSITION_SLOP_SQUARED
             && Vec3.angleBetween(frustumA.direction, frustumB.direction) < MIN_ANGLE_BETWEEN
-            && GLMHelpers.closeEnough(frustumA.angle, frustumB.angle, MIN_RELATIVE_ERROR)
+            && GLMHelpers.closeEnough(frustumA.halfAngle, frustumB.halfAngle, MIN_RELATIVE_ERROR)
             && GLMHelpers.closeEnough(frustumA.farClip, frustumB.farClip, MIN_RELATIVE_ERROR)
-            && GLMHelpers.closeEnough(frustumA.radius, frustumB.radius, MIN_RELATIVE_ERROR);
+            && GLMHelpers.closeEnough(frustumA.centerRadius, frustumB.centerRadius, MIN_RELATIVE_ERROR);
     }
 
 
@@ -108,8 +121,8 @@ class Camera {
     #_hasViewChanged = false;
 
     // Derived values.
-    #_conicalView: ConicalViewFrustum;
-    #_lastQueriedView: ConicalViewFrustum;
+    #_conicalView: ConicalViewFrustum;  // Application::_conicalViews
+    #_lastQueriedView: ConicalViewFrustum;  // Application::_lastQueriedViews
 
 
     constructor() {
@@ -117,9 +130,9 @@ class Camera {
             // C++  ConicalViewFrustum
             position: this.#_position,
             direction: Vec3.multiplyQbyV(this.#_orientation, Camera.#_CAMERA_DIRECTION),
-            angle: this.#calculateConicalAngle(),
+            halfAngle: this.#calculateConicalHalfAngle(),
             farClip: this.#_farClip,
-            radius: this.#_centerRadius
+            centerRadius: this.#_centerRadius
         };
         this.#_lastQueriedView = JSON.parse(JSON.stringify(this.#_conicalView)) as ConicalViewFrustum;
     }
@@ -150,7 +163,7 @@ class Camera {
     set fieldOfView(fieldOfView: number) {
         if (Camera.MIN_FIELD_OF_VIEW <= fieldOfView && fieldOfView <= Camera.MAX_FIELD_OF_VIEW) {
             this.#_fieldOfView = fieldOfView;
-            this.#_conicalView.angle = this.#calculateConicalAngle();
+            this.#_conicalView.halfAngle = this.#calculateConicalHalfAngle();
         }
     }
 
@@ -161,7 +174,7 @@ class Camera {
     set aspectRatio(aspectRatio: number) {
         if (Camera.MIN_ASPECT_RATIO <= aspectRatio && aspectRatio <= Camera.MAX_ASPECT_RATIO) {
             this.#_aspectRatio = aspectRatio;
-            this.#_conicalView.angle = this.#calculateConicalAngle();
+            this.#_conicalView.halfAngle = this.#calculateConicalHalfAngle();
         }
     }
 
@@ -183,12 +196,16 @@ class Camera {
     set centerRadius(centerRadius: number) {
         if (Camera.MIN_CENTER_RADIUS <= centerRadius) {
             this.#_centerRadius = centerRadius;
-            this.#_conicalView.radius = centerRadius;
+            this.#_conicalView.centerRadius = centerRadius;
         }
     }
 
     get hasViewChanged(): boolean {
         return this.#_hasViewChanged;
+    }
+
+    get conicalView(): ConicalViewFrustum {
+        return this.#_conicalView;
     }
 
 
@@ -207,7 +224,7 @@ class Camera {
     }
 
 
-    #calculateConicalAngle(): number {
+    #calculateConicalHalfAngle(): number {
         // Diagonal half angle.
         const xHalfAngleDistance = Math.atan(this.#_fieldOfView / 2.0);
         return Vec3.angleBetween(Camera.#_CAMERA_DIRECTION, {
@@ -220,3 +237,4 @@ class Camera {
 }
 
 export default Camera;
+export type { ConicalViewFrustum };
