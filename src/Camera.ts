@@ -25,7 +25,7 @@ import Vec3, { vec3 } from "./domain/shared/Vec3";
  *
  *  @property {vec3} position - The position of the camera.
  *  @property {quat} orientation - The orientation of the camera.
- *  @property {number} fieldOfView - The horizontal field of view, in radians.
+ *  @property {number} fieldOfView - The vertical field of view, in radians.
  *  @property {number} aspectRatio - The aspect ratio (horizontal / vertical) of the field of view, range <code>0.01 &ndash;
  *      <code>100.0</code>.
  *  @property {number} farClip - The far clipping distance.

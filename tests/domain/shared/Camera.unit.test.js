@@ -34,7 +34,7 @@ describe("Camera - unit tests", () => {
 
         expect(camera.position).toEqual(Vec3.ZERO);
         expect(camera.orientation).toEqual(Quat.IDENTITY);
-        expect(camera.fieldOfView).toBe(80.0 * Math.PI / 180.0);
+        expect(camera.fieldOfView).toBe(45.0 * Math.PI / 180.0);
         expect(camera.aspectRatio).toBe(16.0 / 9.0);
         expect(camera.farClip).toBe(16384.0);
         expect(camera.centerRadius).toBe(3.0);
@@ -68,7 +68,7 @@ describe("Camera - unit tests", () => {
 
         camera.position = { x: 1, y: 2, z: 3 };
         camera.orientation = Quat.IDENTITY;
-        camera.fieldOfView = 71.154 * Math.PI / 180.0;
+        camera.fieldOfView = 45.0 * Math.PI / 180.0;
         camera.aspectRatio = 1.5812;
 
         /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -137,13 +137,13 @@ describe("Camera - unit tests", () => {
         // Field of view.
         camera.update();
         expect(camera.hasViewChanged).toBe(false);
-        camera.fieldOfView = 1.009 * 80.0 * Math.PI / 180.0;  // 0.9%
+        camera.fieldOfView = 1.009 * 45.0 * Math.PI / 180.0;  // 0.9%
         camera.update();
         expect(camera.hasViewChanged).toBe(false);
-        camera.fieldOfView = 1.011 * 80.0 * Math.PI / 180.0;  // 1.1%
+        camera.fieldOfView = 1.011 * 45.0 * Math.PI / 180.0;  // 1.1%
         camera.update();
         expect(camera.hasViewChanged).toBe(false);
-        camera.fieldOfView = 80.0 * Math.PI / 180.0;  // Reset.
+        camera.fieldOfView = 45.0 * Math.PI / 180.0;  // Reset.
         camera.update();
 
         // Far clip.

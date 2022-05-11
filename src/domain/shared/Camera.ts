@@ -34,7 +34,7 @@ type ConicalViewFrustum = {
  *
  *  @property {vec3} position - The position of the camera.
  *  @property {quat} orientation - The orientation of the camera.
- *  @property {number} fieldOfView - The horizontal field of view, in radians.
+ *  @property {number} fieldOfView - The vertical field of view, in radians.
  *  @property {number} aspectRatio - The aspect ratio (horizontal / vertical) of the field of view, range <code>0.01 &ndash;
  *      <code>100.0</code>.
  *  @property {number} farClip - The far clipping distance.
@@ -84,8 +84,8 @@ class Camera {
 
     static readonly #_DEGREES_TO_RADIANS = Math.PI / 180.0;
 
+    static readonly #_DEFAULT_FIELD_OF_VIEW = 45.0 * Camera.#_DEGREES_TO_RADIANS;
     static readonly #_DEFAULT_ASPECT_RATIO = 16.0 / 9.0;
-    static readonly #_DEFAULT_FIELD_OF_VIEW = 45.0 * Camera.#_DEFAULT_ASPECT_RATIO * Camera.#_DEGREES_TO_RADIANS;
     static readonly #_DEFAULT_FAR_CLIP = 16384.0;
     static readonly #_DEFAULT_CENTER_RADIUS = 3.0;
 
@@ -225,7 +225,7 @@ class Camera {
 
 
     #calculateConicalHalfAngle(): number {
-        const halfAngleDistance = Math.tan(this.#_fieldOfView / this.#_aspectRatio / 2.0);  // Vertical frustum half distance.
+        const halfAngleDistance = Math.tan(this.#_fieldOfView / 2.0);  // Vertical frustum half distance.
         return Vec3.angleBetween({ x: 0, y: 0, z: -1 }, {
             x: halfAngleDistance,
             y: halfAngleDistance * this.#_aspectRatio,
