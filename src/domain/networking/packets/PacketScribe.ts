@@ -9,6 +9,7 @@
 //
 
 // In packet number order.
+import EntityQuery from "./EntityQuery";
 import DomainList from "./DomainList";
 import Ping from "./Ping";
 import PingReply from "./PingReply";
@@ -67,6 +68,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.AvatarIdentity&period;write|AvatarIdentity&period;write}
  *  @property {function} DomainConnectRequest.write -
  *      {@link PacketScribe.DomainConnectRequest&period;write|DomainConnectRequest&period;write}
+ *  @property {function} EntityQuery.write -
+ *      {@link PacketScribe.EntityQuery&period;write|EntityQuery&period;write}
  *  @property {function} DomainDisconnectRequest.write -
  *      {@link PacketScribe.DomainDisconnectRequest&period;write|DomainDisconnectRequest&period;write}
  *  @property {function} DomainServerRemovedNode.read -
@@ -109,6 +112,7 @@ const PacketScribe = {
     DomainConnectionDenied,
     AvatarIdentity,
     DomainConnectRequest,
+    EntityQuery,
     DomainDisconnectRequest,
     DomainServerRemovedNode,
     MessagesData,
