@@ -31,7 +31,8 @@ enum OctreeQueryFlags {
  *  The <code>OctreeQuery</code> class
  *  <p>C++: <code>class OctreeQuery : public NodeData</code></p>
  *  @class OctreeQuery
- *  @param {boolean} randomizeConnectionID - To assign, or not, a random number to the connectionID
+ *  @param {boolean} randomizeConnectionID - <code>true</code> to use a random number for the initial connection ID,
+ *  <code>false</code> to start at <code>0</code>.
  */
 // WEBRTC TODO: Extend NodeData
 class OctreeQuery {
@@ -92,7 +93,7 @@ class OctreeQuery {
 
     /*@devdoc
      *  Sets the array of conical frustums.
-     *  @param {Array<ConicalViewFrustum} views - An array of conical frustums.
+     *  @param {Array<ConicalViewFrustum>} views - An array of conical frustums.
      */
     setConicalViews(views: Array<ConicalViewFrustum>): void {
         // C++ void setConicalViews(ConicalViewFrustums views)
@@ -107,7 +108,6 @@ class OctreeQuery {
         // C++ int getBroadcastData(unsigned char* destinationBuffer);
         const connectionID = this.#_connectionID;
 
-        const numFrustums = this.#_conicalViews.length;
         const conicalViews = this.#_conicalViews;
         const maxQueryPPS = this.#_maxQueryPPS;
         const octreeElementSizeScale = this.#_octreeElementSizeScale;
@@ -117,7 +117,6 @@ class OctreeQuery {
 
         return {
             connectionID,
-            numFrustums,
             conicalViews,
             maxQueryPPS,
             octreeElementSizeScale,

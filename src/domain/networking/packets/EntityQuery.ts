@@ -19,7 +19,6 @@ import NLPacket from "../NLPacket";
 
 type EntityQueryDetails = {
     connectionID: number,
-    numFrustums: number,
     conicalViews: Array<ConicalViewFrustum>,
     maxQueryPPS: number,
     octreeElementSizeScale: number,
@@ -33,11 +32,10 @@ const EntityQuery = new class {
     // C++ N/A
 
     /*@devdoc
-     *  Information returned by {@link PacketScribe|writing} a {@link PacketType(1)|EntityQuery} packet.
+     *  Information needed for {@link PacketScribe|writing} a {@link PacketType(1)|EntityQuery} packet.
      *  @typedef {object} PacketScribe.EntityQueryDetails
      *  @property {number} connectionID - The octree query connection ID.
-     *  @property {number} numFrustums - The number of frustums.
-     *  @property {Array<ConicalViewFrustum>} conicalViews - An array of conical frustums.
+     *  @property {Array<ConicalViewFrustum>} conicalViews - An array of conical view frustums.
      *  @property {number} maxQueryPPS - The maximum number of query packets per second.
      *  @property {number} octreeElementSizeScale - The size scale of the octree elements.
      *  @property {number} boundaryLevelAdjust - The boundary level adjust factor.
@@ -66,7 +64,7 @@ const EntityQuery = new class {
 
         data.setUint16(dataPosition, info.connectionID, UDT.LITTLE_ENDIAN);
         dataPosition += 2;
-        data.setUint8(dataPosition, info.numFrustums);
+        data.setUint8(dataPosition, info.conicalViews.length);
         dataPosition += 1;
 
         for (const conicalView of info.conicalViews) {

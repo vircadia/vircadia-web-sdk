@@ -36,7 +36,7 @@ const OctreeConstants = new class {
 
     get TREE_SCALE(): number {
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-        return 32768; // ~20 miles..
+        return 32768; // ~20 miles.
     }
 
 
