@@ -84,8 +84,8 @@ class Camera {
 
     static readonly #_DEGREES_TO_RADIANS = Math.PI / 180.0;
 
-    static readonly #_DEFAULT_FIELD_OF_VIEW = 45 * Camera.#_DEGREES_TO_RADIANS;
     static readonly #_DEFAULT_ASPECT_RATIO = 16.0 / 9.0;
+    static readonly #_DEFAULT_FIELD_OF_VIEW = 45.0 * Camera.#_DEFAULT_ASPECT_RATIO * Camera.#_DEGREES_TO_RADIANS;
     static readonly #_DEFAULT_FAR_CLIP = 16384.0;
     static readonly #_DEFAULT_CENTER_RADIUS = 3.0;
 
@@ -225,12 +225,11 @@ class Camera {
 
 
     #calculateConicalHalfAngle(): number {
-        // Diagonal half angle.
-        const xHalfAngleDistance = Math.atan(this.#_fieldOfView / 2.0);
-        return Vec3.angleBetween(Camera.#_CAMERA_DIRECTION, {
-            x: xHalfAngleDistance,
-            y: xHalfAngleDistance / this.#_aspectRatio,
-            z: 0
+        const halfAngleDistance = Math.tan(this.#_fieldOfView / this.#_aspectRatio / 2.0);  // Vertical frustum half distance.
+        return Vec3.angleBetween({ x: 0, y: 0, z: -1 }, {
+            x: halfAngleDistance,
+            y: halfAngleDistance * this.#_aspectRatio,
+            z: -1
         });
     }
 

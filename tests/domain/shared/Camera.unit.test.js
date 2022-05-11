@@ -34,7 +34,7 @@ describe("Camera - unit tests", () => {
 
         expect(camera.position).toEqual(Vec3.ZERO);
         expect(camera.orientation).toEqual(Quat.IDENTITY);
-        expect(camera.fieldOfView).toBe(45.0 * Math.PI / 180.0);
+        expect(camera.fieldOfView).toBe(80.0 * Math.PI / 180.0);
         expect(camera.aspectRatio).toBe(16.0 / 9.0);
         expect(camera.farClip).toBe(16384.0);
         expect(camera.centerRadius).toBe(3.0);
@@ -59,6 +59,30 @@ describe("Camera - unit tests", () => {
         expect(camera.farClip).toBe(10.0);
         camera.centerRadius = 5.0;
         expect(camera.centerRadius).toBe(5.0);
+    });
+
+    test("The camera's conical view is calculated", () => {
+        const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, Camera);
+        const camera = ContextManager.get(contextID, Camera);
+
+        camera.position = { x: 1, y: 2, z: 3 };
+        camera.orientation = Quat.IDENTITY;
+        camera.fieldOfView = 71.154 * Math.PI / 180.0;
+        camera.aspectRatio = 1.5812;
+
+        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+        /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+        const conicalView = camera.conicalView;
+        expect(conicalView.position).toEqual({ x: 1, y: 2, z: 3 });
+        expect(conicalView.direction).toEqual({ x: 0, y: 0, z: -1 });
+        expect(conicalView.halfAngle).toBeCloseTo(0.659275, 5);
+        expect(conicalView.farClip).toBe(16384.0);
+        expect(conicalView.centerRadius).toBe(3.0);
+
+        /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
     });
 
     test("The camera's view is considered to have changed only if it has changed sufficiently", () => {
@@ -113,13 +137,13 @@ describe("Camera - unit tests", () => {
         // Field of view.
         camera.update();
         expect(camera.hasViewChanged).toBe(false);
-        camera.fieldOfView = 1.009 * 45.0 * Math.PI / 180.0;  // 0.9%
+        camera.fieldOfView = 1.009 * 80.0 * Math.PI / 180.0;  // 0.9%
         camera.update();
         expect(camera.hasViewChanged).toBe(false);
-        camera.fieldOfView = 1.011 * 45.0 * Math.PI / 180.0;  // 1.1%
+        camera.fieldOfView = 1.011 * 80.0 * Math.PI / 180.0;  // 1.1%
         camera.update();
         expect(camera.hasViewChanged).toBe(false);
-        camera.fieldOfView = 45.0 * Math.PI / 180.0;  // Reset.
+        camera.fieldOfView = 80.0 * Math.PI / 180.0;  // Reset.
         camera.update();
 
         // Far clip.
