@@ -264,7 +264,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} RadiusIgnoreRequest - <code>69</code>
  *  @property {PacketType} UsernameFromIDRequest - <code>70</code>
  *  @property {PacketType} UsernameFromIDReply - <code>71</code>
- *  @property {PacketType} AvatarQuery - <code>72</code>
+ *  @property {PacketType} AvatarQuery - <code>72</code> - The user client sends this to the avatar mixer to seek details of
+ *      avatars in the client's view or views.<br />
+ *      {@link PacketScribe.AvatarQueryDetails}
  *  @property {PacketType} RequestsDomainListData - <code>73</code>
  *  @property {PacketType} PerAvatarGainSet - <code>74</code>
  *  @property {PacketType} EntityScriptGetStatus - <code>75</code>
@@ -533,6 +535,10 @@ const PacketType = new class {
         TextOrBinaryData: 18
     };
 
+    readonly #_AvatarQueryVersion = {
+        ConicalFrustums: 22
+    };
+
     readonly #_AvatarMixerPacketVersion = {
         // C++  AvatarMixerPacketVersion
         AvatarTraitsAck: 48,
@@ -607,6 +613,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.SelectedAudioFormat:
                 return DEFAULT_VERSION;
+            case this.AvatarQuery:
+                return this.#_AvatarQueryVersion.ConicalFrustums;
             case this.BulkAvatarTraits:
                 return this.#_AvatarMixerPacketVersion.AvatarTraitsAck;
             case this.BulkAvatarTraitsAck:

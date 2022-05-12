@@ -43,6 +43,8 @@ export { Vircadia };
 export { default as DomainServer } from "./DomainServer";
 export type { ConnectionState } from "./DomainServer";
 
+export { default as Camera } from "./Camera";
+
 export { default as AudioMixer } from "./AudioMixer";
 export type { AudioPositionGetter } from "./domain/audio-client/AudioClient";
 export { default as AvatarMixer, MyAvatarInterface, AvatarListInterface } from "./AvatarMixer";

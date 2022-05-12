@@ -8,8 +8,15 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { quat } from "./Quat";
 import UDT from "../networking/udt/UDT";
+import assert from "./assert";
+import { quat } from "./Quat";
+
+
+enum ClipLimit {
+    SMALL_LIMIT = 10,
+    LARGE_LIMIT = 1000
+}
 
 
 /*@devdoc
@@ -138,6 +145,91 @@ const GLMHelpers = new class {
         /* eslint-enable @typescript-eslint/no-magic-numbers, @typescript-eslint/no-non-null-assertion */
     }
 
+    /*@devdoc
+     *  Writes a degree value to a packet, packing it into 2 bytes.
+     *  @function GLMHelpers.packFloatAngleToTwoByte
+     *  @param {DataView} data - The packet data to write.
+     *  @param {number} dataPosition - The data position to write the value at.
+     *  @param {number} degrees - The degree value to write.
+     *  @returns {number} The number bytes written (i.e., <code>2</code>).
+     */
+    // eslint-disable-next-line class-methods-use-this
+    packFloatAngleToTwoByte(data: DataView, dataPosition: number, degrees: number): number {
+        // C++  int packFloatAngleToTwoByte(unsigned char* buffer, float degrees)
+
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+        // eslint-disable-next-line camelcase
+        const maxUint16_t = (1 << 16) - 1;
+        // eslint-disable-next-line camelcase
+        const ANGLE_CONVERSION_RATIO = maxUint16_t / 360;
+        const twoByteAngle = Math.floor((degrees + 180) * ANGLE_CONVERSION_RATIO);
+
+        data.setUint16(dataPosition, twoByteAngle, UDT.LITTLE_ENDIAN);
+
+        return 2;
+
+        /* eslint-enable @typescript-eslint/no-magic-numbers */
+    }
+
+    /*@devdoc
+     *  Writes a clipping distance value to a packet, packing it into 2 bytes.
+     *  @function SharedUtils.packClipValueToTwoByte
+     *  @param {DataView} data - The packet data to write.
+     *  @param {number} dataPosition - The data position to write the value at.
+     *  @param {number} clipValue - The clipping distance value to write.
+     *  @returns {number} The number bytes written (i.e., <code>2</code>).
+     */
+    // eslint-disable-next-line class-methods-use-this
+    packClipValueToTwoByte(data: DataView, dataPosition: number, clipValue: number): number {
+        // C++ int packClipValueToTwoByte(unsigned char* buffer, float clipValue) {
+
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+        // eslint-disable-next-line camelcase
+        const maxInt16_t = (1 << 15) - 1;
+        // eslint-disable-next-line camelcase
+        assert(clipValue < maxInt16_t, "ERROR: Clip values must be less than max signed 16 bit integers");
+
+        // eslint-disable-next-line @typescript-eslint/init-declarations
+        let holder: number;
+
+        if (clipValue < ClipLimit.SMALL_LIMIT) {
+        // eslint-disable-next-line camelcase
+            const SMALL_RATIO_CONVERSION_RATIO = maxInt16_t / ClipLimit.SMALL_LIMIT;
+            holder = Math.floor(clipValue * SMALL_RATIO_CONVERSION_RATIO);
+        } else {
+            holder = -1 * Math.floor(clipValue);
+        }
+
+        data.setInt16(dataPosition, holder, UDT.LITTLE_ENDIAN);
+
+        return 2;
+
+        /* eslint-enable @typescript-eslint/no-magic-numbers */
+    }
+
+    /*@devdoc
+     *  Checks whether two numbers have very similar values.
+     *  @function.closeEnough
+     *  @param {number} a - The first number.
+     *  @param {number} b - The second number.
+     *  @param {number} relativeError - The acceptable maximum relative error, range <code>0.0 &ndash; 1.0</code>.
+     *  @returns {boolean} <code>true</code> if the absolute difference divided by the absolute average is less than the
+     *      relative error.
+     */
+    // eslint-disable-next-line class-methods-use-this
+    closeEnough(a: number, b: number, relativeError: number): boolean {
+        // C++  bool closeEnough(float a, float b, float relativeError)
+
+        // WEBRTC TODO: Move into GLMHelpers class.
+
+        assert(relativeError >= 0.0);
+        // NOTE: we add EPSILON to the denominator so we can avoid checking for division by zero.
+        // This method works fine when: Math.abs(a + b) >> EPSILON
+        const EPSILON = 0.000001;
+        return Math.abs(a - b) / (Math.abs(a + b) / 2.0 + EPSILON) <= relativeError;
+    }
 
 }();
 

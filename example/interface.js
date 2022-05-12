@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } from "../dist/Vircadia.js";
+import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer, Uuid } from "../dist/Vircadia.js";
 
 (function () {
 
@@ -19,6 +19,7 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
 
     // API objects.
     let domainServer = null;
+    let camera = null;
     let audioMixer = null;
     let avatarMixer = null;
     let avatarMixerGameLoop = null;
@@ -59,6 +60,96 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
         domainServer.sessionUUIDChanged.connect((sessionUUID) => {
             domainSessionUUID.value = sessionUUID.stringify();
         });
+
+    }());
+
+    // Camera
+    (function () {
+        camera = new Camera(contextID);
+
+        const cameraPosX = document.getElementById("cameraPosX");
+        const cameraPosY = document.getElementById("cameraPosY");
+        const cameraPosZ = document.getElementById("cameraPosZ");
+
+        const cameraPosition = camera.position;
+        cameraPosX.value = cameraPosition.x;
+        cameraPosY.value = cameraPosition.y;
+        cameraPosZ.value = cameraPosition.z;
+
+        function onPositionChange() {
+            camera.position = {
+                x: parseFloat(cameraPosX.value),
+                y: parseFloat(cameraPosY.value),
+                z: parseFloat(cameraPosZ.value)
+            };
+        }
+        cameraPosX.addEventListener("blur", onPositionChange);
+        cameraPosY.addEventListener("blur", onPositionChange);
+        cameraPosZ.addEventListener("blur", onPositionChange);
+        cameraPosX.addEventListener("change", onPositionChange);
+        cameraPosY.addEventListener("change", onPositionChange);
+        cameraPosZ.addEventListener("change", onPositionChange);
+
+        const cameraRotX = document.getElementById("cameraRotX");
+        const cameraRotY = document.getElementById("cameraRotY");
+        const cameraRotZ = document.getElementById("cameraRotZ");
+        const cameraRotW = document.getElementById("cameraRotW");
+
+        const cameraOrientation = camera.orientation;
+        cameraRotX.value = cameraOrientation.x;
+        cameraRotY.value = cameraOrientation.y;
+        cameraRotZ.value = cameraOrientation.z;
+        cameraRotW.value = cameraOrientation.w;
+
+        function onOrientationChange() {
+            camera.orientation = {
+                x: parseFloat(cameraRotX.value),
+                y: parseFloat(cameraRotY.value),
+                z: parseFloat(cameraRotZ.value),
+                w: parseFloat(cameraRotW.value)
+            };
+        }
+
+        cameraRotX.addEventListener("blur", onOrientationChange);
+        cameraRotY.addEventListener("blur", onOrientationChange);
+        cameraRotZ.addEventListener("blur", onOrientationChange);
+        cameraRotW.addEventListener("blur", onOrientationChange);
+        cameraRotX.addEventListener("change", onOrientationChange);
+        cameraRotY.addEventListener("change", onOrientationChange);
+        cameraRotZ.addEventListener("change", onOrientationChange);
+        cameraRotW.addEventListener("change", onOrientationChange);
+
+        const fieldOfView = document.getElementById("fieldOfView");
+        fieldOfView.value = camera.fieldOfView;
+        function onFieldOfViewChange() {
+            camera.fieldOfView = parseFloat(fieldOfView.value);
+        }
+        fieldOfView.addEventListener("blur", onFieldOfViewChange);
+        fieldOfView.addEventListener("change", onFieldOfViewChange);
+
+        const aspectRatio = document.getElementById("aspectRatio");
+        aspectRatio.value = camera.aspectRatio;
+        function onAspectRatioChange() {
+            camera.aspectRatio = parseFloat(aspectRatio.value);
+        }
+        aspectRatio.addEventListener("blur", onAspectRatioChange);
+        aspectRatio.addEventListener("change", onAspectRatioChange);
+
+        const farClip = document.getElementById("farClip");
+        farClip.value = camera.farClip;
+        function onFarClipChange() {
+            camera.farClip = parseFloat(farClip.value);
+        }
+        farClip.addEventListener("blur", onFarClipChange);
+        farClip.addEventListener("change", onFarClipChange);
+
+        const centerRadius = document.getElementById("centerRadius");
+        centerRadius.value = camera.centerRadius;
+        function onCenterRadiusChange() {
+            camera.centerRadius = parseFloat(centerRadius.value);
+        }
+        centerRadius.addEventListener("blur", onCenterRadiusChange);
+        centerRadius.addEventListener("change", onCenterRadiusChange);
 
     }());
 
@@ -374,7 +465,10 @@ import { Vircadia, DomainServer, AudioMixer, AvatarMixer, MessageMixer, Uuid } f
             gameLoopStart = now;
             gameRateValue.value = gameRate.toFixed(1);
 
-            // Update the avatar mixer with latest user client avatar data.
+            // Update the camera ready for use by the avatar mixer update.
+            camera.update();
+
+            // Update the avatar mixer with latest user client avatar data and get latest data from avatar mixer.
             avatarMixerGameLoop();
 
             const timeout = Math.max(TARGET_INTERVAL - (Date.now() - gameLoopStart), MIN_TIMEOUT);
