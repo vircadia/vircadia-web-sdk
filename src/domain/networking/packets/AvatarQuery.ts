@@ -23,7 +23,7 @@ type AvatarQueryDetails = {
 const AvatarQuery = new class {
 
     /*@devdoc
-     *  Information or needed for {@link PacketScribe|writing} an {@link PacketType(1)|AvatarQuery} packet.
+     *  Information needed for {@link PacketScribe|writing} an {@link PacketType(1)|AvatarQuery} packet.
      *  @typedef {object} PacketScribe.AvatarQueryDetails
      *  @property {ConicalViewFrustum[]} conicalViews - The views that the client wants the details of avatars in.
      */
