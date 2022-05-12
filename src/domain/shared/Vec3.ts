@@ -132,7 +132,7 @@ const Vec3 = new class {
      *  @function Vec3.distance2
      *  @param {vec3} p1 - The first point.
      *  @param {vec3} p2 - The second point.
-     *  @returns {number} The saquare of the distance between the two points.
+     *  @returns {number} The square of the distance between the two points.
      */
     distance2(p1: vec3, p2: vec3): number {
         return (p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2 + (p2.z - p1.z) ** 2;
