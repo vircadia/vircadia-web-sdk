@@ -8,13 +8,15 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType, { NodeTypeValue } from "./domain/networking/NodeType";
-import AssignmentClient from "./domain/AssignmentClient";
+import OctreeConstants from "./domain/octree/OctreeConstants";
 import OctreeQuery from "./domain/octree/OctreeQuery";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
 import ContextManager from "./domain/shared/ContextManager";
-import OctreeConstants from "./domain/octree/OctreeConstants";
+import AssignmentClient from "./domain/AssignmentClient";
+
 
 /*@sdkdoc
  *  The <code>EntityServer</code> class provides the interface for working with entity server assignment clients.
@@ -35,6 +37,8 @@ import OctreeConstants from "./domain/octree/OctreeConstants";
  *  @property {EntityServer~onStateChanged|null} onStateChanged - Sets a single function to be called when the state of the
  *      entity server changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
+ *
+ *  @property {number} maxOctreePacketsPerSecond - The set maximum number of octree packets per second.
  */
 class EntityServer extends AssignmentClient {
 
@@ -82,18 +86,25 @@ class EntityServer extends AssignmentClient {
 
     static readonly #MIN_PERIOD_BETWEEN_QUERIES = 3000;
 
+
     constructor(contextID: number) {
         super(contextID, NodeType.EntityServer);
 
         // Context
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
 
+        // C++  Application::Application()
+        this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
+        this.#_nodeList.nodeKilled.connect(this.#nodeKilled);
+
         this.#_queryExpiry = Date.now();
     }
+
 
     get maxOctreePacketsPerSecond(): number {
         return this.#_maxOctreePPS;
     }
+
 
     /*@sdkdoc
      *  Game loop update method that should be called multiple times per second to keep the entity server up to date with user
@@ -111,6 +122,7 @@ class EntityServer extends AssignmentClient {
             this.#_queryExpiry = now + EntityServer.#MIN_PERIOD_BETWEEN_QUERIES;
         }
     }
+
 
     // Sends an EntityQuery packet to the entity server.
     #queryOctree(serverType: NodeTypeValue): void {
@@ -142,6 +154,33 @@ class EntityServer extends AssignmentClient {
             this.#_nodeList.sendUnreliablePacket(packet, node);
         }
     }
+
+
+    // Slot.
+    #nodeActivated = (node: Node): void => {
+        // C++  void Application::nodeActivated(SharedNodePointer node)
+        const nodeType = node.getType();
+        if (nodeType !== NodeType.EntityServer) {
+            return;
+        }
+
+        this.#_queryExpiry = Date.now();
+        this.#_octreeQuery.incrementConnectionID();
+
+        // Safe landing code not implemented.
+    };
+
+    // Slot.
+    #nodeKilled = (node: Node): void => {
+        // C++  void Application::nodeKilled(SharedNodePointer node)
+        const nodeType = node.getType();
+        if (nodeType !== NodeType.EntityServer) {
+            return;  // eslint-disable-line no-useless-return
+        }
+
+        // WEBRTC TODO: Address further code - clear octree.
+
+    };
 
 }
 

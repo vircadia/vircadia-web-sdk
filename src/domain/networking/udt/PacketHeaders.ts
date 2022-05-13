@@ -215,7 +215,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} ICEPing - <code>39</code>
  *  @property {PacketType} ICEPingReply - <code>40</code>
  *  @property {PacketType} EntityData - <code>41</code>
- *  @property {PacketType} EntityQuery - <code>42</code>
+ *  @property {PacketType} EntityQuery - <code>42</code> - The user client sends this to the Entity Server to request details of
+ *      the entities in view. The Domain Server responds with EntityData packets.<br />
+ *      {@link PacketScribe.EntityQueryDetails}
  *  @property {PacketType} EntityAdd - <code>43</code>
  *  @property {PacketType} EntityErase - <code>44</code>
  *  @property {PacketType} EntityEdit - <code>45</code>
@@ -493,17 +495,6 @@ const PacketType = new class {
     ]);
 
 
-    readonly #_EntityVersion = {
-        // C++ EntityVersion
-        ParticleSpin: 92,
-        LAST_PACEKT_TYPE: 133
-    };
-
-    readonly #_EntityQueryPacketVersion = {
-        // C++ EntityQueryPacketVersion
-        ConicalFrustrums: 23
-    };
-
     readonly #_DomainListVersion = {
         // C++  DomainListVersion
         HasConnectReason: 24,
@@ -534,6 +525,17 @@ const PacketType = new class {
         // C++  DomainConnectRequestVersion
         HasCompressedSystemInfo: 26,
         SocketTypes: 27
+    };
+
+    readonly #_EntityVersion = {
+        // C++ EntityVersion
+        ParticleSpin: 92,
+        LAST_PACEKT_TYPE: 133
+    };
+
+    readonly #_EntityQueryPacketVersion = {
+        // C++ EntityQueryPacketVersion
+        ConicalFrustrums: 23
     };
 
     readonly #_AudioVersion = {

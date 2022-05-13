@@ -50,4 +50,5 @@ describe("EntityQuery - unit tests", () => {
         expect(packetSize).toBe(EXPECTED_PACKET.length / 2);
         expect(buffer2hex(packet.getMessageData().buffer.slice(0, packetSize))).toBe(EXPECTED_PACKET);
     });
+
 });

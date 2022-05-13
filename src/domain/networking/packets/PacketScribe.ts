@@ -9,7 +9,6 @@
 //
 
 // In packet number order.
-import EntityQuery from "./EntityQuery";
 import DomainList from "./DomainList";
 import Ping from "./Ping";
 import PingReply from "./PingReply";
@@ -24,6 +23,7 @@ import DomainConnectionDenied from "./DomainConnectionDenied";
 import SetAvatarTraits from "./SetAvatarTraits";
 import AvatarIdentity from "./AvatarIdentity";
 import DomainConnectRequest from "./DomainConnectRequest";
+import EntityQuery from "./EntityQuery";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
 import DomainServerRemovedNode from "./DomainServerRemovedNode";
 import MessagesData from "./MessagesData";

@@ -17,11 +17,11 @@ import { vec3 } from "./Vec3";
  *  <p>C++: <code>class ConicalViewFrustum</code></p>
  *  @class ConicalViewFrustum
  *
- *  @property {vec3} position - The position of the frustrum.
- *  @property {vec3} direction - The direction of the frustrum.
- *  @property {number} angle - The angle of the frustrum.
- *  @property {number} farClip - The far clipping distance of the frustrum.
- *  @property {number} radius - The radius of the frustrum.
+ *  @property {vec3} position - The position of the frustum.
+ *  @property {vec3} direction - The direction of the frustum.
+ *  @property {number} angle - The angle of the frustum.
+ *  @property {number} farClip - The far clipping distance of the frustum.
+ *  @property {number} radius - The radius of the frustum.
  */
 class ConicalViewFrustum {
     // C++ class ConicalViewFrustum

@@ -23,8 +23,8 @@ describe("Vircadia - integration tests", () => {
         expect(Camera).toBeDefined();
         expect(AudioMixer).toBeDefined();
         expect(AvatarMixer).toBeDefined();
-        expect(MessageMixer).toBeDefined();
         expect(EntityServer).toBeDefined();
+        expect(MessageMixer).toBeDefined();
     });
 
 });

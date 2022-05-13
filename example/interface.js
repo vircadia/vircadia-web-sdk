@@ -23,9 +23,9 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
     let audioMixer = null;
     let avatarMixer = null;
     let avatarMixerGameLoop = null;
-    let messageMixer = null;
     let entityServer = null;
     let entityServerGameLoop = null;
+    let messageMixer = null;
 
 
     // Domain Server
@@ -399,6 +399,25 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
     }());
 
+    // Entity Server
+    (function () {
+        entityServer = new EntityServer(contextID);
+
+        const statusText = document.getElementById("entityServerStatus");
+
+        function onStateChanged(state) {
+            statusText.value = EntityServer.stateToString(state);
+        }
+        onStateChanged(entityServer.state);
+        entityServer.onStateChanged = onStateChanged;
+
+        // Game Loop
+
+        entityServerGameLoop = () => {
+            entityServer.update();
+        };
+    }());
+
     // Message Mixer
     (function () {
         messageMixer = new MessageMixer(contextID);
@@ -444,25 +463,6 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
     }());
 
-    // Entity Server
-    (function () {
-        entityServer = new EntityServer(contextID);
-
-        const statusText = document.getElementById("entityServerStatus");
-
-        function onStateChanged(state) {
-            statusText.value = EntityServer.stateToString(state);
-        }
-        onStateChanged(entityServer.state);
-        entityServer.onStateChanged = onStateChanged;
-
-        // Game Loop
-
-        entityServerGameLoop = () => {
-            entityServer.update();
-        };
-    }());
-
     // Wire up mixers.
     audioMixer.positionGetter = () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -489,9 +489,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             // Update the camera ready for use by the avatar mixer update.
             camera.update();
 
-            // Update the avatar mixer with latest user client avatar data and get latest data from avatar mixer.
+            // Update the avatar mixer with latest user client data and get latest data from avatar mixer.
             avatarMixerGameLoop();
 
+            // Update the entity server with latest user client data.
             entityServerGameLoop();
 
             const timeout = Math.max(TARGET_INTERVAL - (Date.now() - gameLoopStart), MIN_TIMEOUT);

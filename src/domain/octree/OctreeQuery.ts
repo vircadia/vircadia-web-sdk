@@ -16,8 +16,8 @@ import OctreeConstants from "./OctreeConstants";
 /*@devdoc
  *  The <code>OctreeQueryFlags</code> namespace provides flags modifying an octree query.
  *  @namespace OctreeQueryFlags
- *  @property {number} NoFlags = <code>0</code> - No flag. <em>Read-only.</em>
- *  @property {number} WantInitialCompletion = <code>1</code> - Notify that the initial query is complete. <em>Read-only.</em>
+ *  @property {number} NoFlags=0 - No flag. <em>Read-only.</em>
+ *  @property {number} WantInitialCompletion=1 - Notify that the initial query is complete. <em>Read-only.</em>
  *
  */
 enum OctreeQueryFlags {
@@ -46,6 +46,7 @@ class OctreeQuery {
     #_jsonParameters: Record<string, unknown> = {};
     #_reportInitialCompletion = false;
 
+
     constructor(randomizeConnectionID: boolean) {
         if (randomizeConnectionID) {
             // Randomize our initial octree query connection ID
@@ -54,6 +55,7 @@ class OctreeQuery {
             this.#_connectionID = Math.floor(Math.random() * (65535 + 1));
         }
     }
+
 
     /*@devdoc
      *  Sets the maximum number of query packets per second.
