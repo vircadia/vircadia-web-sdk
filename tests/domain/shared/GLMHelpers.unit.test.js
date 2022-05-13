@@ -94,14 +94,20 @@ describe("GLMHelpers - unit tests", () => {
         const buffer = new ArrayBuffer(4);
         const data = new DataView(buffer);
 
-        const angle = 45.2;
-        const numBytes = GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
+        let angle = 45.2;
+        let numBytes = GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
         expect(numBytes).toBe(2);
-        const bytes = buffer2hex(buffer);
+        let bytes = buffer2hex(buffer);
         expect(bytes).toBe("000023a0");
+
+        angle = -53.5;
+        numBytes = GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
+        expect(numBytes).toBe(2);
+        bytes = buffer2hex(buffer);
+        expect(bytes).toBe("0000f459");
     });
 
-    test("Can write a clip value into 2 bytes of packet data", () => {
+    test("Can write a clipping distance value into 2 bytes of packet data", () => {
         const buffer = new ArrayBuffer(4);
         const data = new DataView(buffer);
 
@@ -120,7 +126,7 @@ describe("GLMHelpers - unit tests", () => {
         expect(bytes).toBe("0000f2ff");
     });
 
-    test("Can test with two values are close enough", () => {
+    test("Can test that two values are close enough", () => {
         expect(GLMHelpers.closeEnough(0, 0, 0)).toBe(true);
         expect(GLMHelpers.closeEnough(0, 0, 0.001)).toBe(true);
         expect(GLMHelpers.closeEnough(1, 1, 0)).toBe(true);
@@ -129,55 +135,6 @@ describe("GLMHelpers - unit tests", () => {
         expect(GLMHelpers.closeEnough(10, 20, 0.667)).toBe(true);
         expect(GLMHelpers.closeEnough(10, 20, 1.0)).toBe(true);
         expect(GLMHelpers.closeEnough(10, 20, 2.0)).toBe(true);
-    });
-
-    /* eslint-enable @typescript-eslint/no-magic-numbers */
-
-});
-
-describe("Angle - unit tests", () => {
-
-    test("Can write an angle into 2 bytes of packet data", () => {
-        const buffer = new ArrayBuffer(4);
-        const data = new DataView(buffer);
-
-        // 45.2 deg angle.
-        let angle = 45.2;
-        let numBytes = GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
-        expect(numBytes).toBe(2);
-        let bytes = buffer2hex(buffer);
-        expect(bytes).toBe("000023a0");
-
-        // -53.2 deg angle.
-        angle = -53.5;
-        numBytes = GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
-        expect(numBytes).toBe(2);
-        bytes = buffer2hex(buffer);
-        expect(bytes).toBe("0000f459");
-    });
-});
-
-describe("Clipping distance value - unit tests", () => {
-
-    /* eslint-disable @typescript-eslint/no-magic-numbers */
-
-    test("Can write a clip value into 2 bytes of packet data", () => {
-        const buffer = new ArrayBuffer(4);
-        const data = new DataView(buffer);
-
-        // ClipValue under ClipLimit.SMALL_LIMIT
-        let clipValue = 8;
-        let numBytes = GLMHelpers.packClipValueToTwoByte(data, 2, clipValue);
-        expect(numBytes).toBe(2);
-        let bytes = buffer2hex(buffer);
-        expect(bytes).toBe("00006566");
-
-        // ClipValue greater than ClipLimit.SMALL_LIMIT
-        clipValue = 14;
-        numBytes = GLMHelpers.packClipValueToTwoByte(data, 2, clipValue);
-        expect(numBytes).toBe(2);
-        bytes = buffer2hex(buffer);
-        expect(bytes).toBe("0000f2ff");
     });
 
     /* eslint-enable @typescript-eslint/no-magic-numbers */
