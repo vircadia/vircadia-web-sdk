@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer, Uuid } from "../dist/Vircadia.js";
+import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer, Uuid } from "../dist/Vircadia.js";
 
 (function () {
 
@@ -24,6 +24,8 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer, 
     let avatarMixer = null;
     let avatarMixerGameLoop = null;
     let messageMixer = null;
+    let entityServer = null;
+    let entityServerGameLoop = null;
 
 
     // Domain Server
@@ -442,6 +444,25 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer, 
 
     }());
 
+    // Entity Server
+    (function () {
+        entityServer = new EntityServer(contextID);
+
+        const statusText = document.getElementById("entityServerStatus");
+
+        function onStateChanged(state) {
+            statusText.value = EntityServer.stateToString(state);
+        }
+        onStateChanged(entityServer.state);
+        entityServer.onStateChanged = onStateChanged;
+
+        // Game Loop
+
+        entityServerGameLoop = () => {
+            entityServer.update();
+        };
+    }());
+
     // Wire up mixers.
     audioMixer.positionGetter = () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -470,6 +491,8 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer, 
 
             // Update the avatar mixer with latest user client avatar data and get latest data from avatar mixer.
             avatarMixerGameLoop();
+
+            entityServerGameLoop();
 
             const timeout = Math.max(TARGET_INTERVAL - (Date.now() - gameLoopStart), MIN_TIMEOUT);
             gameLoopTimer = setTimeout(gameLoop, timeout);

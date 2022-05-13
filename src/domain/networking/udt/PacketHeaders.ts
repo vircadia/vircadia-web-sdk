@@ -493,6 +493,16 @@ const PacketType = new class {
     ]);
 
 
+    readonly #_EntityVersion = {
+        // C++ EntityVersion
+        ParticleSpin: 92
+    };
+
+    readonly #_EntityQueryPacketVersion = {
+        // C++ EntityQueryPacketVersion
+        ConicalFrustrums: 23
+    };
+
     readonly #_DomainListVersion = {
         // C++  DomainListVersion
         HasConnectReason: 24,
@@ -597,6 +607,8 @@ const PacketType = new class {
                 return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
+            case this.EntityQuery:
+                return this.#_EntityQueryPacketVersion.ConicalFrustrums;
             case this.AudioEnvironment:
                 return DEFAULT_VERSION;
             case this.DomainDisconnectRequest:
@@ -615,6 +627,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.AvatarQuery:
                 return this.#_AvatarQueryVersion.ConicalFrustums;
+            case this.EntityQueryInitialResultsComplete:
+                return this.#_EntityVersion.ParticleSpin;
             case this.BulkAvatarTraits:
                 return this.#_AvatarMixerPacketVersion.AvatarTraitsAck;
             case this.BulkAvatarTraitsAck:

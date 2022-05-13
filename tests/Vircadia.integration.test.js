@@ -12,7 +12,7 @@ import AudioWorkletsMock from "../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
 
 
-import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer } from "../src/Vircadia";
+import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer } from "../src/Vircadia";
 
 
 describe("Vircadia - integration tests", () => {
@@ -24,6 +24,7 @@ describe("Vircadia - integration tests", () => {
         expect(AudioMixer).toBeDefined();
         expect(AvatarMixer).toBeDefined();
         expect(MessageMixer).toBeDefined();
+        expect(EntityServer).toBeDefined();
     });
 
 });

@@ -209,7 +209,7 @@ class LimitedNodeList {
 
 
     /*@devdoc
-     *  Sends a a solitary packet to an address, unreliably. The packet cannot be part of a multi-packet message.
+     *  Sends a solitary packet to an address, unreliably. The packet cannot be part of a multi-packet message.
      *  @param {NLPacket} packet - The packet to send.
      *  @param {SockAddr|Node} sockAddr - The address to send it to.
      *      <p>The node to send it to. Not sent if the node doesn't have an active socket.</p>
