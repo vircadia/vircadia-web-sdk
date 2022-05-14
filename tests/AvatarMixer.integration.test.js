@@ -8,9 +8,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AvatarMixer from "../src/AvatarMixer";
 import Camera from "../src/Camera";
 import DomainServer from "../src/DomainServer";
-import AvatarMixer from "../src/AvatarMixer";
 
 import TestConfig from "./test.config.js";
 
@@ -48,7 +48,7 @@ describe("AvatarMixer - integration tests", () => {
 
     test("States when connect to and disconnect from a domain", (done) => {
         const domainServer = new DomainServer();
-        const camera = new Camera(domainServer.contextID);  // eslint-disable-line
+        const camera = new Camera(domainServer.contextID);  // eslint-disable-line @typescript-eslint/no-unused-vars
         const avatarMixer = new AvatarMixer(domainServer.contextID);
         expect(avatarMixer.state).toBe(AvatarMixer.UNAVAILABLE);
         let haveSeenDisconnected = false;

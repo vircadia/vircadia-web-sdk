@@ -11,6 +11,7 @@
 import UDT from "../networking/udt/UDT";
 import assert from "./assert";
 import { quat } from "./Quat";
+import { vec3 } from "./Vec3";
 
 
 enum ClipLimit {
@@ -22,10 +23,16 @@ enum ClipLimit {
 /*@devdoc
  *  The <code>GLMHelpers</code> namespace provides helpers for working with OpenGL Mathematics (GLM) items.
  *  <p>C++: <code>GLMHelpers.h</code></p>
+ *
  *  @namespace GLMHelpers
+ *
+ *  @property {vec3} IDENTITY_FORWARD=0,0,-1 - Unit vector pointing in the camera forward direction.
  */
 const GLMHelpers = new class {
     // C++  GLMHelpers.h, .cpp
+
+    readonly IDENTITY_FORWARD: vec3 = { x: 0.0, y: 0.0, z: -1.0 };
+
 
     /*@devdoc
      *  Writes a quaternion value to a packet, packing it into 6 bytes.

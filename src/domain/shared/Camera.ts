@@ -91,8 +91,6 @@ class Camera {
     static readonly #_DEFAULT_FAR_CLIP = 16384.0;
     static readonly #_DEFAULT_CENTER_RADIUS = 3.0;
 
-    static readonly #_CAMERA_DIRECTION = { x: 0, y: 0, z: -1 };
-
     /* eslint-enable @typescript-eslint/no-magic-numbers */
 
 
@@ -132,7 +130,7 @@ class Camera {
         this.#_conicalView = {
             // C++  ConicalViewFrustum
             position: this.#_position,
-            direction: Vec3.multiplyQbyV(this.#_orientation, Camera.#_CAMERA_DIRECTION),
+            direction: Vec3.multiplyQbyV(this.#_orientation, GLMHelpers.IDENTITY_FORWARD),
             halfAngle: this.#calculateConicalHalfAngle(),
             farClip: this.#_farClip,
             centerRadius: this.#_centerRadius
@@ -156,7 +154,7 @@ class Camera {
 
     set orientation(orientation: quat) {
         this.#_orientation = orientation;
-        this.#_conicalView.direction = Vec3.multiplyQbyV(this.#_orientation, Camera.#_CAMERA_DIRECTION);
+        this.#_conicalView.direction = Vec3.multiplyQbyV(this.#_orientation, GLMHelpers.IDENTITY_FORWARD);
     }
 
     get fieldOfView(): number {

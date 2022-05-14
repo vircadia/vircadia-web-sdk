@@ -535,7 +535,7 @@ const PacketType = new class {
 
     readonly #_EntityQueryPacketVersion = {
         // C++ EntityQueryPacketVersion
-        ConicalFrustrums: 23
+        ConicalFrustums: 23
     };
 
     readonly #_AudioVersion = {
@@ -615,7 +615,7 @@ const PacketType = new class {
             case this.EntityData:
                 return this.#_EntityVersion.LAST_PACEKT_TYPE;
             case this.EntityQuery:
-                return this.#_EntityQueryPacketVersion.ConicalFrustrums;
+                return this.#_EntityQueryPacketVersion.ConicalFrustums;
             case this.AudioEnvironment:
                 return DEFAULT_VERSION;
             case this.DomainDisconnectRequest:

@@ -34,7 +34,6 @@ enum OctreeQueryFlags {
  *  @param {boolean} randomizeConnectionID - <code>true</code> to use a random number for the initial connection ID,
  *  <code>false</code> to start at <code>0</code>.
  */
-// WEBRTC TODO: Extend NodeData
 class OctreeQuery {
     // C++ class OctreeQuery : public NodeData
 
