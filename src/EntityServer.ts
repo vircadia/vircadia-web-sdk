@@ -14,6 +14,8 @@ import NodeType, { NodeTypeValue } from "./domain/networking/NodeType";
 import OctreeConstants from "./domain/octree/OctreeConstants";
 import OctreeQuery from "./domain/octree/OctreeQuery";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
+import Camera from "./domain/shared/Camera";
+import ConicalViewFrustum from "./domain/shared/ConicalViewFrustum";
 import ContextManager from "./domain/shared/ContextManager";
 import AssignmentClient from "./domain/AssignmentClient";
 
@@ -21,6 +23,8 @@ import AssignmentClient from "./domain/AssignmentClient";
 /*@sdkdoc
  *  The <code>EntityServer</code> class provides the interface for working with entity server assignment clients.
  *  <p>Prerequisite: A {@link DomainServer} object must be created in order to set up the domain context.</p>
+ *  <p>Prerequisite: A {@link Camera} object must be created for this class to use.</p>
+ *
  *  @class EntityServer
  *  @extends AssignmentClient
  *  @param {number} contextID - The domain context to use. See {@link DomainServer|DomainServer.contextID}.
@@ -75,22 +79,24 @@ class EntityServer extends AssignmentClient {
      */
 
 
-    // Context
-    #_nodeList;
-
-
-    #_queryExpiry: number;
-    #_octreeQuery = new OctreeQuery(true);
-    #_physicsEnabled = true;
-    #_maxOctreePPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
-
     static readonly #MIN_PERIOD_BETWEEN_QUERIES = 3000;
+
+
+    // Context
+    #_camera: Camera;
+    #_nodeList: NodeList;
+
+    #_octreeQuery = new OctreeQuery(true);
+    #_maxOctreePPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
+    #_queryExpiry = 0;
+    #_physicsEnabled = true;
 
 
     constructor(contextID: number) {
         super(contextID, NodeType.EntityServer);
 
         // Context
+        this.#_camera = ContextManager.get(contextID, Camera) as Camera;
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
 
         // C++  Application::Application()
@@ -111,14 +117,13 @@ class EntityServer extends AssignmentClient {
      *  client entity state.
      */
     update(): void {
+        // C++  void Application::update(float deltaTime)
+
+        // Request updated entity data.
+        const viewIsDifferentEnough = this.#_camera.hasViewChanged;
         const now = Date.now();
-
-        // WEBRTC TODO: Add viewIsDifferentEnough in the conditional check.
-        if (now > this.#_queryExpiry) {
-            // WEBRTC TODO: Address further C++ code.
-
+        if (now > this.#_queryExpiry || viewIsDifferentEnough) {
             this.#queryOctree(NodeType.EntityServer);
-
             this.#_queryExpiry = now + EntityServer.#MIN_PERIOD_BETWEEN_QUERIES;
         }
     }
@@ -130,27 +135,31 @@ class EntityServer extends AssignmentClient {
 
         const isModifiedQuery = !this.#_physicsEnabled;
         if (isModifiedQuery) {
+
             // WEBRTC TODO: Address further C++ code.
-            console.error("if-else statement not implemented for isModifiedQuery == true!");
+            console.error("EntityServer octree query not implement for physics not enabled!");
+
         } else {
-            // WEBRTC TODO: Set conical view.
-            // WEBRTC TODO: Get values from the LOD manager
-            /* eslint-disable @typescript-eslint/no-magic-numbers */
+            const conicalView = new ConicalViewFrustum();
+            conicalView.position = this.#_camera.conicalView.position;
+            conicalView.direction = this.#_camera.conicalView.direction;
+            conicalView.angle = this.#_camera.conicalView.halfAngle;
+            conicalView.farClip = this.#_camera.conicalView.farClip;
+            conicalView.radius = this.#_camera.conicalView.centerRadius;
+            this.#_octreeQuery.setConicalViews([conicalView]);
 
-            this.#_octreeQuery.setOctreeSizeScale(13_107_200);
+            // WEBRTC TODO: Get values from LODManager.
+            this.#_octreeQuery.setOctreeSizeScale(OctreeConstants.DEFAULT_OCTREE_SIZE_SCALE);
             this.#_octreeQuery.setBoundaryLevelAdjust(0);
-
-            /* eslint-enable @typescript-eslint/no-magic-numbers */
         }
         this.#_octreeQuery.setReportInitialCompletion(isModifiedQuery);
 
-        this.#_octreeQuery.setMaxQueryPacketsPerSecond(this.maxOctreePacketsPerSecond);
-
-        const data = this.#_octreeQuery.getBroadcastData();
-        const packet = PacketScribe.EntityQuery.write(data);
-
         const node = this.#_nodeList.soloNodeOfType(serverType);
         if (node && node.getActiveSocket()) {
+            this.#_octreeQuery.setMaxQueryPacketsPerSecond(this.maxOctreePacketsPerSecond);
+
+            const entityQueryData = this.#_octreeQuery.getBroadcastData();
+            const packet = PacketScribe.EntityQuery.write(entityQueryData);
             this.#_nodeList.sendUnreliablePacket(packet, node);
         }
     }
