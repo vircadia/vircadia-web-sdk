@@ -10,7 +10,7 @@
 
 import { OctreeQueryFlags } from "../../octree/OctreeQuery";
 import assert from "../../shared/assert";
-import ConicalViewFrustum from "../../shared/ConicalViewFrustum";
+import { ConicalViewFrustum } from "../../shared/Camera";
 import GLMHelpers from "../../shared/GLMHelpers";
 import PacketTypeValue from "../udt/PacketHeaders";
 import UDT from "../udt/UDT";
@@ -39,7 +39,7 @@ const EntityQuery = new class {
      *  @property {number} maxQueryPPS - The maximum number of query packets per second.
      *  @property {number} octreeElementSizeScale - The size scale of the octree elements.
      *  @property {number} boundaryLevelAdjust - The boundary level adjust factor.
-     *  @property {Record<string, unknown>} jsonParameters - The JSON paremeters (not used client-side).
+     *  @property {Record<string, unknown>} jsonParameters - JSON query parameters. (Not used client-side.)
      *  @property {OctreeQueryFlags} queryFlags - The query flags.
      */
 
@@ -81,11 +81,11 @@ const EntityQuery = new class {
             dataPosition += 4;
             data.setFloat32(dataPosition, conicalView.direction.z, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
-            GLMHelpers.packFloatAngleToTwoByte(data, dataPosition, conicalView.angle);
+            GLMHelpers.packFloatAngleToTwoByte(data, dataPosition, conicalView.halfAngle);
             dataPosition += 2;
             GLMHelpers.packClipValueToTwoByte(data, dataPosition, conicalView.farClip);
             dataPosition += 2;
-            data.setFloat32(dataPosition, conicalView.radius, UDT.LITTLE_ENDIAN);
+            data.setFloat32(dataPosition, conicalView.centerRadius, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 

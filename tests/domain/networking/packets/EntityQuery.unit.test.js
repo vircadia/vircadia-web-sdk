@@ -11,7 +11,6 @@
 import EntityQuery from "../../../../src/domain/networking/packets/EntityQuery";
 import PacketType from "../../../../src/domain/networking/udt/PacketHeaders";
 import UDT from "../../../../src/domain/networking/udt/UDT";
-import ConicalViewFrustum from "../../../../src/domain/shared/ConicalViewFrustum";
 import NLPacket from "../../../../src/domain/networking/NLPacket";
 import OctreeQuery from "../../../../src/domain/octree/OctreeQuery";
 
@@ -24,15 +23,18 @@ describe("EntityQuery - unit tests", () => {
         // eslint-disable-next-line
         const EXPECTED_PACKET = "000000002a170000416c015bb0a3c1c4f8b8c08ededbc0743c5e3f000000007624fe3e818000c000004040580200000000484b0000000000000000";
 
-        const conicalViews = new ConicalViewFrustum();
-        conicalViews.position = { x: -20.461111, y: -5.7803667, z: -6.8709172 };
-        conicalViews.direction = { x: 0.86810995, y: 0, z: 0.49637193 };
-        conicalViews.angle = 0.714619;
-        conicalViews.farClip = 16384;
-        conicalViews.radius = 3;
+        const conicalViews = [
+            {
+                position: { x: -20.461111, y: -5.7803667, z: -6.8709172 },
+                direction: { x: 0.86810995, y: 0, z: 0.49637193 },
+                halfAngle: 0.714619,
+                farClip: 16384,
+                centerRadius: 3
+            }
+        ];
 
         const octreeQuery = new OctreeQuery();
-        octreeQuery.setConicalViews([conicalViews]);
+        octreeQuery.setConicalViews(conicalViews);
 
         const data = octreeQuery.getBroadcastData();
         // connectionID is randomly generated, but here we set it manually because we need a deterministic value for the purpose

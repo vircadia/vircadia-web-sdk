@@ -10,7 +10,7 @@
 
 
 import { EntityQueryDetails } from "../networking/packets/EntityQuery";
-import ConicalViewFrustum from "../shared/ConicalViewFrustum";
+import { ConicalViewFrustum } from "../shared/Camera";
 import OctreeConstants from "./OctreeConstants";
 
 /*@devdoc
@@ -39,7 +39,7 @@ class OctreeQuery {
     // C++ class OctreeQuery : public NodeData
 
     #_connectionID = 0;
-    #_conicalViews: Array<ConicalViewFrustum> = [new ConicalViewFrustum()];
+    #_conicalViews: Array<ConicalViewFrustum> = [];
     #_maxQueryPPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
     #_octreeElementSizeScale = OctreeConstants.DEFAULT_OCTREE_SIZE_SCALE;
     #_boundaryLevelAdjust = 0; // used for LOD calculations

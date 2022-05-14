@@ -15,7 +15,6 @@ import OctreeConstants from "./domain/octree/OctreeConstants";
 import OctreeQuery from "./domain/octree/OctreeQuery";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
 import Camera from "./domain/shared/Camera";
-import ConicalViewFrustum from "./domain/shared/ConicalViewFrustum";
 import ContextManager from "./domain/shared/ContextManager";
 import AssignmentClient from "./domain/AssignmentClient";
 
@@ -140,13 +139,7 @@ class EntityServer extends AssignmentClient {
             console.error("EntityServer octree query not implement for physics not enabled!");
 
         } else {
-            const conicalView = new ConicalViewFrustum();
-            conicalView.position = this.#_camera.conicalView.position;
-            conicalView.direction = this.#_camera.conicalView.direction;
-            conicalView.angle = this.#_camera.conicalView.halfAngle;
-            conicalView.farClip = this.#_camera.conicalView.farClip;
-            conicalView.radius = this.#_camera.conicalView.centerRadius;
-            this.#_octreeQuery.setConicalViews([conicalView]);
+            this.#_octreeQuery.setConicalViews([this.#_camera.conicalView]);
 
             // WEBRTC TODO: Get values from LODManager.
             this.#_octreeQuery.setOctreeSizeScale(OctreeConstants.DEFAULT_OCTREE_SIZE_SCALE);
