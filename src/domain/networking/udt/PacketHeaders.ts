@@ -491,7 +491,11 @@ const PacketType = new class {
 
     readonly #_EntityVersion = {
         // C++ EntityVersion
-        ParticleSpin: 92
+        ParticleSpin: 92,
+
+        // Add new versions above here
+        NUM_PACKET_TYPE: 136,
+        LAST_PACKET_TYPE: 137
     };
 
     readonly #_EntityQueryPacketVersion = {
@@ -593,10 +597,14 @@ const PacketType = new class {
                 return this.#_AudioVersion.StopInjectors;
             case this.DomainServerAddedNode:
                 return this.#_DomainServerAddedNodeVersion.SocketTypes;
+            case this.OctreeStats:
+                return DEFAULT_VERSION;
             case this.AvatarIdentity:
                 return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
+            case this.EntityData:
+                return this.#_EntityVersion.LAST_PACKET_TYPE;
             case this.EntityQuery:
                 return this.#_EntityQueryPacketVersion.ConicalFrustrums;
             case this.AudioEnvironment:

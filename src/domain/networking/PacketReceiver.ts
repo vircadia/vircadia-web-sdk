@@ -129,6 +129,23 @@ class PacketReceiver {
 
 
     /*@devdoc
+     *  Registers a listener function to invoke for multiple {@link PacketType(1)|PacketType}.
+     *  @param {PacketType[]} types - An array containing the types to register.
+     *  @param {PacketReceiver.ListenerReference} listener - The reference to the listener function.
+     *  @returns {boolean} <code>true</code> if the listener was successfully registered, <code>false</code> if it wasn't.
+     */
+    registerListenerForTypes(types: PacketTypeValue[], listener: ListenerReference): boolean {
+        // C++ bool PacketReceiver::registerListenerForTypes(PacketTypeList types, const ListenerReferencePointer& listener)
+
+        for (const type of types) {
+            this.registerListener(type, listener);
+        }
+
+        return true;
+    }
+
+
+    /*@devdoc
      *  Invokes the listener registered for an {@link NLPacket} per its PacketType.
      *  @function PacketReceiver.handleVerifiedPacket
      *  @type {Slot}

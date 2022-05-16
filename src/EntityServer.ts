@@ -15,6 +15,7 @@ import OctreeQuery from "./domain/octree/OctreeQuery";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
 import ContextManager from "./domain/shared/ContextManager";
 import OctreeConstants from "./domain/octree/OctreeConstants";
+import OctreePacketProcessor from "./domain/octree/OctreePacketProcessor";
 
 /*@sdkdoc
  *  The <code>EntityServer</code> class provides the interface for working with entity server assignment clients.
@@ -73,7 +74,9 @@ class EntityServer extends AssignmentClient {
 
     // Context
     #_nodeList;
-
+    // eslint-disable-next-line
+    // @ts-ignore
+    #_octreeProcessor;
 
     #_queryExpiry: number;
     #_octreeQuery = new OctreeQuery(true);
@@ -87,6 +90,8 @@ class EntityServer extends AssignmentClient {
 
         // Context
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
+        ContextManager.set(contextID, OctreePacketProcessor, contextID);
+        this.#_octreeProcessor = ContextManager.get(contextID, OctreePacketProcessor) as OctreePacketProcessor;
 
         this.#_queryExpiry = Date.now();
     }

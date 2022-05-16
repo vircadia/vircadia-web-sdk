@@ -28,7 +28,7 @@ enum OctreeQueryFlags {
 
 
 /*@devdoc
- *  The <code>OctreeQuery</code> class
+ *  The <code>OctreeQuery</code> class implements an octree Vircadia protocol query.
  *  <p>C++: <code>class OctreeQuery : public NodeData</code></p>
  *  @class OctreeQuery
  *  @param {boolean} randomizeConnectionID - <code>true</code> to use a random number for the initial connection ID,
