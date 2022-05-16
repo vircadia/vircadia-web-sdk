@@ -8,7 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer, Uuid } from "../dist/Vircadia.js";
+import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer, Uuid } from "../dist/Vircadia.js";
 
 (function () {
 
@@ -23,6 +23,8 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer, 
     let audioMixer = null;
     let avatarMixer = null;
     let avatarMixerGameLoop = null;
+    let entityServer = null;
+    let entityServerGameLoop = null;
     let messageMixer = null;
 
 
@@ -397,6 +399,25 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer, 
 
     }());
 
+    // Entity Server
+    (function () {
+        entityServer = new EntityServer(contextID);
+
+        const statusText = document.getElementById("entityServerStatus");
+
+        function onStateChanged(state) {
+            statusText.value = EntityServer.stateToString(state);
+        }
+        onStateChanged(entityServer.state);
+        entityServer.onStateChanged = onStateChanged;
+
+        // Game Loop
+
+        entityServerGameLoop = () => {
+            entityServer.update();
+        };
+    }());
+
     // Message Mixer
     (function () {
         messageMixer = new MessageMixer(contextID);
@@ -468,8 +489,11 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, MessageMixer, 
             // Update the camera ready for use by the avatar mixer update.
             camera.update();
 
-            // Update the avatar mixer with latest user client avatar data and get latest data from avatar mixer.
+            // Update the avatar mixer with latest user client data and get latest data from avatar mixer.
             avatarMixerGameLoop();
+
+            // Update the entity server with latest user client data.
+            entityServerGameLoop();
 
             const timeout = Math.max(TARGET_INTERVAL - (Date.now() - gameLoopStart), MIN_TIMEOUT);
             gameLoopTimer = setTimeout(gameLoop, timeout);

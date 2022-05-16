@@ -16,16 +16,17 @@ import PacketScribe from "./domain/networking/packets/PacketScribe";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType from "./domain/networking/NodeType";
+import Camera from "./domain/shared/Camera";
 import ContextManager from "./domain/shared/ContextManager";
 import AssignmentClient from "./domain/AssignmentClient";
 import AvatarManager from "./domain/AvatarManager";
-import Camera from "./domain/shared/Camera";
 
 
 /*@sdkdoc
  *  The <code>AvatarMixer</code> class provides the interface for working with avatar mixer assignment clients.
  *  <p>Prerequisite: A {@link DomainServer} object must be created in order to set up the domain context.</p>
  *  <p>Prerequisite: A {@link Camera} object must be created for this class to use.</p>
+ *
  *  @class AvatarMixer
  *  @extends AssignmentClient
  *  @param {number} contextID - The domain context to use. See {@link DomainServer|DomainServer.contextID}.
@@ -100,7 +101,6 @@ class AvatarMixer extends AssignmentClient {
 
     #_myAvatarInterface: MyAvatarInterface;
     #_avatarListInterface: AvatarListInterface;
-
 
     #_queryExpiry = 0;
 

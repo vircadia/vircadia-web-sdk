@@ -23,7 +23,7 @@ type ConicalViewFrustum = {
 
 
 /*@devdoc
- *  The <code>Camera</code> internal class manages the client's camera view for the avatar mixer and entity server assignment
+ *  The internal <code>Camera</code> class manages the client's camera view for the avatar mixer and entity server assignment
  *  client code to use.
  *
  *  @class Camera
@@ -53,7 +53,7 @@ type ConicalViewFrustum = {
  *  @property {number} MIN_CENTER_RADIUS=0.0 - The minimum keyhole center radius.
  */
 class Camera {
-    // C++  class Camera : public QObject
+    // C++  N/A - This is quite separate to the Interface-specific Camera C++
 
     /*@devdoc
      *  An approximation of a view frustum where the frustum is represented by a cone that encloses the frustum. The view
@@ -64,8 +64,10 @@ class Camera {
      *  @property {number} halfAngle - The half angle of the conical view that encloses the view frustum, i.e, the diagonal
      *      half angle, in radians.
      *  @property {number} farClip - The distance of the far clipping plane.
-     *  @property {number} centerRrdius - The radius of the center keyhole sphere.
+     *  @property {number} centerRadius - The radius of the center keyhole sphere.
      */
+    // C++'s ConicalViewFrustum and ViewFrustum classes are not used because these are targeted at C++ Interface's camera and
+    // operation and are unnecessarily complex for this SDK.
 
 
     // WEBRTC TODO: Handle multiple cameras.
@@ -88,8 +90,6 @@ class Camera {
     static readonly #_DEFAULT_ASPECT_RATIO = 16.0 / 9.0;
     static readonly #_DEFAULT_FAR_CLIP = 16384.0;
     static readonly #_DEFAULT_CENTER_RADIUS = 3.0;
-
-    static readonly #_CAMERA_DIRECTION = { x: 0, y: 0, z: -1 };
 
     /* eslint-enable @typescript-eslint/no-magic-numbers */
 
@@ -118,6 +118,7 @@ class Camera {
     #_aspectRatio = Camera.#_DEFAULT_ASPECT_RATIO;
     #_farClip = Camera.#_DEFAULT_FAR_CLIP;
     #_centerRadius = Camera.#_DEFAULT_CENTER_RADIUS;
+
     #_hasViewChanged = false;
 
     // Derived values.
@@ -129,7 +130,7 @@ class Camera {
         this.#_conicalView = {
             // C++  ConicalViewFrustum
             position: this.#_position,
-            direction: Vec3.multiplyQbyV(this.#_orientation, Camera.#_CAMERA_DIRECTION),
+            direction: Vec3.multiplyQbyV(this.#_orientation, GLMHelpers.IDENTITY_FORWARD),
             halfAngle: this.#calculateConicalHalfAngle(),
             farClip: this.#_farClip,
             centerRadius: this.#_centerRadius
@@ -153,7 +154,7 @@ class Camera {
 
     set orientation(orientation: quat) {
         this.#_orientation = orientation;
-        this.#_conicalView.direction = Vec3.multiplyQbyV(this.#_orientation, Camera.#_CAMERA_DIRECTION);
+        this.#_conicalView.direction = Vec3.multiplyQbyV(this.#_orientation, GLMHelpers.IDENTITY_FORWARD);
     }
 
     get fieldOfView(): number {

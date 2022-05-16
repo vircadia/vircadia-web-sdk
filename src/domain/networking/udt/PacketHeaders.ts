@@ -215,7 +215,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} ICEPing - <code>39</code>
  *  @property {PacketType} ICEPingReply - <code>40</code>
  *  @property {PacketType} EntityData - <code>41</code>
- *  @property {PacketType} EntityQuery - <code>42</code>
+ *  @property {PacketType} EntityQuery - <code>42</code> - The user client sends this to the Entity Server to request details of
+ *      the entities in view. The Domain Server responds with EntityData packets.<br />
+ *      {@link PacketScribe.EntityQueryDetails}
  *  @property {PacketType} EntityAdd - <code>43</code>
  *  @property {PacketType} EntityErase - <code>44</code>
  *  @property {PacketType} EntityEdit - <code>45</code>
@@ -525,6 +527,17 @@ const PacketType = new class {
         SocketTypes: 27
     };
 
+    readonly #_EntityVersion = {
+        // C++ EntityVersion
+        ParticleSpin: 92,
+        LAST_PACKET_TYPE: 133
+    };
+
+    readonly #_EntityQueryPacketVersion = {
+        // C++ EntityQueryPacketVersion
+        ConicalFrustums: 23
+    };
+
     readonly #_AudioVersion = {
         // C++  AudioVersion
         StopInjectors: 24
@@ -591,12 +604,18 @@ const PacketType = new class {
                 return this.#_AudioVersion.StopInjectors;
             case this.DomainServerAddedNode:
                 return this.#_DomainServerAddedNodeVersion.SocketTypes;
+            case this.OctreeStats:
+                return DEFAULT_VERSION;
             case this.SetAvatarTraits:
                 return DEFAULT_VERSION;
             case this.AvatarIdentity:
                 return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
+            case this.EntityData:
+                return this.#_EntityVersion.LAST_PACKET_TYPE;
+            case this.EntityQuery:
+                return this.#_EntityQueryPacketVersion.ConicalFrustums;
             case this.AudioEnvironment:
                 return DEFAULT_VERSION;
             case this.DomainDisconnectRequest:
@@ -615,6 +634,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.AvatarQuery:
                 return this.#_AvatarQueryVersion.ConicalFrustums;
+            case this.EntityQueryInitialResultsComplete:
+                return this.#_EntityVersion.ParticleSpin;
             case this.BulkAvatarTraits:
                 return this.#_AvatarMixerPacketVersion.AvatarTraitsAck;
             case this.BulkAvatarTraitsAck:

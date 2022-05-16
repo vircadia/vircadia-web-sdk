@@ -34,6 +34,7 @@ import Vec3, { vec3 } from "./domain/shared/Vec3";
  */
 class CameraAPI {
     // Named "CameraAPI" to avoid conflict with internal "Camera" class.
+    // C++  N/A
 
     // Context.
     #_camera: Camera;  // Internal camera object.

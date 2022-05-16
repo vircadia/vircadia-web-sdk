@@ -48,6 +48,7 @@ export { default as Camera } from "./Camera";
 export { default as AudioMixer } from "./AudioMixer";
 export type { AudioPositionGetter } from "./domain/audio-client/AudioClient";
 export { default as AvatarMixer, MyAvatarInterface, AvatarListInterface } from "./AvatarMixer";
+export { default as EntityServer } from "./EntityServer";
 export { default as MessageMixer } from "./MessageMixer";
 export type { AssignmentClientState } from "./domain/AssignmentClient";
 

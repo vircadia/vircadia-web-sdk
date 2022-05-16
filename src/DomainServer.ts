@@ -184,8 +184,9 @@ class DomainServer {
             // WEBRTC TODO: Configure interest set per AC APIs used.
 
             NodeType.AudioMixer,
-            NodeType.MessagesMixer,
-            NodeType.AvatarMixer
+            NodeType.AvatarMixer,
+            NodeType.EntityServer,
+            NodeType.MessagesMixer
         ]));
 
         // WEBRTC TODO: Address further C++ code.
@@ -366,10 +367,7 @@ class DomainServer {
     #nodeAdded = (node: Node): void => {
         // C++  void Application::nodeAdded(Node* node)
         if (node.getType() === NodeType.EntityServer) {
-            console.warn("DomainServer: EntityServer support implemented!");
-
-            // WEBRTC TODO: Address further code - for EntityServer node.
-
+            // Safe landing code not implemented.
         }
     };
 
@@ -380,19 +378,14 @@ class DomainServer {
 
         // AudioMixer node is handled in AudioClient.ts.
         // AvatarMixer node is handled in AvatarManager.ts.
+        // EntityServer node is handled in EntityServer.ts.
 
         if (nodeType === NodeType.AssetServer) {
             console.warn("DomainServer: AssetServer support not implemented!");
 
             // WEBRTC TODO: Address further code - for AssetServer node.
 
-        } else if (nodeType === NodeType.EntityServer) {
-            console.warn("DomainServer: EntityServer support not implemented!");
-
-            // WEBRTC TODO: Address further code - for EntityServer node.
-
         }
-
     };
 
     // Slot.
@@ -402,13 +395,9 @@ class DomainServer {
         const nodeType = node.getType();
 
         // AudioMixer node is handled in AudioMixer.ts.
+        // EntityServer node is handled in EntityServer.ts.
 
-        if (nodeType === NodeType.EntityServer) {
-            console.warn("DomainServer: EntityServer support not implemented!");
-
-            // WEBRTC TODO: Address further code - for EntityServer node.
-
-        } else if (nodeType === NodeType.AssetServer) {
+        if (nodeType === NodeType.AssetServer) {
             console.warn("DomainServer: AssetServer support not implemented!");
 
             // WEBRTC TODO: Address further code - for AssetServer node.
