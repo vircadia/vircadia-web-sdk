@@ -530,7 +530,7 @@ const PacketType = new class {
     readonly #_EntityVersion = {
         // C++ EntityVersion
         ParticleSpin: 92,
-        LAST_PACEKT_TYPE: 133
+        LAST_PACKET_TYPE: 133
     };
 
     readonly #_EntityQueryPacketVersion = {
@@ -613,7 +613,7 @@ const PacketType = new class {
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
             case this.EntityData:
-                return this.#_EntityVersion.LAST_PACEKT_TYPE;
+                return this.#_EntityVersion.LAST_PACKET_TYPE;
             case this.EntityQuery:
                 return this.#_EntityQueryPacketVersion.ConicalFrustums;
             case this.AudioEnvironment:

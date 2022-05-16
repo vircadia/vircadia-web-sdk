@@ -41,7 +41,8 @@ import AssignmentClient from "./domain/AssignmentClient";
  *      entity server changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  *
- *  @property {number} maxOctreePacketsPerSecond - The set maximum number of octree packets per second.
+ *  @property {number} maxOctreePacketsPerSecond - The maximum number of octree packets per second that the user client is
+ *      willing to handle.
  */
 class EntityServer extends AssignmentClient {
 
