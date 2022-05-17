@@ -190,7 +190,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} ICEServerPeerInformation - <code>22</code>
  *  @property {PacketType} ICEServerQuery - <code>23</code>
  *  @property {PacketType} OctreeStats - <code>24</code>
- *  @property {PacketType} SetAvatarTraits - <code>25</code>
+ *  @property {PacketType} SetAvatarTraits - <code>25</code> - The user client sends this to the Avatar Mixer to update it with
+ *      avatar traits: skeleton model URL, skeleton data, avatar entities, or avatar grab data.<br />
+ *      {@link PacketScribe.SetAvatarTraitsDetails}
  *  @property {PacketType} InjectorGainSet - <code>26</code>
  *  @property {PacketType} AssignmentClientStatus - <code>27</code>
  *  @property {PacketType} NoisyMute - <code>28</code>
@@ -213,7 +215,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} ICEPing - <code>39</code>
  *  @property {PacketType} ICEPingReply - <code>40</code>
  *  @property {PacketType} EntityData - <code>41</code>
- *  @property {PacketType} EntityQuery - <code>42</code>
+ *  @property {PacketType} EntityQuery - <code>42</code> - The user client sends this to the Entity Server to request details of
+ *      the entities in view. The Domain Server responds with EntityData packets.<br />
+ *      {@link PacketScribe.EntityQueryDetails}
  *  @property {PacketType} EntityAdd - <code>43</code>
  *  @property {PacketType} EntityErase - <code>44</code>
  *  @property {PacketType} EntityEdit - <code>45</code>
@@ -262,7 +266,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} RadiusIgnoreRequest - <code>69</code>
  *  @property {PacketType} UsernameFromIDRequest - <code>70</code>
  *  @property {PacketType} UsernameFromIDReply - <code>71</code>
- *  @property {PacketType} AvatarQuery - <code>72</code>
+ *  @property {PacketType} AvatarQuery - <code>72</code> - The user client sends this to the avatar mixer to seek details of
+ *      avatars in the client's view or views.<br />
+ *      {@link PacketScribe.AvatarQueryDetails}
  *  @property {PacketType} RequestsDomainListData - <code>73</code>
  *  @property {PacketType} PerAvatarGainSet - <code>74</code>
  *  @property {PacketType} EntityScriptGetStatus - <code>75</code>
@@ -489,20 +495,6 @@ const PacketType = new class {
     ]);
 
 
-    readonly #_EntityVersion = {
-        // C++ EntityVersion
-        ParticleSpin: 92,
-
-        // Add new versions above here
-        NUM_PACKET_TYPE: 136,
-        LAST_PACKET_TYPE: 137
-    };
-
-    readonly #_EntityQueryPacketVersion = {
-        // C++ EntityQueryPacketVersion
-        ConicalFrustrums: 23
-    };
-
     readonly #_DomainListVersion = {
         // C++  DomainListVersion
         HasConnectReason: 24,
@@ -535,6 +527,17 @@ const PacketType = new class {
         SocketTypes: 27
     };
 
+    readonly #_EntityVersion = {
+        // C++ EntityVersion
+        ParticleSpin: 92,
+        LAST_PACKET_TYPE: 133
+    };
+
+    readonly #_EntityQueryPacketVersion = {
+        // C++ EntityQueryPacketVersion
+        ConicalFrustums: 23
+    };
+
     readonly #_AudioVersion = {
         // C++  AudioVersion
         StopInjectors: 24
@@ -543,6 +546,10 @@ const PacketType = new class {
     readonly #_MessageDataVersion = {
         // C++  MessageDataVersion
         TextOrBinaryData: 18
+    };
+
+    readonly #_AvatarQueryVersion = {
+        ConicalFrustums: 22
     };
 
     readonly #_AvatarMixerPacketVersion = {
@@ -599,6 +606,8 @@ const PacketType = new class {
                 return this.#_DomainServerAddedNodeVersion.SocketTypes;
             case this.OctreeStats:
                 return DEFAULT_VERSION;
+            case this.SetAvatarTraits:
+                return DEFAULT_VERSION;
             case this.AvatarIdentity:
                 return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.DomainConnectRequest:
@@ -606,7 +615,7 @@ const PacketType = new class {
             case this.EntityData:
                 return this.#_EntityVersion.LAST_PACKET_TYPE;
             case this.EntityQuery:
-                return this.#_EntityQueryPacketVersion.ConicalFrustrums;
+                return this.#_EntityQueryPacketVersion.ConicalFrustums;
             case this.AudioEnvironment:
                 return DEFAULT_VERSION;
             case this.DomainDisconnectRequest:
@@ -623,6 +632,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.SelectedAudioFormat:
                 return DEFAULT_VERSION;
+            case this.AvatarQuery:
+                return this.#_AvatarQueryVersion.ConicalFrustums;
             case this.EntityQueryInitialResultsComplete:
                 return this.#_EntityVersion.ParticleSpin;
             case this.BulkAvatarTraits:

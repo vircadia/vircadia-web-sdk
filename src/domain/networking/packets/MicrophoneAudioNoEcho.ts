@@ -67,7 +67,7 @@ const MicrophoneAudioNoEcho = new class {
      */
     write(info: MicrophoneAudioNoEchoDetails): NLPacket {  /* eslint-disable-line class-methods-use-this */
         // C++  void AbstractAudioInterface::emitAudioPacket(const void* audioData, size_t bytes, quint16& sequenceNumber,
-        //      bool isStereo, const Transform& transform, glm::vec3 avatarBoundingBoxCorner, glm:: vec3 avatarBoundingBoxScale,
+        //      bool isStereo, const Transform& transform, glm::vec3 avatarBoundingBoxCorner, glm::vec3 avatarBoundingBoxScale,
         //      PacketType packetType, QString codecName)
 
         const packet = NLPacket.create(PacketType.MicrophoneAudioNoEcho);

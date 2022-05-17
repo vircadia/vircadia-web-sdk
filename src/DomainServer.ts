@@ -184,9 +184,9 @@ class DomainServer {
             // WEBRTC TODO: Configure interest set per AC APIs used.
 
             NodeType.AudioMixer,
-            NodeType.MessagesMixer,
             NodeType.AvatarMixer,
-            NodeType.EntityServer
+            NodeType.EntityServer,
+            NodeType.MessagesMixer
         ]));
 
         // WEBRTC TODO: Address further C++ code.
@@ -365,7 +365,7 @@ class DomainServer {
 
     // Slot.
     #nodeAdded = (node: Node): void => {
-        // C++  void Application:: nodeAdded(Node* node)
+        // C++  void Application::nodeAdded(Node* node)
         if (node.getType() === NodeType.EntityServer) {
             // Safe landing code not implemented.
         }
@@ -378,18 +378,14 @@ class DomainServer {
 
         // AudioMixer node is handled in AudioClient.ts.
         // AvatarMixer node is handled in AvatarManager.ts.
+        // EntityServer node is handled in EntityServer.ts.
 
         if (nodeType === NodeType.AssetServer) {
             console.warn("DomainServer: AssetServer support not implemented!");
 
             // WEBRTC TODO: Address further code - for AssetServer node.
 
-        } else if (nodeType === NodeType.EntityServer) {
-            // WEBRTC TODO: Address further code.
-
-            // Safe landing code not implemented.
         }
-
     };
 
     // Slot.
@@ -399,11 +395,9 @@ class DomainServer {
         const nodeType = node.getType();
 
         // AudioMixer node is handled in AudioMixer.ts.
+        // EntityServer node is handled in EntityServer.ts.
 
-        if (nodeType === NodeType.EntityServer) {
-            // WEBRTC TODO: Address further code
-
-        } else if (nodeType === NodeType.AssetServer) {
+        if (nodeType === NodeType.AssetServer) {
             console.warn("DomainServer: AssetServer support not implemented!");
 
             // WEBRTC TODO: Address further code - for AssetServer node.

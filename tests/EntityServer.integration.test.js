@@ -8,6 +8,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import Camera from "../src/Camera";
 import DomainServer from "../src/DomainServer";
 import EntityServer from "../src/EntityServer";
 
@@ -47,6 +48,7 @@ describe("EntityServer - integration tests", () => {
 
     test("States when connect to and disconnect from a domain", (done) => {
         const domainServer = new DomainServer();
+        const camera = new Camera(domainServer.contextID);  // eslint-disable-line @typescript-eslint/no-unused-vars
         const entityServer = new EntityServer(domainServer.contextID);
         expect(entityServer.state).toBe(EntityServer.UNAVAILABLE);
         let haveSeenDisconnected = false;

@@ -8,18 +8,23 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType, { NodeTypeValue } from "./domain/networking/NodeType";
-import AssignmentClient from "./domain/AssignmentClient";
+import OctreeConstants from "./domain/octree/OctreeConstants";
 import OctreeQuery from "./domain/octree/OctreeQuery";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
+import Camera from "./domain/shared/Camera";
 import ContextManager from "./domain/shared/ContextManager";
-import OctreeConstants from "./domain/octree/OctreeConstants";
 import OctreePacketProcessor from "./domain/octree/OctreePacketProcessor";
+import AssignmentClient from "./domain/AssignmentClient";
+
 
 /*@sdkdoc
  *  The <code>EntityServer</code> class provides the interface for working with entity server assignment clients.
  *  <p>Prerequisite: A {@link DomainServer} object must be created in order to set up the domain context.</p>
+ *  <p>Prerequisite: A {@link Camera} object must be created for this class to use.</p>
+ *
  *  @class EntityServer
  *  @extends AssignmentClient
  *  @param {number} contextID - The domain context to use. See {@link DomainServer|DomainServer.contextID}.
@@ -36,6 +41,9 @@ import OctreePacketProcessor from "./domain/octree/OctreePacketProcessor";
  *  @property {EntityServer~onStateChanged|null} onStateChanged - Sets a single function to be called when the state of the
  *      entity server changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
+ *
+ *  @property {number} maxOctreePacketsPerSecond - The maximum number of octree packets per second that the user client is
+ *      willing to handle.
  */
 class EntityServer extends AssignmentClient {
 
@@ -72,50 +80,60 @@ class EntityServer extends AssignmentClient {
      */
 
 
+    static readonly #MIN_PERIOD_BETWEEN_QUERIES = 3000;
+
+
     // Context
-    #_nodeList;
+    #_camera: Camera;
+    #_nodeList: NodeList;
     // eslint-disable-next-line
     // @ts-ignore
-    #_octreeProcessor;
+    #_octreeProcessor: OctreePacketProcessor;
 
-    #_queryExpiry: number;
     #_octreeQuery = new OctreeQuery(true);
-    #_physicsEnabled = true;
     #_maxOctreePPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
+    #_queryExpiry = 0;
+    #_physicsEnabled = true;
 
-    static readonly #MIN_PERIOD_BETWEEN_QUERIES = 3000;
 
     constructor(contextID: number) {
         super(contextID, NodeType.EntityServer);
 
         // Context
+        this.#_camera = ContextManager.get(contextID, Camera) as Camera;
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
         ContextManager.set(contextID, OctreePacketProcessor, contextID);
         this.#_octreeProcessor = ContextManager.get(contextID, OctreePacketProcessor) as OctreePacketProcessor;
 
+        // C++  Application::Application()
+        this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
+        this.#_nodeList.nodeKilled.connect(this.#nodeKilled);
+
         this.#_queryExpiry = Date.now();
     }
+
 
     get maxOctreePacketsPerSecond(): number {
         return this.#_maxOctreePPS;
     }
+
 
     /*@sdkdoc
      *  Game loop update method that should be called multiple times per second to keep the entity server up to date with user
      *  client entity state.
      */
     update(): void {
+        // C++  void Application::update(float deltaTime)
+
+        // Request updated entity data.
+        const viewIsDifferentEnough = this.#_camera.hasViewChanged;
         const now = Date.now();
-
-        // WEBRTC TODO: Add viewIsDifferentEnough in the conditional check.
-        if (now > this.#_queryExpiry) {
-            // WEBRTC TODO: Address further C++ code.
-
+        if (now > this.#_queryExpiry || viewIsDifferentEnough) {
             this.#queryOctree(NodeType.EntityServer);
-
             this.#_queryExpiry = now + EntityServer.#MIN_PERIOD_BETWEEN_QUERIES;
         }
     }
+
 
     // Sends an EntityQuery packet to the entity server.
     #queryOctree(serverType: NodeTypeValue): void {
@@ -123,30 +141,55 @@ class EntityServer extends AssignmentClient {
 
         const isModifiedQuery = !this.#_physicsEnabled;
         if (isModifiedQuery) {
+
             // WEBRTC TODO: Address further C++ code.
-            console.error("if-else statement not implemented for isModifiedQuery == true!");
+            console.error("EntityServer octree query not implement for physics not enabled!");
+
         } else {
-            // WEBRTC TODO: Set conical view.
-            // WEBRTC TODO: Get values from the LOD manager
-            /* eslint-disable @typescript-eslint/no-magic-numbers */
+            this.#_octreeQuery.setConicalViews([this.#_camera.conicalView]);
 
-            this.#_octreeQuery.setOctreeSizeScale(13_107_200);
+            // WEBRTC TODO: Get values from LODManager.
+            this.#_octreeQuery.setOctreeSizeScale(OctreeConstants.DEFAULT_OCTREE_SIZE_SCALE);
             this.#_octreeQuery.setBoundaryLevelAdjust(0);
-
-            /* eslint-enable @typescript-eslint/no-magic-numbers */
         }
         this.#_octreeQuery.setReportInitialCompletion(isModifiedQuery);
 
-        this.#_octreeQuery.setMaxQueryPacketsPerSecond(this.maxOctreePacketsPerSecond);
-
-        const data = this.#_octreeQuery.getBroadcastData();
-        const packet = PacketScribe.EntityQuery.write(data);
-
         const node = this.#_nodeList.soloNodeOfType(serverType);
         if (node && node.getActiveSocket()) {
+            this.#_octreeQuery.setMaxQueryPacketsPerSecond(this.maxOctreePacketsPerSecond);
+
+            const entityQueryData = this.#_octreeQuery.getBroadcastData();
+            const packet = PacketScribe.EntityQuery.write(entityQueryData);
             this.#_nodeList.sendUnreliablePacket(packet, node);
         }
     }
+
+
+    // Slot.
+    #nodeActivated = (node: Node): void => {
+        // C++  void Application::nodeActivated(SharedNodePointer node)
+        const nodeType = node.getType();
+        if (nodeType !== NodeType.EntityServer) {
+            return;
+        }
+
+        this.#_queryExpiry = Date.now();
+        this.#_octreeQuery.incrementConnectionID();
+
+        // Safe landing code not implemented.
+    };
+
+    // Slot.
+    #nodeKilled = (node: Node): void => {
+        // C++  void Application::nodeKilled(SharedNodePointer node)
+        const nodeType = node.getType();
+        if (nodeType !== NodeType.EntityServer) {
+            return;  // eslint-disable-line no-useless-return
+        }
+
+        // WEBRTC TODO: Address further code - clear octree.
+
+    };
 
 }
 

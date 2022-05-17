@@ -13,15 +13,15 @@
  *  The <code>OctreeConstants</code> namespace provides constants for working with octrees.
  *  @namespace OctreeConstants
  *
- *  @property {number} DEFAULT_MAX_OCTREE_PPS - <code>600</code> Default maximum octree packets per second value.
+ *  @property {number} DEFAULT_MAX_OCTREE_PPS=600 - The default maximum number of octree packets per second value.
  *      <em>Read-only.</em>
- *  @property {number} TREE_SCALE - <code>32768</code> The number of meters of the 0.0 to 1.0 voxel universe.
+ *  @property {number} TREE_SCALE=32768 - The number of meters in the <code>0.0</code> to <code1.0</code> voxel universe.
  *      <em>Read-only.</em>
- *  @property {number} DEFAULT_VISIBILITY_DISTANCE_FOR_UNIT_ELEMENT - <code>400</code> Maximum distance where a 1x1x1 cube is
- *  visible for 20:20 vision.
+ *  @property {number} DEFAULT_VISIBILITY_DISTANCE_FOR_UNIT_ELEMENT=400 - The maximum distance where a 1x1x1 cube is visible for
+ *      20:20 vision.
  *      <em>Read-only.</em>
- *  @property {number} DEFAULT_OCTREE_SIZE_SCALE - <code>13,107,200</code> The product of TREE_SCALE and
- *  DEFAULT_VISIBILITY_DISTANCE_FOR_UNIT_ELEMENT.
+ *  @property {number} DEFAULT_OCTREE_SIZE_SCALE=13107200 - The product of <code>TREE_SCALE</code> and
+ *      <code>DEFAULT_VISIBILITY_DISTANCE_FOR_UNIT_ELEMENT</code>.
  *      <em>Read-only.</em>
  */
 const OctreeConstants = new class {

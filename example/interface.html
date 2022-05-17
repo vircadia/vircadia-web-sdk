@@ -39,6 +39,39 @@
         </div>
     </div>
 
+    <h2>Camera</h2>
+    <div>
+        <div class="row">
+            <span>Position:</span>
+            x: <input id="cameraPosX" type="number" class="narrow" />
+            y: <input id="cameraPosY" type="number" class="narrow" />
+            z: <input id="cameraPosZ" type="number" class="narrow" />
+        </div>
+        <div class="row">
+            <span>Orientation:</span>
+            x: <input id="cameraRotX" type="number" class="narrow" />
+            y: <input id="cameraRotY" type="number" class="narrow" />
+            z: <input id="cameraRotZ" type="number" class="narrow" />
+            w: <input id="cameraRotW" type="number" class="narrow" />
+        </div>
+        <div class="row">
+            <span>Field of view:</span>
+            <input id="fieldOfView" type="number" class="narrow" />
+        </div>
+        <div class="row">
+            <span>Aspect ratio:</span>
+            <input id="aspectRatio" type="number" class="narrow" />
+        </div>
+        <div class="row">
+            <span>Far clip:</span>
+            <input id="farClip" type="number" class="narrow" />
+        </div>
+        <div class="row">
+            <span>Center radius:</span>
+            <input id="centerRadius" type="number" class="narrow" />
+        </div>
+    </div>
+
     <h2>Audio Mixer</h2>
     <div>
         <div class="row">
@@ -51,30 +84,6 @@
             <input id="micMuted" type="checkbox" class="checkbox" checked />
         </div>
         <audio id="audioElement" />
-    </div>
-
-    <h2>Message Mixer</h2>
-    <div>
-        <div class="row">
-            <span>Status:</span>
-            <input id="messageMixerStatus" type="text" readonly="readonly" />
-        </div>
-
-        <div class="row">
-            <span>Channel:</span> <input id="messagesChannel" type="text" />
-            <button id="messagesSubscribeButton">Subscribe</button>
-            <button id="messagesUnsubscribeButton">Unsubscribe</button>
-        </div>
-
-        <div class="row">
-            <span>Message:</span> <input id="messagesTextMessage" type="text" />
-            <button id="messagesTextSendButton">Send</button>
-        </div>
-
-        <div class="row">
-            <span>Received:</span> <input id="messagesTextReceived" type="text" readonly class="medium" />
-            from <input id="messagesSender" type="text" readonly="readonly" class="medium" />
-        </div>
     </div>
 
     <h2>Avatar Mixer</h2>
@@ -95,6 +104,11 @@
         <div class="row">
             <span>Session name:</span>
             <input id="myAvatarSessionDisplayName" type="text" readonly="readonly" class="medium" />
+        </div>
+
+        <div class="row">
+            <span>Skeleton URL:</span>
+            <input id="myAvatarSkeletonModelURL" type="text" class="medium" />
         </div>
 
         <div class="row">
@@ -131,6 +145,30 @@
         <div class="row">
             <span>Status:</span>
             <input id="entityServerStatus" type="text" readonly="readonly" />
+        </div>
+    </div>
+
+    <h2>Message Mixer</h2>
+    <div>
+        <div class="row">
+            <span>Status:</span>
+            <input id="messageMixerStatus" type="text" readonly="readonly" />
+        </div>
+
+        <div class="row">
+            <span>Channel:</span> <input id="messagesChannel" type="text" />
+            <button id="messagesSubscribeButton">Subscribe</button>
+            <button id="messagesUnsubscribeButton">Unsubscribe</button>
+        </div>
+
+        <div class="row">
+            <span>Message:</span> <input id="messagesTextMessage" type="text" />
+            <button id="messagesTextSendButton">Send</button>
+        </div>
+
+        <div class="row">
+            <span>Received:</span> <input id="messagesTextReceived" type="text" readonly class="medium" />
+            from <input id="messagesSender" type="text" readonly="readonly" class="medium" />
         </div>
     </div>
 

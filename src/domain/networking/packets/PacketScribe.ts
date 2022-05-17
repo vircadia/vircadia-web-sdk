@@ -9,7 +9,6 @@
 //
 
 // In packet number order.
-import EntityQuery from "./EntityQuery";
 import DomainList from "./DomainList";
 import Ping from "./Ping";
 import PingReply from "./PingReply";
@@ -21,8 +20,10 @@ import BulkAvatarData from "./BulkAvatarData";
 import SilentAudioFrame from "./SilentAudioFrame";
 import DomainListRequest from "./DomainListRequest";
 import DomainConnectionDenied from "./DomainConnectionDenied";
+import SetAvatarTraits from "./SetAvatarTraits";
 import AvatarIdentity from "./AvatarIdentity";
 import DomainConnectRequest from "./DomainConnectRequest";
+import EntityQuery from "./EntityQuery";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
 import DomainServerRemovedNode from "./DomainServerRemovedNode";
 import MessagesData from "./MessagesData";
@@ -30,6 +31,7 @@ import MessagesSubscribe from "../packets/MessagesSubscribe";
 import MessagesUnsubscribe from "../packets/MessagesUnsubscribe";
 import NegotiateAudioFormat from "./NegotiateAudioFormat";
 import SelectedAudioFormat from "./SelectedAudioFormat";
+import AvatarQuery from "./AvatarQuery";
 import BulkAvatarTraits from "./BulkAvatarTraits";
 import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
 
@@ -62,6 +64,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
  *  @property {function} DomainConnectionDenied.read -
  *      {@link PacketScribe.DomainConnectionDenied&period;read|DomainConnectionDenied&period;read}
+ *  @property {function} SetAvatarTraits.write -
+ *      {@link PacketScribe.SetAvatarTraits&period;write|SetAvatarTraits&period;write}
  *  @property {function} AvatarIdentity.read -
  *      {@link PacketScribe.AvatarIdentity&period;read|AvatarIdentity&period;read}
  *  @property {function} AvatarIdentity.write -
@@ -86,9 +90,11 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.NegotiateAudioFormat&period;write|NegotiateAudioFormat&period;write}
  *  @property {function} SelectedAudioFormat.read -
  *      {@link PacketScribe.SelectedAudioFormat&period;read|SelectedAudioFormat&period;read}
+ *  @property {function} AvatarQuery.write -
+ *      {@link PacketScribe.AvatarQuery&period;write|AvatarQuery&period;write}
  *  @property {function} BulkAvatarTraits.read -
  *      {@link PacketScribe.BulkAvatarTraits&period;read|BulkAvatarTraits&period;read}
- *  @property {function} BulkAvatarTraitsAck.write  -
+ *  @property {function} BulkAvatarTraitsAck.write -
  *      {@link PacketScribe.BulkAvatarTraitsAck&period;write|BulkAvatarTraitsAck&period;write}
  */
 
@@ -110,6 +116,7 @@ const PacketScribe = {
     SilentAudioFrame,
     DomainListRequest,
     DomainConnectionDenied,
+    SetAvatarTraits,
     AvatarIdentity,
     DomainConnectRequest,
     EntityQuery,
@@ -120,6 +127,7 @@ const PacketScribe = {
     MessagesUnsubscribe,
     NegotiateAudioFormat,
     SelectedAudioFormat,
+    AvatarQuery,
     BulkAvatarTraits,
     BulkAvatarTraitsAck
 };

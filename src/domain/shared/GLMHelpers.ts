@@ -8,9 +8,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { quat } from "./Quat";
 import UDT from "../networking/udt/UDT";
 import assert from "./assert";
+import { quat } from "./Quat";
+import { vec3 } from "./Vec3";
 
 
 enum ClipLimit {
@@ -22,10 +23,16 @@ enum ClipLimit {
 /*@devdoc
  *  The <code>GLMHelpers</code> namespace provides helpers for working with OpenGL Mathematics (GLM) items.
  *  <p>C++: <code>GLMHelpers.h</code></p>
+ *
  *  @namespace GLMHelpers
+ *
+ *  @property {vec3} IDENTITY_FORWARD=0,0,-1 - Unit vector pointing in the camera forward direction.
  */
 const GLMHelpers = new class {
     // C++  GLMHelpers.h, .cpp
+
+    readonly IDENTITY_FORWARD: vec3 = { x: 0.0, y: 0.0, z: -1.0 };
+
 
     /*@devdoc
      *  Writes a quaternion value to a packet, packing it into 6 bytes.
@@ -37,7 +44,7 @@ const GLMHelpers = new class {
      */
     // eslint-disable-next-line class-methods-use-this
     packOrientationQuatToSixBytes(data: DataView, dataPosition: number, quatInput: quat): number {
-        // C++  int packOrientationQuatToSixBytes(unsigned char* buffer, const glm:: quat& quatInput)
+        // C++  int packOrientationQuatToSixBytes(unsigned char* buffer, const glm::quat& quatInput)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers, @typescript-eslint/no-non-null-assertion */
 
@@ -97,7 +104,7 @@ const GLMHelpers = new class {
      */
     // eslint-disable-next-line class-methods-use-this
     unpackOrientationQuatFromSixBytes(data: DataView, dataPosition: number, quatOutput: quat): number {
-        // C++  int unpackOrientationQuatFromSixBytes(const unsigned char* buffer, glm:: quat& quatOutput)
+        // C++  int unpackOrientationQuatFromSixBytes(const unsigned char* buffer, glm::quat& quatOutput)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers, @typescript-eslint/no-non-null-assertion */
 
@@ -207,6 +214,28 @@ const GLMHelpers = new class {
         return 2;
 
         /* eslint-enable @typescript-eslint/no-magic-numbers */
+    }
+
+    /*@devdoc
+     *  Checks whether two numbers have very similar values.
+     *  @function.closeEnough
+     *  @param {number} a - The first number.
+     *  @param {number} b - The second number.
+     *  @param {number} relativeError - The acceptable maximum relative error, range <code>0.0 &ndash; 1.0</code>.
+     *  @returns {boolean} <code>true</code> if the absolute difference divided by the absolute average is less than the
+     *      relative error.
+     */
+    // eslint-disable-next-line class-methods-use-this
+    closeEnough(a: number, b: number, relativeError: number): boolean {
+        // C++  bool closeEnough(float a, float b, float relativeError)
+
+        // WEBRTC TODO: Move into GLMHelpers class.
+
+        assert(relativeError >= 0.0);
+        // NOTE: we add EPSILON to the denominator so we can avoid checking for division by zero.
+        // This method works fine when: Math.abs(a + b) >> EPSILON
+        const EPSILON = 0.000001;
+        return Math.abs(a - b) / (Math.abs(a + b) / 2.0 + EPSILON) <= relativeError;
     }
 
 }();

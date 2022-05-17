@@ -9,6 +9,8 @@
 //
 
 import Avatar from "../avatar-renderer/Avatar";
+import ClientTraitsHandler from "../avatars/ClientTraitsHandler";
+import assert from "../shared/assert";
 import Uuid from "../shared/Uuid";
 
 
@@ -19,12 +21,19 @@ import Uuid from "../shared/Uuid";
  *  @extends Avatar
  *  @extends AvatarData
  *  @extends SpatiallyNestable
+ *  @param {number} contextID - The {@link ContextManager} context ID.
  *
  *  @property {string|null} displayName - The avatar's display name.
- *  @property {Signal} displayNameChanged - Triggered when the avatar's display name changes.
+ *  @property {Signal<AvatarData~displayNameChanged>} displayNameChanged - Triggered when the avatar's display name changes.
  *  @property {string|null} sessionDisplayName - The avatar's session display name as assigned by the avatar mixer. It is based
  *      on the display name and is unique among all avatars present in the domain. <em>Read-only.</em>
- *  @property {Signal} sessionDisplayNameChanged - Triggered when the avatar's session display name changes.
+ *  @property {Signal<AvatarData~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the avatar's session
+ *      display name changes.
+ *  @property {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
+ *  @property {Signal<AvatarData~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton model
+ *      URL changes.
+ *  @property {vec3} position - The position of the avatar in the domain.
+ *  @property {quat} orientation - The orientation of the avatar in the domain.
  */
 class MyAvatar extends Avatar {
     // C++  class MyAvatar : public Avatar
@@ -43,8 +52,32 @@ class MyAvatar extends Avatar {
     #_nextTraitsSendWindow = 0;
 
 
+    constructor(contextID: number) {
+        // C++  Avatar()
+        super(contextID);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this._clientTraitsHandler = new ClientTraitsHandler(this, contextID);
+
+        // WEBRTC TODO: Address further C++ code.
+    }
+
+
+    // JSDoc is in AvatarData.
+    override setSkeletonModelURL(skeletonModelURL: string | null): void {
+        // C++  void MyAvatar::setSkeletonModelURL(const QUrl& skeletonModelURL)
+
+        // WEBRTC TODO: Address further C++ code.
+
+        super.setSkeletonModelURL(skeletonModelURL);
+
+        // WEBRTC TODO: Address further C++ code.
+    }
+
     /*@devdoc
-     *  Sends the avatar data in an {@link PacketType(1)|AvatarData} packet to the avatar mixer.
+     *  Sends the avatar data in an {@link PacketType(1)|AvatarData} packet to the avatar mixer. Also sends avatar traits in a
+     *  {@link PacketType(1)|SetAvatarTraits} packet if it is time to.
      *  @param {boolean} sendAll - <code>true</code> to send a full update even if nothing has changed, <code>false</code> to
      *      exclude certain data that hasn't changed since the last send.
      */
@@ -59,7 +92,8 @@ class MyAvatar extends Avatar {
                 bytesSent += this.sendIdentityPacket();
             }
 
-            // WEBRTC TODO: Send PacketType.SetAvatarTraits.
+            assert(this._clientTraitsHandler !== null);
+            bytesSent += this._clientTraitsHandler.sendChangedTraitsToMixer();
 
             // Compute the next send window based on how much data we sent and what
             // data rate we're trying to max at.

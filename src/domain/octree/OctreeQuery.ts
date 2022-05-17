@@ -10,14 +10,14 @@
 
 
 import { EntityQueryDetails } from "../networking/packets/EntityQuery";
-import ConicalViewFrustum from "../shared/ConicalViewFrustum";
+import { ConicalViewFrustum } from "../shared/Camera";
 import OctreeConstants from "./OctreeConstants";
 
 /*@devdoc
  *  The <code>OctreeQueryFlags</code> namespace provides flags modifying an octree query.
  *  @namespace OctreeQueryFlags
- *  @property {number} NoFlags = <code>0</code> - No flag. <em>Read-only.</em>
- *  @property {number} WantInitialCompletion = <code>1</code> - Notify that the initial query is complete. <em>Read-only.</em>
+ *  @property {number} NoFlags=0 - No flag. <em>Read-only.</em>
+ *  @property {number} WantInitialCompletion=1 - Notify that the initial query is complete. <em>Read-only.</em>
  *
  */
 enum OctreeQueryFlags {
@@ -34,17 +34,17 @@ enum OctreeQueryFlags {
  *  @param {boolean} randomizeConnectionID - <code>true</code> to use a random number for the initial connection ID,
  *  <code>false</code> to start at <code>0</code>.
  */
-// WEBRTC TODO: Extend NodeData
 class OctreeQuery {
     // C++ class OctreeQuery : public NodeData
 
     #_connectionID = 0;
-    #_conicalViews: Array<ConicalViewFrustum> = [new ConicalViewFrustum()];
+    #_conicalViews: Array<ConicalViewFrustum> = [];
     #_maxQueryPPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
     #_octreeElementSizeScale = OctreeConstants.DEFAULT_OCTREE_SIZE_SCALE;
     #_boundaryLevelAdjust = 0; // used for LOD calculations
     #_jsonParameters: Record<string, unknown> = {};
     #_reportInitialCompletion = false;
+
 
     constructor(randomizeConnectionID: boolean) {
         if (randomizeConnectionID) {
@@ -54,6 +54,7 @@ class OctreeQuery {
             this.#_connectionID = Math.floor(Math.random() * (65535 + 1));
         }
     }
+
 
     /*@devdoc
      *  Sets the maximum number of query packets per second.
