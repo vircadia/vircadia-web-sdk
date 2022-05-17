@@ -17,7 +17,7 @@ import ReceivedMessage from "../networking/ReceivedMessage";
 
 
 /*@devdoc
- *  The <code>OctreePacketProcessor</code> class handles processing of incoming voxel packets.
+ *  The <code>OctreePacketProcessor</code> class handles processing of incoming octree packets.
  *  <p>C++: <code>class OctreePacketProcessor : public ReceivedPacketProcessor</code></p>
  *
  *  @class OctreePacketProcessor
@@ -27,7 +27,7 @@ import ReceivedMessage from "../networking/ReceivedMessage";
  */
 // WEBRTC TODO:  Extend ReceivedPacketProcessor.
 class OctreePacketProcessor {
-    // C++ OctreePacketProcessor.cpp
+    // C++  class OctreePacketProcessor : public ReceivedPacketProcessor
 
 
     static readonly contextItemType = "OctreePacketProcessor";
@@ -53,7 +53,8 @@ class OctreePacketProcessor {
         // C++ packetReceiver.registerDirectListenerForTypes() is used but in TypeScript we can use the non-direct variant of
         // the method.
         // Also, processPacket() is called directly unlike in the C++ where received packets are pushed to a queue
-        // via OctreePacketProcessor::handleOctreePacket().
+        // via OctreePacketProcessor::handleOctreePacket(). We can process the packet directly because we send the contents
+        // off to the user app to handle.
         this.#_packetReceiver.registerListenerForTypes(octreePackets,
             PacketReceiver.makeSourcedListenerReference(this.#processPacket));
     }
@@ -71,10 +72,10 @@ class OctreePacketProcessor {
             case PacketType.EntityData:
             case PacketType.EntityErase:
             case PacketType.EntityQueryInitialResultsComplete:
-                console.warn("OctreePacketProcessor: Packet type %d not processed: ", packetType);
+                console.error("OctreePacketProcessor: Packet type %d not processed: ", packetType);
                 break;
             default:
-                console.error("ERROR - Unknown packet type in processPacket() :", packetType);
+                console.error("ERROR - Unexpected packet type in OctreePacketProcessor.processPacket() :", packetType);
         }
 
         // WEBRTC TODO: Address further C++ code.

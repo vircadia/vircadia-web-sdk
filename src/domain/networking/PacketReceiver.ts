@@ -138,6 +138,7 @@ class PacketReceiver {
         // C++ bool PacketReceiver::registerListenerForTypes(PacketTypeList types, const ListenerReferencePointer& listener)
 
         for (const type of types) {
+            // WEBRTC TODO: Address further code.
             this.registerListener(type, listener);
         }
 

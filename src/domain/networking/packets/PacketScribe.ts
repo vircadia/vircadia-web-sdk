@@ -72,6 +72,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.AvatarIdentity&period;write|AvatarIdentity&period;write}
  *  @property {function} DomainConnectRequest.write -
  *      {@link PacketScribe.DomainConnectRequest&period;write|DomainConnectRequest&period;write}
+ *  @property {function} EntityData.read -
+ *      {@link PacketScribe.EntityData&period;read|EntityData&period;read}
  *  @property {function} EntityQuery.write -
  *      {@link PacketScribe.EntityQuery&period;write|EntityQuery&period;write}
  *  @property {function} DomainDisconnectRequest.write -
