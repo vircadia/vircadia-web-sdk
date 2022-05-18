@@ -234,7 +234,7 @@ class DomainServer {
     }
 
     /*@sdkdoc
-     *  Called when the when the <code>sessionUUID</code> property value changes.
+     *  Called when the <code>sessionUUID</code> property value changes.
      *  @callback DomainServer~OnSessionUuidChanged
      *  @param {Uuid} sessionUUID - Unique ID assigned to the user client in the domain. {@lnk Uuid|Uuid.NULL} if not connected
      *      to a domain.
