@@ -91,7 +91,7 @@ const ContextManager = new class {
      *  @function ContextManager.set
      *  @param {number} contextID - The ID of the context.
      *  @param {ContextManager.DependencyType} dependencyType - The type of the new object to create and add. The new object is
-     *      created using using <code>new()</code>.
+     *      created using <code>new()</code>.
      *  @param {...any} dependencyParams - Optional parameters to use when creating the new object.
      *  @throws Throws an error of the context ID is invalid or an object of the specified type already exists in the context.
      */
