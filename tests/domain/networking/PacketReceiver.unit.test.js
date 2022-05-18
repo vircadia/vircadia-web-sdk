@@ -114,6 +114,26 @@ describe("PacketReceiver - unit tests", () => {
         packetReceiver.handleVerifiedPacket(packet);
     });
 
+    test("Can register a sourced listener for types", () => {
+        function fn() {
+            //
+        }
+
+        // Create.
+        const packetReceiver = ContextManager.get(contextID, NodeList).getPacketReceiver();
+        const registerListener = jest.spyOn(packetReceiver, "registerListener").mockImplementation(() => { /* no-op */ });
+
+        const listenerReference = PacketReceiver.makeSourcedListenerReference(fn);
+        expect(listenerReference.listener).toBe(fn);
+        expect(listenerReference.sourced).toBe(true);
+        expect(listenerReference.deliverPending).toBe(false);
+
+        // Register.
+        packetReceiver.registerListenerForTypes([PacketType.Ping, PacketType.KillAvatar], listenerReference);
+        expect(registerListener).toHaveBeenCalledTimes(2);
+
+        registerListener.mockRestore();
+    });
 
     log.mockReset();
 });
