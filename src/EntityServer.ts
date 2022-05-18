@@ -12,6 +12,7 @@ import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType, { NodeTypeValue } from "./domain/networking/NodeType";
 import OctreeConstants from "./domain/octree/OctreeConstants";
+import OctreePacketProcessor from "./domain/octree/OctreePacketProcessor";
 import OctreeQuery from "./domain/octree/OctreeQuery";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
 import Camera from "./domain/shared/Camera";
@@ -87,6 +88,9 @@ class EntityServer extends AssignmentClient {
     #_nodeList: NodeList;
 
     #_octreeQuery = new OctreeQuery(true);
+    // eslint-disable-next-line
+    // @ts-ignore
+    #_octreeProcessor;
     #_maxOctreePPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
     #_queryExpiry = 0;
     #_physicsEnabled = true;
@@ -98,6 +102,8 @@ class EntityServer extends AssignmentClient {
         // Context
         this.#_camera = ContextManager.get(contextID, Camera) as Camera;
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
+        ContextManager.set(contextID, OctreePacketProcessor, contextID);
+        this.#_octreeProcessor = ContextManager.get(contextID, OctreePacketProcessor) as OctreePacketProcessor;
 
         // C++  Application::Application()
         this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
