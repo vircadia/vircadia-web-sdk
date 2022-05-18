@@ -45,6 +45,8 @@ the SDK repo's source into `C:\Workspaces\vircadia-web-sdk`. Thus with the main 
 you search for code then both C++ and TypeScript results are returned, helping you compare the two codebases and keep them in
 sync.
 
+Note: Unix line endings (LF, `0A` character) are used. If using Windows it is recommended that you configure Git's global setting `core.autocrlf` to be `true`. This makes the files use Windows line endings (CRLF, `0D0A` characters) on your computer but stores the files in the Git repo with Linux line endings.
+
 
 ### Install NPM packages
 

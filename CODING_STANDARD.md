@@ -17,6 +17,8 @@ Unit and integration tests are kept in the `/tests` directory.
 The [Vircadia Coding Standard](https://github.com/vircadia/vircadia/blob/master/CODING_STANDARD.md) should be followed, where
 applicable.
 
+Unix line endings (LF, `0A` character) are used.
+
 
 ## Linting Rules
 
