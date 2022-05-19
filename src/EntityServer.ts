@@ -13,6 +13,7 @@ import NodeList from "./domain/networking/NodeList";
 import NodeType, { NodeTypeValue } from "./domain/networking/NodeType";
 import OctreeConstants from "./domain/octree/OctreeConstants";
 import OctreePacketProcessor from "./domain/octree/OctreePacketProcessor";
+import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
 import OctreeQuery from "./domain/octree/OctreeQuery";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
 import Camera from "./domain/shared/Camera";
@@ -44,6 +45,7 @@ import AssignmentClient from "./domain/AssignmentClient";
  *
  *  @property {number} maxOctreePacketsPerSecond - The maximum number of octree packets per second that the user client is
  *      willing to handle.
+ *  @property {Signal} addedEntity - Triggered when an entity data packet is received.
  */
 class EntityServer extends AssignmentClient {
 
@@ -94,6 +96,7 @@ class EntityServer extends AssignmentClient {
     #_maxOctreePPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
     #_queryExpiry = 0;
     #_physicsEnabled = true;
+    #_addedEntity = new SignalEmitter();
 
 
     constructor(contextID: number) {
@@ -102,8 +105,12 @@ class EntityServer extends AssignmentClient {
         // Context
         this.#_camera = ContextManager.get(contextID, Camera) as Camera;
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
+
         ContextManager.set(contextID, OctreePacketProcessor, contextID);
         this.#_octreeProcessor = ContextManager.get(contextID, OctreePacketProcessor) as OctreePacketProcessor;
+        this.#_octreeProcessor.addedEntity.connect(() => {
+            this.#_addedEntity.emit();
+        });
 
         // C++  Application::Application()
         this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
@@ -115,6 +122,15 @@ class EntityServer extends AssignmentClient {
 
     get maxOctreePacketsPerSecond(): number {
         return this.#_maxOctreePPS;
+    }
+
+    /*@devdoc
+     *  Triggered when an entity data packet is received.
+     *  @function EntityServer.addedEntity
+     *  @returns {Signal}
+     */
+    get addedEntity(): Signal {
+        return this.#_addedEntity.signal();
     }
 
 
