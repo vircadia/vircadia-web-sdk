@@ -3,20 +3,22 @@
 //
 //  Created by Julien Merzoug on 26 Apr 2022.
 //  Copyright 2022 Vircadia contributors.
+//  Copyright 2022 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import PacketScribe from "./domain/networking/packets/PacketScribe";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType, { NodeTypeValue } from "./domain/networking/NodeType";
 import OctreeConstants from "./domain/octree/OctreeConstants";
 import OctreePacketProcessor from "./domain/octree/OctreePacketProcessor";
 import OctreeQuery from "./domain/octree/OctreeQuery";
-import PacketScribe from "./domain/networking/packets/PacketScribe";
 import Camera from "./domain/shared/Camera";
 import ContextManager from "./domain/shared/ContextManager";
+import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
 import AssignmentClient from "./domain/AssignmentClient";
 
 
@@ -44,6 +46,7 @@ import AssignmentClient from "./domain/AssignmentClient";
  *
  *  @property {number} maxOctreePacketsPerSecond - The maximum number of octree packets per second that the user client is
  *      willing to handle.
+ *  @property {Signal<EntityServer~AddedEntityCallback>} addedEntity - Triggered when an entity data packet is received.
  */
 class EntityServer extends AssignmentClient {
 
@@ -94,6 +97,7 @@ class EntityServer extends AssignmentClient {
     #_maxOctreePPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
     #_queryExpiry = 0;
     #_physicsEnabled = true;
+    #_addedEntity = new SignalEmitter();
 
 
     constructor(contextID: number) {
@@ -102,8 +106,12 @@ class EntityServer extends AssignmentClient {
         // Context
         this.#_camera = ContextManager.get(contextID, Camera) as Camera;
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
+
         ContextManager.set(contextID, OctreePacketProcessor, contextID);
         this.#_octreeProcessor = ContextManager.get(contextID, OctreePacketProcessor) as OctreePacketProcessor;
+        this.#_octreeProcessor.addedEntity.connect(() => {
+            this.#_addedEntity.emit();
+        });
 
         // C++  Application::Application()
         this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
@@ -115,6 +123,14 @@ class EntityServer extends AssignmentClient {
 
     get maxOctreePacketsPerSecond(): number {
         return this.#_maxOctreePPS;
+    }
+
+    /*@sdkdoc
+     *  Triggered when an entity data packet is received.
+     *  @callback EntityServer~AddedEntityCallback
+     */
+    get addedEntity(): Signal {
+        return this.#_addedEntity.signal();
     }
 
 

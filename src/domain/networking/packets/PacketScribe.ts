@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 13 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -23,6 +24,7 @@ import DomainConnectionDenied from "./DomainConnectionDenied";
 import SetAvatarTraits from "./SetAvatarTraits";
 import AvatarIdentity from "./AvatarIdentity";
 import DomainConnectRequest from "./DomainConnectRequest";
+import EntityData from "./EntityData";
 import EntityQuery from "./EntityQuery";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
 import DomainServerRemovedNode from "./DomainServerRemovedNode";
@@ -72,6 +74,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.AvatarIdentity&period;write|AvatarIdentity&period;write}
  *  @property {function} DomainConnectRequest.write -
  *      {@link PacketScribe.DomainConnectRequest&period;write|DomainConnectRequest&period;write}
+ *  @property {function} EntityData.read -
+ *      {@link PacketScribe.EntityData&period;read|EntityData&period;read}
  *  @property {function} EntityQuery.write -
  *      {@link PacketScribe.EntityQuery&period;write|EntityQuery&period;write}
  *  @property {function} DomainDisconnectRequest.write -
@@ -119,6 +123,7 @@ const PacketScribe = {
     SetAvatarTraits,
     AvatarIdentity,
     DomainConnectRequest,
+    EntityData,
     EntityQuery,
     DomainDisconnectRequest,
     DomainServerRemovedNode,

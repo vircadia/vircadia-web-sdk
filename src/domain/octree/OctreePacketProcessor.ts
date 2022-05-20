@@ -3,17 +3,20 @@
 //
 //  Created by Julien Merzoug on 18 May 2022.
 //  Copyright 2022 Vircadia contributors.
+//  Copyright 2022 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import PacketScribe from "../networking/packets/PacketScribe";
 import PacketType from "../networking/udt/PacketHeaders";
 import ContextManager from "../shared/ContextManager";
 import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
 import PacketReceiver from "../networking/PacketReceiver";
 import ReceivedMessage from "../networking/ReceivedMessage";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 
 
 /*@devdoc
@@ -22,6 +25,7 @@ import ReceivedMessage from "../networking/ReceivedMessage";
  *
  *  @class OctreePacketProcessor
  *  @property {string} contextItemType="OctreePacketProcessor" - The type name for use with the {@link ContextManager}.
+ *  @property {Signal} addedEntity - Triggered when an entity data packet is received.
  *
  *  @param {number} contextID - The {@link ContextManager} context ID.
  */
@@ -36,6 +40,8 @@ class OctreePacketProcessor {
     // Context
     #_nodeList;
     #_packetReceiver;
+
+    #_addedEntity = new SignalEmitter();
 
     constructor(contextID: number) {
 
@@ -59,6 +65,15 @@ class OctreePacketProcessor {
             PacketReceiver.makeSourcedListenerReference(this.#processPacket));
     }
 
+    /*@devdoc
+     *  Triggered when an entity data packet is received.
+     *  @function OctreePacketProcessor.addedEntity
+     *  @returns {Signal}
+     */
+    get addedEntity(): Signal {
+        return this.#_addedEntity.signal();
+    }
+
     // Listener
     // eslint-disable-next-line
     // @ts-ignore
@@ -67,9 +82,18 @@ class OctreePacketProcessor {
 
         const packetType = message.getType();
 
+        if (packetType === PacketType.OctreeStats) {
+            console.error("OctreePacketProcessor: Packet type not processed: ", packetType);
+            // WEBRTC TODO: Address further C++ code.
+            return;
+        }
+
         switch (packetType) {
-            case PacketType.OctreeStats:
             case PacketType.EntityData:
+                PacketScribe.EntityData.read();
+                // WEBRTC TODO: Emit data.
+                this.#_addedEntity.emit();
+                break;
             case PacketType.EntityErase:
             case PacketType.EntityQueryInitialResultsComplete:
                 console.error("OctreePacketProcessor: Packet type not processed: ", packetType);

@@ -214,7 +214,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} ICEServerHeartbeat - <code>38</code>
  *  @property {PacketType} ICEPing - <code>39</code>
  *  @property {PacketType} ICEPingReply - <code>40</code>
- *  @property {PacketType} EntityData - <code>41</code>
+ *  @property {PacketType} EntityData - <code>41</code> - The Domain Server sends this to the user client in response to an
+ *      EntityQuery packet.<br />
+ *      {@link PacketScribe.EntityDataDetails}
  *  @property {PacketType} EntityQuery - <code>42</code> - The user client sends this to the Entity Server to request details of
  *      the entities in view. The Domain Server responds with EntityData packets.<br />
  *      {@link PacketScribe.EntityQueryDetails}
