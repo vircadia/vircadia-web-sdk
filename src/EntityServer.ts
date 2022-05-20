@@ -125,7 +125,7 @@ class EntityServer extends AssignmentClient {
         return this.#_maxOctreePPS;
     }
 
-    /*@devdoc
+    /*@sdkdoc
      *  Triggered when an entity data packet is received.
      *  @callback EntityServer~AddedEntityCallback
      */
