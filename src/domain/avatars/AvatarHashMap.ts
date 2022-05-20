@@ -9,19 +9,20 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import AvatarData, { KillAvatarReason } from "./AvatarData";
+import { BulkAvatarDataDetails } from "../networking/packets/BulkAvatarData";
+import PacketScribe from "../networking/packets/PacketScribe";
+import { PacketTypeValue } from "../networking/udt/PacketHeaders";
 import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
 import NodeType, { NodeTypeValue } from "../networking/NodeType";
 import PacketReceiver from "../networking/PacketReceiver";
 import ReceivedMessage from "../networking/ReceivedMessage";
-import { BulkAvatarDataDetails } from "../networking/packets/BulkAvatarData";
-import PacketScribe from "../networking/packets/PacketScribe";
-import { PacketTypeValue } from "../networking/udt/PacketHeaders";
 import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
-import Uuid from "../shared/Uuid";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
+import Uuid from "../shared/Uuid";
+import AvatarData, { KillAvatarReason } from "./AvatarData";
+import AvatarTraits, { TraitType } from "./AvatarTraits";
 
 
 /*@devdoc
@@ -52,6 +53,9 @@ class AvatarHashMap {
 
     #_avatarAddedEvent = new SignalEmitter();
     #_avatarRemovedEvent = new SignalEmitter();
+
+    #_processedTraitVersions: Map<Uuid, Map<TraitType, number>> = new Map();
+
 
     // AvatarReplicas per the C++ is not implemented because that is for load testing.
 
@@ -235,7 +239,43 @@ class AvatarHashMap {
             this.#_nodeList.sendPacket(traitsAckPacket, avatarMixer);
         }
 
-        // WEBRTC TODO: Read and process the avatar traits data.
+        // Process the avatar traits data.
+        for (const avatarTraits of bulkAvatarTraitsDetails.avatarTraitsList) {
+
+            const isNewAvatar = false;
+            const avatar = this.#newOrExistingAvatar(avatarTraits.avatarID, sendingNode, { value: isNewAvatar });
+
+            let lastProcessedVersions = this.#_processedTraitVersions.get(avatarTraits.avatarID);
+
+            for (const avatarTraitValue of avatarTraits.avatarTraits) {
+
+                if (AvatarTraits.isSimpleTrait(avatarTraitValue.type)) {
+                    let lastProcessedVersion = 0;
+                    if (lastProcessedVersions !== undefined) {
+                        lastProcessedVersion = lastProcessedVersions.get(avatarTraitValue.type) ?? 0;
+                    }
+
+                    if (avatarTraitValue.version > lastProcessedVersion) {
+                        avatar.processTrait(avatarTraitValue.type, avatarTraitValue.value);
+                        // AvatarReplicas per the C++ is not implemented because that is for load testing.
+
+                        if (lastProcessedVersions === undefined) {
+                            lastProcessedVersions = new Map();
+                            this.#_processedTraitVersions.set(avatarTraits.avatarID, lastProcessedVersions);
+                        }
+                        lastProcessedVersions.set(avatarTraitValue.type, avatarTraitValue.version);
+                    }
+
+
+                } else {
+
+                    // WEBRTC TODO: Address further C++ code - avatar entity and grab traits.
+
+                }
+
+            }
+
+        }
 
     };
 

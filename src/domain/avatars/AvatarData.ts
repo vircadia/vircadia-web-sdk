@@ -3,25 +3,27 @@
 //
 //  Created by David Rowe on 28 Oct 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import Node from "../networking/Node";
-import NodeList from "../networking/NodeList";
-import NodeType from "../networking/NodeType";
 import { AvatarIdentityDetails } from "../networking/packets/AvatarIdentity";
 import { BulkAvatarDataDetails } from "../networking/packets/BulkAvatarData";
 import PacketScribe from "../networking/packets/PacketScribe";
 import SequenceNumber from "../networking/udt/SequenceNumber";
+import Node from "../networking/Node";
+import NodeList from "../networking/NodeList";
+import NodeType from "../networking/NodeType";
+import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
+import Quat, { quat } from "../shared/Quat";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import SpatiallyNestable, { NestableType } from "../shared/SpatiallyNestable";
-import Quat, { quat } from "../shared/Quat";
 import Uuid from "../shared/Uuid";
 import Vec3, { vec3 } from "../shared/Vec3";
-import AvatarTraits from "./AvatarTraits";
+import AvatarTraits, { TraitType, TraitValue } from "./AvatarTraits";
 import ClientTraitsHandler from "./ClientTraitsHandler";
 
 
@@ -113,6 +115,8 @@ class AvatarData extends SpatiallyNestable {
     readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
 
     readonly #_AVATAR_MIXER_NODE_SET = new Set([NodeType.AvatarMixer]);
+
+    #_haveWarnedSkeletonData = false;
 
 
     constructor(contextID: number) {
@@ -518,6 +522,29 @@ class AvatarData extends SpatiallyNestable {
 
         // WEBRTC TODO: Address further C++ code - further avatar properties.
 
+    }
+
+    /*@devdoc
+     *  Processes a simple trait value received in a packet.
+     *  @param {AvatarTraits.TraitType} traitType - The trait type.
+     *  @param {AvatarTraits.TraitValue} traitValue - The trait value.
+     */
+    processTrait(traitType: TraitType, traitValue: TraitValue): void {
+        // C++  void processTrait(AvatarTraits:: TraitType traitType, QByteArray traitBinaryData)
+        //      Reading the trait value is done in AvatarTraits.
+        if (traitType === AvatarTraits.SkeletonModelURL) {
+            assert(typeof traitValue === "string");
+            this.setSkeletonModelURL(traitValue);
+        } else {
+            assert(traitType === AvatarTraits.SkeletonData);
+
+            // WEBRTC TODO: Address further C++ code - skeleton data.
+            if (!this.#_haveWarnedSkeletonData) {
+                console.error("AvatarData: Processing avatar skeleton data not handled.");
+                this.#_haveWarnedSkeletonData = true;
+            }
+
+        }
     }
 
     /*@devdoc
