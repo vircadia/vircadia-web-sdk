@@ -129,7 +129,8 @@ const AvatarTraits = new class {
 
     /*@devdoc
      *  Checks whether a trait type value is a simple trait.
-     *  @param {TraitType> traitType - The trait type value to check.
+     *  @function AvatarTraits.isSimpleTrait
+     *  @param {AvatarTraits.TraitType} traitType - The trait type value to check.
      *  @returns {boolean} <code>true</code> if it is a simple trait, <code>false</code> if it isn't.
      */
     isSimpleTrait(traitType: TraitType): boolean {
@@ -139,10 +140,11 @@ const AvatarTraits = new class {
 
     /*@devdoc
      *  Reads a trait value from packet data.
+     *  @function AvatarTraits.processTrait
      *  @param {AvatarTraits.TraitType} traitType - The type of trait to read the value of.
      *  @param {DataView} data - The packet data.
      *  @param {number} dataPosition - The start position of the trait value.
-     *  @param {number} dataLength - The number of bytes of the trait value.
+     *  @param {number} dataLength - The number of bytes in the trait value.
      */
     processTrait(traitType: TraitType, data: DataView, dataPosition: number, dataLength: number): TraitValue {
         // C++  AvatarData::processTrait(AvatarTraits::TraitType traitType, QByteArray traitBinaryData)
@@ -153,10 +155,13 @@ const AvatarTraits = new class {
         }
 
         if (traitType === AvatarTraits.SkeletonData) {
+
+            // WEBRTC TODO: Address further C++ code - skeleton data.
             if (!this.#_haveWarnedSkeletonData) {
                 console.error("AvatarTraits: Reading avatar skeleton data not handled.");
                 this.#_haveWarnedSkeletonData = true;
             }
+
             return undefined;
         }
 
