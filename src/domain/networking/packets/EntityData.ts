@@ -9,12 +9,31 @@
 //
 
 
+type EntityDataDetails = {
+    // WEBRTC TODO: Address further code.
+};
+
+
 const EntityData = new class {
     // C++ N/A
 
-    read(): void { /* eslint-disable-line class-methods-use-this */ }
+    /*@devdoc
+     *  Information returned by {@link PacketScribe|reading} an {@link PacketType(1)|EntityData} packet.
+     *  @typedef {object} PacketScribe.EntityDataDetails
+     */
+
+    /*@devdoc
+     *  Reads an {@link PacketType(1)|EntityData} packet.
+     *  @function PacketScribe.EntityData&period;read
+     *  @returns {PacketScribe.EntityDataDetails} The entity data information.
+     */
+    /* eslint-disable-next-line */
+    //@ts-ignore
+    read(): EntityDataDetails { /* eslint-disable-line class-methods-use-this */
     // WEBRTC TODO: Address further C++ code.
+    }
 
 }();
 
 export default EntityData;
+export type { EntityDataDetails };

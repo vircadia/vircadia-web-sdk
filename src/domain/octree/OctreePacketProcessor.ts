@@ -24,7 +24,7 @@ import SignalEmitter, { Signal } from "../shared/SignalEmitter";
  *
  *  @class OctreePacketProcessor
  *  @property {string} contextItemType="OctreePacketProcessor" - The type name for use with the {@link ContextManager}.
- *  @property {Signal} Triggered when an entity data packet is received.
+ *  @property {Signal} addedEntity - Triggered when an entity data packet is received.
  *
  *  @param {number} contextID - The {@link ContextManager} context ID.
  */

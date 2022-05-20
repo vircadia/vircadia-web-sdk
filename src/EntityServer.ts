@@ -8,16 +8,16 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import PacketScribe from "./domain/networking/packets/PacketScribe";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType, { NodeTypeValue } from "./domain/networking/NodeType";
 import OctreeConstants from "./domain/octree/OctreeConstants";
 import OctreePacketProcessor from "./domain/octree/OctreePacketProcessor";
-import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
 import OctreeQuery from "./domain/octree/OctreeQuery";
-import PacketScribe from "./domain/networking/packets/PacketScribe";
 import Camera from "./domain/shared/Camera";
 import ContextManager from "./domain/shared/ContextManager";
+import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
 import AssignmentClient from "./domain/AssignmentClient";
 
 
@@ -45,7 +45,7 @@ import AssignmentClient from "./domain/AssignmentClient";
  *
  *  @property {number} maxOctreePacketsPerSecond - The maximum number of octree packets per second that the user client is
  *      willing to handle.
- *  @property {Signal} addedEntity - Triggered when an entity data packet is received.
+ *  @property {Signal<EntityServer~AddedEntityCallback>} addedEntity - Triggered when an entity data packet is received.
  */
 class EntityServer extends AssignmentClient {
 
@@ -126,8 +126,7 @@ class EntityServer extends AssignmentClient {
 
     /*@devdoc
      *  Triggered when an entity data packet is received.
-     *  @function EntityServer.addedEntity
-     *  @returns {Signal}
+     *  @callback EntityServer~AddedEntityCallback
      */
     get addedEntity(): Signal {
         return this.#_addedEntity.signal();
