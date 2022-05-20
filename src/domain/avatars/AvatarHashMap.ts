@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 29 Oct 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -225,10 +226,10 @@ class AvatarHashMap {
 
         const bulkAvatarTraitsDetails = PacketScribe.BulkAvatarTraits.read(message.getMessage());
 
+        // Send ACK.
         const traitsAckPacket = PacketScribe.BulkAvatarTraitsAck.write({
-            traitSequenceNumber: bulkAvatarTraitsDetails.traitSequenceNumber
+            traitsSequenceNumber: bulkAvatarTraitsDetails.traitsSequenceNumber
         });
-
         const avatarMixer = this.#_nodeList.soloNodeOfType(NodeType.AvatarMixer);
         if (avatarMixer) {
             this.#_nodeList.sendPacket(traitsAckPacket, avatarMixer);
