@@ -2,7 +2,8 @@
 //  interface.js
 //
 //  Created by David Rowe on 1 Aug 2021.
-//  Copyright 2020 Vircadia contributors.
+//  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -360,12 +361,20 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             td.className = "number";
             td.innerHTML = quatToYaw(avatar.orientation).toFixed(YAW_DECIMAL_PLACES);
             tr.appendChild(td);
+            td = document.createElement("td");
+            td.className = "string";
+            tr.appendChild(td);
             avatarListBody.appendChild(tr);
 
             avatars.set(sessionID, { avatar, tr });
 
+            const SESSION_DISPLAY_NAME_INDEX = 1;
             avatar.sessionDisplayNameChanged.connect(() => {
-                tr.childNodes[1].innerHTML = avatar.sessionDisplayName;
+                tr.childNodes[SESSION_DISPLAY_NAME_INDEX].innerHTML = avatar.sessionDisplayName;
+            });
+            const SKELETON_MODEL_URL_INDEX = 6;
+            avatar.skeletonModelURLChanged.connect(() => {
+                tr.childNodes[SKELETON_MODEL_URL_INDEX].innerHTML = avatar.skeletonModelURL;
             });
         }
         avatarMixer.avatarList.avatarAdded.connect(onAvatarAdded);

@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 11 Nov 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -30,6 +31,7 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.isValid).toBe(false);
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
+        expect(scriptAvatar.skeletonModelURL).toBe("");
         expect(scriptAvatar.position).toEqual(Vec3.ZERO);
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
         // Can still access signals.
@@ -37,6 +39,8 @@ describe("ScriptAvatar - unit tests", () => {
         expect(typeof scriptAvatar.displayNameChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.disconnect).toBe("function");
+        expect(typeof scriptAvatar.skeletonModelURLChanged.connect).toBe("function");
+        expect(typeof scriptAvatar.skeletonModelURLChanged.disconnect).toBe("function");
     });
 
     test("A ScriptAvatar created from an invalid session ID is invalid", () => {
@@ -51,6 +55,7 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.isValid).toBe(false);
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
+        expect(scriptAvatar.skeletonModelURL).toBe("");
         expect(scriptAvatar.position).toEqual(Vec3.ZERO);
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
         // Can still access signals.
@@ -58,6 +63,8 @@ describe("ScriptAvatar - unit tests", () => {
         expect(typeof scriptAvatar.displayNameChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.disconnect).toBe("function");
+        expect(typeof scriptAvatar.skeletonModelURLChanged.connect).toBe("function");
+        expect(typeof scriptAvatar.skeletonModelURLChanged.disconnect).toBe("function");
 
         log.mockReset();
     });

@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 28 Nov 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -14,7 +15,7 @@ import NLPacket from "../NLPacket";
 
 
 type BulkAvatarTraitsAckDetails = {
-    traitSequenceNumber: bigint
+    traitsSequenceNumber: bigint
 };
 
 
@@ -23,7 +24,7 @@ const BulkAvatarTraitsAck = new class {
     /*@devdoc
      *  Information needed for {@link PacketScribe|writing} a {@link PacketType(1)|BulkAvatarTraitsAck} packet.
      *  @typedef {object} PacketScribe.BulkAvatarTraitsAckDetails
-     *  @property {bigint} traitSequenceNumber - The sequence number of the avatar traits message being acknowledged.
+     *  @property {bigint} traitsSequenceNumber - The sequence number of the avatar traits message being acknowledged.
      */
 
     /*@devdoc
@@ -43,7 +44,7 @@ const BulkAvatarTraitsAck = new class {
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-        data.setBigUint64(dataPosition, info.traitSequenceNumber, UDT.LITTLE_ENDIAN);
+        data.setBigUint64(dataPosition, info.traitsSequenceNumber, UDT.LITTLE_ENDIAN);
         dataPosition += 8;
 
         /* eslint-enable @typescript-eslint/no-magic-numbers */

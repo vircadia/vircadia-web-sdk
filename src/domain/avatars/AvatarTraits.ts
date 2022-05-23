@@ -3,10 +3,13 @@
 //
 //  Created by Julien Merzoug on 14 Apr 2022.
 //  Copyright 2022 Vircadia contributors.
+//  Copyright 2022 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
+
+import Uuid from "../shared/Uuid";
 
 
 /*@devdoc
@@ -28,7 +31,7 @@
  *  @typedef {number} AvatarTraits.TraitType
  */
 enum TraitType {
-    // C++  AvatarTraits::TraitType
+    // C++  AvatarTraits::TraitType : int8_t
 
     // Null trait
     NullTrait = -1,
@@ -47,6 +50,20 @@ enum TraitType {
 }
 
 
+type TraitValue = string | undefined;  // SkeletonModelURL | ...
+
+type AvatarTraitValue = {
+    type: TraitType,
+    version: number,
+    value: TraitValue
+};
+
+type AvatarTraitsValues = {
+    avatarID: Uuid,
+    avatarTraits: AvatarTraitValue[]
+};
+
+
 /*@devdoc
  *  The <code>AvatarTraits</code> namespace provides facilities for working with avatar traits.
  *  @namespace AvatarTraits
@@ -61,6 +78,38 @@ enum TraitType {
  *  @property {number} DEFAULT_TRAIT_VERSION=0 - The default trait version sequence number. <em>Read-only.</em>
  */
 const AvatarTraits = new class {
+    // C++  namespace AvatarTraits
+
+    /*@devdoc
+     *  The traits of an avatar.
+     *  @typedef {object} AvatarTraits.AvatarTraitsValues
+     *  @property {Uuid} avatarID - The avatar's session UUID.
+     *  @property {AvatarTraits.AvatarTraitValue[]} avatarTraits - The avatar's traits.
+     */
+
+    /*@devdoc
+     *  An avatar trait.
+     *  @typedef {object} AvatarTraits.AvatarTraitValue
+     *  @property {AvatarTraits.TraitType} type - The type of trait.
+     *  @property {number} version - The version number of the trait value for the avatar's connection to the avcatar mixer.
+     *      This is incremented each time that the trait value is changed.
+     *  @property {AvatarTraits.TraitValue} value - The trait value.
+     */
+
+    /*@devdoc
+     *  The type of the trait value depends on the trait type:
+     *  <table>
+     *      <thead>
+     *          <tr><th>TraitType</th><th>Value</th></tr>
+     *      </thead>
+     *      <tbody>
+     *          <tr><td><code>SkeletonModelURL</code></td><td><code>string</code></td></tr>
+     *          <tr><td>Other types</td><td><code>undefined</code></td></tr>
+     *      </tbody>
+     *  </table>
+     *  @typedef {string|undefined} AvatarTraits.TraitValue
+     */
+
 
     readonly NullTrait = TraitType.NullTrait;
     readonly SkeletonModelURL = TraitType.SkeletonModelURL;
@@ -73,7 +122,69 @@ const AvatarTraits = new class {
     readonly NUM_SIMPLE_TRAITS = TraitType.FirstInstancedTrait;
 
     readonly DEFAULT_TRAIT_VERSION = 0;
+
+
+    #_haveWarnedSkeletonData = false;
+
+
+    /*@devdoc
+     *  Checks whether a trait type value is a simple trait.
+     *  @function AvatarTraits.isSimpleTrait
+     *  @param {AvatarTraits.TraitType} traitType - The trait type value to check.
+     *  @returns {boolean} <code>true</code> if it is a simple trait, <code>false</code> if it isn't.
+     */
+    isSimpleTrait(traitType: TraitType): boolean {
+        return this.NullTrait < traitType && traitType < this.FirstInstancedTrait;
+    }
+
+
+    /*@devdoc
+     *  Reads a trait value from packet data.
+     *  @function AvatarTraits.processTrait
+     *  @param {AvatarTraits.TraitType} traitType - The type of trait to read the value of.
+     *  @param {DataView} data - The packet data.
+     *  @param {number} dataPosition - The start position of the trait value.
+     *  @param {number} dataLength - The number of bytes in the trait value.
+     */
+    processTrait(traitType: TraitType, data: DataView, dataPosition: number, dataLength: number): TraitValue {
+        // C++  AvatarData::processTrait(AvatarTraits::TraitType traitType, QByteArray traitBinaryData)
+        //      Reading the data but not applying it to an avatar.
+
+        if (traitType === AvatarTraits.SkeletonModelURL) {
+            return this.#unpackSkeletonModelURL(data, dataPosition, dataLength);
+        }
+
+        if (traitType === AvatarTraits.SkeletonData) {
+
+            // WEBRTC TODO: Address further C++ code - skeleton data.
+            if (!this.#_haveWarnedSkeletonData) {
+                console.error("AvatarTraits: Reading avatar skeleton data not handled.");
+                this.#_haveWarnedSkeletonData = true;
+            }
+
+            return undefined;
+        }
+
+        console.error("AvatarTraits: Unexpected trait type to read.");
+        return undefined;
+    }
+
+
+    // eslint-disable-next-line class-methods-use-this
+    #unpackSkeletonModelURL(data: DataView, dataPosition: number, dataLength: number): string {
+        // C++  void AvatarData::unpackSkeletonModelURL(const QByteArray& data)
+        //      Reading the data but not applying it to an avatar.
+
+        if (dataLength === 0) {
+            return "";
+        }
+
+        const textDecoder = new TextDecoder();
+        return textDecoder.decode(new DataView(data.buffer, data.byteOffset + dataPosition, dataLength));
+    }
+
 }();
 
 export default AvatarTraits;
-export type { TraitType };
+export { TraitType };
+export type { TraitValue, AvatarTraitValue, AvatarTraitsValues };
