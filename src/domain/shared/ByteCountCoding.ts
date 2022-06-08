@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+
 // TODO: doc
 class ByteCountCoded {
     // C++ template<typename T> class ByteCountCoded
@@ -24,7 +25,10 @@ class ByteCountCoded {
     }
 
     // TODO: doc
-    decode(encodedBuffer: DataView, encodedSize: number): number { // eslint-disable-line class-methods-use-this
+    // eslint-disable-next-line class-methods-use-this
+    decode(encodedBuffer: DataView, encodedSize: number, dataPosition: number): number {
+        // C++ template<typename T> inline size_t ByteCountCoded<T>::decode(const char* encodedBuffer, int encodedSize)
+
         /* Process each bit of each  byte until the stop condition is reached.
         * Starts from the leftmost bit.
         * Advance through the lead bits (contiguous 1s starting from the left) until the first non lead bit is found (first 0
@@ -33,6 +37,8 @@ class ByteCountCoded {
         * Continue iterating through the next bits and add the current bitValue to data when if a bit is set.
         * Double the current bitValue during each iteration, bitValue starting at 1.
         * Stop after we processed the lead bits AND we processed the last bit (at the position denoted by lastValueBit).
+        *
+        * The number of lead bits is equal to the number of bytes to decode.
         *
         * Examples:
         * a. 0001 0000 -> The decoded value is 4.
@@ -55,7 +61,7 @@ class ByteCountCoded {
         let lastValueBit = 0;
         let bitValue = 1;
 
-        for (let byte = 0; byte < encodedSize; byte++) {
+        for (let byte = dataPosition; byte < encodedSize; byte++) {
             const originalByte = encodedBuffer.getUint8(byte);
             bytesConsumed += 1;
             let maskBit = 128; // LEFT MOST BIT set

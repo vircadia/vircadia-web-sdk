@@ -18,19 +18,20 @@ describe("ByteCountCoding - unit tests", () => {
 
 
     // TODO: better test name
-    test("Can decode a number", () => {
+    test("Can decode an encoded byte", () => {
+
+        // 2 bytes buffer.
         const bufferHex = "10dc";
         const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
             return parseInt(hex, 16);
         }));
         const data = new DataView(bufferArray.buffer);
-
         const codec = new ByteCountCoded();
-
-        const bytesConsumed = codec.decode(data, 2);
+        const bytesConsumed = codec.decode(data, 2, 0);
 
         expect(bytesConsumed).toBe(1);
         expect(codec.data).toBe(4);
+
     });
 
 });
