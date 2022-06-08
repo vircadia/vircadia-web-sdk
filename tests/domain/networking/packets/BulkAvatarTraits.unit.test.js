@@ -153,7 +153,7 @@ describe("BulkAvatarTraits - unit tests", () => {
         expect(firstJoint.defaultRotation.y).toBeCloseTo(-0.90480, 4);
         expect(firstJoint.defaultRotation.z).toBeCloseTo(0.084356, 4);
         expect(firstJoint.defaultRotation.w).toBeCloseTo(-0.35924, 4);
-        expect(firstJoint.defaultScale).toBeCloseTo(99.7955, 4); //  <<<<<<< TEST FAILS
+        expect(firstJoint.defaultScale).toBeCloseTo(99.7955, 4);
         expect(firstJoint.jointIndex).toEqual(0);
         expect(firstJoint.parentIndex).toEqual(-1);
         expect(firstJoint.jointName).toEqual("Camera");
@@ -167,7 +167,7 @@ describe("BulkAvatarTraits - unit tests", () => {
         expect(lastJoint.defaultRotation.y).toBeCloseTo(-0.47240, 4);
         expect(lastJoint.defaultRotation.z).toBeCloseTo(0.47236, 4);
         expect(lastJoint.defaultRotation.w).toBeCloseTo(-0.52618, 4);
-        expect(lastJoint.defaultScale).toBeCloseTo(0.91556, 5); // <<<<<<< TEST FAILS
+        expect(lastJoint.defaultScale).toBeCloseTo(0.91556, 5);
         expect(lastJoint.jointIndex).toEqual(87);
         expect(lastJoint.parentIndex).toEqual(86);
         expect(lastJoint.jointName).toEqual("LeftHandIndex3_end");
