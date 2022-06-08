@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 7 Dec 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -12,12 +13,6 @@ import UDT from "../networking/udt/UDT";
 import assert from "./assert";
 import { quat } from "./Quat";
 import { vec3 } from "./Vec3";
-
-
-enum ClipLimit {
-    SMALL_LIMIT = 10,
-    LARGE_LIMIT = 1000
-}
 
 
 /*@devdoc
@@ -35,6 +30,7 @@ const GLMHelpers = new class {
 
     readonly #_SMALL_LIMIT = 10.0;
     readonly #_LARGE_LIMIT = 1000.0;
+    readonly #_UINT16_MAX = 65535.0;
     readonly #_INT16_MAX = 32767.0;
     readonly #_INT16_MIN = -32768.0;
 
@@ -45,10 +41,9 @@ const GLMHelpers = new class {
      *  @param {DataView} data - The packet data to write.
      *  @param {number} dataPosition - The data position to write the value at.
      *  @param {quat} quatInput - The quaternion value to write.
-     *  @returns {number} The number bytes written (i.e., <code>6</code>).
      */
     // eslint-disable-next-line class-methods-use-this
-    packOrientationQuatToSixBytes(data: DataView, dataPosition: number, quatInput: quat): number {
+    packOrientationQuatToSixBytes(data: DataView, dataPosition: number, quatInput: quat): void {
         // C++  int packOrientationQuatToSixBytes(unsigned char* buffer, const glm::quat& quatInput)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers, @typescript-eslint/no-non-null-assertion */
@@ -94,8 +89,6 @@ const GLMHelpers = new class {
         data.setUint16(dataPosition + 2, components[1], UDT.BIG_ENDIAN);
         data.setUint16(dataPosition + 4, components[2]!, UDT.BIG_ENDIAN);
 
-        return 6;
-
         /* eslint-enable @typescript-eslint/no-magic-numbers, @typescript-eslint/no-non-null-assertion */
     }
 
@@ -104,11 +97,10 @@ const GLMHelpers = new class {
      *  @function GLMHelpers.unpackOrientationQuatFromSixBytes
      *  @param {DataView} data - The packet data to read.
      *  @param {number} dataPosition - The data position to read the value from.
-     *  @param {quat} quatOutput - The quaternion to update with the value read.
-     *  @returns {number} The number bytes read (i.e., <code>6</code>).
+     *  @returns {quat} The quaternion value.
      */
     // eslint-disable-next-line class-methods-use-this
-    unpackOrientationQuatFromSixBytes(data: DataView, dataPosition: number, quatOutput: quat): number {
+    unpackOrientationQuatFromSixBytes(data: DataView, dataPosition: number): quat {
         // C++  int unpackOrientationQuatFromSixBytes(const unsigned char* buffer, glm::quat& quatOutput)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers, @typescript-eslint/no-non-null-assertion */
@@ -147,12 +139,12 @@ const GLMHelpers = new class {
             }
         }
 
-        quatOutput.x = output[0]!;
-        quatOutput.y = output[1]!;
-        quatOutput.z = output[2]!;
-        quatOutput.w = output[3]!;
-
-        return 6;
+        return {
+            x: output[0]!,
+            y: output[1]!,
+            z: output[2]!,
+            w: output[3]!
+        };
 
         /* eslint-enable @typescript-eslint/no-magic-numbers, @typescript-eslint/no-non-null-assertion */
     }
@@ -163,60 +155,47 @@ const GLMHelpers = new class {
      *  @param {DataView} data - The packet data to write.
      *  @param {number} dataPosition - The data position to write the value at.
      *  @param {number} degrees - The degree value to write.
-     *  @returns {number} The number bytes written (i.e., <code>2</code>).
      */
     // eslint-disable-next-line class-methods-use-this
-    packFloatAngleToTwoByte(data: DataView, dataPosition: number, degrees: number): number {
+    packFloatAngleToTwoByte(data: DataView, dataPosition: number, degrees: number): void {
         // C++  int packFloatAngleToTwoByte(unsigned char* buffer, float degrees)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-        // eslint-disable-next-line camelcase
-        const maxUint16_t = (1 << 16) - 1;
-        // eslint-disable-next-line camelcase
-        const ANGLE_CONVERSION_RATIO = maxUint16_t / 360;
+        const ANGLE_CONVERSION_RATIO = this.#_UINT16_MAX / 360;
         const twoByteAngle = Math.floor((degrees + 180) * ANGLE_CONVERSION_RATIO);
 
         data.setUint16(dataPosition, twoByteAngle, UDT.LITTLE_ENDIAN);
-
-        return 2;
 
         /* eslint-enable @typescript-eslint/no-magic-numbers */
     }
 
     /*@devdoc
      *  Writes a clipping distance value to a packet, packing it into 2 bytes.
-     *  @function SharedUtils.packClipValueToTwoByte
+     *  @function GLMHelpers.packClipValueToTwoByte
      *  @param {DataView} data - The packet data to write.
      *  @param {number} dataPosition - The data position to write the value at.
      *  @param {number} clipValue - The clipping distance value to write.
-     *  @returns {number} The number bytes written (i.e., <code>2</code>).
      */
     // eslint-disable-next-line class-methods-use-this
-    packClipValueToTwoByte(data: DataView, dataPosition: number, clipValue: number): number {
+    packClipValueToTwoByte(data: DataView, dataPosition: number, clipValue: number): void {
         // C++ int packClipValueToTwoByte(unsigned char* buffer, float clipValue) {
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-        // eslint-disable-next-line camelcase
-        const maxInt16_t = (1 << 15) - 1;
-        // eslint-disable-next-line camelcase
-        assert(clipValue < maxInt16_t, "ERROR: Clip values must be less than max signed 16 bit integers");
+        assert(clipValue < this.#_INT16_MAX, "ERROR: Clip values must be less than max signed 16 bit integers");
 
         // eslint-disable-next-line @typescript-eslint/init-declarations
         let holder: number;
 
-        if (clipValue < ClipLimit.SMALL_LIMIT) {
-        // eslint-disable-next-line camelcase
-            const SMALL_RATIO_CONVERSION_RATIO = maxInt16_t / ClipLimit.SMALL_LIMIT;
+        if (clipValue < this.#_SMALL_LIMIT) {
+            const SMALL_RATIO_CONVERSION_RATIO = this.#_INT16_MAX / this.#_SMALL_LIMIT;
             holder = Math.floor(clipValue * SMALL_RATIO_CONVERSION_RATIO);
         } else {
             holder = -1 * Math.floor(clipValue);
         }
 
         data.setInt16(dataPosition, holder, UDT.LITTLE_ENDIAN);
-
-        return 2;
 
         /* eslint-enable @typescript-eslint/no-magic-numbers */
     }
@@ -308,10 +287,12 @@ const GLMHelpers = new class {
      */
     // A convenience for sending vec3's as fixed-point floats
     packFloatVec3ToSignedTwoByteFixed(data: DataView, dataPosition: number, vector: vec3, radix: number): void {
-        // C++  int packFloatVec3ToSignedTwoByteFixed(unsigned char* destBuffer, const glm:: vec3& srcVector, int radix)
+        // C++  int packFloatVec3ToSignedTwoByteFixed(unsigned char* destBuffer, const glm::vec3& srcVector, int radix)
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
         this.packFloatScalarToSignedTwoByteFixed(data, dataPosition, vector.x, radix);
         this.packFloatScalarToSignedTwoByteFixed(data, dataPosition + 2, vector.y, radix);
         this.packFloatScalarToSignedTwoByteFixed(data, dataPosition + 4, vector.z, radix);
+        /* eslint-enable @typescript-eslint/no-magic-numbers */
     }
 
     /*@devdoc
@@ -335,7 +316,7 @@ const GLMHelpers = new class {
 
     /*@devdoc
      *  Checks whether two numbers have very similar values.
-     *  @function.closeEnough
+     *  @function GLMHelpers.closeEnough
      *  @param {number} a - The first number.
      *  @param {number} b - The second number.
      *  @param {number} relativeError - The acceptable maximum relative error, range <code>0.0 &ndash; 1.0</code>.

@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 7 Dec 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -24,9 +25,7 @@ describe("GLMHelpers - unit tests", () => {
             return parseInt(hex, 16);
         }));
         let data = new DataView(bufferArray.buffer);
-        let quat = { x: 0, y: 0, z: 0, w: 0 };
-        let numBytes = GLMHelpers.unpackOrientationQuatFromSixBytes(data, 2, quat);
-        expect(numBytes).toBe(6);
+        let quat = GLMHelpers.unpackOrientationQuatFromSixBytes(data, 2);
         // Unpacked quat happens to come out negative of that originally packed but this represents that same rotation.
         expect(quat.x).toBeCloseTo(0, 4);
         expect(quat.y).toBeCloseTo(-0.258819, 4);
@@ -39,9 +38,7 @@ describe("GLMHelpers - unit tests", () => {
             return parseInt(hex, 16);
         }));
         data = new DataView(bufferArray.buffer);
-        quat = { x: 0, y: 0, z: 0, w: 0 };
-        numBytes = GLMHelpers.unpackOrientationQuatFromSixBytes(data, 2, quat);
-        expect(numBytes).toBe(6);
+        quat = GLMHelpers.unpackOrientationQuatFromSixBytes(data, 2);
         // Unpacked quat happens to come out negative of that originally packed but this represents that same rotation.
         expect(quat.x).toBeCloseTo(-0.127679, 4);
         expect(quat.y).toBeCloseTo(-0.144878, 4);
@@ -54,9 +51,7 @@ describe("GLMHelpers - unit tests", () => {
             return parseInt(hex, 16);
         }));
         data = new DataView(bufferArray.buffer);
-        quat = { x: 0, y: 0, z: 0, w: 0 };
-        numBytes = GLMHelpers.unpackOrientationQuatFromSixBytes(data, 2, quat);
-        expect(numBytes).toBe(6);
+        quat = GLMHelpers.unpackOrientationQuatFromSixBytes(data, 2);
         // Unpacked quat happens to come out negative of that originally packed but this represents that same rotation.
         expect(quat.x).toBeCloseTo(0.0560226, 4);
         expect(quat.y).toBeCloseTo(-0.763129, 4);
@@ -70,22 +65,19 @@ describe("GLMHelpers - unit tests", () => {
 
         // 30 deg yaw.
         let quat = { x: 0, y: 0.258819, z: 0, w: 0.965926 };
-        let numBytes = GLMHelpers.packOrientationQuatToSixBytes(data, 2, quat);
-        expect(numBytes).toBe(6);
+        GLMHelpers.packOrientationQuatToSixBytes(data, 2, quat);
         let bytes = buffer2hex(buffer);
         expect(bytes).toBe("0000bfffa8923fff00000000");
 
         // 10, 20, -30 deg pitch, yaw, roll.
         quat = { x: 0.127679, y: 0.144878, z: -0.268536, w: 0.943714 };
-        numBytes = GLMHelpers.packOrientationQuatToSixBytes(data, 2, quat);
-        expect(numBytes).toBe(6);
+        GLMHelpers.packOrientationQuatToSixBytes(data, 2, quat);
         bytes = buffer2hex(buffer);
         expect(bytes).toBe("0000b471b2e2584d00000000");
 
         // -100 deg yaw.
         quat = { x: 0.0560226, y: -0.763129, z: 0.0667652, w: 0.640342 };
-        numBytes = GLMHelpers.packOrientationQuatToSixBytes(data, 2, quat);
-        expect(numBytes).toBe(6);
+        GLMHelpers.packOrientationQuatToSixBytes(data, 2, quat);
         bytes = buffer2hex(buffer);
         expect(bytes).toBe("0000c511460a79f400000000");
     });
@@ -95,14 +87,12 @@ describe("GLMHelpers - unit tests", () => {
         const data = new DataView(buffer);
 
         let angle = 45.2;
-        let numBytes = GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
-        expect(numBytes).toBe(2);
+        GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
         let bytes = buffer2hex(buffer);
         expect(bytes).toBe("000023a0");
 
         angle = -53.5;
-        numBytes = GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
-        expect(numBytes).toBe(2);
+        GLMHelpers.packFloatAngleToTwoByte(data, 2, angle);
         bytes = buffer2hex(buffer);
         expect(bytes).toBe("0000f459");
     });
@@ -113,15 +103,13 @@ describe("GLMHelpers - unit tests", () => {
 
         // ClipValue under ClipLimit.SMALL_LIMIT
         let clipValue = 8;
-        let numBytes = GLMHelpers.packClipValueToTwoByte(data, 2, clipValue);
-        expect(numBytes).toBe(2);
+        GLMHelpers.packClipValueToTwoByte(data, 2, clipValue);
         let bytes = buffer2hex(buffer);
         expect(bytes).toBe("00006566");
 
         // ClipValue greater than ClipLimit.SMALL_LIMIT
         clipValue = 14;
-        numBytes = GLMHelpers.packClipValueToTwoByte(data, 2, clipValue);
-        expect(numBytes).toBe(2);
+        GLMHelpers.packClipValueToTwoByte(data, 2, clipValue);
         bytes = buffer2hex(buffer);
         expect(bytes).toBe("0000f2ff");
     });
