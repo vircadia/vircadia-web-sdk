@@ -23,7 +23,8 @@ import "../../shared/DataViewExtensions";
 type BulkAvatarDataDetails = {
     sessionUUID: Uuid,
     globalPosition: vec3 | undefined,
-    localOrientation: quat | undefined
+    localOrientation: quat | undefined,
+    avatarScale: number | undefined
 };
 
 
@@ -39,6 +40,8 @@ const BulkAvatarData = new class {
      *  @property {vec3|undefined} globalPosition - The avatar's position in the domain.
      *      <code>undefined</code> if not included in the packet.
      *  @property {quat|undefined} localOrientation - The avatar's orientation.
+     *      <code>undefined</code> if not included in the packet.
+     *  @property {number|undefined} avatarScale - The avatar's scale.
      *      <code>undefined</code> if not included in the packet.
      */
 
@@ -106,8 +109,10 @@ const BulkAvatarData = new class {
                 dataPosition += 6;
             }
 
+            let avatarScale: number | undefined = undefined;
             if (hasAvatarScale) {
                 // WEBRTC TODO: Address further code - avatar scale.
+                avatarScale = GLMHelpers.unpackFloatRatioFromTwoByte(data, dataPosition);
                 dataPosition += 2;
             }
 
@@ -209,7 +214,8 @@ const BulkAvatarData = new class {
             avatarDataDetailsList.push({
                 sessionUUID,
                 globalPosition,
-                localOrientation
+                localOrientation,
+                avatarScale
             });
 
         }
