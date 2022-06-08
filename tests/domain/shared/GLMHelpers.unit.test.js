@@ -126,6 +126,81 @@ describe("GLMHelpers - unit tests", () => {
         expect(bytes).toBe("0000f2ff");
     });
 
+    test("Can write a ratio value into 2 bytes of packet data", () => {
+        const buffer = new ArrayBuffer(4);
+        const data = new DataView(buffer);
+
+        // Ratio < 10.
+        let ratio = 0.33;
+        GLMHelpers.packFloatRatioToTwoByte(data, 1, ratio);
+        let bytes = buffer2hex(buffer);
+        expect(bytes).toBe("00390400");
+
+        // Ratio > 10.
+        ratio = 33.0;
+        GLMHelpers.packFloatRatioToTwoByte(data, 1, ratio);
+        bytes = buffer2hex(buffer);
+        expect(bytes).toBe("000efd00");
+    });
+
+    test("Can read a ratio value from 2 bytes of packet data", () => {
+        let bufferHex = "00390400";
+        let bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        let data = new DataView(bufferArray.buffer);
+        let ratio = GLMHelpers.unpackFloatRatioFromTwoByte(data, 1);
+        expect(ratio).toBeCloseTo(0.33, 3);
+
+        bufferHex = "000efd00";
+        bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        data = new DataView(bufferArray.buffer);
+        ratio = GLMHelpers.unpackFloatRatioFromTwoByte(data, 1);
+        expect(ratio).toBeCloseTo(33.0, 1);
+    });
+
+    test("Can write a fixed-point number into 2 bytes of packet data", () => {
+        const buffer = new ArrayBuffer(4);
+        const data = new DataView(buffer);
+        const fixedPoint = 0.176026133;
+        GLMHelpers.packFloatScalarToSignedTwoByteFixed(data, 1, fixedPoint, 14);
+        const bytes = buffer2hex(buffer);
+        expect(bytes).toBe("00440b00");
+    });
+
+    test("Can read a fixed-point number from 2 bytes of packet data", () => {
+        const bufferHex = "00440b00";
+        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        const data = new DataView(bufferArray.buffer);
+        const fixedPoint = GLMHelpers.unpackFloatScalarFromSignedTwoByteFixed(data, 1, 14);
+        expect(fixedPoint).toBeCloseTo(0.1760, 4);
+    });
+
+    test("Can write a fixed-point vector into 6 bytes of packet data", () => {
+        const buffer = new ArrayBuffer(8);
+        const data = new DataView(buffer);
+        const vector = { x: 0.00263624, y: 1.78368, z: 0.264038 };
+        GLMHelpers.packFloatVec3ToSignedTwoByteFixed(data, 1, vector, 14);
+        const bytes = buffer2hex(buffer);
+        expect(bytes).toBe("002b002772e51000");
+    });
+
+    test("Can read a fixed-point vector from 6 bytes of packet data", () => {
+        const bufferHex = "002b002772e51000";
+        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        const data = new DataView(bufferArray.buffer);
+        const vector = GLMHelpers.unpackFloatVec3FromSignedTwoByteFixed(data, 1, 14);
+        expect(vector.x).toBeCloseTo(0.0026, 4);
+        expect(vector.y).toBeCloseTo(1.7836, 4);
+        expect(vector.z).toBeCloseTo(0.2640, 4);
+    });
+
     test("Can test that two values are close enough", () => {
         expect(GLMHelpers.closeEnough(0, 0, 0)).toBe(true);
         expect(GLMHelpers.closeEnough(0, 0, 0.001)).toBe(true);
