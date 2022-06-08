@@ -364,6 +364,9 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             td = document.createElement("td");
             td.className = "string";
             tr.appendChild(td);
+            td = document.createElement("td");
+            td.className = "number";
+            tr.appendChild(td);
             avatarListBody.appendChild(tr);
 
             avatars.set(sessionID, { avatar, tr });
@@ -375,6 +378,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             const SKELETON_MODEL_URL_INDEX = 6;
             avatar.skeletonModelURLChanged.connect(() => {
                 tr.childNodes[SKELETON_MODEL_URL_INDEX].innerHTML = avatar.skeletonModelURL;
+            });
+            const SKELETON_JOINTS_COUNT_INDEX = 7;
+            avatar.skeletonJointsChanged.connect(() => {
+                tr.childNodes[SKELETON_JOINTS_COUNT_INDEX].innerHTML = avatar.skeletonJoints.length;
             });
         }
         avatarMixer.avatarList.avatarAdded.connect(onAvatarAdded);

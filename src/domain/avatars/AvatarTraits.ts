@@ -56,22 +56,16 @@ enum TraitType {
 }
 
 type SkeletonJoint = {
+    jointName: string,
     jointIndex: number,
     parentIndex: number,
     boneType: number,
     defaultTranslation: vec3,
     defaultRotation: quat,
-    defaultScale: number,
-    jointName: string
+    defaultScale: number
 };
 
-type SkeletonData = {
-    maxTranslationDimension: number,
-    maxScaleDimension: number,
-    joints: SkeletonJoint[]
-};
-
-type TraitValue = string | SkeletonData | undefined;  // SkeletonModelURL | SkeletonData ...
+type TraitValue = string | SkeletonJoint[] | undefined;  // SkeletonModelURL | SkeletonJoint[] ...
 
 type AvatarTraitValue = {
     type: TraitType,
@@ -101,24 +95,16 @@ type AvatarTraitsValues = {
 const AvatarTraits = new class {
     // C++  namespace AvatarTraits
 
-    /*@devdoc
+    /*@sdkdoc
      *  A skeleton bone and joint.
-     *  @typedef {object} AvatarTraits.SkeletonJoint
+     *  @typedef {object} SkeletonJoint
+     *  @property {string} jointName - The joint name.
      *  @property {number} jointIndex - The joint index.
      *  @property {number} parentIndex - The joint's parent, or <code>-1</code> if there is no parent.
      *  @property {BoneType} boneType - The type of bone.
      *  @property {vec3} defaultTranslation - The default joint translation.
      *  @property {quat} defaultRotation - The default joint rotation.
      *  @property {number} defaultScale - The default bone and joint scale factor.
-     *  @property {string} jointName - The joint name.
-     */
-
-    /*@devdoc
-     *  A skeleton's bones and joints.
-     *  @typedef {object}AvatarTraits.SkeletonData
-     *  @property {number} maxTranslationDimension - The maximum bone translation in the skeleton.
-     *  @property {number} maxScaleDimension - The maximum bone scale in the skeleton.
-     *  @property {AvatarTraits.SkeletonJoint[]} joints - The skeleton's bones and joints.
      */
 
     /*@devdoc
@@ -129,11 +115,11 @@ const AvatarTraits = new class {
      *      </thead>
      *      <tbody>
      *          <tr><td><code>SkeletonModelURL</code></td><td><code>string</code></td></tr>
-     *          <tr><td><code>SkeletonData</code></td><td><code>{@link AvatarTraits.SkeletonData}</code></td></tr>
+     *          <tr><td><code>SkeletonData</code></td><td><code>Array&lt;{@link SkeletonJoint}&gt;</code></td></tr>
      *          <tr><td>Other types</td><td><code>undefined</code></td></tr>
      *      </tbody>
      *  </table>
-     *  @typedef {string|AvatarTraits.SkeletonData|undefined} AvatarTraits.TraitValue
+     *  @typedef {string|SkeletonJoint[]|undefined} AvatarTraits.TraitValue
      */
 
     /*@devdoc
@@ -220,7 +206,7 @@ const AvatarTraits = new class {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    #unpackSkeletonData(data: DataView, startPosition: number /* , dataLength: number */): SkeletonData {
+    #unpackSkeletonData(data: DataView, startPosition: number): SkeletonJoint[] {
         // C++  void AvatarData::unpackSkeletonData(const QByteArray& data)
         //      Reading the data but not applying it to an avatar.
 
@@ -239,7 +225,7 @@ const AvatarTraits = new class {
         const stringTableLength = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
         dataPosition += 2;
 
-        const joints = [];
+        const joints: SkeletonJoint[] = [];
         const stringIndexes: Array<{ stringStart: number, stringLength: number }> = [];
         for (let i = 0; i < numJoints; i++) {
             const stringStart = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
@@ -266,13 +252,13 @@ const AvatarTraits = new class {
             defaultScale *= maxScaleDimension;
 
             joints.push({
+                jointName: "",
                 jointIndex,
                 parentIndex,
                 boneType,
                 defaultTranslation,
                 defaultRotation,
-                defaultScale,
-                jointName: ""
+                defaultScale
             });
 
             stringIndexes.push({
@@ -294,15 +280,11 @@ const AvatarTraits = new class {
 
         /* eslint-enable @typescript-eslint/no-magic-numbers */
 
-        return {
-            maxTranslationDimension,
-            maxScaleDimension,
-            joints
-        };
+        return joints;
     }
 
 }();
 
 export default AvatarTraits;
 export { TraitType };
-export type { TraitValue, AvatarTraitValue, AvatarTraitsValues, SkeletonData, SkeletonJoint };
+export type { TraitValue, AvatarTraitValue, AvatarTraitsValues, SkeletonJoint };

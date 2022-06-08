@@ -138,14 +138,10 @@ describe("BulkAvatarTraits - unit tests", () => {
         expect(avatarTraitsList[0].avatarTraits[0].type).toEqual(TraitType.SkeletonModelURL);
         expect(avatarTraitsList[0].avatarTraits[0].value)
             .toEqual("https://cdn-1.vircadia.com/us-e-1/Bazaar/Avatars/Sean/fbx/Sean.fst");
+
         expect(avatarTraitsList[0].avatarTraits[1].type).toEqual(TraitType.SkeletonData);
         expect(avatarTraitsList[0].avatarTraits[1].version).toEqual(1);
-
-        const skeletonData = avatarTraitsList[0].avatarTraits[1].value;
-        expect(skeletonData.maxTranslationDimension).toBeCloseTo(748.113, 3);
-        expect(skeletonData.maxScaleDimension).toBeCloseTo(1000.000, 3);
-
-        const skeletonJoints = skeletonData.joints;  // eslint-disable-line
+        const skeletonJoints = avatarTraitsList[0].avatarTraits[1].value;
         expect(skeletonJoints).toHaveLength(88);
 
         const firstJoint = skeletonJoints[0];
