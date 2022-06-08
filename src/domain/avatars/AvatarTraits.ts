@@ -9,7 +9,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import UDT from "../networking/udt/UDT";
+import assert from "../shared/assert";
+import GLMHelpers from "../shared/GLMHelpers";
+import { quat } from "../shared/Quat";
 import Uuid from "../shared/Uuid";
+import Vec3, { vec3 } from "../shared/Vec3";
+import { BoneType } from "./AvatarData";
 
 
 /*@devdoc
@@ -49,8 +55,23 @@ enum TraitType {
     TotalTraitTypes
 }
 
+type SkeletonJoint = {
+    jointIndex: number,
+    parentIndex: number,
+    boneType: number,
+    defaultTranslation: vec3,
+    defaultRotation: quat,
+    defaultScale: number,
+    jointName: string
+};
 
-type TraitValue = string | undefined;  // SkeletonModelURL | ...
+type SkeletonData = {
+    maxTranslationDimension: number,
+    maxScaleDimension: number,
+    joints: SkeletonJoint[]
+};
+
+type TraitValue = string | SkeletonData | undefined;  // SkeletonModelURL | SkeletonData ...
 
 type AvatarTraitValue = {
     type: TraitType,
@@ -81,10 +102,38 @@ const AvatarTraits = new class {
     // C++  namespace AvatarTraits
 
     /*@devdoc
-     *  The traits of an avatar.
-     *  @typedef {object} AvatarTraits.AvatarTraitsValues
-     *  @property {Uuid} avatarID - The avatar's session UUID.
-     *  @property {AvatarTraits.AvatarTraitValue[]} avatarTraits - The avatar's traits.
+     *  A skeleton bone and joint.
+     *  @typedef {object} AvatarTraits.SkeletonJoint
+     *  @property {number} jointIndex - The joint index.
+     *  @property {number} parentIndex - The joint's parent, or <code>-1</code> if there is no parent.
+     *  @property {BoneType} boneType - The type of bone.
+     *  @property {vec3} defaultTranslation - The default joint translation.
+     *  @property {quat} defaultRotation - The default joint rotation.
+     *  @property {number} defaultScale - The default bone and joint scale factor.
+     *  @property {string} jointName - The joint name.
+     */
+
+    /*@devdoc
+     *  A skeleton's bones and joints.
+     *  @typedef {object}AvatarTraits.SkeletonData
+     *  @property {number} maxTranslationDimension - The maximum bone translation in the skeleton.
+     *  @property {number} maxScaleDimension - The maximum bone scale in the skeleton.
+     *  @property {AvatarTraits.SkeletonJoint[]} joints - The skeleton's bones and joints.
+     */
+
+    /*@devdoc
+     *  The type of the trait value depends on the trait type:
+     *  <table>
+     *      <thead>
+     *          <tr><th>{@link AvatarTraits.TraitType}</th><th>Value</th></tr>
+     *      </thead>
+     *      <tbody>
+     *          <tr><td><code>SkeletonModelURL</code></td><td><code>string</code></td></tr>
+     *          <tr><td><code>SkeletonData</code></td><td><code>{@link AvatarTraits.SkeletonData}</code></td></tr>
+     *          <tr><td>Other types</td><td><code>undefined</code></td></tr>
+     *      </tbody>
+     *  </table>
+     *  @typedef {string|AvatarTraits.SkeletonData|undefined} AvatarTraits.TraitValue
      */
 
     /*@devdoc
@@ -97,17 +146,10 @@ const AvatarTraits = new class {
      */
 
     /*@devdoc
-     *  The type of the trait value depends on the trait type:
-     *  <table>
-     *      <thead>
-     *          <tr><th>TraitType</th><th>Value</th></tr>
-     *      </thead>
-     *      <tbody>
-     *          <tr><td><code>SkeletonModelURL</code></td><td><code>string</code></td></tr>
-     *          <tr><td>Other types</td><td><code>undefined</code></td></tr>
-     *      </tbody>
-     *  </table>
-     *  @typedef {string|undefined} AvatarTraits.TraitValue
+     *  The traits of an avatar.
+     *  @typedef {object} AvatarTraits.AvatarTraitsValues
+     *  @property {Uuid} avatarID - The avatar's session UUID.
+     *  @property {AvatarTraits.AvatarTraitValue[]} avatarTraits - The avatar's traits.
      */
 
 
@@ -124,7 +166,7 @@ const AvatarTraits = new class {
     readonly DEFAULT_TRAIT_VERSION = 0;
 
 
-    #_haveWarnedSkeletonData = false;
+    readonly #_TRANSLATION_COMPRESSION_RADIX = 14;
 
 
     /*@devdoc
@@ -155,14 +197,7 @@ const AvatarTraits = new class {
         }
 
         if (traitType === AvatarTraits.SkeletonData) {
-
-            // WEBRTC TODO: Address further C++ code - skeleton data.
-            if (!this.#_haveWarnedSkeletonData) {
-                console.error("AvatarTraits: Reading avatar skeleton data not handled.");
-                this.#_haveWarnedSkeletonData = true;
-            }
-
-            return undefined;
+            return this.#unpackSkeletonData(data, dataPosition /* , dataLength */);
         }
 
         console.error("AvatarTraits: Unexpected trait type to read.");
@@ -174,6 +209,7 @@ const AvatarTraits = new class {
     #unpackSkeletonModelURL(data: DataView, dataPosition: number, dataLength: number): string {
         // C++  void AvatarData::unpackSkeletonModelURL(const QByteArray& data)
         //      Reading the data but not applying it to an avatar.
+        //      Applying the trait value is done in AvatarData.
 
         if (dataLength === 0) {
             return "";
@@ -183,8 +219,90 @@ const AvatarTraits = new class {
         return textDecoder.decode(new DataView(data.buffer, data.byteOffset + dataPosition, dataLength));
     }
 
+    // eslint-disable-next-line class-methods-use-this
+    #unpackSkeletonData(data: DataView, startPosition: number /* , dataLength: number */): SkeletonData {
+        // C++  void AvatarData::unpackSkeletonData(const QByteArray& data)
+        //      Reading the data but not applying it to an avatar.
+
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+        let dataPosition = startPosition;
+
+        // Header.
+        // V++  AvatarSkeletonTrait::Header
+        const maxTranslationDimension = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+        dataPosition += 4;
+        const maxScaleDimension = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+        dataPosition += 4;
+        const numJoints = data.getUint8(dataPosition);
+        dataPosition += 1;
+        const stringTableLength = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+        dataPosition += 2;
+
+        const joints = [];
+        const stringIndexes: Array<{ stringStart: number, stringLength: number }> = [];
+        for (let i = 0; i < numJoints; i++) {
+            const stringStart = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+            const stringLength = data.getUint8(dataPosition);
+            dataPosition += 1;
+            const boneType = data.getUint8(dataPosition);
+            dataPosition += 1;
+            let defaultTranslation = GLMHelpers.unpackFloatVec3FromSignedTwoByteFixed(data, dataPosition,
+                this.#_TRANSLATION_COMPRESSION_RADIX);
+            dataPosition += 6;
+            const defaultRotation = GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition);
+            dataPosition += 6;
+            let defaultScale = GLMHelpers.unpackFloatRatioFromTwoByte(data, dataPosition);
+            dataPosition += 2;
+            let jointIndex = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+            let parentIndex = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+
+            jointIndex = i;
+            parentIndex = boneType === BoneType.SkeletonRoot || boneType === BoneType.NonSkeletonRoot ? -1 : parentIndex;
+            defaultTranslation = Vec3.multiply(maxTranslationDimension, defaultTranslation);
+            defaultScale *= maxScaleDimension;
+
+            joints.push({
+                jointIndex,
+                parentIndex,
+                boneType,
+                defaultTranslation,
+                defaultRotation,
+                defaultScale,
+                jointName: ""
+            });
+
+            stringIndexes.push({
+                stringStart,
+                stringLength
+            });
+
+        }
+
+        const textDecoder = new TextDecoder();
+        const table = textDecoder.decode(new Uint8Array(data.buffer, data.byteOffset + dataPosition, stringTableLength));
+        dataPosition += stringTableLength;
+        for (let i = 0; i < numJoints; i++) {
+            const joint = joints[i];
+            const stringIndex = stringIndexes[i];
+            assert(joint !== undefined && stringIndex !== undefined);
+            joint.jointName = table.slice(stringIndex.stringStart, stringIndex.stringStart + stringIndex.stringLength);
+        }
+
+        /* eslint-enable @typescript-eslint/no-magic-numbers */
+
+        return {
+            maxTranslationDimension,
+            maxScaleDimension,
+            joints
+        };
+    }
+
 }();
 
 export default AvatarTraits;
 export { TraitType };
-export type { TraitValue, AvatarTraitValue, AvatarTraitsValues };
+export type { TraitValue, AvatarTraitValue, AvatarTraitsValues, SkeletonData, SkeletonJoint };

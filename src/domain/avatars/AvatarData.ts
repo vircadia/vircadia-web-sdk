@@ -66,6 +66,22 @@ enum AvatarDataDetail {
     SendAllData
 }
 
+/*@devdoc
+ *  The <code>BoneType<code> namespace provides types of bones.
+ *  @namespace BoneType
+ *  @property {number} SkeletonRoot=0 - Skeleton root.
+ *  @property {number} SkeletonChild=1 - Skeleton child.
+ *  @property {number} NonSkeletonRoot=2 - Non-skeleton root.
+ *  @property {number} NonSkeletonChild=3 - Non-skeleton child.
+ */
+enum BoneType {
+    // C++  BoneType
+    SkeletonRoot = 0,
+    SkeletonChild,
+    NonSkeletonRoot,
+    NonSkeletonChild
+}
+
 
 /*@devdoc
  *  The <code>AvatarData</code> class handles the avatar data that is written to and read from Vircadia protocol packets.
@@ -617,4 +633,4 @@ class AvatarData extends SpatiallyNestable {
 }
 
 export default AvatarData;
-export { KillAvatarReason, AvatarDataDetail };
+export { KillAvatarReason, AvatarDataDetail, BoneType };
