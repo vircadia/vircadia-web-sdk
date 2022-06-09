@@ -42,7 +42,8 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *  @property {Signal<ScriptAvatar~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the skeleton model URL
  *      changes.
  *      <em>Read-only.</em>
- *  @property {SkeletonJoint[]} skeletonJoints - Information on the avatar skeleton's joints.
+ *  @property {SkeletonJoint[]} skeletonJoints - Information on the avatar skeleton's joints. <code>[]</code> if the avatar
+ *      doesn't exist.
  *      <em>Read-only.</em>
  *  @property {Signal<ScriptAvatar~skeletonJointsChanged>} skeletonJointsChanged - Triggered when information on the avatar's
  *      skeleton joints changes.
