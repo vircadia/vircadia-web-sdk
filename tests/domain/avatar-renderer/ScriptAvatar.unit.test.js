@@ -32,6 +32,7 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
         expect(scriptAvatar.skeletonModelURL).toBe("");
+        expect(scriptAvatar.scale).toEqual(0.0);
         expect(scriptAvatar.position).toEqual(Vec3.ZERO);
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
         // Can still access signals.
@@ -56,6 +57,7 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
         expect(scriptAvatar.skeletonModelURL).toBe("");
+        expect(scriptAvatar.scale).toEqual(0.0);
         expect(scriptAvatar.position).toEqual(Vec3.ZERO);
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
         // Can still access signals.

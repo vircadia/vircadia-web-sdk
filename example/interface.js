@@ -226,10 +226,14 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         const POS_DECIMAL_PLACES = 3;
         const YAW_DECIMAL_PLACES = 1;
+        const SESSION_DISPLAY_NAME_INDEX = 1;
         const X_INDEX = 2;
         const Y_INDEX = 3;
         const Z_INDEX = 4;
         const YAW_INDEX = 5;
+        const SKELETON_MODEL_URL_INDEX = 6;
+        const SKELETON_SCALE_INDEX = 7;
+        const SKELETON_JOINTS_COUNT_INDEX = 8;
 
         const RAD_TO_DEG = 180.0 / Math.PI;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
@@ -367,19 +371,19 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             td = document.createElement("td");
             td.className = "number";
             tr.appendChild(td);
+            td = document.createElement("td");
+            td.className = "number";
+            tr.appendChild(td);
             avatarListBody.appendChild(tr);
 
             avatars.set(sessionID, { avatar, tr });
 
-            const SESSION_DISPLAY_NAME_INDEX = 1;
             avatar.sessionDisplayNameChanged.connect(() => {
                 tr.childNodes[SESSION_DISPLAY_NAME_INDEX].innerHTML = avatar.sessionDisplayName;
             });
-            const SKELETON_MODEL_URL_INDEX = 6;
             avatar.skeletonModelURLChanged.connect(() => {
                 tr.childNodes[SKELETON_MODEL_URL_INDEX].innerHTML = avatar.skeletonModelURL;
             });
-            const SKELETON_JOINTS_COUNT_INDEX = 7;
             avatar.skeletonJointsChanged.connect(() => {
                 tr.childNodes[SKELETON_JOINTS_COUNT_INDEX].innerHTML = avatar.skeletonJoints.length;
             });
@@ -410,6 +414,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                 value.tr.childNodes[Y_INDEX].innerHTML = position.y.toFixed(POS_DECIMAL_PLACES);
                 value.tr.childNodes[Z_INDEX].innerHTML = position.z.toFixed(POS_DECIMAL_PLACES);
                 value.tr.childNodes[YAW_INDEX].innerHTML = quatToYaw(value.avatar.orientation).toFixed(YAW_DECIMAL_PLACES);
+                value.tr.childNodes[SKELETON_SCALE_INDEX].innerHTML = value.avatar.scale.toFixed(1);
             }
         };
 

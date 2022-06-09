@@ -45,4 +45,15 @@ describe("AvatarData - unit tests", () => {
         expect(avatarData.getIdentityDataChanged()).toBe(true);
     });
 
+    test("Can set and get the avatar scale", () => {
+        const avatarData = new AvatarData(contextID);
+        expect(avatarData.getTargetScale()).toEqual(1.0);
+        avatarData.setTargetScale(1.2);
+        expect(avatarData.getTargetScale()).toEqual(1.2);
+        avatarData.setTargetScale(2000.0);
+        expect(avatarData.getTargetScale()).toEqual(1000.0);  // MAX_AVATAR_SCALE
+        avatarData.setTargetScale(0.00001);
+        expect(avatarData.getTargetScale()).toEqual(0.005);  // MIN_AVATAR_SCALE
+    });
+
 });
