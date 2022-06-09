@@ -10,6 +10,7 @@
 //
 
 import AvatarData from "../avatars/AvatarData";
+import { SkeletonJoint } from "../avatars/AvatarTraits";
 import assert from "../shared/assert";
 import Quat, { quat } from "../shared/Quat";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
@@ -40,6 +41,11 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *      <em>Read-only.</em>
  *  @property {Signal<ScriptAvatar~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the skeleton model URL
  *      changes.
+ *      <em>Read-only.</em>
+ *  @property {SkeletonJoint[]} skeletonJoints - Information on the avatar skeleton's joints.
+ *      <em>Read-only.</em>
+ *  @property {Signal<ScriptAvatar~skeletonJointsChanged>} skeletonJointsChanged - Triggered when information on the avatar's
+ *      skeleton joints changes.
  *      <em>Read-only.</em>
  *  @property {vec3} position - The position of the avatar in the domain. {@link Vec3|Vec3.ZERO} if the avatar doesn't exist.
  *      <em>Read-only.</em>
@@ -142,6 +148,32 @@ class ScriptAvatar {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
                 return avatar.skeletonModelURLChanged;
+            }
+        }
+        return new SignalEmitter().signal();
+    }
+
+    get skeletonJoints(): SkeletonJoint[] {
+        // C++  No direct equivalent.
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                return avatar.skeletonJoints;
+            }
+        }
+        return [];
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's skeleton joints change.
+     *  @callback ScriptAvatar~skeletonJointsChanged
+     */
+    get skeletonJointsChanged(): Signal {
+        // C++  No direct equivalent.
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                return avatar.skeletonJointsChanged;
             }
         }
         return new SignalEmitter().signal();

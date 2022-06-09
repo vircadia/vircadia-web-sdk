@@ -23,7 +23,7 @@ import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import SpatiallyNestable, { NestableType } from "../shared/SpatiallyNestable";
 import Uuid from "../shared/Uuid";
 import Vec3, { vec3 } from "../shared/Vec3";
-import AvatarTraits, { TraitType, TraitValue } from "./AvatarTraits";
+import AvatarTraits, { SkeletonJoint, TraitType, TraitValue } from "./AvatarTraits";
 import ClientTraitsHandler from "./ClientTraitsHandler";
 
 
@@ -66,6 +66,22 @@ enum AvatarDataDetail {
     SendAllData
 }
 
+/*@sdkdoc
+ *  The <code>BoneType</code> namespace provides types of bones.
+ *  @namespace BoneType
+ *  @property {number} SkeletonRoot=0 - Skeleton root.
+ *  @property {number} SkeletonChild=1 - Skeleton child.
+ *  @property {number} NonSkeletonRoot=2 - Non-skeleton root.
+ *  @property {number} NonSkeletonChild=3 - Non-skeleton child.
+ */
+enum BoneType {
+    // C++  BoneType
+    SkeletonRoot = 0,
+    SkeletonChild,
+    NonSkeletonRoot,
+    NonSkeletonChild
+}
+
 
 /*@devdoc
  *  The <code>AvatarData</code> class handles the avatar data that is written to and read from Vircadia protocol packets.
@@ -83,6 +99,10 @@ enum AvatarDataDetail {
  *  @property {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *  @property {Signal<AvatarData~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton model
  *      URL changes.
+ *  @property {SkeletonJoint[]} skeletonJoints - Information on the avatar skeleton's joints.
+ *      <em>Read-only.</em>
+ *  @property {Signal<AvatarData~skeletonJointsChanged>} skeletonjointsChanged - Triggered when information on the avatar's
+ *      skeleton joints changes.
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
  */
@@ -110,13 +130,13 @@ class AvatarData extends SpatiallyNestable {
     #_isReplicated = false;
     #_skeletonModelURL: string | null = null;
     #_skeletonModelURLChanged = new SignalEmitter();
+    #_avatarSkeletonData: SkeletonJoint[] = [];
+    #_skeletonJointsChanged = new SignalEmitter();
 
     #_sequenceNumber = 0;  // Avatar data sequence number is a uint16 value.
     readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
 
     readonly #_AVATAR_MIXER_NODE_SET = new Set([NodeType.AvatarMixer]);
-
-    #_haveWarnedSkeletonData = false;
 
 
     constructor(contextID: number) {
@@ -173,6 +193,18 @@ class AvatarData extends SpatiallyNestable {
      */
     get skeletonModelURLChanged(): Signal {
         return this.#_skeletonModelURLChanged.signal();
+    }
+
+    get skeletonJoints(): SkeletonJoint[] {
+        return this.#_avatarSkeletonData;
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's skeleton joints change.
+     *  @callback AvatarData~skeletonJointsChanged
+     */
+    get skeletonJointsChanged(): Signal {
+        return this.#_skeletonJointsChanged.signal();
     }
 
     get position(): vec3 {
@@ -531,19 +563,17 @@ class AvatarData extends SpatiallyNestable {
      */
     processTrait(traitType: TraitType, traitValue: TraitValue): void {
         // C++  void processTrait(AvatarTraits:: TraitType traitType, QByteArray traitBinaryData)
+        //      void AvatarData::unpackSkeletonData(const QByteArray& data)
         //      Reading the trait value is done in AvatarTraits.
         if (traitType === AvatarTraits.SkeletonModelURL) {
             assert(typeof traitValue === "string");
             this.setSkeletonModelURL(traitValue);
         } else {
             assert(traitType === AvatarTraits.SkeletonData);
-
-            // WEBRTC TODO: Address further C++ code - skeleton data.
-            if (!this.#_haveWarnedSkeletonData) {
-                console.error("AvatarData: Processing avatar skeleton data not handled.");
-                this.#_haveWarnedSkeletonData = true;
+            if (this._clientTraitsHandler) {
+                this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonData);
             }
-
+            this.setSkeletonData(traitValue as SkeletonJoint[]);
         }
     }
 
@@ -595,6 +625,12 @@ class AvatarData extends SpatiallyNestable {
         return this.getParentID().value() !== Uuid.NULL;
     }
 
+    protected setSkeletonData(skeletonData: SkeletonJoint[]): void {
+        // C++  void AvatarData::setSkeletonData(const std::vector<AvatarSkeletonTrait::UnpackedJointData>& skeletonData)
+        this.#_avatarSkeletonData = skeletonData;
+        this.#_skeletonJointsChanged.emit();
+    }
+
 
     // eslint-disable-next-line class-methods-use-this
     #lazyInitHeadData(): void {
@@ -617,4 +653,4 @@ class AvatarData extends SpatiallyNestable {
 }
 
 export default AvatarData;
-export { KillAvatarReason, AvatarDataDetail };
+export { KillAvatarReason, AvatarDataDetail, BoneType };
