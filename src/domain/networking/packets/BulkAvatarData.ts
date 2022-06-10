@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 9 Nov 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -101,8 +102,7 @@ const BulkAvatarData = new class {
 
             let localOrientation: quat | undefined = undefined;
             if (hasAvatarOrientation) {
-                localOrientation = { x: 0, y: 0, z: 0, w: 0 };
-                GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition, localOrientation);
+                localOrientation = GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition);
                 dataPosition += 6;
             }
 

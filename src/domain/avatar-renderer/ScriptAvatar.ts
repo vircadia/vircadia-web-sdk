@@ -3,12 +3,14 @@
 //
 //  Created by David Rowe on 11 Nov 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
 import AvatarData from "../avatars/AvatarData";
+import { SkeletonJoint } from "../avatars/AvatarTraits";
 import assert from "../shared/assert";
 import Quat, { quat } from "../shared/Quat";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
@@ -35,6 +37,16 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *  @property {Signal<ScriptAvatar~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the session display
  *      name changes.
  *      <em>Read-only.</em>
+ *  @property {string} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
+ *      <em>Read-only.</em>
+ *  @property {Signal<ScriptAvatar~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the skeleton model URL
+ *      changes.
+ *      <em>Read-only.</em>
+ *  @property {SkeletonJoint[]} skeletonJoints - Information on the avatar skeleton's joints.
+ *      <em>Read-only.</em>
+ *  @property {Signal<ScriptAvatar~skeletonJointsChanged>} skeletonJointsChanged - Triggered when information on the avatar's
+ *      skeleton joints changes.
+ *      <em>Read-only.</em>
  *  @property {vec3} position - The position of the avatar in the domain. {@link Vec3|Vec3.ZERO} if the avatar doesn't exist.
  *      <em>Read-only.</em>
  *  @property {quat} orientation - The orientation of the avatar in the domain. {@link Quat|Quat.IDENTITY} if the avatar doesn't
@@ -47,6 +59,7 @@ class ScriptAvatar {
 
     #_avatarData: WeakRef<AvatarData> | null;
 
+
     constructor(avatar: AvatarData | null) {
         assert(avatar === null || avatar instanceof AvatarData);
         if (avatar === null) {
@@ -55,6 +68,7 @@ class ScriptAvatar {
             this.#_avatarData = new WeakRef(avatar);
         }
     }
+
 
     get isValid(): boolean {
         // C++  N/A
@@ -108,6 +122,58 @@ class ScriptAvatar {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
                 return avatar.sessionDisplayNameChanged;
+            }
+        }
+        return new SignalEmitter().signal();
+    }
+
+    get skeletonModelURL(): string {
+        // C++  QString ScriptAvatarData::getSkeletonModelURLFromScript()
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar && avatar.skeletonModelURL !== null) {
+                return avatar.skeletonModelURL;
+            }
+        }
+        return "";
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's skeleton model URL changes.
+     *  @callback ScriptAvatar~skeletonModelURLChanged
+     */
+    get skeletonModelURLChanged(): Signal {
+        // C++  void ScriptAvatarData::skeletonModelURLChanged();
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                return avatar.skeletonModelURLChanged;
+            }
+        }
+        return new SignalEmitter().signal();
+    }
+
+    get skeletonJoints(): SkeletonJoint[] {
+        // C++  No direct equivalent.
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                return avatar.skeletonJoints;
+            }
+        }
+        return [];
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's skeleton joints change.
+     *  @callback ScriptAvatar~skeletonJointsChanged
+     */
+    get skeletonJointsChanged(): Signal {
+        // C++  No direct equivalent.
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                return avatar.skeletonJointsChanged;
             }
         }
         return new SignalEmitter().signal();

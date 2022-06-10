@@ -3,25 +3,27 @@
 //
 //  Created by David Rowe on 28 Oct 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import Node from "../networking/Node";
-import NodeList from "../networking/NodeList";
-import NodeType from "../networking/NodeType";
 import { AvatarIdentityDetails } from "../networking/packets/AvatarIdentity";
 import { BulkAvatarDataDetails } from "../networking/packets/BulkAvatarData";
 import PacketScribe from "../networking/packets/PacketScribe";
 import SequenceNumber from "../networking/udt/SequenceNumber";
+import Node from "../networking/Node";
+import NodeList from "../networking/NodeList";
+import NodeType from "../networking/NodeType";
+import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
+import Quat, { quat } from "../shared/Quat";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import SpatiallyNestable, { NestableType } from "../shared/SpatiallyNestable";
-import Quat, { quat } from "../shared/Quat";
 import Uuid from "../shared/Uuid";
 import Vec3, { vec3 } from "../shared/Vec3";
-import AvatarTraits from "./AvatarTraits";
+import AvatarTraits, { SkeletonJoint, TraitType, TraitValue } from "./AvatarTraits";
 import ClientTraitsHandler from "./ClientTraitsHandler";
 
 
@@ -64,6 +66,22 @@ enum AvatarDataDetail {
     SendAllData
 }
 
+/*@sdkdoc
+ *  The <code>BoneType</code> namespace provides types of bones.
+ *  @namespace BoneType
+ *  @property {number} SkeletonRoot=0 - Skeleton root.
+ *  @property {number} SkeletonChild=1 - Skeleton child.
+ *  @property {number} NonSkeletonRoot=2 - Non-skeleton root.
+ *  @property {number} NonSkeletonChild=3 - Non-skeleton child.
+ */
+enum BoneType {
+    // C++  BoneType
+    SkeletonRoot = 0,
+    SkeletonChild,
+    NonSkeletonRoot,
+    NonSkeletonChild
+}
+
 
 /*@devdoc
  *  The <code>AvatarData</code> class handles the avatar data that is written to and read from Vircadia protocol packets.
@@ -81,6 +99,10 @@ enum AvatarDataDetail {
  *  @property {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *  @property {Signal<AvatarData~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton model
  *      URL changes.
+ *  @property {SkeletonJoint[]} skeletonJoints - Information on the avatar skeleton's joints.
+ *      <em>Read-only.</em>
+ *  @property {Signal<AvatarData~skeletonJointsChanged>} skeletonjointsChanged - Triggered when information on the avatar's
+ *      skeleton joints changes.
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
  */
@@ -108,6 +130,8 @@ class AvatarData extends SpatiallyNestable {
     #_isReplicated = false;
     #_skeletonModelURL: string | null = null;
     #_skeletonModelURLChanged = new SignalEmitter();
+    #_avatarSkeletonData: SkeletonJoint[] = [];
+    #_skeletonJointsChanged = new SignalEmitter();
 
     #_sequenceNumber = 0;  // Avatar data sequence number is a uint16 value.
     readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
@@ -169,6 +193,18 @@ class AvatarData extends SpatiallyNestable {
      */
     get skeletonModelURLChanged(): Signal {
         return this.#_skeletonModelURLChanged.signal();
+    }
+
+    get skeletonJoints(): SkeletonJoint[] {
+        return this.#_avatarSkeletonData;
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's skeleton joints change.
+     *  @callback AvatarData~skeletonJointsChanged
+     */
+    get skeletonJointsChanged(): Signal {
+        return this.#_skeletonJointsChanged.signal();
     }
 
     get position(): vec3 {
@@ -521,6 +557,27 @@ class AvatarData extends SpatiallyNestable {
     }
 
     /*@devdoc
+     *  Processes a simple trait value received in a packet.
+     *  @param {AvatarTraits.TraitType} traitType - The trait type.
+     *  @param {AvatarTraits.TraitValue} traitValue - The trait value.
+     */
+    processTrait(traitType: TraitType, traitValue: TraitValue): void {
+        // C++  void processTrait(AvatarTraits:: TraitType traitType, QByteArray traitBinaryData)
+        //      void AvatarData::unpackSkeletonData(const QByteArray& data)
+        //      Reading the trait value is done in AvatarTraits.
+        if (traitType === AvatarTraits.SkeletonModelURL) {
+            assert(typeof traitValue === "string");
+            this.setSkeletonModelURL(traitValue);
+        } else {
+            assert(traitType === AvatarTraits.SkeletonData);
+            if (this._clientTraitsHandler) {
+                this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonData);
+            }
+            this.setSkeletonData(traitValue as SkeletonJoint[]);
+        }
+    }
+
+    /*@devdoc
      *  Gets the avatar's world orientation.
      *  @returns {quat} The avatar's world orientation.
      */
@@ -568,6 +625,12 @@ class AvatarData extends SpatiallyNestable {
         return this.getParentID().value() !== Uuid.NULL;
     }
 
+    protected setSkeletonData(skeletonData: SkeletonJoint[]): void {
+        // C++  void AvatarData::setSkeletonData(const std::vector<AvatarSkeletonTrait::UnpackedJointData>& skeletonData)
+        this.#_avatarSkeletonData = skeletonData;
+        this.#_skeletonJointsChanged.emit();
+    }
+
 
     // eslint-disable-next-line class-methods-use-this
     #lazyInitHeadData(): void {
@@ -590,4 +653,4 @@ class AvatarData extends SpatiallyNestable {
 }
 
 export default AvatarData;
-export { KillAvatarReason, AvatarDataDetail };
+export { KillAvatarReason, AvatarDataDetail, BoneType };
