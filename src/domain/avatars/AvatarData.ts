@@ -17,6 +17,7 @@ import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
 import NodeType from "../networking/NodeType";
 import assert from "../shared/assert";
+import AvatarConstants from "../shared/AvatarConstants";
 import ContextManager from "../shared/ContextManager";
 import Quat, { quat } from "../shared/Quat";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
@@ -132,6 +133,8 @@ class AvatarData extends SpatiallyNestable {
     #_skeletonModelURLChanged = new SignalEmitter();
     #_avatarSkeletonData: SkeletonJoint[] = [];
     #_skeletonJointsChanged = new SignalEmitter();
+
+    #_targetScale = 1.0;
 
     #_sequenceNumber = 0;  // Avatar data sequence number is a uint16 value.
     readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
@@ -552,6 +555,14 @@ class AvatarData extends SpatiallyNestable {
 
         }
 
+        if (avatarData.avatarScale) {
+            if (!isNaN(avatarData.avatarScale)) {
+                this.setTargetScale(avatarData.avatarScale);
+
+                // WEBRTC TODO: Address further C++ code - avatar scale rate and update rate.
+            }
+        }
+
         // WEBRTC TODO: Address further C++ code - further avatar properties.
 
     }
@@ -610,6 +621,31 @@ class AvatarData extends SpatiallyNestable {
         }
 
         this.#_skeletonModelURLChanged.emit();
+    }
+
+    /*@devdoc
+     *  Sets the target avatar scale. For your own avatar, the avatar scale actually used may be limited per domain settings.
+     *  For other users' avatars, any domain limits will have already been applied so the target scale is the actual scale.
+     *  @param targetScale - The target avatar scale.
+     */
+    setTargetScale(targetScale: number): void {
+        // C++  void setTargetScale(float targetScale)
+        const newValue = Math.min(Math.max(targetScale, AvatarConstants.MIN_AVATAR_SCALE), AvatarConstants.MAX_AVATAR_SCALE);
+        if (this.#_targetScale !== newValue) {
+            this.#_targetScale = newValue;
+
+            // WEBRTC TODO: Address further code - scale changed data.
+        }
+    }
+
+    /*@devdoc
+     *  Get the target avatar scale. For your own avatar, the avatar scale actually used may be limited per domain settings.
+     *  for other users' avatars, any domain limits will ave already been applied so the target scale is the actual scale.
+     *  @returns The target avatar scale.
+     */
+    getTargetScale(): number {
+        // C++  float getTargetScale()
+        return this.#_targetScale;
     }
 
 

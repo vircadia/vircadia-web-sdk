@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 9 Nov 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -111,6 +112,25 @@ describe("BulkAvatarData - unit tests", () => {
         expect(bulkAvatarDetail.localOrientation.w).toBeCloseTo(-0.995859, 3);
     });
 
-    /* eslint-enable @typescript-eslint/no-magic-numbers */
+    test("Can read a BulkAvtarData message that has avatar scale data", () => {
+        // eslint-disable-next-line max-len
+        const RECEIVED_MESSAGE = "5cd7b12c15bb44bb96048d7dcf3828e7ff317e250339c3bcb23f414a44bf8328933ec529873f8328933e40b6fb3bf0ced5bd402df03cbfff8c743fff091390ad61443438633f52e7ffc600bfff8c743fffe7057cfe0239e86549be424a44bff00400000000000000000000000000000000ffff5800f0ffffffffffffffffffa20fc11340a43ebddcd4387f4684e73836284e3ed6d83205478cb1e52d2f478cb1e52d2f43e1da7947a435d7ec604a6d2efbcd6c491733e4a8734f7533e4a8734f75a97dbfaf4044ab03bf6a4024ac8abf234003b70ec0314108c518c09d3fc741dd8a983eb541dd8a983eb53f678a9240f93f678a9240f9c1640a693e35c1640a693e35bfb90a68411bbfb90a68411bc479d4213e5bc479d4213e5bc479d4213e5bc479d4213e5bed3069785b630375d8f9431457f80c73473252b71c274fd13aa92b31543c37a32eac56b34515327c5af24515327c5af2505f1a345c3f4c9218f96900487917f4707a487917f4707a52e019f55dda4c6b173769b2465c16477727465c1647772751f91a7b58ca4e6418b667d548cf177771dd48cf177771dd54ea1c0653f052361a355e2e525d1a315f12525d1a315f120e4f62b220b627b474754b3e2c9176c046892f1b787f4a7a44976e9750834a8871e54c6140d46fd452c740d46fd452c732b879585d107879c54117f370dfbd150d3070dfbd150d302e587a095cbd774bc86e19fa6f2dbff40e226f2dbff40e22311f797358a6784ec5f6183271e1bd730fda71e1bd730fda2c17788150d037467ac0624e7827c5b618567827c5b6185600b00400000000000000006677b8423700004081e30cf8b5ff00000000c41d0000f407b5ff000058ff0f000000000000000000ff4ffbffffffffffffffff";
+        const MESSAGE_START = 0;
 
+        const arrayBuffer = new ArrayBuffer(RECEIVED_MESSAGE.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(RECEIVED_MESSAGE.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer, MESSAGE_START);
+
+        const bulkAvatarDetails = BulkAvatarData.read(dataView);
+        expect(bulkAvatarDetails).toHaveLength(1);
+
+        const bulkAvatarDetail = bulkAvatarDetails[0];
+        expect(bulkAvatarDetail.sessionUUID.stringify()).toBe("5cd7b12c-15bb-44bb-9604-8d7dcf3828e7");
+        expect(bulkAvatarDetail.avatarScale).toBeCloseTo(1.48717, 5);
+    });
+
+    /* eslint-enable @typescript-eslint/no-magic-numbers */
 });

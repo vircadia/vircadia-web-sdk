@@ -42,10 +42,14 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *  @property {Signal<ScriptAvatar~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the skeleton model URL
  *      changes.
  *      <em>Read-only.</em>
- *  @property {SkeletonJoint[]} skeletonJoints - Information on the avatar skeleton's joints.
+ *  @property {SkeletonJoint[]} skeletonJoints - Information on the avatar skeleton's joints. <code>[]</code> if the avatar
+ *      doesn't exist.
  *      <em>Read-only.</em>
  *  @property {Signal<ScriptAvatar~skeletonJointsChanged>} skeletonJointsChanged - Triggered when information on the avatar's
  *      skeleton joints changes.
+ *      <em>Read-only.</em>
+ *  @property {number} scale - The scale of the avatar. This includes any limits on permissible values imposed by the domain.
+ *      <code>0.0</code> if the avatar doesn't exist.
  *      <em>Read-only.</em>
  *  @property {vec3} position - The position of the avatar in the domain. {@link Vec3|Vec3.ZERO} if the avatar doesn't exist.
  *      <em>Read-only.</em>
@@ -162,6 +166,16 @@ class ScriptAvatar {
             }
         }
         return [];
+    }
+
+    get scale(): number {
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                return avatar.getTargetScale();
+            }
+        }
+        return 0;
     }
 
     /*@sdkdoc
