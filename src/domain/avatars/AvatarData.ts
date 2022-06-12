@@ -135,6 +135,8 @@ class AvatarData extends SpatiallyNestable {
     #_skeletonJointsChanged = new SignalEmitter();
 
     #_targetScale = 1.0;
+    #_jointRotations: (quat | null)[] = [];
+    #_jointTranslations: (vec3 | null)[] = [];
 
     #_sequenceNumber = 0;  // Avatar data sequence number is a uint16 value.
     readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
@@ -297,6 +299,28 @@ class AvatarData extends SpatiallyNestable {
         this._sessionDisplayName = sessionDisplayName;
         this._sessionDisplayNameChanged.emit();
         this.markIdentityDataChanged();
+    }
+
+    /*@devdoc
+     *  Gets the joint rotations relative to avatar space (i.e., not relative to parent bones). If a rotation is
+     *  <code>null</code> then the rotation of the avatar's default pose should be used.
+     *  If a rotation is <code>null</code> then the rotation of the avatar's default pose should be used.
+     *  @returns {Array<quat|null>} The joint rotations.
+     */
+    getJointRotations(): (quat | null)[] {
+        // C++  QVector<glm::quat> getJointRotations()
+        return this.#_jointRotations;
+    }
+
+    /*@devdoc
+     * Gets the translations of the joints relative to their parents, in model coordinates. If a translation is
+     * <code>null</code> then the translation of the avatar's default pose should be used.
+     * <p><strong>Warning:</strong> These coordinates are not necessarily in meters.</p>
+     *  @returns {Array<vec3|null>} The joint translations.
+     */
+    getJointTranslations(): (vec3 | null)[] {
+        // C++  QVector<glm::vec3> getJointTranslations()
+        return this.#_jointTranslations;
     }
 
 
@@ -546,13 +570,12 @@ class AvatarData extends SpatiallyNestable {
         if (avatarData.localOrientation) {
             if (!Quat.equal(avatarData.localOrientation, this.getLocalOrientation())) {
 
-                // WEBRTC TODO: Address further C++ code - Joint data.
+                // WEBRTC TODO: Address further C++ code - _hasNewJointData.
 
                 this.setLocalOrientation(avatarData.localOrientation);
             }
 
             // WEBRTC TODO: Address further C++ code - avatar orientation update rate.
-
         }
 
         if (avatarData.avatarScale) {
@@ -561,6 +584,22 @@ class AvatarData extends SpatiallyNestable {
 
                 // WEBRTC TODO: Address further C++ code - avatar scale rate and update rate.
             }
+        }
+
+        // WEBRTC TODO: Address further C++ code - further avatar properties.
+
+        if (avatarData.jointRotations) {
+            // Just use the reference to the joint data. This is OK because the avatarData value keeps being created.
+            this.#_jointRotations = avatarData.jointRotations;
+
+            // WEBRTC TODO: Address further C++ code - joint update rate.
+        }
+
+        if (avatarData.jointTranslations) {
+            // Just use the reference to the joint data. This is OK because the avatarData value keeps being created.
+            this.#_jointTranslations = avatarData.jointTranslations;
+
+            // WEBRTC TODO: Address further C++ code - joint update rate.
         }
 
         // WEBRTC TODO: Address further C++ code - further avatar properties.

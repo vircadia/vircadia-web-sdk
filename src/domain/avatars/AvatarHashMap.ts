@@ -200,7 +200,7 @@ class AvatarHashMap {
 
     /*@devdoc
      *  Processes a {@link PacketType(1)|BulkAvatarData} message that has been received.
-     *  @function AvatarHashMap.processAvatarDataBacket
+     *  @function AvatarHashMap.processAvatarDataPacket
      *  @type {Slot}
      *  @param {ReceivedMessage} receivedMessage - The received {@link PacketType(1)|BuilkAvatarData} message.
      *  @param {Node} sendingNode - The sending node.

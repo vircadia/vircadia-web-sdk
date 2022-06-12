@@ -56,6 +56,13 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *  @property {quat} orientation - The orientation of the avatar in the domain. {@link Quat|Quat.IDENTITY} if the avatar doesn't
  *      exist.
  *      <em>Read-only.</em>
+ *  @property {Array<quat|null>} jointRotations - The joint rotations relative to avatar space (i.e., not relative to parent
+ *      bones). If a rotation is <code>null</code> then the rotation of the avatar's default pose should be used.
+ *      <code>[]</code> if the avatar doesn't exist.
+ *  @property {Array<vec3|null>} jointTranslations - The bone translations relative to their parent joints. If a translation is
+ *      <code>null</code> then the translation of the avatar's default pose should be used.
+ *      <code>[]</code> if the avatar doesn't exist.<br />
+ *      <strong>Warning:</strong> The coordinate system is not necessarily meters.
  */
 // Don't document the constructor because it shouldn't be used in the SDK.
 class ScriptAvatar {
@@ -168,16 +175,6 @@ class ScriptAvatar {
         return [];
     }
 
-    get scale(): number {
-        if (this.#_avatarData) {
-            const avatar = this.#_avatarData.deref();
-            if (avatar) {
-                return avatar.getTargetScale();
-            }
-        }
-        return 0;
-    }
-
     /*@sdkdoc
      *  Triggered when the avatar's skeleton joints change.
      *  @callback ScriptAvatar~skeletonJointsChanged
@@ -193,11 +190,23 @@ class ScriptAvatar {
         return new SignalEmitter().signal();
     }
 
+    get scale(): number {
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                return avatar.getTargetScale();
+            }
+        }
+        return 0;
+    }
+
     get position(): vec3 {
         // C++  glm::vec3 ScriptAvatarData::getPosition()
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
+                // A reference to the internal value is returned but this is OK because the internal value will keep being
+                // recreated.
                 return avatar.getWorldPosition();
             }
         }
@@ -209,10 +218,42 @@ class ScriptAvatar {
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
+                // A reference to the internal value is returned but this is OK because the internal value will keep being
+                // recreated.
                 return avatar.getWorldOrientation();
             }
         }
         return Quat.IDENTITY;
+    }
+
+    get jointRotations(): (quat | null)[] {
+        // C++  QVector<glm::quat> ScriptAvatarData::getJointRotations()
+
+        // Should this return a copy or a reference?
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                // A reference to the internal value is returned but this is OK because the internal value will keep being
+                // recreated.
+                return avatar.getJointRotations();
+            }
+        }
+        return [];
+    }
+
+    get jointTranslations(): (vec3 | null)[] {
+        // C++  QVector<glm::vec3> ScriptAvatarData::getJointTranslations()
+
+        // Should this return a copy or a reference?
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                // A reference to the internal value is returned but this is OK because the internal value will keep being
+                // recreated.
+                return avatar.getJointTranslations();
+            }
+        }
+        return [];
     }
 
 }

@@ -25,7 +25,8 @@ type BulkAvatarDataDetails = {
     globalPosition: vec3 | undefined,
     localOrientation: quat | undefined,
     avatarScale: number | undefined,
-    jointData: JointData[] | undefined
+    jointRotations: (quat | null)[] | undefined,
+    jointTranslations: (vec3 | null)[] | undefined
 };
 
 type JointData = {
@@ -52,16 +53,15 @@ const BulkAvatarData = new class {
      *      <code>undefined</code> if not included in the packet.
      *  @property {number|undefined} avatarScale - The avatar's scale.
      *      <code>undefined</code> if not included in the packet.
-     */
-
-    /*@devdoc
-     *  Details of an avatar joint's rotation and translation.
-     *  @typedef {object} JointData
-     *  @property {quat|null} rotation - The joint rotation relative to avatar space (i.e., not relative to parent bone).
-     *      If <code>null</code> then the rotation of the avatar's default pose should be used.
-     *  @property {vec3|null} translation - The bone translation relative to its parent joint.
-     *      If <code>null</code> then the rotation of the avatar's default pose should be used.
-     *      Only valid if <code>translationIsDefaultPose</code> is <code>false</code>.
+     *  @property {Array<quat|null>|undefined}} jointRotations - The joint rotations relative to avatar space (i.e., not
+     *      relative to parent bones). If a rotation is <code>null</code> then the rotation of the avatar's default pose should
+     *      be used.
+     *      <code>undefined</code> if not included in the packet.
+     *  @property {Array<vec3|null>|undefined} jointTranslations - The bone translations relative to their parent joints in
+     *      model coordinates. If a translation is <code>null</code> then the translation of the avatar's default pose should be
+     *      used.
+     *      <code>undefined</code> if not included in the packet.<br />
+     *      <strong>Warning:</strong> The coordinate system is not necessarily meters.
      */
 
 
@@ -181,10 +181,11 @@ const BulkAvatarData = new class {
                 dataPosition += numBlendshapeCoefficients * 4;
             }
 
-            let jointData: JointData[] | undefined = undefined;
+            let jointRotations: (quat | null)[] | undefined = undefined;
+            let jointTranslations: (vec3 | null)[] | undefined = undefined;
             if (hasJointData) {
                 // WEBRTC TODO: Address further code - avatar joint data.
-                jointData = [];
+                jointRotations = [];
                 const numJoints = data.getUint8(dataPosition);
                 dataPosition += 1;
 
@@ -202,14 +203,11 @@ const BulkAvatarData = new class {
                     }
                 }
 
-                jointData = new Array(numJoints) as Array<JointData>;
+                jointRotations = new Array(numJoints) as Array<quat | null>;
                 for (let i = 0; i < numJoints; i++) {
-                    jointData[i] = {
-                        rotation: null,
-                        translation: null
-                    };
+                    jointRotations[i] = null;
                     if (validRotations[i]) {
-                        jointData[i]!.rotation = GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition);
+                        jointRotations[i] = GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition);
                         // WEBRTC TODO: Address further C++ code - _hasNewJointData.
                         dataPosition += 6;
                     }
@@ -232,17 +230,17 @@ const BulkAvatarData = new class {
                 const maxTranslationDimension = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
 
+                jointTranslations = new Array(numJoints) as Array<vec3 | null>;
                 for (let i = 0; i < numJoints; i++) {
+                    jointTranslations[i] = null;
                     if (validTranslations[i]) {
-                        jointData[i]!.translation = Vec3.multiply(maxTranslationDimension,
+                        jointTranslations[i] = Vec3.multiply(maxTranslationDimension,
                             GLMHelpers.unpackFloatVec3FromSignedTwoByteFixed(data, dataPosition,
                                 TRANSLATION_COMPRESSION_RADIX));
                         // WEBRTC TODO: Address further C++ code - _hasNewJointData.
                         dataPosition += 6;
                     }
                 }
-
-                // WEBRTC TODO: Address further C++ code - joint update rate.
 
                 if (hasGrabJoints) {
                     // WEBRTC TODO: Address further code - avatar grab joints.
@@ -266,7 +264,8 @@ const BulkAvatarData = new class {
                 globalPosition,
                 localOrientation,
                 avatarScale,
-                jointData
+                jointRotations,
+                jointTranslations
             });
 
         }
