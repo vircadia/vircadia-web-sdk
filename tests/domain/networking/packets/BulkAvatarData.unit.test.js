@@ -132,5 +132,54 @@ describe("BulkAvatarData - unit tests", () => {
         expect(bulkAvatarDetail.avatarScale).toBeCloseTo(1.48717, 5);
     });
 
+    test("Can read a BulkAvatarData message that has avatar joint data", () => {
+        // eslint-disable-next-line max-len
+        const RECEIVED_MESSAGE = "1c9ab1d95001404cb71d790135624b1311305a81f1be9212ac3fbdac98c04150be46f67b16409a41abc65800708cffffffffffffffffbe4bb90d41243917be423f8a3d29c6eb3e963911ba9c475b375cc2394746c303b9064034c3ccb75e3f45c221b5b23e83bea7bb9a4004bf70bb2540313cfa8f4041433cfa8f4041433aab8f6243ac3aab8f6243acbd7f0600421cbd7f0600421cbc050613451bbc050613451bc001bb1d4029c001bb1d4029c001bb1d4029c001bb1d40296260151f1492465d0f753a064264202c3a874351180941da26bc1eec452b3abc257344b64dee20913bd04dee20913bd039a5189e508b32231aa760cb2edd1f436f342edd1f436f3438601918550e328d1af662fb302b1fcf70a6302b1fcf70a63bbe18404cda32dd18ff59c231951df26a3731951df16a373bcd185145b936f11a0054d9319b1a865b5d319b1a865b5d6bb8eefe637e7dc5ca7c45223a9476ca37887a55c17d432958457caf35db46fa798c3a3535037e953b6d35037e953b6d7a45b2d2389e776fa5a42c4974339d4f1faf74339d4f1faf79e5aff234e57702a54129ff74069dea1de374069dea1de37a6eb6243b40782fa8ed32b2763aa1a7237d763aa1a7237d7acab8de41ee7a8aae9b35be78e5a740319c78e5a740319c02b0040000000000000000b8981344302c00401af5ceff780a57ffc2fef5ff00000000a60400003e01f5ff000058ff0f000000000000000000fd4ffbffffffffffffffff"
+        const MESSAGE_START = 0;
+
+        const arrayBuffer = new ArrayBuffer(RECEIVED_MESSAGE.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(RECEIVED_MESSAGE.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer, MESSAGE_START);
+
+        const bulkAvatarDetails = BulkAvatarData.read(dataView);
+        expect(bulkAvatarDetails).toHaveLength(1);
+
+        const bulkAvatarDetail = bulkAvatarDetails[0];
+        expect(bulkAvatarDetail.sessionUUID.stringify()).toBe("1c9ab1d9-5001-404c-b71d-790135624b13");
+
+        const jointData = bulkAvatarDetail.jointData;
+        expect(jointData).toHaveLength(88);
+
+        let joint = jointData[0];
+        expect(joint.rotation).toBeNull();
+        expect(joint.translation).toBeNull();
+
+        joint = jointData[1];
+        expect(joint.rotation).toBeNull();
+        expect(joint.translation.x).toBeCloseTo(407.620, 3);
+        expect(joint.translation.y).toBeCloseTo(590.386, 3);
+        expect(joint.translation.z).toBeCloseTo(-100.536, 3);
+
+        joint = jointData[12];
+        expect(joint.rotation.x).toBeCloseTo(-0.0188392, 6);
+        expect(joint.rotation.y).toBeCloseTo(-0.0767595, 6);
+        expect(joint.rotation.z).toBeCloseTo(0.0126243, 6);
+        expect(joint.rotation.w).toBeCloseTo(-0.996792, 6);
+        expect(joint.translation.x).toBeCloseTo(-1.80172, 3);
+        expect(joint.translation.y).toBeCloseTo(96.572, 3);
+        expect(joint.translation.z).toBeCloseTo(-6.0898, 3);
+
+        joint = jointData[87];
+        expect(joint.rotation.x).toBeCloseTo(0.628642, 6);
+        expect(joint.rotation.y).toBeCloseTo(-0.273438, 6);
+        expect(joint.rotation.z).toBeCloseTo(-0.710469, 6);
+        expect(joint.rotation.w).toBeCloseTo(-0.158979, 6);
+        expect(joint.translation).toBeNull();
+        joint = jointData[1];
+    });
+
     /* eslint-enable @typescript-eslint/no-magic-numbers */
 });

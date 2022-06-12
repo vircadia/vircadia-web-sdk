@@ -15,7 +15,7 @@ import AvatarDataPacket from "../../avatars/AvatarDataPacket";
 import assert from "../../shared/assert";
 import GLMHelpers from "../../shared/GLMHelpers";
 import { quat } from "../../shared/Quat";
-import { vec3 } from "../../shared/Vec3";
+import Vec3, { vec3 } from "../../shared/Vec3";
 
 import "../../shared/DataViewExtensions";
 
@@ -24,7 +24,16 @@ type BulkAvatarDataDetails = {
     sessionUUID: Uuid,
     globalPosition: vec3 | undefined,
     localOrientation: quat | undefined,
-    avatarScale: number | undefined
+    avatarScale: number | undefined,
+    jointData: JointData[] | undefined
+};
+
+type JointData = {
+    // C++  class JointData
+    // The Web SDK encodes the C++'s rotationIsDefaultPose and translationIsDefaultPose property values of false as null
+    // rotation and translation values in order to simplify creation and use of the data.
+    rotation: quat | null,
+    translation: vec3 | null
 };
 
 
@@ -45,6 +54,16 @@ const BulkAvatarData = new class {
      *      <code>undefined</code> if not included in the packet.
      */
 
+    /*@devdoc
+     *  Details of an avatar joint's rotation and translation.
+     *  @typedef {object} JointData
+     *  @property {quat|null} rotation - The joint rotation relative to avatar space (i.e., not relative to parent bone).
+     *      If <code>null</code> then the rotation of the avatar's default pose should be used.
+     *  @property {vec3|null} translation - The bone translation relative to its parent joint.
+     *      If <code>null</code> then the rotation of the avatar's default pose should be used.
+     *      Only valid if <code>translationIsDefaultPose</code> is <code>false</code>.
+     */
+
 
     /*@devdoc
      *  Reads a {@link PacketType(1)|BulkAvatarData} packet containing the details of one or more avatars, possibly including
@@ -57,6 +76,9 @@ const BulkAvatarData = new class {
         // C++  void AvatarHashMap::processAvatarDataPacket(ReceivedMessage* message, Node* sendingNode)
         //      AvatarData* AvatarHashMap::parseAvatarData(ReceivedMessage* message, node* sendingNode)
         //      int AvatarData::parseDataFromBuffer(const QByteArray& buffer)
+
+        const BITS_IN_BYTE = 8;
+        const TRANSLATION_COMPRESSION_RADIX = 14;
 
         const avatarDataDetailsList: BulkAvatarDataDetails[] = [];
 
@@ -159,40 +181,68 @@ const BulkAvatarData = new class {
                 dataPosition += numBlendshapeCoefficients * 4;
             }
 
+            let jointData: JointData[] | undefined = undefined;
             if (hasJointData) {
                 // WEBRTC TODO: Address further code - avatar joint data.
+                jointData = [];
                 const numJoints = data.getUint8(dataPosition);
                 dataPosition += 1;
 
-                const numRotationValidityBytes = Math.ceil(numJoints / 8);
-                let numValidRotations = 0;
-                for (let i = 0; i < numRotationValidityBytes; i++) {
-                    const rotationBits = data.getUint8(dataPosition);
-                    dataPosition += 1;
-                    let bit = 128;
-                    for (let j = 0; j < 8; j++) {
-                        if ((bit & rotationBits) > 0) {
-                            numValidRotations += 1;
+                const validRotations = new Array(numJoints) as Array<boolean>;
+                {
+                    let validity = 0;
+                    let validityBit = 0;
+                    for (let i = 0; i < numJoints; i++) {
+                        if (validityBit === 0) {
+                            validity = data.getUint8(dataPosition);
+                            dataPosition += 1;
                         }
-                        bit = bit >>> 1;
+                        validRotations[i] = (validity & 1 << validityBit) > 0;
+                        validityBit = (validityBit + 1) % BITS_IN_BYTE;
                     }
                 }
-                dataPosition += numValidRotations * 6;
 
-                const numTranslationValidityBytes = Math.ceil(numJoints / 8);
-                let numValidTranslations = 0;
-                for (let i = 0; i < numTranslationValidityBytes; i++) {
-                    const translationBits = data.getUint8(dataPosition);
-                    dataPosition += 1;
-                    let bit = 128;
-                    for (let j = 0; j < 8; j++) {
-                        if ((bit & translationBits) > 0) {
-                            numValidTranslations += 1;
-                        }
-                        bit = bit >>> 1;
+                jointData = new Array(numJoints) as Array<JointData>;
+                for (let i = 0; i < numJoints; i++) {
+                    jointData[i] = {
+                        rotation: null,
+                        translation: null
+                    };
+                    if (validRotations[i]) {
+                        jointData[i]!.rotation = GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition);
+                        // WEBRTC TODO: Address further C++ code - _hasNewJointData.
+                        dataPosition += 6;
                     }
                 }
-                dataPosition += 4 + numValidTranslations * 6;
+
+                const validTranslations = new Array(numJoints) as Array<boolean>;
+                {
+                    let validity = 0;
+                    let validityBit = 0;
+                    for (let i = 0; i < numJoints; i++) {
+                        if (validityBit === 0) {
+                            validity = data.getUint8(dataPosition);
+                            dataPosition += 1;
+                        }
+                        validTranslations[i] = (validity & 1 << validityBit) > 0;
+                        validityBit = (validityBit + 1) % BITS_IN_BYTE;
+                    }
+                }
+
+                const maxTranslationDimension = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+
+                for (let i = 0; i < numJoints; i++) {
+                    if (validTranslations[i]) {
+                        jointData[i]!.translation = Vec3.multiply(maxTranslationDimension,
+                            GLMHelpers.unpackFloatVec3FromSignedTwoByteFixed(data, dataPosition,
+                                TRANSLATION_COMPRESSION_RADIX));
+                        // WEBRTC TODO: Address further C++ code - _hasNewJointData.
+                        dataPosition += 6;
+                    }
+                }
+
+                // WEBRTC TODO: Address further C++ code - joint update rate.
 
                 if (hasGrabJoints) {
                     // WEBRTC TODO: Address further code - avatar grab joints.
@@ -215,7 +265,8 @@ const BulkAvatarData = new class {
                 sessionUUID,
                 globalPosition,
                 localOrientation,
-                avatarScale
+                avatarScale,
+                jointData
             });
 
         }
@@ -228,4 +279,4 @@ const BulkAvatarData = new class {
 }();
 
 export default BulkAvatarData;
-export type { BulkAvatarDataDetails };
+export type { BulkAvatarDataDetails, JointData };
