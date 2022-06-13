@@ -26,7 +26,9 @@ type BulkAvatarDataDetails = {
     localOrientation: quat | undefined,
     avatarScale: number | undefined,
     jointRotations: (quat | null)[] | undefined,
-    jointTranslations: (vec3 | null)[] | undefined
+    jointTranslations: (vec3 | null)[] | undefined,
+    jointRotationsUseDefault: boolean[] | undefined,
+    jointTranslationsUseDefault: boolean[] | undefined
 };
 
 type JointData = {
@@ -62,6 +64,12 @@ const BulkAvatarData = new class {
      *      used.
      *      <code>undefined</code> if not included in the packet.<br />
      *      <strong>Warning:</strong> The coordinate system is not necessarily meters.
+     *  @property {Array<boolean>|undefined} jointRotationsUseDefault - <code>true</code> if the skeleton's default joint
+     *      rotation should be used instead of the value (if any) in <code>jointRotations</code>.<br />
+     *      Note: Normally, a <code>true</code> value will match a <code>null</code> joint rotation value.
+     *  @property {Array<boolean>|undefined} jointTranslationsUseDefault - <code>true</code> if the skeleton's default joint
+     *      translation should be used instead of the value (if any) in <code>jointTranslations</code>.<br />
+     *      Note: Normally, a <code>true</code> value will match a <code>null</code> joint translation value.
      */
 
 
@@ -83,6 +91,9 @@ const BulkAvatarData = new class {
         const avatarDataDetailsList: BulkAvatarDataDetails[] = [];
 
         let dataPosition = 0;
+
+        //const DEBUG = false;
+        const DEBUG = true;
 
         while (dataPosition < data.byteLength) {
 
@@ -249,12 +260,70 @@ const BulkAvatarData = new class {
 
             }
 
+            let jointRotationsUseDefault: boolean[] | undefined = undefined;
+            let jointTranslationsUseDefault: boolean[] | undefined = undefined;
             if (hasJointDefaultPoseFlags) {
-                // WEBRTC TODO: Address further code - avatar joint default pose flags.
                 const numJoints = data.getUint8(dataPosition);
                 dataPosition += 1;
-                const numJointPoseBytes = Math.ceil(numJoints / 8);
-                dataPosition += 2 * numJointPoseBytes;
+
+                jointRotationsUseDefault = new Array(numJoints) as Array<boolean>;
+                {
+                    let validity = 0;
+                    let validityBit = 0;
+                    for (let i = 0; i < numJoints; i++) {
+                        if (validityBit === 0) {
+                            validity = data.getUint8(dataPosition);
+                            dataPosition += 1;
+                        }
+                        jointRotationsUseDefault[i] = (validity & 1 << validityBit) > 0;
+                        validityBit = (validityBit + 1) % BITS_IN_BYTE;
+                    }
+                }
+
+                jointTranslationsUseDefault = new Array(numJoints) as Array<boolean>;
+                {
+                    let validity = 0;
+                    let validityBit = 0;
+                    for (let i = 0; i < numJoints; i++) {
+                        if (validityBit === 0) {
+                            validity = data.getUint8(dataPosition);
+                            dataPosition += 1;
+                        }
+                        jointTranslationsUseDefault[i] = (validity & 1 << validityBit) > 0;
+                        validityBit = (validityBit + 1) % BITS_IN_BYTE;
+                    }
+                }
+
+                if (DEBUG && hasJointData) {
+                    // Check that a default flag value of true matches a null data value.
+                    // Code inspection of the C++ indicates that they should always match.
+
+                    if (jointRotations === undefined || jointTranslations === undefined) {
+                        console.warn("BulkAvatarData: hasJointDefaultPoseFlags without hasjointData.");
+                    } else if (jointRotationsUseDefault.length !== jointRotations.length
+                            || jointTranslationsUseDefault.length !== jointTranslations.length) {
+                        console.warn("BulkAvatarData: jointDefaultPoseFlags length != jointData length.");
+                    } else {
+                        let isDataConsistent = true;
+                        for (let i = 0; i < numJoints; i++) {
+                            isDataConsistent = isDataConsistent
+                                && (!jointRotationsUseDefault[i] || jointRotations[i] === null)
+                                && (!jointTranslationsUseDefault[i] || jointTranslations[i] === null);
+                            /*
+                            if (!((!jointRotationsUseDefault[i] || jointRotations[i] === null)
+                                && (!jointTranslationsUseDefault[i] || jointTranslations[i] === null))) {
+                                console.debug("Inconsistent hasJointDefaultPoseFlags data at:", i);
+                                console.debug("- Rotation flag, value:", jointRotationsUseDefault[i], jointRotations[i]);
+                                console.debug("- Translation flag, value:", jointTranslationsUseDefault[i],
+                                    jointTranslations[i]);
+                            }
+                            */
+                        }
+                        if (!isDataConsistent) {
+                            console.warn("BulkAvatarData: jointDefaultPoseFlags data inconsistent with jointData.");
+                        }
+                    }
+                }
             }
 
             /* eslint-enable @typescript-eslint/no-magic-numbers */
@@ -265,7 +334,9 @@ const BulkAvatarData = new class {
                 localOrientation,
                 avatarScale,
                 jointRotations,
-                jointTranslations
+                jointTranslations,
+                jointRotationsUseDefault,
+                jointTranslationsUseDefault
             });
 
         }
