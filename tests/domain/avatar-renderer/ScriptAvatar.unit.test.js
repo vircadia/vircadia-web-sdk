@@ -27,6 +27,7 @@ describe("ScriptAvatar - unit tests", () => {
 
     test("A ScriptAvatar created from a null ID is invalid", () => {
         const scriptAvatar = new ScriptAvatar(null);
+
         // Null property values.
         expect(scriptAvatar.isValid).toBe(false);
         expect(scriptAvatar.displayName).toBe("");
@@ -36,7 +37,12 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.scale).toEqual(0.0);
         expect(scriptAvatar.position).toEqual(Vec3.ZERO);
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
-        // Can still access signals.
+        expect(scriptAvatar.jointRotations).toEqual([]);
+        expect(scriptAvatar.jointTranslations).toEqual([]);
+        expect(scriptAvatar.jointRotationsUseDefault).toEqual([]);
+        expect(scriptAvatar.jointTranslationsUseDefault).toEqual([]);
+
+        // Can access signals.
         expect(typeof scriptAvatar.displayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.displayNameChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.connect).toBe("function");
@@ -55,6 +61,7 @@ describe("ScriptAvatar - unit tests", () => {
         ContextManager.set(contextID, AvatarManager, contextID);
         const avatarManager = ContextManager.get(contextID, AvatarManager);
         const scriptAvatar = new ScriptAvatar(avatarManager.getAvatarBySessionID(new Uuid(1234n)));
+
         // Null property values.
         expect(scriptAvatar.isValid).toBe(false);
         expect(scriptAvatar.displayName).toBe("");
@@ -64,7 +71,12 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.scale).toEqual(0.0);
         expect(scriptAvatar.position).toEqual(Vec3.ZERO);
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
-        // Can still access signals.
+        expect(scriptAvatar.jointRotations).toEqual([]);
+        expect(scriptAvatar.jointTranslations).toEqual([]);
+        expect(scriptAvatar.jointRotationsUseDefault).toEqual([]);
+        expect(scriptAvatar.jointTranslationsUseDefault).toEqual([]);
+
+        // Can access signals.
         expect(typeof scriptAvatar.displayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.displayNameChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.connect).toBe("function");

@@ -234,6 +234,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const SKELETON_MODEL_URL_INDEX = 6;
         const SKELETON_SCALE_INDEX = 7;
         const SKELETON_JOINTS_COUNT_INDEX = 8;
+        const HEAD_PITCH_INDEX = 9;
 
         const RAD_TO_DEG = 180.0 / Math.PI;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
@@ -333,7 +334,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         const avatarListBody = document.querySelector("#avatarList > tbody");
 
-        const avatars = new Map();  // <sessionID, { avatar, tr }>
+        const avatars = new Map();  // <sessionID, { avatar, tr, headJoint }>
 
         function onAvatarAdded(sessionID) {
 
@@ -374,19 +375,29 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             td = document.createElement("td");
             td.className = "number";
             tr.appendChild(td);
+            td = document.createElement("td");
+            td.className = "number";
+            tr.appendChild(td);
             avatarListBody.appendChild(tr);
-
-            avatars.set(sessionID, { avatar, tr });
 
             avatar.sessionDisplayNameChanged.connect(() => {
                 tr.childNodes[SESSION_DISPLAY_NAME_INDEX].innerHTML = avatar.sessionDisplayName;
             });
             avatar.skeletonModelURLChanged.connect(() => {
-                tr.childNodes[SKELETON_MODEL_URL_INDEX].innerHTML = avatar.skeletonModelURL;
+                tr.childNodes[SKELETON_MODEL_URL_INDEX].innerHTML
+                    = avatar.skeletonModelURL.slice(avatar.skeletonModelURL.lastIndexOf("/") + 1);
             });
+            let headJoint = null;
             avatar.skeletonJointsChanged.connect(() => {
                 tr.childNodes[SKELETON_JOINTS_COUNT_INDEX].innerHTML = avatar.skeletonJoints.length;
+                const headJointData = avatar.skeletonJoints.find((value) => {
+                    return value.jointName === "Head";
+                });
+                headJoint = headJointData !== undefined ? headJointData.jointIndex : null;
+                avatars.get(sessionID).headJoint = headJoint;
             });
+
+            avatars.set(sessionID, { avatar, tr, headJoint });
         }
         avatarMixer.avatarList.avatarAdded.connect(onAvatarAdded);
 
@@ -415,6 +426,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                 value.tr.childNodes[Z_INDEX].innerHTML = position.z.toFixed(POS_DECIMAL_PLACES);
                 value.tr.childNodes[YAW_INDEX].innerHTML = quatToYaw(value.avatar.orientation).toFixed(YAW_DECIMAL_PLACES);
                 value.tr.childNodes[SKELETON_SCALE_INDEX].innerHTML = value.avatar.scale.toFixed(1);
+                value.tr.childNodes[HEAD_PITCH_INDEX].innerHTML
+                    = value.headJoint !== null && value.avatar.jointRotations[value.headJoint] !== null
+                        ? (value.avatar.jointRotations[value.headJoint].x * RAD_TO_DEG).toFixed(1)
+                        : "";
             }
         };
 

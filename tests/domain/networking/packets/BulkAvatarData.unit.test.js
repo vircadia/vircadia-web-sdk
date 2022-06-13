@@ -132,5 +132,98 @@ describe("BulkAvatarData - unit tests", () => {
         expect(bulkAvatarDetail.avatarScale).toBeCloseTo(1.48717, 5);
     });
 
+    test("Can read a BulkAvatarData message that has avatar joint data", () => {
+        // eslint-disable-next-line max-len
+        const RECEIVED_MESSAGE = "1c9ab1d95001404cb71d790135624b1311305a81f1be9212ac3fbdac98c04150be46f67b16409a41abc65800708cffffffffffffffffbe4bb90d41243917be423f8a3d29c6eb3e963911ba9c475b375cc2394746c303b9064034c3ccb75e3f45c221b5b23e83bea7bb9a4004bf70bb2540313cfa8f4041433cfa8f4041433aab8f6243ac3aab8f6243acbd7f0600421cbd7f0600421cbc050613451bbc050613451bc001bb1d4029c001bb1d4029c001bb1d4029c001bb1d40296260151f1492465d0f753a064264202c3a874351180941da26bc1eec452b3abc257344b64dee20913bd04dee20913bd039a5189e508b32231aa760cb2edd1f436f342edd1f436f3438601918550e328d1af662fb302b1fcf70a6302b1fcf70a63bbe18404cda32dd18ff59c231951df26a3731951df16a373bcd185145b936f11a0054d9319b1a865b5d319b1a865b5d6bb8eefe637e7dc5ca7c45223a9476ca37887a55c17d432958457caf35db46fa798c3a3535037e953b6d35037e953b6d7a45b2d2389e776fa5a42c4974339d4f1faf74339d4f1faf79e5aff234e57702a54129ff74069dea1de374069dea1de37a6eb6243b40782fa8ed32b2763aa1a7237d763aa1a7237d7acab8de41ee7a8aae9b35be78e5a740319c78e5a740319c02b0040000000000000000b8981344302c00401af5ceff780a57ffc2fef5ff00000000a60400003e01f5ff000058ff0f000000000000000000fd4ffbffffffffffffffff";
+        const MESSAGE_START = 0;
+
+        const arrayBuffer = new ArrayBuffer(RECEIVED_MESSAGE.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(RECEIVED_MESSAGE.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer, MESSAGE_START);
+
+        const bulkAvatarDetails = BulkAvatarData.read(dataView);
+        expect(bulkAvatarDetails).toHaveLength(1);
+
+        const bulkAvatarDetail = bulkAvatarDetails[0];
+        expect(bulkAvatarDetail.sessionUUID.stringify()).toBe("1c9ab1d9-5001-404c-b71d-790135624b13");
+
+        const jointRotations = bulkAvatarDetail.jointRotations;
+        expect(jointRotations).toHaveLength(88);
+        const jointTranslations = bulkAvatarDetail.jointTranslations;
+        expect(jointTranslations).toHaveLength(88);
+
+        expect(jointRotations[0]).toBeNull();
+        expect(jointTranslations[0]).toBeNull();
+
+        expect(jointRotations[1]).toBeNull();
+        expect(jointTranslations[1].x).toBeCloseTo(407.620, 3);
+        expect(jointTranslations[1].y).toBeCloseTo(590.386, 3);
+        expect(jointTranslations[1].z).toBeCloseTo(-100.536, 3);
+
+        expect(jointRotations[12].x).toBeCloseTo(-0.0188392, 6);
+        expect(jointRotations[12].y).toBeCloseTo(-0.0767595, 6);
+        expect(jointRotations[12].z).toBeCloseTo(0.0126243, 6);
+        expect(jointRotations[12].w).toBeCloseTo(-0.996792, 6);
+        expect(jointTranslations[12].x).toBeCloseTo(-1.80172, 3);
+        expect(jointTranslations[12].y).toBeCloseTo(96.572, 3);
+        expect(jointTranslations[12].z).toBeCloseTo(-6.0898, 3);
+
+        expect(jointRotations[87].x).toBeCloseTo(0.628642, 6);
+        expect(jointRotations[87].y).toBeCloseTo(-0.273438, 6);
+        expect(jointRotations[87].z).toBeCloseTo(-0.710469, 6);
+        expect(jointRotations[87].w).toBeCloseTo(-0.158979, 6);
+        expect(jointTranslations[87]).toBeNull();
+    });
+
+    test("Can read a BulkAvatarData message that has joint default flags", () => {
+
+        // eslint-disable-next-line max-len
+        const RECEIVED_MESSAGE = "7cd12a580e0d45b6a1e6aad6ab0c84bfff31e292abbf89a6ac3f967a15c06b9d8e3e7dfd823f6b9d8e3ec0f0f33b1035cfbdf0c2e83cbfff3fff2ccf7212d12951c6d38a0d4099a6e94600bfff3fff2ccfb805e392abbf80ba47be777a15c0f00400000000000000000000000000000000ffff5800f0ffffffffffffffffffa267c0ce40043e55db873899462ce6cc36544d5ed4ed337f475dafcb2ee5475dafcb2ee543b6d91648993631eaa44b1f2ed0c9c44a363431a4f950893431a4f95089a9bdbf2d408dab3dbedc409cacbfbe8940abb75dc0053f60c546c0433e5f42558a78401642558a7840163fde8a6b42583fde8a6b4258c2400a883f61c2400a883f61c0950a954246c0950a954246c546c0433e5fc546c0433e5fc546c0433e5fc546c0433e5fee5c6aa25aa8034cd77e445156220d7d489d510a1f0c524438972dde56dc358e315e5945430535985d0d430535985d0d4f2d1d645eb94bec1c636b7948341b6d72f948341b6d72f951c41d3960404bdf1a9f6c34468419cb799c468419cb799c50a71d9a5b3f4db61c206a4548a11af6745648a11af6745653641f13564d511a1d796096514a1d7b6177514a1d7b61770e02639d20df25b2763a4b9429e677a047a52ce97ac34c8b42d171f052144881754a4d9b3f20730954713f20730954717ad1ceae213874bcc62d16c46cf6bd710c926cf6bd710c927926d310216c737dc97b18bb6b2ac0660d7b6b2ac0660d7b2f837bca5a7a748dc6e616ff6dfdbdfa0f346dfdbdfa0f342a2e7aab52ed7767c9ec1c497465c6a917277465c6a9172702b0040000000000000000b8981344302c00401af52500f80991fbc2fef5ff00000000a60400003e01f5ff000058ff0f000000000000000000fd4ffbffffffffffffffff";
+        const MESSAGE_START = 0;
+
+        const arrayBuffer = new ArrayBuffer(RECEIVED_MESSAGE.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(RECEIVED_MESSAGE.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer, MESSAGE_START);
+
+        const bulkAvatarDetails = BulkAvatarData.read(dataView);
+        expect(bulkAvatarDetails).toHaveLength(1);
+
+        const bulkAvatarDetail = bulkAvatarDetails[0];
+        expect(bulkAvatarDetail.sessionUUID.stringify()).toBe("7cd12a58-0e0d-45b6-a1e6-aad6ab0c84bf");
+
+        const jointRotations = bulkAvatarDetail.jointRotations;
+        expect(jointRotations).toHaveLength(88);
+
+        const jointRotationsUseDefault = bulkAvatarDetail.jointRotationsUseDefault;
+        expect(jointRotationsUseDefault).toHaveLength(88);
+        expect(jointRotationsUseDefault[0]).toEqual(true);
+        expect(jointRotationsUseDefault[1]).toEqual(true);
+        expect(jointRotationsUseDefault[1]).toEqual(true);
+        expect(jointRotationsUseDefault[11]).toEqual(true);
+        expect(jointRotationsUseDefault[12]).toEqual(false);
+        expect(jointRotationsUseDefault[13]).toEqual(false);
+        expect(jointRotationsUseDefault[14]).toEqual(false);
+        expect(jointRotationsUseDefault[15]).toEqual(false);
+        expect(jointRotationsUseDefault[87]).toEqual(false);
+
+        const jointTranslationsUseDefault = bulkAvatarDetail.jointTranslationsUseDefault;
+        expect(jointTranslationsUseDefault).toHaveLength(88);
+        expect(jointTranslationsUseDefault[0]).toEqual(true);
+        expect(jointTranslationsUseDefault[1]).toEqual(false);
+        expect(jointTranslationsUseDefault[2]).toEqual(true);
+        expect(jointTranslationsUseDefault[11]).toEqual(true);
+        expect(jointTranslationsUseDefault[12]).toEqual(false);
+        expect(jointTranslationsUseDefault[13]).toEqual(false);
+        expect(jointTranslationsUseDefault[14]).toEqual(true);
+        expect(jointTranslationsUseDefault[15]).toEqual(false);
+        expect(jointTranslationsUseDefault[87]).toEqual(true);
+    });
+
     /* eslint-enable @typescript-eslint/no-magic-numbers */
 });
