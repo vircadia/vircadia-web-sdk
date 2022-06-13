@@ -137,6 +137,8 @@ class AvatarData extends SpatiallyNestable {
     #_targetScale = 1.0;
     #_jointRotations: (quat | null)[] = [];
     #_jointTranslations: (vec3 | null)[] = [];
+    #_jointRotationsUseDefault: boolean[] = [];
+    #_jointTranslationsUseDefault: boolean[] = [];
 
     #_sequenceNumber = 0;  // Avatar data sequence number is a uint16 value.
     readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
@@ -321,6 +323,26 @@ class AvatarData extends SpatiallyNestable {
     getJointTranslations(): (vec3 | null)[] {
         // C++  QVector<glm::vec3> getJointTranslations()
         return this.#_jointTranslations;
+    }
+
+    /*@devdoc
+     *  Gets whether the rotations of the avatar's default pose should be used instead of given joint rotations, if any.
+     *  @returns {Array<boolean>} <code>true</code> if the rotation of the avatar's default pose should be used instead of a
+     *      given joint rotation, if any; <code>false</code> if the given joint rotation should be used, if any.
+     */
+    getJointRotationsUseDefault(): boolean[] {
+        // C++  N/A
+        return this.#_jointRotationsUseDefault;
+    }
+
+    /*@devdoc
+     *  Gets whether the translations of the avatar's default pose should be used instead of given joint translations, if any.
+     *  @returns {Array<boolean>} <code>true</code> if the translation of the avatar's default pose should be used instead of a
+     *      given joint rotation, if any; <code>false</code> if the given joint translation should be used, if any.
+     */
+    getJointTranslationsUseDefault(): boolean[] {
+        // C++  N/A
+        return this.#_jointTranslationsUseDefault;
     }
 
 
@@ -595,11 +617,19 @@ class AvatarData extends SpatiallyNestable {
             // WEBRTC TODO: Address further C++ code - joint update rate.
         }
 
+        if (avatarData.jointRotationsUseDefault) {
+            this.#_jointRotationsUseDefault = avatarData.jointRotationsUseDefault;
+        }
+
         if (avatarData.jointTranslations) {
             // Just use the reference to the joint data. This is OK because the avatarData value keeps being created.
             this.#_jointTranslations = avatarData.jointTranslations;
 
             // WEBRTC TODO: Address further C++ code - joint update rate.
+        }
+
+        if (avatarData.jointTranslationsUseDefault) {
+            this.#_jointTranslationsUseDefault = avatarData.jointTranslationsUseDefault;
         }
 
         // WEBRTC TODO: Address further C++ code - further avatar properties.

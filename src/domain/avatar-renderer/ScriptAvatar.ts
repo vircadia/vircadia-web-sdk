@@ -63,6 +63,14 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *      <code>null</code> then the translation of the avatar's default pose should be used.
  *      <code>[]</code> if the avatar doesn't exist.<br />
  *      <strong>Warning:</strong> The coordinate system is not necessarily meters.
+ *  @property {Array<boolean>} jointRotationsUseDefault - <code>true</code> if the skeleton's default joint rotation should be
+ *      used instead of the value (if any) in <code>jointRotations</code>.<br />
+ *      Note: Normally, a <code>true</code> value will match a <code>null</code> joint rotation value.
+ *      <code>[]</code> if the avatar doesn't exist.
+ *  @property {Array<boolean>} jointTranslationsUseDefault - <code>true</code> if the skeleton's default joint translation
+ *      should be used instead of the value (if any) in <code>jointTranslations</code>.<br />
+ *      Note: Normally, a <code>true</code> value will match a <code>null</code> joint translation value.
+ *      <code>[]</code> if the avatar doesn't exist.
  */
 // Don't document the constructor because it shouldn't be used in the SDK.
 class ScriptAvatar {
@@ -229,7 +237,6 @@ class ScriptAvatar {
     get jointRotations(): (quat | null)[] {
         // C++  QVector<glm::quat> ScriptAvatarData::getJointRotations()
 
-        // Should this return a copy or a reference?
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
@@ -244,13 +251,40 @@ class ScriptAvatar {
     get jointTranslations(): (vec3 | null)[] {
         // C++  QVector<glm::vec3> ScriptAvatarData::getJointTranslations()
 
-        // Should this return a copy or a reference?
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
                 // A reference to the internal value is returned but this is OK because the internal value will keep being
                 // recreated.
                 return avatar.getJointTranslations();
+            }
+        }
+        return [];
+    }
+
+    get jointRotationsUseDefault(): boolean[] {
+        // C++  N/A
+
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                // A reference to the internal value is returned but this is OK because the internal value will keep being
+                // recreated.
+                return avatar.getJointRotationsUseDefault();
+            }
+        }
+        return [];
+    }
+
+    get jointTranslationsUseDefault(): boolean[] {
+        // C++  N/A
+
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                // A reference to the internal value is returned but this is OK because the internal value will keep being
+                // recreated.
+                return avatar.getJointTranslationsUseDefault();
             }
         }
         return [];

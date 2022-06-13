@@ -27,6 +27,7 @@ describe("ScriptAvatar - unit tests", () => {
 
     test("A ScriptAvatar created from a null ID is invalid", () => {
         const scriptAvatar = new ScriptAvatar(null);
+
         // Null property values.
         expect(scriptAvatar.isValid).toBe(false);
         expect(scriptAvatar.displayName).toBe("");
@@ -38,7 +39,10 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
         expect(scriptAvatar.jointRotations).toEqual([]);
         expect(scriptAvatar.jointTranslations).toEqual([]);
-        // Can still access signals.
+        expect(scriptAvatar.jointRotationsUseDefault).toEqual([]);
+        expect(scriptAvatar.jointTranslationsUseDefault).toEqual([]);
+
+        // Can access signals.
         expect(typeof scriptAvatar.displayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.displayNameChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.connect).toBe("function");
@@ -69,6 +73,8 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
         expect(scriptAvatar.jointRotations).toEqual([]);
         expect(scriptAvatar.jointTranslations).toEqual([]);
+        expect(scriptAvatar.jointRotationsUseDefault).toEqual([]);
+        expect(scriptAvatar.jointTranslationsUseDefault).toEqual([]);
 
         // Can access signals.
         expect(typeof scriptAvatar.displayNameChanged.connect).toBe("function");

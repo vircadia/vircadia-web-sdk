@@ -92,7 +92,6 @@ const BulkAvatarData = new class {
 
         let dataPosition = 0;
 
-        //const DEBUG = false;
         const DEBUG = true;
 
         while (dataPosition < data.byteLength) {
