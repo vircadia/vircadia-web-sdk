@@ -34,7 +34,7 @@ class ByteCountCoded {
         * Advance through the lead bits (contiguous 1s starting from the left) until the first non lead bit is found (first 0
         * encountered).
         * Compute the position of the last bit.
-        * Continue iterating through the next bits and add the current bitValue to data when if a bit is set.
+        * Continue iterating through the next bits and add the current bitValue to data when a bit is set.
         * Double the current bitValue during each iteration, bitValue starting at 1.
         * Stop after we processed the lead bits AND we processed the last bit (at the position denoted by lastValueBit).
         *
