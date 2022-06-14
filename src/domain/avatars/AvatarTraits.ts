@@ -100,7 +100,7 @@ const AvatarTraits = new class {
      *  @typedef {object} SkeletonJoint
      *  @property {string} jointName - The joint name.
      *  @property {number} jointIndex - The joint index.
-     *  @property {number} parentIndex - The joint's parent, or <code>-1</code> if there is no parent.
+     *  @property {number} parentIndex - The joint's parent, or <code>65535</code> or <code>-1</code> if there is no parent.
      *  @property {BoneType} boneType - The type of bone.
      *  @property {vec3} defaultTranslation - The default joint translation.
      *  @property {quat} defaultRotation - The default joint rotation.
