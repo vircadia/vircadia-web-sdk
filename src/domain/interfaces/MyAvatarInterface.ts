@@ -35,7 +35,7 @@ import AvatarManager from "../AvatarManager";
  *      model URL changes.
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
- *  @property {SkeletonJoint[]|null} skeleton - Information on the avatar's skeleton. <code>mull</code> if the avatar doesn't
+ *  @property {SkeletonJoint[]|null} skeleton - Information on the avatar's skeleton. <code>null</code> if the avatar doesn't
  *      exist.
  *  @property {Signal<MyAvatarInterface~skeletonChanged>} skeletonChanged - Triggered when the avatar's skeleton changes.
  */
