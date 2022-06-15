@@ -3,16 +3,18 @@
 //
 //  Created by David Rowe on 31 Oct 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import AvatarManager from "../AvatarManager";
+import { SkeletonJoint } from "../avatars/AvatarTraits";
 import ContextManager from "../shared/ContextManager";
 import Quat, { quat } from "../shared/Quat";
 import { Signal } from "../shared/SignalEmitter";
 import Vec3, { vec3 } from "../shared/Vec3";
+import AvatarManager from "../AvatarManager";
 
 
 /*@sdkdoc
@@ -33,6 +35,10 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *      model URL changes.
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
+ *  @property {SkeletonJoint[]|null} skeletonJoints - Information on the avatar skeleton's joints. <code>mull</code> if the
+ *      avatar doesn't exist.
+ *  @property {Signal<MyAvatarInterface~skeletonJointsChanged>} skeletonJointsChanged - Triggered when the avatar's skeleton
+ *      joints change.
  */
 // Don't document the constructor because it shouldn't be used in the SDK.
 class MyAvatarInterface {
@@ -100,6 +106,51 @@ class MyAvatarInterface {
      */
     get skeletonModelURLChanged(): Signal {
         return this.#_avatarManager.getMyAvatar().skeletonModelURLChanged;
+    }
+
+    get skeletonJoints(): SkeletonJoint[] | null {
+        return this.#_avatarManager.getMyAvatar().skeletonJoints;
+    }
+
+    set skeletonJoints(skeletonJoints: SkeletonJoint[] | null) {
+        let isValidParam = skeletonJoints instanceof Array && skeletonJoints.length > 0 || skeletonJoints === null;
+        if (isValidParam && skeletonJoints !== null) {
+            let i = 0;
+            const length = skeletonJoints.length;
+            while (isValidParam && i < length) {
+                const skeletonJoint = skeletonJoints[i];
+                isValidParam = skeletonJoint !== undefined
+                    && skeletonJoint instanceof Object
+                    && Object.keys(skeletonJoint).length === 7  // eslint-disable-line @typescript-eslint/no-magic-numbers
+                    && typeof skeletonJoint.jointName === "string"
+                    && typeof skeletonJoint.jointIndex === "number"
+                    && typeof skeletonJoint.parentIndex === "number"
+                    && typeof skeletonJoint.boneType === "number"
+                    && Vec3.valid(skeletonJoint.defaultTranslation)
+                    && Quat.valid(skeletonJoint.defaultRotation)
+                    && typeof skeletonJoint.defaultScale === "number";
+                i += 1;
+            }
+        }
+        if (!isValidParam) {
+            const skeletonJointsString = JSON.stringify(skeletonJoints);
+            const MAX_STRING_LENGTH = 100;
+            console.error("[AvatarMixer] [MyAvatar] Tried to set invalid skeleton joints!",
+                skeletonJointsString.slice(0, MAX_STRING_LENGTH)
+                + (skeletonJointsString.length > MAX_STRING_LENGTH ? "..." : ""));
+            return;
+        }
+        this.#_avatarManager.getMyAvatar().skeletonJoints = skeletonJoints !== null
+            ? JSON.parse(JSON.stringify(skeletonJoints)) as SkeletonJoint[]
+            : null;
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's skeleton joints change.
+     *  @callback MyAvatarInterface~skeletonJointsChanged
+     */
+    get skeletonJointsChanged(): Signal {
+        return this.#_avatarManager.getMyAvatar().skeletonJointsChanged;
     }
 
     get position(): vec3 {

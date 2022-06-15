@@ -172,11 +172,11 @@ class ScriptAvatar {
         return new SignalEmitter().signal();
     }
 
-    get skeletonJoints(): SkeletonJoint[] {
+    get skeletonJoints(): SkeletonJoint[] | null {
         // C++  No direct equivalent.
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
-            if (avatar) {
+            if (avatar && avatar.skeletonJoints !== null) {
                 return avatar.skeletonJoints;
             }
         }
