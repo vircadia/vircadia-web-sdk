@@ -194,7 +194,6 @@ const BulkAvatarData = new class {
             let jointRotations: (quat | null)[] | undefined = undefined;
             let jointTranslations: (vec3 | null)[] | undefined = undefined;
             if (hasJointData) {
-                // WEBRTC TODO: Address further code - avatar joint data.
                 jointRotations = [];
                 const numJoints = data.getUint8(dataPosition);
                 dataPosition += 1;

@@ -152,9 +152,6 @@ const AvatarTraits = new class {
     readonly DEFAULT_TRAIT_VERSION = 0;
 
 
-    readonly #_TRANSLATION_COMPRESSION_RADIX = 14;
-
-
     /*@devdoc
      *  Checks whether a trait type value is a simple trait.
      *  @function AvatarTraits.isSimpleTrait
@@ -209,6 +206,7 @@ const AvatarTraits = new class {
     #unpackSkeletonData(data: DataView, startPosition: number): SkeletonJoint[] {
         // C++  void AvatarData::unpackSkeletonData(const QByteArray& data)
         //      Reading the data but not applying it to an avatar.
+        const TRANSLATION_COMPRESSION_RADIX = 14;
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
@@ -235,7 +233,7 @@ const AvatarTraits = new class {
             const boneType = data.getUint8(dataPosition);
             dataPosition += 1;
             let defaultTranslation = GLMHelpers.unpackFloatVec3FromSignedTwoByteFixed(data, dataPosition,
-                this.#_TRANSLATION_COMPRESSION_RADIX);
+                TRANSLATION_COMPRESSION_RADIX);
             dataPosition += 6;
             const defaultRotation = GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition);
             dataPosition += 6;
