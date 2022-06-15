@@ -42,11 +42,9 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *  @property {Signal<ScriptAvatar~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the skeleton model URL
  *      changes.
  *      <em>Read-only.</em>
- *  @property {SkeletonJoint[]} skeletonJoints - Information on the avatar skeleton's joints. <code>[]</code> if the avatar
- *      doesn't exist.
+ *  @property {SkeletonJoint[]} skeleton - Information on the avatar's skeleton. <code>[]</code> if the avatar doesn't exist.
  *      <em>Read-only.</em>
- *  @property {Signal<ScriptAvatar~skeletonJointsChanged>} skeletonJointsChanged - Triggered when information on the avatar's
- *      skeleton joints changes.
+ *  @property {Signal<ScriptAvatar~skeletonChanged>} skeletonChanged - Triggered when the avatar's skeleton changes.
  *      <em>Read-only.</em>
  *  @property {number} scale - The scale of the avatar. This includes any limits on permissible values imposed by the domain.
  *      <code>0.0</code> if the avatar doesn't exist.
@@ -172,27 +170,27 @@ class ScriptAvatar {
         return new SignalEmitter().signal();
     }
 
-    get skeletonJoints(): SkeletonJoint[] {
+    get skeleton(): SkeletonJoint[] | null {
         // C++  No direct equivalent.
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
-            if (avatar) {
-                return avatar.skeletonJoints;
+            if (avatar && avatar.skeleton !== null) {
+                return avatar.skeleton;
             }
         }
         return [];
     }
 
     /*@sdkdoc
-     *  Triggered when the avatar's skeleton joints change.
-     *  @callback ScriptAvatar~skeletonJointsChanged
+     *  Triggered when the avatar's skeleton changes.
+     *  @callback ScriptAvatar~skeletonChanged
      */
-    get skeletonJointsChanged(): Signal {
+    get skeletonChanged(): Signal {
         // C++  No direct equivalent.
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
-                return avatar.skeletonJointsChanged;
+                return avatar.skeletonChanged;
             }
         }
         return new SignalEmitter().signal();

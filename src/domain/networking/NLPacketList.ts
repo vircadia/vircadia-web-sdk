@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 4 Oct 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -83,6 +84,12 @@ class NLPacketList {
     #_uuidArray = new Uint8Array(this.#_uuidBuffer);
     #_uuidData = new DataView(this.#_uuidBuffer);
 
+    // Helpers for writing float values.
+    readonly #FLOAT_LENGTH = 4;
+    #_floatBuffer = new ArrayBuffer(this.#FLOAT_LENGTH);
+    #_floatArray = new Uint8Array(this.#_floatBuffer);
+    #_floatData = new DataView(this.#_floatBuffer);
+
 
     constructor(packetType: PacketTypeValue, extendedHeader: ArrayBuffer | null, isReliable: boolean, isOrdered: boolean) {
         // C++  PacketList(PacketType packetType, QByteArray extendedHeader = QByteArray(), bool isReliable = false,
@@ -148,6 +155,19 @@ class NLPacketList {
                 console.error("NLPacketList.writePrimitive() - Unhandled type:", typeof value);
                 return 0;
         }
+    }
+
+    /*@devdoc
+     *  Writes a float (4-byte real number) value to the current packet.
+     *  @param {number} value - The value to write.
+     *  @param {boolean|undefined} littleEndian=true - Whether to write the number in little- or big-endian format.
+     *  @returns {number} The number of bytes written.
+     */
+    writeFloat(value: number, littleEndian?: boolean): number {
+        // C++  N/A - Real number version of writePrimitive() needed because TypeScript doesn't distinguish number types.
+        const isLittleEndian = littleEndian === undefined || littleEndian;
+        this.#_floatData.setFloat32(0, value, isLittleEndian);
+        return this.#writeData(this.#_floatArray, this.#FLOAT_LENGTH);
     }
 
     /*@devdoc

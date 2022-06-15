@@ -100,10 +100,8 @@ enum BoneType {
  *  @property {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *  @property {Signal<AvatarData~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton model
  *      URL changes.
- *  @property {SkeletonJoint[]} skeletonJoints - Information on the avatar skeleton's joints.
- *      <em>Read-only.</em>
- *  @property {Signal<AvatarData~skeletonJointsChanged>} skeletonjointsChanged - Triggered when information on the avatar's
- *      skeleton joints changes.
+ *  @property {SkeletonJoint[]|null} skeleton - Information on the avatar's skeleton.
+ *  @property {Signal<AvatarData~skeletonChanged>} skeletonChanged - Triggered when the avatar's skeleton changes.
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
  */
@@ -131,8 +129,8 @@ class AvatarData extends SpatiallyNestable {
     #_isReplicated = false;
     #_skeletonModelURL: string | null = null;
     #_skeletonModelURLChanged = new SignalEmitter();
-    #_avatarSkeletonData: SkeletonJoint[] = [];
-    #_skeletonJointsChanged = new SignalEmitter();
+    #_avatarSkeletonData: SkeletonJoint[] | null = null;
+    #_skeletonChanged = new SignalEmitter();  // No C++ equivalent.
 
     #_targetScale = 1.0;
     #_jointRotations: (quat | null)[] = [];
@@ -202,16 +200,20 @@ class AvatarData extends SpatiallyNestable {
         return this.#_skeletonModelURLChanged.signal();
     }
 
-    get skeletonJoints(): SkeletonJoint[] {
+    get skeleton(): SkeletonJoint[] | null {
         return this.#_avatarSkeletonData;
+    }
+
+    set skeleton(skeleton: SkeletonJoint[] | null) {
+        this.setSkeletonData(skeleton);
     }
 
     /*@sdkdoc
      *  Triggered when the avatar's skeleton joints change.
-     *  @callback AvatarData~skeletonJointsChanged
+     *  @callback AvatarData~skeletonChanged
      */
-    get skeletonJointsChanged(): Signal {
-        return this.#_skeletonJointsChanged.signal();
+    get skeletonChanged(): Signal {
+        return this.#_skeletonChanged.signal();
     }
 
     get position(): vec3 {
@@ -650,9 +652,7 @@ class AvatarData extends SpatiallyNestable {
             this.setSkeletonModelURL(traitValue);
         } else {
             assert(traitType === AvatarTraits.SkeletonData);
-            if (this._clientTraitsHandler) {
-                this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonData);
-            }
+            // The trait is marked as updated in setSkeletonData().
             this.setSkeletonData(traitValue as SkeletonJoint[]);
         }
     }
@@ -730,10 +730,24 @@ class AvatarData extends SpatiallyNestable {
         return this.getParentID().value() !== Uuid.NULL;
     }
 
-    protected setSkeletonData(skeletonData: SkeletonJoint[]): void {
+    protected setSkeletonData(skeletonData: SkeletonJoint[] | null): void {
         // C++  void AvatarData::setSkeletonData(const std::vector<AvatarSkeletonTrait::UnpackedJointData>& skeletonData)
+
+        if (skeletonData === null || skeletonData.length === 0) {
+            console.log("[avatars] setSkeletonData() called with empty skeleton data.");
+        }
+
+        if (skeletonData === this.#_avatarSkeletonData) {
+            return;
+        }
+
+        // Need to call markTraitUpdated() here because there is no equivalent of C++'s Rig and sendSkeletonData().
+        if (this._clientTraitsHandler) {
+            this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonModelURL);
+        }
+
         this.#_avatarSkeletonData = skeletonData;
-        this.#_skeletonJointsChanged.emit();
+        this.#_skeletonChanged.emit();  // SDK-specific.
     }
 
 

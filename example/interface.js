@@ -388,9 +388,9 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                     = avatar.skeletonModelURL.slice(avatar.skeletonModelURL.lastIndexOf("/") + 1);
             });
             let headJoint = null;
-            avatar.skeletonJointsChanged.connect(() => {
-                tr.childNodes[SKELETON_JOINTS_COUNT_INDEX].innerHTML = avatar.skeletonJoints.length;
-                const headJointData = avatar.skeletonJoints.find((value) => {
+            avatar.skeletonChanged.connect(() => {
+                tr.childNodes[SKELETON_JOINTS_COUNT_INDEX].innerHTML = avatar.skeleton.length;
+                const headJointData = avatar.skeleton.find((value) => {
                     return value.jointName === "Head";
                 });
                 headJoint = headJointData !== undefined ? headJointData.jointIndex : null;
