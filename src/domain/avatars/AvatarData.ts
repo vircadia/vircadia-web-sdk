@@ -100,9 +100,8 @@ enum BoneType {
  *  @property {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *  @property {Signal<AvatarData~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton model
  *      URL changes.
- *  @property {SkeletonJoint[]|null} skeletonJoints - Information on the avatar skeleton's joints.
- *  @property {Signal<AvatarData~skeletonJointsChanged>} skeletonjointsChanged - Triggered when information on the avatar's
- *      skeleton joints changes.
+ *  @property {SkeletonJoint[]|null} skeleton - Information on the avatar's skeleton.
+ *  @property {Signal<AvatarData~skeletonChanged>} skeletonChanged - Triggered when the avatar's skeleton changes.
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
  */
@@ -131,7 +130,7 @@ class AvatarData extends SpatiallyNestable {
     #_skeletonModelURL: string | null = null;
     #_skeletonModelURLChanged = new SignalEmitter();
     #_avatarSkeletonData: SkeletonJoint[] | null = null;
-    #_skeletonJointsChanged = new SignalEmitter();  // No C++ equivalent.
+    #_skeletonChanged = new SignalEmitter();  // No C++ equivalent.
 
     #_targetScale = 1.0;
     #_jointRotations: (quat | null)[] = [];
@@ -201,20 +200,20 @@ class AvatarData extends SpatiallyNestable {
         return this.#_skeletonModelURLChanged.signal();
     }
 
-    get skeletonJoints(): SkeletonJoint[] | null {
+    get skeleton(): SkeletonJoint[] | null {
         return this.#_avatarSkeletonData;
     }
 
-    set skeletonJoints(skeletonJoints: SkeletonJoint[] | null) {
-        this.setSkeletonData(skeletonJoints);
+    set skeleton(skeleton: SkeletonJoint[] | null) {
+        this.setSkeletonData(skeleton);
     }
 
     /*@sdkdoc
      *  Triggered when the avatar's skeleton joints change.
-     *  @callback AvatarData~skeletonJointsChanged
+     *  @callback AvatarData~skeletonChanged
      */
-    get skeletonJointsChanged(): Signal {
-        return this.#_skeletonJointsChanged.signal();
+    get skeletonChanged(): Signal {
+        return this.#_skeletonChanged.signal();
     }
 
     get position(): vec3 {
@@ -748,7 +747,7 @@ class AvatarData extends SpatiallyNestable {
         }
 
         this.#_avatarSkeletonData = skeletonData;
-        this.#_skeletonJointsChanged.emit();  // SDK-specific.
+        this.#_skeletonChanged.emit();  // SDK-specific.
     }
 
 

@@ -30,8 +30,8 @@ describe("MyAvatarInterface - unit tests", () => {
         expect(typeof myAvatarInterface.sessionDisplayNameChanged.disconnect).toBe("function");
         expect(typeof myAvatarInterface.skeletonModelURLChanged.connect).toBe("function");
         expect(typeof myAvatarInterface.skeletonModelURLChanged.disconnect).toBe("function");
-        expect(typeof myAvatarInterface.skeletonJointsChanged.connect).toBe("function");
-        expect(typeof myAvatarInterface.skeletonJointsChanged.disconnect).toBe("function");
+        expect(typeof myAvatarInterface.skeletonChanged.connect).toBe("function");
+        expect(typeof myAvatarInterface.skeletonChanged.disconnect).toBe("function");
     });
 
 });

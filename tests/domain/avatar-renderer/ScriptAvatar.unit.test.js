@@ -33,7 +33,7 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
         expect(scriptAvatar.skeletonModelURL).toBe("");
-        expect(scriptAvatar.skeletonJoints).toEqual([]);
+        expect(scriptAvatar.skeleton).toEqual([]);
         expect(scriptAvatar.scale).toEqual(0.0);
         expect(scriptAvatar.position).toEqual(Vec3.ZERO);
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
@@ -49,8 +49,8 @@ describe("ScriptAvatar - unit tests", () => {
         expect(typeof scriptAvatar.sessionDisplayNameChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.skeletonModelURLChanged.connect).toBe("function");
         expect(typeof scriptAvatar.skeletonModelURLChanged.disconnect).toBe("function");
-        expect(typeof scriptAvatar.skeletonJointsChanged.connect).toBe("function");
-        expect(typeof scriptAvatar.skeletonJointsChanged.disconnect).toBe("function");
+        expect(typeof scriptAvatar.skeletonChanged.connect).toBe("function");
+        expect(typeof scriptAvatar.skeletonChanged.disconnect).toBe("function");
     });
 
     test("A ScriptAvatar created from an invalid session ID is invalid", () => {
@@ -67,7 +67,7 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
         expect(scriptAvatar.skeletonModelURL).toBe("");
-        expect(scriptAvatar.skeletonJoints).toEqual([]);
+        expect(scriptAvatar.skeleton).toEqual([]);
         expect(scriptAvatar.scale).toEqual(0.0);
         expect(scriptAvatar.position).toEqual(Vec3.ZERO);
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
@@ -83,8 +83,8 @@ describe("ScriptAvatar - unit tests", () => {
         expect(typeof scriptAvatar.sessionDisplayNameChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.skeletonModelURLChanged.connect).toBe("function");
         expect(typeof scriptAvatar.skeletonModelURLChanged.disconnect).toBe("function");
-        expect(typeof scriptAvatar.skeletonJointsChanged.connect).toBe("function");
-        expect(typeof scriptAvatar.skeletonJointsChanged.disconnect).toBe("function");
+        expect(typeof scriptAvatar.skeletonChanged.connect).toBe("function");
+        expect(typeof scriptAvatar.skeletonChanged.disconnect).toBe("function");
 
         log.mockReset();
     });

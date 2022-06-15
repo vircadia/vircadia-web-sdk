@@ -158,7 +158,7 @@ class ClientTraitsHandler {
             const packetList = PacketScribe.SetAvatarTraits.write({
                 currentTraitVersion: this.#_currentTraitVersion,
                 skeletonModelURL: this.#_owningAvatar.skeletonModelURL !== null ? this.#_owningAvatar.skeletonModelURL : "",
-                skeletonData: this.#_owningAvatar.skeletonJoints !== null ? this.#_owningAvatar.skeletonJoints : [],
+                skeletonData: this.#_owningAvatar.skeleton !== null ? this.#_owningAvatar.skeleton : [],
                 traitStatuses: traitStatusCopy,
                 initialSend
             });

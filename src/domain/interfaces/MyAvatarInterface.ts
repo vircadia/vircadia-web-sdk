@@ -35,10 +35,9 @@ import AvatarManager from "../AvatarManager";
  *      model URL changes.
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
- *  @property {SkeletonJoint[]|null} skeletonJoints - Information on the avatar skeleton's joints. <code>mull</code> if the
- *      avatar doesn't exist.
- *  @property {Signal<MyAvatarInterface~skeletonJointsChanged>} skeletonJointsChanged - Triggered when the avatar's skeleton
- *      joints change.
+ *  @property {SkeletonJoint[]|null} skeleton - Information on the avatar's skeleton. <code>mull</code> if the avatar doesn't
+ *      exist.
+ *  @property {Signal<MyAvatarInterface~skeletonChanged>} skeletonChanged - Triggered when the avatar's skeleton changes.
  */
 // Don't document the constructor because it shouldn't be used in the SDK.
 class MyAvatarInterface {
@@ -108,17 +107,17 @@ class MyAvatarInterface {
         return this.#_avatarManager.getMyAvatar().skeletonModelURLChanged;
     }
 
-    get skeletonJoints(): SkeletonJoint[] | null {
-        return this.#_avatarManager.getMyAvatar().skeletonJoints;
+    get skeleton(): SkeletonJoint[] | null {
+        return this.#_avatarManager.getMyAvatar().skeleton;
     }
 
-    set skeletonJoints(skeletonJoints: SkeletonJoint[] | null) {
-        let isValidParam = skeletonJoints instanceof Array && skeletonJoints.length > 0 || skeletonJoints === null;
-        if (isValidParam && skeletonJoints !== null) {
+    set skeleton(skeleton: SkeletonJoint[] | null) {
+        let isValidParam = skeleton instanceof Array && skeleton.length > 0 || skeleton === null;
+        if (isValidParam && skeleton !== null) {
             let i = 0;
-            const length = skeletonJoints.length;
+            const length = skeleton.length;
             while (isValidParam && i < length) {
-                const skeletonJoint = skeletonJoints[i];
+                const skeletonJoint = skeleton[i];
                 isValidParam = skeletonJoint !== undefined
                     && skeletonJoint instanceof Object
                     && Object.keys(skeletonJoint).length === 7  // eslint-disable-line @typescript-eslint/no-magic-numbers
@@ -133,24 +132,23 @@ class MyAvatarInterface {
             }
         }
         if (!isValidParam) {
-            const skeletonJointsString = JSON.stringify(skeletonJoints);
+            const skeletonString = JSON.stringify(skeleton);
             const MAX_STRING_LENGTH = 100;
-            console.error("[AvatarMixer] [MyAvatar] Tried to set invalid skeleton joints!",
-                skeletonJointsString.slice(0, MAX_STRING_LENGTH)
-                + (skeletonJointsString.length > MAX_STRING_LENGTH ? "..." : ""));
+            console.error("[AvatarMixer] [MyAvatar] Tried to set invalid skeleton!",
+                skeletonString.slice(0, MAX_STRING_LENGTH) + (skeletonString.length > MAX_STRING_LENGTH ? "..." : ""));
             return;
         }
-        this.#_avatarManager.getMyAvatar().skeletonJoints = skeletonJoints !== null
-            ? JSON.parse(JSON.stringify(skeletonJoints)) as SkeletonJoint[]
+        this.#_avatarManager.getMyAvatar().skeleton = skeleton !== null
+            ? JSON.parse(JSON.stringify(skeleton)) as SkeletonJoint[]  // Make a copy.
             : null;
     }
 
     /*@sdkdoc
-     *  Triggered when the avatar's skeleton joints change.
-     *  @callback MyAvatarInterface~skeletonJointsChanged
+     *  Triggered when the avatar's skeleton changes.
+     *  @callback MyAvatarInterface~skeletonChanged
      */
-    get skeletonJointsChanged(): Signal {
-        return this.#_avatarManager.getMyAvatar().skeletonJointsChanged;
+    get skeletonChanged(): Signal {
+        return this.#_avatarManager.getMyAvatar().skeletonChanged;
     }
 
     get position(): vec3 {
