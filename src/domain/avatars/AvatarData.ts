@@ -111,6 +111,9 @@ class AvatarData extends SpatiallyNestable {
     protected _sessionDisplayName: string | null = null;
     protected _sessionDisplayNameChanged = new SignalEmitter();
 
+    protected _targetScale = 1.0;
+    protected _avatarScaleChanged = 0;
+
     protected _globalPosition = Vec3.ZERO;
     protected _clientTraitsHandler: ClientTraitsHandler | null = null;
 
@@ -132,7 +135,6 @@ class AvatarData extends SpatiallyNestable {
     #_avatarSkeletonData: SkeletonJoint[] | null = null;
     #_skeletonChanged = new SignalEmitter();  // No C++ equivalent.
 
-    #_targetScale = 1.0;
     #_jointRotations: (quat | null)[] = [];
     #_jointTranslations: (vec3 | null)[] = [];
     #_jointRotationsUseDefault: boolean[] = [];
@@ -525,7 +527,8 @@ class AvatarData extends SpatiallyNestable {
             // WEBRTC TODO: Address further C+ code - AvatarDataRate.
 
             globalPosition: this._globalPosition,
-            localOrientation: this.rotationChangedSince(lastSentTime) ? this.getOrientationOutbound() : undefined
+            localOrientation: this.rotationChangedSince(lastSentTime) ? this.getOrientationOutbound() : undefined,
+            avatarScale: this.#avatarScaleChangedSince(lastSentTime) ? this.getDomainLimitedScale() : undefined
         };
 
 
@@ -700,10 +703,10 @@ class AvatarData extends SpatiallyNestable {
     setTargetScale(targetScale: number): void {
         // C++  void setTargetScale(float targetScale)
         const newValue = Math.min(Math.max(targetScale, AvatarConstants.MIN_AVATAR_SCALE), AvatarConstants.MAX_AVATAR_SCALE);
-        if (this.#_targetScale !== newValue) {
-            this.#_targetScale = newValue;
-
-            // WEBRTC TODO: Address further code - scale changed data.
+        if (this._targetScale !== newValue) {
+            this._targetScale = newValue;
+            this._scaleChanged = Date.now();
+            this._avatarScaleChanged = this._scaleChanged;
         }
     }
 
@@ -714,7 +717,7 @@ class AvatarData extends SpatiallyNestable {
      */
     getTargetScale(): number {
         // C++  float getTargetScale()
-        return this.#_targetScale;
+        return this._targetScale;
     }
 
 
@@ -750,6 +753,14 @@ class AvatarData extends SpatiallyNestable {
         this.#_skeletonChanged.emit();  // SDK-specific.
     }
 
+    protected getDomainLimitedScale(): number {
+        // C++  float AvatarData::getDomainLimitedScale()
+
+        // WEBRTC TODO: Address further C++ code - limit avatar scale per domain settings.
+
+        return this._targetScale;
+    }
+
 
     // eslint-disable-next-line class-methods-use-this
     #lazyInitHeadData(): void {
@@ -767,6 +778,11 @@ class AvatarData extends SpatiallyNestable {
 
         // WEBRTC TODO: Address further C++ code - Joint data.
 
+    }
+
+    #avatarScaleChangedSince(time: number): boolean {
+        // C++  bool avatarScaleChangedSince(quint64 time)
+        return this._avatarScaleChanged >= time;
     }
 
 }

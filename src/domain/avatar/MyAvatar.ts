@@ -34,6 +34,8 @@ import Uuid from "../shared/Uuid";
  *      URL changes.
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
+ *
+ *  @property {Signal<Avatar~targetScaleChanged>} targetScaleChanged - Triggered when the avatar's target scale changes.
  */
 class MyAvatar extends Avatar {
     // C++  class MyAvatar : public Avatar

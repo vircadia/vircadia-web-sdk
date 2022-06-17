@@ -9,6 +9,8 @@
 //
 
 import AvatarData from "../avatars/AvatarData";
+import AvatarConstants from "../shared/AvatarConstants";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 
 
 /*@devdoc
@@ -30,11 +32,15 @@ import AvatarData from "../avatars/AvatarData";
  *      URL changes.
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
+ *
+ *  @property {Signal<Avatar~targetScaleChanged>} targetScaleChanged - Triggered when the avatar's target scale changes.
  */
 class Avatar extends AvatarData {
     // C++  class Avatar : public AvatarData, public ModelProvider, public MetaModelPayload
 
     #_initialized = false;
+
+    #_targetScaleChanged = new SignalEmitter();
 
 
     constructor(contextID: number) {  // eslint-disable-line @typescript-eslint/no-useless-constructor
@@ -42,6 +48,16 @@ class Avatar extends AvatarData {
         super(contextID);
 
         // WEBRTC TODO: Address further C++ code.
+    }
+
+
+    /*@sdkdoc
+     *  Triggered when the avatar's target scale changes.
+     *  @callback Avatar~targetScaleChanged
+     *  @param {number} targetScale - The new target avatar scale.
+     */
+    get targetScaleChanged(): Signal {
+        return this.#_targetScaleChanged.signal();
     }
 
 
@@ -81,6 +97,21 @@ class Avatar extends AvatarData {
         super.setSkeletonModelURL(skeletonModelURL);
 
         // WEBRTC TODO: Address further C++ code.
+    }
+
+    // JSDoc is in AvatarData.
+    override setTargetScale(targetScale: number): void {
+        const newValue = Math.max(AvatarConstants.MIN_AVATAR_SCALE, Math.min(targetScale, AvatarConstants.MAX_AVATAR_SCALE));
+        if (this._targetScale !== newValue) {
+            this._targetScale = newValue;
+            this._scaleChanged = Date.now();
+            this._avatarScaleChanged = this._scaleChanged;
+
+            // WEBRTC TODO: Address further C++ - _isAnimatingScale.
+            // WEBRTC TODO: Address further C++ - _multiSphereShapes.
+
+            this.#_targetScaleChanged.emit(this._targetScale);
+        }
     }
 
 

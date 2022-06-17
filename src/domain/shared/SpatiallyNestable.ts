@@ -42,6 +42,9 @@ enum NestableType {
 class SpatiallyNestable {
     // C++  class SpatiallyNestable
 
+    protected _scaleChanged = Date.now();
+
+
     #_nestableType;
     #_id;
 
@@ -185,7 +188,6 @@ class SpatiallyNestable {
 
     }
 
-
     /*@devdoc
      *  Gets the local orientation of the entity or avatar.
      *  @returns {quat} The local orientation of the entity or avatar.
@@ -214,13 +216,25 @@ class SpatiallyNestable {
 
     }
 
+
+    /*@devdoc
+     *  Gets whether the entity or avatar's scale has changed since a given time.
+     *  @param {number} time - The time in milliseconds elapsed since 1 Jan 1970 00:00:00 UTC.
+     *  @returns {boolean} <code>true</code> if the scale has changed since the given time, <code>false</code> if it
+     *      hasn't.
+     */
+    protected scaleChangedSince(time: number): boolean {
+        // C++  bool scaleChangedSince(quint64 time)
+        return this._scaleChanged > time;
+    }
+
     /*@devdoc
      *  Gets whether the entity or avatar's translation has changed since a given time.
      *  @param {number} time - The time in milliseconds elapsed since 1 Jan 1970 00:00:00 UTC.
      *  @returns {boolean} <code>true</code> if the translation has changed since the given time, <code>false</code> if it
      *      hasn't.
      */
-    translationChangedSince(time: number): boolean {
+    protected translationChangedSince(time: number): boolean {
         // C++  bool tranlationChangedSince(quint64 time)
         return this.#_translationChanged > time;
     }
@@ -231,7 +245,7 @@ class SpatiallyNestable {
      *  @returns {boolean} <code>true</code> if the rotation has changed since the given time, <code>false</code> if it
      *      hasn't.
      */
-    rotationChangedSince(time: number): boolean {
+    protected rotationChangedSince(time: number): boolean {
         // C++  bool rotationChangedSince(quint64 time)
         return this.#_rotationChanged > time;
     }

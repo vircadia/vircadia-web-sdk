@@ -45,7 +45,7 @@ describe("AvatarData - unit tests", () => {
         expect(avatarData.getIdentityDataChanged()).toBe(true);
     });
 
-    test("Can set and get the avatar scale", () => {
+    test("Can set and get the target avatar scale", () => {
         const avatarData = new AvatarData(contextID);
         expect(avatarData.getTargetScale()).toEqual(1.0);
         avatarData.setTargetScale(1.2);

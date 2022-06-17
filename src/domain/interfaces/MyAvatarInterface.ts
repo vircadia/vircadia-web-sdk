@@ -10,6 +10,7 @@
 //
 
 import { SkeletonJoint } from "../avatars/AvatarTraits";
+import AvatarConstants from "../shared/AvatarConstants";
 import ContextManager from "../shared/ContextManager";
 import Quat, { quat } from "../shared/Quat";
 import { Signal } from "../shared/SignalEmitter";
@@ -33,6 +34,11 @@ import AvatarManager from "../AvatarManager";
  *  @property {string} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *  @property {Signal<MyAvatarInterface~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton
  *      model URL changes.
+ *  @property {number} targetScale=1.0 - The target scale of the avatar, <code>0.005</code> &mdash; <code>1000.0</code>. Unlike
+ *      <code>scale</code>, this value is not limited by the domain's settings.
+ *  @property {Signal<MyAvatarInterface~targetScaleChanged>} targetScaleChanged - Triggered when the avatar's target scale
+ *      changes.
+ *  @property {number} targetScale=1.0 - The target scale of the avatar, <code>0.005</code> &mdash; <code>1000.0</code>. This
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
  *  @property {SkeletonJoint[]|null} skeleton - Information on the avatar's skeleton. <code>null</code> if the avatar doesn't
@@ -149,6 +155,31 @@ class MyAvatarInterface {
      */
     get skeletonChanged(): Signal {
         return this.#_avatarManager.getMyAvatar().skeletonChanged;
+    }
+
+    get targetScale(): number {
+        return this.#_avatarManager.getMyAvatar().getTargetScale();
+    }
+
+    set targetScale(targetScale: number) {
+        if (typeof targetScale !== "number") {
+            console.error("[AvatarMixer] [MyAvatar] Tried to set invalid targetScale!", JSON.stringify(targetScale));
+            return;
+        }
+        if (targetScale < AvatarConstants.MIN_AVATAR_SCALE || targetScale > AvatarConstants.MAX_AVATAR_SCALE) {
+            console.warn("[AvatarMixer][MyAvatar] Tried to set an out of range targetScale value.", targetScale);
+        }
+        this.#_avatarManager.getMyAvatar().setTargetScale(Math.max(AvatarConstants.MIN_AVATAR_SCALE,
+            Math.min(targetScale, AvatarConstants.MAX_AVATAR_SCALE)));
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's target scale changes.
+     *  @callback MyAvatarInterface~targetScaleChanged
+     *  @param {number} targetScale - The new target avatar scale.
+     */
+    get targetScaleChanged(): Signal {
+        return this.#_avatarManager.getMyAvatar().targetScaleChanged;
     }
 
     get position(): vec3 {

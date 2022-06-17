@@ -30,4 +30,29 @@ describe("Avatar - unit tests", () => {
         expect(true).toBe(true);
     });
 
+    test("Can set and get the target avatar scale", (done) => {
+        const avatar = new Avatar(contextID);
+        let scaleChangeCount = 0;
+        let scaleChangeTotal = 0.0;
+        avatar.targetScaleChanged.connect((scale) => {
+            scaleChangeCount += 1;
+            scaleChangeTotal += scale;
+        });
+
+        expect(avatar.getTargetScale()).toEqual(1.0);  // Default.
+        avatar.setTargetScale(1.2);
+        expect(avatar.getTargetScale()).toEqual(1.2);
+        avatar.setTargetScale(2000.0);
+        avatar.setTargetScale(2000.0);  // Call again to check that signal isn't triggered again.
+        expect(avatar.getTargetScale()).toEqual(1000.0);  // MAX_AVATAR_SCALE
+        avatar.setTargetScale(0.00001);
+        expect(avatar.getTargetScale()).toEqual(0.005);  // MIN_AVATAR_SCALE
+
+        setTimeout(() => {  // Let targetScaleChanged() events process.
+            expect(scaleChangeCount).toEqual(3);
+            expect(scaleChangeTotal).toEqual(1001.205);
+            done();
+        }, 10);
+    });
+
 });
