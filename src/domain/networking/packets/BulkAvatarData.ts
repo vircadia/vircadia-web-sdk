@@ -55,7 +55,7 @@ const BulkAvatarData = new class {
      *      <code>undefined</code> if not included in the packet.
      *  @property {number|undefined} avatarScale - The avatar's scale.
      *      <code>undefined</code> if not included in the packet.
-     *  @property {Array<quat|null>|undefined}} jointRotations - The joint rotations relative to avatar space (i.e., not
+     *  @property {Array<quat|null>|undefined} jointRotations - The joint rotations relative to avatar space (i.e., not
      *      relative to parent bones). If a rotation is <code>null</code> then the rotation of the avatar's default pose should
      *      be used.
      *      <code>undefined</code> if not included in the packet.

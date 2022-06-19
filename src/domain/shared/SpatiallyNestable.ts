@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 28 Oct 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -137,7 +138,7 @@ class SpatiallyNestable {
 
     /*@devdoc
      *  Gets the world orientation of the entity or avatar.
-     *  @returns {vec3} The world orientation of the entity or avatar.
+     *  @returns {quat} The world orientation of the entity or avatar.
      */
     getWorldOrientation(): quat {
         // C++  glm::vec3 getWorldPosition()
@@ -200,6 +201,10 @@ class SpatiallyNestable {
         return this.#_worldOrientation;
     }
 
+    /*@devdoc
+     *  Sets the local orientation of the entity or avatar.
+     *  @param {quat} orientation - The local orientation of the entity or avatar.
+     */
     setLocalOrientation(orientation: quat): void {
         // C++  void setLocalOrientation(const glm::quat& orientation)
 

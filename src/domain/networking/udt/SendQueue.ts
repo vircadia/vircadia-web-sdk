@@ -292,7 +292,7 @@ class SendQueue {
     */
 
     /*@devdoc
-     *  Triggered when the queue has been inactive to 5s.
+     *  Triggered when the queue has been inactive for 5s.
      *  @function SendQueue.queueInactive
      *  @returns {Signal}
      */
@@ -302,7 +302,7 @@ class SendQueue {
 
     /*@devdoc
      *  Triggered when sending on the queue has timed out.
-     *  @function SendQueue.queueInactive
+     *  @function SendQueue.timeout
      *  @returns {Signal}
      */
     get timeout(): Signal {

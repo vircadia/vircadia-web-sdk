@@ -59,7 +59,7 @@ describe("MyAvatarInterface - unit tests", () => {
 
         expect(myAvatarInterface.targetScale).toBe(1.0);  // Default value.
         expect(errorCount).toBe(0);
-        myAvatarInterface.targetScale = "2.0";
+        myAvatarInterface.targetScale = "2.0";  // String value instead of number.
         expect(errorCount).toBe(1);
         expect(myAvatarInterface.targetScale).toBe(1.0);
 
@@ -72,7 +72,7 @@ describe("MyAvatarInterface - unit tests", () => {
         myAvatarInterface.targetScale = 0.001;
         expect(myAvatarInterface.targetScale).toBe(0.005);  // Clamped value.
 
-        setTimeout(() => {  // Let targetScaleChanged() events process.
+        setTimeout(() => {  // Let events process.
             expect(scaleChangeCount).toEqual(3);
             expect(scaleChangeTotal).toEqual(1001.205);
             done();

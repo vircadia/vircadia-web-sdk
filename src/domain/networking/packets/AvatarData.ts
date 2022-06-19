@@ -149,8 +149,8 @@ const AvatarData = new class {
                 if (sendPALMinimum) {
                     // hasAudioLoudness = true;
                 } else {
-                    // The C++ code is included here - commented out - so that the native client logic can be seen. In the Web
-                    // SDK the "ChangedSince()" logic is included in the caller to AvatarData.write().
+                    // The C++ code is included here - commented out - so that the native client logic can be seen.
+                    // In the Web SDK, the "ChangedSince()" logic is included in the caller to AvatarData.write().
                     //
                     // WEBRTC TODO: Address further C++ code - Further avatar properties.
                     //
