@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 28 Oct 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -10,8 +11,20 @@
 
 import Avatar from "../avatar-renderer/Avatar";
 import ClientTraitsHandler from "../avatars/ClientTraitsHandler";
+import NodeList from "../networking/NodeList";
 import assert from "../shared/assert";
+import AvatarConstants from "../shared/AvatarConstants";
+import ContextManager from "../shared/ContextManager";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Uuid from "../shared/Uuid";
+
+
+type DomainSettings = {
+    avatars: {
+        "min_avatar_height": number,
+        "max_avatar_height": number
+    }
+};
 
 
 /*@devdoc
@@ -23,22 +36,41 @@ import Uuid from "../shared/Uuid";
  *  @extends SpatiallyNestable
  *  @param {number} contextID - The {@link ContextManager} context ID.
  *
- *  @property {string|null} displayName - The avatar's display name.
+ *  @comment MyAvatar properties.
+ *  @property {Signal<MyAvatar~scaleChanged>} scaleChanged - Triggered when the avatar's scale changes. This can be due to the
+ *      user changing the scale of their avatar or the domain limiting the scale of their avatar.
+ *
+ *  @comment Avatar properties - copied from Avatar; do NOT edit here.
+ *  @comment None.
+ *
+ *  @comment AvatarData properties - copied from AvatarData; do NOT edit here.
  *  @property {Signal<AvatarData~displayNameChanged>} displayNameChanged - Triggered when the avatar's display name changes.
- *  @property {string|null} sessionDisplayName - The avatar's session display name as assigned by the avatar mixer. It is based
- *      on the display name and is unique among all avatars present in the domain. <em>Read-only.</em>
  *  @property {Signal<AvatarData~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the avatar's session
  *      display name changes.
- *  @property {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *  @property {Signal<AvatarData~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton model
  *      URL changes.
- *  @property {vec3} position - The position of the avatar in the domain.
- *  @property {quat} orientation - The orientation of the avatar in the domain.
+ *  @property {Signal<AvatarData~skeletonChanged>} skeletonChanged - Triggered when the avatar's skeleton changes.
+ *  @property {Signal<AvatarData~targetScaleChanged>} targetScaleChanged - Triggered when the avatar's target scale changes.
  *
- *  @property {Signal<Avatar~targetScaleChanged>} targetScaleChanged - Triggered when the avatar's target scale changes.
+ *  @comment SpatiallyNestable properties - copied from SpatiallyNestable; do NOT edit here.
+ *  @comment None.
  */
 class MyAvatar extends Avatar {
     // C++  class MyAvatar : public Avatar
+
+    /*@devdoc
+     *  Domain server avatar settings.
+     *  @typedef {object} MyAvatar.AvatarDomainSettings
+     *  @property {number} min_avatar_height - The minimum avatar height permitted in the domain.
+     *  @property {number} max_avatar_height - The maximum avatar height permitted in the domain.
+     */
+
+    /*@devdoc
+     *  Domain server settings.
+     *  @typedef {object} MyAvatar.DomainSettings
+     *  @property {MyAvatar.AvatarDomainSettings} avatars
+     */
+
 
     readonly #MAX_DATA_RATE_MBPS = 3;
     readonly #BYTES_PER_KILOBYTE = 1000;
@@ -53,6 +85,8 @@ class MyAvatar extends Avatar {
 
     #_nextTraitsSendWindow = 0;
 
+    #_scaleChanged = new SignalEmitter();
+
 
     constructor(contextID: number) {
         // C++  Avatar()
@@ -63,6 +97,23 @@ class MyAvatar extends Avatar {
         this._clientTraitsHandler = new ClientTraitsHandler(this, contextID);
 
         // WEBRTC TODO: Address further C++ code.
+
+        const nodeList = ContextManager.get(contextID, NodeList) as NodeList;
+        const domainHandler = nodeList.getDomainHandler();
+        domainHandler.disconnectedFromDomain.connect(this.leaveDomain);
+
+        // WEBRTC TODO: Address further C++ code.
+    }
+
+
+    /*@sdkdoc
+      *  Triggered when the avatar's scale changes.
+      *  @callback MyAvatar~scaleChanged
+      *  @param {number} scale - The new avatar scale.
+      */
+    get scaleChanged(): Signal {
+        // C++  void scaleChanged();
+        return this.#_scaleChanged.signal();
     }
 
 
@@ -113,6 +164,69 @@ class MyAvatar extends Avatar {
         return bytesSent;
     }
 
+    // JSDoc is in AvatarData.
+    override setTargetScale(targetScale: number): void {
+        // C++  N/A - The native scripting API accomplishes this in a more round-about manner involving the avatar Rig.
+        const oldAvatarScale = this.getDomainLimitedScale();
+        super.setTargetScale(targetScale);
+        const newAvatarScale = this.getDomainLimitedScale();
+        if (newAvatarScale !== oldAvatarScale) {
+            this.#_scaleChanged.emit(newAvatarScale);
+        }
+    }
+
+    /*@devdoc
+     *  Restricts the avatar scale per settings received from the domain server.
+     *  @param {MyAvatar.DomainSettings} domainSettings - The domain settings.
+     */
+    restrictScaleFromDomainSettings(domainSettingsObject: DomainSettings): void {
+        // C++  void restrictScaleFromDomainSettings(const QJsonObject& domainSettingsObject)
+        const oldDomainLimitedScale = this.getDomainLimitedScale();
+
+        const settingMinHeight = domainSettingsObject.avatars.min_avatar_height;
+        this.setDomainMinimumHeight(settingMinHeight);
+
+        const settingMaxHeight = domainSettingsObject.avatars.max_avatar_height;
+        this.setDomainMaximumHeight(settingMaxHeight);
+
+        // Make sure that the domain owner didn't flip min and max.
+        if (this._domainMinimumHeight > this._domainMaximumHeight) {
+            const temp = this._domainMinimumHeight;
+            this._domainMinimumHeight = this._domainMaximumHeight;
+            this._domainMaximumHeight = temp;
+        }
+
+        // The Web SDK doesn't use settings to store the "real" target scale so don't overwrite it.
+
+        // Animating scale is not part of the Web SDK's responsibility.
+
+        console.log(`[MyAvatar] This domain requires a minimum avatar height of ${this._domainMinimumHeight}`,
+            `and a maximum avatar height of ${this._domainMaximumHeight}.`);
+
+        // The Web SDK doesn't use an internal modelScale because the (possibly animated) scaling of the actual avatar model
+        // is the app's responsibility. Instead, we directly check whether the scale has changed here.
+        const newDomainLimitedScale = this.getDomainLimitedScale();
+        if (newDomainLimitedScale !== oldDomainLimitedScale) {
+            this.#_scaleChanged.emit(newDomainLimitedScale);
+        }
+
+        // Handling collisions are not part of the Web SDK's responsibility.
+
+        // WEBRTC TODO: Address further C++ code - physics.
+    }
+
+    /*@devdoc
+     *  Clears avatar scale restrictions.
+     *  @function MyAvatar.clearScaleRestriction
+     */
+    clearScaleRestriction(): void {
+        // C++  void MyAvatar::clearScaleRestriction()
+        this._domainMinimumHeight = AvatarConstants.MIN_AVATAR_HEIGHT;
+        this._domainMaximumHeight = AvatarConstants.MAX_AVATAR_HEIGHT;
+
+        // WEBRTC TODO: Address further C++ code - physics.
+    }
+
 
     /*@devdoc
      *  Sets the user client's (avatar's) session UUID and updates avatar attachments' links to it.
@@ -129,6 +243,25 @@ class MyAvatar extends Avatar {
         // WEBRTC TODO: Address further C++ code - avatar entity updates.
 
     };
+
+
+    /*@devdoc
+     *  Performs actions that should be done when the user leaves the current domain.
+     *  @function MyAvatar.leaveDomain
+     *  @type {Slot}
+     */
+    // Slot
+    leaveDomain = (): void => {
+        // C++  void MyAvatar:: leaveDomain()
+        this.clearScaleRestriction();
+
+        // The Web SDK doesn't save settings.
+        // saveAvatarScale();
+
+        // WEBRTC TODO: Address further C++ code - reset instanced avatar traits.
+    };
+
+
 }
 
 export default MyAvatar;

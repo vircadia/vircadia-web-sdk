@@ -272,6 +272,8 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const myAvatarDisplayName = document.getElementById("myAvatarDisplayName");
         const myAvatarSessionDisplayName = document.getElementById("myAvatarSessionDisplayName");
         const myAvatarSkeletonModelURL = document.getElementById("myAvatarSkeletonModelURL");
+        const avatarScale = document.getElementById("avatarScale");
+        const avatarTargetScale = document.getElementById("avatarTargetScale");
         const avatarMixerPosX = document.getElementById("avatarMixerPosX");
         const avatarMixerPosY = document.getElementById("avatarMixerPosY");
         const avatarMixerPosZ = document.getElementById("avatarMixerPosZ");
@@ -296,6 +298,23 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         });
         myAvatarSkeletonModelURL.addEventListener("blur", () => {
             avatarMixer.myAvatar.skeletonModelURL = myAvatarSkeletonModelURL.value;
+        });
+
+        avatarScale.value = avatarMixer.myAvatar.scale.toFixed(1);
+        avatarMixer.myAvatar.scaleChanged.connect((scale) => {
+            avatarScale.value = scale.toFixed(1);
+        });
+        avatarScale.addEventListener("blur", () => {
+            avatarMixer.myAvatar.scale = parseFloat(avatarScale.value);
+            const VERIFY_TIMEOUT = 500;
+            setTimeout(() => {
+                // In case the scale value was rejected. Or do in game loop.
+                avatarScale.value = avatarMixer.myAvatar.scale.toFixed(1);
+            }, VERIFY_TIMEOUT);
+        });
+        avatarTargetScale.value = avatarMixer.myAvatar.targetScale.toFixed(1);
+        avatarMixer.myAvatar.targetScaleChanged.connect((scale) => {
+            avatarTargetScale.value = scale.toFixed(1);
         });
 
         const avatarPosition = avatarMixer.myAvatar.position;

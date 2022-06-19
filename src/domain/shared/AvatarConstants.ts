@@ -15,6 +15,9 @@
  *  @class AvatarConstants
  *
  *  @property {number} DEFAULT_AVATAR_HEIGHT=1.755 - The default avatar height, in meters.
+ *  @property {number} DEFAULT_AVATAR_EYE_TO_TOP_OF_HEAD=0.11 - The default vertical distance between the avatar's eyes to the
+ *      top of head, in meters.
+ *  @property {number} DEFAULT_AVATAR_EYE_HEIGHT= 1.645 - The default height of the avatar's eyes.
  *  @property {number} MAX_AVATAR_HEIGHT= 1755.0 - The absolute maximum avatar height.
  *  @property {number} MIN_AVATAR_HEIGHT=0.008775 - The absolute minimum avatar height.
  *
@@ -27,6 +30,10 @@ class AvatarConstants {
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     static readonly DEFAULT_AVATAR_HEIGHT = 1.755;  // meters
+    static readonly DEFAULT_AVATAR_EYE_TO_TOP_OF_HEAD = 0.11; // meters
+
+    static readonly DEFAULT_AVATAR_EYE_HEIGHT = AvatarConstants.DEFAULT_AVATAR_HEIGHT
+        - AvatarConstants.DEFAULT_AVATAR_EYE_TO_TOP_OF_HEAD;
 
     static readonly MAX_AVATAR_HEIGHT = 1000.0 * AvatarConstants.DEFAULT_AVATAR_HEIGHT;
     static readonly MIN_AVATAR_HEIGHT = 0.005 * AvatarConstants.DEFAULT_AVATAR_HEIGHT;

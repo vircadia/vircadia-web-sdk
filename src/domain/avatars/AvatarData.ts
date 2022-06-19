@@ -91,19 +91,17 @@ enum BoneType {
  *  @extends SpatiallyNestable
  *  @param {number} contextID - The {@link ContextManager} context ID.
  *
- *  @property {string|null} displayName - The avatar's display name.
+ *  @comment AvatarData properties.
  *  @property {Signal<AvatarData~displayNameChanged>} displayNameChanged - Triggered when the avatar's display name changes.
- *  @property {string|null} sessionDisplayName - The avatar's session display name as assigned by the avatar mixer. It is based
- *      on the display name and is unique among all avatars present in the domain. <em>Read-only.</em>
  *  @property {Signal<AvatarData~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the avatar's session
  *      display name changes.
- *  @property {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *  @property {Signal<AvatarData~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton model
  *      URL changes.
- *  @property {SkeletonJoint[]|null} skeleton - Information on the avatar's skeleton.
  *  @property {Signal<AvatarData~skeletonChanged>} skeletonChanged - Triggered when the avatar's skeleton changes.
- *  @property {vec3} position - The position of the avatar in the domain.
- *  @property {quat} orientation - The orientation of the avatar in the domain.
+ *  @property {Signal<AvatarData~targetScaleChanged>} targetScaleChanged - Triggered when the avatar's target scale changes.
+ *
+ *  @comment SpatiallyNestable properties - copied from SpatiallyNestable; do NOT edit here.
+ *  @comment None.
  */
 class AvatarData extends SpatiallyNestable {
     // C++  class AvatarData : public QObject, public SpatiallyNestable
@@ -112,7 +110,10 @@ class AvatarData extends SpatiallyNestable {
     protected _sessionDisplayNameChanged = new SignalEmitter();
 
     protected _targetScale = 1.0;
+    protected _targetScaleChanged = new SignalEmitter();
     protected _avatarScaleChanged = 0;
+    protected _domainMinimumHeight = AvatarConstants.MIN_AVATAR_HEIGHT;
+    protected _domainMaximumHeight = AvatarConstants.MAX_AVATAR_HEIGHT;
 
     protected _globalPosition = Vec3.ZERO;
     protected _clientTraitsHandler: ClientTraitsHandler | null = null;
@@ -157,24 +158,12 @@ class AvatarData extends SpatiallyNestable {
     }
 
 
-    get displayName(): string | null {
-        return this.#_displayName;
-    }
-
-    set displayName(displayName: string | null) {
-        this.setDisplayName(displayName);
-    }
-
     /*@sdkdoc
      *  Triggered when the avatar's display name changes.
      *  @callback AvatarData~displayNameChanged
      */
     get displayNameChanged(): Signal {
         return this.#_displayNameChanged.signal();
-    }
-
-    get sessionDisplayName(): string | null {
-        return this._sessionDisplayName;
     }
 
     /*@sdkdoc
@@ -185,29 +174,12 @@ class AvatarData extends SpatiallyNestable {
         return this._sessionDisplayNameChanged.signal();
     }
 
-    get skeletonModelURL(): string | null {
-        // WEBRTC TODO: return the default avatar URL if null.
-        return this.#_skeletonModelURL;
-    }
-
-    set skeletonModelURL(skeletonModelURL: string | null) {
-        this.setSkeletonModelURL(skeletonModelURL);
-    }
-
     /*@sdkdoc
      *  Triggered when the avatar's skeleton model URL changes.
      *  @callback AvatarData~skeletonModelURLChanged
      */
     get skeletonModelURLChanged(): Signal {
         return this.#_skeletonModelURLChanged.signal();
-    }
-
-    get skeleton(): SkeletonJoint[] | null {
-        return this.#_avatarSkeletonData;
-    }
-
-    set skeleton(skeleton: SkeletonJoint[] | null) {
-        this.setSkeletonData(skeleton);
     }
 
     /*@sdkdoc
@@ -218,20 +190,13 @@ class AvatarData extends SpatiallyNestable {
         return this.#_skeletonChanged.signal();
     }
 
-    get position(): vec3 {
-        return this.getWorldPosition();
-    }
-
-    set position(position: vec3) {
-        this.setWorldPosition(position);
-    }
-
-    get orientation(): quat {
-        return this.getWorldOrientation();
-    }
-
-    set orientation(orientation: quat) {
-        this.setWorldOrientation(orientation);
+    /*@sdkdoc
+     *  Triggered when the avatar's target scale changes.
+     *  @callback AvatarData~targetScaleChanged
+     *  @param {number} targetScale - The new target avatar scale.
+     */
+    get targetScaleChanged(): Signal {
+        return this._targetScaleChanged.signal();
     }
 
 
@@ -288,8 +253,9 @@ class AvatarData extends SpatiallyNestable {
     }
 
     /*@devdoc
-     *  Gets the avatar's session display name.
-     *  @returns {string|null} The avatar's display name.
+     *  Gets the avatar's session display name as assigned by the avatar mixer. It is based on the display name and is unique
+     *  among all avatars present in the domain.
+     *  @returns {string|null} The avatar's session display name.
      */
     getSessionDisplayName(): string | null {
         // C++  QString& getSessionDisplayName()
@@ -297,7 +263,8 @@ class AvatarData extends SpatiallyNestable {
     }
 
     /*@devdoc
-     *  Sets the avatar's session display name.
+     *  Sets the avatar's session display name as assigned by the avatar mixer. It is based on the display name and is unique
+     *  among all avatars present in the domain.
      *  @param {string|null} sessionDisplayName - The avatar's session display name.
      */
     setSessionDisplayName(sessionDisplayName: string | null): void {
@@ -305,6 +272,132 @@ class AvatarData extends SpatiallyNestable {
         this._sessionDisplayName = sessionDisplayName;
         this._sessionDisplayNameChanged.emit();
         this.markIdentityDataChanged();
+    }
+
+    /*@devdoc
+     *  Possibly update the session display name from network data: don't update in the <code>AvatarData</code> class.
+     *  @param {string|null} sessionDisplayName The session display name.
+     */
+    // eslint-disable-next-line
+    // @ts-ignore
+    maybeUpdateSessionDisplayNameFromTransport(sessionDisplayName: string | null): void {  // eslint-disable-line
+        // C++  void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName)
+        // No-op.
+    }
+
+    /*@devdoc
+     *  Gets the URL of the avatar's FST, glTF, or FBX model file.
+     *  @returns {string|null} The URL of the avatar's FST, glTF, or FBX model file.
+     */
+    getSkeletonModelURL(): string | null {
+        // WEBRTC TODO: return the default avatar URL if null.
+        return this.#_skeletonModelURL;
+    }
+
+    /*@devdoc
+     *  Sets the avatar's skeleton model URL.
+     *  @param {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
+     */
+    setSkeletonModelURL(skeletonModelURL: string | null): void {
+        // C++  void setSkeletonModelURL(const QUrl& skeletonModelURL)
+
+        if (skeletonModelURL === null || skeletonModelURL.length === 0) {
+            console.log("[avatars] setSkeletonModelURL() called with empty URL.");
+        }
+
+        // WEBRTC TODO: Set #_skeletonModelURL to the default avatar URL when skeletonModelURL is an empty URL.
+
+        if (skeletonModelURL === this.#_skeletonModelURL) {
+            return;
+        }
+
+        this.#_skeletonModelURL = skeletonModelURL;
+
+        if (this._clientTraitsHandler) {
+            this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonModelURL);
+        }
+
+        this.#_skeletonModelURLChanged.emit();
+    }
+
+    /*@devdoc
+     *  Gets the avatar's skeleton.
+     *  @returns {SkeletonJoint[]} The avatar's skeleton.
+     */
+    getSkeletonData(): SkeletonJoint[] | null {
+        // C++  std::vector<AvatarSkeletonTrait::UnpackedJointData> AvatarData::getSkeletonData() const
+        return this.#_avatarSkeletonData;
+    }
+
+    /*@devdoc
+     *  Sets the avatar's skeleton.
+     *  @param {SkeletonJoint[]} skeletonData - The avatar's skeleton.
+     */
+    setSkeletonData(skeletonData: SkeletonJoint[] | null): void {
+        // C++  void AvatarData::setSkeletonData(const std::vector<AvatarSkeletonTrait::UnpackedJointData>& skeletonData)
+
+        if (skeletonData === null || skeletonData.length === 0) {
+            console.log("[avatars] setSkeletonData() called with empty skeleton data.");
+        }
+
+        if (skeletonData === this.#_avatarSkeletonData) {
+            return;
+        }
+
+        // Need to call markTraitUpdated() here because there is no equivalent of C++'s Rig and sendSkeletonData().
+        if (this._clientTraitsHandler) {
+            this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonModelURL);
+        }
+
+        this.#_avatarSkeletonData = skeletonData;
+        this.#_skeletonChanged.emit();  // SDK-specific.
+    }
+
+    /*@devdoc
+     *  Sets the target avatar scale. For your own avatar, the avatar scale actually used may be limited per domain settings.
+     *  For other users' avatars, any domain limits will have already been applied so the target scale is the actual scale to
+     *  use.
+     *  @param {number} targetScale - The target avatar scale.
+     */
+    setTargetScale(targetScale: number): void {
+        // C++  void setTargetScale(float targetScale)
+        const newValue = Math.min(Math.max(targetScale, AvatarConstants.MIN_AVATAR_SCALE), AvatarConstants.MAX_AVATAR_SCALE);
+        if (this._targetScale !== newValue) {
+            this._targetScale = newValue;
+            this._scaleChanged = Date.now();
+            this._avatarScaleChanged = this._scaleChanged;
+
+            // This signal has been moved from Avatar so that the SDK can emit it without requiring avatar Rig functionality.
+            this._targetScaleChanged.emit(newValue);
+        }
+    }
+
+    /*@devdoc
+     *  Gets the target avatar scale. For your own avatar, the avatar scale actually used may be limited per domain settings.
+     *  for other users' avatars, any domain limits will have already been applied so the target scale is the actual scale to
+     *  use.
+     *  @returns {number} The target avatar scale.
+     */
+    getTargetScale(): number {
+        // C++  float getTargetScale()
+        return this._targetScale;
+    }
+
+    /*@devdoc
+     *  Gets the scale of the avatar, range <code>0.005</code> &mdash; <code>1000.0</code>, possibly temporarily limited by the
+     *  current domain's settings. If the avatar's height is not available then domain limits are not applied.
+     *  @returns {number}
+     */
+    getDomainLimitedScale(): number {
+        // C++  float getDomainLimitedScale() const
+        if (this.canMeasureEyeHeight()) {
+            const minScale = this.getDomainMinScale();
+            const maxScale = this.getDomainMaxScale();
+            return Math.max(minScale, Math.min(this._targetScale, maxScale));
+        }
+
+        // We can't make a good estimate.
+        return this._targetScale;
     }
 
     /*@devdoc
@@ -348,7 +441,6 @@ class AvatarData extends SpatiallyNestable {
         // C++  N/A
         return this.#_jointTranslationsUseDefault;
     }
-
 
     /*@devdoc
      *  Sets a flag that avatar identity data has changed since the last time an {@link PacketType(1)|AvatarIdentity} packet was
@@ -660,110 +752,105 @@ class AvatarData extends SpatiallyNestable {
         }
     }
 
-    /*@devdoc
-     *  Gets the avatar's world orientation.
-     *  @returns {quat} The avatar's world orientation.
-     */
-    getOrientationOutbound(): quat {
-        // C++  glm::quat getOrientationOutbound()
-        return this.getLocalOrientation();
-    }
 
     /*@devdoc
-     *  Sets the avatar's skeleton model URL.
-     *  @param {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
+     *  Gets whether the avatar is parented to something.
+     *  @returns {boolean} <code>true</code> if the avatar is parented to something, <code>false</code> if it isn't.
      */
-    setSkeletonModelURL(skeletonModelURL: string | null): void {
-        // C++  void setSkeletonModelURL(const QUrl& skeletonModelURL)
-
-        if (skeletonModelURL === null || skeletonModelURL.length === 0) {
-            console.log("[avatars] setSkeletonModelURL() called with empty URL.");
-        }
-
-        // WEBRTC TODO: Set #_skeletonModelURL to the default avatar URL when skeletonModelURL is an empty URL.
-
-        if (skeletonModelURL === this.#_skeletonModelURL) {
-            return;
-        }
-
-        this.#_skeletonModelURL = skeletonModelURL;
-
-        if (this._clientTraitsHandler) {
-            this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonModelURL);
-        }
-
-        this.#_skeletonModelURLChanged.emit();
-    }
-
-    /*@devdoc
-     *  Sets the target avatar scale. For your own avatar, the avatar scale actually used may be limited per domain settings.
-     *  For other users' avatars, any domain limits will have already been applied so the target scale is the actual scale.
-     *  @param targetScale - The target avatar scale.
-     */
-    setTargetScale(targetScale: number): void {
-        // C++  void setTargetScale(float targetScale)
-        const newValue = Math.min(Math.max(targetScale, AvatarConstants.MIN_AVATAR_SCALE), AvatarConstants.MAX_AVATAR_SCALE);
-        if (this._targetScale !== newValue) {
-            this._targetScale = newValue;
-            this._scaleChanged = Date.now();
-            this._avatarScaleChanged = this._scaleChanged;
-        }
-    }
-
-    /*@devdoc
-     *  Get the target avatar scale. For your own avatar, the avatar scale actually used may be limited per domain settings.
-     *  for other users' avatars, any domain limits will ave already been applied so the target scale is the actual scale.
-     *  @returns The target avatar scale.
-     */
-    getTargetScale(): number {
-        // C++  float getTargetScale()
-        return this._targetScale;
-    }
-
-
-    // eslint-disable-next-line
-    // @ts-ignore
-    protected maybeUpdateSessionDisplayNameFromTransport(sessionDisplayName: string | null): void {  // eslint-disable-line
-        // C++  void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName)
-        // No-op.
-    }
-
     protected hasParent(): boolean {
         // C++  bool hasParent()
         return this.getParentID().value() !== Uuid.NULL;
     }
 
-    protected setSkeletonData(skeletonData: SkeletonJoint[] | null): void {
-        // C++  void AvatarData::setSkeletonData(const std::vector<AvatarSkeletonTrait::UnpackedJointData>& skeletonData)
-
-        if (skeletonData === null || skeletonData.length === 0) {
-            console.log("[avatars] setSkeletonData() called with empty skeleton data.");
-        }
-
-        if (skeletonData === this.#_avatarSkeletonData) {
-            return;
-        }
-
-        // Need to call markTraitUpdated() here because there is no equivalent of C++'s Rig and sendSkeletonData().
-        if (this._clientTraitsHandler) {
-            this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonModelURL);
-        }
-
-        this.#_avatarSkeletonData = skeletonData;
-        this.#_skeletonChanged.emit();  // SDK-specific.
+    /*@devdoc
+     *  Sets the minimum avatar height in the domain.
+     *  @param {number} domainMinimumHeight - The minimum avatar height in the domain.
+     */
+    protected setDomainMinimumHeight(domainMinimumHeight: number): void {
+        // c++  void setDomainMinimumHeight(float domainMinimumHeight)
+        this._domainMinimumHeight
+            = Math.max(AvatarConstants.MIN_AVATAR_HEIGHT, Math.min(domainMinimumHeight, AvatarConstants.MAX_AVATAR_HEIGHT));
     }
 
-    protected getDomainLimitedScale(): number {
-        // C++  float AvatarData::getDomainLimitedScale()
+    /*@devdoc
+     *  Sets the maximum avatar height in the domain.
+     *  @param {number} domainMinimumHeight - The maximum avatar height in the domain.
+     */
+    protected setDomainMaximumHeight(domainMaximumHeight: number): void {
+        // C++  void setDomainMaximumHeight(float domainMaximumHeight)
+        this._domainMaximumHeight
+            = Math.max(AvatarConstants.MIN_AVATAR_HEIGHT, Math.min(domainMaximumHeight, AvatarConstants.MAX_AVATAR_HEIGHT));
+    }
 
-        // WEBRTC TODO: Address further C++ code - limit avatar scale per domain settings.
+    /*@devdoc
+     *  Gets whether the avatar's eye height is able to be measured.
+     *  @returns {boolean} <code>false</code> in the <code>AvatarData</code> class.
+     */
+    protected canMeasureEyeHeight(): boolean {  // eslint-disable-line class-methods-use-this
+        // C++  virtual bool canMeasureEyeHeight() const
+        return false;
+    }
 
-        return this._targetScale;
+    /*@devdoc
+     *  Gets the minimum avatar scale as set by the domain server.
+     *  @returns {number} The minimum avatar scale as set by the domain server.
+     */
+    protected getDomainMinScale(): number {
+        // C++  float AvatarData::getDomainMinScale() const
+        let unscaledHeight = this.getUnscaledHeight();
+        const EPSILON = 1.0e-4;
+        if (unscaledHeight <= EPSILON) {
+            unscaledHeight = AvatarConstants.DEFAULT_AVATAR_HEIGHT;
+        }
+        return this._domainMinimumHeight / unscaledHeight;
+    }
+
+    /*@devdoc
+     *  Gets the maximum avatar scale as set by the domain server.
+     *  @returns {number} The maximum avatar scale as set by the domain server.
+     */
+    protected getDomainMaxScale(): number {
+        // C++  float AvatarData::getDomainMaxScale() const
+        let unscaledHeight = this.getUnscaledHeight();
+        const EPSILON = 1.0e-4;
+        if (unscaledHeight <= EPSILON) {
+            unscaledHeight = AvatarConstants.DEFAULT_AVATAR_HEIGHT;
+        }
+        return this._domainMaximumHeight / unscaledHeight;
+    }
+
+    /*@devdoc
+     *  Gets the unscaled avatar height.
+     *  @returns {number} The unscaled avatar height.
+     */
+    protected getUnscaledHeight(): number {
+        // C++ float AvatarData::getUnscaledHeight() const
+        const eyeHeight = this.getUnscaledEyeHeight();
+        const ratio = eyeHeight / AvatarConstants.DEFAULT_AVATAR_HEIGHT;
+        return eyeHeight + ratio * AvatarConstants.DEFAULT_AVATAR_EYE_TO_TOP_OF_HEAD;
+    }
+
+    /*@devdoc
+     *  Gets the unscaled avatar eye height.
+     *  @returns {number} The unscaled avatar eye height.
+     */
+    protected getUnscaledEyeHeight(): number {  // eslint-disable-line class-methods-use-this
+        // C++  virtual float getUnscaledEyeHeight() const
+        return AvatarConstants.DEFAULT_AVATAR_EYE_HEIGHT;
+    }
+
+    /*@devdoc
+     *  Gets the avatar's world orientation.
+     *  @returns {quat} The avatar's world orientation.
+     */
+    // A method intended to be overridden by MyAvatar for polling orientation for network transmission.
+    protected getOrientationOutbound(): quat {
+        // C++  glm::quat getOrientationOutbound()
+        return this.getLocalOrientation();
     }
 
 
-    // eslint-disable-next-line class-methods-use-this
-    #lazyInitHeadData(): void {
+    #lazyInitHeadData(): void {  // eslint-disable-line class-methods-use-this
         // C++  void AvatarData::lazyInitHeadData()
         // Lazily allocate memory for HeadData in case we're not an Avatar instance.
 
