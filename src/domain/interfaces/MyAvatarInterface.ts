@@ -10,6 +10,7 @@
 //
 
 import { SkeletonJoint } from "../avatars/AvatarTraits";
+import AvatarConstants from "../shared/AvatarConstants";
 import ContextManager from "../shared/ContextManager";
 import Quat, { quat } from "../shared/Quat";
 import { Signal } from "../shared/SignalEmitter";
@@ -33,6 +34,15 @@ import AvatarManager from "../AvatarManager";
  *  @property {string} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *  @property {Signal<MyAvatarInterface~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton
  *      model URL changes.
+ *  @property {number} scale=1.0 - The scale of the avatar. The value can be set to a target value in the range
+ *      <code>0.005</code> &mdash; <code>1000.0</code>, however when the scale value is fetched, it may temporarily be limited
+ *      by the current domain's settings.
+ *  @property {Signal<MyAvatarInterface~scaleChanged>} scaleChanged - Triggered when the avatar's scale changes. This can be
+ *      due to the user changing the scale of their avatar or the domain limiting the scale of their avatar.
+ *  @property {number} targetScale=1.0 - The target scale of the avatar, <code>0.005</code> &mdash; <code>1000.0</code>. Unlike
+ *      <code>scale</code>, this value is not limited by the domain's settings.
+ *  @property {Signal<MyAvatarInterface~targetScaleChanged>} targetScaleChanged - Triggered when the avatar's target scale
+ *      changes.
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
  *  @property {SkeletonJoint[]|null} skeleton - Information on the avatar's skeleton. <code>null</code> if the avatar doesn't
@@ -52,8 +62,7 @@ class MyAvatarInterface {
 
 
     get displayName(): string {
-        const displayName = this.#_avatarManager.getMyAvatar().displayName;
-        return displayName !== null ? displayName : "";
+        return this.#_avatarManager.getMyAvatar().getDisplayName() ?? "";
     }
 
     set displayName(displayName: string) {
@@ -61,7 +70,7 @@ class MyAvatarInterface {
             console.error("[AvatarMixer] [MyAvatar] Tried to set invalid display name!", JSON.stringify(displayName));
             return;
         }
-        this.#_avatarManager.getMyAvatar().displayName = displayName;
+        this.#_avatarManager.getMyAvatar().setDisplayName(displayName);
     }
 
     /*@sdkdoc
@@ -73,8 +82,7 @@ class MyAvatarInterface {
     }
 
     get sessionDisplayName(): string {
-        const sessionDisplayName = this.#_avatarManager.getMyAvatar().sessionDisplayName;
-        return sessionDisplayName !== null ? sessionDisplayName : "";
+        return this.#_avatarManager.getMyAvatar().getSessionDisplayName() ?? "";
     }
 
     /*@sdkdoc
@@ -86,8 +94,7 @@ class MyAvatarInterface {
     }
 
     get skeletonModelURL(): string {
-        const skeletonModelURL = this.#_avatarManager.getMyAvatar().skeletonModelURL;
-        return skeletonModelURL !== null ? skeletonModelURL : "";
+        return this.#_avatarManager.getMyAvatar().getSkeletonModelURL() ?? "";
     }
 
     set skeletonModelURL(skeletonModelURL: string) {
@@ -96,7 +103,7 @@ class MyAvatarInterface {
                 JSON.stringify(skeletonModelURL));
             return;
         }
-        this.#_avatarManager.getMyAvatar().skeletonModelURL = skeletonModelURL;
+        this.#_avatarManager.getMyAvatar().setSkeletonModelURL(skeletonModelURL);
     }
 
     /*@sdkdoc
@@ -108,7 +115,7 @@ class MyAvatarInterface {
     }
 
     get skeleton(): SkeletonJoint[] | null {
-        return this.#_avatarManager.getMyAvatar().skeleton;
+        return this.#_avatarManager.getMyAvatar().getSkeletonData();
     }
 
     set skeleton(skeleton: SkeletonJoint[] | null) {
@@ -138,9 +145,9 @@ class MyAvatarInterface {
                 skeletonString.slice(0, MAX_STRING_LENGTH) + (skeletonString.length > MAX_STRING_LENGTH ? "..." : ""));
             return;
         }
-        this.#_avatarManager.getMyAvatar().skeleton = skeleton !== null
+        this.#_avatarManager.getMyAvatar().setSkeletonData(skeleton !== null
             ? JSON.parse(JSON.stringify(skeleton)) as SkeletonJoint[]  // Make a copy.
-            : null;
+            : null);
     }
 
     /*@sdkdoc
@@ -151,8 +158,60 @@ class MyAvatarInterface {
         return this.#_avatarManager.getMyAvatar().skeletonChanged;
     }
 
+    get scale(): number {
+        // C++  MyAvatar::scale
+        return this.#_avatarManager.getMyAvatar().getDomainLimitedScale();
+    }
+
+    set scale(scale: number) {
+        // C++  MyAvatar::scale
+        if (typeof scale !== "number") {
+            console.error("[AvatarMixer] [MyAvatar] Tried to set invalid scale!", JSON.stringify(scale));
+            return;
+        }
+        if (scale < AvatarConstants.MIN_AVATAR_SCALE || scale > AvatarConstants.MAX_AVATAR_SCALE) {
+            console.warn("[AvatarMixer] [MyAvatar] Tried to set an out of range targetScale value.", scale);
+        }
+        this.#_avatarManager.getMyAvatar().setTargetScale(Math.max(AvatarConstants.MIN_AVATAR_SCALE,
+            Math.min(scale, AvatarConstants.MAX_AVATAR_SCALE)));
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's scale changes.
+     *  @callback MyAvatarInterface~scaleChanged
+     *  @param {number} scale - The avatar's scale.
+     */
+    get scaleChanged(): Signal {
+        return this.#_avatarManager.getMyAvatar().scaleChanged;
+    }
+
+    get targetScale(): number {
+        return this.#_avatarManager.getMyAvatar().getTargetScale();
+    }
+
+    set targetScale(targetScale: number) {
+        if (typeof targetScale !== "number") {
+            console.error("[AvatarMixer] [MyAvatar] Tried to set invalid targetScale!", JSON.stringify(targetScale));
+            return;
+        }
+        if (targetScale < AvatarConstants.MIN_AVATAR_SCALE || targetScale > AvatarConstants.MAX_AVATAR_SCALE) {
+            console.warn("[AvatarMixer] [MyAvatar] Tried to set an out of range targetScale value.", targetScale);
+        }
+        this.#_avatarManager.getMyAvatar().setTargetScale(Math.max(AvatarConstants.MIN_AVATAR_SCALE,
+            Math.min(targetScale, AvatarConstants.MAX_AVATAR_SCALE)));
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's target scale changes.
+     *  @callback MyAvatarInterface~targetScaleChanged
+     *  @param {number} targetScale - The avatar's target scale.
+     */
+    get targetScaleChanged(): Signal {
+        return this.#_avatarManager.getMyAvatar().targetScaleChanged;
+    }
+
     get position(): vec3 {
-        return this.#_avatarManager.getMyAvatar().position;
+        return this.#_avatarManager.getMyAvatar().getWorldPosition();
     }
 
     set position(position: vec3) {
@@ -160,11 +219,11 @@ class MyAvatarInterface {
             console.error("[AvatarMixer] [MyAvatar] Tried to set an invalid position value!", JSON.stringify(position));
             return;
         }
-        this.#_avatarManager.getMyAvatar().position = position;
+        this.#_avatarManager.getMyAvatar().setWorldPosition(position);
     }
 
     get orientation(): quat {
-        return this.#_avatarManager.getMyAvatar().orientation;
+        return this.#_avatarManager.getMyAvatar().getWorldOrientation();
     }
 
     set orientation(orientation: quat) {
@@ -172,7 +231,7 @@ class MyAvatarInterface {
             console.error("[AvatarMixer] [MyAvatar] Tried to set an invalid orientation value!", JSON.stringify(orientation));
             return;
         }
-        this.#_avatarManager.getMyAvatar().orientation = orientation;
+        this.#_avatarManager.getMyAvatar().setWorldOrientation(orientation);
     }
 
 }

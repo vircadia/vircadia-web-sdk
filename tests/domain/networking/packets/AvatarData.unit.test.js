@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 29 Oct 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -56,6 +57,31 @@ describe("AvatarData - unit tests", () => {
             viewerPosition: { x: 0, y: 0, z: 0 },
             globalPosition: { x: -10, y: 100, z: 20 },
             localOrientation: { x: 0, y: 0.866025, z: 0, w: -0.5 }
+        });
+        expect(packet instanceof NLPacket).toBe(true);
+        expect(packet.getType()).toBe(PacketType.AvatarData);
+        const packetSize = packet.getDataSize();
+        expect(packetSize).toBe(packet.getMessageData().dataPosition);
+        expect(packetSize).toBeGreaterThan(0);
+        expect(packetSize).toBeLessThan(UDT.MAX_PACKET_SIZE);
+
+        expect(packetSize).toBe(EXPECTED_PACKET.length / 2);
+        expect(buffer2hex(packet.getMessageData().buffer.slice(0, packetSize))).toBe(EXPECTED_PACKET);
+    });
+
+    test("Can write an AvatarData packet - avatar scale", () => {
+        // eslint-disable-next-line max-len
+        const EXPECTED_PACKET = "000000000636000000000000000000000000000000000000c1000d009a9999bfc3f5a83f33338b41bfff3fff10cb4e12";
+        const packet = AvatarData.write({
+            sequenceNumber: 193,
+            dataDetail: 3,
+            lastSentTime: Date.now(),
+            dropFaceTracking: false,
+            distanceAdjust: false,
+            viewerPosition: { x: 0, y: 0, z: 0 },
+            globalPosition: { x: -1.2, y: 1.32, z: 17.4 },
+            localOrientation: { x: 0, y: 0.85322, z: 0, w: 0.52156 },
+            avatarScale: 1.43012
         });
         expect(packet instanceof NLPacket).toBe(true);
         expect(packet.getType()).toBe(PacketType.AvatarData);

@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 29 Oct 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -36,7 +37,8 @@ type AvatarDataDetails = {
 
     // Avatar data.
     globalPosition: vec3 | undefined,
-    localOrientation: quat | undefined
+    localOrientation: quat | undefined,
+    avatarScale: number | undefined
 };
 
 
@@ -56,8 +58,13 @@ const AvatarData = new class {
      *  @property {boolean} distanceAdjust
      *  @property {vec3} viewerPosition
      *
-     *  @property {vec3|undefined} globalPosition - The avatar's position in the domain.
-     *  @property {quat|undefined} localOrientation - The avatar's orientation.
+     *  @property {vec3|undefined} globalPosition - The avatar's position in the domain.<br />
+     *      Should be <code>undefined</code> if not known, otherwise it should always be sent.
+     *  @property {quat|undefined} localOrientation - The avatar's orientation.<br />
+     *      Should be <code>undefined</code> if not known or the value hasn't changed since the last time the packet was sent.
+     *  @property {number|undefined} avatarScale - The target scale of the avatar. The target scale is the desired scale of the
+     *      avatar without any restrictions on permissible scale values imposed by the domain.<br />
+     *      Should be <code>undefined</code> if not known or the value hasn't changed since the last time the packet was sent.
      */
 
 
@@ -119,10 +126,10 @@ const AvatarData = new class {
 
             if (sendStatus.itemFlags === 0) {
                 // New avatar...
-                const hasAvatarGlobalPosition = info.globalPosition !== undefined;
-                const hasAvatarOrientation = info.localOrientation !== undefined;
+                const hasAvatarGlobalPosition = info.globalPosition !== undefined;  // Should always be sent.
+                let hasAvatarOrientation = false;
                 const hasAvatarBoundingBox = false;
-                const hasAvatarScale = false;
+                let hasAvatarScale = false;
                 const hasLookAtPosition = false;
                 const hasAudioLoudness = false;
                 const hasSensorToWorldMatrix = false;
@@ -142,10 +149,16 @@ const AvatarData = new class {
                 if (sendPALMinimum) {
                     // hasAudioLoudness = true;
                 } else {
+                    // The C++ code is included here - commented out - so that the native client logic can be seen.
+                    // In the Web SDK, the "ChangedSince()" logic is included in the caller to AvatarData.write().
+                    //
                     // WEBRTC TODO: Address further C++ code - Further avatar properties.
-                    // hasAvatarOrientation = sendAll || info.avatarData.rotationChangedSince(info.lastSentTime);
+                    //
+                    // hasAvatarOrientation = sendAll || rotationChangedSince(lastSentTime);
+                    hasAvatarOrientation = info.localOrientation !== undefined;
                     // hasAvatarBoundingBox = sendAll || avatarBoundingBoxChangedSince(lastSentTime);
                     // hasAvatarScale = sendAll || avatarScaleChangedSince(lastSentTime);
+                    hasAvatarScale = info.avatarScale !== undefined;
                     // hasLookAtPosition = sendAll || lookAtPositionChangedSince(lastSentTime);
                     // hasAudioLoudness = sendAll || audioLoudnessChangedSince(lastSentTime);
                     // hasSensorToWorldMatrix = sendAll || sensorToWorldMatrixChangedSince(lastSentTime);
@@ -228,7 +241,6 @@ const AvatarData = new class {
 
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_AVATAR_BOUNDING_BOX.
 
-            // WEBRTC TODO: Address further C++ code - PACKET_HAS_AVATAR_ORIENTATION.
             if (avatarSpace(AvatarDataPacket.PACKET_HAS_AVATAR_ORIENTATION, 6)) {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 GLMHelpers.packOrientationQuatToSixBytes(data, dataPosition, info.localOrientation!);
@@ -236,7 +248,13 @@ const AvatarData = new class {
                 // WEBRTC TODO: Address further C++ code - Outbound data rate.
             }
 
-            // WEBRTC TODO: Address further C++ code - PACKET_HAS_AVATAR_SCALE.
+            if (avatarSpace(AvatarDataPacket.PACKET_HAS_AVATAR_SCALE, 2)) {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                GLMHelpers.packFloatRatioToTwoByte(data, dataPosition, info.avatarScale!);
+                dataPosition += 2;
+                // WEBRTC TODO: Address further C++ code - Outbound data rate.
+            }
+
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_LOOK_AT_POSITION.
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_AUDIO_LOUDNESS.
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_SENSOR_TO_WORLD_MATRIX.

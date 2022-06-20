@@ -49,6 +49,8 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *  @property {number} scale - The scale of the avatar. This includes any limits on permissible values imposed by the domain.
  *      <code>0.0</code> if the avatar doesn't exist.
  *      <em>Read-only.</em>
+ *  @property {Signal<ScriptAvatar~scaleChanged>} scaleChanged - Triggered when the avatar's scale changes. This can be
+ *      due to the user changing the scale of their avatar or the domain limiting the scale of their avatar.
  *  @property {vec3} position - The position of the avatar in the domain. {@link Vec3|Vec3.ZERO} if the avatar doesn't exist.
  *      <em>Read-only.</em>
  *  @property {quat} orientation - The orientation of the avatar in the domain. {@link Quat|Quat.IDENTITY} if the avatar doesn't
@@ -97,7 +99,7 @@ class ScriptAvatar {
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
-                return avatar.displayName !== null ? avatar.displayName : "";
+                return avatar.getDisplayName() ?? "";
             }
         }
         return "";
@@ -123,7 +125,7 @@ class ScriptAvatar {
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
-                return avatar.sessionDisplayName !== null ? avatar.sessionDisplayName : "";
+                return avatar.getSessionDisplayName() ?? "";
             }
         }
         return "";
@@ -148,8 +150,8 @@ class ScriptAvatar {
         // C++  QString ScriptAvatarData::getSkeletonModelURLFromScript()
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
-            if (avatar && avatar.skeletonModelURL !== null) {
-                return avatar.skeletonModelURL;
+            if (avatar) {
+                return avatar.getSkeletonModelURL() ?? "";
             }
         }
         return "";
@@ -174,8 +176,8 @@ class ScriptAvatar {
         // C++  No direct equivalent.
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
-            if (avatar && avatar.skeleton !== null) {
-                return avatar.skeleton;
+            if (avatar) {
+                return avatar.getSkeletonData() ?? [];
             }
         }
         return [];
@@ -204,6 +206,21 @@ class ScriptAvatar {
             }
         }
         return 0;
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's scale changes.
+     *  @callback ScriptAvatar~scaleChanged
+     *  @param {number} The new avatar scale.
+     */
+    get scaleChanged(): Signal {
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                return avatar.targetScaleChanged;
+            }
+        }
+        return new SignalEmitter().signal();
     }
 
     get position(): vec3 {

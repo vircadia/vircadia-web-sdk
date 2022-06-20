@@ -157,8 +157,8 @@ class ClientTraitsHandler {
             // WEBRTC TODO: Send other trait types.
             const packetList = PacketScribe.SetAvatarTraits.write({
                 currentTraitVersion: this.#_currentTraitVersion,
-                skeletonModelURL: this.#_owningAvatar.skeletonModelURL !== null ? this.#_owningAvatar.skeletonModelURL : "",
-                skeletonData: this.#_owningAvatar.skeleton !== null ? this.#_owningAvatar.skeleton : [],
+                skeletonModelURL: this.#_owningAvatar.getSkeletonModelURL() ?? "",
+                skeletonData: this.#_owningAvatar.getSkeletonData() ?? [],
                 traitStatuses: traitStatusCopy,
                 initialSend
             });

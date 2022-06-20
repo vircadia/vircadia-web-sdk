@@ -45,6 +45,8 @@ describe("ScriptAvatar - unit tests", () => {
         // Can access signals.
         expect(typeof scriptAvatar.displayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.displayNameChanged.disconnect).toBe("function");
+        expect(typeof scriptAvatar.scaleChanged.connect).toBe("function");
+        expect(typeof scriptAvatar.scaleChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.skeletonModelURLChanged.connect).toBe("function");
@@ -79,6 +81,8 @@ describe("ScriptAvatar - unit tests", () => {
         // Can access signals.
         expect(typeof scriptAvatar.displayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.displayNameChanged.disconnect).toBe("function");
+        expect(typeof scriptAvatar.scaleChanged.connect).toBe("function");
+        expect(typeof scriptAvatar.scaleChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.skeletonModelURLChanged.connect).toBe("function");
