@@ -253,6 +253,7 @@ enum EntityPropertyFlags {
 }
 
 type EntityDataDetails = {
+    sequence: number;
     id: Uuid,
     entityType: EntityTypes,
     created: BigInt,
@@ -367,6 +368,11 @@ type aaCubeData = {
 const EntityData = new class {
     // C++ N/A
 
+    // C++ OctreePacketData.h
+    readonly PACKET_IS_COMPRESSED_BIT = 1;
+    readonly OVERFLOWED_OCTCODE_BUFFER = -1;
+    readonly UNKNOWN_OCTCODE_LENGTH = -2;
+
     /*@devdoc
      *  Information returned by {@link PacketScribe|reading} an {@link PacketType(1)|EntityData} packet.
      *  @typedef {object} PacketScribe.EntityDataDetails
@@ -378,16 +384,14 @@ const EntityData = new class {
      *  @read {DataView} data - The {@link Packets|EntityData} message data to read.
      *  @returns {PacketScribe.EntityDataDetails} The entity data information.
      */
-    read(data: DataView): EntityDataDetails { /* eslint-disable-line class-methods-use-this */
+    read(data: DataView): EntityDataDetails[] { /* eslint-disable-line class-methods-use-this */
         // C++ void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointer sourceNode)
         //     int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //     ReadBitstreamToTreeParams& args)
 
         // TODO:
-        // 0. Strip first 4 bytes (qCompress header)
-        // 1. Decompresss data
-        // 2. Get total number of bytes to read.
-        // 3. Loop until all bytes have been read.
+        // 3. Get total number of bytes to read.
+        // 4. Loop until all bytes have been read.
 
         const textDecoder = new TextDecoder();
 
@@ -395,1007 +399,1121 @@ const EntityData = new class {
 
         let dataPosition = 0;
 
-        const id = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
-        dataPosition += 16;
+        const flags = data.getUint8(dataPosition);
+        dataPosition += 1;
 
-        const entityTypeCodec = new ByteCountCoded();
-        dataPosition += entityTypeCodec.decode(data, data.byteLength - dataPosition, dataPosition);
-        const entityType = entityTypeCodec.data;
-        // TODO: Check entityType. Return if it's not a modelEntity
-        // (return default values for other fields in EntityDataDetails?)
-        // if (entityType !== EntityTypes.Model) {
-        //     return {};
-        // }
+        const sequence = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+        dataPosition += 2;
 
-        const created = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
+        // TODO: not used?
+        // eslint-disable-next-line
+        // @ts-ignore
+        const sentAt = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
         dataPosition += 8;
 
-        const lastEdited = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
-        dataPosition += 8;
+        const packetIsCompressed = flags >> 7 - this.PACKET_IS_COMPRESSED_BIT & 1;
 
-        const updateDeltaCodec = new ByteCountCoded();
-        dataPosition += updateDeltaCodec.decode(data, data.byteLength - dataPosition, dataPosition);
-        const updateDelta = updateDeltaCodec.data;
-
-        const simulatedDeltaCodec = new ByteCountCoded();
-        dataPosition += simulatedDeltaCodec.decode(data, data.byteLength - dataPosition, dataPosition);
-        const simulatedDelta = simulatedDeltaCodec.data;
-
-        const propertyFlags = new PropertyFlags();
-        dataPosition += propertyFlags.decode(data, data.byteLength - dataPosition, dataPosition);
-
-        let propSimOwnerData: ArrayBuffer | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+        let sectionLength = 0;
+        if (packetIsCompressed) {
+            sectionLength = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
-            if (length > 0) {
-                const buffer = new Uint8Array(length);
-                const view = new DataView(buffer.buffer);
+        } else {
+            sectionLength = data.buffer.byteLength - dataPosition;
+        }
 
-                for (let i = 0; i < length; i++) {
-                    view.setUint8(i, data.getUint8(dataPosition));
-                    dataPosition += 1;
+        const entityDataDetails: EntityDataDetails[] = [];
+
+        if (sectionLength) {
+            // eslint-disable-next-line
+            let entityData;
+            if (packetIsCompressed) {
+                // Skip the next first 4 bytes (QT qCompress header).
+                const compressedData = data.buffer.slice(dataPosition + 4);
+                // TODO: Check error returned by ungzip.
+                entityData = new DataView(ungzip(compressedData).buffer);
+                dataPosition = 0;
+            } else {
+                entityData = data;
+
+            }
+
+            // TODO?: Put this function in its own module?
+            // Originally written recursively, numberOfThreeBitSectionsInCode is here rewritten iteratively
+            // to be used as an anonymous function .
+            // eslint-disable-next-line max-len
+            const numberOfThreeBitSectionsInCode = (data: DataView, dataPosition: number, maxBytes: number): number => { // eslint-disable-line @typescript-eslint/no-shadow
+                // C++ int numberOfThreeBitSectionsInCode(const unsigned char* octalCode, int maxBytes)
+
+                if (maxBytes === this.OVERFLOWED_OCTCODE_BUFFER) {
+                    return this.OVERFLOWED_OCTCODE_BUFFER;
                 }
-                propSimOwnerData = buffer;
-            }
-        }
 
-        let propParentID: Uuid | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
+                let dataPos = dataPosition;
 
-            if (length > 0) {
-                propParentID = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
-                dataPosition += 16;
-            }
-        }
+                let curOctalCode = data.getUint8(dataPosition);
+                let result = curOctalCode;
+                while (curOctalCode === 255) {
+                    result += curOctalCode;
+                    dataPos += 1;
+                    curOctalCode = data.getUint8(dataPos);
 
-        let propParentJointIndex: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PARENT_JOINT_INDEX)) {
-            propParentJointIndex = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-        }
+                    const newMaxBytes = maxBytes === this.UNKNOWN_OCTCODE_LENGTH ? this.UNKNOWN_OCTCODE_LENGTH : maxBytes - 1;
+                    if (newMaxBytes === this.OVERFLOWED_OCTCODE_BUFFER) {
+                        result += this.OVERFLOWED_OCTCODE_BUFFER;
+                        break;
+                    }
+                }
 
-        let propVisible: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VISIBLE)) {
-            propVisible = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propName: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_NAME)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-            if (length > 0) {
-                propName = textDecoder.decode(new Uint8Array(data.buffer, data.byteOffset + dataPosition, length));
-                dataPosition += length;
-            }
-        }
-
-        let propLocked: boolean | undefined = false;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LOCKED)) {
-            propLocked = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propUserData: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USER_DATA)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-            if (length > 0) {
-                propUserData = textDecoder.decode(new Uint8Array(data.buffer, data.byteOffset + dataPosition, length));
-                dataPosition += length;
-            }
-        }
-
-        let propPrivateUserData: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PRIVATE_USER_DATA)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-            if (length > 0) {
-                propPrivateUserData = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
-            }
-        }
-
-        let propHref: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HREF)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-            if (length > 0) {
-                propHref = textDecoder.decode(new Uint8Array(data.buffer, data.byteOffset + dataPosition, length));
-                dataPosition += length;
-            }
-        }
-
-        let propDescription: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DESCRIPTION)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-            if (length > 0) {
-                propDescription = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
-            }
-        }
-
-        let propPosition: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_POSITION)) {
-            propPosition = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                return result;
             };
-            dataPosition += 12;
-        }
 
-        let propDimension: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DIMENSIONS)) {
-            propDimension = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+            const numberOfThreeBitSectionsFromNode
+                = numberOfThreeBitSectionsInCode(entityData, dataPosition, entityData.byteLength);
+
+            // TODO?: Put in its own module?
+            const bytesRequiredForCodeLength = (threeBitCodes: number): number => {
+                // C++ size_t bytesRequiredForCodeLength(unsigned char threeBitCodes)
+
+                if (threeBitCodes === 0) {
+                    return 1;
+                }
+                return 1 + Math.ceil(threeBitCodes * 3 / 8.0);
             };
-            dataPosition += 12;
-        }
 
-        let propRotation: quat | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ROTATION)) {
-            propRotation = GLMHelpers.unpackOrientationQuatFromBytes(data, dataPosition);
+            const octalCodeBytes = bytesRequiredForCodeLength(numberOfThreeBitSectionsFromNode);
+            dataPosition += octalCodeBytes;
+
+            // WEBRTC TODO: Use colorInPacketMask as in C++ Octree::readElementData.
+            // eslint-disable-next-line
+            // @ts-ignore
+            const colorInPacketMask = entityData.getUint8(dataPosition);
+            dataPosition += 1;
+
+            // WEBRTC TODO: Use bytesForMask as in C++ Octree::readElementData.
+            // eslint-disable-next-line
+            // @ts-ignore
+            const bytesForMask = 2;
+            dataPosition += bytesForMask;
+
+            // WEBRTC TODO: Use numberOfEntities as in EntityTree::readEntityDataFromBuffer.
+            // eslint-disable-next-line
+            // @ts-ignore
+            const numberOfEntities = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+
+            const id = new Uuid(entityData.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
+            dataPosition += 16;
+
+            const entityTypeCodec = new ByteCountCoded();
+            dataPosition += entityTypeCodec.decode(entityData, entityData.byteLength - dataPosition, dataPosition);
+            const entityType = entityTypeCodec.data;
+            // TODO: Check entityType. Return if it's not a modelEntity
+            // (return default values for other fields in EntityDataDetails?)
+            // if (entityType !== EntityTypes.Model) {
+            //     return {};
+            // }
+
+            const created = entityData.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 8;
-        }
 
-        let propRegistrationPoint: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_REGISTRATION_POINT)) {
-            propRegistrationPoint = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
-            };
-            dataPosition += 12;
-        }
-
-        let propCreated: BigInt | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CREATED)) {
-            propCreated = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
+            const lastEdited = entityData.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 8;
-        }
 
-        let propLastEdited: Uuid | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LAST_EDITED_BY)) {
-            const propLastEditedLength = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
+            const updateDeltaCodec = new ByteCountCoded();
+            dataPosition += updateDeltaCodec.decode(entityData, entityData.byteLength - dataPosition, dataPosition);
+            const updateDelta = updateDeltaCodec.data;
 
-            if (propLastEditedLength > 0) {
-                propLastEdited = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
-                dataPosition += 16;
+            const simulatedDeltaCodec = new ByteCountCoded();
+            dataPosition += simulatedDeltaCodec.decode(entityData, entityData.byteLength - dataPosition, dataPosition);
+            const simulatedDelta = simulatedDeltaCodec.data;
+
+            const propertyFlags = new PropertyFlags();
+            dataPosition += propertyFlags.decode(entityData, entityData.byteLength - dataPosition, dataPosition);
+
+            let propSimOwnerData: ArrayBuffer | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    const buffer = new Uint8Array(length);
+                    const view = new DataView(buffer.buffer);
+
+                    for (let i = 0; i < length; i++) {
+                        view.setUint8(i, entityData.getUint8(dataPosition));
+                        dataPosition += 1;
+                    }
+                    propSimOwnerData = buffer;
+                }
             }
-        }
 
-        let propAaCubeData: aaCubeData | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_QUERY_AA_CUBE)) {
-            const corner = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
-            };
-            dataPosition += 12;
+            let propParentID: Uuid | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
 
-            const scale = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-
-            propAaCubeData = {
-                corner,
-                scale
-            };
-        }
-
-        let propCanCastShadow: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CAN_CAST_SHADOW)) {
-            propCanCastShadow = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propRenderLayer: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RENDER_LAYER)) {
-            propRenderLayer = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propPrimitiveMode: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PRIMITIVE_MODE)) {
-            propPrimitiveMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propIgnorePickIntersection: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_IGNORE_PICK_INTERSECTION)) {
-            propIgnorePickIntersection = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propRenderWithZones: Uuid[] | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RENDER_WITH_ZONES)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propRenderWithZones = [];
-                for (let i = 0; i < length; i++) {
-                    propRenderWithZones.push(new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN)));
+                if (length > 0) {
+                    propParentID = new Uuid(entityData.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
                     dataPosition += 16;
                 }
             }
 
-        }
-
-        let propBillboardMode: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BILLBOARD_MODE)) {
-            propBillboardMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propGrabbable: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_GRABBABLE)) {
-            propGrabbable = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propKinematic: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_KINEMATIC)) {
-            propKinematic = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propFollowsController: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_FOLLOWS_CONTROLLER)) {
-            propFollowsController = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propTriggerable: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_TRIGGERABLE)) {
-            propTriggerable = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propEquippable: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE)) {
-            propEquippable = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propDelegateToParent: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_DELEGATE_TO_PARENT)) {
-            propDelegateToParent = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propGrabLeftEquippablePositionOffset: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET)) {
-            propGrabLeftEquippablePositionOffset = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
-            };
-            dataPosition += 12;
-        }
-
-        let propGrabLeftEquippableRotationOffset: quat | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET)) {
-            propGrabLeftEquippableRotationOffset = GLMHelpers.unpackOrientationQuatFromBytes(data, dataPosition);
-            dataPosition += 8;
-        }
-
-        let propGrabRightEquippablePositionOffset: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET)) {
-            propGrabRightEquippablePositionOffset = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
-            };
-            dataPosition += 12;
-        }
-
-        let propGrabRightEquippableRotationOffset: quat | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET)) {
-            propGrabRightEquippableRotationOffset = GLMHelpers.unpackOrientationQuatFromBytes(data, dataPosition);
-            dataPosition += 8;
-        }
-
-        let propGrabEquippableIndicatorUrl: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_URL)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propGrabEquippableIndicatorUrl = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propParentJointIndex: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PARENT_JOINT_INDEX)) {
+                propParentJointIndex = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
             }
-        }
 
-        let propGrabRightEquippableIndicatorScale: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE)) {
-            propGrabRightEquippableIndicatorScale = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
-            };
-            dataPosition += 12;
-        }
-
-        let propGrabRightEquippableIndicatorOffset: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET)) {
-            propGrabRightEquippableIndicatorOffset = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
-            };
-            dataPosition += 12;
-        }
-
-        let propDensity: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DENSITY)) {
-            propDensity = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propVelocity: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VELOCITY)) {
-            propVelocity = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
-            };
-            dataPosition += 12;
-        }
-
-        let propAngularVelocity: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_VELOCITY)) {
-            propAngularVelocity = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
-            };
-            dataPosition += 12;
-        }
-
-        let propGravity: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAVITY)) {
-            propGravity = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
-            };
-            dataPosition += 12;
-        }
-
-        let propAcceleration: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACCELERATION)) {
-            propAcceleration = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
-            };
-            dataPosition += 12;
-        }
-
-        let propDamping: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DAMPING)) {
-            propDamping = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propAngularDampling: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_DAMPING)) {
-            propAngularDampling = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propRestitution: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RESTITUTION)) {
-            propRestitution = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propFriction: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_FRICTION)) {
-            propFriction = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propLifetime: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIFETIME)) {
-            propLifetime = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propCollisionless: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISIONLESS)) {
-            propCollisionless = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propCollisionMask: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_MASK)) {
-            propCollisionMask = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-        }
-
-        let propDynamic: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DYNAMIC)) {
-            propDynamic = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propCollisionSoundUrl: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_SOUND_URL)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propCollisionSoundUrl = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propVisible: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VISIBLE)) {
+                propVisible = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
             }
-        }
 
-        let propActionData: ArrayBuffer | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACTION_DATA)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                const buffer = new Uint8Array(length);
-                const view = new DataView(buffer.buffer);
-
-                for (let i = 0; i < length; i++) {
-                    view.setUint8(i, data.getUint8(dataPosition));
-                    dataPosition += 1;
+            let propName: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_NAME)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+                if (length > 0) {
+                    propName = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
                 }
-                propActionData = buffer;
+            }
+
+            let propLocked: boolean | undefined = false;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LOCKED)) {
+                propLocked = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propUserData: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USER_DATA)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+                if (length > 0) {
+                    propUserData = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propPrivateUserData: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PRIVATE_USER_DATA)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+                if (length > 0) {
+                    propPrivateUserData = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propHref: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HREF)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+                if (length > 0) {
+                    propHref = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propDescription: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DESCRIPTION)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+                if (length > 0) {
+                    propDescription = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propPosition: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_POSITION)) {
+                propPosition = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let propDimension: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DIMENSIONS)) {
+                propDimension = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let propRotation: quat | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ROTATION)) {
+                propRotation = GLMHelpers.unpackOrientationQuatFromBytes(entityData, dataPosition);
+                dataPosition += 8;
+            }
+
+            let propRegistrationPoint: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_REGISTRATION_POINT)) {
+                propRegistrationPoint = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let propCreated: BigInt | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CREATED)) {
+                propCreated = entityData.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 8;
+            }
+
+            let propLastEdited: Uuid | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LAST_EDITED_BY)) {
+                const propLastEditedLength = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (propLastEditedLength > 0) {
+                    propLastEdited = new Uuid(entityData.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
+                    dataPosition += 16;
+                }
+            }
+
+            let propAaCubeData: aaCubeData | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_QUERY_AA_CUBE)) {
+                const corner = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+
+                const scale = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+
+                propAaCubeData = {
+                    corner,
+                    scale
+                };
+            }
+
+            let propCanCastShadow: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CAN_CAST_SHADOW)) {
+                propCanCastShadow = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propRenderLayer: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RENDER_LAYER)) {
+                propRenderLayer = entityData.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propPrimitiveMode: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PRIMITIVE_MODE)) {
+                propPrimitiveMode = entityData.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propIgnorePickIntersection: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_IGNORE_PICK_INTERSECTION)) {
+                propIgnorePickIntersection = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propRenderWithZones: Uuid[] | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RENDER_WITH_ZONES)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propRenderWithZones = [];
+                    for (let i = 0; i < length; i++) {
+                        propRenderWithZones.push(new Uuid(entityData.getBigUint128(dataPosition, UDT.BIG_ENDIAN)));
+                        dataPosition += 16;
+                    }
+                }
 
             }
-        }
 
-        let propCloneable: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONEABLE)) {
-            propCloneable = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propCloneLifetime: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_LIFETIME)) {
-            propCloneLifetime = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propCloneLimit: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_LIMIT)) {
-            propCloneLimit = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propCloneDynamic: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_DYNAMIC)) {
-            propCloneDynamic = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propCloneAvatarIdentity: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_AVATAR_ENTITY)) {
-            propCloneAvatarIdentity = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propCloneOriginId: Uuid | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_ORIGIN_ID)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propCloneOriginId = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
-                dataPosition += 16;
+            let propBillboardMode: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BILLBOARD_MODE)) {
+                propBillboardMode = entityData.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
             }
-        }
 
-        let propScript: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propScript = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propGrabbable: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_GRABBABLE)) {
+                propGrabbable = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
             }
-        }
 
-        let propScriptTimestamp: BigInt | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT_TIMESTAMP)) {
-            propScriptTimestamp = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 8;
-        }
-
-        let propServerScripts: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SERVER_SCRIPTS)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propServerScripts = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propKinematic: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_KINEMATIC)) {
+                propKinematic = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
             }
-        }
 
-        let propItemName: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_NAME)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propItemName = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propFollowsController: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_FOLLOWS_CONTROLLER)) {
+                propFollowsController = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
             }
-        }
 
-        let propItemDescription: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_DESCRIPTION)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propItemDescription = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propTriggerable: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_TRIGGERABLE)) {
+                propTriggerable = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
             }
-        }
 
-        let propItemCategories: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_CATEGORIES)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propItemCategories = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propEquippable: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE)) {
+                propEquippable = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
             }
-        }
 
-        let propItemArtist: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_ARTIST)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propItemArtist = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propDelegateToParent: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_DELEGATE_TO_PARENT)) {
+                propDelegateToParent = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
             }
-        }
 
-        let propItemLicense: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_LICENSE)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propItemLicense = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propGrabLeftEquippablePositionOffset: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET)) {
+                propGrabLeftEquippablePositionOffset = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
             }
-        }
 
-        let propLimitedRun: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIMITED_RUN)) {
-            propLimitedRun = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propMarketplaceID: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MARKETPLACE_ID)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propMarketplaceID = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propGrabLeftEquippableRotationOffset: quat | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET)) {
+                propGrabLeftEquippableRotationOffset = GLMHelpers.unpackOrientationQuatFromBytes(entityData, dataPosition);
+                dataPosition += 8;
             }
-        }
 
-        let propEditionNumber: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EDITION_NUMBER)) {
-            propEditionNumber = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propEntityInstanceNumber: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ENTITY_INSTANCE_NUMBER)) {
-            propEntityInstanceNumber = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propCertificateID: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_ID)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propCertificateID = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propGrabRightEquippablePositionOffset: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET)) {
+                propGrabRightEquippablePositionOffset = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
             }
-        }
 
-        let propCertificateType: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_TYPE)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propCertificateType = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propGrabRightEquippableRotationOffset: quat | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET)) {
+                propGrabRightEquippableRotationOffset = GLMHelpers.unpackOrientationQuatFromBytes(entityData, dataPosition);
+                dataPosition += 8;
             }
-        }
 
-        let propStaticCertificateVersion: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_STATIC_CERTIFICATE_VERSION)) {
-            propStaticCertificateVersion = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
+            let propGrabEquippableIndicatorUrl: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_URL)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
 
-        let propShapeType: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SHAPE_TYPE)) {
-            propShapeType = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let propCompoundShapeUrl: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COMPOUND_SHAPE_URL)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propCompoundShapeUrl = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+                if (length > 0) {
+                    propGrabEquippableIndicatorUrl = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
             }
-        }
 
-        let propColor: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
+            let propGrabRightEquippableIndicatorScale: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE)) {
+                propGrabRightEquippableIndicatorScale = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let propGrabRightEquippableIndicatorOffset: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET)) {
+                propGrabRightEquippableIndicatorOffset = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let propDensity: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DENSITY)) {
+                propDensity = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propVelocity: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VELOCITY)) {
+                propVelocity = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let propAngularVelocity: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_VELOCITY)) {
+                propAngularVelocity = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let propGravity: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAVITY)) {
+                propGravity = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let propAcceleration: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACCELERATION)) {
+                propAcceleration = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let propDamping: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DAMPING)) {
+                propDamping = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propAngularDampling: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_DAMPING)) {
+                propAngularDampling = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propRestitution: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RESTITUTION)) {
+                propRestitution = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propFriction: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_FRICTION)) {
+                propFriction = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propLifetime: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIFETIME)) {
+                propLifetime = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propCollisionless: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISIONLESS)) {
+                propCollisionless = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propCollisionMask: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_MASK)) {
+                propCollisionMask = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+            }
+
+            let propDynamic: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DYNAMIC)) {
+                propDynamic = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propCollisionSoundUrl: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_SOUND_URL)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propCollisionSoundUrl = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propActionData: ArrayBuffer | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACTION_DATA)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    const buffer = new Uint8Array(length);
+                    const view = new DataView(buffer.buffer);
+
+                    for (let i = 0; i < length; i++) {
+                        view.setUint8(i, entityData.getUint8(dataPosition));
+                        dataPosition += 1;
+                    }
+                    propActionData = buffer;
+
+                }
+            }
+
+            let propCloneable: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONEABLE)) {
+                propCloneable = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propCloneLifetime: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_LIFETIME)) {
+                propCloneLifetime = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propCloneLimit: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_LIMIT)) {
+                propCloneLimit = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propCloneDynamic: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_DYNAMIC)) {
+                propCloneDynamic = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propCloneAvatarIdentity: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_AVATAR_ENTITY)) {
+                propCloneAvatarIdentity = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propCloneOriginId: Uuid | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_ORIGIN_ID)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propCloneOriginId = new Uuid(entityData.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
+                    dataPosition += 16;
+                }
+            }
+
+            let propScript: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propScript = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propScriptTimestamp: BigInt | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT_TIMESTAMP)) {
+                propScriptTimestamp = entityData.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 8;
+            }
+
+            let propServerScripts: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SERVER_SCRIPTS)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propServerScripts = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propItemName: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_NAME)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propItemName = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propItemDescription: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_DESCRIPTION)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propItemDescription = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propItemCategories: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_CATEGORIES)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propItemCategories = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propItemArtist: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_ARTIST)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propItemArtist = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propItemLicense: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_LICENSE)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propItemLicense = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propLimitedRun: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIMITED_RUN)) {
+                propLimitedRun = entityData.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propMarketplaceID: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MARKETPLACE_ID)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propMarketplaceID = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propEditionNumber: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EDITION_NUMBER)) {
+                propEditionNumber = entityData.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propEntityInstanceNumber: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ENTITY_INSTANCE_NUMBER)) {
+                propEntityInstanceNumber = entityData.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propCertificateID: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_ID)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propCertificateID = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propCertificateType: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_TYPE)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propCertificateType = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propStaticCertificateVersion: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_STATIC_CERTIFICATE_VERSION)) {
+                propStaticCertificateVersion = entityData.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propShapeType: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SHAPE_TYPE)) {
+                propShapeType = entityData.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propCompoundShapeUrl: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COMPOUND_SHAPE_URL)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propCompoundShapeUrl = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propColor: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
             // The C++ stores the color property into a glm::u8vec3. It does not make a difference here
             // because the type of x, y and z is number.
-            propColor = {
-                x: data.getUint8(dataPosition),
-                y: data.getUint8(dataPosition + 1),
-                z: data.getUint8(dataPosition + 2)
-            };
-            dataPosition += 3;
-        }
-
-        let propTextures: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXTURES)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propTextures = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+                propColor = {
+                    x: entityData.getUint8(dataPosition),
+                    y: entityData.getUint8(dataPosition + 1),
+                    z: entityData.getUint8(dataPosition + 2)
+                };
+                dataPosition += 3;
             }
-        }
 
-        let propModelUrl: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_URL)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
+            let propTextures: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXTURES)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
 
-            if (length > 0) {
-                propModelUrl = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
-            }
-        }
-
-        let propModelScale: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_SCALE)) {
-            propModelScale = {
-                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
-            };
-            dataPosition += 12;
-        }
-
-        let propJointRotationsSet: boolean[] | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_ROTATIONS_SET)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propJointRotationsSet = [];
-                for (let i = 0; i < length; i++) {
-                    propJointRotationsSet.push(Boolean(data.getUint8(dataPosition + i)));
-                }
-                dataPosition += length;
-            }
-        }
-
-        let propJointRotations: quat[] | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_ROTATIONS)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propJointRotations = [];
-                for (let i = 0; i < length; i++) {
-                    propJointRotations.push(GLMHelpers.unpackOrientationQuatFromBytes(data, dataPosition + i * 8));
-                }
-                dataPosition += length;
-            }
-        }
-
-        let propJointTranslationsSet: boolean[] | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_TRANSLATIONS_SET)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propJointTranslationsSet = [];
-                for (let i = 0; i < length; i++) {
-                    propJointTranslationsSet.push(Boolean(data.getUint8(dataPosition + i)));
-                }
-                dataPosition += length;
-            }
-        }
-
-        let propJointTranslations: vec3[] | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_TRANSLATIONS)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propJointTranslations = [];
-                for (let i = 0; i < length; i++) {
-                    propJointTranslations.push(
-                        {
-                            x: data.getFloat32(dataPosition + i * 12, UDT.LITTLE_ENDIAN),
-                            y: data.getFloat32(dataPosition + 4 + i * 12, UDT.LITTLE_ENDIAN),
-                            z: data.getFloat32(dataPosition + 8 + i * 12, UDT.LITTLE_ENDIAN)
-                        }
+                if (length > 0) {
+                    propTextures = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
                     );
-
+                    dataPosition += length;
                 }
-                dataPosition += length;
             }
-        }
 
-        let propRelayParentJoints: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RELAY_PARENT_JOINTS)) {
-            propRelayParentJoints = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
+            let propModelUrl: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_URL)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
 
-        let propGroupCulled: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GROUP_CULLED)) {
-            propGroupCulled = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propBlendShapeCoefficients: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BLENDSHAPE_COEFFICIENTS)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propBlendShapeCoefficients = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+                if (length > 0) {
+                    propModelUrl = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
             }
-        }
 
-        let propUseOriginalPivot: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USE_ORIGINAL_PIVOT)) {
-            propUseOriginalPivot = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
-
-        let propAnimationUrl: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_URL)) {
-            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 2;
-
-            if (length > 0) {
-                propAnimationUrl = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
-                dataPosition += length;
+            let propModelScale: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_SCALE)) {
+                propModelScale = {
+                    x: entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: entityData.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: entityData.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
             }
-        }
 
-        let propAnimationAllowTranslation: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_ALLOW_TRANSLATION)) {
-            propAnimationAllowTranslation = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
+            let propJointRotationsSet: boolean[] | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_ROTATIONS_SET)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
 
-        let propAnimationFPS: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FPS)) {
-            propAnimationFPS = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
+                if (length > 0) {
+                    propJointRotationsSet = [];
+                    for (let i = 0; i < length; i++) {
+                        propJointRotationsSet.push(Boolean(entityData.getUint8(dataPosition + i)));
+                    }
+                    dataPosition += length;
+                }
+            }
 
-        let propAnimationFrameIndex: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FRAME_INDEX)) {
-            propAnimationFrameIndex = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
+            let propJointRotations: quat[] | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_ROTATIONS)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
 
-        let propAnimationPlaying: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_PLAYING)) {
-            propAnimationPlaying = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
+                if (length > 0) {
+                    propJointRotations = [];
+                    for (let i = 0; i < length; i++) {
+                        propJointRotations.push(GLMHelpers.unpackOrientationQuatFromBytes(entityData, dataPosition + i * 8));
+                    }
+                    dataPosition += length;
+                }
+            }
 
-        let propAnimationLoop: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_LOOP)) {
-            propAnimationLoop = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
-        }
+            let propJointTranslationsSet: boolean[] | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_TRANSLATIONS_SET)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
 
-        let propAnimationFirstFrame: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FIRST_FRAME)) {
-            propAnimationFirstFrame = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
+                if (length > 0) {
+                    propJointTranslationsSet = [];
+                    for (let i = 0; i < length; i++) {
+                        propJointTranslationsSet.push(Boolean(entityData.getUint8(dataPosition + i)));
+                    }
+                    dataPosition += length;
+                }
+            }
 
-        let propAnimationLastFrame: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_LAST_FRAME)) {
-            propAnimationLastFrame = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
+            let propJointTranslations: vec3[] | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_TRANSLATIONS)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
 
-        let propAnimationHold: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_HOLD)) {
-            propAnimationHold = Boolean(data.getUint8(dataPosition));
-            dataPosition += 1;
+                if (length > 0) {
+                    propJointTranslations = [];
+                    for (let i = 0; i < length; i++) {
+                        propJointTranslations.push(
+                            {
+                                x: entityData.getFloat32(dataPosition + i * 12, UDT.LITTLE_ENDIAN),
+                                y: entityData.getFloat32(dataPosition + 4 + i * 12, UDT.LITTLE_ENDIAN),
+                                z: entityData.getFloat32(dataPosition + 8 + i * 12, UDT.LITTLE_ENDIAN)
+                            }
+                        );
+
+                    }
+                    dataPosition += length;
+                }
+            }
+
+            let propRelayParentJoints: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RELAY_PARENT_JOINTS)) {
+                propRelayParentJoints = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propGroupCulled: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GROUP_CULLED)) {
+                propGroupCulled = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propBlendShapeCoefficients: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BLENDSHAPE_COEFFICIENTS)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propBlendShapeCoefficients = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propUseOriginalPivot: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USE_ORIGINAL_PIVOT)) {
+                propUseOriginalPivot = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propAnimationUrl: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_URL)) {
+                const length = entityData.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    propAnimationUrl = textDecoder.decode(
+                        new Uint8Array(entityData.buffer, entityData.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let propAnimationAllowTranslation: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_ALLOW_TRANSLATION)) {
+                propAnimationAllowTranslation = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propAnimationFPS: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FPS)) {
+                propAnimationFPS = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propAnimationFrameIndex: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FRAME_INDEX)) {
+                propAnimationFrameIndex = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propAnimationPlaying: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_PLAYING)) {
+                propAnimationPlaying = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propAnimationLoop: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_LOOP)) {
+                propAnimationLoop = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let propAnimationFirstFrame: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FIRST_FRAME)) {
+                propAnimationFirstFrame = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propAnimationLastFrame: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_LAST_FRAME)) {
+                propAnimationLastFrame = entityData.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let propAnimationHold: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_HOLD)) {
+                propAnimationHold = Boolean(entityData.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            entityDataDetails.push(
+                {
+                    sequence,
+                    id,
+                    entityType,
+                    created,
+                    lastEdited,
+                    updateDelta,
+                    simulatedDelta,
+                    propSimOwnerData,
+                    propParentID,
+                    propParentJointIndex,
+                    propVisible,
+                    propName,
+                    propLocked,
+                    propUserData,
+                    propPrivateUserData,
+                    propHref,
+                    propDescription,
+                    propPosition,
+                    propDimension,
+                    propRotation,
+                    propRegistrationPoint,
+                    propCreated,
+                    propLastEdited,
+                    propAaCubeData,
+                    propCanCastShadow,
+                    propRenderLayer,
+                    propPrimitiveMode,
+                    propIgnorePickIntersection,
+                    propRenderWithZones,
+                    propBillboardMode,
+                    propGrabbable,
+                    propKinematic,
+                    propFollowsController,
+                    propTriggerable,
+                    propEquippable,
+                    propDelegateToParent,
+                    propGrabLeftEquippablePositionOffset,
+                    propGrabLeftEquippableRotationOffset,
+                    propGrabRightEquippablePositionOffset,
+                    propGrabRightEquippableRotationOffset,
+                    propGrabEquippableIndicatorUrl,
+                    propGrabRightEquippableIndicatorScale,
+                    propGrabRightEquippableIndicatorOffset,
+                    propDensity,
+                    propVelocity,
+                    propAngularVelocity,
+                    propGravity,
+                    propAcceleration,
+                    propDamping,
+                    propAngularDampling,
+                    propRestitution,
+                    propFriction,
+                    propLifetime,
+                    propCollisionless,
+                    propCollisionMask,
+                    propDynamic,
+                    propCollisionSoundUrl,
+                    propActionData,
+                    propCloneable,
+                    propCloneLifetime,
+                    propCloneLimit,
+                    propCloneDynamic,
+                    propCloneAvatarIdentity,
+                    propCloneOriginId,
+                    propScript,
+                    propScriptTimestamp,
+                    propServerScripts,
+                    propItemName,
+                    propItemDescription,
+                    propItemCategories,
+                    propItemArtist,
+                    propItemLicense,
+                    propLimitedRun,
+                    propMarketplaceID,
+                    propEditionNumber,
+                    propEntityInstanceNumber,
+                    propCertificateID,
+                    propCertificateType,
+                    propStaticCertificateVersion,
+                    propShapeType,
+                    propCompoundShapeUrl,
+                    propColor,
+                    propTextures,
+                    propModelUrl,
+                    propModelScale,
+                    propJointRotationsSet,
+                    propJointRotations,
+                    propJointTranslationsSet,
+                    propJointTranslations,
+                    propGroupCulled,
+                    propRelayParentJoints,
+                    propBlendShapeCoefficients,
+                    propUseOriginalPivot,
+                    propAnimationUrl,
+                    propAnimationAllowTranslation,
+                    propAnimationFPS,
+                    propAnimationFrameIndex,
+                    propAnimationPlaying,
+                    propAnimationLoop,
+                    propAnimationFirstFrame,
+                    propAnimationLastFrame,
+                    propAnimationHold
+                });
         }
 
         // WEBRTC TODO: Address further C++ code.
 
         /* eslint-enable @typescript-eslint/no-magic-numbers */
 
-        return {
-            id,
-            entityType,
-            created,
-            lastEdited,
-            updateDelta,
-            simulatedDelta,
-            propSimOwnerData,
-            propParentID,
-            propParentJointIndex,
-            propVisible,
-            propName,
-            propLocked,
-            propUserData,
-            propPrivateUserData,
-            propHref,
-            propDescription,
-            propPosition,
-            propDimension,
-            propRotation,
-            propRegistrationPoint,
-            propCreated,
-            propLastEdited,
-            propAaCubeData,
-            propCanCastShadow,
-            propRenderLayer,
-            propPrimitiveMode,
-            propIgnorePickIntersection,
-            propRenderWithZones,
-            propBillboardMode,
-            propGrabbable,
-            propKinematic,
-            propFollowsController,
-            propTriggerable,
-            propEquippable,
-            propDelegateToParent,
-            propGrabLeftEquippablePositionOffset,
-            propGrabLeftEquippableRotationOffset,
-            propGrabRightEquippablePositionOffset,
-            propGrabRightEquippableRotationOffset,
-            propGrabEquippableIndicatorUrl,
-            propGrabRightEquippableIndicatorScale,
-            propGrabRightEquippableIndicatorOffset,
-            propDensity,
-            propVelocity,
-            propAngularVelocity,
-            propGravity,
-            propAcceleration,
-            propDamping,
-            propAngularDampling,
-            propRestitution,
-            propFriction,
-            propLifetime,
-            propCollisionless,
-            propCollisionMask,
-            propDynamic,
-            propCollisionSoundUrl,
-            propActionData,
-            propCloneable,
-            propCloneLifetime,
-            propCloneLimit,
-            propCloneDynamic,
-            propCloneAvatarIdentity,
-            propCloneOriginId,
-            propScript,
-            propScriptTimestamp,
-            propServerScripts,
-            propItemName,
-            propItemDescription,
-            propItemCategories,
-            propItemArtist,
-            propItemLicense,
-            propLimitedRun,
-            propMarketplaceID,
-            propEditionNumber,
-            propEntityInstanceNumber,
-            propCertificateID,
-            propCertificateType,
-            propStaticCertificateVersion,
-            propShapeType,
-            propCompoundShapeUrl,
-            propColor,
-            propTextures,
-            propModelUrl,
-            propModelScale,
-            propJointRotationsSet,
-            propJointRotations,
-            propJointTranslationsSet,
-            propJointTranslations,
-            propGroupCulled,
-            propRelayParentJoints,
-            propBlendShapeCoefficients,
-            propUseOriginalPivot,
-            propAnimationUrl,
-            propAnimationAllowTranslation,
-            propAnimationFPS,
-            propAnimationFrameIndex,
-            propAnimationPlaying,
-            propAnimationLoop,
-            propAnimationFirstFrame,
-            propAnimationLastFrame,
-            propAnimationHold
-        };
+        return entityDataDetails;
     }
 
 }();
