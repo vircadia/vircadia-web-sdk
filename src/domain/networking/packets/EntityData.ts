@@ -531,11 +531,11 @@ const EntityData = new class {
                     entityDataPosition
                     += entityTypeCodec.decode(entityData, entityData.byteLength - entityDataPosition, entityDataPosition);
                     const entityType = entityTypeCodec.data;
-                    // TODO: Check entityType. Return if it's not a modelEntity
-                    // (return default values for other fields in EntityDataDetails?)
-                    // if (entityType !== EntityTypes.Model) {
-                    //     return {};
-                    // }
+
+                    if (entityType !== EntityTypes.Model) {
+                        console.error("Entity is not a Model entity");
+                        return [];
+                    }
 
                     const created = entityData.getBigUint64(entityDataPosition, UDT.LITTLE_ENDIAN);
                     entityDataPosition += 8;

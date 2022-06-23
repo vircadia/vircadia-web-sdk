@@ -65,7 +65,9 @@ class PropertyFlags {
         if (bytePos > this.#_maxFlag) {
             if (value) {
                 this.#_maxFlag = bytePos;
-                this.#_flags = new Uint8Array([...this.#_flags, 0]);
+                const newFlags = new Uint8Array(this.#_flags.length + bytePos + 1);
+                newFlags.set(this.#_flags);
+                this.#_flags = newFlags;
             } else {
                 // bail early, we're setting a flag outside of our current _maxFlag to false, which is already the default
                 return;
