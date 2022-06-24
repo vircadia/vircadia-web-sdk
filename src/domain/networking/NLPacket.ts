@@ -11,6 +11,7 @@
 import HMACAuth from "./HMACAuth";
 import Packet from "./udt/Packet";
 import PacketType, { PacketTypeValue } from "./udt/PacketHeaders";
+import SockAddr from "./SockAddr";
 import UDT from "./udt/UDT";
 import { LocalID } from "../networking/NetworkPeer";
 import Node from "../networking/Node";
@@ -73,6 +74,21 @@ class NLPacket extends Packet {
     static fromBase(packet: Packet): NLPacket {
         // C++  NLPacket* fromBase(Packet* packet)
         return new NLPacket(packet);
+    }
+
+    /*@devdoc
+     *  Creates a new NLPacket from received data &mdash; an alternative to using <code>new NLPacket(...)</code>.
+     *  <p><em>Static</em></p>
+     *  @function NLPacket.fromReceivedPacket
+     *  @param {DataView} data - The raw byte data of a new packet.
+     *  @param {number} size - The size of that data in bytes.
+     *  @param {SockAddr} senderSockAddr - The sender's IP address and port.
+     *  @returns {NLPacket} An NLPacket created from the received data.
+     *  @static
+     */
+    static override fromReceivedPacket(data: DataView, size: number, senderSockAddr: SockAddr): NLPacket {
+        // C++  NLPacket fromReceivedPacket(std::unique_ptr<char[]> data, qint64 size, const SockAddr& senderSockAddr)
+        return new NLPacket(data, size, senderSockAddr);
     }
 
     /*@devdoc
@@ -147,13 +163,13 @@ class NLPacket extends Packet {
 
 
     constructor(
-        param0: number | Packet,
+        param0: number | DataView | Packet,
         param1: number | undefined = undefined,
-        param2: boolean | undefined = undefined,
+        param2: boolean | SockAddr | undefined = undefined,
         param3: boolean | undefined = undefined,
         param4: number | undefined = undefined) {
 
-        if (typeof param0 === "number") {
+        if (typeof param0 === "number" && (typeof param2 === "undefined" || typeof param2 === "boolean")) {
             // C++  NLPacket(PacketType type, qint64 size = -1, bool isReliable = false, bool isPartOfMessage = false,
             //               PacketVersion version = 0)
             const type = param0;
@@ -180,6 +196,19 @@ class NLPacket extends Packet {
             this._messageData.dataPosition = headerStart;  // Reset to start of header for #localHeaderSize().
             this.adjustPayloadStartAndCapacity(NLPacket.#localHeaderSize(this._messageData.type));
 
+        } else if (param0 instanceof DataView && typeof param1 === "number" && param2 instanceof SockAddr) {
+            // C++ NLPacket(std::unique_ptr<char[]> data, qint64 size, const SockAddr& senderSockAddr)
+            const data = param0;
+            const size = param1;
+            const senderSockAddr = param2;
+
+            super(data, size, senderSockAddr);
+            const headerStart = this._messageData.dataPosition;
+            this.#readType();
+            this.#readVersion();
+            this.#readSourceID();
+            this._messageData.dataPosition = headerStart;  // Reset to start of header for #localHeaderSize().
+            this.adjustPayloadStartAndCapacity(NLPacket.#localHeaderSize(this._messageData.type));
         } else {
             console.error("Invalid parameters in Packet constructor!", typeof param0, typeof param1, typeof param2,
                 typeof param3, typeof param4);
