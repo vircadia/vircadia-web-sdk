@@ -133,14 +133,12 @@ class AvatarData extends SpatiallyNestable {
     #_isReplicated = false;
     #_skeletonModelURL: string | null = null;
     #_skeletonModelURLChanged = new SignalEmitter();
-    #_avatarSkeletonData: SkeletonJoint[] | null = null;
+    #_avatarSkeletonData: SkeletonJoint[] = [];
     #_skeletonChanged = new SignalEmitter();  // No C++ equivalent.
 
     // C++  _jointData
     #_jointRotations: (quat | null)[] = [];
     #_jointTranslations: (vec3 | null)[] = [];
-    #_jointRotationsUseDefault: boolean[] = [];
-    #_jointTranslationsUseDefault: boolean[] = [];
 
     // C++  _lastSentJointData
     #_lastSentJointRotations: (quat | null)[] = [];
@@ -328,21 +326,21 @@ class AvatarData extends SpatiallyNestable {
 
     /*@devdoc
      *  Gets the avatar's skeleton.
-     *  @returns {SkeletonJoint[]} The avatar's skeleton.
+     *  @returns {SkeletonJoint[]|null} The avatar's skeleton. <code>[]</code> if there is no skeleton set.
      */
-    getSkeletonData(): SkeletonJoint[] | null {
+    getSkeletonData(): SkeletonJoint[] {
         // C++  std::vector<AvatarSkeletonTrait::UnpackedJointData> AvatarData::getSkeletonData() const
         return this.#_avatarSkeletonData;
     }
 
     /*@devdoc
-     *  Sets the avatar's skeleton.
+     *  Sets the avatar's skeleton and resets the joints.
      *  @param {SkeletonJoint[]} skeletonData - The avatar's skeleton.
      */
-    setSkeletonData(skeletonData: SkeletonJoint[] | null): void {
+    setSkeletonData(skeletonData: SkeletonJoint[]): void {
         // C++  void AvatarData::setSkeletonData(const std::vector<AvatarSkeletonTrait::UnpackedJointData>& skeletonData)
 
-        if (skeletonData === null || skeletonData.length === 0) {
+        if (skeletonData.length === 0) {
             console.log("[avatars] setSkeletonData() called with empty skeleton data.");
         }
 
@@ -412,7 +410,7 @@ class AvatarData extends SpatiallyNestable {
 
     /*@devdoc
      *  Gets the avatar's joint rotations. The rotations are relative to avatar space (i.e., not relative to parent bones). If a
-     *  rotation is <code>null</code> then the rotation of the avatar's default pose should be used.
+     *  rotation is <code>null</code> then the rotation of the avatar skeletons's default pose should be used.
      *  @returns {Array<quat|null>} The joint rotations.
      */
     getJointRotations(): (quat | null)[] {
@@ -422,7 +420,7 @@ class AvatarData extends SpatiallyNestable {
 
     /*@devdoc
      *  Sets the avatar's joint rotations. The rotations are relative to avatar space (i.e., not relative to parent bones). Set
-     *  a rotation to <code>null</code> if the avatar's default pose rotation should be used.
+     *  a rotation to <code>null</code> if the avatar skeleton's default pose rotation should be used.
      *  @param {Array<quat|null>} jointRotations - The avatar's joint rotations.
      */
     setJointRotations(jointRotations: (quat | null)[]): void {
@@ -432,7 +430,7 @@ class AvatarData extends SpatiallyNestable {
 
     /*@devdoc
      *  Gets the translations of the avatar's joints. The translations are relative to their parents, in model coordinates. If a
-     *  translation is <code>null</code> then the translation of the avatar's default pose should be used.
+     *  translation is <code>null</code> then the translation of the avatar skeleton's default pose should be used.
      *  <p><strong>Warning:</strong> These coordinates are not necessarily in meters.</p>
      *  @returns {Array<vec3|null>} The joint translations.
      */
@@ -443,33 +441,13 @@ class AvatarData extends SpatiallyNestable {
 
     /*@devdoc
      *  Sets the avatar's joint translations. The translations are relative to their parents, in model coordinates. Set a
-     *  translations to <code>null</code> if the avatar's default pose translation should be used.
+     *  translation to <code>null</code> if the avatar skeleton's default pose translation should be used.
      *  <p><strong>Warning:</strong> These coordinates are not necessarily in meters.</p>
      *  @param {Array<vec3|null>} jointTranslations - The avatar's joint translations.
      */
     setJointTranslations(jointTranslations: (vec3 | null)[]): void {
         // C++  void AvatarData::setJointTranslations(const QVector<glm::vec3>& jointTranslations)
         this.#_jointTranslations = jointTranslations;
-    }
-
-    /*@devdoc
-     *  Gets whether the rotations of the avatar's default pose should be used instead of given joint rotations, if any.
-     *  @returns {Array<boolean>} <code>true</code> if the rotation of the avatar's default pose should be used instead of a
-     *      given joint rotation, if any; <code>false</code> if the given joint rotation should be used, if any.
-     */
-    getJointRotationsUseDefault(): boolean[] {
-        // C++  N/A
-        return this.#_jointRotationsUseDefault;
-    }
-
-    /*@devdoc
-     *  Gets whether the translations of the avatar's default pose should be used instead of given joint translations, if any.
-     *  @returns {Array<boolean>} <code>true</code> if the translation of the avatar's default pose should be used instead of a
-     *      given joint rotation, if any; <code>false</code> if the given joint translation should be used, if any.
-     */
-    getJointTranslationsUseDefault(): boolean[] {
-        // C++  N/A
-        return this.#_jointTranslationsUseDefault;
     }
 
     /*@devdoc
@@ -773,7 +751,13 @@ class AvatarData extends SpatiallyNestable {
         }
 
         if (avatarData.jointRotationsUseDefault) {
-            this.#_jointRotationsUseDefault = avatarData.jointRotationsUseDefault;
+            // In the Web SDK, use of default joint rotations is indicated by null values.
+            const jointRotationsUseDefault = avatarData.jointRotationsUseDefault;
+            for (let i = 0, length = jointRotationsUseDefault.length; i < length; i++) {
+                if (jointRotationsUseDefault[i]) {
+                    this.#_jointRotations[i] = null;
+                }
+            }
         }
 
         if (avatarData.jointTranslations) {
@@ -784,7 +768,13 @@ class AvatarData extends SpatiallyNestable {
         }
 
         if (avatarData.jointTranslationsUseDefault) {
-            this.#_jointTranslationsUseDefault = avatarData.jointTranslationsUseDefault;
+            // In the Web SDK, use of default joint translations is indicated by null values.
+            const jointTranslationsUseDefault = avatarData.jointTranslationsUseDefault;
+            for (let i = 0, length = jointTranslationsUseDefault.length; i < length; i++) {
+                if (jointTranslationsUseDefault[i]) {
+                    this.#_jointTranslations[i] = null;
+                }
+            }
         }
 
         // WEBRTC TODO: Address further C++ code - further avatar properties.
@@ -988,15 +978,10 @@ class AvatarData extends SpatiallyNestable {
 
     #resetJoints(): void {
         // C++  N/A
-        if (this.#_avatarSkeletonData === null) {
-            this.#_jointRotations = [];
-            this.#_jointTranslations = [];
-        } else {
-            this.#_jointRotations = new Array(this.#_avatarSkeletonData.length) as (quat | null)[];
-            this.#_jointRotations.fill(null);
-            this.#_jointTranslations = new Array(this.#_avatarSkeletonData.length) as (vec3 | null)[];
-            this.#_jointTranslations.fill(null);
-        }
+        this.#_jointRotations = new Array(this.#_avatarSkeletonData.length) as (quat | null)[];
+        this.#_jointRotations.fill(null);
+        this.#_jointTranslations = new Array(this.#_avatarSkeletonData.length) as (vec3 | null)[];
+        this.#_jointTranslations.fill(null);
     }
 
 }

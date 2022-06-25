@@ -36,8 +36,7 @@ import AvatarManager from "../AvatarManager";
  *  @property {Signal<MyAvatarInterface~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton
  *      model URL changes.
  *      <em>Read-only.</em>
- *  @property {SkeletonJoint[]|null} skeleton - Information on the avatar's skeleton. <code>null</code> if the avatar doesn't
- *      exist.
+ *  @property {SkeletonJoint[]} skeleton - Information on the avatar's skeleton.
  *  @property {Signal<MyAvatarInterface~skeletonChanged>} skeletonChanged - Triggered when the avatar's skeleton changes.
  *      <em>Read-only.</em>
  *  @property {number} scale=1.0 - The scale of the avatar. The value can be set to a target value in the range
@@ -56,7 +55,7 @@ import AvatarManager from "../AvatarManager";
  *  @property {Array<quat|null>} jointRotations - The avatar's joint rotations.
  *      The rotations are relative to avatar space (i.e., not relative to parent bones).
  *      A rotation value of <code>null</code> means that the skeleton's default rotation for that joint should be used.
- *      <p><strong>Warning:</strong Gets and sets the internal data structure used for joint rotations. This is done for speed
+ *      <p><strong>Warning:</strong> Gets and sets the internal data structure used for joint rotations. This is done for speed
  *      of operation and convenience (you can update individual rotation values without setting the property value again).</p>
  *  @property {Array<vec3|null>} jointTranslations - The avatar's joint translations.
  *      The translations are relative to their parents, in model coordinates.
@@ -130,13 +129,15 @@ class MyAvatarInterface {
         return this.#_avatarManager.getMyAvatar().skeletonModelURLChanged;
     }
 
-    get skeleton(): SkeletonJoint[] | null {
-        return this.#_avatarManager.getMyAvatar().getSkeletonData();
+    get skeleton(): SkeletonJoint[] {
+        return JSON.parse(JSON.stringify(  // Return a copy.
+            this.#_avatarManager.getMyAvatar().getSkeletonData())
+        ) as SkeletonJoint[];
     }
 
-    set skeleton(skeleton: SkeletonJoint[] | null) {
-        let isValidParam = skeleton instanceof Array && skeleton.length > 0 || skeleton === null;
-        if (isValidParam && skeleton !== null) {
+    set skeleton(skeleton: SkeletonJoint[]) {
+        let isValidParam = skeleton instanceof Array && skeleton.length > 0;
+        if (isValidParam) {
             let i = 0;
             const length = skeleton.length;
             while (isValidParam && i < length) {
@@ -161,9 +162,10 @@ class MyAvatarInterface {
                 skeletonString.slice(0, MAX_STRING_LENGTH) + (skeletonString.length > MAX_STRING_LENGTH ? "..." : ""));
             return;
         }
-        this.#_avatarManager.getMyAvatar().setSkeletonData(skeleton !== null
-            ? JSON.parse(JSON.stringify(skeleton)) as SkeletonJoint[]  // Make a copy.
-            : null);
+
+        this.#_avatarManager.getMyAvatar().setSkeletonData(
+            JSON.parse(JSON.stringify(skeleton)) as SkeletonJoint[]  // Make a copy.
+        );
     }
 
     /*@sdkdoc
@@ -227,7 +229,7 @@ class MyAvatarInterface {
     }
 
     get position(): vec3 {
-        return this.#_avatarManager.getMyAvatar().getWorldPosition();
+        return Vec3.copy(this.#_avatarManager.getMyAvatar().getWorldPosition());
     }
 
     set position(position: vec3) {
@@ -235,11 +237,11 @@ class MyAvatarInterface {
             console.error("[AvatarMixer] [MyAvatar] Tried to set an invalid position value!", JSON.stringify(position));
             return;
         }
-        this.#_avatarManager.getMyAvatar().setWorldPosition(position);
+        this.#_avatarManager.getMyAvatar().setWorldPosition(Vec3.copy(position));
     }
 
     get orientation(): quat {
-        return this.#_avatarManager.getMyAvatar().getWorldOrientation();
+        return Quat.copy(this.#_avatarManager.getMyAvatar().getWorldOrientation());
     }
 
     set orientation(orientation: quat) {
@@ -247,7 +249,7 @@ class MyAvatarInterface {
             console.error("[AvatarMixer] [MyAvatar] Tried to set an invalid orientation value!", JSON.stringify(orientation));
             return;
         }
-        this.#_avatarManager.getMyAvatar().setWorldOrientation(orientation);
+        this.#_avatarManager.getMyAvatar().setWorldOrientation(Quat.copy(orientation));
     }
 
     get jointRotations(): (quat | null)[] {

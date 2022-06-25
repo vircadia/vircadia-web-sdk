@@ -27,12 +27,12 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *  @property {boolean} isValid - <code>true</code> if the avatar is valid (i.e., was found when the object was created and is
  *      still present in the domain), <code>false</code> if it isn't.
  *      <em>Read-only.</em>
- *  @property {string} displayName - The avatar's display name. <code>""</code> if the avatar doesn't exist.
+ *  @property {string} displayName - The avatar's display name. <code>""</code> if the avatar isn't valid.
  *      <em>Read-only.</em>
  *  @property {Signal<ScriptAvatar~displayNameChanged>} displayNameChanged - Triggered when the display name changes.
  *      <em>Read-only.</em>
  *  @property {string} sessionDisplayName - The avatar's session display name, assigned by the domain server based on the
- *      avatar display name. It is unique among all avatars present in the domain. <code>""</code> if the avatar doesn't exist.
+ *      avatar display name. It is unique among all avatars present in the domain. <code>""</code> if the avatar isn't valid.
  *      <em>Read-only.</em>
  *  @property {Signal<ScriptAvatar~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the session display
  *      name changes.
@@ -42,35 +42,34 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *  @property {Signal<ScriptAvatar~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the skeleton model URL
  *      changes.
  *      <em>Read-only.</em>
- *  @property {SkeletonJoint[]} skeleton - Information on the avatar's skeleton. <code>[]</code> if the avatar doesn't exist.
+ *  @property {SkeletonJoint[]} skeleton - Information on the avatar's skeleton. <code>[]</code> if the avatar isn't valid.
  *      <em>Read-only.</em>
  *  @property {Signal<ScriptAvatar~skeletonChanged>} skeletonChanged - Triggered when the avatar's skeleton changes.
  *      <em>Read-only.</em>
  *  @property {number} scale - The scale of the avatar. This includes any limits on permissible values imposed by the domain.
- *      <code>0.0</code> if the avatar doesn't exist.
+ *      <code>0.0</code> if the avatar isn't valid.
  *      <em>Read-only.</em>
  *  @property {Signal<ScriptAvatar~scaleChanged>} scaleChanged - Triggered when the avatar's scale changes. This can be
  *      due to the user changing the scale of their avatar or the domain limiting the scale of their avatar.
- *  @property {vec3} position - The position of the avatar in the domain. {@link Vec3|Vec3.ZERO} if the avatar doesn't exist.
+ *  @property {vec3} position - The position of the avatar in the domain. {@link Vec3|Vec3.ZERO} if the avatar isn't valid.
  *      <em>Read-only.</em>
  *  @property {quat} orientation - The orientation of the avatar in the domain. {@link Quat|Quat.IDENTITY} if the avatar doesn't
  *      exist.
  *      <em>Read-only.</em>
  *  @property {Array<quat|null>} jointRotations - The joint rotations relative to avatar space (i.e., not relative to parent
- *      bones). If a rotation is <code>null</code> then the rotation of the avatar's default pose should be used.
- *      <code>[]</code> if the avatar doesn't exist.
+ *      bones).
+ *      A rotation value of <code>null</code> means that the skeleton's default rotation for that joint should be used.
+ *      <code>[]</code> if the avatar isn't valid.
+ *      <em>Read-only.</em>
+ *      <p><strong>Warning:</strong> Gets the latest copy of the joint rotations, which is replaced each time new joint data is
+ *      received from the avatar.</p>
  *  @property {Array<vec3|null>} jointTranslations - The bone translations relative to their parent joints. If a translation is
- *      <code>null</code> then the translation of the avatar's default pose should be used.
- *      <code>[]</code> if the avatar doesn't exist.<br />
- *      <strong>Warning:</strong> The coordinate system is not necessarily meters.
- *  @property {Array<boolean>} jointRotationsUseDefault - <code>true</code> if the skeleton's default joint rotation should be
- *      used instead of the value (if any) in <code>jointRotations</code>.<br />
- *      Note: Normally, a <code>true</code> value will match a <code>null</code> joint rotation value.
- *      <code>[]</code> if the avatar doesn't exist.
- *  @property {Array<boolean>} jointTranslationsUseDefault - <code>true</code> if the skeleton's default joint translation
- *      should be used instead of the value (if any) in <code>jointTranslations</code>.<br />
- *      Note: Normally, a <code>true</code> value will match a <code>null</code> joint translation value.
- *      <code>[]</code> if the avatar doesn't exist.
+ *      <code>null</code> then skeleton's default translation for that joint should be used.
+ *      <code>[]</code> if the avatar isn't valid.
+ *      <em>Read-only.</em>
+ *      <p><strong>Warning:</strong> The coordinate system is not necessarily meters.</p>
+ *      <p><strong>Warning:</strong> Gets the latest copy of the joint translations, which is replaced each time new joint data
+ *      is received from the avatar.</p>
  */
 // Don't document the constructor because it shouldn't be used in the SDK.
 class ScriptAvatar {
@@ -172,12 +171,14 @@ class ScriptAvatar {
         return new SignalEmitter().signal();
     }
 
-    get skeleton(): SkeletonJoint[] | null {
+    get skeleton(): SkeletonJoint[] {
         // C++  No direct equivalent.
         if (this.#_avatarData) {
             const avatar = this.#_avatarData.deref();
             if (avatar) {
-                return avatar.getSkeletonData() ?? [];
+                return JSON.parse(JSON.stringify(  // Return a copy.
+                    avatar.getSkeletonData())
+                ) as SkeletonJoint[];
             }
         }
         return [];
@@ -230,7 +231,7 @@ class ScriptAvatar {
             if (avatar) {
                 // A reference to the internal value is returned but this is OK because the internal value will keep being
                 // recreated.
-                return avatar.getWorldPosition();
+                return Vec3.copy(avatar.getWorldPosition());
             }
         }
         return Vec3.ZERO;
@@ -243,7 +244,7 @@ class ScriptAvatar {
             if (avatar) {
                 // A reference to the internal value is returned but this is OK because the internal value will keep being
                 // recreated.
-                return avatar.getWorldOrientation();
+                return Quat.copy(avatar.getWorldOrientation());
             }
         }
         return Quat.IDENTITY;
@@ -272,34 +273,6 @@ class ScriptAvatar {
                 // A reference to the internal value is returned but this is OK because the internal value will keep being
                 // recreated.
                 return avatar.getJointTranslations();
-            }
-        }
-        return [];
-    }
-
-    get jointRotationsUseDefault(): boolean[] {
-        // C++  N/A
-
-        if (this.#_avatarData) {
-            const avatar = this.#_avatarData.deref();
-            if (avatar) {
-                // A reference to the internal value is returned but this is OK because the internal value will keep being
-                // recreated.
-                return avatar.getJointRotationsUseDefault();
-            }
-        }
-        return [];
-    }
-
-    get jointTranslationsUseDefault(): boolean[] {
-        // C++  N/A
-
-        if (this.#_avatarData) {
-            const avatar = this.#_avatarData.deref();
-            if (avatar) {
-                // A reference to the internal value is returned but this is OK because the internal value will keep being
-                // recreated.
-                return avatar.getJointTranslationsUseDefault();
             }
         }
         return [];

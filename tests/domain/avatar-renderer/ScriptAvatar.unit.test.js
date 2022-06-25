@@ -39,8 +39,6 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
         expect(scriptAvatar.jointRotations).toEqual([]);
         expect(scriptAvatar.jointTranslations).toEqual([]);
-        expect(scriptAvatar.jointRotationsUseDefault).toEqual([]);
-        expect(scriptAvatar.jointTranslationsUseDefault).toEqual([]);
 
         // Can access signals.
         expect(typeof scriptAvatar.displayNameChanged.connect).toBe("function");
@@ -75,8 +73,6 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
         expect(scriptAvatar.jointRotations).toEqual([]);
         expect(scriptAvatar.jointTranslations).toEqual([]);
-        expect(scriptAvatar.jointRotationsUseDefault).toEqual([]);
-        expect(scriptAvatar.jointTranslationsUseDefault).toEqual([]);
 
         // Can access signals.
         expect(typeof scriptAvatar.displayNameChanged.connect).toBe("function");

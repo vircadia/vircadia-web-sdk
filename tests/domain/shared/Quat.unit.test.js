@@ -35,6 +35,14 @@ describe("Quat - unit tests", () => {
         expect(Quat.valid({ x: 0, y: 1, z: 2, w: 3 })).toBe(true);
     });
 
+    test("Quat.copy() copies a quaternion", () => {
+        const q1 = { x: 1, y: 2, z: 3, w: 4 };
+        const q2 = Quat.copy(q1);
+        expect(q2 === q1).toBe(false);
+        expect(q2).not.toBe(q1);
+        expect(q2).toEqual(q1);
+    });
+
     test("Quat.equal() tests equality", () => {
         const q1 = { x: 0.1, y: 0, z: 0, w: 0.949 };
         const q2 = { x: 0.1, y: 0, z: 0, w: 0.949 };

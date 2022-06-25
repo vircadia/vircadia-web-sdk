@@ -65,6 +65,16 @@ const Quat = new class {
 
 
     /*@sdkdoc
+     *  Makes a copy of a quaternion.
+     *  @function Quat.copy
+     *  @param {quat} q - The quaternion.
+     *  @returns {quat} A copy of the quaternion.
+     */
+    copy(q: quat) {
+        return { x: q.x, y: q.y, z: q.z, w: q.w };
+    }
+
+    /*@sdkdoc
      *  Tests whether two quaternions are equal.
      *  @function Quat.equal
      *  @param {quat} q1 - The first quaternion.
