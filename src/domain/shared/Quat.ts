@@ -75,6 +75,17 @@ const Quat = new class {
         return q1.x === q2.x && q1.y === q2.y && q1.z === q2.z && q1.w === q2.w;
     }
 
+    /*@sdkdoc
+     *  Calculates the dot product of two quaternions.
+     *  @function Quat.dot
+     *  @param {quat} q1 - The first quaternion.
+     *  @param {quat} q2 - The second quaternion.
+     *  @returns {number} The dot product of the two quaternions.
+     */
+    dot(q1: quat, q2: quat): number {
+        return q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
+    }
+
 
     /* eslint-enable class-methods-use-this */
 }();
