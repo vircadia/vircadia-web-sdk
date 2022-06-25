@@ -136,10 +136,16 @@ class AvatarData extends SpatiallyNestable {
     #_avatarSkeletonData: SkeletonJoint[] | null = null;
     #_skeletonChanged = new SignalEmitter();  // No C++ equivalent.
 
+    // C++  _jointData
     #_jointRotations: (quat | null)[] = [];
     #_jointTranslations: (vec3 | null)[] = [];
     #_jointRotationsUseDefault: boolean[] = [];
     #_jointTranslationsUseDefault: boolean[] = [];
+
+    // C++  _lastSentJointData
+    #_lastSentJointRotations: (quat | null)[] = [];
+    #_lastSentJointTranslations: (vec3 | null)[] = [];
+
 
     #_sequenceNumber = 0;  // Avatar data sequence number is a uint16 value.
     readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
@@ -350,6 +356,10 @@ class AvatarData extends SpatiallyNestable {
         }
 
         this.#_avatarSkeletonData = skeletonData;
+
+        // Web SDK: The joints data are resized and set to "use default pose" to make the SDK easier to use and more robust.
+        this.#resetJoints();
+
         this.#_skeletonChanged.emit();  // SDK-specific.
     }
 
@@ -401,9 +411,8 @@ class AvatarData extends SpatiallyNestable {
     }
 
     /*@devdoc
-     *  Gets the joint rotations relative to avatar space (i.e., not relative to parent bones). If a rotation is
-     *  <code>null</code> then the rotation of the avatar's default pose should be used.
-     *  If a rotation is <code>null</code> then the rotation of the avatar's default pose should be used.
+     *  Gets the avatar's joint rotations. The rotations are relative to avatar space (i.e., not relative to parent bones). If a
+     *  rotation is <code>null</code> then the rotation of the avatar's default pose should be used.
      *  @returns {Array<quat|null>} The joint rotations.
      */
     getJointRotations(): (quat | null)[] {
@@ -412,14 +421,35 @@ class AvatarData extends SpatiallyNestable {
     }
 
     /*@devdoc
-     * Gets the translations of the joints relative to their parents, in model coordinates. If a translation is
-     * <code>null</code> then the translation of the avatar's default pose should be used.
-     * <p><strong>Warning:</strong> These coordinates are not necessarily in meters.</p>
+     *  Sets the avatar's joint rotations. The rotations are relative to avatar space (i.e., not relative to parent bones). Set
+     *  a rotation to <code>null</code> if the avatar's default pose rotation should be used.
+     *  @param {Array<quat|null>} jointRotations - The avatar's joint rotations.
+     */
+    setJointRotations(jointRotations: (quat | null)[]): void {
+        // C++  void AvatarData::setJointRotations(const QVector<glm::quat>& jointRotations)
+        this.#_jointRotations = jointRotations;
+    }
+
+    /*@devdoc
+     *  Gets the translations of the avatar's joints. The translations are relative to their parents, in model coordinates. If a
+     *  translation is <code>null</code> then the translation of the avatar's default pose should be used.
+     *  <p><strong>Warning:</strong> These coordinates are not necessarily in meters.</p>
      *  @returns {Array<vec3|null>} The joint translations.
      */
     getJointTranslations(): (vec3 | null)[] {
         // C++  QVector<glm::vec3> getJointTranslations()
         return this.#_jointTranslations;
+    }
+
+    /*@devdoc
+     *  Sets the avatar's joint translations. The translations are relative to their parents, in model coordinates. Set a
+     *  translations to <code>null</code> if the avatar's default pose translation should be used.
+     *  <p><strong>Warning:</strong> These coordinates are not necessarily in meters.</p>
+     *  @param {Array<vec3|null>} jointTranslations - The avatar's joint translations.
+     */
+    setJointTranslations(jointTranslations: (vec3 | null)[]): void {
+        // C++  void AvatarData::setJointTranslations(const QVector<glm::vec3>& jointTranslations)
+        this.#_jointTranslations = jointTranslations;
     }
 
     /*@devdoc
@@ -586,6 +616,7 @@ class AvatarData extends SpatiallyNestable {
         const cullSmallData = !sendAll && Math.random() < AVATAR_SEND_FULL_UPDATE_RATIO;
         const dataDetail = cullSmallData ? AvatarDataDetail.SendAllData : AvatarDataDetail.CullSmallData;
 
+
         // C++  QByteArray MyAvatar::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
         this._globalPosition = this.getWorldPosition();
         //
@@ -594,33 +625,60 @@ class AvatarData extends SpatiallyNestable {
         // WEBRTC TODO: Address further C++ code - camera mode.
         //
 
-        // C++  QByteArray AvatarData::toByteArrayStateful(...)
+
+        // C++  QByteArray AvatarData::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
         const lastSentTime = this.#_lastToByteArray;
         this.#_lastToByteArray = Date.now();
         // SendStatus - Not used in user client.
+        this.#getLastJointData();
 
 
-        // C++  QByteArray AvatarData::toByteArray(...)
+        // C++  QByteArray AvatarData::toByteArray(AvatarDataDetail dataDetail, quint64 lastSentTime,
+        //          const QVector<JointData>& lastSentJointData, AvatarDataPacket::SendStatus& sendStatus,
+        //          bool dropFaceTracking, bool distanceAdjust, glm::vec3 viewerPosition, QVector<JointData>* sentJointDataOut,
+        //          int maxDataSize, AvatarDataRate* outboundDataRateOut)
+
         this.#lazyInitHeadData();
-
 
         const avatarDataDetails = {
             sequenceNumber: this.#_sequenceNumber,
 
             dataDetail,
             lastSentTime,
-            // WEBRTC TODO: Address further C++ code - JointData.
+            lastSentJointRotations: this.#_lastSentJointRotations,
+            lastSentJointTranslations: this.#_lastSentJointTranslations,
             // sendStatus, - Not used in user client.
-            dropFaceTracking: false,
-            distanceAdjust: false,
-            viewerPosition: { x: 0, y: 0, z: 0 },
+            // dropFaceTracking: value,
+            // distanceAdjust: false, - Always false in user client.
+            // viewerPosition: { x: 0, y: 0, z: 0 }, - Not used in user client.
             // sentJointDataOut: null, - Not used in user client.
             // maxDataSize: 0, - Not used in user client.
             // WEBRTC TODO: Address further C+ code - AvatarDataRate.
 
+            // The C++ code is included here, commented out, so that the native client logic can be seen.
+            //
+            // hasAvatarOrientation = sendAll || rotationChangedSince(lastSentTime);
+            // hasAvatarBoundingBox = sendAll || avatarBoundingBoxChangedSince(lastSentTime);
+            // hasAvatarScale = sendAll || avatarScaleChangedSince(lastSentTime);
+            // hasLookAtPosition = sendAll || lookAtPositionChangedSince(lastSentTime);
+            // hasAudioLoudness = sendAll || audioLoudnessChangedSince(lastSentTime);
+            // hasSensorToWorldMatrix = sendAll || sensorToWorldMatrixChangedSince(lastSentTime);
+            // hasAdditionalFlags = sendAll || additionalFlagsChangedSince(lastSentTime);
+            // hasParentInfo = sendAll || parentInfoChangedSince(lastSentTime);
+            // hasAvatarLocalPosition = hasParent() && (sendAll ||
+            //     tranlationChangedSince(lastSentTime) ||
+            //     parentInfoChangedSince(lastSentTime));
+            // hasHandControllers = _controllerLeftHandMatrixCache.isValid() || _controllerRightHandMatrixCache.isValid();
+            // hasFaceTrackerInfo = !dropFaceTracking && (getHasScriptedBlendshapes() || _headData->_hasInputDrivenBlendshapes)
+            //     && (sendAll || faceTrackerInfoChangedSince(lastSentTime));
+            // hasJointData = !sendMinimum;
+            // hasJointDefaultPoseFlags = hasJointData;
+
             globalPosition: this._globalPosition,
-            localOrientation: this.rotationChangedSince(lastSentTime) ? this.getOrientationOutbound() : undefined,
-            avatarScale: this.#avatarScaleChangedSince(lastSentTime) ? this.getDomainLimitedScale() : undefined
+            localOrientation: sendAll || this.rotationChangedSince(lastSentTime) ? this.getOrientationOutbound() : undefined,
+            avatarScale: sendAll || this.#avatarScaleChangedSince(lastSentTime) ? this.getDomainLimitedScale() : undefined,
+            jointRotations: this.#_jointRotations,  // sendMinimum is implemented in PacketScribe.AvatarData.write().
+            jointTranslations: this.#_jointTranslations
         };
 
 
@@ -634,7 +692,7 @@ class AvatarData extends SpatiallyNestable {
         if (avatarPacket.getDataSize() === 0) {
             // Try excluding face tracking.
             avatarDataDetails.lastSentTime = this.#_lastToByteArray;
-            avatarDataDetails.dropFaceTracking = true;
+            // avatarDataDetails.dropFaceTracking = true;
             this.#_lastToByteArray = Date.now();
             avatarPacket = PacketScribe.AvatarData.write(avatarDataDetails);
         }
@@ -850,6 +908,12 @@ class AvatarData extends SpatiallyNestable {
     }
 
 
+    #getLastJointData(): void {
+        // C++  QVector<JointData> getLastSentJointData()
+        // Resize in place without returning as result.
+        this.#resizeLastSentJointData();
+    }
+
     #lazyInitHeadData(): void {  // eslint-disable-line class-methods-use-this
         // C++  void AvatarData::lazyInitHeadData()
         // Lazily allocate memory for HeadData in case we're not an Avatar instance.
@@ -858,18 +922,81 @@ class AvatarData extends SpatiallyNestable {
 
     }
 
-    // eslint-disable-next-line
-    // @ts-ignore
     #doneEncoding(cullSmallChanges: boolean): void {  // eslint-disable-line
         // C++  void doneEncoding(bool cullSmallChanges)
+        // The server has finished sending this version of the joint-data to other nodes. Update #_lastSentJointRotations and
+        // #_lastSentJointTranslations.
+        // NOTE: This is never used in a "distanceAdjust" mode, so it's OK that it doesn't use a variable minimum
+        // rotation / translation.
 
-        // WEBRTC TODO: Address further C++ code - Joint data.
+        const AVATAR_MIN_ROTATION_DOT = 0.9999999;
+        const AVATAR_MIN_TRANSLATION = 0.0001;
 
+        this.#resizeLastSentJointData();
+
+        for (let i = 0, length = this.#_jointRotations.length; i < length; i++) {
+            // The Web SDK uses null values for default rotations and translations so the logic is different but achieves the
+            // same end.
+
+            const jointRotation = this.#_jointRotations[i];
+            const lastSentJointRotation = this.#_lastSentJointRotations[i];
+            assert(jointRotation !== undefined && lastSentJointRotation !== undefined);
+            if (jointRotation === null || lastSentJointRotation === null) {
+                this.#_lastSentJointRotations[i] = jointRotation;
+            } else if (!Quat.equal(lastSentJointRotation, jointRotation)) {
+                if (!cullSmallChanges
+                    || Math.abs(Quat.dot(jointRotation, lastSentJointRotation)) <= AVATAR_MIN_ROTATION_DOT) {
+                    this.#_lastSentJointRotations[i] = jointRotation;
+                }
+            }
+
+            const jointTranslation = this.#_jointTranslations[i];
+            const lastSentJointTranslation = this.#_lastSentJointTranslations[i];
+            assert(jointTranslation !== undefined && lastSentJointTranslation !== undefined);
+            if (jointTranslation === null || lastSentJointTranslation === null) {
+                this.#_lastSentJointTranslations[i] = jointTranslation;
+            } else if (!Vec3.equal(lastSentJointTranslation, jointTranslation)) {
+                if (!cullSmallChanges
+                    || Vec3.distance(jointTranslation, lastSentJointTranslation) > AVATAR_MIN_TRANSLATION) {
+                    this.#_lastSentJointTranslations[i] = jointTranslation;
+                }
+            }
+
+        }
+    }
+
+    #resizeLastSentJointData(): void {
+        // C++  _lastSentJointData.resize(_jointData.size())
+        assert(this.#_lastSentJointRotations.length === this.#_lastSentJointTranslations.length);
+        if (this.#_lastSentJointRotations.length < this.#_jointRotations.length) {
+            for (let i = this.#_lastSentJointRotations.length, length = this.#_jointRotations.length; i < length; i++) {
+                this.#_lastSentJointRotations.push(null);
+                this.#_lastSentJointTranslations.push(null);
+            }
+        } else if (this.#_lastSentJointRotations.length > this.#_jointRotations.length) {
+            for (let i = this.#_jointRotations.length, length = this.#_lastSentJointRotations.length; i > length; i--) {
+                this.#_lastSentJointRotations.pop();
+                this.#_lastSentJointTranslations.pop();
+            }
+        }
     }
 
     #avatarScaleChangedSince(time: number): boolean {
         // C++  bool avatarScaleChangedSince(quint64 time)
         return this._avatarScaleChanged >= time;
+    }
+
+    #resetJoints(): void {
+        // C++  N/A
+        if (this.#_avatarSkeletonData === null) {
+            this.#_jointRotations = [];
+            this.#_jointTranslations = [];
+        } else {
+            this.#_jointRotations = new Array(this.#_avatarSkeletonData.length) as (quat | null)[];
+            this.#_jointRotations.fill(null);
+            this.#_jointTranslations = new Array(this.#_avatarSkeletonData.length) as (vec3 | null)[];
+            this.#_jointTranslations.fill(null);
+        }
     }
 
 }
