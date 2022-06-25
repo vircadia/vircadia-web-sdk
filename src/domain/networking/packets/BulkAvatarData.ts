@@ -60,10 +60,10 @@ const BulkAvatarData = new class {
      *      be used.
      *      <code>undefined</code> if not included in the packet.
      *  @property {Array<vec3|null>|undefined} jointTranslations - The bone translations relative to their parent joints in
-     *      model coordinates. If a translation is <code>null</code> then the translation of the avatar's default pose should be
-     *      used.
+     *      avatar model coordinates. If a translation is <code>null</code> then the translation of the avatar's default pose
+     *      should be used.
      *      <code>undefined</code> if not included in the packet.<br />
-     *      <strong>Warning:</strong> The coordinate system is not necessarily meters.
+     *      <strong>Warning:</strong> The avatar model coordinate system is not necessarily meters.
      *  @property {Array<boolean>|undefined} jointRotationsUseDefault - <code>true</code> if the skeleton's default joint
      *      rotation should be used instead of the value (if any) in <code>jointRotations</code>.<br />
      *      Note: Normally, a <code>true</code> value will match a <code>null</code> joint rotation value.

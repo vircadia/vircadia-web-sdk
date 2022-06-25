@@ -11,7 +11,7 @@
 import { WorkerUrl } from "worker-url";
 
 
-/*@sdkdoc
+/*@devdoc
  *  The <code>AudioWorklets</code> namespace abstracts the loading of the input and output audio worklets such that the worklet
  *  files are built (the WorkerUrl package used makes certain demands on the code) and the methods can be mocked for unit and
  *  integration testing the (the <code>import.meta.url</code> is not compatible with the Jest test environment).
