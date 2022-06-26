@@ -236,7 +236,6 @@ enum EntityPropertyFlags {
 }
 
 type EntityDataDetails = {
-    sequence: number;
     entityItemID: Uuid,
     entityType: EntityTypes,
     created: BigInt,
@@ -389,6 +388,9 @@ const EntityData = new class {
         const flags = data.getUint8(dataPosition);
         dataPosition += 1;
 
+        // TODO: not used?
+        // eslint-disable-next-line
+        // @ts-ignore
         const sequence = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
         dataPosition += 2;
 
@@ -1437,7 +1439,6 @@ const EntityData = new class {
 
                     entityDataDetails.push(
                         {
-                            sequence,
                             entityItemID,
                             entityType,
                             created,

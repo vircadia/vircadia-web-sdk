@@ -12,6 +12,7 @@
 import PacketScribe from "../networking/packets/PacketScribe";
 import PacketType from "../networking/udt/PacketHeaders";
 import ContextManager from "../shared/ContextManager";
+import NLPacket from "../networking/NLPacket";
 import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
 import PacketReceiver from "../networking/PacketReceiver";
@@ -75,25 +76,61 @@ class OctreePacketProcessor {
     }
 
     // Listener
-    // eslint-disable-next-line
-    // @ts-ignore
-    #processPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {// eslint-disable-line
+    #processPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {
         // C++ void OctreePacketProcessor::processPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer sendingNode)
 
-        const packetType = message.getType();
-
-        if (packetType === PacketType.OctreeStats) {
-            console.error("OctreePacketProcessor: Packet type not processed: ", packetType);
-            // WEBRTC TODO: Address further C++ code.
+        if (!sendingNode) {
+            // TODO: Better message.
+            console.error("Could not process the packet");
             return;
         }
 
+        // TODO: Figure out what these 24 bytes represents
+        const tmpOffset = 24;
+
+        let messageLocal = message;
+
+        let hasOctreeStats = false;
+
+        const octreePacketType = message.getType();
+
+        if (octreePacketType === PacketType.OctreeStats) {
+            // WEBRTC TODO: Address further C++ code.
+
+            hasOctreeStats = true;
+
+            // WEBRTC TODO: Do not hardcode statsMessageLength.
+            const statsMessageLength = 222;
+            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+            const piggybackBytes = messageLocal.getMessage().byteLength - statsMessageLength;
+
+            if (piggybackBytes > 0) {
+                // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+                const view = new DataView(messageLocal.getMessage().buffer.slice(222 + tmpOffset, 222 + tmpOffset + piggybackBytes));
+                const packet = NLPacket.fromReceivedPacket(view, piggybackBytes, sendingNode.getPublicSocket());
+                messageLocal = new ReceivedMessage(packet);
+            } else {
+                return;
+            }
+        }
+
+        const packetType = messageLocal.getType();
+
+        if (!hasOctreeStats) {
+            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+            const view = new DataView(messageLocal.getMessage().buffer.slice(tmpOffset));
+            const packet = NLPacket.fromReceivedPacket(view, view.byteLength, sendingNode.getPublicSocket());
+            messageLocal = new ReceivedMessage(packet);
+        }
+
         switch (packetType) {
-            case PacketType.EntityData:
-                PacketScribe.EntityData.read();
-                // WEBRTC TODO: Emit data.
-                this.#_addedEntity.emit();
+            case PacketType.EntityData: {
+                const entityDataDetails = PacketScribe.EntityData.read(messageLocal.getMessage());
+                console.warn("entityDataDetails: ", entityDataDetails);
+                // TODO: Emit entity data
+                // this.#_addedEntity.emit(entityDataDetails);
                 break;
+            }
             case PacketType.EntityErase:
             case PacketType.EntityQueryInitialResultsComplete:
                 console.error("OctreePacketProcessor: Packet type not processed: ", packetType);
