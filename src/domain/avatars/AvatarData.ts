@@ -743,34 +743,68 @@ class AvatarData extends SpatiallyNestable {
 
         // WEBRTC TODO: Address further C++ code - further avatar properties.
 
-        if (avatarData.jointRotations) {
-            // Just use the reference to the joint data. This is OK because the avatarData value keeps being created.
-            this.#_jointRotations = avatarData.jointRotations;
+        if (avatarData.jointRotationsValid && avatarData.jointRotations) {
+            const jointRotationsValid = avatarData.jointRotationsValid;
+            const jointRotations = avatarData.jointRotations;
+            const numJoints = jointRotationsValid.length;
+            if (this.#_jointRotations.length !== numJoints) {
+                this.#resizeJointRotations(numJoints);
+            }
+            let j = 0;
+            for (let i = 0; i < numJoints; i++) {
+                if (jointRotationsValid[i]) {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    this.#_jointRotations[i] = jointRotations[j]!;
+                    j += 1;
+                }
+            }
 
+            // WEBRTC TODO: Address further C++ code - _hasNewJointData.
             // WEBRTC TODO: Address further C++ code - joint update rate.
         }
 
         if (avatarData.jointRotationsUseDefault) {
-            // In the Web SDK, use of default joint rotations is indicated by null values.
             const jointRotationsUseDefault = avatarData.jointRotationsUseDefault;
-            for (let i = 0, length = jointRotationsUseDefault.length; i < length; i++) {
+            const numJoints = jointRotationsUseDefault.length;
+            if (this.#_jointRotations.length !== numJoints) {
+                this.#resizeJointRotations(numJoints);
+            }
+            for (let i = 0; i < numJoints; i++) {
                 if (jointRotationsUseDefault[i]) {
                     this.#_jointRotations[i] = null;
                 }
             }
+
+            // WEBRTC TODO: Address further C++ code - joint default pose update rate.
         }
 
-        if (avatarData.jointTranslations) {
-            // Just use the reference to the joint data. This is OK because the avatarData value keeps being created.
-            this.#_jointTranslations = avatarData.jointTranslations;
+        if (avatarData.jointTranslationsValid && avatarData.jointTranslations) {
+            const jointTranslationsValid = avatarData.jointTranslationsValid;
+            const jointTranslations = avatarData.jointTranslations;
+            const numJoints = jointTranslationsValid.length;
+            if (this.#_jointTranslations.length !== numJoints) {
+                this.#resizeJointTranslations(numJoints);
+            }
+            this.#resizeJointTranslations(numJoints);
+            let j = 0;
+            for (let i = 0; i < numJoints; i++) {
+                if (jointTranslationsValid[i]) {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    this.#_jointTranslations[i] = jointTranslations[j]!;
+                    j += 1;
+                }
+            }
 
             // WEBRTC TODO: Address further C++ code - joint update rate.
         }
 
         if (avatarData.jointTranslationsUseDefault) {
-            // In the Web SDK, use of default joint translations is indicated by null values.
             const jointTranslationsUseDefault = avatarData.jointTranslationsUseDefault;
-            for (let i = 0, length = jointTranslationsUseDefault.length; i < length; i++) {
+            const numJoints = jointTranslationsUseDefault.length;
+            if (this.#_jointTranslations.length !== numJoints) {
+                this.#resizeJointTranslations(numJoints);
+            }
+            for (let i = 0; i < numJoints; i++) {
                 if (jointTranslationsUseDefault[i]) {
                     this.#_jointTranslations[i] = null;
                 }
@@ -952,6 +986,30 @@ class AvatarData extends SpatiallyNestable {
                 }
             }
 
+        }
+    }
+
+    #resizeJointRotations(numJoints: number): void {
+        if (this.#_jointRotations.length < numJoints) {
+            for (let i = this.#_jointRotations.length; i < numJoints; i++) {
+                this.#_jointRotations.push(null);
+            }
+        } else if (this.#_jointRotations.length > numJoints) {
+            for (let i = this.#_jointRotations.length; i > numJoints; i--) {
+                this.#_jointRotations.pop();
+            }
+        }
+    }
+
+    #resizeJointTranslations(numJoints: number): void {
+        if (this.#_jointTranslations.length < numJoints) {
+            for (let i = this.#_jointTranslations.length; i < numJoints; i++) {
+                this.#_jointTranslations.push(null);
+            }
+        } else if (this.#_jointTranslations.length > numJoints) {
+            for (let i = this.#_jointTranslations.length; i > numJoints; i--) {
+                this.#_jointTranslations.pop();
+            }
         }
     }
 

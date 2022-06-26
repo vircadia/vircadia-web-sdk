@@ -25,8 +25,10 @@ type BulkAvatarDataDetails = {
     globalPosition: vec3 | undefined,
     localOrientation: quat | undefined,
     avatarScale: number | undefined,
-    jointRotations: (quat | null)[] | undefined,
-    jointTranslations: (vec3 | null)[] | undefined,
+    jointRotationsValid: boolean[] | undefined
+    jointRotations: quat[] | undefined,
+    jointTranslationsValid: boolean[] | undefined
+    jointTranslations: vec3[] | undefined,
     jointRotationsUseDefault: boolean[] | undefined,
     jointTranslationsUseDefault: boolean[] | undefined
 };
@@ -50,26 +52,37 @@ const BulkAvatarData = new class {
      *  @typedef {object} PacketScribe.BulkAvatarDataDetails
      *  @property {Uuid} sessionUUID - The avatar's session UUID.
      *  @property {vec3|undefined} globalPosition - The avatar's position in the domain.
-     *      <code>undefined</code> if not included in the packet.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
      *  @property {quat|undefined} localOrientation - The avatar's orientation.
-     *      <code>undefined</code> if not included in the packet.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
      *  @property {number|undefined} avatarScale - The avatar's scale.
-     *      <code>undefined</code> if not included in the packet.
-     *  @property {Array<quat|null>|undefined} jointRotations - The joint rotations relative to avatar space (i.e., not
-     *      relative to parent bones). If a rotation is <code>null</code> then the rotation of the avatar's default pose should
-     *      be used.
-     *      <code>undefined</code> if not included in the packet.
-     *  @property {Array<vec3|null>|undefined} jointTranslations - The bone translations relative to their parent joints in
-     *      avatar model coordinates. If a translation is <code>null</code> then the translation of the avatar's default pose
-     *      should be used.
-     *      <code>undefined</code> if not included in the packet.<br />
-     *      <strong>Warning:</strong> The avatar model coordinate system is not necessarily meters.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
+     *  @property {boolean[]|undefined} jointRotationsValid - A flag for each joint where <code>true</code> means that a
+     *      rotation value is included in <code>jointRotations</code>, <code>false</code> means that no value is included in
+     *      <code>jointRotations</code>. (A value may be excluded if it hasn't changed significantly since the last value
+     *      provided or the joint's default value should be used.)
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
+     *  @property {Array<quat>|undefined} jointRotations - The joint rotations relative to avatar space (i.e., not relative
+     *      to parent bones). Rotations are only provided for joints which have a <code>jointRotationsValid</code> flag value of
+     *      <code>true</code>.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
+     *  @property {boolean[]|undefined} jointTranslationsValid - A flag for each joint where <code>true</code> means that a
+     *      rotation value is included in <code>jointTranslations</code>, <code>false</code> means that no value is included in
+     *      <code>jointTranslations</code>. (A value may be excluded if it hasn't changed significantly since the last value
+     *      provided or the joint's default value should be used.)
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
+     *  @property {Array<quat>|undefined} jointTranslations - The joint rotations relative to avatar space (i.e., not relative
+     *      to parent bones). Translations are only provided for joints which have a <code>jointTranslationsValid</code> flag
+     *      value of <code>true</code>.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
      *  @property {Array<boolean>|undefined} jointRotationsUseDefault - <code>true</code> if the skeleton's default joint
-     *      rotation should be used instead of the value (if any) in <code>jointRotations</code>.<br />
-     *      Note: Normally, a <code>true</code> value will match a <code>null</code> joint rotation value.
+     *      rotation should be used instead of any value currently held, <code>false</code> if the skeleton's default joint
+     *      rotation should be used.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
      *  @property {Array<boolean>|undefined} jointTranslationsUseDefault - <code>true</code> if the skeleton's default joint
-     *      translation should be used instead of the value (if any) in <code>jointTranslations</code>.<br />
-     *      Note: Normally, a <code>true</code> value will match a <code>null</code> joint translation value.
+     *      rotation should be used instead of any value currently held, <code>false</code> if the skeleton's default joint
+     *      rotation should be used.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
      */
 
 
@@ -91,8 +104,6 @@ const BulkAvatarData = new class {
         const avatarDataDetailsList: BulkAvatarDataDetails[] = [];
 
         let dataPosition = 0;
-
-        const DEBUG = true;
 
         while (dataPosition < data.byteLength) {
 
@@ -191,14 +202,17 @@ const BulkAvatarData = new class {
                 dataPosition += numBlendshapeCoefficients * 4;
             }
 
-            let jointRotations: (quat | null)[] | undefined = undefined;
-            let jointTranslations: (vec3 | null)[] | undefined = undefined;
+            let jointRotationsValid: boolean[] | undefined = undefined;
+            let jointRotations: quat[] | undefined = undefined;
+            let jointTranslationsValid: boolean[] | undefined = undefined;
+            let jointTranslations: vec3[] | undefined = undefined;
             if (hasJointData) {
                 jointRotations = [];
                 const numJoints = data.getUint8(dataPosition);
                 dataPosition += 1;
 
-                const validRotations = new Array(numJoints) as Array<boolean>;
+                jointRotationsValid = new Array(numJoints) as Array<boolean>;
+                let jointRotationsValidCount = 0;
                 {
                     let validity = 0;
                     let validityBit = 0;
@@ -207,22 +221,27 @@ const BulkAvatarData = new class {
                             validity = data.getUint8(dataPosition);
                             dataPosition += 1;
                         }
-                        validRotations[i] = (validity & 1 << validityBit) > 0;
+                        jointRotationsValid[i] = (validity & 1 << validityBit) > 0;
                         validityBit = (validityBit + 1) % BITS_IN_BYTE;
+                        if (jointRotationsValid[i]) {
+                            jointRotationsValidCount += 1;
+                        }
                     }
                 }
 
-                jointRotations = new Array(numJoints) as Array<quat | null>;
+                jointRotations = new Array(jointRotationsValidCount) as Array<quat>;
+                let j = 0;
                 for (let i = 0; i < numJoints; i++) {
-                    jointRotations[i] = null;
-                    if (validRotations[i]) {
-                        jointRotations[i] = GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition);
-                        // WEBRTC TODO: Address further C++ code - _hasNewJointData.
+                    if (jointRotationsValid[i]) {
+                        jointRotations[j] = GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition);
                         dataPosition += 6;
+                        // WEBRTC TODO: Address further C++ code - _hasNewJointData.
+                        j += 1;
                     }
                 }
 
-                const validTranslations = new Array(numJoints) as Array<boolean>;
+                jointTranslationsValid = new Array(numJoints) as Array<boolean>;
+                let jointTranslationsValidCount = 0;
                 {
                     let validity = 0;
                     let validityBit = 0;
@@ -231,23 +250,27 @@ const BulkAvatarData = new class {
                             validity = data.getUint8(dataPosition);
                             dataPosition += 1;
                         }
-                        validTranslations[i] = (validity & 1 << validityBit) > 0;
+                        jointTranslationsValid[i] = (validity & 1 << validityBit) > 0;
                         validityBit = (validityBit + 1) % BITS_IN_BYTE;
+                        if (jointTranslationsValid[i]) {
+                            jointTranslationsValidCount += 1;
+                        }
                     }
                 }
 
                 const maxTranslationDimension = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
 
-                jointTranslations = new Array(numJoints) as Array<vec3 | null>;
+                jointTranslations = new Array(jointTranslationsValidCount) as Array<vec3>;
+                j = 0;
                 for (let i = 0; i < numJoints; i++) {
-                    jointTranslations[i] = null;
-                    if (validTranslations[i]) {
-                        jointTranslations[i] = Vec3.multiply(maxTranslationDimension,
+                    if (jointTranslationsValid[i]) {
+                        jointTranslations[j] = Vec3.multiply(maxTranslationDimension,
                             GLMHelpers.unpackFloatVec3FromSignedTwoByteFixed(data, dataPosition,
                                 TRANSLATION_COMPRESSION_RADIX));
-                        // WEBRTC TODO: Address further C++ code - _hasNewJointData.
                         dataPosition += 6;
+                        // WEBRTC TODO: Address further C++ code - _hasNewJointData.
+                        j += 1;
                     }
                 }
 
@@ -291,37 +314,6 @@ const BulkAvatarData = new class {
                         validityBit = (validityBit + 1) % BITS_IN_BYTE;
                     }
                 }
-
-                if (DEBUG && hasJointData) {
-                    // Check that a default flag value of true matches a null data value.
-                    // Code inspection of the C++ indicates that they should always match.
-
-                    if (jointRotations === undefined || jointTranslations === undefined) {
-                        console.warn("BulkAvatarData: hasJointDefaultPoseFlags without hasjointData.");
-                    } else if (jointRotationsUseDefault.length !== jointRotations.length
-                            || jointTranslationsUseDefault.length !== jointTranslations.length) {
-                        console.warn("BulkAvatarData: jointDefaultPoseFlags length != jointData length.");
-                    } else {
-                        let isDataConsistent = true;
-                        for (let i = 0; i < numJoints; i++) {
-                            isDataConsistent = isDataConsistent
-                                && (!jointRotationsUseDefault[i] || jointRotations[i] === null)
-                                && (!jointTranslationsUseDefault[i] || jointTranslations[i] === null);
-                            /*
-                            if (!((!jointRotationsUseDefault[i] || jointRotations[i] === null)
-                                && (!jointTranslationsUseDefault[i] || jointTranslations[i] === null))) {
-                                console.debug("Inconsistent hasJointDefaultPoseFlags data at:", i);
-                                console.debug("- Rotation flag, value:", jointRotationsUseDefault[i], jointRotations[i]);
-                                console.debug("- Translation flag, value:", jointTranslationsUseDefault[i],
-                                    jointTranslations[i]);
-                            }
-                            */
-                        }
-                        if (!isDataConsistent) {
-                            console.warn("BulkAvatarData: jointDefaultPoseFlags data inconsistent with jointData.");
-                        }
-                    }
-                }
             }
 
             /* eslint-enable @typescript-eslint/no-magic-numbers */
@@ -331,7 +323,9 @@ const BulkAvatarData = new class {
                 globalPosition,
                 localOrientation,
                 avatarScale,
+                jointRotationsValid,
                 jointRotations,
+                jointTranslationsValid,
                 jointTranslations,
                 jointRotationsUseDefault,
                 jointTranslationsUseDefault

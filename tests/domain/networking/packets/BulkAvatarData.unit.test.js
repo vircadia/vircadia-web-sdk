@@ -66,25 +66,6 @@ describe("BulkAvatarData - unit tests", () => {
         expect(bulkAvatarDetail.globalPosition.z).toBeCloseTo(13.732, 3);
     });
 
-    test("Can read a BulkAvatarData message that has joint data", () => {
-        // eslint-disable-next-line max-len
-        const RECEIVED_MESSAGE = "41571a4d7dd34fa1bf57922549e7b4b1117030e75ac0ffec9cc2ec9e10c0fc69cc46c4329cc2590f9a46b000000000000080808000300260000000000000000000ef45b69b6526ed93ae3767bcc90294c46b3ef03ab60e6369ea57ac2b6a21d0a58e796915ca8793c36a4fcc5c8d7269fd0c0000000000000000000000000000000000000000000dff213f1401ff3f34e71401004034e70000000000000000000000000000803f0000000000000000000000000000000000000000000000000000803f000000000000000000000000ee43b5434ac9b93f52531ec49c4a333f951956be8222293fa53a2f3eb0f3070000000000000000000000000000000000000000f3ffffffffffffffffffffffffffffffffffffffffff";
-        const MESSAGE_START = 0;
-
-        const arrayBuffer = new ArrayBuffer(RECEIVED_MESSAGE.length / 2);
-        const uint8Array = new Uint8Array(arrayBuffer);
-        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
-            uint8Array[i] = Number.parseInt(RECEIVED_MESSAGE.substr(i * 2, 2), 16);
-        }
-        const dataView = new DataView(arrayBuffer, MESSAGE_START);
-
-        const bulkAvatarDetails = BulkAvatarData.read(dataView);
-        expect(bulkAvatarDetails).toHaveLength(1);
-
-        const bulkAvatarDetail = bulkAvatarDetails[0];
-        expect(bulkAvatarDetail.sessionUUID.stringify()).toBe("41571a4d-7dd3-4fa1-bf57-922549e7b4b1");
-    });
-
     test("Can read a BulkAvatarData message that has orientation data", () => {
         // eslint-disable-next-line max-len
         const RECEIVED_MESSAGE = "000000000b36000000000000000000000000000000000000ba351668ba234dd9b45356207632381615304181d2c0948c823faf3ee140bfffb7c43fff531982c44eabd23fbdd1ffc62a00feffffff03c365baed40983b35a6e13c5a5234c11547554a039f433efdc91601023af5c91601023af53aaec23745863526eb48429531b6caae3bec30fba57c425130fba57c4251bc9bc5863effbe10c55c3e9cbe7fc6ca3e1d157af1e320550d45d9e23e570394c9ee335a023ac4dc2c2c37b100e435a2225505d44d9118160be05a1f18160be05a1f15246c6c16b939c86d222c6055ab642c23a85fd959431e80661353a928f768ef461f46ba67fe3ec555d467fe3ec555d4bea1c5fb3df0c219c2183f9ec219c2183f9e00020200000059c4c5422c0000405efe00004f1b00002aff0100000000fffdfdffff03";
@@ -132,52 +113,6 @@ describe("BulkAvatarData - unit tests", () => {
         expect(bulkAvatarDetail.avatarScale).toBeCloseTo(1.48717, 5);
     });
 
-    test("Can read a BulkAvatarData message that has avatar joint data", () => {
-        // eslint-disable-next-line max-len
-        const RECEIVED_MESSAGE = "1c9ab1d95001404cb71d790135624b1311305a81f1be9212ac3fbdac98c04150be46f67b16409a41abc65800708cffffffffffffffffbe4bb90d41243917be423f8a3d29c6eb3e963911ba9c475b375cc2394746c303b9064034c3ccb75e3f45c221b5b23e83bea7bb9a4004bf70bb2540313cfa8f4041433cfa8f4041433aab8f6243ac3aab8f6243acbd7f0600421cbd7f0600421cbc050613451bbc050613451bc001bb1d4029c001bb1d4029c001bb1d4029c001bb1d40296260151f1492465d0f753a064264202c3a874351180941da26bc1eec452b3abc257344b64dee20913bd04dee20913bd039a5189e508b32231aa760cb2edd1f436f342edd1f436f3438601918550e328d1af662fb302b1fcf70a6302b1fcf70a63bbe18404cda32dd18ff59c231951df26a3731951df16a373bcd185145b936f11a0054d9319b1a865b5d319b1a865b5d6bb8eefe637e7dc5ca7c45223a9476ca37887a55c17d432958457caf35db46fa798c3a3535037e953b6d35037e953b6d7a45b2d2389e776fa5a42c4974339d4f1faf74339d4f1faf79e5aff234e57702a54129ff74069dea1de374069dea1de37a6eb6243b40782fa8ed32b2763aa1a7237d763aa1a7237d7acab8de41ee7a8aae9b35be78e5a740319c78e5a740319c02b0040000000000000000b8981344302c00401af5ceff780a57ffc2fef5ff00000000a60400003e01f5ff000058ff0f000000000000000000fd4ffbffffffffffffffff";
-        const MESSAGE_START = 0;
-
-        const arrayBuffer = new ArrayBuffer(RECEIVED_MESSAGE.length / 2);
-        const uint8Array = new Uint8Array(arrayBuffer);
-        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
-            uint8Array[i] = Number.parseInt(RECEIVED_MESSAGE.substr(i * 2, 2), 16);
-        }
-        const dataView = new DataView(arrayBuffer, MESSAGE_START);
-
-        const bulkAvatarDetails = BulkAvatarData.read(dataView);
-        expect(bulkAvatarDetails).toHaveLength(1);
-
-        const bulkAvatarDetail = bulkAvatarDetails[0];
-        expect(bulkAvatarDetail.sessionUUID.stringify()).toBe("1c9ab1d9-5001-404c-b71d-790135624b13");
-
-        const jointRotations = bulkAvatarDetail.jointRotations;
-        expect(jointRotations).toHaveLength(88);
-        const jointTranslations = bulkAvatarDetail.jointTranslations;
-        expect(jointTranslations).toHaveLength(88);
-
-        expect(jointRotations[0]).toBeNull();
-        expect(jointTranslations[0]).toBeNull();
-
-        expect(jointRotations[1]).toBeNull();
-        expect(jointTranslations[1].x).toBeCloseTo(407.620, 3);
-        expect(jointTranslations[1].y).toBeCloseTo(590.386, 3);
-        expect(jointTranslations[1].z).toBeCloseTo(-100.536, 3);
-
-        expect(jointRotations[12].x).toBeCloseTo(-0.0188392, 6);
-        expect(jointRotations[12].y).toBeCloseTo(-0.0767595, 6);
-        expect(jointRotations[12].z).toBeCloseTo(0.0126243, 6);
-        expect(jointRotations[12].w).toBeCloseTo(-0.996792, 6);
-        expect(jointTranslations[12].x).toBeCloseTo(-1.80172, 3);
-        expect(jointTranslations[12].y).toBeCloseTo(96.572, 3);
-        expect(jointTranslations[12].z).toBeCloseTo(-6.0898, 3);
-
-        expect(jointRotations[87].x).toBeCloseTo(0.628642, 6);
-        expect(jointRotations[87].y).toBeCloseTo(-0.273438, 6);
-        expect(jointRotations[87].z).toBeCloseTo(-0.710469, 6);
-        expect(jointRotations[87].w).toBeCloseTo(-0.158979, 6);
-        expect(jointTranslations[87]).toBeNull();
-    });
-
     test("Can read a BulkAvatarData message that has joint default flags", () => {
 
         // eslint-disable-next-line max-len
@@ -196,9 +131,6 @@ describe("BulkAvatarData - unit tests", () => {
 
         const bulkAvatarDetail = bulkAvatarDetails[0];
         expect(bulkAvatarDetail.sessionUUID.stringify()).toBe("7cd12a58-0e0d-45b6-a1e6-aad6ab0c84bf");
-
-        const jointRotations = bulkAvatarDetail.jointRotations;
-        expect(jointRotations).toHaveLength(88);
 
         const jointRotationsUseDefault = bulkAvatarDetail.jointRotationsUseDefault;
         expect(jointRotationsUseDefault).toHaveLength(88);
@@ -223,6 +155,63 @@ describe("BulkAvatarData - unit tests", () => {
         expect(jointTranslationsUseDefault[14]).toEqual(true);
         expect(jointTranslationsUseDefault[15]).toEqual(false);
         expect(jointTranslationsUseDefault[87]).toEqual(true);
+    });
+
+
+    test("Can read a BulkAvataDataPacket that has joint data", () => {
+        // eslint-disable-next-line max-len
+        const RECEIVED_MESSAGE = "0096c5e6cd164cb8a9477088c0a6040d113014ae91c0c079aa3fb3df3ac1cc0f8b4500c516403cb7fdc65800308cffffffffffffffffbf72bab93e8c3accbe703c5b3abfbcc845a83847c04a45bcc224ba1b3e0ac4c6b9e63d78c470b9993d19b9a7b87a3ae6c328b5c9359b3e458ccd4d203e458ccd4d203be38ccd4f683be38ccd4f68c24c095a4d09c24c095a4d09c0b709dc4feec0b709dc4feebefab6ef35f1befab6ef35f1befab6ef35f1befab6ef35f11842e9fd162f0309c40e38563dd90cbc3533014cba7a35bc21ec0cf22f7630560e96329b40dc0792321740dc079232172f8301d93f09259405834a9f1faf0a4755671faf0a4755672d9a027542b424f505c54cc41f4b0b3158981f4b0b315898325700ff3c4d280903ad453c22d20866524a22d20866524a00fbb52536372da402ca40da290603e34352290603e3435165c4eaf96b417adcc75c49ad3db47b6132c27abbbd864b5a59d5781a2fa84e0e76a030843fd77d36320b3fd77d36320b7c1bb20c406a7b43a73635645fb179bb56415fb179bb56417bf7b0a03d297ad9a79533c979aca187286179aca18728617bd6b4a043137b2ea93b3a1f7abaa3102ce87abaa3102ce87b59b7ae49a87c76ae303d9a7bd4a8c13a3c7bd4a8c13a3c00b0040000000000000000a5f5c1427f0000408ffb70f8b9ff000000004f1c00009007b9ff000058ff0f000000000000000000ff4ffbffffffffffffffff";
+        const MESSAGE_START = 0;
+
+        const arrayBuffer = new ArrayBuffer(RECEIVED_MESSAGE.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(RECEIVED_MESSAGE.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer, MESSAGE_START);
+
+        const bulkAvatarDetails = BulkAvatarData.read(dataView);
+        expect(bulkAvatarDetails).toHaveLength(1);
+
+        const bulkAvatarDetail = bulkAvatarDetails[0];
+        expect(bulkAvatarDetail.sessionUUID.stringify()).toBe("0096c5e6-cd16-4cb8-a947-7088c0a6040d");
+
+        const numJoints = 88;
+        expect(bulkAvatarDetail.jointRotationsValid).toHaveLength(numJoints);
+        expect(bulkAvatarDetail.jointRotations.length).toBeLessThan(numJoints);
+        expect(bulkAvatarDetail.jointRotationsUseDefault).toHaveLength(numJoints);
+        expect(bulkAvatarDetail.jointTranslationsValid).toHaveLength(numJoints);
+        expect(bulkAvatarDetail.jointTranslations.length).toBeLessThan(numJoints);
+        expect(bulkAvatarDetail.jointTranslationsUseDefault).toHaveLength(numJoints);
+
+        /* eslint-disable max-len */
+
+        expect(bulkAvatarDetail.jointRotationsValid).toEqual([false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]);
+        const expectedJointRotations = [{ x: -0.00610709, y: -0.0582871, z: -0.0160338, w: -0.998152 }, { x: -0.0574672, y: -0.0172423, z: -0.997387, w: -0.0402464 }, { x: -0.0580282, y: -0.035542, z: -0.995721, w: 0.0625169 }, { x: -0.0853052, y: 0.00321537, z: -0.994332, w: 0.06338 }, { x: 0.0236731, y: -0.0651064, z: -0.0216446, w: -0.997363 }, { x: 0.0527627, y: -0.0673938, z: -0.0279459, w: -0.995938 }, { x: 0.049051, y: -0.0707172, z: -0.0320461, w: -0.995774 }, { x: -0.0701129, y: -0.083104, z: -0.056345, w: -0.992473 }, { x: 0.0348946, y: -0.112841, z: -0.114826, w: -0.986339 }, { x: -0.0190982, y: -0.565672, z: -0.81155, w: 0.145038 }, { x: -0.0190982, y: -0.565672, z: -0.81155, w: 0.145038 }, { x: -0.0454256, y: -0.565672, z: -0.805586, w: 0.170243 }, { x: -0.0454256, y: -0.565672, z: -0.805586, w: 0.170243 }, { x: 0.0253994, y: -0.783615, z: -0.603782, w: 0.144045 }, { x: 0.0253994, y: -0.783615, z: -0.603782, w: 0.144045 }, { x: 0.00791979, y: -0.781756, z: -0.598172, w: 0.176027 }, { x: 0.00791979, y: -0.781756, z: -0.598172, w: 0.176027 }, { x: -0.0112863, y: -0.100152, z: -0.111115, w: -0.988684 }, { x: -0.0112863, y: -0.100152, z: -0.111115, w: -0.988684 }, { x: -0.0112863, y: -0.100152, z: -0.111115, w: -0.988684 }, { x: -0.0112863, y: -0.100152, z: -0.111115, w: -0.988684 }, { x: -0.439085, y: 0.463945, z: -0.615234, w: -0.462003 }, { x: -0.673572, y: 0.0448213, z: -0.732888, w: -0.0846577 }, { x: -0.815097, y: -0.0237594, z: -0.566406, w: -0.119315 }, { x: -0.692778, y: -0.0610062, z: -0.709561, w: -0.113402 }, { x: -0.733488, y: -0.332308, z: -0.564076, w: -0.182717 }, { x: -0.806287, y: -0.173049, z: -0.545949, w: -0.147973 }, { x: -0.766543, y: 0.00951666, z: -0.623463, w: -0.15367 }, { x: -0.766543, y: 0.00951666, z: -0.623463, w: -0.15367 }, { x: -0.703676, y: -0.182155, z: -0.686692, w: -0.0106389 }, { x: -0.695289, y: -0.291911, z: -0.646208, w: 0.117373 }, { x: -0.681387, y: -0.357039, z: -0.593554, w: 0.236494 }, { x: -0.681387, y: -0.357039, z: -0.593554, w: 0.236494 }, { x: -0.70388, y: -0.203261, z: -0.679959, w: 0.0298881 }, { x: -0.690596, y: -0.298773, z: -0.64336, w: 0.141067 }, { x: -0.67465, y: -0.361355, z: -0.583454, w: 0.271755 }, { x: -0.67465, y: -0.361355, z: -0.583454, w: 0.271755 }, { x: -0.700715, y: -0.150908, z: -0.696101, w: -0.0408506 }, { x: -0.694507, y: -0.264763, z: -0.666493, w: 0.0578555 }, { x: -0.691265, y: -0.322381, z: -0.614313, w: 0.202095 }, { x: -0.691265, y: -0.322381, z: -0.614313, w: 0.202095 }, { x: -0.696274, y: -0.119919, z: -0.699384, w: -0.108093 }, { x: -0.708098, y: -0.202829, z: -0.676291, w: 0.00943035 }, { x: -0.702213, y: -0.253844, z: -0.664163, w: 0.0367073 }, { x: -0.702216, y: -0.253844, z: -0.664163, w: 0.0366641 }, { x: 0.417289, y: 0.474821, z: -0.609917, w: 0.477929 }, { x: 0.650352, y: 0.0813344, z: -0.747659, w: 0.106928 }, { x: -0.739932, y: -0.0253563, z: 0.656092, w: -0.14629 }, { x: 0.648928, y: -0.0273417, z: -0.74994, w: 0.125444 }, { x: -0.708288, y: 0.285437, z: 0.619881, w: -0.180559 }, { x: -0.763101, y: 0.15531, z: 0.603567, w: -0.171063 }, { x: -0.720275, y: -0.00174797, z: 0.676334, w: -0.154188 }, { x: -0.720275, y: -0.00174797, z: 0.676334, w: -0.154188 }, { x: 0.66412, y: -0.154145, z: -0.731549, w: 0.00459653 }, { x: 0.654797, y: -0.27387, z: -0.694622, w: -0.1172 }, { x: -0.640328, y: 0.350176, z: 0.637879, w: 0.245902 }, { x: -0.640328, y: 0.350176, z: 0.637879, w: 0.245902 }, { x: 0.662566, y: -0.169855, z: -0.728816, w: -0.0313555 }, { x: 0.650222, y: -0.26977, z: -0.6973, w: -0.134939 }, { x: 0.637231, y: -0.336667, z: -0.642253, w: -0.260965 }, { x: 0.637231, y: -0.336667, z: -0.642253, w: -0.260965 }, { x: 0.661142, y: -0.125659, z: -0.738882, w: 0.0339882 }, { x: 0.653891, y: -0.251556, z: -0.710584, w: -0.0649338 }, { x: 0.648884, y: -0.319705, z: -0.65745, w: -0.210943 }, { x: 0.648884, y: -0.319705, z: -0.65745, w: -0.210943 }, { x: 0.655747, y: -0.0919086, z: -0.741729, w: 0.106712 }, { x: 0.668047, y: -0.196787, z: -0.717138, w: -0.0264785 }, { x: 0.661055, y: -0.256822, z: -0.702135, w: -0.0636821 }, { x: 0.661055, y: -0.256822, z: -0.702135, w: -0.0636821 }];
+        expect(bulkAvatarDetail.jointRotations).toHaveLength(expectedJointRotations.length);
+        for (let i = 0, length = expectedJointRotations.length; i < length; i++) {
+            const expected = expectedJointRotations[i];
+            const received = bulkAvatarDetail.jointRotations[i];
+            expect(received.x).toBeCloseTo(expected.x, 5);
+            expect(received.y).toBeCloseTo(expected.y, 5);
+            expect(received.z).toBeCloseTo(expected.z, 5);
+        }
+        expect(bulkAvatarDetail.jointRotationsUseDefault).toEqual([true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+
+        expect(bulkAvatarDetail.jointTranslationsValid).toEqual([false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+        const expectedJointTranslations = [{ x: 0.751735, y: 96.9798, z: -6.7301 }, { x: -11.4595, y: -0.420261, z: 0 }, { x: 0, y: 42.8963, z: 0 }, { x: 11.4595, y: -0.420261, z: 0 }];
+        expect(bulkAvatarDetail.jointTranslations).toHaveLength(expectedJointTranslations.length);
+        for (let i = 0, length = expectedJointTranslations.length; i < length; i++) {
+            const expected = expectedJointTranslations[i];
+            const received = bulkAvatarDetail.jointTranslations[i];
+            expect(received.x).toBeCloseTo(expected.x, 3);
+            expect(received.y).toBeCloseTo(expected.y, 3);
+            expect(received.z).toBeCloseTo(expected.z, 3);
+        }
+        expect(bulkAvatarDetail.jointTranslationsUseDefault).toEqual([true, true, true, true, true, true, true, true, true, true, true, true, false, false, true, false, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]);
+
+        /* eslint-enable max-len */
+
     });
 
     /* eslint-enable @typescript-eslint/no-magic-numbers */
