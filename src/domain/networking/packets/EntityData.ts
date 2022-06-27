@@ -388,13 +388,11 @@ const EntityData = new class {
         const flags = data.getUint8(dataPosition);
         dataPosition += 1;
 
-        // TODO: not used?
         // eslint-disable-next-line
         // @ts-ignore
         const sequence = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
         dataPosition += 2;
 
-        // TODO: not used?
         // eslint-disable-next-line
         // @ts-ignore
         const sentAt = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
@@ -407,13 +405,13 @@ const EntityData = new class {
         let error = false;
 
         while (data.byteLength - dataPosition > 0 && !error) {
-            const entityMessage = new DataView(data.buffer.slice(dataPosition));
+            const entityMessage = new DataView(data.buffer.slice(data.byteOffset + dataPosition));
             let entityMessagePosition = 0;
 
             // eslint-disable-next-line @typescript-eslint/init-declarations
             let sectionLength;
             if (packetIsCompressed) {
-                // TODO: explain that 2 is sizeof(OCTREE_PACKET_INTERNAL_SECTION_SIZE)
+                // 2 represents sizeof(OCTREE_PACKET_INTERNAL_SECTION_SIZE) in the C++ code.
                 if (entityMessage.byteLength > 2) {
                     sectionLength = entityMessage.getUint16(entityMessagePosition, UDT.LITTLE_ENDIAN);
                     entityMessagePosition += 2;
@@ -431,17 +429,16 @@ const EntityData = new class {
 
                 if (packetIsCompressed) {
                     // Skip the next 4 bytes (QT qCompress header).
-                    const compressedData = entityMessage.buffer.slice(entityMessagePosition + 4);
-                    entityData = new DataView(ungzip(compressedData).buffer); // TODO: Check error returned by ungzip.
+                    const compressedData = entityMessage.buffer.slice(entityMessage.byteOffset + entityMessagePosition + 4);
+                    entityData = new DataView(ungzip(compressedData).buffer);
                 } else {
-                    entityData = new DataView(entityMessage.buffer.slice(entityMessagePosition));
+                    entityData = new DataView(entityMessage.buffer.slice(entityMessage.byteOffset + entityMessagePosition));
                 }
 
                 let entityDataPosition = 0;
 
-                // TODO?: Put this function in its own module?
-                // Originally written recursively, numberOfThreeBitSectionsInCode is here rewritten iteratively
-                // to be used as an anonymous function .
+                // Written recursively in the C++ code, numberOfThreeBitSectionsInCode is here written iteratively
+                // to be used as an anonymous function.
                 // eslint-disable-next-line max-len
                 const numberOfThreeBitSectionsInCode = (data: DataView, dataPosition: number, maxBytes: number): number => { // eslint-disable-line @typescript-eslint/no-shadow
                 // C++ int numberOfThreeBitSectionsInCode(const unsigned char* octalCode, int maxBytes)
@@ -471,14 +468,9 @@ const EntityData = new class {
                     return result;
                 };
 
-                // TODO?:
-                // Add numberOfThreeBitSectionsInStream to entityDataDetails?
-                // In the C++ they compare numberOfThreeBitSectionsInStream and numberOfThreeBitSectionsFromNode
-                // and create a node if they're not equal
                 const numberOfThreeBitSectionsInStream
                 = numberOfThreeBitSectionsInCode(entityData, entityDataPosition, entityData.byteLength);
 
-                // TODO?: Put in its own module?
                 const bytesRequiredForCodeLength = (threeBitCodes: number): number => {
                 // C++ size_t bytesRequiredForCodeLength(unsigned char threeBitCodes)
 
@@ -491,7 +483,7 @@ const EntityData = new class {
                 const octalCodeBytes = bytesRequiredForCodeLength(numberOfThreeBitSectionsInStream);
                 entityDataPosition += octalCodeBytes;
 
-                // TODO: Explain 1 is sizeof(unsigned char)
+                // 1 represents sizeof(unsigned char) in the C++ code.
                 if (entityData.byteLength - entityDataPosition < 1) {
                     break;
                 }
@@ -510,7 +502,7 @@ const EntityData = new class {
 
                 // WEBRTC TODO: Address further C++ code.
 
-                // TODO: Explain that 2 is the sizeof(numberOfEntities) in the C++ code.
+                // 2 represents sizeof(numberOfEntities) in the C++ code.
                 if (entityData.byteLength - entityDataPosition < 2) {
                     break;
                 }

@@ -17,6 +17,7 @@ import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
 import PacketReceiver from "../networking/PacketReceiver";
 import ReceivedMessage from "../networking/ReceivedMessage";
+import assert from "../shared/assert";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 
 
@@ -79,25 +80,16 @@ class OctreePacketProcessor {
     #processPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {
         // C++ void OctreePacketProcessor::processPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer sendingNode)
 
-        if (!sendingNode) {
-            // TODO: Better message.
-            console.error("Could not process the packet");
-            return;
-        }
-
-        // TODO: Figure out what these 24 bytes represents
-        const tmpOffset = 24;
+        assert(sendingNode !== null, "OctreePacketProcessor.processPacket()", "Sending node is missing.");
 
         let messageLocal = message;
 
-        let hasOctreeStats = false;
-
-        const octreePacketType = message.getType();
+        const octreePacketType = messageLocal.getType();
 
         if (octreePacketType === PacketType.OctreeStats) {
-            // WEBRTC TODO: Address further C++ code.
+            // WEBRTC TODO: Address further C++ code - process OctreeStats packet.
 
-            hasOctreeStats = true;
+            console.error("OctreePacketProcessor: Packet type not processed: ", octreePacketType);
 
             // WEBRTC TODO: Do not hardcode statsMessageLength.
             const statsMessageLength = 222;
@@ -106,7 +98,10 @@ class OctreePacketProcessor {
 
             if (piggybackBytes > 0) {
                 // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-                const view = new DataView(messageLocal.getMessage().buffer.slice(222 + tmpOffset, 222 + tmpOffset + piggybackBytes));
+                const view = new DataView(
+                    // messageLocal.getMessage().buffer.slice(messageLocal.getMessage().byteOffset + statsMessageLength)
+                    messageLocal.getMessage().buffer.slice(messageLocal.getMessage().byteOffset + statsMessageLength)
+                );
                 const packet = NLPacket.fromReceivedPacket(view, piggybackBytes, sendingNode.getPublicSocket());
                 messageLocal = new ReceivedMessage(packet);
             } else {
@@ -116,17 +111,9 @@ class OctreePacketProcessor {
 
         const packetType = messageLocal.getType();
 
-        if (!hasOctreeStats) {
-            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-            const view = new DataView(messageLocal.getMessage().buffer.slice(tmpOffset));
-            const packet = NLPacket.fromReceivedPacket(view, view.byteLength, sendingNode.getPublicSocket());
-            messageLocal = new ReceivedMessage(packet);
-        }
-
         switch (packetType) {
             case PacketType.EntityData: {
                 const entityDataDetails = PacketScribe.EntityData.read(messageLocal.getMessage());
-                console.warn("entityDataDetails: ", entityDataDetails);
                 // TODO: Emit entity data
                 // this.#_addedEntity.emit(entityDataDetails);
                 break;
