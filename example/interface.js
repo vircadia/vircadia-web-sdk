@@ -9,7 +9,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer, Uuid } from "../dist/Vircadia.js";
+import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer, Vec3, Uuid }
+    from "../dist/Vircadia.js";
 
 (function () {
 
@@ -27,6 +28,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
     let entityServer = null;
     let entityServerGameLoop = null;
     let messageMixer = null;
+    let doppelganger = null;
 
 
     // Domain Server
@@ -355,6 +357,12 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         const avatars = new Map();  // <sessionID, { avatar, tr, headJoint }>
 
+        function onEchoClicked(checkbox, sessionID) {
+            if (doppelganger !== null) {
+                doppelganger.toggle(checkbox, sessionID);
+            }
+        }
+
         function onAvatarAdded(sessionID) {
 
             avatarsCount.value = avatarMixer.avatarList.count;
@@ -396,6 +404,19 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             tr.appendChild(td);
             td = document.createElement("td");
             td.className = "number";
+            tr.appendChild(td);
+            td = document.createElement("td");
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.className = "checkbox";
+            if (sessionID.value() === Uuid.AVATAR_SELF_ID) {
+                cb.disabled = true;
+            } else {
+                cb.onclick = (event) => {
+                    onEchoClicked(event.target, sessionID);
+                };
+            }
+            td.appendChild(cb);
             tr.appendChild(td);
             avatarListBody.appendChild(tr);
 
@@ -518,6 +539,121 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
     }());
 
+    // Doppelganger
+    (function () {
+        let avatarCheckbox = null;
+        let avatarSessionID = null;
+        const myAvatar = avatarMixer.myAvatar;
+        let avatar = null;
+        const DOPPELGANGER_OFFSET = { x: 0, y: 0, z: 2 };
+
+        function updateSkeletonModelURL() {
+            myAvatar.skeletonModelURL = avatar.skeletonModelURL;
+        }
+
+        function updateSkeleton() {
+            myAvatar.skeleton = avatar.skeleton;
+        }
+
+        function updateScale(scale) {
+            myAvatar.scale = scale;
+        }
+
+        function updateAvatarPositionAndOrientation() {
+            myAvatar.position = Vec3.sum(avatar.position, DOPPELGANGER_OFFSET);
+            myAvatar.orientation = avatar.orientation;
+        }
+
+        function updateJoints() {
+            // $$$$$$$: Do I really need to make a copy or not?
+            myAvatar.jointRotations = JSON.parse(JSON.stringify(avatar.jointRotations));
+            myAvatar.jointTranslations = JSON.parse(JSON.stringify(avatar.jointTranslations));
+        }
+
+
+        function startDoppelganger() {
+            console.debug("Start doppelganger for", avatarSessionID.stringify());
+
+            // Access avatar.
+            avatar = avatarMixer.avatarList.getAvatar(avatarSessionID);
+            if (!avatar.isValid) {
+                console.error("Error getting avatar to echo.");
+                avatar = null;
+                return;
+            }
+
+
+            // Avatar.
+            updateSkeletonModelURL();
+            avatar.skeletonModelURLChanged.connect(updateSkeletonModelURL);
+            updateSkeleton();
+            avatar.skeletonChanged.connect(updateSkeleton);
+            updateScale(avatar.scale);
+            avatar.scaleChanged.connect(updateScale);
+
+            // Position and orientation.
+            // These are handled by gameLoop().
+
+            // Joints.
+            // These are handled by gameLoop().
+
+        }
+
+        function stopDoppelganger() {
+            console.debug("Stop doppelganger for", avatarSessionID.stringify());
+
+            // Retain current skeleton URL, scale, position, orientation, and skeleton data but stop updating with changes.
+
+            // Avatar.
+            avatar.skeletonModelURLChanged.disconnect(updateSkeletonModelURL);
+            avatar.skeletonChanged.disconnect(updateSkeleton);
+            avatar.scaleChanged.disconnect(updateScale);
+
+            // Position and orientation.
+            // These are handled by gameLoop().
+
+            // Joints.
+            // These are handled by gameLoop().
+
+            // Finish with avatar.
+            avatar = null;
+        }
+
+
+        function toggle(checkbox, sessionID) {
+
+            if (avatarSessionID !== null) {
+                // Stop the current doppelganger, if any.
+                avatarCheckbox.checked = false;
+                stopDoppelganger();
+            }
+
+            if (sessionID !== avatarSessionID) {
+                avatarSessionID = sessionID;
+                avatarCheckbox = checkbox;
+                avatarCheckbox.checked = true;
+                startDoppelganger();
+            } else {
+                // There is no current doppelganger.
+                avatarSessionID = null;
+                avatarCheckbox = null;
+            }
+        }
+
+        function gameLoop() {
+            if (avatar !== null) {
+                updateAvatarPositionAndOrientation();
+                updateJoints();
+            }
+        }
+
+        doppelganger = {
+            toggle,
+            gameLoop
+        };
+
+    }());
+
     // Wire up mixers.
     audioMixer.positionGetter = () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -546,6 +682,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
             // Update the avatar mixer with latest user client data and get latest data from avatar mixer.
             avatarMixerGameLoop();
+            doppelganger.gameLoop();
 
             // Update the entity server with latest user client data.
             entityServerGameLoop();
