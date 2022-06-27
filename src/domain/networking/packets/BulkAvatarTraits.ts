@@ -102,7 +102,9 @@ const BulkAvatarTraits = new class {
                         this.#_haveWarnedComplexTraits = true;
                     }
 
-                    dataPosition += traitBinarySize;
+                    if (traitBinarySize > AvatarTraits.DELETED_TRAIT_SIZE) {
+                        dataPosition += traitBinarySize;
+                    }
                 }
 
                 // Read the next trait type, which is Null Trait if there are no more traits for this avatar.
