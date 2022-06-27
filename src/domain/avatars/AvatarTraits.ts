@@ -91,6 +91,8 @@ type AvatarTraitsValues = {
  *  @property {AvatarTraits.TraitType} TotalTraitTypes=4 - The number of trait types. <em>Read-only.</em>
  *  @property {AvatarTraits.TraitType} NUM_SIMPLE_TRAITS=2 - The number of simple traits. <em>Read-only.</em>
  *  @property {number} DEFAULT_TRAIT_VERSION=0 - The default trait version sequence number. <em>Read-only.</em>
+ *  @property {number} DELETED_TRAIT_SIZE=-1 - The nominal trait binary size for deleting an instanced trait.
+ *      <em>Read-only.</em>
  */
 const AvatarTraits = new class {
     // C++  namespace AvatarTraits
@@ -150,6 +152,7 @@ const AvatarTraits = new class {
     readonly NUM_SIMPLE_TRAITS = TraitType.FirstInstancedTrait;
 
     readonly DEFAULT_TRAIT_VERSION = 0;
+    readonly DELETED_TRAIT_SIZE = -1;
 
 
     /*@devdoc
