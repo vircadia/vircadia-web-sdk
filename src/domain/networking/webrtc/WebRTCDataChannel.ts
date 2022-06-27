@@ -109,7 +109,7 @@ class WebRTCDataChannel {
             {
                 urls: [
                     "stun:stun1.l.google.com:19302",
-                    "stun:stun.schlund.de"
+                    "stun:stun4.l.google.com:19302"
                 ]
             }
         ]
