@@ -213,7 +213,7 @@ class ScriptAvatar {
     /*@sdkdoc
      *  Triggered when the avatar's scale changes.
      *  @callback ScriptAvatar~scaleChanged
-     *  @param {number} The new avatar scale.
+     *  @param {number} scale - The new avatar scale.
      */
     get scaleChanged(): Signal {
         if (this.#_avatarData) {
