@@ -177,6 +177,8 @@ describe("BulkAvatarTraits - unit tests", () => {
     });
 
     test("Can skip over grab and ungrab complex traits data in a BulkAvatarTraits message", () => {
+        const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
+
         // eslint-disable-next-line max-len
         const RECEIVED_MESSAGE_GRAB = "e0f78661090000000000000064300f5e52f16f5ed0ae1601585e0aa017790681040000000000000072c0c01d8cfc443faabf4a8738efeff80303000000cfd633fa8d0b493fb04bdc2298fb99426c000000000172c0c01d8cfc443faabf4a8738efeff8852461da20504cd0b9e1619af13dc65f0000fff600000008006e006f006e00650000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003ff0000000000000ff";
         // eslint-disable-next-line max-len
@@ -206,6 +208,8 @@ describe("BulkAvatarTraits - unit tests", () => {
         bulkAvatarTraitsDetails = BulkAvatarTraits.read(dataView);
         expect(bulkAvatarTraitsDetails.traitsSequenceNumber).toBe(5n);
         expect(bulkAvatarTraitsDetails.avatarTraitsList).toHaveLength(0);
+
+        warn.mockReset();
     });
 
     /* eslint-enable @typescript-eslint/no-magic-numbers */
