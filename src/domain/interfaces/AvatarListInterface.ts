@@ -20,11 +20,12 @@ import Uuid from "../shared/Uuid";
  *  The <code>AvatarListInterface</code> namespace provides facilities for working with avatars in the domain. It is
  *  provided as the <code>avatarList</code> property of the {@link AvatarMixer} class.
  *  @namespace AvatarListInterface
+ *  @comment Don't document the constructor because it shouldn't be used in the SDK.
+ *
  *  @property {number} count - The number of avatars the user client knows about in the domain, including the user client's.
  *  @property {Signal<AvatarListInterface~avatarAdded>} avatarAdded - Triggered when an avatar is added.
  *  @property {Signal<AvatarListInterface~avatarRemoved>} avatarRemoved - Triggered when an avatar is removed.
  */
-// Don't document the constructor because it shouldn't be used in the SDK.
 class AvatarListInterface {
     // C++  The user scripting interface for the AvatarManager class.
 

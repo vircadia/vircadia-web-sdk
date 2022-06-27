@@ -65,6 +65,16 @@ const Quat = new class {
 
 
     /*@sdkdoc
+     *  Makes a copy of a quaternion.
+     *  @function Quat.copy
+     *  @param {quat} q - The quaternion.
+     *  @returns {quat} A copy of the quaternion.
+     */
+    copy(q: quat) {
+        return { x: q.x, y: q.y, z: q.z, w: q.w };
+    }
+
+    /*@sdkdoc
      *  Tests whether two quaternions are equal.
      *  @function Quat.equal
      *  @param {quat} q1 - The first quaternion.
@@ -73,6 +83,17 @@ const Quat = new class {
      */
     equal(q1: quat, q2: quat): boolean {
         return q1.x === q2.x && q1.y === q2.y && q1.z === q2.z && q1.w === q2.w;
+    }
+
+    /*@sdkdoc
+     *  Calculates the dot product of two quaternions.
+     *  @function Quat.dot
+     *  @param {quat} q1 - The first quaternion.
+     *  @param {quat} q2 - The second quaternion.
+     *  @returns {number} The dot product of the two quaternions.
+     */
+    dot(q1: quat, q2: quat): number {
+        return q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
     }
 
 
