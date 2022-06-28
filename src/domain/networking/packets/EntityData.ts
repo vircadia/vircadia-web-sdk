@@ -10,8 +10,9 @@
 //
 
 import { EntityTypes } from "../../entities/EntityItem";
-import "../../shared/DataViewExtensions";
+import AACube from "../../shared/AACube";
 import ByteCountCoded from "../../shared/ByteCountCoding";
+import "../../shared/DataViewExtensions";
 import GLMHelpers from "../../shared/GLMHelpers";
 import PropertyFlags from "../../shared/PropertyFlags";
 import { quat } from "../../shared/Quat";
@@ -22,19 +23,226 @@ import UDT from "../udt/UDT";
 import { ungzip } from "pako";
 
 
-/*@sdkdoc
+/*@devdoc
+ *  The positions of the flags in {@link PropertyFlags}.
  *  <table>
  *      <thead>
  *          <tr><th>Name</th><th>Value</th><th>Description</th></tr>
  *      </thead>
  *      <tbody>
- *          // TODO: doc
- *          <tr><td>DISCONNECTED</td><td>0</td><td>Disconnected from the domain server.</td></tr> // TODO: remove
+ *          <tr><td>PROP_PAGED_PROPERTY</td><td>0</td><td>Paged property flag.</td></tr>
+            <tr><td>PROP_CUSTOM_PROPERTIES_INCLUDED</td><td>1</td><td>Custom properties included flag.</td></tr>
+            <tr><td>PROP_SIMULATION_OWNER</td><td>2</td><td>Simulation owner flag.</td></tr>
+            <tr><td>PROP_PARENT_ID</td><td>3</td><td>Parent id flag.</td></tr>
+            <tr><td>PROP_PARENT_JOINT_INDEX</td><td>4</td><td>Parent joint index flag.</td></tr>
+            <tr><td>PROP_VISIBLE</td><td>5</td><td>Visible flag.</td></tr>
+            <tr><td>PROP_NAME</td><td>6</td><td>Name flag.</td></tr>
+            <tr><td>PROP_LOCKED</td><td>7</td><td>Locked flag.</td></tr>
+            <tr><td>PROP_USER_DATA</td><td>8</td><td>User data flag.</td></tr>
+            <tr><td>PROP_PRIVATE_USER_DATA</td><td>9</td><td>Private user data flag.</td></tr>
+            <tr><td>PROP_HREF</td><td>10</td><td>Href flag.</td></tr>
+            <tr><td>PROP_DESCRIPTION</td><td>11</td><td>Description flag.</td></tr>
+            <tr><td>PROP_POSITION</td><td>12</td><td>Position flag.</td></tr>
+            <tr><td>PROP_DIMENSIONS</td><td>13</td><td>Dimensions flag.</td></tr>
+            <tr><td>PROP_ROTATION</td><td>14</td><td>Rotation flag.</td></tr>
+            <tr><td>PROP_REGISTRATION_POINT</td><td>15</td><td>Registration point flag.</td></tr>
+            <tr><td>PROP_CREATED</td><td>16</td><td>Created flag.</td></tr>
+            <tr><td>PROP_LAST_EDITED_BY</td><td>17</td><td>Last edited by flag.</td></tr>
+            <tr><td>PROP_ENTITY_HOST_TYPE</td><td>18</td><td>Entity host type flag.</td></tr>
+            <tr><td>PROP_OWNING_AVATAR_ID</td><td>19</td><td>Owning avatar id flag.</td></tr>
+            <tr><td>PROP_QUERY_AA_CUBE</td><td>20</td><td>Query aa cube flag.</td></tr>
+            <tr><td>PROP_CAN_CAST_SHADOW</td><td>21</td><td>Can cast shadow flag.</td></tr>
+            <tr><td>PROP_VISIBLE_IN_SECONDARY_CAMERA</td><td>22</td><td>Visible in secondary camera flag.</td></tr>
+            <tr><td>PROP_RENDER_LAYER</td><td>23</td><td>Render layer flag.</td></tr>
+            <tr><td>PROP_PRIMITIVE_MODE</td><td>24</td><td>Primitive mode flag.</td></tr>
+            <tr><td>PROP_IGNORE_PICK_INTERSECTION</td><td>25</td><td>Ignore pick intersection flag.</td></tr>
+            <tr><td>PROP_RENDER_WITH_ZONES</td><td>26</td><td>Render with zones flag.</td></tr>
+            <tr><td>PROP_BILLBOARD_MODE</td><td>27</td><td>Billboard mode flag.</td></tr>
+            <tr><td>PROP_GRAB_GRABBABLE</td><td>28</td><td>Grab grabbable flag.</td></tr>
+            <tr><td>PROP_GRAB_KINEMATIC</td><td>29</td><td>Grab kinematic flag.</td></tr>
+            <tr><td>PROP_GRAB_FOLLOWS_CONTROLLER</td><td>30</td><td>Grab follows controller flag.</td></tr>
+            <tr><td>PROP_GRAB_TRIGGERABLE</td><td>31</td><td>Grab triggerable flag.</td></tr>
+            <tr><td>PROP_GRAB_EQUIPPABLE</td><td>32</td><td>Grab equippable flag.</td></tr>
+            <tr><td>PROP_GRAB_DELEGATE_TO_PARENT</td><td>33</td><td>Grab delegate to parent flag.</td></tr>
+            <tr><td>PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET</td><td>34</td><td>Grab left equippable position offset flag.</td>
+            </tr>
+            <tr><td>PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET</td><td>35</td><td>Grab left equippable rotation offset flag.</td>
+            </tr>
+            <tr><td>PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET</td><td>36</td><td>Grab right equippable position offset flag.
+            </td></tr>
+            <tr><td>PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET</td><td>37</td><td>Grab right equippable rotation offset flag.
+            </td></tr>
+            <tr><td>PROP_GRAB_EQUIPPABLE_INDICATOR_URL</td><td>38</td><td>Grab equippable indicator url flag.</td></tr>
+            <tr><td>PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE</td><td>39</td><td>Grab equippable indicator scale flag.</td></tr>
+            <tr><td>PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET</td><td>40</td><td>Grab equippable indicator offset flag.</td></tr>
+            <tr><td>PROP_DENSITY</td><td>41</td><td>Density flag.</td></tr>
+            <tr><td>PROP_VELOCITY</td><td>42</td><td>Velocity flag.</td></tr>
+            <tr><td>PROP_ANGULAR_VELOCITY</td><td>43</td><td>Angular velocity flag.</td></tr>
+            <tr><td>PROP_GRAVITY</td><td>44</td><td>Gravity flag.</td></tr>
+            <tr><td>PROP_ACCELERATION</td><td>45</td><td>Acceleration flag.</td></tr>
+            <tr><td>PROP_DAMPING</td><td>46</td><td>Damping flag.</td></tr>
+            <tr><td>PROP_ANGULAR_DAMPING</td><td>47</td><td>Angular damping flag.</td></tr>
+            <tr><td>PROP_RESTITUTION</td><td>48</td><td>Restitution flag.</td></tr>
+            <tr><td>PROP_FRICTION</td><td>49</td><td>Friction flag.</td></tr>
+            <tr><td>PROP_LIFETIME</td><td>50</td><td>Lifetime flag.</td></tr>
+            <tr><td>PROP_COLLISIONLESS</td><td>51</td><td>Collisionless flag.</td></tr>
+            <tr><td>PROP_COLLISION_MASK</td><td>52</td><td>Collision mask flag.</td></tr>
+            <tr><td>PROP_DYNAMIC</td><td>53</td><td>Dynamic flag.</td></tr>
+            <tr><td>PROP_COLLISION_SOUND_URL</td><td>54</td><td>Collision sound url flag.</td></tr>
+            <tr><td>PROP_ACTION_DATA</td><td>55</td><td>Action data flag.</td></tr>
+            <tr><td>PROP_CLONEABLE</td><td>56</td><td>Cloneable flag.</td></tr>
+            <tr><td>PROP_CLONE_LIFETIME</td><td>57</td><td>Clone lifetime flag.</td></tr>
+            <tr><td>PROP_CLONE_LIMIT</td><td>58</td><td>Clone limit flag.</td></tr>
+            <tr><td>PROP_CLONE_DYNAMIC</td><td>59</td><td>Clone dynamic flag.</td></tr>
+            <tr><td>PROP_CLONE_AVATAR_ENTITY</td><td>60</td><td>Clone avatar entity flag.</td></tr>
+            <tr><td>PROP_CLONE_ORIGIN_ID</td><td>61</td><td>Clone origin id flag.</td></tr>
+            <tr><td>PROP_SCRIPT</td><td>62</td><td>Script flag.</td></tr>
+            <tr><td>PROP_SCRIPT_TIMESTAMP</td><td>63</td><td>Script timestamp flag.</td></tr>
+            <tr><td>PROP_SERVER_SCRIPTS</td><td>64</td><td>Server scripts flag.</td></tr>
+            <tr><td>PROP_ITEM_NAME</td><td>65</td><td>Item name flag.</td></tr>
+            <tr><td>PROP_ITEM_DESCRIPTION</td><td>66</td><td>Item description flag.</td></tr>
+            <tr><td>PROP_ITEM_CATEGORIES</td><td>67</td><td>Item categories flag.</td></tr>
+            <tr><td>PROP_ITEM_ARTIST</td><td>68</td><td>Item artist flag.</td></tr>
+            <tr><td>PROP_ITEM_LICENSE</td><td>69</td><td>Item license flag.</td></tr>
+            <tr><td>PROP_LIMITED_RUN</td><td>70</td><td>Limited run flag.</td></tr>
+            <tr><td>PROP_MARKETPLACE_ID</td><td>71</td><td>Marketplace id flag.</td></tr>
+            <tr><td>PROP_EDITION_NUMBER</td><td>72</td><td>Edition number flag.</td></tr>
+            <tr><td>PROP_ENTITY_INSTANCE_NUMBER</td><td>73</td><td>Entity instance number flag.</td></tr>
+            <tr><td>PROP_CERTIFICATE_ID</td><td>74</td><td>Certificate id flag.</td></tr>
+            <tr><td>PROP_CERTIFICATE_TYPE</td><td>75</td><td>Certificate type flag.</td></tr>
+            <tr><td>PROP_STATIC_CERTIFICATE_VERSION</td><td>76</td><td>Static certificate version flag.</td></tr>
+            <tr><td>PROP_LOCAL_POSITION</td><td>77</td><td>Local position flag.</td></tr>
+            <tr><td>PROP_LOCAL_ROTATION</td><td>78</td><td>Local rotation flag.</td></tr>
+            <tr><td>PROP_LOCAL_VELOCITY</td><td>79</td><td>Local velocity flag.</td></tr>
+            <tr><td>PROP_LOCAL_ANGULAR_VELOCITY</td><td>80</td><td>Local angular velocity flag.</td></tr>
+            <tr><td>PROP_LOCAL_DIMENSIONS</td><td>81</td><td>Local dimensions flag.</td></tr>
+            <tr><td>PROP_SHAPE_TYPE</td><td>82</td><td>Shape type flag.</td></tr>
+            <tr><td>PROP_COMPOUND_SHAPE_URL</td><td>83</td><td>Compound shape url flag.</td></tr>
+            <tr><td>PROP_COLOR</td><td>84</td><td>Color flag.</td></tr>
+            <tr><td>PROP_ALPHA</td><td>85</td><td>Alpha flag.</td></tr>
+            <tr><td>PROP_PULSE_MIN</td><td>86</td><td>Pulse min flag.</td></tr>
+            <tr><td>PROP_PULSE_MAX</td><td>87</td><td>Pulse max flag.</td></tr>
+            <tr><td>PROP_PULSE_PERIOD</td><td>88</td><td>Pulse period flag.</td></tr>
+            <tr><td>PROP_PULSE_COLOR_MODE</td><td>89</td><td>Pulse color mode flag.</td></tr>
+            <tr><td>PROP_PULSE_ALPHA_MODE</td><td>90</td><td>Pulse alpha mode flag.</td></tr>
+            <tr><td>PROP_TEXTURES</td><td>91</td><td>Textures flag.</td></tr>
+            <tr><td>PROP_DERIVED_0</td><td>92</td><td>Derived 0 flag.</td></tr>
+            <tr><td>PROP_DERIVED_1</td><td>93</td><td>Derived 1 flag.</td></tr>
+            <tr><td>PROP_DERIVED_2</td><td>94</td><td>Derived 2 flag.</td></tr>
+            <tr><td>PROP_DERIVED_3</td><td>95</td><td>Derived 3 flag.</td></tr>
+            <tr><td>PROP_DERIVED_4</td><td>96</td><td>Derived 4 flag.</td></tr>
+            <tr><td>PROP_DERIVED_5</td><td>97</td><td>Derived 5 flag.</td></tr>
+            <tr><td>PROP_DERIVED_6</td><td>98</td><td>Derived 6 flag.</td></tr>
+            <tr><td>PROP_DERIVED_7</td><td>99</td><td>Derived 7 flag.</td></tr>
+            <tr><td>PROP_DERIVED_8</td><td>100</td><td>Derived 8 flag.</td></tr>
+            <tr><td>PROP_DERIVED_9</td><td>101</td><td>Derived 9 flag.</td></tr>
+            <tr><td>PROP_DERIVED_10</td><td>102</td><td>Derived 10 flag.</td></tr>
+            <tr><td>PROP_DERIVED_11</td><td>103</td><td>Derived 11 flag.</td></tr>
+            <tr><td>PROP_DERIVED_12</td><td>104</td><td>Derived 12 flag.</td></tr>
+            <tr><td>PROP_DERIVED_13</td><td>105</td><td>Derived 13 flag.</td></tr>
+            <tr><td>PROP_DERIVED_14</td><td>106</td><td>Derived 14 flag.</td></tr>
+            <tr><td>PROP_DERIVED_15</td><td>107</td><td>Derived 15 flag.</td></tr>
+            <tr><td>PROP_DERIVED_16</td><td>108</td><td>Derived 16 flag.</td></tr>
+            <tr><td>PROP_DERIVED_17</td><td>109</td><td>Derived 17 flag.</td></tr>
+            <tr><td>PROP_DERIVED_18</td><td>110</td><td>Derived 18 flag.</td></tr>
+            <tr><td>PROP_DERIVED_19</td><td>111</td><td>Derived 19 flag.</td></tr>
+            <tr><td>PROP_DERIVED_20</td><td>112</td><td>Derived 20 flag.</td></tr>
+            <tr><td>PROP_DERIVED_21</td><td>113</td><td>Derived 21 flag.</td></tr>
+            <tr><td>PROP_DERIVED_22</td><td>114</td><td>Derived 22 flag.</td></tr>
+            <tr><td>PROP_DERIVED_23</td><td>115</td><td>Derived 23 flag.</td></tr>
+            <tr><td>PROP_DERIVED_24</td><td>116</td><td>Derived 24 flag.</td></tr>
+            <tr><td>PROP_DERIVED_25</td><td>117</td><td>Derived 25 flag.</td></tr>
+            <tr><td>PROP_DERIVED_26</td><td>118</td><td>Derived 26 flag.</td></tr>
+            <tr><td>PROP_DERIVED_27</td><td>119</td><td>Derived 27 flag.</td></tr>
+            <tr><td>PROP_DERIVED_28</td><td>120</td><td>Derived 28 flag.</td></tr>
+            <tr><td>PROP_DERIVED_29</td><td>121</td><td>Derived 29 flag.</td></tr>
+            <tr><td>PROP_DERIVED_30</td><td>122</td><td>Derived 30 flag.</td></tr>
+            <tr><td>PROP_DERIVED_31</td><td>123</td><td>Derived 31 flag.</td></tr>
+            <tr><td>PROP_DERIVED_32</td><td>124</td><td>Derived 32 flag.</td></tr>
+            <tr><td>PROP_DERIVED_33</td><td>125</td><td>Derived 33 flag.</td></tr>
+            <tr><td>PROP_DERIVED_34</td><td>126</td><td>Derived 34 flag.</td></tr>
+            <tr><td>PROP_AFTER_LAST_ITEM</td><td>127</td><td>After last item flag.</td></tr>
+            <tr><td>PROP_MAX_PARTICLES</td><td>{@link EntityPropertyFlags|PROP_DERIVED_0}</td><td>Max particles flag.</td></tr>
+            <tr><td>PROP_LIFESPAN</td><td>{@link EntityPropertyFlags|PROP_DERIVED_1}</td><td>Lifespan flag.</td></tr>
+            <tr><td>PROP_EMITTING_PARTICLES</td><td>{@link EntityPropertyFlags|PROP_DERIVED_2}</td><td>Emitting_particles flag.
+            </td></tr>
+            <tr><td>PROP_EMIT_RATE</td><td>{@link EntityPropertyFlags|PROP_DERIVED_3}</td><td>Emit rate flag.</td></tr>
+            <tr><td>PROP_EMIT_SPEED</td><td>{@link EntityPropertyFlags|PROP_DERIVED_4}</td><td>Emit speed flag.</td></tr>
+            <tr><td>PROP_SPEED_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_5}</td><td>Speed spread flag.</td></tr>
+            <tr><td>PROP_EMIT_ORIENTATION</td><td>{@link EntityPropertyFlags|PROP_DERIVED_6}</td><td>Emit orientation flag.
+            </td></tr>
+            <tr><td>PROP_EMIT_DIMENSIONS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_7}</td><td>Emit dimensions flag.</td>
+            </tr>
+            <tr><td>PROP_ACCELERATION_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_8}</td><td>Acceleration spread
+            flag.</td></tr>
+            <tr><td>PROP_POLAR_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_9}</td><td>Polar start flag.</td></tr>
+            <tr><td>PROP_POLAR_FINISH</td><td>{@link EntityPropertyFlags|PROP_DERIVED_10}</td><td>Polar finish flag.</td></tr>
+            <tr><td>PROP_AZIMUTH_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_11}</td><td>Azimuth start flag.</td></tr>
+            <tr><td>PROP_AZIMUTH_FINISH</td><td>{@link EntityPropertyFlags|PROP_DERIVED_12}</td><td>Azimuth finish flag.</td>
+            </tr>
+            <tr><td>PROP_EMIT_RADIUS_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_13}</td><td>Emit radius start flag.
+            </td></tr>
+            <tr><td>PROP_EMIT_ACCELERATION</td><td>{@link EntityPropertyFlags|PROP_DERIVED_14}</td><td>Emit acceleration flag.
+            </td></tr>
+            <tr><td>PROP_PARTICLE_RADIUS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_15}</td><td>Particle radius flag.</td>
+            </tr>
+            <tr><td>PROP_RADIUS_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_16}</td><td>Radius spread flag.</td></tr>
+            <tr><td>PROP_RADIUS_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_17}</td><td>Radius start flag.</td></tr>
+            <tr><td>PROP_RADIUS_FINISH</td><td>{@link EntityPropertyFlags|PROP_DERIVED_18}</td><td>Radius finish flag.</td></tr>
+            <tr><td>PROP_COLOR_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_19}</td><td>Color spread flag.</td></tr>
+            <tr><td>PROP_COLOR_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_20}</td><td>Color start flag.</td></tr>
+            <tr><td>PROP_COLOR_FINISH</td><td>{@link EntityPropertyFlags|PROP_DERIVED_21}</td><td>Color finish flag.</td></tr>
+            <tr><td>PROP_ALPHA_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_22}</td><td>Alpha spread flag.</td></tr>
+            <tr><td>PROP_ALPHA_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_23}</td><td>Alpha start flag.</td></tr>
+            <tr><td>PROP_ALPHA_FINISH</td><td>{@link EntityPropertyFlags|PROP_DERIVED_24}</td><td>Alpha finish flag.</td></tr>
+            <tr><td>PROP_EMITTER_SHOULD_TRAIL</td><td>{@link EntityPropertyFlags|PROP_DERIVED_25}</td><td>Emitter should trail
+            flag.</td></tr>
+            <tr><td>PROP_PARTICLE_SPIN</td><td>{@link EntityPropertyFlags|PROP_DERIVED_26}</td><td>Particle spin flag.</td></tr>
+            <tr><td>PROP_SPIN_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_27}</td><td>Spin start flag.</td></tr>
+            <tr><td>PROP_SPIN_FINISH</td><td>{@link EntityPropertyFlags|PROP_DERIVED_28}</td><td>Spin finish flag.</td></tr>
+            <tr><td>PROP_SPIN_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_29}</td><td>Spin spread flag.</td></tr>
+            <tr><td>PROP_PARTICLE_ROTATE_WITH_ENTITY</td><td>{@link EntityPropertyFlags|PROP_DERIVED_30}</td><td>Particle rotate
+            with entity flag.</td></tr>
+            <tr><td>PROP_MODEL_URL</td><td>{@link EntityPropertyFlags|PROP_DERIVED_0}</td><td>Model url flag.</td></tr>
+            <tr><td>PROP_MODEL_SCALE</td><td>{@link EntityPropertyFlags|PROP_DERIVED_1}</td><td>Model scale flag.</td></tr>
+            <tr><td>PROP_JOINT_ROTATIONS_SET</td><td>{@link EntityPropertyFlags|PROP_DERIVED_2}</td><td>Joint rotations set
+            flag.</td></tr>
+            <tr><td>PROP_JOINT_ROTATIONS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_3}</td><td>Joint rotations flag.</td>
+            </tr>
+            <tr><td>PROP_JOINT_TRANSLATIONS_SET</td><td>{@link EntityPropertyFlags|PROP_DERIVED_4}</td><td>Joint translations
+            set flag.</td></tr>
+            <tr><td>PROP_JOINT_TRANSLATIONS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_5}</td><td>Joint translations flag.
+            </td></tr>
+            <tr><td>PROP_RELAY_PARENT_JOINTS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_6}</td><td>Relay parent joints
+            flag.</td></tr>
+            <tr><td>PROP_GROUP_CULLED</td><td>{@link EntityPropertyFlags|PROP_DERIVED_7}</td><td>Group culled flag.</td></tr>
+            <tr><td>PROP_BLENDSHAPE_COEFFICIENTS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_8}</td><td>Blendshape
+            coefficients flag.</td></tr>
+            <tr><td>PROP_USE_ORIGINAL_PIVOT</td><td>{@link EntityPropertyFlags|PROP_DERIVED_9}</td><td>Use original pivot flag.
+            </td></tr>
+            <tr><td>PROP_ANIMATION_URL</td><td>{@link EntityPropertyFlags|PROP_DERIVED_10}</td><td>Animation url flag.</td></tr>
+            <tr><td>PROP_ANIMATION_ALLOW_TRANSLATION</td><td>{@link EntityPropertyFlags|PROP_DERIVED_11}</td><td>Animation allow
+            translation flag.</td></tr>
+            <tr><td>PROP_ANIMATION_FPS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_12}</td><td>Animation fps flag.</td></tr>
+            <tr><td>PROP_ANIMATION_FRAME_INDEX</td><td>{@link EntityPropertyFlags|PROP_DERIVED_13}</td><td>Animation frame index
+            flag.</td></tr>
+            <tr><td>PROP_ANIMATION_PLAYING</td><td>{@link EntityPropertyFlags|PROP_DERIVED_14}</td><td>Animation playing flag.
+            </td></tr>
+            <tr><td>PROP_ANIMATION_LOOP</td><td>{@link EntityPropertyFlags|PROP_DERIVED_15}</td><td>Animation loop flag.</td>
+            </tr>
+            <tr><td>PROP_ANIMATION_FIRST_FRAME</td><td>{@link EntityPropertyFlags|PROP_DERIVED_16}</td><td>Animation first frame
+            flag.</td></tr>
+            <tr><td>PROP_ANIMATION_LAST_FRAME</td><td>{@link EntityPropertyFlags|PROP_DERIVED_17}</td><td>Animation last frame
+            flag.</td></tr>
+            <tr><td>PROP_ANIMATION_HOLD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_18}</td><td>Animation hold flag.</td>
+            </tr>
  *      </tbody>
  *  </table>
- *  @typedef {number} DomainServer.State // TODO: do we need that?
+ *  @typedef {number} EntityPropertyFlags
  */
 enum EntityPropertyFlags {
+    // C++ EntityPropertyFlags.h
+
     PROP_PAGED_PROPERTY,
     PROP_CUSTOM_PROPERTIES_INCLUDED,
 
@@ -238,111 +446,105 @@ enum EntityPropertyFlags {
 type EntityDataDetails = {
     entityItemID: Uuid,
     entityType: EntityTypes,
-    created: BigInt,
+    createdFromBuffer: BigInt,
     lastEdited: BigInt,
     updateDelta: number,
     simulatedDelta: number,
-    propSimOwnerData: ArrayBuffer | undefined;
-    propParentID: Uuid | undefined;
-    propParentJointIndex: number | undefined;
-    propVisible: boolean | undefined;
-    propName: string | undefined;
-    propLocked: boolean | undefined;
-    propUserData: string | undefined;
-    propPrivateUserData: string | undefined;
-    propHref: string | undefined;
-    propDescription: string | undefined;
-    propPosition: vec3 | undefined;
-    propDimension: vec3 | undefined;
-    propRotation: quat | undefined;
-    propRegistrationPoint: vec3 | undefined;
-    propCreated: BigInt | undefined;
-    propLastEditedBy: Uuid | undefined;
-    propAaCubeData: aaCubeData | undefined;
-    propCanCastShadow: boolean | undefined;
-    propRenderLayer: number | undefined;
-    propPrimitiveMode: number | undefined;
-    propIgnorePickIntersection: boolean | undefined;
-    propRenderWithZones: Uuid[] | undefined;
-    propBillboardMode: number | undefined;
-    propGrabbable: boolean | undefined;
-    propKinematic: boolean | undefined;
-    propFollowsController: boolean | undefined;
-    propTriggerable: boolean | undefined;
-    propEquippable: boolean | undefined;
-    propDelegateToParent: boolean | undefined;
-    propGrabLeftEquippablePositionOffset: vec3 | undefined;
-    propGrabLeftEquippableRotationOffset: quat | undefined;
-    propGrabRightEquippablePositionOffset: vec3 | undefined;
-    propGrabRightEquippableRotationOffset: quat | undefined;
-    propGrabEquippableIndicatorUrl: string | undefined;
-    propGrabRightEquippableIndicatorScale: vec3 | undefined;
-    propGrabRightEquippableIndicatorOffset: vec3 | undefined;
-    propDensity: number | undefined;
-    propVelocity: vec3 | undefined;
-    propAngularVelocity: vec3 | undefined;
-    propGravity: vec3 | undefined;
-    propAcceleration: vec3 | undefined;
-    propDamping: number | undefined;
-    propAngularDampling: number | undefined;
-    propRestitution: number | undefined;
-    propFriction: number | undefined;
-    propLifetime: number | undefined;
-    propCollisionless: boolean | undefined;
-    propCollisionMask: number | undefined;
-    propDynamic: boolean | undefined;
-    propCollisionSoundUrl: string | undefined;
-    propActionData: ArrayBuffer | undefined;
-    propCloneable: boolean | undefined;
-    propCloneLifetime: number | undefined;
-    propCloneLimit: number | undefined;
-    propCloneDynamic: boolean | undefined;
-    propCloneAvatarIdentity: boolean | undefined;
-    propCloneOriginId: Uuid | undefined;
-    propScript: string | undefined;
-    propScriptTimestamp: BigInt | undefined;
-    propServerScripts: string | undefined;
-    propItemName: string | undefined;
-    propItemDescription: string | undefined;
-    propItemCategories: string | undefined;
-    propItemArtist: string | undefined;
-    propItemLicense: string | undefined;
-    propLimitedRun: number | undefined;
-    propMarketplaceID: string | undefined;
-    propEditionNumber: number | undefined;
-    propEntityInstanceNumber: number | undefined;
-    propCertificateID: string | undefined;
-    propCertificateType: string | undefined;
-    propStaticCertificateVersion: number | undefined;
-    propShapeType: number | undefined;
-    propCompoundShapeUrl: string | undefined;
-    propColor: vec3 | undefined;
-    propTextures: string | undefined;
-    propModelUrl: string | undefined;
-    propModelScale: vec3 | undefined;
-    propJointRotationsSet: boolean[] | undefined;
-    propJointRotations: quat[] | undefined;
-    propJointTranslationsSet: boolean[] | undefined;
-    propJointTranslations: vec3[] | undefined;
-    propGroupCulled: boolean | undefined;
-    propRelayParentJoints: boolean | undefined;
-    propBlendShapeCoefficients: string | undefined;
-    propUseOriginalPivot: boolean | undefined;
-    propAnimationUrl: string | undefined;
-    propAnimationAllowTranslation: boolean | undefined;
-    propAnimationFPS: number | undefined;
-    propAnimationFrameIndex: number | undefined;
-    propAnimationPlaying: boolean | undefined;
-    propAnimationLoop: boolean | undefined;
-    propAnimationFirstFrame: number | undefined;
-    propAnimationLastFrame: number | undefined;
-    propAnimationHold: boolean | undefined;
-};
-
-
-type aaCubeData = {
-    corner: vec3;
-    scale: number;
+    simOwnerData: ArrayBuffer | undefined;
+    parentID: Uuid | null | undefined;
+    parentJointIndex: number | undefined;
+    visible: boolean | undefined;
+    name: string | undefined;
+    locked: boolean | undefined;
+    userData: string | undefined;
+    privateUserData: string | undefined;
+    href: string | undefined;
+    description: string | undefined;
+    position: vec3 | undefined;
+    dimensions: vec3 | undefined;
+    rotation: quat | undefined;
+    registrationPoint: vec3 | undefined;
+    created: BigInt | undefined;
+    lastEditedBy: Uuid | undefined;
+    queryAACube: AACube | undefined;
+    canCastShadow: boolean | undefined;
+    renderLayer: number | undefined;
+    primitiveMode: number | undefined;
+    ignorePickIntersection: boolean | undefined;
+    renderWithZones: Uuid[] | undefined;
+    billboardMode: number | undefined;
+    grabbable: boolean | undefined;
+    grabKinematic: boolean | undefined;
+    grabFollowsController: boolean | undefined;
+    triggerable: boolean | undefined;
+    grabEquippable: boolean | undefined;
+    delegateToParent: boolean | undefined;
+    equippableLefPositionOffset: vec3 | undefined;
+    equippableLeftRotationOffset: quat | undefined;
+    equippableRightPositionOffset: vec3 | undefined;
+    equippableRightRotationOffset: quat | undefined;
+    equippableIndicatorUrl: string | undefined;
+    equippableIndicatorScale: vec3 | undefined;
+    equippableIndicatorOffset: vec3 | undefined;
+    density: number | undefined;
+    velocity: vec3 | undefined;
+    angularVelocity: vec3 | undefined;
+    gravity: vec3 | undefined;
+    acceleration: vec3 | undefined;
+    damping: number | undefined;
+    angularDampling: number | undefined;
+    restitution: number | undefined;
+    friction: number | undefined;
+    lifetime: number | undefined;
+    collisionless: boolean | undefined;
+    collisionMask: number | undefined;
+    dynamic: boolean | undefined;
+    collisionSoundUrl: string | undefined;
+    actionData: ArrayBuffer | undefined;
+    cloneable: boolean | undefined;
+    cloneLifetime: number | undefined;
+    cloneLimit: number | undefined;
+    cloneDynamic: boolean | undefined;
+    cloneAvatarIdentity: boolean | undefined;
+    cloneOriginId: Uuid | undefined;
+    script: string | undefined;
+    scriptTimestamp: BigInt | undefined;
+    serverScripts: string | undefined;
+    itemName: string | undefined;
+    itemDescription: string | undefined;
+    itemCategories: string | undefined;
+    itemArtist: string | undefined;
+    itemLicense: string | undefined;
+    limitedRun: number | undefined;
+    marketplaceID: string | undefined;
+    editionNumber: number | undefined;
+    entityInstanceNumber: number | undefined;
+    certificateID: string | undefined;
+    certificateType: string | undefined;
+    staticCertificateVersion: number | undefined;
+    shapeType: number | undefined;
+    compoundShapeUrl: string | undefined;
+    color: vec3 | undefined;
+    textures: string | undefined;
+    modelUrl: string | undefined;
+    modelScale: vec3 | undefined;
+    jointRotationsSet: boolean[] | undefined;
+    jointRotations: quat[] | undefined;
+    jointTranslationsSet: boolean[] | undefined;
+    jointTranslations: vec3[] | undefined;
+    groupCulled: boolean | undefined;
+    relayParentJoints: boolean | undefined;
+    blendShapeCoefficients: string | undefined;
+    useOriginalPivot: boolean | undefined;
+    animationUrl: string | undefined;
+    animationAllowTranslation: boolean | undefined;
+    animationFPS: number | undefined;
+    animationFrameIndex: number | undefined;
+    animationPlaying: boolean | undefined;
+    animationLoop: boolean | undefined;
+    animationFirstFrame: number | undefined;
+    animationLastFrame: number | undefined;
+    animationHold: boolean | undefined;
 };
 
 
@@ -350,10 +552,10 @@ const EntityData = new class {
     // C++ N/A
 
     // C++ OctreePacketData.h
-    readonly PACKET_IS_COMPRESSED_BIT = 1;
-    readonly OVERFLOWED_OCTCODE_BUFFER = -1;
-    readonly UNKNOWN_OCTCODE_LENGTH = -2;
-    // TODO: Add to doc
+    readonly #_PACKET_IS_COMPRESSED_BIT = 1;
+    // C++ OctalCode.h
+    readonly #_OVERFLOWED_OCTCODE_BUFFER = -1;
+    readonly #_UNKNOWN_OCTCODE_LENGTH = -2;
     // Header bytes
     //    object ID [16 bytes]
     //    ByteCountCoded(type code) [~1 byte]
@@ -361,15 +563,206 @@ const EntityData = new class {
     //    ByteCountCoded(last_edited to last_updated delta) [~1-8 bytes]
     //    PropertyFlags<>( everything ) [1-2 bytes]
     // ~27-35 bytes...
-    readonly MINIMUM_HEADER_BYTES = 27;
+    readonly #_MINIMUM_HEADER_BYTES = 27;
 
     /*@devdoc
      *  Information returned by {@link PacketScribe|reading} an {@link PacketType(1)|EntityData} packet.
      *  @typedef {object} PacketScribe.EntityDataDetails
+     * @property {Uuid} entityItemID - The ID of the entity.
+     * @property {EntityTypes} entityType - The entity's type. It cannot be changed after an entity is created.
+     * @property {BigInt} createdFromBuffer - Timestamp for when the entity was created. Expressed in number of microseconds since Unix
+     *     epoch.
+     * @property {BigInt} lastEdited - Timestamp for when the entity was last edited. Expressed in number of microseconds since
+     *     Unix epoch.
+     * @property {number} updateDelta - The delta between {@link EntityDataDetails|lastEdited} and the last time the entity was
+     *     updated.
+     * @property {number} simulatedDelta - The delta between {@link EntityDataDetails|lastEdited} and the last time the entity
+     *     was simulated.
+     * @property {ArrayBuffer | undefined} simOwnerData - The simulation owner data.
+     * @property {Uuid | null | undefined} parentID - The ID of the entity that the entity is parented to. Is <code>null</code>
+     *     if the entity is not parented.
+     * @property {number | undefined} parentJointIndex - The joint of the entity that the entity is parented to.
+     * @property {boolean | undefined} visible - Is <code>true</code> if the entity is rendered, <code>false</code> if it isn't.
+     * @property {string | undefined} name - The entity's name. Doesn't have to be unique.
+     * @property {boolean | undefined} locked - Is <code>true</code> if properties other than locked cannot be changed and the
+     *     entity cannot be deleted, <code>false</code> if all properties can be changed and the entity can be deleted.
+     * @property {string | undefined} userData - Used to store extra data about the entity in JSON format.
+     * @property {string | undefined} privateUserData - Like userData, but only accessible by server entity scripts, assignment
+     *     client scripts, and users who have "Can Get and Set Private User Data" permissions in the domain.
+     * @property {string | undefined} href - A "hifi://" metaverse address that a user is teleported to when they click on the
+     *     entity.
+     * @property {string | undefined} description - A description of the href property value.
+     * @property {vec3 | undefined} position - The position of the entity in world coordinates.
+     * @property {vec3 | undefined} dimensions - The dimensions of the entity. When adding an entity, if no dimensions value is
+     *     specified then the model is automatically sized to its natural dimensions.
+     * @property {quat | undefined} rotation - The orientation of the entity in world coordinates.
+     * @property {vec3 | undefined} registrationPoint - The point in the entity that is set to the entity's position and is
+     *     rotated about.
+     * @property {BigInt | undefined} created - Timestamp for when the entity was created. Expressed in number of microseconds
+     *     since Unix
+     * @property {Uuid | undefined} lastEditedBy - The session ID of the avatar or agent that most recently created or edited
+     *     the entity.
+     * @property {AACube | undefined} queryAACube - The axis-aligned cube that determines where the entity lives in the entity
+     *     server's octree. The cube may be considerably larger than the entity in some situations, e.g., when the entity is
+     *     grabbed by an avatar: the position of the entity is determined through avatar mixer updates and so the AA cube is
+     *     expanded in order to reduce unnecessary entity server updates. Scripts should not change this property's value.
+     * @property {boolean | undefined} canCastShadow - Is <code>true</code> if the entity can cast a shadow, <code>false</code>
+     *     if it can't.
+     * @property {number | undefined} renderLayer - The layer that the entity renders in.
+     * @property {number | undefined} primitiveMode - How the entity's geometry is rendered.
+     * @property {boolean | undefined} ignorePickIntersection - Is <code>true</code> if Picks and RayPick ignore the entity,
+     *     <code>false</code> if they don't.
+     * @property {Uuid[] | undefined} renderWithZones - A list of entity IDs representing with which zones this entity should
+     *     render. If it is empty, this entity will render normally. Otherwise, this entity will only render if your avatar is
+     *     within one of the zones in this list.
+     * @property {number | undefined} billboardMode - Whether the entity is billboarded to face the camera. Use the rotation
+     *     property to control which axis is facing you.
+     * @property {boolean | undefined} grabbable - Is <code>true</code> if the entity can be grabbed, <code>false</code> if it
+     *     can't be.
+     * @property {boolean | undefined} grabKinematic - Is <code>true</code> if the entity will be updated in a kinematic manner
+     *     when grabbed; <code>false</code> if it will be grabbed using a tractor action. A kinematic grab will make the item
+     *     appear more tightly held but will cause it to behave poorly when interacting with dynamic entities.
+     * @property {boolean | undefined} grabFollowsController - Is <code>true</code> if the entity will follow the motions of the
+     *     hand controller even if the avatar's hand can't get to the implied position, <code>false</code> if it will follow the
+     *     motions of the avatar's hand. This should be set true for tools, pens, etc. and <code>false</code> for things meant
+     *     to decorate the hand.
+     * @property {boolean | undefined} triggerable - Is <code>true</code> if the entity will receive calls to trigger Controller
+     *     entity methods, <code>false</code> if it won't.
+     * @property {boolean | undefined} equippable - Is <code>true</code> if the entity can be equipped, <code>false</code> if it
+     *     cannot.
+     * @property {boolean | undefined} delegateToParent - Is <code>true</code> if when the entity is grabbed, the grab will be
+     *     transferred to its parent entity if there is one; <code>false</code> if the grab won't be transferred, so a child
+     *     entity can be grabbed and moved relative to its parent.
+     * @property {vec3 | undefined} equippableLeftPositionOffset - Positional offset from the left hand, when equipped.
+     * @property {quat | undefined} equippableLeftRotationOffset - Rotational offset from the left hand, when equipped.
+     * @property {vec3 | undefined} equippableRightPositionOffset - Positional offset from the right hand, when equipped.
+     * @property {quat | undefined} equippableRightRotationOffset - Rotational offset from the right hand, when equipped.
+     * @property {string | undefined} equippableIndicatorUrl - If non-empty, this model will be used to indicate that an entity
+    *      is equippable, rather than the default.
+     * @property {vec3 | undefined} equippableIndicatorScale - If equippableIndicatorURL is non-empty, this controls the scale
+     *     of the displayed indicator.
+     * @property {vec3 | undefined} equippableIndicatorOffset - If equippableIndicatorURL is non-empty, this controls the
+     *     relative offset of the displayed object from the equippable entity.
+     * @property {number | undefined} density - The density of the entity in <code>kg/m3</code>, range <code>100 – 10000</code>.
+     *     Examples: <code>100</code> for balsa wood, <code>10000</code> for silver. The density is used in conjunction with the
+     *     entity's bounding box volume to work out its mass in the application of physics.
+     * @property {vec3 | undefined} velocity - The linear velocity of the entity in m/s with respect to world coordinates.
+     * @property {vec3 | undefined} angularVelocity - The angular velocity of the entity in <code>rad/s</code> with respect to
+     *     its axes, about its registration point.
+     * @property {vec3 | undefined} gravity - The acceleration due to gravity in <code>m/s2</code> that the entity should move
+     *     with, in world coordinates. Use a value of <code>{ x: 0, y: -9.8, z: 0 }</code> to simulate Earth's gravity. Gravity
+     *     is applied to an entity's motion only if its dynamic property is true. If changing an entity's gravity from
+     *     {@link Vec3|ZERO}, you need to give it a small velocity in order to kick off physics simulation.
+     * @property {vec3 | undefined} acceleration - The current, measured acceleration of the entity, in <code>m/s2</code>.
+     * @property {number | undefined} damping - How much the linear velocity of an entity slows down over time, range
+     *     <code>0.0</code> – <code>1.0</code>. A higher damping value slows down the entity more quickly. The default value is
+     *     for an exponential decay timescale of <code>2.0s</code>, where it takes <code>2.0s</code> for the movement to slow to
+     *     <code>1/e = 0.368</code> of its initial value.
+     * @property {number | undefined} angularDampling - How much the angular velocity of an entity slows down over time, range
+     *     <code>0.0 – 1.0</code>. A higher damping value slows down the entity more quickly. The default value is for an
+     *     exponential decay timescale of <code>2.0s</code>, where it takes <code>2.0s</code> for the movement to slow to
+     *     <code>1/e = 0.368</code> of its initial value.
+     * @property {number | undefined} restitution - The "bounciness" of an entity when it collides, range
+     *     <code>0.0 – 0.99</code>. The higher the value, the more bouncy.
+     * @property {number | undefined} friction - How much an entity slows down when it's moving against another, range
+     *     <code>0.0 – 10.0</code>. The higher the value, the more quickly it slows down. Examples: <code>0.1</code> for ice,
+     *     <code>0.9</code> for sandpaper.
+     * @property {number | undefined} lifetime - How long an entity lives for, in seconds, before being automatically deleted.
+     *     A value of -1 means that the entity lives for ever.
+     * @property {boolean | undefined} collisionless - Is <code>true</code> if the entity shouldn't collide, <code>false</code>
+     *     if it collides with items per its {@link EntityData|collisionMask} property.
+     * @property {number | undefined} collisionMask - What types of items the entity should collide with.
+     * @property {boolean | undefined} dynamic - Is <code>true</code> if the entity's movement is affected by collisions,
+     *     <code>false</code> if it isn't.
+     * @property {string | undefined} collisionSoundUrl - The sound that's played when the entity experiences a collision.
+     * @property {ArrayBuffer | undefined} actionData - Base-64 encoded compressed dump of the actions associated with the
+     *     entity. This property is typically not used in scripts directly; rather, functions that manipulate an entity's
+     *     actions update it. The size of this property increases with the number of actions. Because this property value has to
+     *     fit within a Vircadia datagram packet, there is a limit to the number of actions that an entity can have; edits which
+     *     would result in overflow are rejected.
+     * @property {boolean | undefined} cloneable - Is <code>true</code> if the domain or avatar entity can be cloned,
+     *     <code>false</code> if it can't be.
+     * @property {number | undefined} cloneLifetime - The entity lifetime for clones created from this entity.
+     * @property {number | undefined} cloneLimit - The total number of clones of this entity that can exist in the domain at any
+     *     given time.
+     * @property {boolean | undefined} cloneDynamic - Is <code>true</code> if clones created from this entity will have their
+     *     dynamic property set to true, <code>false</code> if they won't.
+     * @property {boolean | undefined} cloneAvatarIdentity - Is <code>true</code> if clones created from this entity will be
+     *     created as avatar entities, <code>false</code> if they won't be.
+     * @property {Uuid | undefined} cloneOriginId - The ID of the entity that this entity was cloned from.
+     * @property {string | undefined} script - The URL of the client entity script, if any, that is attached to the entity.
+     * @property {BigInt | undefined} scriptTimestamp - Used to indicate when the client entity script was loaded. Should be an
+     *     integer number of milliseconds since Unix epoch. If you update the property's value, the script is re-downloaded and
+     *     reloaded.
+     * @property {string | undefined} serverScripts - The URL of the server entity script, if any, that is attached to the
+     *     entity.
+     * @property {string | undefined} itemName - Certifiable name of the Marketplace item.
+     * @property {string | undefined} itemDescription - Certifiable description of the Marketplace item.
+     * @property {string | undefined} itemCategories - Certifiable category of the Marketplace item.
+     * @property {string | undefined} itemArtist - Certifiable artist that created the Marketplace item.
+     * @property {string | undefined} itemLicense - Certifiable license URL for the Marketplace item.
+     * @property {number | undefined} limitedRun - Certifiable maximum integer number of editions (copies) of the Marketplace
+     *     item allowed to be sold.
+     * @property {string | undefined} marketplaceID - Certifiable UUID for the Marketplace item, as used in the URL of the
+     *     item's download and its Marketplace Web page.
+     * @property {number | undefined} editionNumber - Certifiable integer edition (copy) number or the Marketplace item. Each
+     *     copy sold in the Marketplace is numbered sequentially, starting at <code>1</code>.
+     * @property {number | undefined} entityInstanceNumber - Certifiable integer instance number for identical entities in a
+     *     Marketplace item. A Marketplace item may have multiple, identical parts. If so, then each is numbered sequentially
+     *     with an instance number.
+     * @property {string | undefined} certificateID - Hash of the entity's static certificate JSON, signed by the artist's
+     *     private key.
+     * @property {string | undefined} certificateType - Type of the certificate.
+     * @property {number | undefined} staticCertificateVersion - The version of the method used to generate the certificateID.
+     * @property {number | undefined} shapeType - The shape of the collision hull used if collisions are enabled.
+     * @property {string | undefined} compoundShapeUrl - The model file to use for the compound shape if shapeType is
+     *     "compound".
+     * @property {vec3 | undefined} color - Currently not used.
+     * @property {string | undefined} textures - A JSON string of texture name, URL pairs used when rendering the model in place
+     *     of the model's original textures. Use a texture name from the originalTextures property to override that texture.
+     *     Only the texture names and URLs to be overridden need be specified; original textures are used where there are no
+     *     overrides. You can use JSON.stringify() to convert a JavaScript object of name, URL pairs into a JSON string.
+     * @property {string | undefined} modelUrl - The URL of the glTF, FBX, or OBJ model. glTF models may be in JSON or binary
+     *     format (".gltf" or ".glb" URLs respectively). Baked models' URLs have ".baked" before the file type. Model files may
+     *     also be compressed in GZ format, in which case the URL ends in ".gz".
+     * @property {vec3 | undefined} modelScale - The scale factor applied to the model's dimensions.
+     * @property {boolean | undefined} jointRotationsSet - Is <code>true</code> values for joints that have had rotations
+     *     applied, <code>false</code> otherwise; Empty if none are applied or the model hasn't loaded.
+     * @property {quat[] | undefined} jointRotations - Joint rotations applied to the model; Empty if none are applied or the
+     *     model hasn't loaded.
+     * @property {boolean | undefined} jointTranslationsSet - Is <code>true</code> values for joints that have had translations
+     *     applied, <code>false</code> otherwise; Empty if none are applied or the model hasn't loaded.
+     * @property {vec3[] | undefined} jointTranslations - Joint translations applied to the model; Empty if none are applied or
+     *     the model hasn't loaded.
+     * @property {boolean | undefined} groupCulled - Is <code>true</code> if the mesh parts of the model are LOD culled as a
+     *     group, <code>false</code> if separate mesh parts are LOD culled individually.
+     * @property {boolean | undefined} relayParentJoints - Is <code>true</code> if when the entity is parented to an avatar, the
+     *     avatar's joint rotations are applied to the entity's joints; Is <code>false</code> if a parent avatar's joint
+     *     rotations are not applied to the entity's joints.
+     * @property {string | undefined} blendShapeCoefficients - A JSON string of a map of blendshape names to values. Only stores
+     *     set values. When editing this property, only coefficients that you are editing will change; it will not explicitly
+     *     reset other coefficients.
+     * @property {boolean | undefined} useOriginalPivot - If <code>false</code>, the model will be centered based on its
+     *     content, ignoring any offset in the model itself. If <code>true</code>, the model will respect its original offset.
+     *     Currently, only pivots relative to <code>{x: 0, y: 0, z: 0}</code> are supported.
+     * @property {string | undefined} animationUrl - The URL of the glTF or FBX file that has the animation. glTF files may be
+     *     in JSON or binary format (".gltf" or ".glb" URLs respectively).
+     * @property {boolean | undefined} animationAllowTranslation - Is <code>true</code> to enable translations contained in the
+     *     animation to be played, <code>false</code> to disable translations.
+     * @property {number | undefined} animationFPS - The speed in frames/s that the animation is played at.
+     * @property {number | undefined} animationFrameIndex - The current frame being played in the animation.
+     * @property {boolean | undefined} animationPlaying - Is <code>true</code> if the animation should play, <code>false</code>
+     *     if it shouldn't.
+     * @property {boolean | undefined} animationLoop - Is <code>true</code> if the animation is continuously repeated in a
+     *     loop, <code>false</code> if it isn't.
+     * @property {number | undefined} animationFirstFrame - The first frame to play in the animation.
+     * @property {number | undefined} animationLastFrame - The last frame to play in the animation.
+     * @property {boolean | undefined} animationHold - Is <code>true</code> if the rotations and translations of the last frame
+     *     played are maintained when the animation stops playing, <code>false</code> if they aren't.
      */
 
     /*@devdoc
-     *  Reads an {@link PacketType(1)|EntityData} packet.
+     *  Reads an {@link PacketType(1)|EntityData} packet containing the details of one or more entities.
      *  @function PacketScribe.EntityData&period;read
      *  @read {DataView} data - The {@link Packets|EntityData} message data to read.
      *  @returns {PacketScribe.EntityDataDetails} The entity data information.
@@ -388,17 +781,17 @@ const EntityData = new class {
         const flags = data.getUint8(dataPosition);
         dataPosition += 1;
 
-        // eslint-disable-next-line
-        // @ts-ignore
-        const sequence = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+        /* eslint-disable @typescript-eslint/no-unused-vars */
+
+        // WEBRTC TODO: Read and use the variable sequence as in the C++ method OctreeProcessor::processDatagram
         dataPosition += 2;
 
-        // eslint-disable-next-line
-        // @ts-ignore
-        const sentAt = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
+        // WEBRTC TODO: Read and use the variable sentAt as in the C++ method OctreeProcessor::processDatagram
         dataPosition += 8;
 
-        const packetIsCompressed = flags >> 7 - this.PACKET_IS_COMPRESSED_BIT & 1;
+        /* eslint-enable @typescript-eslint/no-unused-vars */
+
+        const packetIsCompressed = flags >> 7 - this.#_PACKET_IS_COMPRESSED_BIT & 1;
 
         const entityDataDetails: EntityDataDetails[] = [];
 
@@ -437,14 +830,14 @@ const EntityData = new class {
 
                 let entityDataPosition = 0;
 
-                // Written recursively in the C++ code, numberOfThreeBitSectionsInCode is here written iteratively
+                // Implemented recursively in the C++ code, numberOfThreeBitSectionsInCode is here implemented iteratively
                 // to be used as an anonymous function.
                 // eslint-disable-next-line max-len
                 const numberOfThreeBitSectionsInCode = (data: DataView, dataPosition: number, maxBytes: number): number => { // eslint-disable-line @typescript-eslint/no-shadow
                 // C++ int numberOfThreeBitSectionsInCode(const unsigned char* octalCode, int maxBytes)
 
-                    if (maxBytes === this.OVERFLOWED_OCTCODE_BUFFER) {
-                        return this.OVERFLOWED_OCTCODE_BUFFER;
+                    if (maxBytes === this.#_OVERFLOWED_OCTCODE_BUFFER) {
+                        return this.#_OVERFLOWED_OCTCODE_BUFFER;
                     }
 
                     let dataPos = dataPosition;
@@ -456,12 +849,12 @@ const EntityData = new class {
                         dataPos += 1;
                         curOctalCode = data.getUint8(dataPos);
 
-                        const newMaxBytes = maxBytes === this.UNKNOWN_OCTCODE_LENGTH
-                            ? this.UNKNOWN_OCTCODE_LENGTH
+                        const newMaxBytes = maxBytes === this.#_UNKNOWN_OCTCODE_LENGTH
+                            ? this.#_UNKNOWN_OCTCODE_LENGTH
                             : maxBytes - 1;
 
-                        if (newMaxBytes === this.OVERFLOWED_OCTCODE_BUFFER) {
-                            result += this.OVERFLOWED_OCTCODE_BUFFER;
+                        if (newMaxBytes === this.#_OVERFLOWED_OCTCODE_BUFFER) {
+                            result += this.#_OVERFLOWED_OCTCODE_BUFFER;
                             break;
                         }
                     }
@@ -488,10 +881,7 @@ const EntityData = new class {
                     break;
                 }
 
-                // WEBRTC TODO: Use colorInPacketMask as in C++ Octree::readElementData.
-                // eslint-disable-next-line
-                // @ts-ignore
-                const colorInPacketMask = entityData.getUint8(entityDataPosition);
+                // WEBRTC TODO: Read and use the variable colorInPacketMask as in C++ method Octree::readElementData.
                 entityDataPosition += 1;
 
                 // WEBRTC TODO: Do not hardcode value.
@@ -507,13 +897,10 @@ const EntityData = new class {
                     break;
                 }
 
-                // WEBRTC TODO: Use numberOfEntities as in EntityTree::readEntityDataFromBuffer.
-                // eslint-disable-next-line
-                // @ts-ignore
                 const numberOfEntities = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                 entityDataPosition += 2;
 
-                if (entityData.byteLength < numberOfEntities * this.MINIMUM_HEADER_BYTES) {
+                if (entityData.byteLength < numberOfEntities * this.#_MINIMUM_HEADER_BYTES) {
                     break;
                 }
 
@@ -522,8 +909,9 @@ const EntityData = new class {
                     entityDataPosition += 16;
 
                     const entityTypeCodec = new ByteCountCoded();
-                    entityDataPosition
-                    += entityTypeCodec.decode(entityData, entityData.byteLength - entityDataPosition, entityDataPosition);
+                    let encodedData = new DataView(entityData.buffer, entityData.byteOffset + entityDataPosition);
+                    entityDataPosition += entityTypeCodec.decode(encodedData, encodedData.byteLength);
+
                     const entityType = entityTypeCodec.data;
 
                     if (entityType !== EntityTypes.Model) {
@@ -531,27 +919,29 @@ const EntityData = new class {
                         return [];
                     }
 
-                    const created = entityData.getBigUint64(entityDataPosition, UDT.LITTLE_ENDIAN);
+                    const createdFromBuffer = entityData.getBigUint64(entityDataPosition, UDT.LITTLE_ENDIAN);
                     entityDataPosition += 8;
 
                     const lastEdited = entityData.getBigUint64(entityDataPosition, UDT.LITTLE_ENDIAN);
                     entityDataPosition += 8;
 
                     const updateDeltaCodec = new ByteCountCoded();
-                    entityDataPosition
-                    += updateDeltaCodec.decode(entityData, entityData.byteLength - entityDataPosition, entityDataPosition);
+                    encodedData = new DataView(entityData.buffer, entityData.byteOffset + entityDataPosition);
+                    entityDataPosition += updateDeltaCodec.decode(encodedData, encodedData.byteLength);
+
                     const updateDelta = updateDeltaCodec.data;
 
                     const simulatedDeltaCodec = new ByteCountCoded();
-                    entityDataPosition
-                    += simulatedDeltaCodec.decode(entityData, entityData.byteLength - entityDataPosition, entityDataPosition);
+                    encodedData = new DataView(entityData.buffer, entityData.byteOffset + entityDataPosition);
+                    entityDataPosition += simulatedDeltaCodec.decode(encodedData, encodedData.byteLength);
+
                     const simulatedDelta = simulatedDeltaCodec.data;
 
                     const propertyFlags = new PropertyFlags();
-                    entityDataPosition
-                    += propertyFlags.decode(entityData, entityData.byteLength - entityDataPosition, entityDataPosition);
+                    const encodedFlags = new DataView(entityData.buffer, entityData.byteOffset + entityDataPosition);
+                    entityDataPosition += propertyFlags.decode(encodedFlags, encodedFlags.byteLength);
 
-                    let propSimOwnerData: ArrayBuffer | undefined = undefined;
+                    let simOwnerData: ArrayBuffer | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
@@ -564,102 +954,104 @@ const EntityData = new class {
                                 view.setUint8(j, entityData.getUint8(entityDataPosition));
                                 entityDataPosition += 1;
                             }
-                            propSimOwnerData = buffer;
+                            simOwnerData = buffer;
                         }
                     }
 
-                    let propParentID: Uuid | undefined = undefined;
+                    let parentID: Uuid | null | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propParentID = new Uuid(entityData.getBigUint128(entityDataPosition, UDT.BIG_ENDIAN));
+                            parentID = new Uuid(entityData.getBigUint128(entityDataPosition, UDT.BIG_ENDIAN));
                             entityDataPosition += 16;
+                        } else {
+                            parentID = null;
                         }
                     }
 
-                    let propParentJointIndex: number | undefined = undefined;
+                    let parentJointIndex: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PARENT_JOINT_INDEX)) {
-                        propParentJointIndex = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        parentJointIndex = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
                     }
 
-                    let propVisible: boolean | undefined = undefined;
+                    let visible: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VISIBLE)) {
-                        propVisible = Boolean(entityData.getUint8(entityDataPosition));
+                        visible = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propName: string | undefined = undefined;
+                    let name: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_NAME)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
                         if (length > 0) {
-                            propName = textDecoder.decode(
+                            name = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propLocked: boolean | undefined = false;
+                    let locked: boolean | undefined = false;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LOCKED)) {
-                        propLocked = Boolean(entityData.getUint8(entityDataPosition));
+                        locked = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propUserData: string | undefined = undefined;
+                    let userData: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USER_DATA)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
                         if (length > 0) {
-                            propUserData = textDecoder.decode(
+                            userData = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propPrivateUserData: string | undefined = undefined;
+                    let privateUserData: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PRIVATE_USER_DATA)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
                         if (length > 0) {
-                            propPrivateUserData = textDecoder.decode(
+                            privateUserData = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propHref: string | undefined = undefined;
+                    let href: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HREF)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
                         if (length > 0) {
-                            propHref = textDecoder.decode(
+                            href = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propDescription: string | undefined = undefined;
+                    let description: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DESCRIPTION)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
                         if (length > 0) {
-                            propDescription = textDecoder.decode(
+                            description = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propPosition: vec3 | undefined = undefined;
+                    let position: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_POSITION)) {
-                        propPosition = {
+                        position = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
                             y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
                             z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
@@ -667,9 +1059,9 @@ const EntityData = new class {
                         entityDataPosition += 12;
                     }
 
-                    let propDimension: vec3 | undefined = undefined;
+                    let dimensions: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DIMENSIONS)) {
-                        propDimension = {
+                        dimensions = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
                             y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
                             z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
@@ -677,15 +1069,15 @@ const EntityData = new class {
                         entityDataPosition += 12;
                     }
 
-                    let propRotation: quat | undefined = undefined;
+                    let rotation: quat | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ROTATION)) {
-                        propRotation = GLMHelpers.unpackOrientationQuatFromBytes(entityData, entityDataPosition);
+                        rotation = GLMHelpers.unpackOrientationQuatFromBytes(entityData, entityDataPosition);
                         entityDataPosition += 8;
                     }
 
-                    let propRegistrationPoint: vec3 | undefined = undefined;
+                    let registrationPoint: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_REGISTRATION_POINT)) {
-                        propRegistrationPoint = {
+                        registrationPoint = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
                             y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
                             z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
@@ -693,24 +1085,24 @@ const EntityData = new class {
                         entityDataPosition += 12;
                     }
 
-                    let propCreated: BigInt | undefined = undefined;
+                    let created: BigInt | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CREATED)) {
-                        propCreated = entityData.getBigUint64(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        created = entityData.getBigUint64(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 8;
                     }
 
-                    let propLastEditedBy: Uuid | undefined = undefined;
+                    let lastEditedBy: Uuid | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LAST_EDITED_BY)) {
-                        const propLastEditedLength = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        const lastEditedLength = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
-                        if (propLastEditedLength > 0) {
-                            propLastEditedBy = new Uuid(entityData.getBigUint128(entityDataPosition, UDT.BIG_ENDIAN));
+                        if (lastEditedLength > 0) {
+                            lastEditedBy = new Uuid(entityData.getBigUint128(entityDataPosition, UDT.BIG_ENDIAN));
                             entityDataPosition += 16;
                         }
                     }
 
-                    let propAaCubeData: aaCubeData | undefined = undefined;
+                    let queryAACube: AACube | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_QUERY_AA_CUBE)) {
                         const corner = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
@@ -722,45 +1114,42 @@ const EntityData = new class {
                         const scale = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
 
-                        propAaCubeData = {
-                            corner,
-                            scale
-                        };
+                        queryAACube = new AACube(corner, scale);
                     }
 
-                    let propCanCastShadow: boolean | undefined = undefined;
+                    let canCastShadow: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CAN_CAST_SHADOW)) {
-                        propCanCastShadow = Boolean(entityData.getUint8(entityDataPosition));
+                        canCastShadow = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propRenderLayer: number | undefined = undefined;
+                    let renderLayer: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RENDER_LAYER)) {
-                        propRenderLayer = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        renderLayer = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propPrimitiveMode: number | undefined = undefined;
+                    let primitiveMode: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PRIMITIVE_MODE)) {
-                        propPrimitiveMode = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        primitiveMode = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propIgnorePickIntersection: boolean | undefined = undefined;
+                    let ignorePickIntersection: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_IGNORE_PICK_INTERSECTION)) {
-                        propIgnorePickIntersection = Boolean(entityData.getUint8(entityDataPosition));
+                        ignorePickIntersection = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propRenderWithZones: Uuid[] | undefined = undefined;
+                    let renderWithZones: Uuid[] | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RENDER_WITH_ZONES)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propRenderWithZones = [];
+                            renderWithZones = [];
                             for (let j = 0; j < length; j++) {
-                                propRenderWithZones.push(
+                                renderWithZones.push(
                                     new Uuid(entityData.getBigUint128(entityDataPosition, UDT.BIG_ENDIAN))
                                 );
                                 entityDataPosition += 16;
@@ -769,51 +1158,51 @@ const EntityData = new class {
 
                     }
 
-                    let propBillboardMode: number | undefined = undefined;
+                    let billboardMode: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BILLBOARD_MODE)) {
-                        propBillboardMode = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        billboardMode = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propGrabbable: boolean | undefined = undefined;
+                    let grabbable: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_GRABBABLE)) {
-                        propGrabbable = Boolean(entityData.getUint8(entityDataPosition));
+                        grabbable = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propKinematic: boolean | undefined = undefined;
+                    let grabKinematic: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_KINEMATIC)) {
-                        propKinematic = Boolean(entityData.getUint8(entityDataPosition));
+                        grabKinematic = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propFollowsController: boolean | undefined = undefined;
+                    let grabFollowsController: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_FOLLOWS_CONTROLLER)) {
-                        propFollowsController = Boolean(entityData.getUint8(entityDataPosition));
+                        grabFollowsController = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propTriggerable: boolean | undefined = undefined;
+                    let triggerable: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_TRIGGERABLE)) {
-                        propTriggerable = Boolean(entityData.getUint8(entityDataPosition));
+                        triggerable = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propEquippable: boolean | undefined = undefined;
+                    let grabEquippable: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE)) {
-                        propEquippable = Boolean(entityData.getUint8(entityDataPosition));
+                        grabEquippable = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propDelegateToParent: boolean | undefined = undefined;
+                    let delegateToParent: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_DELEGATE_TO_PARENT)) {
-                        propDelegateToParent = Boolean(entityData.getUint8(entityDataPosition));
+                        delegateToParent = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propGrabLeftEquippablePositionOffset: vec3 | undefined = undefined;
+                    let equippableLeftPositionOffset: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET)) {
-                        propGrabLeftEquippablePositionOffset = {
+                        equippableLeftPositionOffset = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
                             y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
                             z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
@@ -821,16 +1210,16 @@ const EntityData = new class {
                         entityDataPosition += 12;
                     }
 
-                    let propGrabLeftEquippableRotationOffset: quat | undefined = undefined;
+                    let equippableLeftRotationOffset: quat | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET)) {
-                        propGrabLeftEquippableRotationOffset
+                        equippableLeftRotationOffset
                         = GLMHelpers.unpackOrientationQuatFromBytes(entityData, entityDataPosition);
                         entityDataPosition += 8;
                     }
 
-                    let propGrabRightEquippablePositionOffset: vec3 | undefined = undefined;
+                    let equippableRightPositionOffset: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET)) {
-                        propGrabRightEquippablePositionOffset = {
+                        equippableRightPositionOffset = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
                             y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
                             z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
@@ -838,29 +1227,29 @@ const EntityData = new class {
                         entityDataPosition += 12;
                     }
 
-                    let propGrabRightEquippableRotationOffset: quat | undefined = undefined;
+                    let equippableRightRotationOffset: quat | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET)) {
-                        propGrabRightEquippableRotationOffset
+                        equippableRightRotationOffset
                         = GLMHelpers.unpackOrientationQuatFromBytes(entityData, entityDataPosition);
                         entityDataPosition += 8;
                     }
 
-                    let propGrabEquippableIndicatorUrl: string | undefined = undefined;
+                    let equippableIndicatorUrl: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_URL)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propGrabEquippableIndicatorUrl = textDecoder.decode(
+                            equippableIndicatorUrl = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propGrabRightEquippableIndicatorScale: vec3 | undefined = undefined;
+                    let equippableIndicatorScale: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE)) {
-                        propGrabRightEquippableIndicatorScale = {
+                        equippableIndicatorScale = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
                             y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
                             z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
@@ -868,9 +1257,9 @@ const EntityData = new class {
                         entityDataPosition += 12;
                     }
 
-                    let propGrabRightEquippableIndicatorOffset: vec3 | undefined = undefined;
+                    let equippableIndicatorOffset: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET)) {
-                        propGrabRightEquippableIndicatorOffset = {
+                        equippableIndicatorOffset = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
                             y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
                             z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
@@ -878,15 +1267,15 @@ const EntityData = new class {
                         entityDataPosition += 12;
                     }
 
-                    let propDensity: number | undefined = undefined;
+                    let density: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DENSITY)) {
-                        propDensity = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        density = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propVelocity: vec3 | undefined = undefined;
+                    let velocity: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VELOCITY)) {
-                        propVelocity = {
+                        velocity = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
                             y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
                             z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
@@ -894,9 +1283,9 @@ const EntityData = new class {
                         entityDataPosition += 12;
                     }
 
-                    let propAngularVelocity: vec3 | undefined = undefined;
+                    let angularVelocity: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_VELOCITY)) {
-                        propAngularVelocity = {
+                        angularVelocity = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
                             y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
                             z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
@@ -904,9 +1293,9 @@ const EntityData = new class {
                         entityDataPosition += 12;
                     }
 
-                    let propGravity: vec3 | undefined = undefined;
+                    let gravity: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAVITY)) {
-                        propGravity = {
+                        gravity = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
                             y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
                             z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
@@ -914,9 +1303,9 @@ const EntityData = new class {
                         entityDataPosition += 12;
                     }
 
-                    let propAcceleration: vec3 | undefined = undefined;
+                    let acceleration: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACCELERATION)) {
-                        propAcceleration = {
+                        acceleration = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
                             y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
                             z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
@@ -924,68 +1313,68 @@ const EntityData = new class {
                         entityDataPosition += 12;
                     }
 
-                    let propDamping: number | undefined = undefined;
+                    let damping: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DAMPING)) {
-                        propDamping = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        damping = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propAngularDampling: number | undefined = undefined;
+                    let angularDampling: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_DAMPING)) {
-                        propAngularDampling = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        angularDampling = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propRestitution: number | undefined = undefined;
+                    let restitution: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RESTITUTION)) {
-                        propRestitution = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        restitution = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propFriction: number | undefined = undefined;
+                    let friction: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_FRICTION)) {
-                        propFriction = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        friction = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propLifetime: number | undefined = undefined;
+                    let lifetime: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIFETIME)) {
-                        propLifetime = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        lifetime = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propCollisionless: boolean | undefined = undefined;
+                    let collisionless: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISIONLESS)) {
-                        propCollisionless = Boolean(entityData.getUint8(entityDataPosition));
+                        collisionless = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propCollisionMask: number | undefined = undefined;
+                    let collisionMask: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_MASK)) {
-                        propCollisionMask = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        collisionMask = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
                     }
 
-                    let propDynamic: boolean | undefined = undefined;
+                    let dynamic: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DYNAMIC)) {
-                        propDynamic = Boolean(entityData.getUint8(entityDataPosition));
+                        dynamic = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propCollisionSoundUrl: string | undefined = undefined;
+                    let collisionSoundUrl: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_SOUND_URL)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propCollisionSoundUrl = textDecoder.decode(
+                            collisionSoundUrl = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propActionData: ArrayBuffer | undefined = undefined;
+                    let actionData: ArrayBuffer | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACTION_DATA)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
@@ -997,236 +1386,236 @@ const EntityData = new class {
                                 view.setUint8(j, entityData.getUint8(entityDataPosition));
                                 entityDataPosition += 1;
                             }
-                            propActionData = buffer;
+                            actionData = buffer;
 
                         }
                     }
 
-                    let propCloneable: boolean | undefined = undefined;
+                    let cloneable: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONEABLE)) {
-                        propCloneable = Boolean(entityData.getUint8(entityDataPosition));
+                        cloneable = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propCloneLifetime: number | undefined = undefined;
+                    let cloneLifetime: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_LIFETIME)) {
-                        propCloneLifetime = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        cloneLifetime = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propCloneLimit: number | undefined = undefined;
+                    let cloneLimit: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_LIMIT)) {
-                        propCloneLimit = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        cloneLimit = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propCloneDynamic: boolean | undefined = undefined;
+                    let cloneDynamic: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_DYNAMIC)) {
-                        propCloneDynamic = Boolean(entityData.getUint8(entityDataPosition));
+                        cloneDynamic = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propCloneAvatarIdentity: boolean | undefined = undefined;
+                    let cloneAvatarIdentity: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_AVATAR_ENTITY)) {
-                        propCloneAvatarIdentity = Boolean(entityData.getUint8(entityDataPosition));
+                        cloneAvatarIdentity = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propCloneOriginId: Uuid | undefined = undefined;
+                    let cloneOriginId: Uuid | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_ORIGIN_ID)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propCloneOriginId = new Uuid(entityData.getBigUint128(entityDataPosition, UDT.BIG_ENDIAN));
+                            cloneOriginId = new Uuid(entityData.getBigUint128(entityDataPosition, UDT.BIG_ENDIAN));
                             entityDataPosition += 16;
                         }
                     }
 
-                    let propScript: string | undefined = undefined;
+                    let script: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propScript = textDecoder.decode(
+                            script = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propScriptTimestamp: BigInt | undefined = undefined;
+                    let scriptTimestamp: BigInt | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT_TIMESTAMP)) {
-                        propScriptTimestamp = entityData.getBigUint64(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        scriptTimestamp = entityData.getBigUint64(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 8;
                     }
 
-                    let propServerScripts: string | undefined = undefined;
+                    let serverScripts: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SERVER_SCRIPTS)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propServerScripts = textDecoder.decode(
+                            serverScripts = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propItemName: string | undefined = undefined;
+                    let itemName: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_NAME)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propItemName = textDecoder.decode(
+                            itemName = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propItemDescription: string | undefined = undefined;
+                    let itemDescription: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_DESCRIPTION)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propItemDescription = textDecoder.decode(
+                            itemDescription = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propItemCategories: string | undefined = undefined;
+                    let itemCategories: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_CATEGORIES)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propItemCategories = textDecoder.decode(
+                            itemCategories = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propItemArtist: string | undefined = undefined;
+                    let itemArtist: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_ARTIST)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propItemArtist = textDecoder.decode(
+                            itemArtist = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propItemLicense: string | undefined = undefined;
+                    let itemLicense: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_LICENSE)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propItemLicense = textDecoder.decode(
+                            itemLicense = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propLimitedRun: number | undefined = undefined;
+                    let limitedRun: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIMITED_RUN)) {
-                        propLimitedRun = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        limitedRun = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propMarketplaceID: string | undefined = undefined;
+                    let marketplaceID: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MARKETPLACE_ID)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propMarketplaceID = textDecoder.decode(
+                            marketplaceID = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propEditionNumber: number | undefined = undefined;
+                    let editionNumber: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EDITION_NUMBER)) {
-                        propEditionNumber = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        editionNumber = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propEntityInstanceNumber: number | undefined = undefined;
+                    let entityInstanceNumber: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ENTITY_INSTANCE_NUMBER)) {
-                        propEntityInstanceNumber = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        entityInstanceNumber = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propCertificateID: string | undefined = undefined;
+                    let certificateID: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_ID)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propCertificateID = textDecoder.decode(
+                            certificateID = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propCertificateType: string | undefined = undefined;
+                    let certificateType: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_TYPE)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propCertificateType = textDecoder.decode(
+                            certificateType = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propStaticCertificateVersion: number | undefined = undefined;
+                    let staticCertificateVersion: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_STATIC_CERTIFICATE_VERSION)) {
-                        propStaticCertificateVersion = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        staticCertificateVersion = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propShapeType: number | undefined = undefined;
+                    let shapeType: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SHAPE_TYPE)) {
-                        propShapeType = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        shapeType = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propCompoundShapeUrl: string | undefined = undefined;
+                    let compoundShapeUrl: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COMPOUND_SHAPE_URL)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propCompoundShapeUrl = textDecoder.decode(
+                            compoundShapeUrl = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propColor: vec3 | undefined = undefined;
+                    let color: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
-                    // The C++ stores the color property into a glm::u8vec3. It does not make a difference here
+                    // The C++ stores the color property into a glm::u8vec3. It does not matter here
                     // because the type of x, y and z is number.
-                        propColor = {
+                        color = {
                             x: entityData.getUint8(entityDataPosition),
                             y: entityData.getUint8(entityDataPosition + 1),
                             z: entityData.getUint8(entityDataPosition + 2)
@@ -1234,35 +1623,35 @@ const EntityData = new class {
                         entityDataPosition += 3;
                     }
 
-                    let propTextures: string | undefined = undefined;
+                    let textures: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXTURES)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propTextures = textDecoder.decode(
+                            textures = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propModelUrl: string | undefined = undefined;
+                    let modelUrl: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_URL)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propModelUrl = textDecoder.decode(
+                            modelUrl = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propModelScale: vec3 | undefined = undefined;
+                    let modelScale: vec3 | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_SCALE)) {
-                        propModelScale = {
+                        modelScale = {
                             x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
                             y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
                             z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
@@ -1270,29 +1659,29 @@ const EntityData = new class {
                         entityDataPosition += 12;
                     }
 
-                    let propJointRotationsSet: boolean[] | undefined = undefined;
+                    let jointRotationsSet: boolean[] | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_ROTATIONS_SET)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propJointRotationsSet = [];
+                            jointRotationsSet = [];
                             for (let j = 0; j < length; j++) {
-                                propJointRotationsSet.push(Boolean(entityData.getUint8(entityDataPosition + j)));
+                                jointRotationsSet.push(Boolean(entityData.getUint8(entityDataPosition + j)));
                             }
                             entityDataPosition += length;
                         }
                     }
 
-                    let propJointRotations: quat[] | undefined = undefined;
+                    let jointRotations: quat[] | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_ROTATIONS)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propJointRotations = [];
+                            jointRotations = [];
                             for (let j = 0; j < length; j++) {
-                                propJointRotations.push(
+                                jointRotations.push(
                                     GLMHelpers.unpackOrientationQuatFromBytes(
                                         entityData, entityDataPosition + j * 8
                                     )
@@ -1302,29 +1691,29 @@ const EntityData = new class {
                         }
                     }
 
-                    let propJointTranslationsSet: boolean[] | undefined = undefined;
+                    let jointTranslationsSet: boolean[] | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_TRANSLATIONS_SET)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propJointTranslationsSet = [];
+                            jointTranslationsSet = [];
                             for (let j = 0; j < length; j++) {
-                                propJointTranslationsSet.push(Boolean(entityData.getUint8(entityDataPosition + j)));
+                                jointTranslationsSet.push(Boolean(entityData.getUint8(entityDataPosition + j)));
                             }
                             entityDataPosition += length;
                         }
                     }
 
-                    let propJointTranslations: vec3[] | undefined = undefined;
+                    let jointTranslations: vec3[] | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_TRANSLATIONS)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propJointTranslations = [];
+                            jointTranslations = [];
                             for (let j = 0; j < length; j++) {
-                                propJointTranslations.push(
+                                jointTranslations.push(
                                     {
                                         x: entityData.getFloat32(entityDataPosition + j * 12, UDT.LITTLE_ENDIAN),
                                         y: entityData.getFloat32(entityDataPosition + 4 + j * 12, UDT.LITTLE_ENDIAN),
@@ -1337,95 +1726,95 @@ const EntityData = new class {
                         }
                     }
 
-                    let propRelayParentJoints: boolean | undefined = undefined;
+                    let relayParentJoints: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RELAY_PARENT_JOINTS)) {
-                        propRelayParentJoints = Boolean(entityData.getUint8(entityDataPosition));
+                        relayParentJoints = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propGroupCulled: boolean | undefined = undefined;
+                    let groupCulled: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GROUP_CULLED)) {
-                        propGroupCulled = Boolean(entityData.getUint8(entityDataPosition));
+                        groupCulled = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propBlendShapeCoefficients: string | undefined = undefined;
+                    let blendShapeCoefficients: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BLENDSHAPE_COEFFICIENTS)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propBlendShapeCoefficients = textDecoder.decode(
+                            blendShapeCoefficients = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propUseOriginalPivot: boolean | undefined = undefined;
+                    let useOriginalPivot: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USE_ORIGINAL_PIVOT)) {
-                        propUseOriginalPivot = Boolean(entityData.getUint8(entityDataPosition));
+                        useOriginalPivot = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propAnimationUrl: string | undefined = undefined;
+                    let animationUrl: string | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_URL)) {
                         const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 2;
 
                         if (length > 0) {
-                            propAnimationUrl = textDecoder.decode(
+                            animationUrl = textDecoder.decode(
                                 new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
                             );
                             entityDataPosition += length;
                         }
                     }
 
-                    let propAnimationAllowTranslation: boolean | undefined = undefined;
+                    let animationAllowTranslation: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_ALLOW_TRANSLATION)) {
-                        propAnimationAllowTranslation = Boolean(entityData.getUint8(entityDataPosition));
+                        animationAllowTranslation = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propAnimationFPS: number | undefined = undefined;
+                    let animationFPS: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FPS)) {
-                        propAnimationFPS = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        animationFPS = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propAnimationFrameIndex: number | undefined = undefined;
+                    let animationFrameIndex: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FRAME_INDEX)) {
-                        propAnimationFrameIndex = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        animationFrameIndex = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propAnimationPlaying: boolean | undefined = undefined;
+                    let animationPlaying: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_PLAYING)) {
-                        propAnimationPlaying = Boolean(entityData.getUint8(entityDataPosition));
+                        animationPlaying = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propAnimationLoop: boolean | undefined = undefined;
+                    let animationLoop: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_LOOP)) {
-                        propAnimationLoop = Boolean(entityData.getUint8(entityDataPosition));
+                        animationLoop = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
-                    let propAnimationFirstFrame: number | undefined = undefined;
+                    let animationFirstFrame: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FIRST_FRAME)) {
-                        propAnimationFirstFrame = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        animationFirstFrame = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propAnimationLastFrame: number | undefined = undefined;
+                    let animationLastFrame: number | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_LAST_FRAME)) {
-                        propAnimationLastFrame = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
+                        animationLastFrame = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
                         entityDataPosition += 4;
                     }
 
-                    let propAnimationHold: boolean | undefined = undefined;
+                    let animationHold: boolean | undefined = undefined;
                     if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_HOLD)) {
-                        propAnimationHold = Boolean(entityData.getUint8(entityDataPosition));
+                        animationHold = Boolean(entityData.getUint8(entityDataPosition));
                         entityDataPosition += 1;
                     }
 
@@ -1433,105 +1822,105 @@ const EntityData = new class {
                         {
                             entityItemID,
                             entityType,
-                            created,
+                            createdFromBuffer,
                             lastEdited,
                             updateDelta,
                             simulatedDelta,
-                            propSimOwnerData,
-                            propParentID,
-                            propParentJointIndex,
-                            propVisible,
-                            propName,
-                            propLocked,
-                            propUserData,
-                            propPrivateUserData,
-                            propHref,
-                            propDescription,
-                            propPosition,
-                            propDimension,
-                            propRotation,
-                            propRegistrationPoint,
-                            propCreated,
-                            propLastEditedBy,
-                            propAaCubeData,
-                            propCanCastShadow,
-                            propRenderLayer,
-                            propPrimitiveMode,
-                            propIgnorePickIntersection,
-                            propRenderWithZones,
-                            propBillboardMode,
-                            propGrabbable,
-                            propKinematic,
-                            propFollowsController,
-                            propTriggerable,
-                            propEquippable,
-                            propDelegateToParent,
-                            propGrabLeftEquippablePositionOffset,
-                            propGrabLeftEquippableRotationOffset,
-                            propGrabRightEquippablePositionOffset,
-                            propGrabRightEquippableRotationOffset,
-                            propGrabEquippableIndicatorUrl,
-                            propGrabRightEquippableIndicatorScale,
-                            propGrabRightEquippableIndicatorOffset,
-                            propDensity,
-                            propVelocity,
-                            propAngularVelocity,
-                            propGravity,
-                            propAcceleration,
-                            propDamping,
-                            propAngularDampling,
-                            propRestitution,
-                            propFriction,
-                            propLifetime,
-                            propCollisionless,
-                            propCollisionMask,
-                            propDynamic,
-                            propCollisionSoundUrl,
-                            propActionData,
-                            propCloneable,
-                            propCloneLifetime,
-                            propCloneLimit,
-                            propCloneDynamic,
-                            propCloneAvatarIdentity,
-                            propCloneOriginId,
-                            propScript,
-                            propScriptTimestamp,
-                            propServerScripts,
-                            propItemName,
-                            propItemDescription,
-                            propItemCategories,
-                            propItemArtist,
-                            propItemLicense,
-                            propLimitedRun,
-                            propMarketplaceID,
-                            propEditionNumber,
-                            propEntityInstanceNumber,
-                            propCertificateID,
-                            propCertificateType,
-                            propStaticCertificateVersion,
-                            propShapeType,
-                            propCompoundShapeUrl,
-                            propColor,
-                            propTextures,
-                            propModelUrl,
-                            propModelScale,
-                            propJointRotationsSet,
-                            propJointRotations,
-                            propJointTranslationsSet,
-                            propJointTranslations,
-                            propGroupCulled,
-                            propRelayParentJoints,
-                            propBlendShapeCoefficients,
-                            propUseOriginalPivot,
-                            propAnimationUrl,
-                            propAnimationAllowTranslation,
-                            propAnimationFPS,
-                            propAnimationFrameIndex,
-                            propAnimationPlaying,
-                            propAnimationLoop,
-                            propAnimationFirstFrame,
-                            propAnimationLastFrame,
-                            propAnimationHold
+                            simOwnerData,
+                            parentID,
+                            parentJointIndex,
+                            visible,
+                            name,
+                            locked,
+                            userData,
+                            privateUserData,
+                            href,
+                            description,
+                            position,
+                            dimensions,
+                            rotation,
+                            registrationPoint,
+                            created,
+                            lastEditedBy,
+                            queryAACube,
+                            canCastShadow,
+                            renderLayer,
+                            primitiveMode,
+                            ignorePickIntersection,
+                            renderWithZones,
+                            billboardMode,
+                            grabbable,
+                            grabKinematic,
+                            grabFollowsController,
+                            triggerable,
+                            grabEquippable,
+                            delegateToParent,
+                            equippableLefPositionOffset: equippableLeftPositionOffset,
+                            equippableLeftRotationOffset,
+                            equippableRightPositionOffset,
+                            equippableRightRotationOffset,
+                            equippableIndicatorUrl,
+                            equippableIndicatorScale,
+                            equippableIndicatorOffset,
+                            density,
+                            velocity,
+                            angularVelocity,
+                            gravity,
+                            acceleration,
+                            damping,
+                            angularDampling,
+                            restitution,
+                            friction,
+                            lifetime,
+                            collisionless,
+                            collisionMask,
+                            dynamic,
+                            collisionSoundUrl,
+                            actionData,
+                            cloneable,
+                            cloneLifetime,
+                            cloneLimit,
+                            cloneDynamic,
+                            cloneAvatarIdentity,
+                            cloneOriginId,
+                            script,
+                            scriptTimestamp,
+                            serverScripts,
+                            itemName,
+                            itemDescription,
+                            itemCategories,
+                            itemArtist,
+                            itemLicense,
+                            limitedRun,
+                            marketplaceID,
+                            editionNumber,
+                            entityInstanceNumber,
+                            certificateID,
+                            certificateType,
+                            staticCertificateVersion,
+                            shapeType,
+                            compoundShapeUrl,
+                            color,
+                            textures,
+                            modelUrl,
+                            modelScale,
+                            jointRotationsSet,
+                            jointRotations,
+                            jointTranslationsSet,
+                            jointTranslations,
+                            groupCulled,
+                            relayParentJoints,
+                            blendShapeCoefficients,
+                            useOriginalPivot,
+                            animationUrl,
+                            animationAllowTranslation,
+                            animationFPS,
+                            animationFrameIndex,
+                            animationPlaying,
+                            animationLoop,
+                            animationFirstFrame,
+                            animationLastFrame,
+                            animationHold
                         });
                 }
                 dataPosition += sectionLength;

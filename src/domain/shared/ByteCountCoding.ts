@@ -10,23 +10,31 @@
 //
 
 
-// TODO: doc
+/*@devdoc
+ *  The <code>ByteCountCoded</code> class provides facilities to decode data.
+ *  <p>C++: <code>template<typename T> class ByteCountCoded</code></p>
+ *  @class PropertyFlags
+ */
+// WEBRTC TODO: Make the class generic.
 class ByteCountCoded {
     // C++ template<typename T> class ByteCountCoded
 
     // WEBRTC TODO: Move to NumericalConstants.ts
-    static readonly BITS_IN_BYTE = 8;
+    readonly #BITS_IN_BYTE = 8;
 
     #_data = 0;
 
-    // TODO: doc
     get data(): number {
         return this.#_data;
     }
 
-    // TODO: doc
-    // eslint-disable-next-line class-methods-use-this
-    decode(encodedBuffer: DataView, encodedSize: number, dataPosition: number): number {
+    /*@devdoc
+     *  Decode the encoded data.
+     *  @param {DataView} data - The data to decode.
+     *  @param {number} size - The size of the data to decode.
+     *  @returns {number} The number of bytes processed.
+     */
+    decode(encodedBuffer: DataView, encodedSize: number): number {
         // C++ template<typename T> inline size_t ByteCountCoded<T>::decode(const char* encodedBuffer, int encodedSize)
 
         /* Process each bit of each  byte until the stop condition is reached.
@@ -36,9 +44,9 @@ class ByteCountCoded {
         * Compute the position of the last bit.
         * Continue iterating through the next bits and add the current bitValue to data when a bit is set.
         * Double the current bitValue during each iteration, bitValue starting at 1.
-        * Stop after we processed the lead bits AND we processed the last bit (at the position denoted by lastValueBit).
+        * Stop when the lead bits AND the last bit have been processed (at the position denoted by lastValueBit).
         *
-        * The number of lead bits is equal to the number of bytes to decode.
+        * The number of lead bits represents the number of bytes to decode.
         *
         * Examples:
         * a. 0001 0000 -> The decoded value is 4.
@@ -51,7 +59,7 @@ class ByteCountCoded {
         this.#_data = 0;
 
         let bytesConsumed = 0;
-        const bitCount = ByteCountCoded.BITS_IN_BYTE * encodedSize;
+        const bitCount = this.#BITS_IN_BYTE * encodedSize;
 
         let encodedByteCount = 1; // there is at least 1 byte (after the leadBits)
         let leadBits = 1; // there is always at least 1 lead bit
@@ -61,11 +69,11 @@ class ByteCountCoded {
         let lastValueBit = 0;
         let bitValue = 1;
 
-        for (let byte = dataPosition; byte < encodedSize; byte++) {
+        for (let byte = 0; byte < encodedSize; byte++) {
             const originalByte = encodedBuffer.getUint8(byte);
             bytesConsumed += 1;
             let maskBit = 128; // LEFT MOST BIT set
-            for (let bit = 0; bit < ByteCountCoded.BITS_IN_BYTE; bit++) {
+            for (let bit = 0; bit < this.#BITS_IN_BYTE; bit++) {
                 const bitIsSet: boolean = (originalByte & maskBit) !== 0;
 
                 // Processing of the lead bits
@@ -75,7 +83,7 @@ class ByteCountCoded {
                         leadBits += 1;
                     } else {
                         inLeadBits = false; // once we hit our first 0, we know we're out of the lead bits
-                        expectedBitCount = encodedByteCount * ByteCountCoded.BITS_IN_BYTE - leadBits;
+                        expectedBitCount = encodedByteCount * this.#BITS_IN_BYTE - leadBits;
                         lastValueBit = expectedBitCount + bitAt;
 
                         // check to see if the remainder of our buffer is sufficient

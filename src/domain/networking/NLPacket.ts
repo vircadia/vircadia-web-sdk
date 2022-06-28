@@ -10,9 +10,9 @@
 //
 
 import HMACAuth from "./HMACAuth";
+import SockAddr from "./SockAddr";
 import Packet from "./udt/Packet";
 import PacketType, { PacketTypeValue } from "./udt/PacketHeaders";
-import SockAddr from "./SockAddr";
 import UDT from "./udt/UDT";
 import { LocalID } from "../networking/NetworkPeer";
 import Node from "../networking/Node";
@@ -80,12 +80,11 @@ class NLPacket extends Packet {
     /*@devdoc
      *  Creates a new NLPacket from received data &mdash; an alternative to using <code>new NLPacket(...)</code>.
      *  <p><em>Static</em></p>
-     *  @function NLPacket.fromReceivedPacket
+     *  @static
      *  @param {DataView} data - The raw byte data of a new packet.
      *  @param {number} size - The size of that data in bytes.
      *  @param {SockAddr} senderSockAddr - The sender's IP address and port.
      *  @returns {NLPacket} An NLPacket created from the received data.
-     *  @static
      */
     static override fromReceivedPacket(data: DataView, size: number, senderSockAddr: SockAddr): NLPacket {
         // C++  NLPacket fromReceivedPacket(std::unique_ptr<char[]> data, qint64 size, const SockAddr& senderSockAddr)

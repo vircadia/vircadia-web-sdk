@@ -10,36 +10,40 @@
 //
 
 
-// TODO: doc
+/*@devdoc
+ *  The <code>PropertyFlags</code> class provides facilities to decode, set and get property flags.
+ *  <p>C++: <code>template<typename Enum>class PropertyFlags </code></p>
+ *  @class PropertyFlags
+ */
+// WEBRTC TODO: Make the class generic.
 class PropertyFlags {
-    // TODO: doc
+    // C++ template<typename Enum>class PropertyFlags
 
     // WEBRTC TODO: Move to NumericalConstants.ts
-    static readonly BITS_IN_BYTE = 8;
+    readonly #BITS_IN_BYTE = 8;
 
-    #_flags = new Uint8Array(0); // TODO: set size to 0 and resize in methods
+    #_flags = new Uint8Array(0);
     #_maxFlag = Number.MIN_SAFE_INTEGER;
     #_minFlag = Number.MAX_SAFE_INTEGER;
     #_trailingFlipped = false;
 
-    // TODO: doc
-    get flags(): Uint8Array {
-        return this.#_flags;
-    }
-
-    // TODO: doc
+    /*@devdoc
+     *  Gets whether the property flag is present in the flags sent by the server.
+     *  @param {number} flag - The number of the flag.
+     *  @returns {boolean} <code>true</code> if the property flag is present, <code>false</code> if it isn't.
+     */
     getHasProperty(flag: number): boolean {
-        // TODO: doc
+        // C++ bool getHasProperty(Enum flag)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-        const bytePos = Math.floor(flag / 8);
+        const bytePos = Math.floor(flag / this.#BITS_IN_BYTE);
 
         if (bytePos > this.#_maxFlag) {
             return this.#_trailingFlipped; // usually false
         }
 
-        const bitPos = flag - bytePos * 8;
+        const bitPos = flag - bytePos * this.#BITS_IN_BYTE;
         const mask = 1 << bitPos;
         const tmp = this.#_flags[bytePos] ?? 0;
 
@@ -48,13 +52,17 @@ class PropertyFlags {
         /* eslint-enable @typescript-eslint/no-magic-numbers */
     }
 
-    // TODO: doc
+    /*@devdoc
+     *  Sets the property flag.
+     *  @param {number} flag - The bit position of the flag.
+     *  @param {boolean} value - The value to set the flag to.
+     */
     setHasProperty(flag: number, value: boolean): void {
-        // TODO: doc
+        // C++ void setHasProperty(Enum flag, bool value = true)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-        const bytePos = Math.floor(flag / 8);
+        const bytePos = Math.floor(flag / this.#BITS_IN_BYTE);
 
         if (bytePos < this.#_minFlag) {
             if (value) {
@@ -74,11 +82,10 @@ class PropertyFlags {
             }
         }
 
-        // flag represents the position of the bit to be set.
-        // Because we store the bit representation of flag in an array of byte
-        // we want the bit position within the byte to be updated.
-        // That's why we subtract bytePos * 8 bits from flag.
-        const bitPosInByte = flag - bytePos * 8;
+        // flag represents the position of the bit to set.
+        // We subtract bytePos * 8 bits from flag because we store the bit representation of flags as an array of bytes, and we
+        // want to update a single bit within a byte.
+        const bitPosInByte = flag - bytePos * this.#BITS_IN_BYTE;
         const byteMask = 1 << bitPosInByte;
         let byteValue = this.#_flags[bytePos] ?? 0;
 
@@ -93,9 +100,8 @@ class PropertyFlags {
         /* eslint-enable @typescript-eslint/no-magic-numbers */
     }
 
-    // TODO: doc
-    clear(): void {
-        // TODO: doc
+    #clear(): void {
+        // C++ void clear()
         this.#_flags = new Uint8Array(0);
         this.#_maxFlag = Number.MIN_SAFE_INTEGER;
         this.#_minFlag = Number.MAX_SAFE_INTEGER;
@@ -104,14 +110,30 @@ class PropertyFlags {
         // WEBRTC TODO: Address further C++ code.
     }
 
-    // TODO: doc
-    decode(data: DataView, size: number, dataPosition: number): number {
-        // TODO: doc
+    /*@devdoc
+     *  Decode the encoded property flags.
+     *  @param {DataView} data - The data to decode.
+     *  @param {number} size - The size of the data to decode.
+     *  @returns {number} The number of bytes processed.
+     */
+    decode(data: DataView, size: number): number {
+        // C++ size_t decode(const uint8_t* data, size_t length)
 
-        this.clear();
+        /* Process each bit of each  byte until the stop condition is reached.
+        * Starts from the leftmost bit.
+        * Advance through the lead bits (contiguous 1s starting from the left) until the first non lead bit is found (first 0
+        * encountered).
+        * Compute the position of the last bit.
+        * Continue iterating through the next bits and set the flag property corresponding to the current value of the variable
+        * flag when a bit is set.
+        * Stop when the lead bits AND the last bit have been processed (at the position denoted by lastValueBit).
+        *
+        * The number of lead bits represents the number of bytes to decode.
+        */
+        this.#clear();
 
         let bytesConsumed = 0;
-        const bitCount = PropertyFlags.BITS_IN_BYTE * size;
+        const bitCount = this.#BITS_IN_BYTE * size;
 
         let encodedByteCount = 1; // there is at least 1 byte (after the leadBits)
         let leadBits = 1; // there is always at least 1 lead bit
@@ -120,11 +142,11 @@ class PropertyFlags {
         let expectedBitCount = 0;
         let lastValueBit = 0;
 
-        for (let byte = dataPosition; byte < size; byte++) {
+        for (let byte = 0; byte < size; byte++) {
             const originalByte = data.getUint8(byte);
             bytesConsumed += 1;
             let maskBit = 128; // LEFT MOST BIT set
-            for (let bit = 0; bit < PropertyFlags.BITS_IN_BYTE; bit++) {
+            for (let bit = 0; bit < this.#BITS_IN_BYTE; bit++) {
                 const bitIsSet: boolean = (originalByte & maskBit) !== 0;
 
                 // Processing of the lead bits
@@ -134,7 +156,7 @@ class PropertyFlags {
                         leadBits += 1;
                     } else {
                         inLeadBits = false; // once we hit our first 0, we know we're out of the lead bits
-                        expectedBitCount = encodedByteCount * PropertyFlags.BITS_IN_BYTE - leadBits;
+                        expectedBitCount = encodedByteCount * this.#BITS_IN_BYTE - leadBits;
                         lastValueBit = expectedBitCount + bitAt;
 
                         // check to see if the remainder of our buffer is sufficient
