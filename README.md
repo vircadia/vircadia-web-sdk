@@ -1,8 +1,7 @@
 
 # Vircadia Web SDK
 
-The **Vircadia Web SDK** (codename Ananke) is a JavaScript SDK for developing web-based clients for virtual worlds powered by
-[Vircadia](https://vircadia.com/). Vircadia domain servers provide the worlds (a.k.a. "domains") to visit, and the Vircadia
+The **Vircadia Web SDK** (codename Ananke) is a JavaScript/TypeScript SDK for developing web-based applications for virtual worlds powered by the open source metaverse platform [Vircadia](https://vircadia.com/). Vircadia domain servers provide the worlds (a.k.a. "domains") to visit, and the Vircadia
 metaverse server provides global services that connect the users and domains.
 See the user docs to [Understand the Architecture](https://docs.vircadia.com/explore/get-started/architecture.html).
 
@@ -14,21 +13,24 @@ The SDK is written in TypeScript.
 - [Project Configuration](CONFIGURATION.md)
 - [Coding Standard](CODING_STANDARD.md)
 
-To learn more about using Vircadia and exploring the metaverse, see the [User Documentation](https://docs.vircadia.com).
+To learn more about using Vircadia's metaverse ecosystem, see the [Developer Documentation](https://docs.vircadia.dev).
 
 For scripting API documentation, see the [Vircadia API Reference](https://apidocs.vircadia.dev).
 
 
 ## Prerequisites
 
-**Node.js** version &ge; 10.13 ; LTS version &ge; 14.16 recommended  
-**npm** version &ge; 6.4.1 ; LTS version &ge; 6.14 recommended 
+### Node.js
 
 https://nodejs.org/en/download/
 
-Jest is used for unit testing. It is included as an NPM dev dependency, however, you may also install it globally if you want
-to. https://jestjs.io/. 
+**Node.js** version &ge; 10.13 ; LTS version &ge; 14.16 recommended  
+**npm** version &ge; 6.4.1 ; LTS version &ge; 6.14 recommended
 
+### Jest
+
+[Jest](https://jestjs.io/) is used for unit testing. It is included as an NPM dev dependency, however, you may also install it globally if you want
+to. 
 
 ## Project setup
 
