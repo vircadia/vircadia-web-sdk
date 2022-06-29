@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 7 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLc.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -182,7 +183,9 @@ const enum PacketTypeValue {
  *      {@link PacketScribe.DomainConnectionDeniedDetails}
  *  @property {PacketType} MuteEnvironment - <code>17</code>
  *  @property {PacketType} AudioStreamStats - <code>18</code>
- *  @property {PacketType} DomainServerPathQuery - <code>19</code>
+ *  @property {PacketType} DomainServerPathQuery - <code>19</code> - The user client sends this to the Domain Server to get the
+ *      position and orientation set for a path in the domain.<br />
+ *      {@link PacketScribe.DomainServerPathQueryDetails}
  *  @property {PacketType} DomainServerPathResponse - <code>20</code>
  *  @property {PacketType} DomainServerAddedNode - <code>21</code> - The Domain Server sends this to user clients when an
  *      assignment client start up, and to assignment clients and when another assignment client starts up or a user connects to
@@ -604,6 +607,8 @@ const PacketType = new class {
                 return this.#_DomainConnectionDeniedVersion.IncludesExtraInfo;
             case this.AudioStreamStats:
                 return this.#_AudioVersion.StopInjectors;
+            case this.DomainServerPathQuery:
+                return DEFAULT_VERSION;
             case this.DomainServerAddedNode:
                 return this.#_DomainServerAddedNodeVersion.SocketTypes;
             case this.OctreeStats:
