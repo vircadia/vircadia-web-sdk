@@ -711,4 +711,8 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
     document.getElementById("sdkVersion").innerText = Vircadia.version;
 
+    window.addEventListener("beforeunload", function () {
+        domainServer.disconnect();
+    });
+
 }());
