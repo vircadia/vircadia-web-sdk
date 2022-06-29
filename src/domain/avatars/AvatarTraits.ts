@@ -91,6 +91,8 @@ type AvatarTraitsValues = {
  *  @property {AvatarTraits.TraitType} TotalTraitTypes=4 - The number of trait types. <em>Read-only.</em>
  *  @property {AvatarTraits.TraitType} NUM_SIMPLE_TRAITS=2 - The number of simple traits. <em>Read-only.</em>
  *  @property {number} DEFAULT_TRAIT_VERSION=0 - The default trait version sequence number. <em>Read-only.</em>
+ *  @property {number} DELETED_TRAIT_SIZE=-1 - The nominal trait binary size for deleting an instanced trait.
+ *      <em>Read-only.</em>
  */
 const AvatarTraits = new class {
     // C++  namespace AvatarTraits
@@ -100,7 +102,7 @@ const AvatarTraits = new class {
      *  @typedef {object} SkeletonJoint
      *  @property {string} jointName - The joint name.
      *  @property {number} jointIndex - The joint index.
-     *  @property {number} parentIndex - The joint's parent, or <code>-1</code> if there is no parent.
+     *  @property {number} parentIndex - The joint's parent, or <code>65535</code> or <code>-1</code> if there is no parent.
      *  @property {BoneType} boneType - The type of bone.
      *  @property {vec3} defaultTranslation - The default joint translation.
      *  @property {quat} defaultRotation - The default joint rotation.
@@ -150,9 +152,7 @@ const AvatarTraits = new class {
     readonly NUM_SIMPLE_TRAITS = TraitType.FirstInstancedTrait;
 
     readonly DEFAULT_TRAIT_VERSION = 0;
-
-
-    readonly #_TRANSLATION_COMPRESSION_RADIX = 14;
+    readonly DELETED_TRAIT_SIZE = -1;
 
 
     /*@devdoc
@@ -209,6 +209,7 @@ const AvatarTraits = new class {
     #unpackSkeletonData(data: DataView, startPosition: number): SkeletonJoint[] {
         // C++  void AvatarData::unpackSkeletonData(const QByteArray& data)
         //      Reading the data but not applying it to an avatar.
+        const TRANSLATION_COMPRESSION_RADIX = 14;
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
@@ -235,7 +236,7 @@ const AvatarTraits = new class {
             const boneType = data.getUint8(dataPosition);
             dataPosition += 1;
             let defaultTranslation = GLMHelpers.unpackFloatVec3FromSignedTwoByteFixed(data, dataPosition,
-                this.#_TRANSLATION_COMPRESSION_RADIX);
+                TRANSLATION_COMPRESSION_RADIX);
             dataPosition += 6;
             const defaultRotation = GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition);
             dataPosition += 6;

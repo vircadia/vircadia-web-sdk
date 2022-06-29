@@ -113,6 +113,12 @@
         </div>
 
         <div class="row">
+            <span>Scale:</span>
+            <input id="avatarScale" type="number" class="narrow" />
+            with target of <input id="avatarTargetScale" type="number" class="narrow" readonly="readonly" />
+        </div>
+
+        <div class="row">
             <span>Position:</span>
             x: <input id="avatarMixerPosX" type="number" class="narrow" />
             y: <input id="avatarMixerPosY" type="number" class="narrow" />
@@ -135,7 +141,7 @@
         <table id="avatarList">
             <thead>
                 <tr><th>Session ID</th><th>Session name</th><th colspan="3">Position</th><th>Yaw</th><th>Model</th>
-                <th>Joints</th></tr>
+                <th>Scale</th></th><th>Joints</th><th>Head Pitch</th><th>Echo</th></tr>
             </thead>
             <tbody>
             </tbody>

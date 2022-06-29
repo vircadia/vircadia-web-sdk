@@ -200,7 +200,7 @@ class AvatarHashMap {
 
     /*@devdoc
      *  Processes a {@link PacketType(1)|BulkAvatarData} message that has been received.
-     *  @function AvatarHashMap.processAvatarDataBacket
+     *  @function AvatarHashMap.processAvatarDataPacket
      *  @type {Slot}
      *  @param {ReceivedMessage} receivedMessage - The received {@link PacketType(1)|BuilkAvatarData} message.
      *  @param {Node} sendingNode - The sending node.
@@ -368,16 +368,17 @@ class AvatarHashMap {
         const sessionUUID = avatarData.sessionUUID;
         assert(sessionUUID !== undefined);
 
-        let avatar: AvatarData;  // eslint-disable-line @typescript-eslint/init-declarations
         if (sessionUUID.value() !== this.#_lastOwnerSessionUUID.value()
                 && (!this.#_nodeList.isIgnoringNode(sessionUUID) || this.#_nodeList.getRequestsDomainListData())) {
 
-            const isNewAvatar = false;
-            avatar = this.#newOrExistingAvatar(sessionUUID, sendingNode, { value: isNewAvatar });
+            const isNewAvatar = { value: false };
+            const avatar = this.#newOrExistingAvatar(sessionUUID, sendingNode, isNewAvatar);
 
-            avatar.parseDataFromBuffer(avatarData);
+            // WEBRTC TODO: Address further C++ code - use isNewAvatar value for avatar transits.
 
             // AvatarReplicas per the C++ is not implemented because that is for load testing.
+
+            avatar.parseDataFromBuffer(avatarData);
 
         } else {
             // This shouldn't happen if the avatar mixer is functioning correctly.
@@ -385,8 +386,7 @@ class AvatarHashMap {
                 sessionUUID.value() === this.#_lastOwnerSessionUUID.value() ? "(is self)" : "",
                 "isIgnoringNode =", this.#_nodeList.isIgnoringNode(sessionUUID));
 
-            // Create a dummy AvatarData class to ignore this avatar.
-            avatar = new AvatarData(this.#_contextID);
+            // Don't need to create a dummy AvatarData object per the C++ because we're not returning an avatar.
         }
     }
 

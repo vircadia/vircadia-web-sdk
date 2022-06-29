@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 12 Sep 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -56,13 +57,22 @@ const Quat = new class {
             && value !== undefined
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers
             && Object.keys(value).length === 4
-            && "x" in value && "y" in value && "z" in value && "w" in value
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             && typeof value.x === "number" && typeof value.y === "number" && typeof value.z === "number"
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             && typeof value.w === "number";
     }
 
+
+    /*@sdkdoc
+     *  Makes a copy of a quaternion.
+     *  @function Quat.copy
+     *  @param {quat} q - The quaternion.
+     *  @returns {quat} A copy of the quaternion.
+     */
+    copy(q: quat) {
+        return { x: q.x, y: q.y, z: q.z, w: q.w };
+    }
 
     /*@sdkdoc
      *  Tests whether two quaternions are equal.
@@ -73,6 +83,17 @@ const Quat = new class {
      */
     equal(q1: quat, q2: quat): boolean {
         return q1.x === q2.x && q1.y === q2.y && q1.z === q2.z && q1.w === q2.w;
+    }
+
+    /*@sdkdoc
+     *  Calculates the dot product of two quaternions.
+     *  @function Quat.dot
+     *  @param {quat} q1 - The first quaternion.
+     *  @param {quat} q2 - The second quaternion.
+     *  @returns {number} The dot product of the two quaternions.
+     */
+    dot(q1: quat, q2: quat): number {
+        return q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
     }
 
 

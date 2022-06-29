@@ -15,7 +15,7 @@ import AvatarDataPacket from "../../avatars/AvatarDataPacket";
 import assert from "../../shared/assert";
 import GLMHelpers from "../../shared/GLMHelpers";
 import { quat } from "../../shared/Quat";
-import { vec3 } from "../../shared/Vec3";
+import Vec3, { vec3 } from "../../shared/Vec3";
 
 import "../../shared/DataViewExtensions";
 
@@ -23,7 +23,22 @@ import "../../shared/DataViewExtensions";
 type BulkAvatarDataDetails = {
     sessionUUID: Uuid,
     globalPosition: vec3 | undefined,
-    localOrientation: quat | undefined
+    localOrientation: quat | undefined,
+    avatarScale: number | undefined,
+    jointRotationsValid: boolean[] | undefined
+    jointRotations: quat[] | undefined,
+    jointTranslationsValid: boolean[] | undefined
+    jointTranslations: vec3[] | undefined,
+    jointRotationsUseDefault: boolean[] | undefined,
+    jointTranslationsUseDefault: boolean[] | undefined
+};
+
+type JointData = {
+    // C++  class JointData
+    // The Web SDK encodes the C++'s rotationIsDefaultPose and translationIsDefaultPose property values of false as null
+    // rotation and translation values in order to simplify creation and use of the data.
+    rotation: quat | null,
+    translation: vec3 | null
 };
 
 
@@ -37,9 +52,37 @@ const BulkAvatarData = new class {
      *  @typedef {object} PacketScribe.BulkAvatarDataDetails
      *  @property {Uuid} sessionUUID - The avatar's session UUID.
      *  @property {vec3|undefined} globalPosition - The avatar's position in the domain.
-     *      <code>undefined</code> if not included in the packet.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
      *  @property {quat|undefined} localOrientation - The avatar's orientation.
-     *      <code>undefined</code> if not included in the packet.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
+     *  @property {number|undefined} avatarScale - The avatar's scale.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
+     *  @property {boolean[]|undefined} jointRotationsValid - A flag for each joint where <code>true</code> means that a
+     *      rotation value is included in <code>jointRotations</code>, <code>false</code> means that no value is included in
+     *      <code>jointRotations</code>. (A value may be excluded if it hasn't changed significantly since the last value
+     *      provided or the joint's default value should be used.)
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
+     *  @property {Array<quat>|undefined} jointRotations - The joint rotations relative to avatar space (i.e., not relative
+     *      to parent bones). Rotations are only provided for joints which have a <code>jointRotationsValid</code> flag value of
+     *      <code>true</code>.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
+     *  @property {boolean[]|undefined} jointTranslationsValid - A flag for each joint where <code>true</code> means that a
+     *      rotation value is included in <code>jointTranslations</code>, <code>false</code> means that no value is included in
+     *      <code>jointTranslations</code>. (A value may be excluded if it hasn't changed significantly since the last value
+     *      provided or the joint's default value should be used.)
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
+     *  @property {Array<quat>|undefined} jointTranslations - The joint rotations relative to avatar space (i.e., not relative
+     *      to parent bones). Translations are only provided for joints which have a <code>jointTranslationsValid</code> flag
+     *      value of <code>true</code>.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
+     *  @property {Array<boolean>|undefined} jointRotationsUseDefault - <code>true</code> if the skeleton's default joint
+     *      rotation should be used instead of any value currently held, <code>false</code> if the skeleton's default joint
+     *      rotation should be used.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
+     *  @property {Array<boolean>|undefined} jointTranslationsUseDefault - <code>true</code> if the skeleton's default joint
+     *      rotation should be used instead of any value currently held, <code>false</code> if the skeleton's default joint
+     *      rotation should be used.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
      */
 
 
@@ -54,6 +97,9 @@ const BulkAvatarData = new class {
         // C++  void AvatarHashMap::processAvatarDataPacket(ReceivedMessage* message, Node* sendingNode)
         //      AvatarData* AvatarHashMap::parseAvatarData(ReceivedMessage* message, node* sendingNode)
         //      int AvatarData::parseDataFromBuffer(const QByteArray& buffer)
+
+        const BITS_IN_BYTE = 8;
+        const TRANSLATION_COMPRESSION_RADIX = 14;
 
         const avatarDataDetailsList: BulkAvatarDataDetails[] = [];
 
@@ -106,8 +152,10 @@ const BulkAvatarData = new class {
                 dataPosition += 6;
             }
 
+            let avatarScale: number | undefined = undefined;
             if (hasAvatarScale) {
                 // WEBRTC TODO: Address further code - avatar scale.
+                avatarScale = GLMHelpers.unpackFloatRatioFromTwoByte(data, dataPosition);
                 dataPosition += 2;
             }
 
@@ -154,40 +202,77 @@ const BulkAvatarData = new class {
                 dataPosition += numBlendshapeCoefficients * 4;
             }
 
+            let jointRotationsValid: boolean[] | undefined = undefined;
+            let jointRotations: quat[] | undefined = undefined;
+            let jointTranslationsValid: boolean[] | undefined = undefined;
+            let jointTranslations: vec3[] | undefined = undefined;
             if (hasJointData) {
-                // WEBRTC TODO: Address further code - avatar joint data.
+                jointRotations = [];
                 const numJoints = data.getUint8(dataPosition);
                 dataPosition += 1;
 
-                const numRotationValidityBytes = Math.ceil(numJoints / 8);
-                let numValidRotations = 0;
-                for (let i = 0; i < numRotationValidityBytes; i++) {
-                    const rotationBits = data.getUint8(dataPosition);
-                    dataPosition += 1;
-                    let bit = 128;
-                    for (let j = 0; j < 8; j++) {
-                        if ((bit & rotationBits) > 0) {
-                            numValidRotations += 1;
+                jointRotationsValid = new Array(numJoints) as Array<boolean>;
+                let jointRotationsValidCount = 0;
+                {
+                    let validity = 0;
+                    let validityBit = 0;
+                    for (let i = 0; i < numJoints; i++) {
+                        if (validityBit === 0) {
+                            validity = data.getUint8(dataPosition);
+                            dataPosition += 1;
                         }
-                        bit = bit >>> 1;
+                        jointRotationsValid[i] = (validity & 1 << validityBit) > 0;
+                        validityBit = (validityBit + 1) % BITS_IN_BYTE;
+                        if (jointRotationsValid[i]) {
+                            jointRotationsValidCount += 1;
+                        }
                     }
                 }
-                dataPosition += numValidRotations * 6;
 
-                const numTranslationValidityBytes = Math.ceil(numJoints / 8);
-                let numValidTranslations = 0;
-                for (let i = 0; i < numTranslationValidityBytes; i++) {
-                    const translationBits = data.getUint8(dataPosition);
-                    dataPosition += 1;
-                    let bit = 128;
-                    for (let j = 0; j < 8; j++) {
-                        if ((bit & translationBits) > 0) {
-                            numValidTranslations += 1;
-                        }
-                        bit = bit >>> 1;
+                jointRotations = new Array(jointRotationsValidCount) as Array<quat>;
+                let j = 0;
+                for (let i = 0; i < numJoints; i++) {
+                    if (jointRotationsValid[i]) {
+                        jointRotations[j] = GLMHelpers.unpackOrientationQuatFromSixBytes(data, dataPosition);
+                        dataPosition += 6;
+                        // WEBRTC TODO: Address further C++ code - _hasNewJointData.
+                        j += 1;
                     }
                 }
-                dataPosition += 4 + numValidTranslations * 6;
+
+                jointTranslationsValid = new Array(numJoints) as Array<boolean>;
+                let jointTranslationsValidCount = 0;
+                {
+                    let validity = 0;
+                    let validityBit = 0;
+                    for (let i = 0; i < numJoints; i++) {
+                        if (validityBit === 0) {
+                            validity = data.getUint8(dataPosition);
+                            dataPosition += 1;
+                        }
+                        jointTranslationsValid[i] = (validity & 1 << validityBit) > 0;
+                        validityBit = (validityBit + 1) % BITS_IN_BYTE;
+                        if (jointTranslationsValid[i]) {
+                            jointTranslationsValidCount += 1;
+                        }
+                    }
+                }
+
+                const maxTranslationDimension = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+
+                jointTranslations = new Array(jointTranslationsValidCount) as Array<vec3>;
+                j = 0;
+                for (let i = 0; i < numJoints; i++) {
+                    if (jointTranslationsValid[i]) {
+                        jointTranslations[j] = Vec3.multiply(maxTranslationDimension,
+                            GLMHelpers.unpackFloatVec3FromSignedTwoByteFixed(data, dataPosition,
+                                TRANSLATION_COMPRESSION_RADIX));
+                        dataPosition += 6;
+                        // WEBRTC TODO: Address further C++ code - _hasNewJointData.
+                        j += 1;
+                    }
+                }
 
                 if (hasGrabJoints) {
                     // WEBRTC TODO: Address further code - avatar grab joints.
@@ -196,12 +281,39 @@ const BulkAvatarData = new class {
 
             }
 
+            let jointRotationsUseDefault: boolean[] | undefined = undefined;
+            let jointTranslationsUseDefault: boolean[] | undefined = undefined;
             if (hasJointDefaultPoseFlags) {
-                // WEBRTC TODO: Address further code - avatar joint default pose flags.
                 const numJoints = data.getUint8(dataPosition);
                 dataPosition += 1;
-                const numJointPoseBytes = Math.ceil(numJoints / 8);
-                dataPosition += 2 * numJointPoseBytes;
+
+                jointRotationsUseDefault = new Array(numJoints) as Array<boolean>;
+                {
+                    let validity = 0;
+                    let validityBit = 0;
+                    for (let i = 0; i < numJoints; i++) {
+                        if (validityBit === 0) {
+                            validity = data.getUint8(dataPosition);
+                            dataPosition += 1;
+                        }
+                        jointRotationsUseDefault[i] = (validity & 1 << validityBit) > 0;
+                        validityBit = (validityBit + 1) % BITS_IN_BYTE;
+                    }
+                }
+
+                jointTranslationsUseDefault = new Array(numJoints) as Array<boolean>;
+                {
+                    let validity = 0;
+                    let validityBit = 0;
+                    for (let i = 0; i < numJoints; i++) {
+                        if (validityBit === 0) {
+                            validity = data.getUint8(dataPosition);
+                            dataPosition += 1;
+                        }
+                        jointTranslationsUseDefault[i] = (validity & 1 << validityBit) > 0;
+                        validityBit = (validityBit + 1) % BITS_IN_BYTE;
+                    }
+                }
             }
 
             /* eslint-enable @typescript-eslint/no-magic-numbers */
@@ -209,7 +321,14 @@ const BulkAvatarData = new class {
             avatarDataDetailsList.push({
                 sessionUUID,
                 globalPosition,
-                localOrientation
+                localOrientation,
+                avatarScale,
+                jointRotationsValid,
+                jointRotations,
+                jointTranslationsValid,
+                jointTranslations,
+                jointRotationsUseDefault,
+                jointTranslationsUseDefault
             });
 
         }
@@ -222,4 +341,4 @@ const BulkAvatarData = new class {
 }();
 
 export default BulkAvatarData;
-export type { BulkAvatarDataDetails };
+export type { BulkAvatarDataDetails, JointData };

@@ -9,7 +9,7 @@
 //
 
 
-/*@sdkdoc
+/*@devdoc
  *  The <code>OctreeConstants</code> namespace provides constants for working with octrees.
  *  @namespace OctreeConstants
  *

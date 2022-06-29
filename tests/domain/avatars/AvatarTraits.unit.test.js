@@ -19,6 +19,7 @@ describe("AvatarTraits - unit tests", () => {
         expect(AvatarTraits.SkeletonModelURL).toBe(0);
         expect(AvatarTraits.TotalTraitTypes).toBe(AvatarTraits.Grab + 1);
         expect(AvatarTraits.DEFAULT_TRAIT_VERSION).toBe(0);
+        expect(AvatarTraits.DELETED_TRAIT_SIZE).toBe(-1);
     });
 
     test("Can check whether a trait is a simple trait type", () => {

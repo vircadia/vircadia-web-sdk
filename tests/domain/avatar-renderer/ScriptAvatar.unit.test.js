@@ -27,20 +27,30 @@ describe("ScriptAvatar - unit tests", () => {
 
     test("A ScriptAvatar created from a null ID is invalid", () => {
         const scriptAvatar = new ScriptAvatar(null);
+
         // Null property values.
         expect(scriptAvatar.isValid).toBe(false);
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
         expect(scriptAvatar.skeletonModelURL).toBe("");
+        expect(scriptAvatar.skeleton).toEqual([]);
+        expect(scriptAvatar.scale).toEqual(0.0);
         expect(scriptAvatar.position).toEqual(Vec3.ZERO);
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
-        // Can still access signals.
+        expect(scriptAvatar.jointRotations).toEqual([]);
+        expect(scriptAvatar.jointTranslations).toEqual([]);
+
+        // Can access signals.
         expect(typeof scriptAvatar.displayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.displayNameChanged.disconnect).toBe("function");
+        expect(typeof scriptAvatar.scaleChanged.connect).toBe("function");
+        expect(typeof scriptAvatar.scaleChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.skeletonModelURLChanged.connect).toBe("function");
         expect(typeof scriptAvatar.skeletonModelURLChanged.disconnect).toBe("function");
+        expect(typeof scriptAvatar.skeletonChanged.connect).toBe("function");
+        expect(typeof scriptAvatar.skeletonChanged.disconnect).toBe("function");
     });
 
     test("A ScriptAvatar created from an invalid session ID is invalid", () => {
@@ -51,20 +61,30 @@ describe("ScriptAvatar - unit tests", () => {
         ContextManager.set(contextID, AvatarManager, contextID);
         const avatarManager = ContextManager.get(contextID, AvatarManager);
         const scriptAvatar = new ScriptAvatar(avatarManager.getAvatarBySessionID(new Uuid(1234n)));
+
         // Null property values.
         expect(scriptAvatar.isValid).toBe(false);
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
         expect(scriptAvatar.skeletonModelURL).toBe("");
+        expect(scriptAvatar.skeleton).toEqual([]);
+        expect(scriptAvatar.scale).toEqual(0.0);
         expect(scriptAvatar.position).toEqual(Vec3.ZERO);
         expect(scriptAvatar.orientation).toEqual(Quat.IDENTITY);
-        // Can still access signals.
+        expect(scriptAvatar.jointRotations).toEqual([]);
+        expect(scriptAvatar.jointTranslations).toEqual([]);
+
+        // Can access signals.
         expect(typeof scriptAvatar.displayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.displayNameChanged.disconnect).toBe("function");
+        expect(typeof scriptAvatar.scaleChanged.connect).toBe("function");
+        expect(typeof scriptAvatar.scaleChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.connect).toBe("function");
         expect(typeof scriptAvatar.sessionDisplayNameChanged.disconnect).toBe("function");
         expect(typeof scriptAvatar.skeletonModelURLChanged.connect).toBe("function");
         expect(typeof scriptAvatar.skeletonModelURLChanged.disconnect).toBe("function");
+        expect(typeof scriptAvatar.skeletonChanged.connect).toBe("function");
+        expect(typeof scriptAvatar.skeletonChanged.disconnect).toBe("function");
 
         log.mockReset();
     });

@@ -9,7 +9,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer, Uuid } from "../dist/Vircadia.js";
+import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer, Vec3, Uuid }
+    from "../dist/Vircadia.js";
 
 (function () {
 
@@ -27,6 +28,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
     let entityServer = null;
     let entityServerGameLoop = null;
     let messageMixer = null;
+    let doppelganger = null;
 
 
     // Domain Server
@@ -226,10 +228,15 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         const POS_DECIMAL_PLACES = 3;
         const YAW_DECIMAL_PLACES = 1;
+        const SESSION_DISPLAY_NAME_INDEX = 1;
         const X_INDEX = 2;
         const Y_INDEX = 3;
         const Z_INDEX = 4;
         const YAW_INDEX = 5;
+        const SKELETON_MODEL_URL_INDEX = 6;
+        const SKELETON_SCALE_INDEX = 7;
+        const SKELETON_JOINTS_COUNT_INDEX = 8;
+        const HEAD_PITCH_INDEX = 9;
 
         const RAD_TO_DEG = 180.0 / Math.PI;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
@@ -267,6 +274,8 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const myAvatarDisplayName = document.getElementById("myAvatarDisplayName");
         const myAvatarSessionDisplayName = document.getElementById("myAvatarSessionDisplayName");
         const myAvatarSkeletonModelURL = document.getElementById("myAvatarSkeletonModelURL");
+        const avatarScale = document.getElementById("avatarScale");
+        const avatarTargetScale = document.getElementById("avatarTargetScale");
         const avatarMixerPosX = document.getElementById("avatarMixerPosX");
         const avatarMixerPosY = document.getElementById("avatarMixerPosY");
         const avatarMixerPosZ = document.getElementById("avatarMixerPosZ");
@@ -291,6 +300,23 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         });
         myAvatarSkeletonModelURL.addEventListener("blur", () => {
             avatarMixer.myAvatar.skeletonModelURL = myAvatarSkeletonModelURL.value;
+        });
+
+        avatarScale.value = avatarMixer.myAvatar.scale.toFixed(1);
+        avatarMixer.myAvatar.scaleChanged.connect((scale) => {
+            avatarScale.value = scale.toFixed(1);
+        });
+        avatarScale.addEventListener("blur", () => {
+            avatarMixer.myAvatar.scale = parseFloat(avatarScale.value);
+            const VERIFY_TIMEOUT = 500;
+            setTimeout(() => {
+                // In case the scale value was rejected. Or do in game loop.
+                avatarScale.value = avatarMixer.myAvatar.scale.toFixed(1);
+            }, VERIFY_TIMEOUT);
+        });
+        avatarTargetScale.value = avatarMixer.myAvatar.targetScale.toFixed(1);
+        avatarMixer.myAvatar.targetScaleChanged.connect((scale) => {
+            avatarTargetScale.value = scale.toFixed(1);
         });
 
         const avatarPosition = avatarMixer.myAvatar.position;
@@ -329,7 +355,13 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         const avatarListBody = document.querySelector("#avatarList > tbody");
 
-        const avatars = new Map();  // <sessionID, { avatar, tr }>
+        const avatars = new Map();  // <sessionID, { avatar, tr, headJoint }>
+
+        function onEchoClicked(checkbox, sessionID) {
+            if (doppelganger !== null) {
+                doppelganger.toggle(checkbox, sessionID);
+            }
+        }
 
         function onAvatarAdded(sessionID) {
 
@@ -367,22 +399,45 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             td = document.createElement("td");
             td.className = "number";
             tr.appendChild(td);
+            td = document.createElement("td");
+            td.className = "number";
+            tr.appendChild(td);
+            td = document.createElement("td");
+            td.className = "number";
+            tr.appendChild(td);
+            td = document.createElement("td");
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.className = "checkbox";
+            if (sessionID.value() === Uuid.AVATAR_SELF_ID) {
+                cb.disabled = true;
+            } else {
+                cb.onclick = (event) => {
+                    onEchoClicked(event.target, sessionID);
+                };
+            }
+            td.appendChild(cb);
+            tr.appendChild(td);
             avatarListBody.appendChild(tr);
 
-            avatars.set(sessionID, { avatar, tr });
-
-            const SESSION_DISPLAY_NAME_INDEX = 1;
             avatar.sessionDisplayNameChanged.connect(() => {
                 tr.childNodes[SESSION_DISPLAY_NAME_INDEX].innerHTML = avatar.sessionDisplayName;
             });
-            const SKELETON_MODEL_URL_INDEX = 6;
             avatar.skeletonModelURLChanged.connect(() => {
-                tr.childNodes[SKELETON_MODEL_URL_INDEX].innerHTML = avatar.skeletonModelURL;
+                tr.childNodes[SKELETON_MODEL_URL_INDEX].innerHTML
+                    = avatar.skeletonModelURL.slice(avatar.skeletonModelURL.lastIndexOf("/") + 1);
             });
-            const SKELETON_JOINTS_COUNT_INDEX = 7;
-            avatar.skeletonJointsChanged.connect(() => {
-                tr.childNodes[SKELETON_JOINTS_COUNT_INDEX].innerHTML = avatar.skeletonJoints.length;
+            let headJoint = null;
+            avatar.skeletonChanged.connect(() => {
+                tr.childNodes[SKELETON_JOINTS_COUNT_INDEX].innerHTML = avatar.skeleton.length;
+                const headJointData = avatar.skeleton.find((value) => {
+                    return value.jointName === "Head";
+                });
+                headJoint = headJointData !== undefined ? headJointData.jointIndex : null;
+                avatars.get(sessionID).headJoint = headJoint;
             });
+
+            avatars.set(sessionID, { avatar, tr, headJoint });
         }
         avatarMixer.avatarList.avatarAdded.connect(onAvatarAdded);
 
@@ -410,6 +465,11 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                 value.tr.childNodes[Y_INDEX].innerHTML = position.y.toFixed(POS_DECIMAL_PLACES);
                 value.tr.childNodes[Z_INDEX].innerHTML = position.z.toFixed(POS_DECIMAL_PLACES);
                 value.tr.childNodes[YAW_INDEX].innerHTML = quatToYaw(value.avatar.orientation).toFixed(YAW_DECIMAL_PLACES);
+                value.tr.childNodes[SKELETON_SCALE_INDEX].innerHTML = value.avatar.scale.toFixed(1);
+                value.tr.childNodes[HEAD_PITCH_INDEX].innerHTML
+                    = value.headJoint !== null && value.avatar.jointRotations[value.headJoint] !== null
+                        ? (value.avatar.jointRotations[value.headJoint].x * RAD_TO_DEG).toFixed(1)
+                        : "";
             }
         };
 
@@ -479,6 +539,121 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
     }());
 
+    // Doppelganger
+    (function () {
+        let avatarCheckbox = null;
+        let avatarSessionID = null;
+        const myAvatar = avatarMixer.myAvatar;
+        let avatar = null;
+        const DOPPELGANGER_OFFSET = { x: 0, y: 0, z: 2 };
+
+        function updateSkeletonModelURL() {
+            myAvatar.skeletonModelURL = avatar.skeletonModelURL;
+        }
+
+        function updateSkeleton() {
+            myAvatar.skeleton = avatar.skeleton;
+        }
+
+        function updateScale(scale) {
+            myAvatar.scale = scale;
+        }
+
+        function updateAvatarPositionAndOrientation() {
+            myAvatar.position = Vec3.sum(avatar.position, DOPPELGANGER_OFFSET);
+            myAvatar.orientation = avatar.orientation;
+        }
+
+        function updateJoints() {
+            // $$$$$$$: Do I really need to make a copy or not?
+            myAvatar.jointRotations = JSON.parse(JSON.stringify(avatar.jointRotations));
+            myAvatar.jointTranslations = JSON.parse(JSON.stringify(avatar.jointTranslations));
+        }
+
+
+        function startDoppelganger() {
+            console.debug("Start doppelganger for", avatarSessionID.stringify());
+
+            // Access avatar.
+            avatar = avatarMixer.avatarList.getAvatar(avatarSessionID);
+            if (!avatar.isValid) {
+                console.error("Error getting avatar to echo.");
+                avatar = null;
+                return;
+            }
+
+
+            // Avatar.
+            updateSkeletonModelURL();
+            avatar.skeletonModelURLChanged.connect(updateSkeletonModelURL);
+            updateSkeleton();
+            avatar.skeletonChanged.connect(updateSkeleton);
+            updateScale(avatar.scale);
+            avatar.scaleChanged.connect(updateScale);
+
+            // Position and orientation.
+            // These are handled by gameLoop().
+
+            // Joints.
+            // These are handled by gameLoop().
+
+        }
+
+        function stopDoppelganger() {
+            console.debug("Stop doppelganger for", avatarSessionID.stringify());
+
+            // Retain current skeleton URL, scale, position, orientation, and skeleton data but stop updating with changes.
+
+            // Avatar.
+            avatar.skeletonModelURLChanged.disconnect(updateSkeletonModelURL);
+            avatar.skeletonChanged.disconnect(updateSkeleton);
+            avatar.scaleChanged.disconnect(updateScale);
+
+            // Position and orientation.
+            // These are handled by gameLoop().
+
+            // Joints.
+            // These are handled by gameLoop().
+
+            // Finish with avatar.
+            avatar = null;
+        }
+
+
+        function toggle(checkbox, sessionID) {
+
+            if (avatarSessionID !== null) {
+                // Stop the current doppelganger, if any.
+                avatarCheckbox.checked = false;
+                stopDoppelganger();
+            }
+
+            if (sessionID !== avatarSessionID) {
+                avatarSessionID = sessionID;
+                avatarCheckbox = checkbox;
+                avatarCheckbox.checked = true;
+                startDoppelganger();
+            } else {
+                // There is no current doppelganger.
+                avatarSessionID = null;
+                avatarCheckbox = null;
+            }
+        }
+
+        function gameLoop() {
+            if (avatar !== null) {
+                updateAvatarPositionAndOrientation();
+                updateJoints();
+            }
+        }
+
+        doppelganger = {
+            toggle,
+            gameLoop
+        };
+
+    }());
+
     // Wire up mixers.
     audioMixer.positionGetter = () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -507,6 +682,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
             // Update the avatar mixer with latest user client data and get latest data from avatar mixer.
             avatarMixerGameLoop();
+            doppelganger.gameLoop();
 
             // Update the entity server with latest user client data.
             entityServerGameLoop();

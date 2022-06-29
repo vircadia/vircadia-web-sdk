@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 28 Oct 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -15,6 +16,7 @@ AudioWorkletsMock.mock();
 import AvatarData from "../../../src/domain/avatars/AvatarData";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodeList from "../../../src/domain/networking/NodeList";
+import AvatarConstants from "../../../src/domain/shared/AvatarConstants";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import { Uuid } from "../../../src/Vircadia";
 
@@ -43,6 +45,63 @@ describe("AvatarData - unit tests", () => {
         expect(avatarData.getIdentityDataChanged()).toBe(false);
         avatarData.markIdentityDataChanged();
         expect(avatarData.getIdentityDataChanged()).toBe(true);
+    });
+
+    test("Can set and get the target avatar scale", (done) => {
+        const avatarData = new AvatarData(contextID);
+        let scaleChangedCount = 0;
+        avatarData.targetScaleChanged.connect(() => {
+            scaleChangedCount += 1;
+        });
+
+        expect(avatarData.getTargetScale()).toEqual(1.0);
+        avatarData.setTargetScale(1.2);
+        expect(avatarData.getTargetScale()).toEqual(1.2);
+        avatarData.setTargetScale(2000.0);
+        expect(avatarData.getTargetScale()).toEqual(1000.0);  // MAX_AVATAR_SCALE
+        avatarData.setTargetScale(1000.0);  // No "scale changed" signal.
+        expect(avatarData.getTargetScale()).toEqual(1000.0);
+        avatarData.setTargetScale(0.00001);
+        expect(avatarData.getTargetScale()).toEqual(0.005);  // MIN_AVATAR_SCALE
+        avatarData.setTargetScale(0.005);
+        expect(avatarData.getTargetScale()).toEqual(0.005);  // No "scale changed" signal.
+
+        setTimeout(() => {
+            expect(scaleChangedCount).toEqual(3);
+            done();
+        }, 10);
+    });
+
+    test("Cannot limit the avatar height per the domain", (done) => {
+        // This because at the AvatarData class level the target scale cannot be changed.
+        const avatarData = new AvatarData(contextID);
+        let scaleChangedCount = 0;
+        avatarData.targetScaleChanged.connect(() => {
+            scaleChangedCount += 1;
+        });
+
+        expect(avatarData.getTargetScale()).toEqual(1.0);
+
+        avatarData.setDomainMaximumHeight(AvatarConstants.DEFAULT_AVATAR_HEIGHT / 2.0);
+        expect(avatarData.getDomainLimitedScale()).toBe(1.0);
+        expect(avatarData.getTargetScale()).toEqual(1.0);
+
+        avatarData.setDomainMaximumHeight(AvatarConstants.MAX_AVATAR_HEIGHT / 2);
+        expect(avatarData.getDomainLimitedScale()).toBe(1.0);
+        expect(avatarData.getTargetScale()).toEqual(1.0);
+
+        avatarData.setDomainMinimumHeight(AvatarConstants.DEFAULT_AVATAR_HEIGHT * 2.0);
+        expect(avatarData.getDomainLimitedScale()).toBe(1.0);
+        expect(avatarData.getTargetScale()).toEqual(1.0);
+
+        avatarData.setDomainMinimumHeight(AvatarConstants.MIN_AVATAR_HEIGHT / 2);
+        expect(avatarData.getDomainLimitedScale()).toBe(1.0);
+        expect(avatarData.getTargetScale()).toEqual(1.0);
+
+        setTimeout(() => {
+            expect(scaleChangedCount).toEqual(0);
+            done();
+        }, 10);
     });
 
 });

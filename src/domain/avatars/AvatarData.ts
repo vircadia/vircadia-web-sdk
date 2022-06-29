@@ -17,6 +17,7 @@ import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
 import NodeType from "../networking/NodeType";
 import assert from "../shared/assert";
+import AvatarConstants from "../shared/AvatarConstants";
 import ContextManager from "../shared/ContextManager";
 import Quat, { quat } from "../shared/Quat";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
@@ -90,27 +91,29 @@ enum BoneType {
  *  @extends SpatiallyNestable
  *  @param {number} contextID - The {@link ContextManager} context ID.
  *
- *  @property {string|null} displayName - The avatar's display name.
+ *  @comment AvatarData properties.
  *  @property {Signal<AvatarData~displayNameChanged>} displayNameChanged - Triggered when the avatar's display name changes.
- *  @property {string|null} sessionDisplayName - The avatar's session display name as assigned by the avatar mixer. It is based
- *      on the display name and is unique among all avatars present in the domain. <em>Read-only.</em>
  *  @property {Signal<AvatarData~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the avatar's session
  *      display name changes.
- *  @property {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *  @property {Signal<AvatarData~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the avatar's skeleton model
  *      URL changes.
- *  @property {SkeletonJoint[]} skeletonJoints - Information on the avatar skeleton's joints.
- *      <em>Read-only.</em>
- *  @property {Signal<AvatarData~skeletonJointsChanged>} skeletonjointsChanged - Triggered when information on the avatar's
- *      skeleton joints changes.
- *  @property {vec3} position - The position of the avatar in the domain.
- *  @property {quat} orientation - The orientation of the avatar in the domain.
+ *  @property {Signal<AvatarData~skeletonChanged>} skeletonChanged - Triggered when the avatar's skeleton changes.
+ *  @property {Signal<AvatarData~targetScaleChanged>} targetScaleChanged - Triggered when the avatar's target scale changes.
+ *
+ *  @comment SpatiallyNestable properties - copied from SpatiallyNestable; do NOT edit here.
+ *  @comment None.
  */
 class AvatarData extends SpatiallyNestable {
     // C++  class AvatarData : public QObject, public SpatiallyNestable
 
     protected _sessionDisplayName: string | null = null;
     protected _sessionDisplayNameChanged = new SignalEmitter();
+
+    protected _targetScale = 1.0;
+    protected _targetScaleChanged = new SignalEmitter();
+    protected _avatarScaleChanged = 0;
+    protected _domainMinimumHeight = AvatarConstants.MIN_AVATAR_HEIGHT;
+    protected _domainMaximumHeight = AvatarConstants.MAX_AVATAR_HEIGHT;
 
     protected _globalPosition = Vec3.ZERO;
     protected _clientTraitsHandler: ClientTraitsHandler | null = null;
@@ -131,7 +134,16 @@ class AvatarData extends SpatiallyNestable {
     #_skeletonModelURL: string | null = null;
     #_skeletonModelURLChanged = new SignalEmitter();
     #_avatarSkeletonData: SkeletonJoint[] = [];
-    #_skeletonJointsChanged = new SignalEmitter();
+    #_skeletonChanged = new SignalEmitter();  // No C++ equivalent.
+
+    // C++  _jointData
+    #_jointRotations: (quat | null)[] = [];
+    #_jointTranslations: (vec3 | null)[] = [];
+
+    // C++  _lastSentJointData
+    #_lastSentJointRotations: (quat | null)[] = [];
+    #_lastSentJointTranslations: (vec3 | null)[] = [];
+
 
     #_sequenceNumber = 0;  // Avatar data sequence number is a uint16 value.
     readonly #SEQUENCE_NUMBER_MODULO = 65536;  // Sequence number is a uint16.
@@ -150,24 +162,12 @@ class AvatarData extends SpatiallyNestable {
     }
 
 
-    get displayName(): string | null {
-        return this.#_displayName;
-    }
-
-    set displayName(displayName: string | null) {
-        this.setDisplayName(displayName);
-    }
-
     /*@sdkdoc
      *  Triggered when the avatar's display name changes.
      *  @callback AvatarData~displayNameChanged
      */
     get displayNameChanged(): Signal {
         return this.#_displayNameChanged.signal();
-    }
-
-    get sessionDisplayName(): string | null {
-        return this._sessionDisplayName;
     }
 
     /*@sdkdoc
@@ -178,15 +178,6 @@ class AvatarData extends SpatiallyNestable {
         return this._sessionDisplayNameChanged.signal();
     }
 
-    get skeletonModelURL(): string | null {
-        // WEBRTC TODO: return the default avatar URL if null.
-        return this.#_skeletonModelURL;
-    }
-
-    set skeletonModelURL(skeletonModelURL: string | null) {
-        this.setSkeletonModelURL(skeletonModelURL);
-    }
-
     /*@sdkdoc
      *  Triggered when the avatar's skeleton model URL changes.
      *  @callback AvatarData~skeletonModelURLChanged
@@ -195,32 +186,21 @@ class AvatarData extends SpatiallyNestable {
         return this.#_skeletonModelURLChanged.signal();
     }
 
-    get skeletonJoints(): SkeletonJoint[] {
-        return this.#_avatarSkeletonData;
+    /*@sdkdoc
+     *  Triggered when the avatar's skeleton joints change.
+     *  @callback AvatarData~skeletonChanged
+     */
+    get skeletonChanged(): Signal {
+        return this.#_skeletonChanged.signal();
     }
 
     /*@sdkdoc
-     *  Triggered when the avatar's skeleton joints change.
-     *  @callback AvatarData~skeletonJointsChanged
+     *  Triggered when the avatar's target scale changes.
+     *  @callback AvatarData~targetScaleChanged
+     *  @param {number} targetScale - The new target avatar scale.
      */
-    get skeletonJointsChanged(): Signal {
-        return this.#_skeletonJointsChanged.signal();
-    }
-
-    get position(): vec3 {
-        return this.getWorldPosition();
-    }
-
-    set position(position: vec3) {
-        this.setWorldPosition(position);
-    }
-
-    get orientation(): quat {
-        return this.getWorldOrientation();
-    }
-
-    set orientation(orientation: quat) {
-        this.setWorldOrientation(orientation);
+    get targetScaleChanged(): Signal {
+        return this._targetScaleChanged.signal();
     }
 
 
@@ -277,8 +257,9 @@ class AvatarData extends SpatiallyNestable {
     }
 
     /*@devdoc
-     *  Gets the avatar's session display name.
-     *  @returns {string|null} The avatar's display name.
+     *  Gets the avatar's session display name as assigned by the avatar mixer. It is based on the display name and is unique
+     *  among all avatars present in the domain.
+     *  @returns {string|null} The avatar's session display name.
      */
     getSessionDisplayName(): string | null {
         // C++  QString& getSessionDisplayName()
@@ -286,7 +267,8 @@ class AvatarData extends SpatiallyNestable {
     }
 
     /*@devdoc
-     *  Sets the avatar's session display name.
+     *  Sets the avatar's session display name as assigned by the avatar mixer. It is based on the display name and is unique
+     *  among all avatars present in the domain.
      *  @param {string|null} sessionDisplayName - The avatar's session display name.
      */
     setSessionDisplayName(sessionDisplayName: string | null): void {
@@ -296,6 +278,177 @@ class AvatarData extends SpatiallyNestable {
         this.markIdentityDataChanged();
     }
 
+    /*@devdoc
+     *  Possibly update the session display name from network data: don't update in the <code>AvatarData</code> class.
+     *  @param {string|null} sessionDisplayName The session display name.
+     */
+    // eslint-disable-next-line
+    // @ts-ignore
+    maybeUpdateSessionDisplayNameFromTransport(sessionDisplayName: string | null): void {  // eslint-disable-line
+        // C++  void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName)
+        // No-op.
+    }
+
+    /*@devdoc
+     *  Gets the URL of the avatar's FST, glTF, or FBX model file.
+     *  @returns {string|null} The URL of the avatar's FST, glTF, or FBX model file.
+     */
+    getSkeletonModelURL(): string | null {
+        // WEBRTC TODO: return the default avatar URL if null.
+        return this.#_skeletonModelURL;
+    }
+
+    /*@devdoc
+     *  Sets the avatar's skeleton model URL.
+     *  @param {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
+     */
+    setSkeletonModelURL(skeletonModelURL: string | null): void {
+        // C++  void setSkeletonModelURL(const QUrl& skeletonModelURL)
+
+        if (skeletonModelURL === null || skeletonModelURL.length === 0) {
+            console.log("[avatars] setSkeletonModelURL() called with empty URL.");
+        }
+
+        // WEBRTC TODO: Set #_skeletonModelURL to the default avatar URL when skeletonModelURL is an empty URL.
+
+        if (skeletonModelURL === this.#_skeletonModelURL) {
+            return;
+        }
+
+        this.#_skeletonModelURL = skeletonModelURL;
+
+        if (this._clientTraitsHandler) {
+            this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonModelURL);
+        }
+
+        this.#_skeletonModelURLChanged.emit();
+    }
+
+    /*@devdoc
+     *  Gets the avatar's skeleton.
+     *  @returns {SkeletonJoint[]|null} The avatar's skeleton. <code>[]</code> if there is no skeleton set.
+     */
+    getSkeletonData(): SkeletonJoint[] {
+        // C++  std::vector<AvatarSkeletonTrait::UnpackedJointData> AvatarData::getSkeletonData() const
+        return this.#_avatarSkeletonData;
+    }
+
+    /*@devdoc
+     *  Sets the avatar's skeleton and resets the joints.
+     *  @param {SkeletonJoint[]} skeletonData - The avatar's skeleton.
+     */
+    setSkeletonData(skeletonData: SkeletonJoint[]): void {
+        // C++  void AvatarData::setSkeletonData(const std::vector<AvatarSkeletonTrait::UnpackedJointData>& skeletonData)
+
+        if (skeletonData.length === 0) {
+            console.log("[avatars] setSkeletonData() called with empty skeleton data.");
+        }
+
+        if (skeletonData === this.#_avatarSkeletonData) {
+            return;
+        }
+
+        // Need to call markTraitUpdated() here because there is no equivalent of C++'s Rig and sendSkeletonData().
+        if (this._clientTraitsHandler) {
+            this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonModelURL);
+        }
+
+        this.#_avatarSkeletonData = skeletonData;
+
+        // Web SDK: The joints data are resized and set to "use default pose" to make the SDK easier to use and more robust.
+        this.#resetJoints();
+
+        this.#_skeletonChanged.emit();  // SDK-specific.
+    }
+
+    /*@devdoc
+     *  Sets the target avatar scale. For your own avatar, the avatar scale actually used may be limited per domain settings.
+     *  For other users' avatars, any domain limits will have already been applied so the target scale is the actual scale to
+     *  use.
+     *  @param {number} targetScale - The target avatar scale.
+     */
+    setTargetScale(targetScale: number): void {
+        // C++  void setTargetScale(float targetScale)
+        const newValue = Math.min(Math.max(targetScale, AvatarConstants.MIN_AVATAR_SCALE), AvatarConstants.MAX_AVATAR_SCALE);
+        if (this._targetScale !== newValue) {
+            this._targetScale = newValue;
+            this._scaleChanged = Date.now();
+            this._avatarScaleChanged = this._scaleChanged;
+
+            // This signal has been moved from Avatar so that the SDK can emit it without requiring avatar Rig functionality.
+            this._targetScaleChanged.emit(newValue);
+        }
+    }
+
+    /*@devdoc
+     *  Gets the target avatar scale. For your own avatar, the avatar scale actually used may be limited per domain settings.
+     *  for other users' avatars, any domain limits will have already been applied so the target scale is the actual scale to
+     *  use.
+     *  @returns {number} The target avatar scale.
+     */
+    getTargetScale(): number {
+        // C++  float getTargetScale()
+        return this._targetScale;
+    }
+
+    /*@devdoc
+     *  Gets the scale of the avatar, range <code>0.005</code> &mdash; <code>1000.0</code>, possibly temporarily limited by the
+     *  current domain's settings. If the avatar's height is not available then domain limits are not applied.
+     *  @returns {number}
+     */
+    getDomainLimitedScale(): number {
+        // C++  float getDomainLimitedScale() const
+        if (this.canMeasureEyeHeight()) {
+            const minScale = this.getDomainMinScale();
+            const maxScale = this.getDomainMaxScale();
+            return Math.max(minScale, Math.min(this._targetScale, maxScale));
+        }
+
+        // We can't make a good estimate.
+        return this._targetScale;
+    }
+
+    /*@devdoc
+     *  Gets the avatar's joint rotations. The rotations are relative to avatar space (i.e., not relative to parent bones). If a
+     *  rotation is <code>null</code> then the rotation of the avatar skeletons's default pose should be used.
+     *  @returns {Array<quat|null>} The joint rotations.
+     */
+    getJointRotations(): (quat | null)[] {
+        // C++  QVector<glm::quat> getJointRotations()
+        return this.#_jointRotations;
+    }
+
+    /*@devdoc
+     *  Sets the avatar's joint rotations. The rotations are relative to avatar space (i.e., not relative to parent bones). Set
+     *  a rotation to <code>null</code> if the avatar skeleton's default pose rotation should be used.
+     *  @param {Array<quat|null>} jointRotations - The avatar's joint rotations.
+     */
+    setJointRotations(jointRotations: (quat | null)[]): void {
+        // C++  void AvatarData::setJointRotations(const QVector<glm::quat>& jointRotations)
+        this.#_jointRotations = jointRotations;
+    }
+
+    /*@devdoc
+     *  Gets the translations of the avatar's joints. The translations are relative to their parents, in model coordinates. If a
+     *  translation is <code>null</code> then the translation of the avatar skeleton's default pose should be used.
+     *  <p><strong>Warning:</strong> These coordinates are not necessarily in meters.</p>
+     *  @returns {Array<vec3|null>} The joint translations.
+     */
+    getJointTranslations(): (vec3 | null)[] {
+        // C++  QVector<glm::vec3> getJointTranslations()
+        return this.#_jointTranslations;
+    }
+
+    /*@devdoc
+     *  Sets the avatar's joint translations. The translations are relative to their parents, in model coordinates. Set a
+     *  translation to <code>null</code> if the avatar skeleton's default pose translation should be used.
+     *  <p><strong>Warning:</strong> These coordinates are not necessarily in meters.</p>
+     *  @param {Array<vec3|null>} jointTranslations - The avatar's joint translations.
+     */
+    setJointTranslations(jointTranslations: (vec3 | null)[]): void {
+        // C++  void AvatarData::setJointTranslations(const QVector<glm::vec3>& jointTranslations)
+        this.#_jointTranslations = jointTranslations;
+    }
 
     /*@devdoc
      *  Sets a flag that avatar identity data has changed since the last time an {@link PacketType(1)|AvatarIdentity} packet was
@@ -441,6 +594,7 @@ class AvatarData extends SpatiallyNestable {
         const cullSmallData = !sendAll && Math.random() < AVATAR_SEND_FULL_UPDATE_RATIO;
         const dataDetail = cullSmallData ? AvatarDataDetail.SendAllData : AvatarDataDetail.CullSmallData;
 
+
         // C++  QByteArray MyAvatar::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
         this._globalPosition = this.getWorldPosition();
         //
@@ -449,32 +603,60 @@ class AvatarData extends SpatiallyNestable {
         // WEBRTC TODO: Address further C++ code - camera mode.
         //
 
-        // C++  QByteArray AvatarData::toByteArrayStateful(...)
+
+        // C++  QByteArray AvatarData::toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking)
         const lastSentTime = this.#_lastToByteArray;
         this.#_lastToByteArray = Date.now();
         // SendStatus - Not used in user client.
+        this.#getLastJointData();
 
 
-        // C++  QByteArray AvatarData::toByteArray(...)
+        // C++  QByteArray AvatarData::toByteArray(AvatarDataDetail dataDetail, quint64 lastSentTime,
+        //          const QVector<JointData>& lastSentJointData, AvatarDataPacket::SendStatus& sendStatus,
+        //          bool dropFaceTracking, bool distanceAdjust, glm::vec3 viewerPosition, QVector<JointData>* sentJointDataOut,
+        //          int maxDataSize, AvatarDataRate* outboundDataRateOut)
+
         this.#lazyInitHeadData();
-
 
         const avatarDataDetails = {
             sequenceNumber: this.#_sequenceNumber,
 
             dataDetail,
             lastSentTime,
-            // WEBRTC TODO: Address further C++ code - JointData.
+            lastSentJointRotations: this.#_lastSentJointRotations,
+            lastSentJointTranslations: this.#_lastSentJointTranslations,
             // sendStatus, - Not used in user client.
-            dropFaceTracking: false,
-            distanceAdjust: false,
-            viewerPosition: { x: 0, y: 0, z: 0 },
+            // dropFaceTracking: value,
+            // distanceAdjust: false, - Always false in user client.
+            // viewerPosition: { x: 0, y: 0, z: 0 }, - Not used in user client.
             // sentJointDataOut: null, - Not used in user client.
             // maxDataSize: 0, - Not used in user client.
             // WEBRTC TODO: Address further C+ code - AvatarDataRate.
 
+            // The C++ code is included here, commented out, so that the native client logic can be seen.
+            //
+            // hasAvatarOrientation = sendAll || rotationChangedSince(lastSentTime);
+            // hasAvatarBoundingBox = sendAll || avatarBoundingBoxChangedSince(lastSentTime);
+            // hasAvatarScale = sendAll || avatarScaleChangedSince(lastSentTime);
+            // hasLookAtPosition = sendAll || lookAtPositionChangedSince(lastSentTime);
+            // hasAudioLoudness = sendAll || audioLoudnessChangedSince(lastSentTime);
+            // hasSensorToWorldMatrix = sendAll || sensorToWorldMatrixChangedSince(lastSentTime);
+            // hasAdditionalFlags = sendAll || additionalFlagsChangedSince(lastSentTime);
+            // hasParentInfo = sendAll || parentInfoChangedSince(lastSentTime);
+            // hasAvatarLocalPosition = hasParent() && (sendAll ||
+            //     tranlationChangedSince(lastSentTime) ||
+            //     parentInfoChangedSince(lastSentTime));
+            // hasHandControllers = _controllerLeftHandMatrixCache.isValid() || _controllerRightHandMatrixCache.isValid();
+            // hasFaceTrackerInfo = !dropFaceTracking && (getHasScriptedBlendshapes() || _headData->_hasInputDrivenBlendshapes)
+            //     && (sendAll || faceTrackerInfoChangedSince(lastSentTime));
+            // hasJointData = !sendMinimum;
+            // hasJointDefaultPoseFlags = hasJointData;
+
             globalPosition: this._globalPosition,
-            localOrientation: this.rotationChangedSince(lastSentTime) ? this.getOrientationOutbound() : undefined
+            localOrientation: sendAll || this.rotationChangedSince(lastSentTime) ? this.getOrientationOutbound() : undefined,
+            avatarScale: sendAll || this.#avatarScaleChangedSince(lastSentTime) ? this.getDomainLimitedScale() : undefined,
+            jointRotations: this.#_jointRotations,  // sendMinimum is implemented in PacketScribe.AvatarData.write().
+            jointTranslations: this.#_jointTranslations
         };
 
 
@@ -488,7 +670,7 @@ class AvatarData extends SpatiallyNestable {
         if (avatarPacket.getDataSize() === 0) {
             // Try excluding face tracking.
             avatarDataDetails.lastSentTime = this.#_lastToByteArray;
-            avatarDataDetails.dropFaceTracking = true;
+            // avatarDataDetails.dropFaceTracking = true;
             this.#_lastToByteArray = Date.now();
             avatarPacket = PacketScribe.AvatarData.write(avatarDataDetails);
         }
@@ -543,13 +725,90 @@ class AvatarData extends SpatiallyNestable {
         if (avatarData.localOrientation) {
             if (!Quat.equal(avatarData.localOrientation, this.getLocalOrientation())) {
 
-                // WEBRTC TODO: Address further C++ code - Joint data.
+                // WEBRTC TODO: Address further C++ code - _hasNewJointData.
 
                 this.setLocalOrientation(avatarData.localOrientation);
             }
 
             // WEBRTC TODO: Address further C++ code - avatar orientation update rate.
+        }
 
+        if (avatarData.avatarScale) {
+            if (!isNaN(avatarData.avatarScale)) {
+                this.setTargetScale(avatarData.avatarScale);
+
+                // WEBRTC TODO: Address further C++ code - avatar scale rate and update rate.
+            }
+        }
+
+        // WEBRTC TODO: Address further C++ code - further avatar properties.
+
+        if (avatarData.jointRotationsValid && avatarData.jointRotations) {
+            const jointRotationsValid = avatarData.jointRotationsValid;
+            const jointRotations = avatarData.jointRotations;
+            const numJoints = jointRotationsValid.length;
+            if (this.#_jointRotations.length !== numJoints) {
+                this.#resizeJointRotations(numJoints);
+            }
+            let j = 0;
+            for (let i = 0; i < numJoints; i++) {
+                if (jointRotationsValid[i]) {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    this.#_jointRotations[i] = jointRotations[j]!;
+                    j += 1;
+                }
+            }
+
+            // WEBRTC TODO: Address further C++ code - _hasNewJointData.
+            // WEBRTC TODO: Address further C++ code - joint update rate.
+        }
+
+        if (avatarData.jointRotationsUseDefault) {
+            const jointRotationsUseDefault = avatarData.jointRotationsUseDefault;
+            const numJoints = jointRotationsUseDefault.length;
+            if (this.#_jointRotations.length !== numJoints) {
+                this.#resizeJointRotations(numJoints);
+            }
+            for (let i = 0; i < numJoints; i++) {
+                if (jointRotationsUseDefault[i]) {
+                    this.#_jointRotations[i] = null;
+                }
+            }
+
+            // WEBRTC TODO: Address further C++ code - joint default pose update rate.
+        }
+
+        if (avatarData.jointTranslationsValid && avatarData.jointTranslations) {
+            const jointTranslationsValid = avatarData.jointTranslationsValid;
+            const jointTranslations = avatarData.jointTranslations;
+            const numJoints = jointTranslationsValid.length;
+            if (this.#_jointTranslations.length !== numJoints) {
+                this.#resizeJointTranslations(numJoints);
+            }
+            this.#resizeJointTranslations(numJoints);
+            let j = 0;
+            for (let i = 0; i < numJoints; i++) {
+                if (jointTranslationsValid[i]) {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    this.#_jointTranslations[i] = jointTranslations[j]!;
+                    j += 1;
+                }
+            }
+
+            // WEBRTC TODO: Address further C++ code - joint update rate.
+        }
+
+        if (avatarData.jointTranslationsUseDefault) {
+            const jointTranslationsUseDefault = avatarData.jointTranslationsUseDefault;
+            const numJoints = jointTranslationsUseDefault.length;
+            if (this.#_jointTranslations.length !== numJoints) {
+                this.#resizeJointTranslations(numJoints);
+            }
+            for (let i = 0; i < numJoints; i++) {
+                if (jointTranslationsUseDefault[i]) {
+                    this.#_jointTranslations[i] = null;
+                }
+            }
         }
 
         // WEBRTC TODO: Address further C++ code - further avatar properties.
@@ -570,70 +829,116 @@ class AvatarData extends SpatiallyNestable {
             this.setSkeletonModelURL(traitValue);
         } else {
             assert(traitType === AvatarTraits.SkeletonData);
-            if (this._clientTraitsHandler) {
-                this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonData);
-            }
+            // The trait is marked as updated in setSkeletonData().
             this.setSkeletonData(traitValue as SkeletonJoint[]);
         }
+    }
+
+
+    /*@devdoc
+     *  Gets whether the avatar is parented to something.
+     *  @returns {boolean} <code>true</code> if the avatar is parented to something, <code>false</code> if it isn't.
+     */
+    protected hasParent(): boolean {
+        // C++  bool hasParent()
+        return this.getParentID().value() !== Uuid.NULL;
+    }
+
+    /*@devdoc
+     *  Sets the minimum avatar height in the domain.
+     *  @param {number} domainMinimumHeight - The minimum avatar height in the domain.
+     */
+    protected setDomainMinimumHeight(domainMinimumHeight: number): void {
+        // c++  void setDomainMinimumHeight(float domainMinimumHeight)
+        this._domainMinimumHeight
+            = Math.max(AvatarConstants.MIN_AVATAR_HEIGHT, Math.min(domainMinimumHeight, AvatarConstants.MAX_AVATAR_HEIGHT));
+    }
+
+    /*@devdoc
+     *  Sets the maximum avatar height in the domain.
+     *  @param {number} domainMinimumHeight - The maximum avatar height in the domain.
+     */
+    protected setDomainMaximumHeight(domainMaximumHeight: number): void {
+        // C++  void setDomainMaximumHeight(float domainMaximumHeight)
+        this._domainMaximumHeight
+            = Math.max(AvatarConstants.MIN_AVATAR_HEIGHT, Math.min(domainMaximumHeight, AvatarConstants.MAX_AVATAR_HEIGHT));
+    }
+
+    /*@devdoc
+     *  Gets whether the avatar's eye height is able to be measured.
+     *  @returns {boolean} <code>false</code> in the <code>AvatarData</code> class.
+     */
+    protected canMeasureEyeHeight(): boolean {  // eslint-disable-line class-methods-use-this
+        // C++  virtual bool canMeasureEyeHeight() const
+        return false;
+    }
+
+    /*@devdoc
+     *  Gets the minimum avatar scale as set by the domain server.
+     *  @returns {number} The minimum avatar scale as set by the domain server.
+     */
+    protected getDomainMinScale(): number {
+        // C++  float AvatarData::getDomainMinScale() const
+        let unscaledHeight = this.getUnscaledHeight();
+        const EPSILON = 1.0e-4;
+        if (unscaledHeight <= EPSILON) {
+            unscaledHeight = AvatarConstants.DEFAULT_AVATAR_HEIGHT;
+        }
+        return this._domainMinimumHeight / unscaledHeight;
+    }
+
+    /*@devdoc
+     *  Gets the maximum avatar scale as set by the domain server.
+     *  @returns {number} The maximum avatar scale as set by the domain server.
+     */
+    protected getDomainMaxScale(): number {
+        // C++  float AvatarData::getDomainMaxScale() const
+        let unscaledHeight = this.getUnscaledHeight();
+        const EPSILON = 1.0e-4;
+        if (unscaledHeight <= EPSILON) {
+            unscaledHeight = AvatarConstants.DEFAULT_AVATAR_HEIGHT;
+        }
+        return this._domainMaximumHeight / unscaledHeight;
+    }
+
+    /*@devdoc
+     *  Gets the unscaled avatar height.
+     *  @returns {number} The unscaled avatar height.
+     */
+    protected getUnscaledHeight(): number {
+        // C++ float AvatarData::getUnscaledHeight() const
+        const eyeHeight = this.getUnscaledEyeHeight();
+        const ratio = eyeHeight / AvatarConstants.DEFAULT_AVATAR_HEIGHT;
+        return eyeHeight + ratio * AvatarConstants.DEFAULT_AVATAR_EYE_TO_TOP_OF_HEAD;
+    }
+
+    /*@devdoc
+     *  Gets the unscaled avatar eye height.
+     *  @returns {number} The unscaled avatar eye height.
+     */
+    protected getUnscaledEyeHeight(): number {  // eslint-disable-line class-methods-use-this
+        // C++  virtual float getUnscaledEyeHeight() const
+        return AvatarConstants.DEFAULT_AVATAR_EYE_HEIGHT;
     }
 
     /*@devdoc
      *  Gets the avatar's world orientation.
      *  @returns {quat} The avatar's world orientation.
      */
-    getOrientationOutbound(): quat {
+    // A method intended to be overridden by MyAvatar for polling orientation for network transmission.
+    protected getOrientationOutbound(): quat {
         // C++  glm::quat getOrientationOutbound()
         return this.getLocalOrientation();
     }
 
-    /*@devdoc
-     *  Sets the avatar's skeleton model URL.
-     *  @param {string|null} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
-     */
-    setSkeletonModelURL(skeletonModelURL: string | null): void {
-        // C++  void setSkeletonModelURL(const QUrl& skeletonModelURL)
 
-        if (skeletonModelURL === null || skeletonModelURL.length === 0) {
-            console.log("[avatars] setSkeletonModelURL() called with empty URL.");
-        }
-
-        // WEBRTC TODO: Set #_skeletonModelURL to the default avatar URL when skeletonModelURL is an empty URL.
-
-        if (skeletonModelURL === this.#_skeletonModelURL) {
-            return;
-        }
-
-        this.#_skeletonModelURL = skeletonModelURL;
-
-        if (this._clientTraitsHandler) {
-            this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonModelURL);
-        }
-
-        this.#_skeletonModelURLChanged.emit();
+    #getLastJointData(): void {
+        // C++  QVector<JointData> getLastSentJointData()
+        // Resize in place without returning as result.
+        this.#resizeLastSentJointData();
     }
 
-
-    // eslint-disable-next-line
-    // @ts-ignore
-    protected maybeUpdateSessionDisplayNameFromTransport(sessionDisplayName: string | null): void {  // eslint-disable-line
-        // C++  void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName)
-        // No-op.
-    }
-
-    protected hasParent(): boolean {
-        // C++  bool hasParent()
-        return this.getParentID().value() !== Uuid.NULL;
-    }
-
-    protected setSkeletonData(skeletonData: SkeletonJoint[]): void {
-        // C++  void AvatarData::setSkeletonData(const std::vector<AvatarSkeletonTrait::UnpackedJointData>& skeletonData)
-        this.#_avatarSkeletonData = skeletonData;
-        this.#_skeletonJointsChanged.emit();
-    }
-
-
-    // eslint-disable-next-line class-methods-use-this
-    #lazyInitHeadData(): void {
+    #lazyInitHeadData(): void {  // eslint-disable-line class-methods-use-this
         // C++  void AvatarData::lazyInitHeadData()
         // Lazily allocate memory for HeadData in case we're not an Avatar instance.
 
@@ -641,13 +946,100 @@ class AvatarData extends SpatiallyNestable {
 
     }
 
-    // eslint-disable-next-line
-    // @ts-ignore
     #doneEncoding(cullSmallChanges: boolean): void {  // eslint-disable-line
         // C++  void doneEncoding(bool cullSmallChanges)
+        // The server has finished sending this version of the joint-data to other nodes. Update #_lastSentJointRotations and
+        // #_lastSentJointTranslations.
+        // NOTE: This is never used in a "distanceAdjust" mode, so it's OK that it doesn't use a variable minimum
+        // rotation / translation.
 
-        // WEBRTC TODO: Address further C++ code - Joint data.
+        const AVATAR_MIN_ROTATION_DOT = 0.9999999;
+        const AVATAR_MIN_TRANSLATION = 0.0001;
 
+        this.#resizeLastSentJointData();
+
+        for (let i = 0, length = this.#_jointRotations.length; i < length; i++) {
+            // The Web SDK uses null values for default rotations and translations so the logic is different but achieves the
+            // same end.
+
+            const jointRotation = this.#_jointRotations[i];
+            const lastSentJointRotation = this.#_lastSentJointRotations[i];
+            assert(jointRotation !== undefined && lastSentJointRotation !== undefined);
+            if (jointRotation === null || lastSentJointRotation === null) {
+                this.#_lastSentJointRotations[i] = jointRotation;
+            } else if (!Quat.equal(lastSentJointRotation, jointRotation)) {
+                if (!cullSmallChanges
+                    || Math.abs(Quat.dot(jointRotation, lastSentJointRotation)) <= AVATAR_MIN_ROTATION_DOT) {
+                    this.#_lastSentJointRotations[i] = jointRotation;
+                }
+            }
+
+            const jointTranslation = this.#_jointTranslations[i];
+            const lastSentJointTranslation = this.#_lastSentJointTranslations[i];
+            assert(jointTranslation !== undefined && lastSentJointTranslation !== undefined);
+            if (jointTranslation === null || lastSentJointTranslation === null) {
+                this.#_lastSentJointTranslations[i] = jointTranslation;
+            } else if (!Vec3.equal(lastSentJointTranslation, jointTranslation)) {
+                if (!cullSmallChanges
+                    || Vec3.distance(jointTranslation, lastSentJointTranslation) > AVATAR_MIN_TRANSLATION) {
+                    this.#_lastSentJointTranslations[i] = jointTranslation;
+                }
+            }
+
+        }
+    }
+
+    #resizeJointRotations(numJoints: number): void {
+        if (this.#_jointRotations.length < numJoints) {
+            for (let i = this.#_jointRotations.length; i < numJoints; i++) {
+                this.#_jointRotations.push(null);
+            }
+        } else if (this.#_jointRotations.length > numJoints) {
+            for (let i = this.#_jointRotations.length; i > numJoints; i--) {
+                this.#_jointRotations.pop();
+            }
+        }
+    }
+
+    #resizeJointTranslations(numJoints: number): void {
+        if (this.#_jointTranslations.length < numJoints) {
+            for (let i = this.#_jointTranslations.length; i < numJoints; i++) {
+                this.#_jointTranslations.push(null);
+            }
+        } else if (this.#_jointTranslations.length > numJoints) {
+            for (let i = this.#_jointTranslations.length; i > numJoints; i--) {
+                this.#_jointTranslations.pop();
+            }
+        }
+    }
+
+    #resizeLastSentJointData(): void {
+        // C++  _lastSentJointData.resize(_jointData.size())
+        assert(this.#_lastSentJointRotations.length === this.#_lastSentJointTranslations.length);
+        if (this.#_lastSentJointRotations.length < this.#_jointRotations.length) {
+            for (let i = this.#_lastSentJointRotations.length, length = this.#_jointRotations.length; i < length; i++) {
+                this.#_lastSentJointRotations.push(null);
+                this.#_lastSentJointTranslations.push(null);
+            }
+        } else if (this.#_lastSentJointRotations.length > this.#_jointRotations.length) {
+            for (let i = this.#_jointRotations.length, length = this.#_lastSentJointRotations.length; i > length; i--) {
+                this.#_lastSentJointRotations.pop();
+                this.#_lastSentJointTranslations.pop();
+            }
+        }
+    }
+
+    #avatarScaleChangedSince(time: number): boolean {
+        // C++  bool avatarScaleChangedSince(quint64 time)
+        return this._avatarScaleChanged >= time;
+    }
+
+    #resetJoints(): void {
+        // C++  N/A
+        this.#_jointRotations = new Array(this.#_avatarSkeletonData.length) as (quat | null)[];
+        this.#_jointRotations.fill(null);
+        this.#_jointTranslations = new Array(this.#_avatarSkeletonData.length) as (vec3 | null)[];
+        this.#_jointTranslations.fill(null);
     }
 
 }

@@ -3,6 +3,7 @@
 //
 //  Created by Julien Merzoug on 8 Apr 2022.
 //  Copyright 2022 Vircadia contributors.
+//  Copyright 2022 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -156,7 +157,8 @@ class ClientTraitsHandler {
             // WEBRTC TODO: Send other trait types.
             const packetList = PacketScribe.SetAvatarTraits.write({
                 currentTraitVersion: this.#_currentTraitVersion,
-                skeletonModelURL: this.#_owningAvatar.skeletonModelURL !== null ? this.#_owningAvatar.skeletonModelURL : "",
+                skeletonModelURL: this.#_owningAvatar.getSkeletonModelURL() ?? "",
+                skeletonData: this.#_owningAvatar.getSkeletonData() ?? [],
                 traitStatuses: traitStatusCopy,
                 initialSend
             });
