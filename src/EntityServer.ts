@@ -91,13 +91,11 @@ class EntityServer extends AssignmentClient {
     #_nodeList: NodeList;
 
     #_octreeQuery = new OctreeQuery(true);
-    // eslint-disable-next-line
-    // @ts-ignore
     #_octreeProcessor;
     #_maxOctreePPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
     #_queryExpiry = 0;
     #_physicsEnabled = true;
-    #_addedEntity = new SignalEmitter();
+    #_entityData = new SignalEmitter();
 
 
     constructor(contextID: number) {
@@ -109,8 +107,8 @@ class EntityServer extends AssignmentClient {
 
         ContextManager.set(contextID, OctreePacketProcessor, contextID);
         this.#_octreeProcessor = ContextManager.get(contextID, OctreePacketProcessor) as OctreePacketProcessor;
-        this.#_octreeProcessor.addedEntity.connect(() => {
-            this.#_addedEntity.emit();
+        this.#_octreeProcessor.entityData.connect((data) => {
+            this.#_entityData.emit(data);
         });
 
         // C++  Application::Application()
@@ -129,8 +127,8 @@ class EntityServer extends AssignmentClient {
      *  Triggered when an entity data packet is received.
      *  @callback EntityServer~AddedEntityCallback
      */
-    get addedEntity(): Signal {
-        return this.#_addedEntity.signal();
+    get entityData(): Signal {
+        return this.#_entityData.signal();
     }
 
 

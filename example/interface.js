@@ -479,6 +479,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
     (function () {
         entityServer = new EntityServer(contextID);
 
+        const POS_DECIMAL_PLACES = 3;
+
+        // Status
+
         const statusText = document.getElementById("entityServerStatus");
 
         function onStateChanged(state) {
@@ -486,6 +490,58 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         }
         onStateChanged(entityServer.state);
         entityServer.onStateChanged = onStateChanged;
+
+
+        // Entity List
+
+        const entitiesCount = document.getElementById("entitiesCount");
+        const entityListBody = document.querySelector("#entityList > tbody");
+
+        const entityIDsList = [];
+
+        function onEntityData(data) {
+
+            data.forEach((rcv) => {
+                if (entityIDsList.some((id) => {
+                    return rcv.entityItemID.stringify() === id;
+                })) {
+                    const cols = document.getElementById(rcv.entityItemID.stringify()).children;
+                    /* eslint-disable @typescript-eslint/no-magic-numbers */
+                    cols.item(2).innerHTML = rcv.position.x.toFixed(POS_DECIMAL_PLACES);
+                    cols.item(3).innerHTML = rcv.position.y.toFixed(POS_DECIMAL_PLACES);
+                    cols.item(4).innerHTML = rcv.position.z.toFixed(POS_DECIMAL_PLACES);
+                    /* eslint-enable @typescript-eslint/no-magic-numbers */
+                } else {
+                    entityIDsList.push(rcv.entityItemID.stringify());
+
+                    const tr = document.createElement("tr");
+                    tr.id = rcv.entityItemID.stringify();
+                    let td = document.createElement("td");
+                    td.innerHTML = rcv.entityItemID.stringify();
+                    tr.appendChild(td);
+                    td = document.createElement("td");
+                    td.innerHTML = rcv.entityType;
+                    tr.appendChild(td);
+                    const position = rcv.position;
+                    td = document.createElement("td");
+                    td.className = "number";
+                    td.innerHTML = position.x.toFixed(POS_DECIMAL_PLACES);
+                    tr.appendChild(td);
+                    td = document.createElement("td");
+                    td.className = "number";
+                    td.innerHTML = position.y.toFixed(POS_DECIMAL_PLACES);
+                    tr.appendChild(td);
+                    td = document.createElement("td");
+                    td.className = "number";
+                    td.innerHTML = position.z.toFixed(POS_DECIMAL_PLACES);
+                    tr.appendChild(td);
+                    entityListBody.appendChild(tr);
+                }
+            });
+
+            entitiesCount.value = entityIDsList.length;
+        }
+        entityServer.entityData.connect(onEntityData);
 
         // Game Loop
 

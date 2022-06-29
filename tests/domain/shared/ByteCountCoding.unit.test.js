@@ -17,7 +17,6 @@ describe("ByteCountCoding - unit tests", () => {
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
 
-    // TODO: better test name
     test("Can decode an encoded byte", () => {
 
         // 2 bytes buffer.

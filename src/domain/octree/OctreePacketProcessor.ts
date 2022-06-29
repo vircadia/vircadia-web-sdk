@@ -43,7 +43,7 @@ class OctreePacketProcessor {
     #_nodeList;
     #_packetReceiver;
 
-    #_addedEntity = new SignalEmitter();
+    #_entityData = new SignalEmitter();
 
     constructor(contextID: number) {
 
@@ -72,8 +72,8 @@ class OctreePacketProcessor {
      *  @function OctreePacketProcessor.addedEntity
      *  @returns {Signal}
      */
-    get addedEntity(): Signal {
-        return this.#_addedEntity.signal();
+    get entityData(): Signal {
+        return this.#_entityData.signal();
     }
 
     // Listener
@@ -114,8 +114,7 @@ class OctreePacketProcessor {
         switch (packetType) {
             case PacketType.EntityData: {
                 const entityDataDetails = PacketScribe.EntityData.read(messageLocal.getMessage());
-                // TODO: Emit entity data
-                // this.#_addedEntity.emit(entityDataDetails);
+                this.#_entityData.emit(entityDataDetails);
                 break;
             }
             case PacketType.EntityErase:
