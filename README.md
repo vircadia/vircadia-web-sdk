@@ -65,18 +65,18 @@ npm run build
 ```
 Does a development compile and packages the SDK into the `dist` directory.
 
-### Compile and minify for production
-```
-npm run build-prod
-```
-Does a clean production compile and packages a releasable version of the SDK into the `dist` directory.
-
 ### Hot-recompile for development
 ```
 npm run watch
 ```
 Does a development compile and enables webpack to watch the sources and recomile when source files change.
 This is often useful when testing SDK development using the `example` tool.
+
+### Compile and minify for production
+```
+npm run build-prod
+```
+Does a clean production compile and packages a releasable version of the SDK into the `dist` directory.
 
 ### Hot-recompile for production
 ```
@@ -106,7 +106,6 @@ npm run lint-path <path>
 Unit tests can be run without any external dependencies but integration tests require a domain server to be running on
 `localhost` or other location specified in `./tests/test.config.json`. The location and other values of the config JSON can be
 overridden with environment variables, using the same property names, but prefixed with "VIRCADIA_".
-
 
 All tests:
 ```
@@ -146,6 +145,12 @@ npm run devdoc
 
 
 ### Publish to NPM
+
+Build for release:
+```
+npm run clean
+npm run build-prod
+```
 
 Package for release:
 ```
