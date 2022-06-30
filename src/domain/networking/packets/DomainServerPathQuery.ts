@@ -29,7 +29,8 @@ const DomainServerPathQuery = new class {
 
 
     /*@devdoc
-     *  Writes a {@link PacketType(1)|DomainServerPathQuery} packet, ready for sending.
+     *  Writes a {@link PacketType(1)|DomainServerPathQuery} packet, ready for sending. If the path is too long to fit into the
+     *  packet then no payload data is written.
      *  @function PacketScribe.DomainServerPathQuery&period;write
      *  @param {PacketScribe.DomainServerPathQueryDetails} info - The information needed for writing the packet.
      *  @returns {NLPacket} The packet, ready for sending.
@@ -42,14 +43,20 @@ const DomainServerPathQuery = new class {
         const data = messageData.data;
         let dataPosition = messageData.dataPosition;
 
-        data.setUint16(dataPosition, info.path.length, UDT.LITTLE_ENDIAN);
-        dataPosition += 2;
-
         const textEncoder = new TextEncoder();
         const pathQueryUTF8 = textEncoder.encode(info.path);
-        for (let i = 0; i < pathQueryUTF8.length; i += 1) {
-            data.setUint8(dataPosition, pathQueryUTF8.at(i) ?? 0);
-            dataPosition += 1;
+
+        // Only write data if there is room.
+        if (2 + pathQueryUTF8.byteLength < packet.bytesAvailableForWrite()) {
+
+            data.setUint16(dataPosition, info.path.length, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+
+            for (let i = 0; i < pathQueryUTF8.length; i += 1) {
+                data.setUint8(dataPosition, pathQueryUTF8.at(i) ?? 0);
+                dataPosition += 1;
+            }
+
         }
 
         messageData.dataPosition = dataPosition;

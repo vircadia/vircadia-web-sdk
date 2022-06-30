@@ -34,5 +34,20 @@ describe("DomainServerPathQuery - unit tests", () => {
         expect(packetSize).toBe(packet.getMessageData().packetSize);
     });
 
+    test("No data is written if it won't fit in the packet", () => {
+        let packet = DomainServerPathQuery.write({
+            path: "/somepath"
+        });
+        expect(packet.getDataSize()).toBe(17);  // 6 bytes header, 2 bytes path length, path.
+
+        const longPath = new Array(2000)
+            .fill("A")
+            .join("");
+        packet = DomainServerPathQuery.write({
+            path: longPath
+        });
+        expect(packet.getDataSize()).toBe(6);
+    });
+
     /* eslint-enable @typescript-eslint/no-magic-numbers */
 });
