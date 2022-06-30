@@ -74,6 +74,16 @@ describe("DomainHandler - integration tests", () => {
         expect(domainHandler.getSockAddr().getPort()).toBe(port);
     });
 
+    test("Can set, get, and clear domain server pending path", () => {
+        expect(domainHandler.getPendingPath()).toBe("");
+        domainHandler.setPendingPath("/somepath");
+        expect(domainHandler.getPendingPath()).toBe("/somepath");
+        domainHandler.setPendingPath("/");
+        expect(domainHandler.getPendingPath()).toBe("/");
+        domainHandler.clearPendingPath();
+        expect(domainHandler.getPendingPath()).toBe("");
+    });
+
     test("Setting connected and disconnected emits signals", (done) => {
         expect.assertions(4);
         expect(domainHandler.isConnected()).toBe(false);

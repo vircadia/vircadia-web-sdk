@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 5 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -101,6 +102,8 @@ class DomainHandler {
     #_connectedToDomain = new SignalEmitter();
     #_disconnectedFromDomain = new SignalEmitter();
     #_domainConnectionRefused = new SignalEmitter();
+
+    #_pendingPath = "";
 
     // Context objects.
     #_nodeList;
@@ -359,6 +362,35 @@ class DomainHandler {
         // WEBRTC TODO: Address further C++ code.
         this.#_domainConnectionRefused.emit(reasonMessage, reasonCode, extraInfo);
     };
+
+
+    /*@devdoc
+     *  Sets the domain path to query the domain server about once it is connected, to retrieve the viewpoint (position and
+     *  orientation) set for the path.
+     *  @param {string} pendingPath - The domain path to query the domain server on.
+     */
+    setPendingPath(pendingPath: string): void {
+        // C++  void setPendingPath(const QString& pendingPath)
+        this.#_pendingPath = pendingPath;
+    }
+
+    /*@devdoc
+     *  Gets the domain path to query the domain server about once it is connected, to retrieve the viewpoint (position and
+     *  orientation) set for the path.
+     *  @returns {string} The domain path to query the domain server on.
+     */
+    getPendingPath(): string {
+        //  const QString& getPendingPath()
+        return this.#_pendingPath;
+    }
+
+    /*@devdoc
+     *  Clears the domain path to query the domain server about.
+     */
+    clearPendingPath(): void {
+        // C++  void clearPendingPath()
+        this.#_pendingPath = "";
+    }
 
 
     /*@devdoc
