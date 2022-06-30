@@ -91,11 +91,7 @@ Sent by `EntityServer.#sendNackPackets()` which is called in `EntityServer.updat
 
 This is handled by `OctreePacketProcessor.handleOctreePacket()`. The packet is not queued for later processing; instead, it is immediately processed by `OctreePacketProcessor.processPacket()`.
 
-The user application is notified of the new or changed entity via the `EntityServer.entityData` signal. This signal (unlike the scripting API's `Entities.addingEntity` signal) includes all the entity data (not just the entity ID) because the user application will want all the data in order to render it.
-
-_TO DO: Instead of an `EntityServer.entityData` signal should there be `entityAdded` and `entityUpdated` signals?_
-
-_TO DO: For entity edits, does the `EntityData` packet contain partial entity data, in which case the `EntityServer` may need to keep its own copy of all the entities in order to provide usable information in the API?_
+The user application is notified of the new or changed entity via the `EntityServer.entityData` signal. This signal (unlike the scripting API's `Entities.addingEntity` signal) includes all the entity data (not just the entity ID) because the user application will want all the data in order to render it. When an entity is edited, all data concerning this entity is passed to the user application.
 
 
 ##### `EntityQueryInitialResultsComplete`
