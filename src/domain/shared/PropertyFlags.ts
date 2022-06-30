@@ -29,7 +29,7 @@ class PropertyFlags {
 
     /*@devdoc
      *  Gets whether the property flag is present in the flags sent by the server.
-     *  @param {number} flag - The number of the flag.
+     *  @param {number} flag - The bit position of the flag.
      *  @returns {boolean} <code>true</code> if the property flag is present, <code>false</code> if it isn't.
      */
     getHasProperty(flag: number): boolean {
@@ -40,7 +40,8 @@ class PropertyFlags {
         const bytePos = Math.floor(flag / this.#BITS_IN_BYTE);
 
         if (bytePos > this.#_maxFlag) {
-            return this.#_trailingFlipped; // usually false
+            // Usually false.
+            return this.#_trailingFlipped;
         }
 
         const bitPos = flag - bytePos * this.#BITS_IN_BYTE;
@@ -77,7 +78,7 @@ class PropertyFlags {
                 newFlags.set(this.#_flags);
                 this.#_flags = newFlags;
             } else {
-                // bail early, we're setting a flag outside of our current _maxFlag to false, which is already the default
+                // Bail early, we're setting a flag outside of our current _maxFlag to false, which is already the default.
                 return;
             }
         }
@@ -134,9 +135,10 @@ class PropertyFlags {
 
         let bytesConsumed = 0;
         const bitCount = this.#BITS_IN_BYTE * size;
-
-        let encodedByteCount = 1; // there is at least 1 byte (after the leadBits)
-        let leadBits = 1; // there is always at least 1 lead bit
+        // There is at least 1 byte (after the leadBits).
+        let encodedByteCount = 1;
+        // There is always at least 1 lead bit.
+        let leadBits = 1;
         let inLeadBits = true;
         let bitAt = 0;
         let expectedBitCount = 0;
@@ -145,21 +147,23 @@ class PropertyFlags {
         for (let byte = 0; byte < size; byte++) {
             const originalByte = data.getUint8(byte);
             bytesConsumed += 1;
-            let maskBit = 128; // LEFT MOST BIT set
+            // Left Most Bit set.
+            let maskBit = 128;
             for (let bit = 0; bit < this.#BITS_IN_BYTE; bit++) {
                 const bitIsSet: boolean = (originalByte & maskBit) !== 0;
 
-                // Processing of the lead bits
+                // Processing of the lead bits.
                 if (inLeadBits) {
                     if (bitIsSet) {
                         encodedByteCount += 1;
                         leadBits += 1;
                     } else {
-                        inLeadBits = false; // once we hit our first 0, we know we're out of the lead bits
+                        // Once we hit our first 0, we know we're out of the lead bits.
+                        inLeadBits = false;
                         expectedBitCount = encodedByteCount * this.#BITS_IN_BYTE - leadBits;
                         lastValueBit = expectedBitCount + bitAt;
 
-                        // check to see if the remainder of our buffer is sufficient
+                        // Check to see if the remainder of our buffer is sufficient.
                         if (expectedBitCount > bitCount - leadBits) {
                             break;
                         }
@@ -185,7 +189,6 @@ class PropertyFlags {
         // WEBRTC TODO: Address further C++ code.
 
         return bytesConsumed;
-
     }
 }
 

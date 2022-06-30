@@ -27,7 +27,6 @@ describe("EntityData - unit tests", () => {
         propertyFlags.setHasProperty(0, false);
         expect(propertyFlags.getHasProperty(0)).toBe(false);
 
-
         // Set 2nd bit.
         propertyFlags.setHasProperty(1, true);
         expect(propertyFlags.getHasProperty(1)).toBe(true);
@@ -35,7 +34,6 @@ describe("EntityData - unit tests", () => {
         // Clear 2nd bit.
         propertyFlags.setHasProperty(1, false);
         expect(propertyFlags.getHasProperty(1)).toBe(false);
-
 
         // Set 1st, 2nd and 9th bits.
         propertyFlags.setHasProperty(0, true);

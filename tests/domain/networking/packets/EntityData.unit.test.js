@@ -17,7 +17,6 @@ describe("EntityData - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-
     test("Can read one Model Entity in a packet", () => {
         // eslint-disable-next-line max-len
         const bufferHex = "c030005f878ad79fe105001a010000023378da636030666064c85cb6c2caff93d3df6969e6756d5c5ab7041666755d9fff909501462b28fcff67ffffec7f30f86121ffff9f200316f0ff3f324f6d8783bd898afbc18dab2d1cce9e39630bc3ffebc110a4d61e86611609303c58b88a79238b4bd94a758d152c2faf784de8d1b27fdbe671f08c82b1c39a18433b46744b198122288248e663156bb047606450e5c2403e80faa4613f833c5c6c9a337e3da0c0c423c7c090c090515252506ca5af9f9c92a76ba8579659949c989299a8979c9fab5f5aac9baa6ba8ef9458959858a4ef585c9c5a52acef9b9f929a53acef969f9fa29f94595492919258199f9c989daa9f9e5392862aa4979e93843d345818aab96ab92081fac11112ca6032e0b03b03002d4487fd";
@@ -47,113 +46,87 @@ describe("EntityData - unit tests", () => {
         expect(info[0].privateUserData).toBeUndefined();
         expect(info[0].href).toBeUndefined();
         expect(info[0].description).toBeUndefined();
-
         expect(info[0].position.x).toBeCloseTo(0.752809, 3);
         expect(info[0].position.y).toBeCloseTo(-12.4463, 3);
         expect(info[0].position.z).toBeCloseTo(2.885479, 3);
-
         expect(info[0].dimensions.x).toBeCloseTo(0.100000, 3);
         expect(info[0].dimensions.y).toBeCloseTo(0.100000, 3);
         expect(info[0].dimensions.z).toBeCloseTo(0.100000, 3);
-
         expect(info[0].rotation.x).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].rotation.y).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].rotation.z).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].rotation.w).toBeCloseTo(1, 2);
-
         expect(info[0].registrationPoint.x).toBeCloseTo(0.5, 3);
         expect(info[0].registrationPoint.y).toBeCloseTo(0.5, 3);
         expect(info[0].registrationPoint.z).toBeCloseTo(0.5, 3);
-
         expect(info[0].created).toBe(1655451515775649n);
         expect(info[0].lastEditedBy instanceof Uuid).toBe(true);
         expect(info[0].lastEditedBy.stringify()).toBe("e0a1aa03-b104-4476-a927-28a804e9d44a");
-
         expect(info[0].queryAACube.corner.x).toBeCloseTo(0.6662073, 3);
         expect(info[0].queryAACube.corner.y).toBeCloseTo(-12.5329, 3);
         expect(info[0].queryAACube.corner.z).toBeCloseTo(2.7988767, 3);
         expect(info[0].queryAACube.scale).toBeCloseTo(0.173205, 3);
-
         expect(info[0].canCastShadow).toBe(true);
         expect(info[0].renderLayer).toBe(0);
         expect(info[0].primitiveMode).toBe(0);
         expect(info[0].ignorePickIntersection).toBe(false);
-
         expect(info[0].renderWithZones).toBeUndefined();
         expect(info[0].billboardMode).toBe(0);
-
         expect(info[0].grabbable).toBe(false);
         expect(info[0].grabKinematic).toBe(true);
         expect(info[0].grabFollowsController).toBe(true);
         expect(info[0].triggerable).toBe(false);
         expect(info[0].grabEquippable).toBe(false);
         expect(info[0].delegateToParent).toBe(true);
-
         expect(info[0].equippableLefPositionOffset.x).toBeCloseTo(0, 2);
         expect(info[0].equippableLefPositionOffset.y).toBeCloseTo(0, 2);
         expect(info[0].equippableLefPositionOffset.z).toBeCloseTo(0, 2);
-
         expect(info[0].equippableLeftRotationOffset.x).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].equippableLeftRotationOffset.y).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].equippableLeftRotationOffset.z).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].equippableLeftRotationOffset.w).toBeCloseTo(1, 2);
-
         expect(info[0].equippableRightPositionOffset.x).toBeCloseTo(0, 2);
         expect(info[0].equippableRightPositionOffset.y).toBeCloseTo(0, 2);
         expect(info[0].equippableRightPositionOffset.z).toBeCloseTo(0, 2);
-
         expect(info[0].equippableRightRotationOffset.x).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].equippableRightRotationOffset.y).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].equippableRightRotationOffset.z).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].equippableRightRotationOffset.w).toBeCloseTo(1, 2);
-
         expect(info[0].equippableIndicatorUrl).toBeUndefined();
-
         expect(info[0].equippableIndicatorScale.x).toBeCloseTo(1, 2);
         expect(info[0].equippableIndicatorScale.y).toBeCloseTo(1, 2);
         expect(info[0].equippableIndicatorScale.z).toBeCloseTo(1, 2);
-
         expect(info[0].equippableIndicatorOffset.x).toBeCloseTo(0, 2);
         expect(info[0].equippableIndicatorOffset.y).toBeCloseTo(0, 2);
         expect(info[0].equippableIndicatorOffset.z).toBeCloseTo(0, 2);
-
         expect(info[0].density).toBeCloseTo(1000, 2);
-
         expect(info[0].velocity.x).toBeCloseTo(0, 2);
         expect(info[0].velocity.y).toBeCloseTo(0, 2);
         expect(info[0].velocity.z).toBeCloseTo(0, 2);
-
         expect(info[0].angularVelocity.x).toBeCloseTo(0, 2);
         expect(info[0].angularVelocity.y).toBeCloseTo(0, 2);
         expect(info[0].angularVelocity.z).toBeCloseTo(0, 2);
-
         expect(info[0].gravity.x).toBeCloseTo(0, 2);
         expect(info[0].gravity.y).toBeCloseTo(0, 2);
         expect(info[0].gravity.z).toBeCloseTo(0, 2);
-
         expect(info[0].acceleration.x).toBeCloseTo(0, 2);
         expect(info[0].acceleration.y).toBeCloseTo(0, 2);
         expect(info[0].acceleration.z).toBeCloseTo(0, 2);
-
         expect(info[0].damping).toBeCloseTo(0, 2);
         expect(info[0].angularDampling).toBeCloseTo(0, 2);
         expect(info[0].restitution).toBeCloseTo(0.5, 3);
         expect(info[0].friction).toBeCloseTo(0.5, 3);
         expect(info[0].lifetime).toBeCloseTo(-1, 2);
-
         expect(info[0].collisionless).toBe(false);
         expect(info[0].collisionMask).toBe(31);
         expect(info[0].dynamic).toBe(false);
         expect(info[0].collisionSoundUrl).toBeUndefined();
-
         expect(info[0].actionData).toBeUndefined();
-
         expect(info[0].cloneable).toBe(false);
         expect(info[0].cloneLifetime).toBeCloseTo(300, 2);
         expect(info[0].cloneLimit).toBeCloseTo(0, 2);
         expect(info[0].cloneDynamic).toBe(false);
         expect(info[0].cloneAvatarIdentity).toBe(false);
-
         expect(info[0].cloneOriginId).toBeUndefined();
         expect(info[0].script).toBeUndefined();
         expect(info[0].scriptTimestamp).toBe(0n);
@@ -163,56 +136,41 @@ describe("EntityData - unit tests", () => {
         expect(info[0].itemCategories).toBeUndefined();
         expect(info[0].itemArtist).toBeUndefined();
         expect(info[0].itemLicense).toBeUndefined();
-
         expect(info[0].limitedRun).toBe(4294967295);
-
         expect(info[0].marketplaceID).toBeUndefined();
-
         expect(info[0].editionNumber).toBe(0);
         expect(info[0].entityInstanceNumber).toBe(0);
         expect(info[0].certificateID).toBeUndefined();
         expect(info[0].certificateType).toBeUndefined();
         expect(info[0].staticCertificateVersion).toBe(0);
-
         expect(info[0].shapeType).toBe(0);
         expect(info[0].compoundShapeUrl).toBeUndefined();
-
         expect(info[0].color.x).toBe(255);
         expect(info[0].color.y).toBe(255);
         expect(info[0].color.z).toBe(255);
-
         expect(info[0].textures).toBeUndefined();
-
         expect(info[0].modelUrl).toBe(
             "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
         );
-
         expect(info[0].modelScale.x).toBeCloseTo(1, 2);
         expect(info[0].modelScale.y).toBeCloseTo(1, 2);
         expect(info[0].modelScale.z).toBeCloseTo(1, 2);
-
         expect(info[0].jointRotationsSet).toBeUndefined();
         expect(info[0].jointRotations).toBeUndefined();
         expect(info[0].jointTranslationsSet).toBeUndefined();
         expect(info[0].jointTranslations).toBeUndefined();
-
         expect(info[0].relayParentJoints).toBe(false);
         expect(info[0].groupCulled).toBe(false);
-
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
-
         expect(info[0].useOriginalPivot).toBe(true);
         expect(info[0].animationUrl).toBeUndefined();
         expect(info[0].animationAllowTranslation).toBe(false);
         expect(info[0].animationFPS).toBeCloseTo(30, 2);
         expect(info[0].animationFrameIndex).toBeCloseTo(0, 2);
-
         expect(info[0].animationPlaying).toBe(false);
         expect(info[0].animationLoop).toBe(true);
-
         expect(info[0].animationFirstFrame).toBeCloseTo(0, 2);
         expect(info[0].animationLastFrame).toBeCloseTo(100000, 2);
-
         expect(info[0].animationHold).toBe(false);
     });
 

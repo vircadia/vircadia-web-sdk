@@ -16,7 +16,6 @@ describe("ByteCountCoding - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-
     test("Can decode an encoded byte", () => {
 
         // 2 bytes buffer.
@@ -30,7 +29,6 @@ describe("ByteCountCoding - unit tests", () => {
 
         expect(bytesConsumed).toBe(1);
         expect(codec.data).toBe(4);
-
     });
 
 });

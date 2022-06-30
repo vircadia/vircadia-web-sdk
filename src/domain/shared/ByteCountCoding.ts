@@ -61,8 +61,10 @@ class ByteCountCoded {
         let bytesConsumed = 0;
         const bitCount = this.#BITS_IN_BYTE * encodedSize;
 
-        let encodedByteCount = 1; // there is at least 1 byte (after the leadBits)
-        let leadBits = 1; // there is always at least 1 lead bit
+        // There is at least 1 byte (after the leadBits).
+        let encodedByteCount = 1;
+        // There is always at least 1 lead bit.
+        let leadBits = 1;
         let inLeadBits = true;
         let bitAt = 0;
         let expectedBitCount = 0;
@@ -72,21 +74,23 @@ class ByteCountCoded {
         for (let byte = 0; byte < encodedSize; byte++) {
             const originalByte = encodedBuffer.getUint8(byte);
             bytesConsumed += 1;
-            let maskBit = 128; // LEFT MOST BIT set
+            // Left Most Bit set.
+            let maskBit = 128;
             for (let bit = 0; bit < this.#BITS_IN_BYTE; bit++) {
                 const bitIsSet: boolean = (originalByte & maskBit) !== 0;
 
-                // Processing of the lead bits
+                // Processing of the lead bits.
                 if (inLeadBits) {
                     if (bitIsSet) {
                         encodedByteCount += 1;
                         leadBits += 1;
                     } else {
-                        inLeadBits = false; // once we hit our first 0, we know we're out of the lead bits
+                        // Once we hit our first 0, we know we're out of the lead bits.
+                        inLeadBits = false;
                         expectedBitCount = encodedByteCount * this.#BITS_IN_BYTE - leadBits;
                         lastValueBit = expectedBitCount + bitAt;
 
-                        // check to see if the remainder of our buffer is sufficient
+                        // Check to see if the remainder of our buffer is sufficient.
                         if (expectedBitCount > bitCount - leadBits) {
                             break;
                         }

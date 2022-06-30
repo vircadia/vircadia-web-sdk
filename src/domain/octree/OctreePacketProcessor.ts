@@ -99,7 +99,6 @@ class OctreePacketProcessor {
             if (piggybackBytes > 0) {
                 // eslint-disable-next-line @typescript-eslint/no-magic-numbers
                 const view = new DataView(
-                    // messageLocal.getMessage().buffer.slice(messageLocal.getMessage().byteOffset + statsMessageLength)
                     messageLocal.getMessage().buffer.slice(messageLocal.getMessage().byteOffset + statsMessageLength)
                 );
                 const packet = NLPacket.fromReceivedPacket(view, piggybackBytes, sendingNode.getPublicSocket());
