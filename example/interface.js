@@ -501,28 +501,28 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         function onEntityData(data) {
 
-            data.forEach((rcv) => {
+            data.forEach((e) => {
                 if (entityIDsList.some((id) => {
-                    return rcv.entityItemID.stringify() === id;
+                    return e.entityItemID.stringify() === id;
                 })) {
-                    const cols = document.getElementById(rcv.entityItemID.stringify()).children;
+                    const cols = document.getElementById(e.entityItemID.stringify()).children;
                     /* eslint-disable @typescript-eslint/no-magic-numbers */
-                    cols.item(2).innerHTML = rcv.position.x.toFixed(POS_DECIMAL_PLACES);
-                    cols.item(3).innerHTML = rcv.position.y.toFixed(POS_DECIMAL_PLACES);
-                    cols.item(4).innerHTML = rcv.position.z.toFixed(POS_DECIMAL_PLACES);
+                    cols.item(2).innerHTML = e.position.x.toFixed(POS_DECIMAL_PLACES);
+                    cols.item(3).innerHTML = e.position.y.toFixed(POS_DECIMAL_PLACES);
+                    cols.item(4).innerHTML = e.position.z.toFixed(POS_DECIMAL_PLACES);
                     /* eslint-enable @typescript-eslint/no-magic-numbers */
                 } else {
-                    entityIDsList.push(rcv.entityItemID.stringify());
+                    entityIDsList.push(e.entityItemID.stringify());
 
                     const tr = document.createElement("tr");
-                    tr.id = rcv.entityItemID.stringify();
+                    tr.id = e.entityItemID.stringify();
                     let td = document.createElement("td");
-                    td.innerHTML = rcv.entityItemID.stringify();
+                    td.innerHTML = e.entityItemID.stringify();
                     tr.appendChild(td);
                     td = document.createElement("td");
-                    td.innerHTML = rcv.entityType;
+                    td.innerHTML = e.entityType;
                     tr.appendChild(td);
-                    const position = rcv.position;
+                    const position = e.position;
                     td = document.createElement("td");
                     td.className = "number";
                     td.innerHTML = position.x.toFixed(POS_DECIMAL_PLACES);
