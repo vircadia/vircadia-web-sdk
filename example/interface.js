@@ -481,6 +481,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         const POS_DECIMAL_PLACES = 3;
 
+
         // Status
 
         const statusText = document.getElementById("entityServerStatus");
@@ -542,6 +543,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             entitiesCount.value = entityIDsList.length;
         }
         entityServer.entityData.connect(onEntityData);
+
 
         // Game Loop
 

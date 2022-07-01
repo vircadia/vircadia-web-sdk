@@ -89,8 +89,6 @@ class OctreePacketProcessor {
         if (octreePacketType === PacketType.OctreeStats) {
             // WEBRTC TODO: Address further C++ code - process OctreeStats packet.
 
-            console.error("OctreePacketProcessor: Packet type not processed: ", octreePacketType);
-
             // WEBRTC TODO: Do not hardcode statsMessageLength.
             const statsMessageLength = 222;
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers
@@ -117,8 +115,9 @@ class OctreePacketProcessor {
                 break;
             }
             case PacketType.EntityErase:
+                console.error("OctreePacketProcessor: Packet type not processed: EntityErase");
+                break;
             case PacketType.EntityQueryInitialResultsComplete:
-                console.error("OctreePacketProcessor: Packet type not processed: ", packetType);
                 break;
             default:
                 console.error("ERROR - Unexpected packet type in OctreePacketProcessor.processPacket() :", packetType);
