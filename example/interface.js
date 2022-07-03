@@ -565,7 +565,6 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         }
 
         function updateJoints() {
-            // $$$$$$$: Do I really need to make a copy or not?
             myAvatar.jointRotations = JSON.parse(JSON.stringify(avatar.jointRotations));
             myAvatar.jointTranslations = JSON.parse(JSON.stringify(avatar.jointTranslations));
         }
