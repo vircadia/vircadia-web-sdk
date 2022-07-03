@@ -3,11 +3,18 @@
 //
 //  Created by David Rowe on 5 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import assert from "../shared/assert";
+import ContextManager from "../shared/ContextManager";
+import Uuid from "../shared/Uuid";
+import PacketScribe from "./packets/PacketScribe";
+import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
+import Socket from "./udt/Socket";
 import AddressManager from "./AddressManager";
 import DomainHandler from "./DomainHandler";
 import FingerprintUtils from "./FingerprintUtils";
@@ -18,12 +25,6 @@ import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import ReceivedMessage from "./ReceivedMessage";
 import SockAddr from "./SockAddr";
-import PacketScribe from "./packets/PacketScribe";
-import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
-import Socket from "./udt/Socket";
-import assert from "../shared/assert";
-import ContextManager from "../shared/ContextManager";
-import Uuid from "../shared/Uuid";
 
 
 /*@devdoc
@@ -71,11 +72,18 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        // Handle a request for a path change from the AddressManager.
+        this.#_addressManager.pathChangeRequired.connect(this.#handleDSPathQuery);
+
+        // We didn't have a connection to the domain server when a path change was requested; send the path change when we get
+        // a connection.
+        this.#_domainHandler.connectedToDomain.connect(this.#sendPendingDSPathQuery);
+
+
+        // WEBRTC TODO: Address further C++ code.
+
         // clear our NodeList when the domain changes
-        this.#_domainHandler.disconnectedFromDomain.connect(() => {
-            // C++  void resetFromDomainHandler()
-            this.reset("Reset from Domain Handler", true);
-        });
+        this.#_domainHandler.disconnectedFromDomain.connect(this.#resetFromDomainHandler);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -476,6 +484,29 @@ class NodeList extends LimitedNodeList {
         // WEBRTC TODO: Address further C++ code. Audio mixer.
     }
 
+    #sendDSPathQuery(newPath: string): void {
+        // C++  void NodeList::sendDSPathQuery(const QString& newPath) {
+
+        // Only send a path query if we're connected to the domain server.
+        if (this._nodeSocket.getSocketState(this.#_domainHandler.getURL(), NodeType.DomainServer) === Socket.CONNECTED) {
+
+            const pathQueryPacket = PacketScribe.DomainServerPathQuery.write({
+                path: newPath
+            });
+
+            // Only send packet if the path was written.
+            if (pathQueryPacket.getMessageData().packetSize
+                > NLPacket.totalNLHeaderSize(PacketType.DomainServerPathQuery, false)) {
+                console.log("[networking] Sending a path query for", newPath, "to domain server at",
+                    this.#_domainHandler.getSockAddr().toString());
+                this.sendPacket(pathQueryPacket, this.#_domainHandler.getSockAddr());
+            } else {
+                console.log(`[Networking] Path too long for path query packet:`, newPath);
+            }
+
+        }
+    }
+
 
     // Slot.
     #startNodeHolePunch = (node: Node): void => {
@@ -513,6 +544,44 @@ class NodeList extends LimitedNodeList {
         // this is most likely makes setting up the connection less responsive.
 
         // Vircadia clients can never have upstream nodes or downstream nodes so we don't need to cater for these.
+    };
+
+    // Slot.
+    #handleDSPathQuery = (newPath: string): void => {
+        // C++  void handleDSPathQuery(const QString& newPath)
+
+        // WEBRTC TODO: Address further C++ code. Serverless domains.
+
+        if (this._nodeSocket.getSocketState(this.#_domainHandler.getURL(), NodeType.DomainServer) === Socket.CONNECTED) {
+            // If we have an open domain server socket we send it off right away.
+            this.#sendDSPathQuery(newPath);
+        } else {
+            // Otherwise send it once a connection is established.
+            this.#_domainHandler.setPendingPath(newPath);
+        }
+    };
+
+    // Slot.
+    #sendPendingDSPathQuery = (): void => {
+        // C++  void sendPendingDSPathQuery()
+
+        const pendingPath = this.#_domainHandler.getPendingPath();
+
+        if (pendingPath !== "") {
+
+            // WEBRTC TODO: Address further C++ code. Serverless domains.
+
+            console.log(`[networking] Attempting to send pending query to domain server for path ${pendingPath}.`);
+            this.#sendDSPathQuery(pendingPath);
+
+            this.#_domainHandler.clearPendingPath();
+        }
+    };
+
+    // Slot.
+    #resetFromDomainHandler = (): void => {
+        // C++  void resetFromDomainHandler()
+        this.reset("Reset from Domain Handler", true);
     };
 
     // Slot.

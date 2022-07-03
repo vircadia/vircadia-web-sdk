@@ -9,11 +9,12 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
+import Url from "../shared/Url";
+import Uuid from "../shared/Uuid";
 import { LocalID } from "./NetworkPeer";
 import NodeList from "./NodeList";
 import SockAddr from "./SockAddr";
-import SignalEmitter, { Signal } from "../shared/SignalEmitter";
-import Uuid from "../shared/Uuid";
 import PacketScribe from "./packets/PacketScribe";
 import ReceivedMessage from "./ReceivedMessage";
 
@@ -90,13 +91,13 @@ class DomainHandler {
     }();
 
 
-    #_domainURL = "";
+    #_domainURL = new Url();
     #_sockAddr = new SockAddr();  // For WebRTC, the port is the critical part.
     #_isConnected = false;
     #_localID = 0;
     #_uuid = new Uuid(Uuid.NULL);
 
-    #_errorDomainURL = "";
+    #_errorDomainURL = new Url();
     #_domainConnectionRefusals: Set<string> = new Set();
 
     #_connectedToDomain = new SignalEmitter();
@@ -162,7 +163,7 @@ class DomainHandler {
      *  <p>Note: The web app uses the domain's URL rather than its IP address.<p>
      *  @returns {string} The current domain's URL.
      */
-    getURL(): string {
+    getURL(): Url {
         // C++  N/A
 
         // WEBRTC TODO: Revisit using URL versus IP address..
@@ -233,6 +234,16 @@ class DomainHandler {
             // Close the WebRTC communications channel.
             this.#_disconnectedFromDomain.emit();
         }
+    }
+
+    /*@devdoc
+     *  Gets whether the DomainHandler is in an error state.
+     *  @returns {boolean} <code>true</code> if in an error state, <code>false</code> if not.
+     */
+    isInErrorState(): boolean {  // eslint-disable-line class-methods-use-this
+        // C++  bool isInErrorState()
+        // Always false in the Web SDK because interstitial mode is not supported.
+        return false;
     }
 
     /*@devdoc
@@ -318,17 +329,17 @@ class DomainHandler {
      *  Sets the current domain's URL and pending ID.
      *  @function DomainHandler.setURLAndID
      *  @type {Slot}
-     *  @param {string} url - The domain's URL.
+     *  @param {Url} url - The domain's URL.
      *  @param {Uuid} id - The domain's pending ID.
      */
     // eslint-disable-next-line
     // @ts-ignore
-    setURLAndID = (domainURL: string, domainID: Uuid): void => {  // eslint-disable-line
+    setURLAndID = (domainURL: Url, domainID: Uuid): void => {  // eslint-disable-line
         // C++  void setURLAndID(QUrl domainURL, QUuid domainID)
 
         // WEBRTC TODO: Address further C++ code.
 
-        if (this.#_domainURL !== domainURL) {
+        if (this.#_domainURL.toString() !== domainURL.toString()) {
             this.#hardReset("Changing domain URL");
 
             // WEBRTC TODO: Address further C++ code.
@@ -348,14 +359,14 @@ class DomainHandler {
      *  {@link DomainHandler.domainConnectionRefused|domainConnectionRefused} signal to be emitted.
      *  @function DomainHandler.setRedirectErrorState
      *  @type {Slot}
-     *  @param {string} errorUrl - Not currently used.
+     *  @param {Url} errorUrl - Not currently used.
      *  @param {string} reasonMessage - The reason that the client was refused connection to the domain.
      *  @param {DomainHandler.ConnectionRefusedReason} reasonCode - The reason code for the refusal.
      *  @param {string} extraInfo - Extra information about the refusal.
      */
     // eslint-disable-next-line
     // @ts-ignore
-    setRedirectErrorState = (errorUrl: string, reasonMessage = "", reasonCode = -1, extraInfo = ""): void => {
+    setRedirectErrorState = (errorUrl: Url, reasonMessage = "", reasonCode = -1, extraInfo = ""): void => {
         // C++  void setRedirectErrorState(QUrl errorUrl, QString reasonMessage = "", int reasonCode = -1,
         //          const QString& extraInfo = "")
 
@@ -396,7 +407,7 @@ class DomainHandler {
     /*@devdoc
      *  Triggered when the client connects to then domain.
      *  @function DomainHandler.connectedToDomain
-     *  @param {string} domainURL - The domain's URL.
+     *  @param {Url} domainURL - The domain's URL.
      *  @returns {Signal}
      */
     get connectedToDomain(): Signal {
@@ -443,7 +454,7 @@ class DomainHandler {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.#_domainURL = "";
+        this.#_domainURL = new Url();
         this.#_sockAddr = new SockAddr();
         this.#_domainConnectionRefusals.clear();
 

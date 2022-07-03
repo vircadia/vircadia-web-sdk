@@ -3,11 +3,19 @@
 //
 //  Created by David Rowe on 28 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import assert from "../../shared/assert";
+import Url from "../../shared/Url";
+import { default as WebRTCSocket, WebRTCSocketDatagram } from "../webrtc/WebRTCSocket";
+import NLPacket from "../NLPacket";
+import NLPacketList from "../NLPacketList";
+import { NodeTypeValue } from "../NodeType";
+import SockAddr from "../SockAddr";
 import BasePacket from "./BasePacket";
 import CongestionControl from "./CongestionControl";
 import Connection from "./Connection";
@@ -15,17 +23,11 @@ import ControlPacket from "./ControlPacket";
 import Packet from "./Packet";
 import SequenceNumber from "./SequenceNumber";
 import UDT from "./UDT";
-import NLPacket from "../NLPacket";
-import NLPacketList from "../NLPacketList";
-import { NodeTypeValue } from "../NodeType";
-import SockAddr from "../SockAddr";
-import { default as WebRTCSocket, WebRTCSocketDatagram } from "../webrtc/WebRTCSocket";
-import assert from "../../shared/assert";
 
 
 type PacketHandlerCallback = (packet: Packet) => void;
 type MessageHandlerCallback = (packet: Packet) => void;
-type MessageFailureHandlerCallback = (sockaAddr: SockAddr, messageNumber: number) => void;
+type MessageFailureHandlerCallback = (sockAddr: SockAddr, messageNumber: number) => void;
 type ConnectionCreationFilterOperator = (sockAddr: SockAddr) => boolean;
 type PacketFilterOperator = (packet: Packet) => boolean;
 
@@ -108,14 +110,14 @@ class Socket {
 
 
     /*@devdoc
-     *  Gets the state of the connection to a node.
-     *  @param {string} URL - The URL of the domain server.
+     *  Gets the state of the socket for a specified domain and node type.
+     *  @param {Url} URL - The URL of the domain server.
      *  @param {NodeType} nodeType - The type of node.
      *  @returns {Socket.ConnectionState} The state of the connection.
      */
-    getSocketState(url: string, nodeType: NodeTypeValue): number {
+    getSocketState(url: Url, nodeType: NodeTypeValue): number {
         // C++  N/A
-        return Socket.#WEBRTCSOCKET_TO_SOCKET_STATES[this.#_webrtcSocket.state(url.trim(), nodeType)] as number;
+        return Socket.#WEBRTCSOCKET_TO_SOCKET_STATES[this.#_webrtcSocket.state(url.toString(), nodeType)] as number;
     }
 
     /*@devdoc
@@ -125,14 +127,14 @@ class Socket {
      */
     /*@devdoc
      *  Opens a connection to a node.
-     *  @param {string} URL - The URL of the domain server.
+     *  @param {Url} URL - The URL of the domain server.
      *  @param {NodeType} nodeType - The type of node to connect to.
      *  @param {Socket~openSocketCallback} callback - Function to call when the connection has been opened.
      */
     // Note: Not called "openConnection" because a "Connection" is a distinct type of object.
-    openSocket(url: string, nodeType: NodeTypeValue, callback: (socketID: number) => void): void {
+    openSocket(url: Url, nodeType: NodeTypeValue, callback: (socketID: number) => void): void {
         // C++  N/A
-        this.#_webrtcSocket.connectToHost(url, nodeType, callback);
+        this.#_webrtcSocket.connectToHost(url.toString(), nodeType, callback);
     }
 
 
