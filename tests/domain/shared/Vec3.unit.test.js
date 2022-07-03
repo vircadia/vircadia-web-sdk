@@ -35,6 +35,7 @@ describe("Vec3 - unit tests", () => {
         expect(Vec3.valid({ x: 0, y: 1, z: 2, w: 3 })).toBe(false);
         expect(Vec3.valid({ x: 0, y: 1 })).toBe(false);
         expect(Vec3.valid({ x: 0, y: 1, z: 2 })).toBe(true);
+        expect(Vec3.valid({ x: 0, y: 1, z: NaN })).toBe(false);
     });
 
     test("Vec3.length() calculates the length of a vector", () => {

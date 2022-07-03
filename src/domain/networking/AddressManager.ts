@@ -9,9 +9,11 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import Quat from "../shared/Quat";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Url from "../shared/Url";
 import Uuid from "../shared/Uuid";
+import Vec3 from "../shared/Vec3";
 
 
 /*@devdoc
@@ -33,6 +35,7 @@ class AddressManager {
     #_domainURL = new Url();
     #_possibleDomainChangeRequired = new SignalEmitter();
     #_pathChangeRequired = new SignalEmitter();
+    #_locationChangeRequired = new SignalEmitter();
 
 
     /*@devdoc
@@ -56,6 +59,20 @@ class AddressManager {
     }
 
     /*@devdoc
+     * Takes you to a position and orientation resulting from a lookup for a path in the domain (set in the domain server's
+     * settings).
+     * @function AddressManager.goToViewpointForPath
+     * @param {string} viewpoint - The position and orientation for the domain path.
+     * @param {string} path - The domain path that was looked up on the domain server.
+     */
+    // eslint-disable-next-line
+    goToViewpointForPath(viewpointString: string,  // @ts-ignore
+        pathString: string): boolean {  // eslint-disable-line @typescript-eslint/no-unused-vars
+        // C++  bool goToViewpointForPath(const QString& viewpointString, const QString& pathString)
+        return this.#handleViewpoint(viewpointString, false);
+    }
+
+    /*@devdoc
      *  Gets the domain's place name.
      *  @function AddressManager.getPlaceName
      *  @returns {string} The domain's place name if known, otherwise <code>""</code>.
@@ -67,6 +84,7 @@ class AddressManager {
 
         return "";
     }
+
 
     /*@devdoc
      *  Triggered when a request is made to go to a URL or IP address.
@@ -87,8 +105,26 @@ class AddressManager {
      *  @returns {Signal}
      */
     get pathChangeRequired(): Signal {
-        // C++   void pathChangeRequired(const QString& newPath)
+        // C++  void pathChangeRequired(const QString& newPath)
         return this.#_pathChangeRequired.signal();
+    }
+
+    /*@devdoc
+     *  Triggered when the user avatar location should change to that of a path looked up on the domain (set in the domain
+     *  server's settings).
+     *  @function AddressManager.locationChangeRequired
+     *  @param {vec3} newPosition - The position that the user avatar should go to.
+     *  @param {boolean} hasNewOrientation - <code>true</code> if the avatar should also change orientation,
+     *      <code>false</code> if it shouldn't.
+     *  @param {quat} newOrientation - The new orientation to use if <code>hasNewOrientation == true</code>.
+     *  @param {boolean} shouldFaceLoation - <code>true</code> if the avatar should be positioned a short distance away from the
+     *      <code>newPosition</code> and be orientated to face the position.
+     *  @returns {Signal}
+     */
+    get locationChangeRequired(): Signal {
+        // C++  void locationChangeRequired(const glm::vec3& newPosition, bool hasOrientationChange,
+        //          const glm:: quat& newOrientation, bool shouldFaceLocation);
+        return this.#_locationChangeRequired.signal();
     }
 
 
@@ -131,6 +167,7 @@ class AddressManager {
         return false;
     }
 
+    // Handles the IP or DNS network address part of an address.
     #handleNetworkAddress(lookupString: string, scheme: string): boolean {
         // C++  bool handleNetworkAddress(const QString& lookupString, LookupTrigger trigger, bool& hostChanged)
 
@@ -155,6 +192,7 @@ class AddressManager {
         return false;
     }
 
+    // Handles the path part of an address.
     #handlePath(path: string): void {
         // C++  void handlePath(const QString& path, LookupTrigger trigger, bool wasPathOnly)
 
@@ -163,6 +201,80 @@ class AddressManager {
         // WEBRTC TODO: Address further C++ code: Handle viewpoints.
 
         this.#_pathChangeRequired.emit(path);
+    }
+
+    // Handles a viewpoint received from the domain server in response to a path query.
+    #handleViewpoint(viewpointString: string, shouldFace: boolean): boolean {
+        // C++  bool AddressManager:: handleViewpoint(const QString& viewpointString, bool shouldFace, LookupTrigger trigger,
+        //          bool definitelyPathOnly, const QString& pathString)
+
+        const FLOAT_REGEX_STRING = "([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)";
+        const SPACED_COMMA_REGEX_STRING = "\\s*,\\s*";
+        const POSITION_REGEX_STRING = "\\/" + FLOAT_REGEX_STRING + SPACED_COMMA_REGEX_STRING
+            + FLOAT_REGEX_STRING + SPACED_COMMA_REGEX_STRING + FLOAT_REGEX_STRING + "\\s*(?:$|\\/)";
+        const QUAT_REGEX_STRING = "\\/" + FLOAT_REGEX_STRING + SPACED_COMMA_REGEX_STRING
+            + FLOAT_REGEX_STRING + SPACED_COMMA_REGEX_STRING + FLOAT_REGEX_STRING + SPACED_COMMA_REGEX_STRING
+            + FLOAT_REGEX_STRING + "\\s*$";
+
+        const positionRegex = new RegExp(POSITION_REGEX_STRING, "u");
+        const positionMatch = positionRegex.exec(viewpointString);
+        const EXPECTED_POSITION_MATCH_LENGTH = 4;  // [0] is the string matched, other indices are the ordinates.
+
+        if (positionMatch !== null && positionMatch.length === EXPECTED_POSITION_MATCH_LENGTH) {
+
+            // We have at least a position, so emit our signal to say we need to change position.
+            /* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-magic-numbers */
+            const newPosition = {
+                x: parseFloat(positionMatch[1]!),
+                y: parseFloat(positionMatch[2]!),
+                z: parseFloat(positionMatch[3]!)
+            };
+            /* eslint-enable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-magic-numbers */
+
+            // Web SDK: History is not handled.
+
+            if (Vec3.valid(newPosition)) {
+                let newOrientation = Quat.IDENTITY;
+
+                const orientationRegex = new RegExp(QUAT_REGEX_STRING, "u");
+                const orientationMatch = orientationRegex.exec(viewpointString.slice(positionRegex.lastIndex));
+                const EXPECTED_ORIENTATION_MATCH_LENGTH = 5;  // [0] is the string matched, other indices are the ordinates.
+
+                let orientationChanged = false;
+
+                // We may also have an orientation.
+                if (viewpointString[positionRegex.lastIndex] === "/"
+                    && orientationMatch !== null && orientationMatch.length === EXPECTED_ORIENTATION_MATCH_LENGTH) {
+
+                    /* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-magic-numbers */
+                    newOrientation = {
+                        x: parseFloat(orientationMatch[1]!),
+                        y: parseFloat(orientationMatch[2]!),
+                        z: parseFloat(orientationMatch[3]!),
+                        w: parseFloat(orientationMatch[4]!)
+                    };
+                    /* eslint-enable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-magic-numbers */
+
+                    if (Quat.valid(newOrientation)) {
+                        newOrientation = Quat.normalize(newOrientation);
+                        orientationChanged = true;
+                    } else {
+                        console.log("[networking] Orientation from viewpoint string not used because it is invalid.");
+                    }
+                }
+
+                // WebRTC TODO: Address further C++ code. Trigger.
+
+                this.#_locationChangeRequired.emit(newPosition, orientationChanged, newOrientation, shouldFace);
+
+            } else {
+                console.log("[networking] Could not jump to new position in viewpoint string because it is invalid.");
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     #setDomainInfo(domainURL: Url): boolean {

@@ -43,7 +43,7 @@ describe("AddressManager - unit tests", () => {
         log.mockReset();
     });
 
-    test("Path change required signal emitted when URLset", (done) => {
+    test("Path change required signal emitted when URL set", (done) => {
         const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
         expect.assertions(1);
@@ -69,6 +69,26 @@ describe("AddressManager - unit tests", () => {
         ContextManager.set(contextID, AddressManager);
         const addressManager = ContextManager.get(contextID, AddressManager);
         expect(addressManager instanceof AddressManager).toBe(true);
+    });
+
+    test("Location change required signal is emitted when a valid viewpoint is handled", (done) => {
+        const addressManager = new AddressManager();
+        addressManager.locationChangeRequired.connect((newPosition, hasOrientationChange, newOrientation, shouldFace) => {
+            /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+            expect(newPosition.x).toBeCloseTo(9.96095, 4);
+            expect(newPosition.y).toBeCloseTo(1.00000, 4);
+            expect(newPosition.z).toBeCloseTo(6.05810, 4);
+            expect(hasOrientationChange).toBe(true);
+            expect(newOrientation.x).toBeCloseTo(0.000000, 5);
+            expect(newOrientation.y).toBeCloseTo(0.461158, 5);
+            expect(newOrientation.z).toBeCloseTo(0.000000, 5);
+            expect(newOrientation.w).toBeCloseTo(0.887318, 5);
+            expect(shouldFace).toBe(false);
+            /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+            done();
+        });
+
+        addressManager.goToViewpointForPath("/9.96095,1,6.0581/0,0.461158,0,0.887318", "/somewhere");
     });
 
 });

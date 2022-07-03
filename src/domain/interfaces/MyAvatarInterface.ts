@@ -10,6 +10,7 @@
 //
 
 import { SkeletonJoint } from "../avatars/AvatarTraits";
+import AddressManager from "../networking/AddressManager";
 import AvatarConstants from "../shared/AvatarConstants";
 import ContextManager from "../shared/ContextManager";
 import Quat, { quat } from "../shared/Quat";
@@ -52,6 +53,8 @@ import AvatarManager from "../AvatarManager";
  *      <em>Read-only.</em>
  *  @property {vec3} position - The position of the avatar in the domain.
  *  @property {quat} orientation - The orientation of the avatar in the domain.
+ *  @property {Signal<MyAvatarInterface~locationChangeRequired>} locationChangeRequired - Triggered when the avatar's location
+ *      should change to that of a path looked up on the domain (set in the domain server's settings).
  *  @property {Array<quat|null>} jointRotations - The avatar's joint rotations.
  *      The rotations are relative to avatar space (i.e., not relative to parent bones).
  *      A rotation value of <code>null</code> means that the skeleton's default rotation for that joint should be used.
@@ -69,10 +72,12 @@ class MyAvatarInterface {
     // C++  The user scripting interface for the MyAvatar class.
 
     #_avatarManager;
+    #_addressManager;
 
 
     constructor(contextID: number) {
         this.#_avatarManager = ContextManager.get(contextID, AvatarManager) as AvatarManager;
+        this.#_addressManager = ContextManager.get(contextID, AddressManager) as AddressManager;
     }
 
 
@@ -250,6 +255,21 @@ class MyAvatarInterface {
             return;
         }
         this.#_avatarManager.getMyAvatar().setWorldOrientation(Quat.copy(orientation));
+    }
+
+    /*@sdkdoc
+     *  Triggered when the avatar's location should change to that of a path looked up on the domain (set in the domain
+     *  server's settings).
+     *  @callback MyAvatarInterface~locationChangeRequired
+     *  @param {vec3} newPosition - The position that the avatar should go to.
+     *  @param {boolean} hasNewOrientation - <code>true</code> if the avatar should also change orientation,
+     *      <code>false</code> if it shouldn't.
+     *  @param {quat} newOrientation - The new orientation to use if <code>hasNewOrientation == true</code>.
+     *  @param {boolean} shouldFaceLoation - <code>true</code> if the avatar should be positioned a short distance away from the
+     *      <code>newPosition</code> and be orientated to face the position.
+     */
+    get locationChangeRequired(): Signal {
+        return this.#_addressManager.locationChangeRequired;
     }
 
     get jointRotations(): (quat | null)[] {

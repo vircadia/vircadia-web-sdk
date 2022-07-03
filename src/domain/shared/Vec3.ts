@@ -23,7 +23,7 @@ type vec3 = {
  *  The <code>Vec3</code> namespace provides facilities for working with 3-dimensional vectors.
  *  @namespace Vec3
  *
- *  @property {vec3} ZERO - <code>{ x: 0, y: 0, z: 0 }</code> Vector with all axis values set to <code>0</code>.
+ *  @property {vec3} ZERO - <code>{ x: 0, y: 0, z: 0 }</code> A new vector with all axis values set to <code>0</code>.
  *      <em>Read-only.</em>
  */
 const Vec3 = new class {
@@ -48,7 +48,8 @@ const Vec3 = new class {
 
 
     /*@sdkdoc
-     *  Checks whether a value is a valid <code>vec3</code> value: an object with only x, y, z keys that have number values.
+     *  Checks whether a value is a valid <code>vec3</code> value: an object with only x, y, z keys that have valid, non-NaN,
+     *  number values.
      *  @function Vec3.valid
      *  @param {any} value - The value to check.
      *  @returns {boolean} <code>true</code> if the value is a valid <code>vec3</code> value, <code>false</code> if it isn't.
@@ -60,7 +61,9 @@ const Vec3 = new class {
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers
             && Object.keys(value).length === 3
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            && typeof value.x === "number" && typeof value.y === "number" && typeof value.z === "number";
+            && typeof value.x === "number" && typeof value.y === "number" && typeof value.z === "number"
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            && !isNaN(value.x) && !isNaN(value.y) && !isNaN(value.z);
     }
 
     /*@sdkdoc

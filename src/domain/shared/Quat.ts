@@ -22,7 +22,7 @@ type quat = {
  *  The <code>Quat</code> namespace provides facilities for working with quaternions.
  *  @namespace Quat
  *
- *  @property {quat} IDENTITY - <code>{ x: 0, y: 0, z: 0, w: 1 }</code> The identity rotation, i.e., no rotation.
+ *  @property {quat} IDENTITY - <code>{ x: 0, y: 0, z: 0, w: 1 }</code> A new identity rotation, i.e., no rotation.
  *      <em>Read-only.</em>
  */
 const Quat = new class {
@@ -60,9 +60,31 @@ const Quat = new class {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             && typeof value.x === "number" && typeof value.y === "number" && typeof value.z === "number"
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            && typeof value.w === "number";
+            && typeof value.w === "number"
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            && !isNaN(value.x) && !isNaN(value.y) && !isNaN(value.z) && !isNaN(value.w);
     }
 
+    /*@sdkdoc
+     *  Normalizes a quaternion value.
+     *  @function Quat.normalize
+     *  @param {quat} q - The quaternion to normalize.
+     *  @returns {quat} The normalized quaternion.
+     */
+    normalize(q: quat): quat {
+        const magnitude2 = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
+        const EPSILON = 1.0e-5;
+        if (Math.abs(magnitude2 - 1) > EPSILON) {
+            const magnitude = Math.sqrt(magnitude2);
+            return {
+                x: q.x / magnitude,
+                y: q.y / magnitude,
+                z: q.z / magnitude,
+                w: q.w / magnitude
+            };
+        }
+        return { x: q.x, y: q.y, z: q.z, w: q.w };
+    }
 
     /*@sdkdoc
      *  Makes a copy of a quaternion.

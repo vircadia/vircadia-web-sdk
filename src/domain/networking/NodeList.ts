@@ -112,6 +112,8 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        this._packetReceiver.registerListener(PacketType.DomainServerPathResponse,
+            PacketReceiver.makeUnsourcedListenerReference(this.processDomainServerPathResponse));
         this._packetReceiver.registerListener(PacketType.DomainServerRemovedNode,
             PacketReceiver.makeUnsourcedListenerReference(this.processDomainServerRemovedNode));
 
@@ -293,6 +295,31 @@ class NodeList extends LimitedNodeList {
         // WEBRTC TODO: Move this to processPingReplyPacket() when implement sending pings to the assignment client.
         this.#activateSocketFromNodeCommunication(message, sendingNode);
 
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|DomainServerPathResponse} packet received from the domain server in response to a
+     *  {@link PacketType(1)|DomainServerPathQuery} packet sent. No response is received if there is no such path set on the
+     *  domain.
+     *  @function NodeList.processDomainServerPathResponse
+     *  @type {Listener}
+     *  @param {ReceivedMessage} message - The DomainServerPathResponse message.
+     */
+    processDomainServerPathResponse = (message: ReceivedMessage): void => {
+        // C++  void NodeList::processDomainServerPathResponse(QSharedPointer<ReceivedMessage> message)
+
+        // This is a response to a path query we theoretically made.
+        // In the future we may want to check that this was actually from our DS and for a query we actually made.
+
+        const info = PacketScribe.DomainServerPathResponse.read(message.getMessage());
+        assert(info.pathQuery.length > 0 && info.viewpoint.length > 0);
+
+        // Hand it off to the AddressManager to handle.
+        if (this.#_addressManager.goToViewpointForPath(info.viewpoint, info.pathQuery)) {
+            console.log(`Going to viewpoint ${info.viewpoint} as lookup result for path ${info.pathQuery}.`);
+        } else {
+            console.log(`Could not got to viewpoint ${info.viewpoint} as lookup result for path ${info.pathQuery}.`);
+        }
     };
 
 
