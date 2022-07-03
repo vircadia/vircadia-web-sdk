@@ -21,6 +21,7 @@ import BulkAvatarData from "./BulkAvatarData";
 import SilentAudioFrame from "./SilentAudioFrame";
 import DomainListRequest from "./DomainListRequest";
 import DomainServerPathQuery from "./DomainServerPathQuery";
+import DomainServerPathResponse from "./DomainServerPathResponse";
 import DomainConnectionDenied from "./DomainConnectionDenied";
 import SetAvatarTraits from "./SetAvatarTraits";
 import AvatarIdentity from "./AvatarIdentity";
@@ -67,6 +68,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.DomainListRequest&period;write|DomainListRequest&period;write}
  *  @property {function} DomainServerPathQuery.write -
  *      {@link PacketScribe.DomainServerPathQuery&period;write|DomainServerPathQuery&period;write}
+ *  @property {function} DomainServerPathResponse.read -
+ *      {@link PacketScribe.DomainServerPathResponse&period;read|DomainServerPathResponse&period;read}
  *  @property {function} DomainConnectionDenied.read -
  *      {@link PacketScribe.DomainConnectionDenied&period;read|DomainConnectionDenied&period;read}
  *  @property {function} SetAvatarTraits.write -
@@ -124,6 +127,7 @@ const PacketScribe = {
     DomainListRequest,
     DomainConnectionDenied,
     DomainServerPathQuery,
+    DomainServerPathResponse,
     SetAvatarTraits,
     AvatarIdentity,
     DomainConnectRequest,
