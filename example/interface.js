@@ -348,25 +348,6 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         myAvatarRotZ.value = avatarOrientation.z;
         myAvatarRotW.value = avatarOrientation.w;
 
-        /*
-        function onOrientationChange() {
-            avatarMixer.myAvatar.orientation = {
-                x: parseFloat(myAvatarRotX.value),
-                y: parseFloat(myAvatarRotY.value),
-                z: parseFloat(myAvatarRotZ.value),
-                w: parseFloat(myAvatarRotW.value)
-            };
-        }
-        myAvatarRotX.addEventListener("blur", onOrientationChange);
-        myAvatarRotY.addEventListener("blur", onOrientationChange);
-        myAvatarRotZ.addEventListener("blur", onOrientationChange);
-        myAvatarRotW.addEventListener("blur", onOrientationChange);
-        myAvatarRotX.addEventListener("change", onOrientationChange);
-        myAvatarRotY.addEventListener("change", onOrientationChange);
-        myAvatarRotZ.addEventListener("change", onOrientationChange);
-        myAvatarRotW.addEventListener("change", onOrientationChange);
-        */
-
         const avatarYaw = quatToYaw(avatarMixer.myAvatar.orientation);
         myAvatarYaw.value = avatarYaw;
 
