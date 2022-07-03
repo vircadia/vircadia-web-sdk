@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 7 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -618,6 +619,8 @@ const PacketType = new class {
                 return this.#_EntityVersion.LAST_PACKET_TYPE;
             case this.EntityQuery:
                 return this.#_EntityQueryPacketVersion.ConicalFrustums;
+            case this.EntityErase:
+                return DEFAULT_VERSION;
             case this.AudioEnvironment:
                 return DEFAULT_VERSION;
             case this.DomainDisconnectRequest:
