@@ -265,8 +265,8 @@ class MyAvatarInterface {
      *  @param {boolean} hasNewOrientation - <code>true</code> if the avatar should also change orientation,
      *      <code>false</code> if it shouldn't.
      *  @param {quat} newOrientation - The new orientation to use if <code>hasNewOrientation == true</code>.
-     *  @param {boolean} shouldFaceLoation - <code>true</code> if the avatar should be positioned a short distance away from the
-     *      <code>newPosition</code> and be orientated to face the position.
+     *  @param {boolean} shouldFaceLocation - <code>true</code> if the avatar should be positioned a short distance away from
+     *      the <code>newPosition</code> and be orientated to face the position.
      */
     get locationChangeRequired(): Signal {
         return this.#_addressManager.locationChangeRequired;
