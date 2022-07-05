@@ -12,7 +12,7 @@
 import AvatarConstants from "../../../src/domain/shared/AvatarConstants";
 
 
-describe("AvataConstants - unit tests", () => {
+describe("AvatarConstants - unit tests", () => {
 
     test("Can access avatar constants", () => {
         // Test a handful constants, just to make that constants can be accessed as intended.

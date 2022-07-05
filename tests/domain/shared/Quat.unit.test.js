@@ -33,6 +33,18 @@ describe("Quat - unit tests", () => {
         expect(Quat.valid({ x: 0, y: 1, z: 2, w: 3, v: 4 })).toBe(false);
         expect(Quat.valid({ x: 0, y: 1, z: 2 })).toBe(false);
         expect(Quat.valid({ x: 0, y: 1, z: 2, w: 3 })).toBe(true);
+        expect(Quat.valid({ x: 0, y: 1, z: 2, w: NaN })).toBe(false);
+    });
+
+    test("Quat.normalize() normalizes a quaternion", () => {
+        expect(Quat.normalize({ x: 2, y: 0, z: 0, w: 0 })).toEqual({ x: 1, y: 0, z: 0, w: 0 });
+        expect(Quat.normalize({ x: 0, y: 4, z: 0, w: 0 })).toEqual({ x: 0, y: 1, z: 0, w: 0 });
+        expect(Quat.normalize({ x: 0, y: 0, z: 6, w: 0 })).toEqual({ x: 0, y: 0, z: 1, w: 0 });
+        expect(Quat.normalize({ x: 0, y: 0, z: 0, w: 8 })).toEqual({ x: 0, y: 0, z: 0, w: 1 });
+        expect(Quat.normalize({ x: 3, y: 4, z: 0, w: 0 })).toEqual({ x: 0.6, y: 0.8, z: 0.0, w: 0.0 });
+        expect(Quat.normalize({ x: 0, y: 3, z: 4, w: 0 })).toEqual({ x: 0.0, y: 0.6, z: 0.8, w: 0.0 });
+        expect(Quat.normalize({ x: 0, y: 0, z: 3, w: 4 })).toEqual({ x: 0.0, y: 0.0, z: 0.6, w: 0.8 });
+        expect(Quat.normalize({ x: 4, y: 0, z: 0, w: 3 })).toEqual({ x: 0.8, y: 0.0, z: 0.0, w: 0.6 });
     });
 
     test("Quat.copy() copies a quaternion", () => {

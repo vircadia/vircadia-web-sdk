@@ -3,17 +3,19 @@
 //
 //  Created by David Rowe on 27 Jul 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
 import AddressManager from "../../../src/domain/networking/AddressManager";
+import DomainHandler from "../../../src/domain/networking/DomainHandler";
 import NodeList from "../../../src/domain/networking/NodeList";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import SignalEmitter from "../../../src/domain/shared/SignalEmitter";
+import Url from "../../../src/domain/shared/Url";
 import Uuid from "../../../src/domain/shared/Uuid";
-import DomainHandler from "../../../src/domain/networking/DomainHandler";
 
 import TestConfig from "../../test.config.js";
 
@@ -40,13 +42,13 @@ describe("DomainHandler - integration tests", () => {
 
     test("Can set and get the URL", (done) => {
         expect.assertions(2);
-        expect(domainHandler.getURL()).toBe("");
+        expect(domainHandler.getURL().toString()).toBe("");
 
         const signal = new SignalEmitter();
         signal.connect(domainHandler.setURLAndID);  // eslint-disable-line @typescript-eslint/unbound-method
-        signal.emit(TestConfig.SERVER_SIGNALING_SOCKET_URL, null);
+        signal.emit(new Url(TestConfig.SERVER_SIGNALING_SOCKET_URL), null);
         setTimeout(function () {
-            expect(domainHandler.getURL()).toBe(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+            expect(domainHandler.getURL().toString()).toBe(TestConfig.SERVER_SIGNALING_SOCKET_URL);
             done();
         }, 10);
     });
@@ -74,16 +76,30 @@ describe("DomainHandler - integration tests", () => {
         expect(domainHandler.getSockAddr().getPort()).toBe(port);
     });
 
+    test("Can set, get, and clear domain server pending path", () => {
+        expect(domainHandler.getPendingPath()).toBe("");
+        domainHandler.setPendingPath("/somepath");
+        expect(domainHandler.getPendingPath()).toBe("/somepath");
+        domainHandler.setPendingPath("/");
+        expect(domainHandler.getPendingPath()).toBe("/");
+        domainHandler.clearPendingPath();
+        expect(domainHandler.getPendingPath()).toBe("");
+    });
+
+    test("Reports is not in error state", () => {
+        expect(domainHandler.isInErrorState()).toBe(false);
+    });
+
     test("Setting connected and disconnected emits signals", (done) => {
         expect.assertions(4);
         expect(domainHandler.isConnected()).toBe(false);
 
         const signal = new SignalEmitter();
         signal.connect(domainHandler.setURLAndID);  // eslint-disable-line @typescript-eslint/unbound-method
-        signal.emit(TestConfig.SERVER_SIGNALING_SOCKET_URL, null);
+        signal.emit(new Url(TestConfig.SERVER_SIGNALING_SOCKET_URL), null);
 
         domainHandler.connectedToDomain.connect((domainURL) => {
-            expect(domainURL).toBe(TestConfig.SERVER_SIGNALING_SOCKET_URL);
+            expect(domainURL.toString()).toBe(TestConfig.SERVER_SIGNALING_SOCKET_URL);
             expect(domainHandler.isConnected()).toBe(true);
         });
         domainHandler.disconnectedFromDomain.connect(() => {

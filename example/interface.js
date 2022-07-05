@@ -274,12 +274,16 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const myAvatarDisplayName = document.getElementById("myAvatarDisplayName");
         const myAvatarSessionDisplayName = document.getElementById("myAvatarSessionDisplayName");
         const myAvatarSkeletonModelURL = document.getElementById("myAvatarSkeletonModelURL");
-        const avatarScale = document.getElementById("avatarScale");
-        const avatarTargetScale = document.getElementById("avatarTargetScale");
-        const avatarMixerPosX = document.getElementById("avatarMixerPosX");
-        const avatarMixerPosY = document.getElementById("avatarMixerPosY");
-        const avatarMixerPosZ = document.getElementById("avatarMixerPosZ");
-        const avatarMixerYaw = document.getElementById("avatarMixerYaw");
+        const myAvatarScale = document.getElementById("myAvatarScale");
+        const myAvatarTargetScale = document.getElementById("myAvatarTargetScale");
+        const myAvatarPosX = document.getElementById("myAvatarPosX");
+        const myAvatarPosY = document.getElementById("myAvatarPosY");
+        const myAvatarPosZ = document.getElementById("myAvatarPosZ");
+        const myAvatarRotX = document.getElementById("myAvatarRotX");
+        const myAvatarRotY = document.getElementById("myAvatarRotY");
+        const myAvatarRotZ = document.getElementById("myAvatarRotZ");
+        const myAvatarRotW = document.getElementById("myAvatarRotW");
+        const myAvatarYaw = document.getElementById("myAvatarYaw");
 
         myAvatarDisplayName.value = avatarMixer.myAvatar.displayName;
         avatarMixer.myAvatar.displayNameChanged.connect(() => {
@@ -302,50 +306,81 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             avatarMixer.myAvatar.skeletonModelURL = myAvatarSkeletonModelURL.value;
         });
 
-        avatarScale.value = avatarMixer.myAvatar.scale.toFixed(1);
+        myAvatarScale.value = avatarMixer.myAvatar.scale.toFixed(1);
         avatarMixer.myAvatar.scaleChanged.connect((scale) => {
-            avatarScale.value = scale.toFixed(1);
+            myAvatarScale.value = scale.toFixed(1);
         });
-        avatarScale.addEventListener("blur", () => {
-            avatarMixer.myAvatar.scale = parseFloat(avatarScale.value);
+        myAvatarScale.addEventListener("blur", () => {
+            avatarMixer.myAvatar.scale = parseFloat(myAvatarScale.value);
             const VERIFY_TIMEOUT = 500;
             setTimeout(() => {
                 // In case the scale value was rejected. Or do in game loop.
-                avatarScale.value = avatarMixer.myAvatar.scale.toFixed(1);
+                myAvatarScale.value = avatarMixer.myAvatar.scale.toFixed(1);
             }, VERIFY_TIMEOUT);
         });
-        avatarTargetScale.value = avatarMixer.myAvatar.targetScale.toFixed(1);
+        myAvatarTargetScale.value = avatarMixer.myAvatar.targetScale.toFixed(1);
         avatarMixer.myAvatar.targetScaleChanged.connect((scale) => {
-            avatarTargetScale.value = scale.toFixed(1);
+            myAvatarTargetScale.value = scale.toFixed(1);
         });
 
         const avatarPosition = avatarMixer.myAvatar.position;
-        avatarMixerPosX.value = avatarPosition.x;
-        avatarMixerPosY.value = avatarPosition.y;
-        avatarMixerPosZ.value = avatarPosition.z;
+        myAvatarPosX.value = avatarPosition.x;
+        myAvatarPosY.value = avatarPosition.y;
+        myAvatarPosZ.value = avatarPosition.z;
 
         function onPositionChange() {
             avatarMixer.myAvatar.position = {
-                x: parseFloat(avatarMixerPosX.value),
-                y: parseFloat(avatarMixerPosY.value),
-                z: parseFloat(avatarMixerPosZ.value)
+                x: parseFloat(myAvatarPosX.value),
+                y: parseFloat(myAvatarPosY.value),
+                z: parseFloat(myAvatarPosZ.value)
             };
         }
-        avatarMixerPosX.addEventListener("blur", onPositionChange);
-        avatarMixerPosY.addEventListener("blur", onPositionChange);
-        avatarMixerPosZ.addEventListener("blur", onPositionChange);
-        avatarMixerPosX.addEventListener("change", onPositionChange);
-        avatarMixerPosY.addEventListener("change", onPositionChange);
-        avatarMixerPosZ.addEventListener("change", onPositionChange);
+        myAvatarPosX.addEventListener("blur", onPositionChange);
+        myAvatarPosY.addEventListener("blur", onPositionChange);
+        myAvatarPosZ.addEventListener("blur", onPositionChange);
+        myAvatarPosX.addEventListener("change", onPositionChange);
+        myAvatarPosY.addEventListener("change", onPositionChange);
+        myAvatarPosZ.addEventListener("change", onPositionChange);
+
+        const avatarOrientation = avatarMixer.myAvatar.orientation;
+        myAvatarRotX.value = avatarOrientation.x;
+        myAvatarRotY.value = avatarOrientation.y;
+        myAvatarRotZ.value = avatarOrientation.z;
+        myAvatarRotW.value = avatarOrientation.w;
 
         const avatarYaw = quatToYaw(avatarMixer.myAvatar.orientation);
-        avatarMixerYaw.value = avatarYaw;
+        myAvatarYaw.value = avatarYaw;
 
         function onYawChange() {
-            avatarMixer.myAvatar.orientation = yawToQuat(parseFloat(avatarMixerYaw.value));
+            const orientation = yawToQuat(parseFloat(myAvatarYaw.value));
+
+            myAvatarRotX.value = orientation.x;
+            myAvatarRotY.value = orientation.y;
+            myAvatarRotZ.value = orientation.z;
+            myAvatarRotW.value = orientation.w;
+
+            avatarMixer.myAvatar.orientation = orientation;
         }
-        avatarMixerYaw.addEventListener("blur", onYawChange);
-        avatarMixerYaw.addEventListener("change", onYawChange);
+        myAvatarYaw.addEventListener("blur", onYawChange);
+        myAvatarYaw.addEventListener("change", onYawChange);
+
+        function onLocationChangeRequired(newPosition, hasNewOrientation, newOrientation /* , shouldFaceLocation */) {
+            myAvatarPosX.value = newPosition.x;
+            myAvatarPosY.value = newPosition.y;
+            myAvatarPosZ.value = newPosition.z;
+            onPositionChange();
+
+            if (hasNewOrientation) {
+                myAvatarRotX.value = newOrientation.x;
+                myAvatarRotY.value = newOrientation.y;
+                myAvatarRotZ.value = newOrientation.z;
+                myAvatarRotW.value = newOrientation.w;
+
+                myAvatarYaw.value = quatToYaw(newOrientation);
+                onYawChange();
+            }
+        }
+        avatarMixer.myAvatar.locationChangeRequired.connect(onLocationChangeRequired);
 
 
         // Avatar List
@@ -565,7 +600,6 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         }
 
         function updateJoints() {
-            // $$$$$$$: Do I really need to make a copy or not?
             myAvatar.jointRotations = JSON.parse(JSON.stringify(avatar.jointRotations));
             myAvatar.jointTranslations = JSON.parse(JSON.stringify(avatar.jointTranslations));
         }

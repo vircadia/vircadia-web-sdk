@@ -183,8 +183,12 @@ const enum PacketTypeValue {
  *      {@link PacketScribe.DomainConnectionDeniedDetails}
  *  @property {PacketType} MuteEnvironment - <code>17</code>
  *  @property {PacketType} AudioStreamStats - <code>18</code>
- *  @property {PacketType} DomainServerPathQuery - <code>19</code>
- *  @property {PacketType} DomainServerPathResponse - <code>20</code>
+ *  @property {PacketType} DomainServerPathQuery - <code>19</code> - The user client sends this to the Domain Server to get the
+ *      position and orientation set for a path in the domain.<br />
+ *      {@link PacketScribe.DomainServerPathQueryDetails}
+ *  @property {PacketType} DomainServerPathResponse - <code>20</code> - The Domain Server sends this to the user client in
+ *      response to a DomainServerPathQuery packet, to provide the position and orientation set for a path in the domain.<br />
+ *      {@link PacketScribe.DomainServerPathResponseDetails}
  *  @property {PacketType} DomainServerAddedNode - <code>21</code> - The Domain Server sends this to user clients when an
  *      assignment client start up, and to assignment clients and when another assignment client starts up or a user connects to
  *      the domain.
@@ -605,6 +609,10 @@ const PacketType = new class {
                 return this.#_DomainConnectionDeniedVersion.IncludesExtraInfo;
             case this.AudioStreamStats:
                 return this.#_AudioVersion.StopInjectors;
+            case this.DomainServerPathQuery:
+                return DEFAULT_VERSION;
+            case this.DomainServerPathResponse:
+                return DEFAULT_VERSION;
             case this.DomainServerAddedNode:
                 return this.#_DomainServerAddedNodeVersion.SocketTypes;
             case this.OctreeStats:
