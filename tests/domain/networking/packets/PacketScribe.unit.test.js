@@ -3,6 +3,7 @@
 //
 //  Created by David Rowe on 13 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -38,6 +39,10 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.DomainListRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainConnectionDenied).toBe("object");
         expect(typeof PacketScribe.DomainConnectionDenied.read).toBe("function");
+        expect(typeof PacketScribe.DomainServerPathQuery).toBe("object");
+        expect(typeof PacketScribe.DomainServerPathQuery.write).toBe("function");
+        expect(typeof PacketScribe.DomainServerPathResponse).toBe("object");
+        expect(typeof PacketScribe.DomainServerPathResponse.read).toBe("function");
         expect(typeof PacketScribe.SetAvatarTraits).toBe("object");
         expect(typeof PacketScribe.SetAvatarTraits.write).toBe("function");
         expect(typeof PacketScribe.AvatarIdentity).toBe("object");

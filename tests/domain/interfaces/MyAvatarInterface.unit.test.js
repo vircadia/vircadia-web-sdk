@@ -37,6 +37,8 @@ describe("MyAvatarInterface - unit tests", () => {
         expect(typeof myAvatarInterface.scaleChanged.disconnect).toBe("function");
         expect(typeof myAvatarInterface.targetScaleChanged.connect).toBe("function");
         expect(typeof myAvatarInterface.targetScaleChanged.disconnect).toBe("function");
+        expect(typeof myAvatarInterface.locationChangeRequired.connect).toBe("function");
+        expect(typeof myAvatarInterface.locationChangeRequired.disconnect).toBe("function");
     });
 
     test("Target avatar scale is sanitized and clamped", (done) => {

@@ -5,6 +5,7 @@
 //
 //  Created by David Rowe on 8 Jul 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -65,8 +66,8 @@ type OnStateChanged = (state: ConnectionState, info: string) => void;
  *      (AudioMixer, AvatarMixer, etc.) use to connect to and interact with a domain. The context ID is assigned when the
  *      DomainServer object is constructed.
  *      <em>Read-only.</em>
- *  @property {string} location - The current location that the DomainServer is connected to or trying to connect to.
- *      <code>""</code> if no location has been set.
+ *  @property {string} location - The current address that the DomainServer is connected to or trying to connect to.
+ *      <code>""</code> if no address has been set.
  *      <em>Read-only.</em>
  *  @property {Uuid} sessionUUID - Unique ID assigned to the user client in the domain. {@link Uuid(1)|Uuid.NULL} if not
  *      connected to a domain.
@@ -126,7 +127,7 @@ class DomainServer {
     static readonly #DOMAIN_SERVER_CHECK_IN_MSECS = 1000;
 
 
-    #_location = "";
+    #_address = "";
     #_state = DomainServer.DISCONNECTED;
     #_refusalInfo = "";
     #_errorInfo = "";
@@ -195,7 +196,7 @@ class DomainServer {
 
 
     get location(): string {
-        return this.#_location;
+        return this.#_address;
     }
 
     get state(): ConnectionState {
@@ -246,33 +247,34 @@ class DomainServer {
 
     /*@sdkdoc
      *  Initiates connection of the user client to a domain server.
-     *  <p>The following types of location are supported:</p>
+     *  <p>The following types of address are supported:</p>
      *  <table>
      *      <tbody>
-     *          <tr><td><code>WebSocket URL and port</code></td><td>For example, <code>ws://127.0.0.1:40102</code></td></tr>
-     *          <tr><td colspan="2">WEBRTC TODO: Support Vircadia URLs instead (<code>hifi://...</code>, place names,
-     *          ...)</td></tr>
+     *          <tr><td>WebSocket URL and path of the form:</code><br />
+     *          <code>ws[s]://127.0.0.1:40102[/path]</code><br />
+     *          The address may be an IP address or a DNS address.
+     *          The optional path is a viewpoint path set in the domain server's settings.</td>
      *      </tbody>
      *  </table>
-     *  @param {string} location - The location of the domain server to connect to.
+     *  @param {string} address - The address of the domain server to connect to.
      */
-    connect(location: string): void {
+    connect(address: string): void {
         // C++  Application.cpp's domainCheckInTimer.
         //      AddressManager.handleLoockupString() called in many different locations.
 
-        const oldLocation = this.#_location;
+        const oldAddress = this.#_address;
 
-        if (typeof location === "string") {
-            this.#_location = location.trim();
+        if (typeof address === "string") {
+            this.#_address = address.trim();
         } else {
-            console.error("ERROR: DomainServer.connect() location parameter not a string!");
-            this.#_location = "";
+            console.error("ERROR: DomainServer.connect() address parameter is not a string!");
+            this.#_address = "";
         }
 
-        if (this.#_location === "") {
+        if (this.#_address === "") {
             this.#stopDomainServerCheckins();
-            this.#_nodeList.getDomainHandler().disconnect("Invalid location");
-            this.#setState(DomainServer.ERROR, "No location specified.");
+            this.#_nodeList.getDomainHandler().disconnect("Invalid address");
+            this.#setState(DomainServer.ERROR, "No address specified.");
             return;
         }
 
@@ -281,13 +283,13 @@ class DomainServer {
         //              hostChanged and possibleDomainChangeRequired.
         // WEBRTC TODO: If changing domains host a DomainDisconnectRequest should probably be sent to the current domain. The
         // `            C++ currently doesn't do this so leave this for now.
-        if (this.#_location === oldLocation && this.#_domainCheckInTimer) {
+        if (this.#_address === oldAddress && this.#_domainCheckInTimer) {
             return;
         }
 
         this.#setState(DomainServer.CONNECTING);
 
-        this.#_addressManager.handleLookupString(location);
+        this.#_addressManager.handleLookupString(address);
 
         // Start sending domain server check-ins.
         if (!this.#_domainCheckInTimer) {

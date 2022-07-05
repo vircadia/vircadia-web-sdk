@@ -45,6 +45,11 @@ class OctreePacketProcessor {
 
     #_entityData = new SignalEmitter();
 
+    #_haveWarnedOctreeStats = false;
+    #_haveWarnedEntityErase = false;
+    #_haveWarnedEntityQueryInitialResultsComplete = false;
+
+
     constructor(contextID: number) {
 
         // Context
@@ -87,6 +92,11 @@ class OctreePacketProcessor {
         const octreePacketType = messageLocal.getType();
 
         if (octreePacketType === PacketType.OctreeStats) {
+            if (!this.#_haveWarnedOctreeStats) {
+                console.warn("OctreePacketProcessor: OctreeStats packet not processed.");
+                this.#_haveWarnedOctreeStats = true;
+            }
+
             // WEBRTC TODO: Address further C++ code - process OctreeStats packet.
 
             // WEBRTC TODO: Do not hardcode statsMessageLength.
@@ -115,9 +125,18 @@ class OctreePacketProcessor {
                 break;
             }
             case PacketType.EntityErase:
-                console.error("OctreePacketProcessor: Packet type not processed: EntityErase");
+                if (!this.#_haveWarnedEntityErase) {
+                    console.warn("OctreePacketProcessor: EntityErase packet not processed.");
+                    this.#_haveWarnedEntityErase = true;
+                }
+                // WEBRTC TODO: Address further C++ code.
                 break;
             case PacketType.EntityQueryInitialResultsComplete:
+                if (!this.#_haveWarnedEntityQueryInitialResultsComplete) {
+                    console.warn("OctreePacketProcessor: EntityQueryInitialResultsComplete packet not processed.");
+                    this.#_haveWarnedEntityQueryInitialResultsComplete = true;
+                }
+                // WEBRTC TODO: Address further C++ code.
                 break;
             default:
                 console.error("ERROR - Unexpected packet type in OctreePacketProcessor.processPacket() :", packetType);
