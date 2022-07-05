@@ -480,7 +480,7 @@ type CommonEntityProperties = {
     triggerable: boolean | undefined;
     grabEquippable: boolean | undefined;
     delegateToParent: boolean | undefined;
-    equippableLefPositionOffset: vec3 | undefined;
+    equippableLeftPositionOffset: vec3 | undefined;
     equippableLeftRotationOffset: quat | undefined;
     equippableRightPositionOffset: vec3 | undefined;
     equippableRightRotationOffset: quat | undefined;
@@ -1705,7 +1705,7 @@ const EntityData = new class {
                 triggerable,
                 grabEquippable,
                 delegateToParent,
-                equippableLefPositionOffset: equippableLeftPositionOffset,
+                equippableLeftPositionOffset,
                 equippableLeftRotationOffset,
                 equippableRightPositionOffset,
                 equippableRightRotationOffset,
