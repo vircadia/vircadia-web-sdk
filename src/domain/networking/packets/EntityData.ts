@@ -1659,7 +1659,7 @@ const EntityData = new class {
                     break;
                 }
                 default:
-                    // WEBRTC TODO: This line will not be unreachable once all entity types are supported.
+                    // WEBRTC TODO: This line will be unreachable once all entity types are supported.
                     console.error("Entity type not supported: ", entityType);
                     return {
                         bytesRead: dataPosition - pos,
@@ -1668,6 +1668,7 @@ const EntityData = new class {
             }
 
             dataPosition += subclassData.bytesRead;
+
             entitiesDataDetails.push({
                 entityItemID,
                 entityType,
