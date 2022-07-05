@@ -43,6 +43,11 @@ class OctreePacketProcessor {
 
     #_addedEntity = new SignalEmitter();
 
+    #_haveWarnedOctreeStats = false;
+    #_haveWarnedEntityErase = false;
+    #_haveWarnedEntityQueryInitialResultsComplete = false;
+
+
     constructor(contextID: number) {
 
         // Context
@@ -83,7 +88,10 @@ class OctreePacketProcessor {
         const packetType = message.getType();
 
         if (packetType === PacketType.OctreeStats) {
-            console.error("OctreePacketProcessor: Packet type not processed: ", packetType);
+            if (!this.#_haveWarnedOctreeStats) {
+                console.warn("OctreePacketProcessor: OctreeStats packet not processed.");
+                this.#_haveWarnedOctreeStats = true;
+            }
             // WEBRTC TODO: Address further C++ code.
             return;
         }
@@ -95,8 +103,18 @@ class OctreePacketProcessor {
                 this.#_addedEntity.emit();
                 break;
             case PacketType.EntityErase:
+                if (!this.#_haveWarnedEntityErase) {
+                    console.warn("OctreePacketProcessor: EntityErase packet not processed.");
+                    this.#_haveWarnedEntityErase = true;
+                }
+                // WEBRTC TODO: Address further C++ code.
+                break;
             case PacketType.EntityQueryInitialResultsComplete:
-                console.error("OctreePacketProcessor: Packet type not processed: ", packetType);
+                if (!this.#_haveWarnedEntityQueryInitialResultsComplete) {
+                    console.warn("OctreePacketProcessor: EntityQueryInitialResultsComplete packet not processed.");
+                    this.#_haveWarnedEntityQueryInitialResultsComplete = true;
+                }
+                // WEBRTC TODO: Address further C++ code.
                 break;
             default:
                 console.error("ERROR - Unexpected packet type in OctreePacketProcessor.processPacket() :", packetType);
