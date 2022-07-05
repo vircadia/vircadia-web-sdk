@@ -11,6 +11,7 @@
 
 import { EntityTypes } from "../../entities/EntityItem";
 import AACube from "../../shared/AACube";
+import assert from "../../shared/assert";
 import ByteCountCoded from "../../shared/ByteCountCoding";
 import "../../shared/DataViewExtensions";
 import GLMHelpers from "../../shared/GLMHelpers";
@@ -443,7 +444,7 @@ enum EntityPropertyFlags {
     // WEBRTC TODO: Address further C++ code.
 }
 
-type EntityDataDetails = {
+type CommonEntityProperties = {
     entityItemID: Uuid,
     entityType: EntityTypes,
     createdFromBuffer: BigInt,
@@ -522,6 +523,9 @@ type EntityDataDetails = {
     certificateID: string | undefined;
     certificateType: string | undefined;
     staticCertificateVersion: number | undefined;
+};
+
+type ModelEntityProperties = {
     shapeType: number | undefined;
     compoundShapeUrl: string | undefined;
     color: vec3 | undefined;
@@ -547,9 +551,23 @@ type EntityDataDetails = {
     animationHold: boolean | undefined;
 };
 
+type EntityDataDetails = CommonEntityProperties & ModelEntityProperties;
+
+type EntitySubclassData = {
+    bytesRead: number;
+    properties: ModelEntityProperties;
+};
+
+type ParsedData = {
+    bytesRead: number;
+    entitiesDataDetails: EntityDataDetails[];
+};
+
 
 const EntityData = new class {
     // C++ N/A
+
+    // #entityDataDetails: EntityDataDetails[] = [];
 
     // C++ OctreePacketData.h
     readonly #_PACKET_IS_COMPRESSED_BIT = 1;
@@ -579,13 +597,13 @@ const EntityData = new class {
      *  @property {number} simulatedDelta - The delta between {@link EntityDataDetails|lastEdited} and the last time the entity
      *      was simulated.
      *  @property {ArrayBuffer | undefined} simOwnerData - The simulation owner data.
-     *  @property {Uuid | null | undefined} parentID - The ID of the entity that the entity is parented to. Is <code>null</code>
+     *  @property {Uuid | null | undefined} parentID - The ID of the entity that the entity is parented to. <code>null</code>
      *      if the entity is not parented.
      *  @property {number | undefined} parentJointIndex - The joint of the entity that the entity is parented to.
-     *  @property {boolean | undefined} visible - Is <code>true</code> if the entity is rendered, <code>false</code> if it
+     *  @property {boolean | undefined} visible - <code>true</code> if the entity is rendered, <code>false</code> if it
      *      isn't.
      *  @property {string | undefined} name - The entity's name. Doesn't have to be unique.
-     *  @property {boolean | undefined} locked - Is <code>true</code> if properties other than locked cannot be changed and the
+     *  @property {boolean | undefined} locked - <code>true</code> if properties other than locked cannot be changed and the
      *      entity cannot be deleted, <code>false</code> if all properties can be changed and the entity can be deleted.
      *  @property {string | undefined} userData - Used to store extra data about the entity in JSON format.
      *  @property {string | undefined} privateUserData - Like userData, but only accessible by server entity scripts, assignment
@@ -607,31 +625,31 @@ const EntityData = new class {
      *      server's octree. The cube may be considerably larger than the entity in some situations, e.g., when the entity is
      *      grabbed by an avatar: the position of the entity is determined through avatar mixer updates and so the AA cube is
      *      expanded in order to reduce unnecessary entity server updates. Scripts should not change this property's value.
-     *  @property {boolean | undefined} canCastShadow - Is <code>true</code> if the entity can cast a shadow, <code>false</code>
+     *  @property {boolean | undefined} canCastShadow - <code>true</code> if the entity can cast a shadow, <code>false</code>
      *      if it can't.
      *  @property {number | undefined} renderLayer - The layer that the entity renders in.
      *  @property {number | undefined} primitiveMode - How the entity's geometry is rendered.
-     *  @property {boolean | undefined} ignorePickIntersection - Is <code>true</code> if Picks and RayPick ignore the entity,
+     *  @property {boolean | undefined} ignorePickIntersection - <code>true</code> if Picks and RayPick ignore the entity,
      *      <code>false</code> if they don't.
      *  @property {Uuid[] | undefined} renderWithZones - A list of entity IDs representing with which zones this entity should
      *      render. If it is empty, this entity will render normally. Otherwise, this entity will only render if your avatar is
      *      within one of the zones in this list.
      *  @property {number | undefined} billboardMode - Whether the entity is billboarded to face the camera. Use the rotation
      *      property to control which axis is facing you.
-     *  @property {boolean | undefined} grabbable - Is <code>true</code> if the entity can be grabbed, <code>false</code> if it
+     *  @property {boolean | undefined} grabbable - <code>true</code> if the entity can be grabbed, <code>false</code> if it
      *      can't be.
-     *  @property {boolean | undefined} grabKinematic - Is <code>true</code> if the entity will be updated in a kinematic manner
+     *  @property {boolean | undefined} grabKinematic - <code>true</code> if the entity will be updated in a kinematic manner
      *      when grabbed; <code>false</code> if it will be grabbed using a tractor action. A kinematic grab will make the item
      *      appear more tightly held but will cause it to behave poorly when interacting with dynamic entities.
-     *  @property {boolean | undefined} grabFollowsController - Is <code>true</code> if the entity will follow the motions of
+     *  @property {boolean | undefined} grabFollowsController - <code>true</code> if the entity will follow the motions of
      *      the hand controller even if the avatar's hand can't get to the implied position, <code>false</code> if it will
      *      follow the motions of the avatar's hand. This should be set true for tools, pens, etc. and <code>false</code> for
      *      things meant to decorate the hand.
-     *  @property {boolean | undefined} triggerable - Is <code>true</code> if the entity will receive calls to trigger
+     *  @property {boolean | undefined} triggerable - <code>true</code> if the entity will receive calls to trigger
      *      Controller entity methods, <code>false</code> if it won't.
-     *  @property {boolean | undefined} equippable - Is <code>true</code> if the entity can be equipped, <code>false</code> if
+     *  @property {boolean | undefined} equippable - <code>true</code> if the entity can be equipped, <code>false</code> if
      *      it cannot.
-     *  @property {boolean | undefined} delegateToParent - Is <code>true</code> if when the entity is grabbed, the grab will be
+     *  @property {boolean | undefined} delegateToParent - <code>true</code> if when the entity is grabbed, the grab will be
      *      transferred to its parent entity if there is one; <code>false</code> if the grab won't be transferred, so a child
      *      entity can be grabbed and moved relative to its parent.
      *  @property {vec3 | undefined} equippableLeftPositionOffset - Positional offset from the left hand, when equipped.
@@ -671,10 +689,10 @@ const EntityData = new class {
      *      <code>0.9</code> for sandpaper.
      *  @property {number | undefined} lifetime - How long an entity lives for, in seconds, before being automatically deleted.
      *      A value of -1 means that the entity lives for ever.
-     *  @property {boolean | undefined} collisionless - Is <code>true</code> if the entity shouldn't collide, <code>false</code>
+     *  @property {boolean | undefined} collisionless - <code>true</code> if the entity shouldn't collide, <code>false</code>
      *      if it collides with items per its {@link EntityData|collisionMask} property.
      *  @property {number | undefined} collisionMask - What types of items the entity should collide with.
-     *  @property {boolean | undefined} dynamic - Is <code>true</code> if the entity's movement is affected by collisions,
+     *  @property {boolean | undefined} dynamic - <code>true</code> if the entity's movement is affected by collisions,
      *      <code>false</code> if it isn't.
      *  @property {string | undefined} collisionSoundUrl - The sound that's played when the entity experiences a collision.
      *  @property {ArrayBuffer | undefined} actionData - Base-64 encoded compressed dump of the actions associated with the
@@ -682,14 +700,14 @@ const EntityData = new class {
      *      actions update it. The size of this property increases with the number of actions. Because this property value has
      *      to fit within a Vircadia datagram packet, there is a limit to the number of actions that an entity can have; edits
      *      which would result in overflow are rejected.
-     *  @property {boolean | undefined} cloneable - Is <code>true</code> if the domain or avatar entity can be cloned,
+     *  @property {boolean | undefined} cloneable - <code>true</code> if the domain or avatar entity can be cloned,
      *      <code>false</code> if it can't be.
      *  @property {number | undefined} cloneLifetime - The entity lifetime for clones created from this entity.
      *  @property {number | undefined} cloneLimit - The total number of clones of this entity that can exist in the domain at
      *      any given time.
-     *  @property {boolean | undefined} cloneDynamic - Is <code>true</code> if clones created from this entity will have their
+     *  @property {boolean | undefined} cloneDynamic - <code>true</code> if clones created from this entity will have their
      *      dynamic property set to true, <code>false</code> if they won't.
-     *  @property {boolean | undefined} cloneAvatarIdentity - Is <code>true</code> if clones created from this entity will be
+     *  @property {boolean | undefined} cloneAvatarIdentity - <code>true</code> if clones created from this entity will be
      *      created as avatar entities, <code>false</code> if they won't be.
      *  @property {Uuid | undefined} cloneOriginId - The ID of the entity that this entity was cloned from.
      *  @property {string | undefined} script - The URL of the client entity script, if any, that is attached to the entity.
@@ -728,18 +746,18 @@ const EntityData = new class {
      *      format (".gltf" or ".glb" URLs respectively). Baked models' URLs have ".baked" before the file type. Model files may
      *      also be compressed in GZ format, in which case the URL ends in ".gz".
      *  @property {vec3 | undefined} modelScale - The scale factor applied to the model's dimensions.
-     *  @property {boolean | undefined} jointRotationsSet - Is <code>true</code> values for joints that have had rotations
+     *  @property {boolean | undefined} jointRotationsSet - <code>true</code> values for joints that have had rotations
      *      applied, <code>false</code> otherwise; Empty if none are applied or the model hasn't loaded.
      *  @property {quat[] | undefined} jointRotations - Joint rotations applied to the model; Empty if none are applied or the
      *      model hasn't loaded.
-     *  @property {boolean | undefined} jointTranslationsSet - Is <code>true</code> values for joints that have had translations
+     *  @property {boolean | undefined} jointTranslationsSet - <code>true</code> values for joints that have had translations
      *      applied, <code>false</code> otherwise; Empty if none are applied or the model hasn't loaded.
      *  @property {vec3[] | undefined} jointTranslations - Joint translations applied to the model; Empty if none are applied or
      *      the model hasn't loaded.
-     *  @property {boolean | undefined} groupCulled - Is <code>true</code> if the mesh parts of the model are LOD culled as a
+     *  @property {boolean | undefined} groupCulled - <code>true</code> if the mesh parts of the model are LOD culled as a
      *      group, <code>false</code> if separate mesh parts are LOD culled individually.
-     *  @property {boolean | undefined} relayParentJoints - Is <code>true</code> if when the entity is parented to an avatar,
-     *      the avatar's joint rotations are applied to the entity's joints; Is <code>false</code> if a parent avatar's joint
+     *  @property {boolean | undefined} relayParentJoints - <code>true</code> if when the entity is parented to an avatar,
+     *      the avatar's joint rotations are applied to the entity's joints; <code>false</code> if a parent avatar's joint
      *      rotations are not applied to the entity's joints.
      *  @property {string | undefined} blendShapeCoefficients - A JSON string of a map of blendshape names to values. Only
      *      stores set values. When editing this property, only coefficients that you are editing will change; it will not
@@ -749,17 +767,17 @@ const EntityData = new class {
      *      Currently, only pivots relative to <code>{x: 0, y: 0, z: 0}</code> are supported.
      *  @property {string | undefined} animationUrl - The URL of the glTF or FBX file that has the animation. glTF files may be
      *      in JSON or binary format (".gltf" or ".glb" URLs respectively).
-     *  @property {boolean | undefined} animationAllowTranslation - Is <code>true</code> to enable translations contained in the
+     *  @property {boolean | undefined} animationAllowTranslation - <code>true</code> to enable translations contained in the
      *      animation to be played, <code>false</code> to disable translations.
      *  @property {number | undefined} animationFPS - The speed in frames/s that the animation is played at.
      *  @property {number | undefined} animationFrameIndex - The current frame being played in the animation.
-     *  @property {boolean | undefined} animationPlaying - Is <code>true</code> if the animation should play, <code>false</code>
+     *  @property {boolean | undefined} animationPlaying - <code>true</code> if the animation should play, <code>false</code>
      *      if it shouldn't.
-     *  @property {boolean | undefined} animationLoop - Is <code>true</code> if the animation is continuously repeated in a
+     *  @property {boolean | undefined} animationLoop - <code>true</code> if the animation is continuously repeated in a
      *      loop, <code>false</code> if it isn't.
      *  @property {number | undefined} animationFirstFrame - The first frame to play in the animation.
      *  @property {number | undefined} animationLastFrame - The last frame to play in the animation.
-     *  @property {boolean | undefined} animationHold - Is <code>true</code> if the rotations and translations of the last frame
+     *  @property {boolean | undefined} animationHold - <code>true</code> if the rotations and translations of the last frame
      *     played are maintained when the animation stops playing, <code>false</code> if they aren't.
      */
 
@@ -769,12 +787,8 @@ const EntityData = new class {
      *  @read {DataView} data - The {@link Packets|EntityData} message data to read.
      *  @returns {PacketScribe.EntityDataDetails} The entity data information.
      */
-    read(data: DataView): EntityDataDetails[] { /* eslint-disable-line class-methods-use-this */
+    read(data: DataView): EntityDataDetails[] {
         // C++ void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointer sourceNode)
-        //     int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-        //     ReadBitstreamToTreeParams& args)
-
-        const textDecoder = new TextDecoder();
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
@@ -795,9 +809,9 @@ const EntityData = new class {
 
         const packetIsCompressed = flags >> 7 - this.#_PACKET_IS_COMPRESSED_BIT & 1;
 
-        const entityDataDetails: EntityDataDetails[] = [];
-
         let error = false;
+
+        let entityDataDetails: EntityDataDetails[] = [];
 
         while (data.byteLength - dataPosition > 0 && !error) {
             const entityMessage = new DataView(data.buffer.slice(data.byteOffset + dataPosition));
@@ -830,1101 +844,18 @@ const EntityData = new class {
                     entityData = new DataView(entityMessage.buffer.slice(entityMessage.byteOffset + entityMessagePosition));
                 }
 
-                let entityDataPosition = 0;
-
-                // Implemented recursively in the C++ code, numberOfThreeBitSectionsInCode is here implemented iteratively
-                // to be used as an anonymous function.
-                // eslint-disable-next-line max-len
-                const numberOfThreeBitSectionsInCode = (data: DataView, dataPosition: number, maxBytes: number): number => { // eslint-disable-line @typescript-eslint/no-shadow
-                // C++ int numberOfThreeBitSectionsInCode(const unsigned char* octalCode, int maxBytes)
-
-                    if (maxBytes === this.#_OVERFLOWED_OCTCODE_BUFFER) {
-                        return this.#_OVERFLOWED_OCTCODE_BUFFER;
-                    }
-
-                    let dataPos = dataPosition;
-
-                    let curOctalCode = data.getUint8(dataPosition);
-                    let result = curOctalCode;
-                    while (curOctalCode === 255) {
-                        result += curOctalCode;
-                        dataPos += 1;
-                        curOctalCode = data.getUint8(dataPos);
-
-                        const newMaxBytes = maxBytes === this.#_UNKNOWN_OCTCODE_LENGTH
-                            ? this.#_UNKNOWN_OCTCODE_LENGTH
-                            : maxBytes - 1;
-
-                        if (newMaxBytes === this.#_OVERFLOWED_OCTCODE_BUFFER) {
-                            result += this.#_OVERFLOWED_OCTCODE_BUFFER;
-                            break;
-                        }
-                    }
-                    return result;
-                };
-
-                const numberOfThreeBitSectionsInStream
-                = numberOfThreeBitSectionsInCode(entityData, entityDataPosition, entityData.byteLength);
-
-                const bytesRequiredForCodeLength = (threeBitCodes: number): number => {
-                // C++ size_t bytesRequiredForCodeLength(unsigned char threeBitCodes)
-
-                    if (threeBitCodes === 0) {
-                        return 1;
-                    }
-                    return 1 + Math.ceil(threeBitCodes * 3 / 8.0);
-                };
-
-                const octalCodeBytes = bytesRequiredForCodeLength(numberOfThreeBitSectionsInStream);
-                entityDataPosition += octalCodeBytes;
-
-                // 1 represents sizeof(unsigned char) in the C++ code.
-                if (entityData.byteLength - entityDataPosition < 1) {
-                    break;
+                let bytesRead = 0;
+                // WEBRTC TODO: This won't throw once all entity types are supported.
+                try {
+                    const parsedData = this.#readBitstreamToTree(entityData);
+                    bytesRead = parsedData.bytesRead;
+                    entityDataDetails = [...entityDataDetails, ...parsedData.entitiesDataDetails];
+                } catch (err) {
+                    // Discard the whole packet.
+                    return [];
                 }
 
-                // WEBRTC TODO: Read and use the variable colorInPacketMask as in C++ method Octree::readElementData.
-                entityDataPosition += 1;
-
-                // WEBRTC TODO: Do not hardcode value.
-                // eslint-disable-next-line
-                // @ts-ignore
-                const bytesForMask = 2;
-                entityDataPosition += bytesForMask;
-
-                // WEBRTC TODO: Address further C++ code.
-
-                // 2 represents sizeof(numberOfEntities) in the C++ code.
-                if (entityData.byteLength - entityDataPosition < 2) {
-                    break;
-                }
-
-                const numberOfEntities = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                entityDataPosition += 2;
-
-                if (entityData.byteLength < numberOfEntities * this.#_MINIMUM_HEADER_BYTES) {
-                    break;
-                }
-
-                for (let i = 0; i < numberOfEntities; i++) {
-                    const entityItemID = new Uuid(entityData.getBigUint128(entityDataPosition, UDT.BIG_ENDIAN));
-                    entityDataPosition += 16;
-
-                    const entityTypeCodec = new ByteCountCoded();
-                    let encodedData = new DataView(entityData.buffer, entityData.byteOffset + entityDataPosition);
-                    entityDataPosition += entityTypeCodec.decode(encodedData, encodedData.byteLength);
-
-                    const entityType = entityTypeCodec.data;
-
-                    if (entityType !== EntityTypes.Model) {
-                        console.error("Entity is not a Model entity");
-                        return [];
-                    }
-
-                    const createdFromBuffer = entityData.getBigUint64(entityDataPosition, UDT.LITTLE_ENDIAN);
-                    entityDataPosition += 8;
-
-                    const lastEdited = entityData.getBigUint64(entityDataPosition, UDT.LITTLE_ENDIAN);
-                    entityDataPosition += 8;
-
-                    const updateDeltaCodec = new ByteCountCoded();
-                    encodedData = new DataView(entityData.buffer, entityData.byteOffset + entityDataPosition);
-                    entityDataPosition += updateDeltaCodec.decode(encodedData, encodedData.byteLength);
-
-                    const updateDelta = updateDeltaCodec.data;
-
-                    const simulatedDeltaCodec = new ByteCountCoded();
-                    encodedData = new DataView(entityData.buffer, entityData.byteOffset + entityDataPosition);
-                    entityDataPosition += simulatedDeltaCodec.decode(encodedData, encodedData.byteLength);
-
-                    const simulatedDelta = simulatedDeltaCodec.data;
-
-                    const propertyFlags = new PropertyFlags();
-                    const encodedFlags = new DataView(entityData.buffer, entityData.byteOffset + entityDataPosition);
-                    entityDataPosition += propertyFlags.decode(encodedFlags, encodedFlags.byteLength);
-
-                    let simOwnerData: ArrayBuffer | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            const buffer = new Uint8Array(length);
-                            const view = new DataView(buffer.buffer);
-
-                            for (let j = 0; j < length; j++) {
-                                view.setUint8(j, entityData.getUint8(entityDataPosition));
-                                entityDataPosition += 1;
-                            }
-                            simOwnerData = buffer;
-                        }
-                    }
-
-                    let parentID: Uuid | null | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            parentID = new Uuid(entityData.getBigUint128(entityDataPosition, UDT.BIG_ENDIAN));
-                            entityDataPosition += 16;
-                        } else {
-                            parentID = null;
-                        }
-                    }
-
-                    let parentJointIndex: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PARENT_JOINT_INDEX)) {
-                        parentJointIndex = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-                    }
-
-                    let visible: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VISIBLE)) {
-                        visible = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let name: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_NAME)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-                        if (length > 0) {
-                            name = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let locked: boolean | undefined = false;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LOCKED)) {
-                        locked = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let userData: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USER_DATA)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-                        if (length > 0) {
-                            userData = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let privateUserData: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PRIVATE_USER_DATA)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-                        if (length > 0) {
-                            privateUserData = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let href: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HREF)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-                        if (length > 0) {
-                            href = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let description: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DESCRIPTION)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-                        if (length > 0) {
-                            description = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let position: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_POSITION)) {
-                        position = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-                    }
-
-                    let dimensions: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DIMENSIONS)) {
-                        dimensions = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-                    }
-
-                    let rotation: quat | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ROTATION)) {
-                        rotation = GLMHelpers.unpackOrientationQuatFromBytes(entityData, entityDataPosition);
-                        entityDataPosition += 8;
-                    }
-
-                    let registrationPoint: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_REGISTRATION_POINT)) {
-                        registrationPoint = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-                    }
-
-                    let created: BigInt | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CREATED)) {
-                        created = entityData.getBigUint64(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 8;
-                    }
-
-                    let lastEditedBy: Uuid | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LAST_EDITED_BY)) {
-                        const lastEditedLength = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (lastEditedLength > 0) {
-                            lastEditedBy = new Uuid(entityData.getBigUint128(entityDataPosition, UDT.BIG_ENDIAN));
-                            entityDataPosition += 16;
-                        }
-                    }
-
-                    let queryAACube: AACube | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_QUERY_AA_CUBE)) {
-                        const corner = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-
-                        const scale = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-
-                        queryAACube = new AACube(corner, scale);
-                    }
-
-                    let canCastShadow: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CAN_CAST_SHADOW)) {
-                        canCastShadow = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let renderLayer: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RENDER_LAYER)) {
-                        renderLayer = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let primitiveMode: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PRIMITIVE_MODE)) {
-                        primitiveMode = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let ignorePickIntersection: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_IGNORE_PICK_INTERSECTION)) {
-                        ignorePickIntersection = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let renderWithZones: Uuid[] | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RENDER_WITH_ZONES)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            renderWithZones = [];
-                            for (let j = 0; j < length; j++) {
-                                renderWithZones.push(
-                                    new Uuid(entityData.getBigUint128(entityDataPosition, UDT.BIG_ENDIAN))
-                                );
-                                entityDataPosition += 16;
-                            }
-                        }
-
-                    }
-
-                    let billboardMode: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BILLBOARD_MODE)) {
-                        billboardMode = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let grabbable: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_GRABBABLE)) {
-                        grabbable = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let grabKinematic: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_KINEMATIC)) {
-                        grabKinematic = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let grabFollowsController: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_FOLLOWS_CONTROLLER)) {
-                        grabFollowsController = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let triggerable: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_TRIGGERABLE)) {
-                        triggerable = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let grabEquippable: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE)) {
-                        grabEquippable = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let delegateToParent: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_DELEGATE_TO_PARENT)) {
-                        delegateToParent = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let equippableLeftPositionOffset: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET)) {
-                        equippableLeftPositionOffset = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-                    }
-
-                    let equippableLeftRotationOffset: quat | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET)) {
-                        equippableLeftRotationOffset
-                        = GLMHelpers.unpackOrientationQuatFromBytes(entityData, entityDataPosition);
-                        entityDataPosition += 8;
-                    }
-
-                    let equippableRightPositionOffset: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET)) {
-                        equippableRightPositionOffset = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-                    }
-
-                    let equippableRightRotationOffset: quat | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET)) {
-                        equippableRightRotationOffset
-                        = GLMHelpers.unpackOrientationQuatFromBytes(entityData, entityDataPosition);
-                        entityDataPosition += 8;
-                    }
-
-                    let equippableIndicatorUrl: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_URL)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            equippableIndicatorUrl = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let equippableIndicatorScale: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE)) {
-                        equippableIndicatorScale = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-                    }
-
-                    let equippableIndicatorOffset: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET)) {
-                        equippableIndicatorOffset = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-                    }
-
-                    let density: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DENSITY)) {
-                        density = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let velocity: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VELOCITY)) {
-                        velocity = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-                    }
-
-                    let angularVelocity: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_VELOCITY)) {
-                        angularVelocity = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-                    }
-
-                    let gravity: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAVITY)) {
-                        gravity = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-                    }
-
-                    let acceleration: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACCELERATION)) {
-                        acceleration = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-                    }
-
-                    let damping: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DAMPING)) {
-                        damping = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let angularDampling: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_DAMPING)) {
-                        angularDampling = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let restitution: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RESTITUTION)) {
-                        restitution = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let friction: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_FRICTION)) {
-                        friction = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let lifetime: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIFETIME)) {
-                        lifetime = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let collisionless: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISIONLESS)) {
-                        collisionless = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let collisionMask: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_MASK)) {
-                        collisionMask = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-                    }
-
-                    let dynamic: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DYNAMIC)) {
-                        dynamic = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let collisionSoundUrl: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_SOUND_URL)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            collisionSoundUrl = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let actionData: ArrayBuffer | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACTION_DATA)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            const buffer = new Uint8Array(length);
-                            const view = new DataView(buffer.buffer);
-                            for (let j = 0; j < length; j++) {
-                                view.setUint8(j, entityData.getUint8(entityDataPosition));
-                                entityDataPosition += 1;
-                            }
-                            actionData = buffer;
-
-                        }
-                    }
-
-                    let cloneable: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONEABLE)) {
-                        cloneable = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let cloneLifetime: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_LIFETIME)) {
-                        cloneLifetime = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let cloneLimit: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_LIMIT)) {
-                        cloneLimit = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let cloneDynamic: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_DYNAMIC)) {
-                        cloneDynamic = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let cloneAvatarIdentity: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_AVATAR_ENTITY)) {
-                        cloneAvatarIdentity = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let cloneOriginId: Uuid | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_ORIGIN_ID)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            cloneOriginId = new Uuid(entityData.getBigUint128(entityDataPosition, UDT.BIG_ENDIAN));
-                            entityDataPosition += 16;
-                        }
-                    }
-
-                    let script: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            script = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let scriptTimestamp: BigInt | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT_TIMESTAMP)) {
-                        scriptTimestamp = entityData.getBigUint64(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 8;
-                    }
-
-                    let serverScripts: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SERVER_SCRIPTS)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            serverScripts = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let itemName: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_NAME)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            itemName = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let itemDescription: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_DESCRIPTION)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            itemDescription = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let itemCategories: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_CATEGORIES)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            itemCategories = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let itemArtist: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_ARTIST)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            itemArtist = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let itemLicense: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_LICENSE)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            itemLicense = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let limitedRun: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIMITED_RUN)) {
-                        limitedRun = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let marketplaceID: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MARKETPLACE_ID)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            marketplaceID = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let editionNumber: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EDITION_NUMBER)) {
-                        editionNumber = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let entityInstanceNumber: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ENTITY_INSTANCE_NUMBER)) {
-                        entityInstanceNumber = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let certificateID: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_ID)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            certificateID = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let certificateType: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_TYPE)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            certificateType = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let staticCertificateVersion: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_STATIC_CERTIFICATE_VERSION)) {
-                        staticCertificateVersion = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let shapeType: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SHAPE_TYPE)) {
-                        shapeType = entityData.getUint32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let compoundShapeUrl: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COMPOUND_SHAPE_URL)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            compoundShapeUrl = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let color: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
-                    // The C++ stores the color property into a glm::u8vec3. It does not matter here
-                    // because the type of x, y and z is number.
-                        color = {
-                            x: entityData.getUint8(entityDataPosition),
-                            y: entityData.getUint8(entityDataPosition + 1),
-                            z: entityData.getUint8(entityDataPosition + 2)
-                        };
-                        entityDataPosition += 3;
-                    }
-
-                    let textures: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXTURES)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            textures = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let modelUrl: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_URL)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            modelUrl = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let modelScale: vec3 | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_SCALE)) {
-                        modelScale = {
-                            x: entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN),
-                            y: entityData.getFloat32(entityDataPosition + 4, UDT.LITTLE_ENDIAN),
-                            z: entityData.getFloat32(entityDataPosition + 8, UDT.LITTLE_ENDIAN)
-                        };
-                        entityDataPosition += 12;
-                    }
-
-                    let jointRotationsSet: boolean[] | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_ROTATIONS_SET)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            jointRotationsSet = [];
-                            for (let j = 0; j < length; j++) {
-                                jointRotationsSet.push(Boolean(entityData.getUint8(entityDataPosition + j)));
-                            }
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let jointRotations: quat[] | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_ROTATIONS)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            jointRotations = [];
-                            for (let j = 0; j < length; j++) {
-                                jointRotations.push(
-                                    GLMHelpers.unpackOrientationQuatFromBytes(
-                                        entityData, entityDataPosition + j * 8
-                                    )
-                                );
-                            }
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let jointTranslationsSet: boolean[] | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_TRANSLATIONS_SET)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            jointTranslationsSet = [];
-                            for (let j = 0; j < length; j++) {
-                                jointTranslationsSet.push(Boolean(entityData.getUint8(entityDataPosition + j)));
-                            }
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let jointTranslations: vec3[] | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_TRANSLATIONS)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            jointTranslations = [];
-                            for (let j = 0; j < length; j++) {
-                                jointTranslations.push(
-                                    {
-                                        x: entityData.getFloat32(entityDataPosition + j * 12, UDT.LITTLE_ENDIAN),
-                                        y: entityData.getFloat32(entityDataPosition + 4 + j * 12, UDT.LITTLE_ENDIAN),
-                                        z: entityData.getFloat32(entityDataPosition + 8 + j * 12, UDT.LITTLE_ENDIAN)
-                                    }
-                                );
-
-                            }
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let relayParentJoints: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RELAY_PARENT_JOINTS)) {
-                        relayParentJoints = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let groupCulled: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GROUP_CULLED)) {
-                        groupCulled = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let blendShapeCoefficients: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BLENDSHAPE_COEFFICIENTS)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            blendShapeCoefficients = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let useOriginalPivot: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USE_ORIGINAL_PIVOT)) {
-                        useOriginalPivot = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let animationUrl: string | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_URL)) {
-                        const length = entityData.getUint16(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 2;
-
-                        if (length > 0) {
-                            animationUrl = textDecoder.decode(
-                                new Uint8Array(entityData.buffer, entityData.byteOffset + entityDataPosition, length)
-                            );
-                            entityDataPosition += length;
-                        }
-                    }
-
-                    let animationAllowTranslation: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_ALLOW_TRANSLATION)) {
-                        animationAllowTranslation = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let animationFPS: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FPS)) {
-                        animationFPS = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let animationFrameIndex: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FRAME_INDEX)) {
-                        animationFrameIndex = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let animationPlaying: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_PLAYING)) {
-                        animationPlaying = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let animationLoop: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_LOOP)) {
-                        animationLoop = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    let animationFirstFrame: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FIRST_FRAME)) {
-                        animationFirstFrame = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let animationLastFrame: number | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_LAST_FRAME)) {
-                        animationLastFrame = entityData.getFloat32(entityDataPosition, UDT.LITTLE_ENDIAN);
-                        entityDataPosition += 4;
-                    }
-
-                    let animationHold: boolean | undefined = undefined;
-                    if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_HOLD)) {
-                        animationHold = Boolean(entityData.getUint8(entityDataPosition));
-                        entityDataPosition += 1;
-                    }
-
-                    entityDataDetails.push(
-                        {
-                            entityItemID,
-                            entityType,
-                            createdFromBuffer,
-                            lastEdited,
-                            updateDelta,
-                            simulatedDelta,
-                            simOwnerData,
-                            parentID,
-                            parentJointIndex,
-                            visible,
-                            name,
-                            locked,
-                            userData,
-                            privateUserData,
-                            href,
-                            description,
-                            position,
-                            dimensions,
-                            rotation,
-                            registrationPoint,
-                            created,
-                            lastEditedBy,
-                            queryAACube,
-                            canCastShadow,
-                            renderLayer,
-                            primitiveMode,
-                            ignorePickIntersection,
-                            renderWithZones,
-                            billboardMode,
-                            grabbable,
-                            grabKinematic,
-                            grabFollowsController,
-                            triggerable,
-                            grabEquippable,
-                            delegateToParent,
-                            equippableLefPositionOffset: equippableLeftPositionOffset,
-                            equippableLeftRotationOffset,
-                            equippableRightPositionOffset,
-                            equippableRightRotationOffset,
-                            equippableIndicatorUrl,
-                            equippableIndicatorScale,
-                            equippableIndicatorOffset,
-                            density,
-                            velocity,
-                            angularVelocity,
-                            gravity,
-                            acceleration,
-                            damping,
-                            angularDampling,
-                            restitution,
-                            friction,
-                            lifetime,
-                            collisionless,
-                            collisionMask,
-                            dynamic,
-                            collisionSoundUrl,
-                            actionData,
-                            cloneable,
-                            cloneLifetime,
-                            cloneLimit,
-                            cloneDynamic,
-                            cloneAvatarIdentity,
-                            cloneOriginId,
-                            script,
-                            scriptTimestamp,
-                            serverScripts,
-                            itemName,
-                            itemDescription,
-                            itemCategories,
-                            itemArtist,
-                            itemLicense,
-                            limitedRun,
-                            marketplaceID,
-                            editionNumber,
-                            entityInstanceNumber,
-                            certificateID,
-                            certificateType,
-                            staticCertificateVersion,
-                            shapeType,
-                            compoundShapeUrl,
-                            color,
-                            textures,
-                            modelUrl,
-                            modelScale,
-                            jointRotationsSet,
-                            jointRotations,
-                            jointTranslationsSet,
-                            jointTranslations,
-                            groupCulled,
-                            relayParentJoints,
-                            blendShapeCoefficients,
-                            useOriginalPivot,
-                            animationUrl,
-                            animationAllowTranslation,
-                            animationFPS,
-                            animationFrameIndex,
-                            animationPlaying,
-                            animationLoop,
-                            animationFirstFrame,
-                            animationLastFrame,
-                            animationHold
-                        });
-                }
+                assert(sectionLength !== bytesRead);
                 dataPosition += sectionLength;
             }
             dataPosition += entityMessagePosition;
@@ -1936,6 +867,1204 @@ const EntityData = new class {
 
         return entityDataDetails;
     }
+
+    #readBitstreamToTree(data: DataView): ParsedData {
+        // C++ void Octree::readBitstreamToTree(const unsigned char * bitstream, uint64_t bufferSizeBytes,
+        //     ReadBitstreamToTreeParams& args)
+
+        let dataPosition = 0;
+
+        let entitiesDataDetails: EntityDataDetails[] = [];
+
+        while (dataPosition < data.byteLength) {
+            const numberOfThreeBitSectionsInStream
+            = this.#numberOfThreeBitSectionsInCode(data, dataPosition, data.byteLength);
+
+            const octalCodeBytes = this.#bytesRequiredForCodeLength(numberOfThreeBitSectionsInStream);
+            dataPosition += octalCodeBytes;
+
+            const parsedData = this.#readElementData(data, dataPosition);
+            dataPosition += parsedData.bytesRead;
+
+            entitiesDataDetails = [...entitiesDataDetails, ...parsedData.entitiesDataDetails];
+        }
+        return {
+            bytesRead: dataPosition,
+            entitiesDataDetails
+        };
+    }
+
+    #readElementData(data: DataView, position: number): ParsedData {
+        // C++ int Octree::readElementData(const OctreeElementPointer& destinationElement, const unsigned char* nodeData,
+        //     int bytesAvailable, ReadBitstreamToTreeParams& args) {
+
+        let dataPosition = position;
+
+        // 1 represents sizeof(unsigned char) in the C++ code.
+        if (data.byteLength - dataPosition < 1) {
+            console.error("Not enough meaningful data.");
+            return {
+                bytesRead: dataPosition - position,
+                entitiesDataDetails: []
+            };
+        }
+
+        // WEBRTC TODO: Read and use the variable colorInPacketMask.
+        dataPosition += 1;
+
+        // WEBRTC TODO: Do not hardcode value.
+        // eslint-disable-next-line
+                // @ts-ignore
+        const bytesForMask = 2;
+        dataPosition += bytesForMask;
+
+        // WEBRTC TODO: Address further C++ code.
+
+        const parsedData = this.#readEntityDataFromBuffer(data, dataPosition);
+        dataPosition += parsedData.bytesRead;
+
+        return {
+            bytesRead: dataPosition - position,
+            entitiesDataDetails: parsedData.entitiesDataDetails
+        };
+    }
+
+    #readEntityDataFromBuffer(data: DataView, pos: number): ParsedData {
+        // C++ int EntityTree::readEntityDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
+        //     ReadBitstreamToTreeParams& args)
+
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+        let dataPosition = pos;
+
+        const textDecoder = new TextDecoder();
+
+        // 2 represents sizeof(numberOfEntities) in the C++ code.
+        if (data.byteLength - dataPosition < 2) {
+            console.error("Not enough meaningful data");
+            return {
+                bytesRead: dataPosition - pos,
+                entitiesDataDetails: []
+            };
+        }
+
+        const numberOfEntities = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+        dataPosition += 2;
+
+        if (data.byteLength < numberOfEntities * this.#_MINIMUM_HEADER_BYTES) {
+            console.error("Not enough meaningful data");
+            return {
+                bytesRead: dataPosition - pos,
+                entitiesDataDetails: []
+            };
+        }
+
+        const entitiesDataDetails: EntityDataDetails[] = [];
+
+        for (let i = 0; i < numberOfEntities; i++) {
+            const entityItemID = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
+            dataPosition += 16;
+
+            const entityTypeCodec = new ByteCountCoded();
+            let encodedData = new DataView(data.buffer, data.byteOffset + dataPosition);
+            dataPosition += entityTypeCodec.decode(encodedData, encodedData.byteLength);
+
+            const entityType = entityTypeCodec.data;
+
+            // WEBRTC TODO: Unnecessary check once all entity types are supported.
+            if (entityType !== EntityTypes.Model) {
+                throw new Error(`Entity type is not supported: ${entityType}`);
+            }
+
+            const createdFromBuffer = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 8;
+
+            const lastEdited = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 8;
+
+            const updateDeltaCodec = new ByteCountCoded();
+            encodedData = new DataView(data.buffer, data.byteOffset + dataPosition);
+            dataPosition += updateDeltaCodec.decode(encodedData, encodedData.byteLength);
+
+            const updateDelta = updateDeltaCodec.data;
+
+            const simulatedDeltaCodec = new ByteCountCoded();
+            encodedData = new DataView(data.buffer, data.byteOffset + dataPosition);
+            dataPosition += simulatedDeltaCodec.decode(encodedData, encodedData.byteLength);
+
+            const simulatedDelta = simulatedDeltaCodec.data;
+
+            const propertyFlags = new PropertyFlags();
+            const encodedFlags = new DataView(data.buffer, data.byteOffset + dataPosition);
+            dataPosition += propertyFlags.decode(encodedFlags, encodedFlags.byteLength);
+
+            let simOwnerData: ArrayBuffer | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    const buffer = new Uint8Array(length);
+                    const view = new DataView(buffer.buffer);
+
+                    for (let j = 0; j < length; j++) {
+                        view.setUint8(j, data.getUint8(dataPosition));
+                        dataPosition += 1;
+                    }
+                    simOwnerData = buffer;
+                }
+            }
+
+            let parentID: Uuid | null | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    parentID = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
+                    dataPosition += 16;
+                } else {
+                    parentID = null;
+                }
+            }
+
+            let parentJointIndex: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PARENT_JOINT_INDEX)) {
+                parentJointIndex = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+            }
+
+            let visible: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VISIBLE)) {
+                visible = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let name: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_NAME)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+                if (length > 0) {
+                    name = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let locked: boolean | undefined = false;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LOCKED)) {
+                locked = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let userData: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USER_DATA)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+                if (length > 0) {
+                    userData = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let privateUserData: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PRIVATE_USER_DATA)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+                if (length > 0) {
+                    privateUserData = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let href: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HREF)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+                if (length > 0) {
+                    href = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let description: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DESCRIPTION)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+                if (length > 0) {
+                    description = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let position: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_POSITION)) {
+                position = {
+                    x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let dimensions: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DIMENSIONS)) {
+                dimensions = {
+                    x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let rotation: quat | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ROTATION)) {
+                rotation = GLMHelpers.unpackOrientationQuatFromBytes(data, dataPosition);
+                dataPosition += 8;
+            }
+
+            let registrationPoint: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_REGISTRATION_POINT)) {
+                registrationPoint = {
+                    x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let created: BigInt | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CREATED)) {
+                created = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 8;
+            }
+
+            let lastEditedBy: Uuid | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LAST_EDITED_BY)) {
+                const lastEditedLength = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (lastEditedLength > 0) {
+                    lastEditedBy = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
+                    dataPosition += 16;
+                }
+            }
+
+            let queryAACube: AACube | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_QUERY_AA_CUBE)) {
+                const corner = {
+                    x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+
+                const scale = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+
+                queryAACube = new AACube(corner, scale);
+            }
+
+            let canCastShadow: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CAN_CAST_SHADOW)) {
+                canCastShadow = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let renderLayer: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RENDER_LAYER)) {
+                renderLayer = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let primitiveMode: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PRIMITIVE_MODE)) {
+                primitiveMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let ignorePickIntersection: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_IGNORE_PICK_INTERSECTION)) {
+                ignorePickIntersection = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let renderWithZones: Uuid[] | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RENDER_WITH_ZONES)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    renderWithZones = [];
+                    for (let j = 0; j < length; j++) {
+                        renderWithZones.push(
+                            new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN))
+                        );
+                        dataPosition += 16;
+                    }
+                }
+
+            }
+
+            let billboardMode: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BILLBOARD_MODE)) {
+                billboardMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let grabbable: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_GRABBABLE)) {
+                grabbable = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let grabKinematic: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_KINEMATIC)) {
+                grabKinematic = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let grabFollowsController: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_FOLLOWS_CONTROLLER)) {
+                grabFollowsController = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let triggerable: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_TRIGGERABLE)) {
+                triggerable = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let grabEquippable: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE)) {
+                grabEquippable = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let delegateToParent: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_DELEGATE_TO_PARENT)) {
+                delegateToParent = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let equippableLeftPositionOffset: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET)) {
+                equippableLeftPositionOffset = {
+                    x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let equippableLeftRotationOffset: quat | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET)) {
+                equippableLeftRotationOffset
+                        = GLMHelpers.unpackOrientationQuatFromBytes(data, dataPosition);
+                dataPosition += 8;
+            }
+
+            let equippableRightPositionOffset: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET)) {
+                equippableRightPositionOffset = {
+                    x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let equippableRightRotationOffset: quat | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET)) {
+                equippableRightRotationOffset
+                        = GLMHelpers.unpackOrientationQuatFromBytes(data, dataPosition);
+                dataPosition += 8;
+            }
+
+            let equippableIndicatorUrl: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_URL)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    equippableIndicatorUrl = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let equippableIndicatorScale: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE)) {
+                equippableIndicatorScale = {
+                    x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let equippableIndicatorOffset: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET)) {
+                equippableIndicatorOffset = {
+                    x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let density: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DENSITY)) {
+                density = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let velocity: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VELOCITY)) {
+                velocity = {
+                    x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let angularVelocity: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_VELOCITY)) {
+                angularVelocity = {
+                    x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let gravity: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAVITY)) {
+                gravity = {
+                    x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let acceleration: vec3 | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACCELERATION)) {
+                acceleration = {
+                    x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                    y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                    z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                };
+                dataPosition += 12;
+            }
+
+            let damping: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DAMPING)) {
+                damping = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let angularDampling: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_DAMPING)) {
+                angularDampling = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let restitution: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RESTITUTION)) {
+                restitution = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let friction: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_FRICTION)) {
+                friction = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let lifetime: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIFETIME)) {
+                lifetime = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let collisionless: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISIONLESS)) {
+                collisionless = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let collisionMask: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_MASK)) {
+                collisionMask = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+            }
+
+            let dynamic: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DYNAMIC)) {
+                dynamic = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let collisionSoundUrl: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_SOUND_URL)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    collisionSoundUrl = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let actionData: ArrayBuffer | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACTION_DATA)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    const buffer = new Uint8Array(length);
+                    const view = new DataView(buffer.buffer);
+                    for (let j = 0; j < length; j++) {
+                        view.setUint8(j, data.getUint8(dataPosition));
+                        dataPosition += 1;
+                    }
+                    actionData = buffer;
+
+                }
+            }
+
+            let cloneable: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONEABLE)) {
+                cloneable = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let cloneLifetime: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_LIFETIME)) {
+                cloneLifetime = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let cloneLimit: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_LIMIT)) {
+                cloneLimit = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let cloneDynamic: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_DYNAMIC)) {
+                cloneDynamic = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let cloneAvatarIdentity: boolean | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_AVATAR_ENTITY)) {
+                cloneAvatarIdentity = Boolean(data.getUint8(dataPosition));
+                dataPosition += 1;
+            }
+
+            let cloneOriginId: Uuid | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_ORIGIN_ID)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    cloneOriginId = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
+                    dataPosition += 16;
+                }
+            }
+
+            let script: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    script = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let scriptTimestamp: BigInt | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT_TIMESTAMP)) {
+                scriptTimestamp = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 8;
+            }
+
+            let serverScripts: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SERVER_SCRIPTS)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    serverScripts = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let itemName: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_NAME)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    itemName = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let itemDescription: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_DESCRIPTION)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    itemDescription = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let itemCategories: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_CATEGORIES)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    itemCategories = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let itemArtist: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_ARTIST)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    itemArtist = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let itemLicense: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_LICENSE)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    itemLicense = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let limitedRun: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIMITED_RUN)) {
+                limitedRun = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let marketplaceID: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MARKETPLACE_ID)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    marketplaceID = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let editionNumber: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EDITION_NUMBER)) {
+                editionNumber = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let entityInstanceNumber: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ENTITY_INSTANCE_NUMBER)) {
+                entityInstanceNumber = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+            let certificateID: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_ID)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    certificateID = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let certificateType: string | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_TYPE)) {
+                const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 2;
+
+                if (length > 0) {
+                    certificateType = textDecoder.decode(
+                        new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                    );
+                    dataPosition += length;
+                }
+            }
+
+            let staticCertificateVersion: number | undefined = undefined;
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_STATIC_CERTIFICATE_VERSION)) {
+                staticCertificateVersion = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+                dataPosition += 4;
+            }
+
+
+            // The C++ code uses polymorphism to call the right method. Here we use a switch statement instead.
+            // eslint-disable-next-line @typescript-eslint/init-declarations
+            let subclassData: EntitySubclassData;
+            switch (entityType) {
+                case EntityTypes.Model: {
+                    subclassData = this.#modelEntityItemReadEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                    break;
+                }
+                default:
+                    // WEBRTC TODO: This line will not be unreachable once all entity types are supported.
+                    console.error("Entity type not supported: ", entityType);
+                    return {
+                        bytesRead: dataPosition - pos,
+                        entitiesDataDetails: []
+                    };
+            }
+
+            dataPosition += subclassData.bytesRead;
+            entitiesDataDetails.push({
+                entityItemID,
+                entityType,
+                createdFromBuffer,
+                lastEdited,
+                updateDelta,
+                simulatedDelta,
+                simOwnerData,
+                parentID,
+                parentJointIndex,
+                visible,
+                name,
+                locked,
+                userData,
+                privateUserData,
+                href,
+                description,
+                position,
+                dimensions,
+                rotation,
+                registrationPoint,
+                created,
+                lastEditedBy,
+                queryAACube,
+                canCastShadow,
+                renderLayer,
+                primitiveMode,
+                ignorePickIntersection,
+                renderWithZones,
+                billboardMode,
+                grabbable,
+                grabKinematic,
+                grabFollowsController,
+                triggerable,
+                grabEquippable,
+                delegateToParent,
+                equippableLefPositionOffset: equippableLeftPositionOffset,
+                equippableLeftRotationOffset,
+                equippableRightPositionOffset,
+                equippableRightRotationOffset,
+                equippableIndicatorUrl,
+                equippableIndicatorScale,
+                equippableIndicatorOffset,
+                density,
+                velocity,
+                angularVelocity,
+                gravity,
+                acceleration,
+                damping,
+                angularDampling,
+                restitution,
+                friction,
+                lifetime,
+                collisionless,
+                collisionMask,
+                dynamic,
+                collisionSoundUrl,
+                actionData,
+                cloneable,
+                cloneLifetime,
+                cloneLimit,
+                cloneDynamic,
+                cloneAvatarIdentity,
+                cloneOriginId,
+                script,
+                scriptTimestamp,
+                serverScripts,
+                itemName,
+                itemDescription,
+                itemCategories,
+                itemArtist,
+                itemLicense,
+                limitedRun,
+                marketplaceID,
+                editionNumber,
+                entityInstanceNumber,
+                certificateID,
+                certificateType,
+                staticCertificateVersion,
+                ...subclassData.properties
+            });
+        }
+
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+        return {
+            bytesRead: dataPosition - pos,
+            entitiesDataDetails
+        };
+    }
+
+    // eslint-disable-next-line max-len
+    #modelEntityItemReadEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): EntitySubclassData { // eslint-disable-line class-methods-use-this
+        // C++ int ModelEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
+        //     ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
+        //     bool& somethingChanged)
+
+        let dataPosition = position;
+
+        const textDecoder = new TextDecoder();
+
+        let shapeType: number | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SHAPE_TYPE)) {
+            shapeType = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 4;
+        }
+
+        let compoundShapeUrl: string | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COMPOUND_SHAPE_URL)) {
+            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+
+            if (length > 0) {
+                compoundShapeUrl = textDecoder.decode(
+                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                );
+                dataPosition += length;
+            }
+        }
+
+        let color: vec3 | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
+            // The C++ stores the color property into a glm::u8vec3. It does not matter here
+            // because the type of x, y and z is number.
+            color = {
+                x: data.getUint8(dataPosition),
+                y: data.getUint8(dataPosition + 1),
+                z: data.getUint8(dataPosition + 2)
+            };
+            dataPosition += 3;
+        }
+
+        let textures: string | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXTURES)) {
+            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+
+            if (length > 0) {
+                textures = textDecoder.decode(
+                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                );
+                dataPosition += length;
+            }
+        }
+
+        let modelUrl: string | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_URL)) {
+            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+
+            if (length > 0) {
+                modelUrl = textDecoder.decode(
+                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                );
+                dataPosition += length;
+            }
+        }
+
+        let modelScale: vec3 | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_SCALE)) {
+            modelScale = {
+                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+            };
+            dataPosition += 12;
+        }
+
+        let jointRotationsSet: boolean[] | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_ROTATIONS_SET)) {
+            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+
+            if (length > 0) {
+                jointRotationsSet = [];
+                for (let j = 0; j < length; j++) {
+                    jointRotationsSet.push(Boolean(data.getUint8(dataPosition + j)));
+                }
+                dataPosition += length;
+            }
+        }
+
+        let jointRotations: quat[] | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_ROTATIONS)) {
+            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+
+            if (length > 0) {
+                jointRotations = [];
+                for (let j = 0; j < length; j++) {
+                    jointRotations.push(
+                        GLMHelpers.unpackOrientationQuatFromBytes(
+                            data, dataPosition + j * 8
+                        )
+                    );
+                }
+                dataPosition += length;
+            }
+        }
+
+        let jointTranslationsSet: boolean[] | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_TRANSLATIONS_SET)) {
+            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+
+            if (length > 0) {
+                jointTranslationsSet = [];
+                for (let j = 0; j < length; j++) {
+                    jointTranslationsSet.push(Boolean(data.getUint8(dataPosition + j)));
+                }
+                dataPosition += length;
+            }
+        }
+
+        let jointTranslations: vec3[] | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_TRANSLATIONS)) {
+            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+
+            if (length > 0) {
+                jointTranslations = [];
+                for (let j = 0; j < length; j++) {
+                    jointTranslations.push(
+                        {
+                            x: data.getFloat32(dataPosition + j * 12, UDT.LITTLE_ENDIAN),
+                            y: data.getFloat32(dataPosition + 4 + j * 12, UDT.LITTLE_ENDIAN),
+                            z: data.getFloat32(dataPosition + 8 + j * 12, UDT.LITTLE_ENDIAN)
+                        }
+                    );
+
+                }
+                dataPosition += length;
+            }
+        }
+
+        let relayParentJoints: boolean | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RELAY_PARENT_JOINTS)) {
+            relayParentJoints = Boolean(data.getUint8(dataPosition));
+            dataPosition += 1;
+        }
+
+        let groupCulled: boolean | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GROUP_CULLED)) {
+            groupCulled = Boolean(data.getUint8(dataPosition));
+            dataPosition += 1;
+        }
+
+        let blendShapeCoefficients: string | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BLENDSHAPE_COEFFICIENTS)) {
+            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+
+            if (length > 0) {
+                blendShapeCoefficients = textDecoder.decode(
+                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                );
+                dataPosition += length;
+            }
+        }
+
+        let useOriginalPivot: boolean | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USE_ORIGINAL_PIVOT)) {
+            useOriginalPivot = Boolean(data.getUint8(dataPosition));
+            dataPosition += 1;
+        }
+
+        let animationUrl: string | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_URL)) {
+            const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 2;
+
+            if (length > 0) {
+                animationUrl = textDecoder.decode(
+                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
+                );
+                dataPosition += length;
+            }
+        }
+
+        let animationAllowTranslation: boolean | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_ALLOW_TRANSLATION)) {
+            animationAllowTranslation = Boolean(data.getUint8(dataPosition));
+            dataPosition += 1;
+        }
+
+        let animationFPS: number | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FPS)) {
+            animationFPS = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 4;
+        }
+
+        let animationFrameIndex: number | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FRAME_INDEX)) {
+            animationFrameIndex = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 4;
+        }
+
+        let animationPlaying: boolean | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_PLAYING)) {
+            animationPlaying = Boolean(data.getUint8(dataPosition));
+            dataPosition += 1;
+        }
+
+        let animationLoop: boolean | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_LOOP)) {
+            animationLoop = Boolean(data.getUint8(dataPosition));
+            dataPosition += 1;
+        }
+
+        let animationFirstFrame: number | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FIRST_FRAME)) {
+            animationFirstFrame = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 4;
+        }
+
+        let animationLastFrame: number | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_LAST_FRAME)) {
+            animationLastFrame = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+            dataPosition += 4;
+        }
+
+        let animationHold: boolean | undefined = undefined;
+        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_HOLD)) {
+            animationHold = Boolean(data.getUint8(dataPosition));
+            dataPosition += 1;
+        }
+
+        return {
+            bytesRead: dataPosition - position,
+            properties: {
+                shapeType,
+                compoundShapeUrl,
+                color,
+                textures,
+                modelUrl,
+                modelScale,
+                jointRotationsSet,
+                jointRotations,
+                jointTranslationsSet,
+                jointTranslations,
+                groupCulled,
+                relayParentJoints,
+                blendShapeCoefficients,
+                useOriginalPivot,
+                animationUrl,
+                animationAllowTranslation,
+                animationFPS,
+                animationFrameIndex,
+                animationPlaying,
+                animationLoop,
+                animationFirstFrame,
+                animationLastFrame,
+                animationHold
+            }
+        };
+    }
+
+    // Implemented recursively in the C++ code, numberOfThreeBitSectionsInCode is here implemented iteratively.
+    #numberOfThreeBitSectionsInCode(data: DataView, dataPosition: number, maxBytes: number): number {
+        // C++ int OctalCode::numberOfThreeBitSectionsInCode(const unsigned char* octalCode, int maxBytes)
+
+        if (maxBytes === this.#_OVERFLOWED_OCTCODE_BUFFER) {
+            return this.#_OVERFLOWED_OCTCODE_BUFFER;
+        }
+
+        let dataPos = dataPosition;
+
+        let curOctalCode = data.getUint8(dataPosition);
+        let result = curOctalCode;
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        while (curOctalCode === 255) {
+            result += curOctalCode;
+            dataPos += 1;
+            curOctalCode = data.getUint8(dataPos);
+
+            const newMaxBytes = maxBytes === this.#_UNKNOWN_OCTCODE_LENGTH
+                ? this.#_UNKNOWN_OCTCODE_LENGTH
+                : maxBytes - 1;
+
+            if (newMaxBytes === this.#_OVERFLOWED_OCTCODE_BUFFER) {
+                result += this.#_OVERFLOWED_OCTCODE_BUFFER;
+                break;
+            }
+        }
+        return result;
+    }
+
+    #bytesRequiredForCodeLength(threeBitCodes: number): number { // eslint-disable-line class-methods-use-this
+        // C++ size_t OctalCode::bytesRequiredForCodeLength(unsigned char threeBitCodes)
+
+        if (threeBitCodes === 0) {
+            return 1;
+        }
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        return 1 + Math.ceil(threeBitCodes * 3 / 8.0);
+    }
+
 
 }();
 
