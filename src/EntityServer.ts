@@ -46,7 +46,8 @@ import AssignmentClient from "./domain/AssignmentClient";
  *
  *  @property {number} maxOctreePacketsPerSecond - The maximum number of octree packets per second that the user client is
  *      willing to handle.
- *  @property {Signal<EntityServer~AddedEntityCallback>} addedEntity - Triggered when an entity data packet is received.
+ *  @property {Signal<EntityServer~entityData>} entityData - Triggered when new or changed entity data is received from the
+ *      entity server.
  */
 class EntityServer extends AssignmentClient {
 
@@ -124,8 +125,9 @@ class EntityServer extends AssignmentClient {
     }
 
     /*@sdkdoc
-     *  Triggered when an entity data packet is received.
-     *  @callback EntityServer~AddedEntityCallback
+     *  Triggered when new or changed entity data is received from the entity server.
+     *  @callback EntityServer~entityData
+     *  @param {EntityDataDetails[]} entityData - The entity data information for one or more entities.
      */
     get entityData(): Signal {
         return this.#_entityData.signal();

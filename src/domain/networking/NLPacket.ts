@@ -26,20 +26,25 @@ import assert from "../shared/assert";
  *  <p>C++ <code>NLPacket : public Packet</code></p>
  *  @class NLPacket
  *  @extends Packet
- *  @param {PacketType|Packet} type|packet - The type of NLPacket to create.
+ *  @param {PacketType|DataView|Packet} type|packet - The type of NLPacket to create.
+ *      <p>A Dataview to create the NLPacket from.</p>
  *      <p>A base Packet to create the NLPacket from.</p>
  *      <p>Note: The {@link MessageData} from the base packet is reused in-place, not copied.</p>
- *  @param {number|unused} size - The size of the packet in bytes. If <code>-1</code>, a packet of the maximum size is created
- *      (though not all of it need be sent). <strong>Default Value:</strong> <code>-1</code>
+ *  @param {number|number|unused} size - The size of the packet in bytes. If <code>-1</code>, a packet of the maximum size is
+ *      created (though not all of it need be sent). <strong>Default Value:</strong> <code>-1</code>
+ *      <p>The size of the packet in bytes.</p>
  *      <p>Unused.</p>
- *  @param {boolean|unused} isReliable - <code>true</code> if the packet is to be sent reliably, <code>false</code> if it isn't.
- *      <strong>Default Value:</strong> <code>false</code
+ *  @param {boolean|SockAddr|unused} isReliable - <code>true</code> if the packet is to be sent reliably, <code>false</code> if
+ *      it isn't. <strong>Default Value:</strong> <code>false</code
+ *      <p>The sender's IP address and port.</p>
  *      <p>Unused.</p>
- *  @param {boolean|unused} isPartOfMessage - <code>true</code> if the packet is part of a message, <code>false</code> if it
- *      isn't. <strong>Default Value:</strong> <code>false</code>
+ *  @param {boolean|unused|unused} isPartOfMessage - <code>true</code> if the packet is part of a message, <code>false</code> if
+ *      it isn't. <strong>Default Value:</strong> <code>false</code>
  *      <p>Unused.</p>
- *  @param {PacketVersion|unused} version - The version of the NLPacket to create. <strong>Default Value:</strong>
+ *      <p>Unused.</p>
+ *  @param {PacketVersion|unused|unused} version - The version of the NLPacket to create. <strong>Default Value:</strong>
  *      <code>0</code>
+ *      <p>Unused.</p>
  *      <p>Unused.</p>
  */
 class NLPacket extends Packet {
@@ -197,7 +202,7 @@ class NLPacket extends Packet {
             this.adjustPayloadStartAndCapacity(NLPacket.#localHeaderSize(this._messageData.type));
 
         } else if (param0 instanceof DataView && typeof param1 === "number" && param2 instanceof SockAddr) {
-            // C++ NLPacket(std::unique_ptr<char[]> data, qint64 size, const SockAddr& senderSockAddr)
+            // C++  NLPacket(std::unique_ptr<char[]> data, qint64 size, const SockAddr& senderSockAddr)
             const data = param0;
             const size = param1;
             const senderSockAddr = param2;

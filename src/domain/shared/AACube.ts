@@ -13,8 +13,8 @@ import { vec3 } from "../shared/Vec3";
 
 
 /*@devdoc
- *  The <code>AACube</code> class provides an axis-aligned cube, defined as the bottom right near (minimum axes values) corner
- *  of the cube plus the dimension of its sides.
+ *  The <code>AACube</code> class provides an axis-aligned cube, defined as the minimum axes values corner of the cube plus the
+ *  dimension of its sides.
  *  <p>C++: <code>class AACube</code></p>
  *  @class AACube
  *  @param {vec3} corner - The coordinate vector of the bottom right near corner of the cube.

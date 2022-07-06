@@ -1,5 +1,5 @@
 //
-//  ByteCountCoding.unit.test.js
+//  ByteCountCoded.unit.test.js
 //
 //  Created by Julien Merzoug on 01 June 2022.
 //  Copyright 2022 Vircadia contributors.
@@ -9,10 +9,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import ByteCountCoded from "../../../src/domain/shared/ByteCountCoding";
+import ByteCountCoded from "../../../src/domain/shared/ByteCountCoded";
 
 
-describe("ByteCountCoding - unit tests", () => {
+describe("ByteCountCoded - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 

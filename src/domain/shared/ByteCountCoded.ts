@@ -1,5 +1,5 @@
 //
-//  ByteCountCoding.ts
+//  ByteCountCoded.ts
 //
 //  Created by Julien Merzoug on 01 June 2022.
 //  Copyright 2022 Vircadia contributors.
@@ -12,8 +12,10 @@
 
 /*@devdoc
  *  The <code>ByteCountCoded</code> class provides facilities to decode data.
- *  <p>C++: <code>template<typename T> class ByteCountCoded</code></p>
- *  @class PropertyFlags
+ *  <p>C++: <code>template&lt;typename T&gt; class ByteCountCoded</code></p>
+ *  @class ByteCountCoded
+ *
+ *  @property {number} data - The decoded byte count encoded data.
  */
 // WEBRTC TODO: Make the class generic.
 class ByteCountCoded {

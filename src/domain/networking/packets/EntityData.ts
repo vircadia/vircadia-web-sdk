@@ -9,10 +9,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { EntityTypes } from "../../entities/EntityItem";
+import { EntityTypes } from "../../entities/EntityTypes";
 import AACube from "../../shared/AACube";
 import assert from "../../shared/assert";
-import ByteCountCoded from "../../shared/ByteCountCoding";
+import ByteCountCoded from "../../shared/ByteCountCoded";
 import "../../shared/DataViewExtensions";
 import GLMHelpers from "../../shared/GLMHelpers";
 import PropertyFlags from "../../shared/PropertyFlags";
@@ -447,8 +447,8 @@ enum EntityPropertyFlags {
 type CommonEntityProperties = {
     entityItemID: Uuid,
     entityType: EntityTypes,
-    createdFromBuffer: BigInt,
-    lastEdited: BigInt,
+    createdFromBuffer: bigint,
+    lastEdited: bigint,
     updateDelta: number,
     simulatedDelta: number,
     simOwnerData: ArrayBuffer | undefined;
@@ -465,7 +465,7 @@ type CommonEntityProperties = {
     dimensions: vec3 | undefined;
     rotation: quat | undefined;
     registrationPoint: vec3 | undefined;
-    created: BigInt | undefined;
+    created: bigint | undefined;
     lastEditedBy: Uuid | undefined;
     queryAACube: AACube | undefined;
     canCastShadow: boolean | undefined;
@@ -484,7 +484,7 @@ type CommonEntityProperties = {
     equippableLeftRotationOffset: quat | undefined;
     equippableRightPositionOffset: vec3 | undefined;
     equippableRightRotationOffset: quat | undefined;
-    equippableIndicatorUrl: string | undefined;
+    equippableIndicatorURL: string | undefined;
     equippableIndicatorScale: vec3 | undefined;
     equippableIndicatorOffset: vec3 | undefined;
     density: number | undefined;
@@ -500,16 +500,16 @@ type CommonEntityProperties = {
     collisionless: boolean | undefined;
     collisionMask: number | undefined;
     dynamic: boolean | undefined;
-    collisionSoundUrl: string | undefined;
+    collisionSoundURL: string | undefined;
     actionData: ArrayBuffer | undefined;
     cloneable: boolean | undefined;
     cloneLifetime: number | undefined;
     cloneLimit: number | undefined;
     cloneDynamic: boolean | undefined;
     cloneAvatarIdentity: boolean | undefined;
-    cloneOriginId: Uuid | undefined;
+    cloneOriginID: Uuid | undefined;
     script: string | undefined;
-    scriptTimestamp: BigInt | undefined;
+    scriptTimestamp: bigint | undefined;
     serverScripts: string | undefined;
     itemName: string | undefined;
     itemDescription: string | undefined;
@@ -525,22 +525,8 @@ type CommonEntityProperties = {
     staticCertificateVersion: number | undefined;
 };
 
-type ModelEntityProperties = {
-    shapeType: number | undefined;
-    compoundShapeUrl: string | undefined;
-    color: vec3 | undefined;
-    textures: string | undefined;
-    modelUrl: string | undefined;
-    modelScale: vec3 | undefined;
-    jointRotationsSet: boolean[] | undefined;
-    jointRotations: quat[] | undefined;
-    jointTranslationsSet: boolean[] | undefined;
-    jointTranslations: vec3[] | undefined;
-    groupCulled: boolean | undefined;
-    relayParentJoints: boolean | undefined;
-    blendShapeCoefficients: string | undefined;
-    useOriginalPivot: boolean | undefined;
-    animationUrl: string | undefined;
+type AnimationProperties = {
+    animationURL: string | undefined;
     animationAllowTranslation: boolean | undefined;
     animationFPS: number | undefined;
     animationFrameIndex: number | undefined;
@@ -550,6 +536,23 @@ type ModelEntityProperties = {
     animationLastFrame: number | undefined;
     animationHold: boolean | undefined;
 };
+
+type ModelEntityProperties = {
+    shapeType: number | undefined;
+    compoundShapeURL: string | undefined;
+    color: vec3 | undefined;
+    textures: string | undefined;
+    modelURL: string | undefined;
+    modelScale: vec3 | undefined;
+    jointRotationsSet: boolean[] | undefined;
+    jointRotations: quat[] | undefined;
+    jointTranslationsSet: boolean[] | undefined;
+    jointTranslations: vec3[] | undefined;
+    groupCulled: boolean | undefined;
+    relayParentJoints: boolean | undefined;
+    blendShapeCoefficients: string | undefined;
+    useOriginalPivot: boolean | undefined;
+} & AnimationProperties;
 
 type EntityDataDetails = CommonEntityProperties & ModelEntityProperties;
 
@@ -588,9 +591,9 @@ const EntityData = new class {
      *  @typedef {object} PacketScribe.EntityDataDetails
      *  @property {Uuid} entityItemID - The ID of the entity.
      *  @property {EntityTypes} entityType - The entity's type. It cannot be changed after an entity is created.
-     *  @property {BigInt} createdFromBuffer - Timestamp for when the entity was created. Expressed in number of microseconds
+     *  @property {bigint} createdFromBuffer - Timestamp for when the entity was created. Expressed in number of microseconds
      *      since Unix epoch.
-     *  @property {BigInt} lastEdited - Timestamp for when the entity was last edited. Expressed in number of microseconds since
+     *  @property {bigint} lastEdited - Timestamp for when the entity was last edited. Expressed in number of microseconds since
      *      Unix epoch.
      *  @property {number} updateDelta - The delta between {@link EntityDataDetails|lastEdited} and the last time the entity was
      *      updated.
@@ -617,7 +620,7 @@ const EntityData = new class {
      *  @property {quat | undefined} rotation - The orientation of the entity in world coordinates.
      *  @property {vec3 | undefined} registrationPoint - The point in the entity that is set to the entity's position and is
      *      rotated about.
-     *  @property {BigInt | undefined} created - Timestamp for when the entity was created. Expressed in number of microseconds
+     *  @property {bigint | undefined} created - Timestamp for when the entity was created. Expressed in number of microseconds
      *      since Unix
      *  @property {Uuid | undefined} lastEditedBy - The session ID of the avatar or agent that most recently created or edited
      *      the entity.
@@ -656,7 +659,7 @@ const EntityData = new class {
      *  @property {quat | undefined} equippableLeftRotationOffset - Rotational offset from the left hand, when equipped.
      *  @property {vec3 | undefined} equippableRightPositionOffset - Positional offset from the right hand, when equipped.
      *  @property {quat | undefined} equippableRightRotationOffset - Rotational offset from the right hand, when equipped.
-     *  @property {string | undefined} equippableIndicatorUrl - If non-empty, this model will be used to indicate that an entity
+     *  @property {string | undefined} equippableIndicatorURL - If non-empty, this model will be used to indicate that an entity
      *      is equippable, rather than the default.
      *  @property {vec3 | undefined} equippableIndicatorScale - If equippableIndicatorURL is non-empty, this controls the scale
      *      of the displayed indicator.
@@ -694,7 +697,7 @@ const EntityData = new class {
      *  @property {number | undefined} collisionMask - What types of items the entity should collide with.
      *  @property {boolean | undefined} dynamic - <code>true</code> if the entity's movement is affected by collisions,
      *      <code>false</code> if it isn't.
-     *  @property {string | undefined} collisionSoundUrl - The sound that's played when the entity experiences a collision.
+     *  @property {string | undefined} collisionSoundURL - The sound that's played when the entity experiences a collision.
      *  @property {ArrayBuffer | undefined} actionData - Base-64 encoded compressed dump of the actions associated with the
      *      entity. This property is typically not used in scripts directly; rather, functions that manipulate an entity's
      *      actions update it. The size of this property increases with the number of actions. Because this property value has
@@ -709,9 +712,9 @@ const EntityData = new class {
      *      dynamic property set to true, <code>false</code> if they won't.
      *  @property {boolean | undefined} cloneAvatarIdentity - <code>true</code> if clones created from this entity will be
      *      created as avatar entities, <code>false</code> if they won't be.
-     *  @property {Uuid | undefined} cloneOriginId - The ID of the entity that this entity was cloned from.
+     *  @property {Uuid | undefined} cloneOriginID - The ID of the entity that this entity was cloned from.
      *  @property {string | undefined} script - The URL of the client entity script, if any, that is attached to the entity.
-     *  @property {BigInt | undefined} scriptTimestamp - Used to indicate when the client entity script was loaded. Should be an
+     *  @property {bigint | undefined} scriptTimestamp - Used to indicate when the client entity script was loaded. Should be an
      *      integer number of milliseconds since Unix epoch. If you update the property's value, the script is re-downloaded and
      *      reloaded.
      *  @property {string | undefined} serverScripts - The URL of the server entity script, if any, that is attached to the
@@ -735,14 +738,14 @@ const EntityData = new class {
      *  @property {string | undefined} certificateType - Type of the certificate.
      *  @property {number | undefined} staticCertificateVersion - The version of the method used to generate the certificateID.
      *  @property {number | undefined} shapeType - The shape of the collision hull used if collisions are enabled.
-     *  @property {string | undefined} compoundShapeUrl - The model file to use for the compound shape if shapeType is
+     *  @property {string | undefined} compoundShapeURL - The model file to use for the compound shape if shapeType is
      *      "compound".
      *  @property {vec3 | undefined} color - Currently not used.
      *  @property {string | undefined} textures - A JSON string of texture name, URL pairs used when rendering the model in
      *      place of the model's original textures. Use a texture name from the originalTextures property to override that
      *      texture.  Only the texture names and URLs to be overridden need be specified; original textures are used where there
      *      are no overrides. You can use JSON.stringify() to convert a JavaScript object of name, URL pairs into a JSON string.
-     *  @property {string | undefined} modelUrl - The URL of the glTF, FBX, or OBJ model. glTF models may be in JSON or binary
+     *  @property {string | undefined} modelURL - The URL of the glTF, FBX, or OBJ model. glTF models may be in JSON or binary
      *      format (".gltf" or ".glb" URLs respectively). Baked models' URLs have ".baked" before the file type. Model files may
      *      also be compressed in GZ format, in which case the URL ends in ".gz".
      *  @property {vec3 | undefined} modelScale - The scale factor applied to the model's dimensions.
@@ -765,7 +768,7 @@ const EntityData = new class {
      *  @property {boolean | undefined} useOriginalPivot - If <code>false</code>, the model will be centered based on its
      *      content, ignoring any offset in the model itself. If <code>true</code>, the model will respect its original offset.
      *      Currently, only pivots relative to <code>{x: 0, y: 0, z: 0}</code> are supported.
-     *  @property {string | undefined} animationUrl - The URL of the glTF or FBX file that has the animation. glTF files may be
+     *  @property {string | undefined} animationURL - The URL of the glTF or FBX file that has the animation. glTF files may be
      *      in JSON or binary format (".gltf" or ".glb" URLs respectively).
      *  @property {boolean | undefined} animationAllowTranslation - <code>true</code> to enable translations contained in the
      *      animation to be played, <code>false</code> to disable translations.
@@ -785,7 +788,7 @@ const EntityData = new class {
      *  Reads an {@link PacketType(1)|EntityData} packet containing the details of one or more entities.
      *  @function PacketScribe.EntityData&period;read
      *  @read {DataView} data - The {@link Packets|EntityData} message data to read.
-     *  @returns {PacketScribe.EntityDataDetails} The entity data information.
+     *  @returns {PacketScribe.EntityDataDetails[]} The entity data information for one or more entities.
      */
     read(data: DataView): EntityDataDetails[] {
         // C++ void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointer sourceNode)
@@ -799,7 +802,7 @@ const EntityData = new class {
 
         /* eslint-disable @typescript-eslint/no-unused-vars */
 
-        // WEBRTC TODO: Read and use the variable sequence as in the C++ method OctreeProcessor::processDatagram
+        // Skip over the sequence value which is used for safe landing.
         dataPosition += 2;
 
         // WEBRTC TODO: Read and use the variable sentAt as in the C++ method OctreeProcessor::processDatagram
@@ -877,8 +880,7 @@ const EntityData = new class {
         let entitiesDataDetails: EntityDataDetails[] = [];
 
         while (dataPosition < data.byteLength) {
-            const numberOfThreeBitSectionsInStream
-            = this.#numberOfThreeBitSectionsInCode(data, dataPosition, data.byteLength);
+            const numberOfThreeBitSectionsInStream = this.#numberOfThreeBitSectionsInCode(data, dataPosition, data.byteLength);
 
             const octalCodeBytes = this.#bytesRequiredForCodeLength(numberOfThreeBitSectionsInStream);
             dataPosition += octalCodeBytes;
@@ -909,12 +911,12 @@ const EntityData = new class {
             };
         }
 
-        // WEBRTC TODO: Read and use the variable colorInPacketMask.
+        // Skip over colorInPacketMask which is used for the management of the octree in the native client.
         dataPosition += 1;
 
         // WEBRTC TODO: Do not hardcode value.
         // eslint-disable-next-line
-                // @ts-ignore
+        // @ts-ignore
         const bytesForMask = 2;
         dataPosition += bytesForMask;
 
@@ -960,20 +962,21 @@ const EntityData = new class {
         }
 
         const entitiesDataDetails: EntityDataDetails[] = [];
+        const codec = new ByteCountCoded();
 
         for (let i = 0; i < numberOfEntities; i++) {
             const entityItemID = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
             dataPosition += 16;
 
-            const entityTypeCodec = new ByteCountCoded();
             let encodedData = new DataView(data.buffer, data.byteOffset + dataPosition);
-            dataPosition += entityTypeCodec.decode(encodedData, encodedData.byteLength);
-
-            const entityType = entityTypeCodec.data;
+            dataPosition += codec.decode(encodedData, encodedData.byteLength);
+            const entityType = codec.data;
 
             // WEBRTC TODO: Unnecessary check once all entity types are supported.
             if (entityType !== EntityTypes.Model) {
-                throw new Error(`Entity type is not supported: ${entityType}`);
+                const errorMessage = `Entity type is not supported: ${entityType}`;
+                console.error(errorMessage);
+                throw new Error(errorMessage);
             }
 
             const createdFromBuffer = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
@@ -982,17 +985,13 @@ const EntityData = new class {
             const lastEdited = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 8;
 
-            const updateDeltaCodec = new ByteCountCoded();
             encodedData = new DataView(data.buffer, data.byteOffset + dataPosition);
-            dataPosition += updateDeltaCodec.decode(encodedData, encodedData.byteLength);
+            dataPosition += codec.decode(encodedData, encodedData.byteLength);
+            const updateDelta = codec.data;
 
-            const updateDelta = updateDeltaCodec.data;
-
-            const simulatedDeltaCodec = new ByteCountCoded();
             encodedData = new DataView(data.buffer, data.byteOffset + dataPosition);
-            dataPosition += simulatedDeltaCodec.decode(encodedData, encodedData.byteLength);
-
-            const simulatedDelta = simulatedDeltaCodec.data;
+            dataPosition += codec.decode(encodedData, encodedData.byteLength);
+            const simulatedDelta = codec.data;
 
             const propertyFlags = new PropertyFlags();
             const encodedFlags = new DataView(data.buffer, data.byteOffset + dataPosition);
@@ -1142,7 +1141,7 @@ const EntityData = new class {
                 dataPosition += 12;
             }
 
-            let created: BigInt | undefined = undefined;
+            let created: bigint | undefined = undefined;
             if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CREATED)) {
                 created = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 8;
@@ -1291,13 +1290,13 @@ const EntityData = new class {
                 dataPosition += 8;
             }
 
-            let equippableIndicatorUrl: string | undefined = undefined;
+            let equippableIndicatorURL: string | undefined = undefined;
             if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_URL)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
                 if (length > 0) {
-                    equippableIndicatorUrl = textDecoder.decode(
+                    equippableIndicatorURL = textDecoder.decode(
                         new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
                     );
                     dataPosition += length;
@@ -1418,13 +1417,13 @@ const EntityData = new class {
                 dataPosition += 1;
             }
 
-            let collisionSoundUrl: string | undefined = undefined;
+            let collisionSoundURL: string | undefined = undefined;
             if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_SOUND_URL)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
                 if (length > 0) {
-                    collisionSoundUrl = textDecoder.decode(
+                    collisionSoundURL = textDecoder.decode(
                         new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
                     );
                     dataPosition += length;
@@ -1478,13 +1477,13 @@ const EntityData = new class {
                 dataPosition += 1;
             }
 
-            let cloneOriginId: Uuid | undefined = undefined;
+            let cloneOriginID: Uuid | undefined = undefined;
             if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_ORIGIN_ID)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
                 if (length > 0) {
-                    cloneOriginId = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
+                    cloneOriginID = new Uuid(data.getBigUint128(dataPosition, UDT.BIG_ENDIAN));
                     dataPosition += 16;
                 }
             }
@@ -1502,7 +1501,7 @@ const EntityData = new class {
                 }
             }
 
-            let scriptTimestamp: BigInt | undefined = undefined;
+            let scriptTimestamp: bigint | undefined = undefined;
             if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT_TIMESTAMP)) {
                 scriptTimestamp = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 8;
@@ -1655,7 +1654,7 @@ const EntityData = new class {
             let subclassData: EntitySubclassData;
             switch (entityType) {
                 case EntityTypes.Model: {
-                    subclassData = this.#modelEntityItemReadEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                    subclassData = this.#readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
                 }
                 default:
@@ -1709,7 +1708,7 @@ const EntityData = new class {
                 equippableLeftRotationOffset,
                 equippableRightPositionOffset,
                 equippableRightRotationOffset,
-                equippableIndicatorUrl,
+                equippableIndicatorURL,
                 equippableIndicatorScale,
                 equippableIndicatorOffset,
                 density,
@@ -1725,14 +1724,14 @@ const EntityData = new class {
                 collisionless,
                 collisionMask,
                 dynamic,
-                collisionSoundUrl,
+                collisionSoundURL,
                 actionData,
                 cloneable,
                 cloneLifetime,
                 cloneLimit,
                 cloneDynamic,
                 cloneAvatarIdentity,
-                cloneOriginId,
+                cloneOriginID,
                 script,
                 scriptTimestamp,
                 serverScripts,
@@ -1761,7 +1760,7 @@ const EntityData = new class {
     }
 
     // eslint-disable-next-line max-len
-    #modelEntityItemReadEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): EntitySubclassData { // eslint-disable-line class-methods-use-this
+    #readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): EntitySubclassData { // eslint-disable-line class-methods-use-this
         // C++ int ModelEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //     ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //     bool& somethingChanged)
@@ -1776,13 +1775,13 @@ const EntityData = new class {
             dataPosition += 4;
         }
 
-        let compoundShapeUrl: string | undefined = undefined;
+        let compoundShapeURL: string | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COMPOUND_SHAPE_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
             if (length > 0) {
-                compoundShapeUrl = textDecoder.decode(
+                compoundShapeURL = textDecoder.decode(
                     new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
                 );
                 dataPosition += length;
@@ -1814,13 +1813,13 @@ const EntityData = new class {
             }
         }
 
-        let modelUrl: string | undefined = undefined;
+        let modelURL: string | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
             if (length > 0) {
-                modelUrl = textDecoder.decode(
+                modelURL = textDecoder.decode(
                     new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
                 );
                 dataPosition += length;
@@ -1935,13 +1934,13 @@ const EntityData = new class {
             dataPosition += 1;
         }
 
-        let animationUrl: string | undefined = undefined;
+        let animationURL: string | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
             if (length > 0) {
-                animationUrl = textDecoder.decode(
+                animationURL = textDecoder.decode(
                     new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
                 );
                 dataPosition += length;
@@ -2000,10 +1999,10 @@ const EntityData = new class {
             bytesRead: dataPosition - position,
             properties: {
                 shapeType,
-                compoundShapeUrl,
+                compoundShapeURL,
                 color,
                 textures,
-                modelUrl,
+                modelURL,
                 modelScale,
                 jointRotationsSet,
                 jointRotations,
@@ -2013,7 +2012,7 @@ const EntityData = new class {
                 relayParentJoints,
                 blendShapeCoefficients,
                 useOriginalPivot,
-                animationUrl,
+                animationURL,
                 animationAllowTranslation,
                 animationFPS,
                 animationFrameIndex,

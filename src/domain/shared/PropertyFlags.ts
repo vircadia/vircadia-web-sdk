@@ -12,7 +12,7 @@
 
 /*@devdoc
  *  The <code>PropertyFlags</code> class provides facilities to decode, set and get property flags.
- *  <p>C++: <code>template<typename Enum>class PropertyFlags </code></p>
+ *  <p>C++: <code>template&lt;typename Enum&gt; class PropertyFlags </code></p>
  *  @class PropertyFlags
  */
 // WEBRTC TODO: Make the class generic.
@@ -35,8 +35,6 @@ class PropertyFlags {
     getHasProperty(flag: number): boolean {
         // C++ bool getHasProperty(Enum flag)
 
-        /* eslint-disable @typescript-eslint/no-magic-numbers */
-
         const bytePos = Math.floor(flag / this.#BITS_IN_BYTE);
 
         if (bytePos > this.#_maxFlag) {
@@ -49,8 +47,6 @@ class PropertyFlags {
         const tmp = this.#_flags[bytePos] ?? 0;
 
         return (tmp & mask) > 0;
-
-        /* eslint-enable @typescript-eslint/no-magic-numbers */
     }
 
     /*@devdoc
@@ -60,8 +56,6 @@ class PropertyFlags {
      */
     setHasProperty(flag: number, value: boolean): void {
         // C++ void setHasProperty(Enum flag, bool value = true)
-
-        /* eslint-disable @typescript-eslint/no-magic-numbers */
 
         const bytePos = Math.floor(flag / this.#BITS_IN_BYTE);
 
@@ -97,18 +91,6 @@ class PropertyFlags {
         }
 
         this.#_flags.set([byteValue], bytePos);
-
-        /* eslint-enable @typescript-eslint/no-magic-numbers */
-    }
-
-    #clear(): void {
-        // C++ void clear()
-        this.#_flags = new Uint8Array(0);
-        this.#_maxFlag = Number.MIN_SAFE_INTEGER;
-        this.#_minFlag = Number.MAX_SAFE_INTEGER;
-        this.#_trailingFlipped = false;
-
-        // WEBRTC TODO: Address further C++ code.
     }
 
     /*@devdoc
@@ -189,6 +171,16 @@ class PropertyFlags {
         // WEBRTC TODO: Address further C++ code.
 
         return bytesConsumed;
+    }
+
+    #clear(): void {
+        // C++ void clear()
+        this.#_flags = new Uint8Array(0);
+        this.#_maxFlag = Number.MIN_SAFE_INTEGER;
+        this.#_minFlag = Number.MAX_SAFE_INTEGER;
+        this.#_trailingFlipped = false;
+
+        // WEBRTC TODO: Address further C++ code.
     }
 }
 

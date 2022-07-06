@@ -27,7 +27,7 @@ import SignalEmitter, { Signal } from "../shared/SignalEmitter";
  *
  *  @class OctreePacketProcessor
  *  @property {string} contextItemType="OctreePacketProcessor" - The type name for use with the {@link ContextManager}.
- *  @property {Signal} addedEntity - Triggered when an entity data packet is received.
+ *  @property {Signal} entityData - Triggered when an entity data packet is received.
  *
  *  @param {number} contextID - The {@link ContextManager} context ID.
  */
@@ -74,7 +74,8 @@ class OctreePacketProcessor {
 
     /*@devdoc
      *  Triggered when an entity data packet is received.
-     *  @function OctreePacketProcessor.addedEntity
+     *  @callback OctreePacketProcessor.entityData
+     *  @param {EntityDataDetails[]} entityData - The entity data information for one or more entities.
      *  @returns {Signal}
      */
     get entityData(): Signal {
@@ -99,7 +100,7 @@ class OctreePacketProcessor {
 
             // WEBRTC TODO: Address further C++ code - process OctreeStats packet.
 
-            // WEBRTC TODO: Do not hardcode statsMessageLength.
+            // The stats message is always 222 bytes long.
             const statsMessageLength = 222;
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers
             const piggybackBytes = messageLocal.getMessage().byteLength - statsMessageLength;

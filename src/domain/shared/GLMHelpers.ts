@@ -36,7 +36,7 @@ const GLMHelpers = new class {
 
 
     /*@devdoc
-     *  Reads a quaternion value from a packet.
+     *  Reads a quaternion value from a packet, unpacking it from 8 bytes.
      *  @function GLMHelpers.unpackOrientationQuatFromBytes
      *  @param {DataView} data - The packet data to read.
      *  @param {number} dataPosition - The data position to read the value from.
@@ -44,7 +44,7 @@ const GLMHelpers = new class {
      */
     // eslint-disable-next-line class-methods-use-this
     unpackOrientationQuatFromBytes(data: DataView, dataPosition: number): quat {
-    // C++ int unpackOrientationQuatFromBytes(const unsigned char* buffer, glm::quat& quatOutput)
+        // C++  int unpackOrientationQuatFromBytes(const unsigned char* buffer, glm::quat& quatOutput)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 

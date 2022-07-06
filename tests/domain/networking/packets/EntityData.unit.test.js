@@ -78,9 +78,9 @@ describe("EntityData - unit tests", () => {
         expect(info[0].triggerable).toBe(false);
         expect(info[0].grabEquippable).toBe(false);
         expect(info[0].delegateToParent).toBe(true);
-        expect(info[0].equippableLefPositionOffset.x).toBeCloseTo(0, 2);
-        expect(info[0].equippableLefPositionOffset.y).toBeCloseTo(0, 2);
-        expect(info[0].equippableLefPositionOffset.z).toBeCloseTo(0, 2);
+        expect(info[0].equippableLeftPositionOffset.x).toBeCloseTo(0, 2);
+        expect(info[0].equippableLeftPositionOffset.y).toBeCloseTo(0, 2);
+        expect(info[0].equippableLeftPositionOffset.z).toBeCloseTo(0, 2);
         expect(info[0].equippableLeftRotationOffset.x).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].equippableLeftRotationOffset.y).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].equippableLeftRotationOffset.z).toBeCloseTo(-0.0000152588, 8);
@@ -120,7 +120,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].collisionless).toBe(false);
         expect(info[0].collisionMask).toBe(31);
         expect(info[0].dynamic).toBe(false);
-        expect(info[0].collisionSoundUrl).toBeUndefined();
+        expect(info[0].collisionSoundURL).toBeUndefined();
         expect(info[0].actionData).toBeUndefined();
         expect(info[0].cloneable).toBe(false);
         expect(info[0].cloneLifetime).toBeCloseTo(300, 2);
@@ -149,7 +149,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].color.y).toBe(255);
         expect(info[0].color.z).toBe(255);
         expect(info[0].textures).toBeUndefined();
-        expect(info[0].modelUrl).toBe(
+        expect(info[0].modelURL).toBe(
             "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
         );
         expect(info[0].modelScale.x).toBeCloseTo(1, 2);
@@ -223,7 +223,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].triggerable).toBeUndefined();
         expect(info[0].grabEquippable).toBeUndefined();
         expect(info[0].delegateToParent).toBeUndefined();
-        expect(info[0].equippableLefPositionOffset).toBeUndefined();
+        expect(info[0].equippableLeftPositionOffset).toBeUndefined();
         expect(info[0].equippableLeftRotationOffset).toBeUndefined();
         expect(info[0].equippableRightPositionOffset).toBeUndefined();
         expect(info[0].equippableRightRotationOffset).toBeUndefined();
@@ -247,7 +247,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].collisionless).toBeUndefined();
         expect(info[0].collisionMask).toBe(31);
         expect(info[0].dynamic).toBeUndefined();
-        expect(info[0].collisionSoundUrl).toBeUndefined();
+        expect(info[0].collisionSoundURL).toBeUndefined();
         expect(info[0].actionData).toBeUndefined();
         expect(info[0].cloneable).toBe(false);
         expect(info[0].cloneLifetime).toBeCloseTo(300, 2);
@@ -276,7 +276,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].color.y).toBe(255);
         expect(info[0].color.z).toBe(255);
         expect(info[0].textures).toBeUndefined();
-        expect(info[0].modelUrl).toBe(
+        expect(info[0].modelURL).toBe(
             "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
         );
         expect(info[0].modelScale.x).toBeCloseTo(1, 2);
@@ -351,9 +351,9 @@ describe("EntityData - unit tests", () => {
         expect(info[1].triggerable).toBe(false);
         expect(info[1].grabEquippable).toBe(false);
         expect(info[1].delegateToParent).toBe(true);
-        expect(info[1].equippableLefPositionOffset.x).toBeCloseTo(0, 2);
-        expect(info[1].equippableLefPositionOffset.y).toBeCloseTo(0, 2);
-        expect(info[1].equippableLefPositionOffset.z).toBeCloseTo(0, 2);
+        expect(info[1].equippableLeftPositionOffset.x).toBeCloseTo(0, 2);
+        expect(info[1].equippableLeftPositionOffset.y).toBeCloseTo(0, 2);
+        expect(info[1].equippableLeftPositionOffset.z).toBeCloseTo(0, 2);
         expect(info[1].equippableLeftRotationOffset.x).toBeCloseTo(-0.0000152588, 8);
         expect(info[1].equippableLeftRotationOffset.y).toBeCloseTo(-0.0000152588, 8);
         expect(info[1].equippableLeftRotationOffset.z).toBeCloseTo(-0.0000152588, 8);
@@ -393,7 +393,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].collisionless).toBe(false);
         expect(info[1].collisionMask).toBe(31);
         expect(info[1].dynamic).toBe(false);
-        expect(info[1].collisionSoundUrl).toBeUndefined();
+        expect(info[1].collisionSoundURL).toBeUndefined();
         expect(info[1].actionData).toBeUndefined();
         expect(info[1].cloneable).toBe(false);
         expect(info[1].cloneLifetime).toBeCloseTo(300, 2);
@@ -422,7 +422,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].color.y).toBe(255);
         expect(info[1].color.z).toBe(255);
         expect(info[1].textures).toBeUndefined();
-        expect(info[1].modelUrl).toBe(
+        expect(info[1].modelURL).toBe(
             "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
         );
         expect(info[1].modelScale.x).toBeCloseTo(1, 2);
