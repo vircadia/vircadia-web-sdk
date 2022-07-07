@@ -588,6 +588,25 @@ const EntityData = new class {
     readonly #_MINIMUM_HEADER_BYTES = 27;
 
     /*@devdoc
+     *  An animation is configured by the following properties.
+     *  @typedef {object} AnimationProperties
+     *  @property {string | undefined} animationURL - The URL of the glTF or FBX file that has the animation. glTF files may be
+     *      in JSON or binary format (".gltf" or ".glb" URLs respectively).
+     *  @property {boolean | undefined} animationAllowTranslation - <code>true</code> to enable translations contained in the
+     *      animation to be played, <code>false</code> to disable translations.
+     *  @property {number | undefined} animationFPS - The speed in frames/s that the animation is played at.
+     *  @property {number | undefined} animationFrameIndex - The current frame being played in the animation.
+     *  @property {boolean | undefined} animationPlaying - <code>true</code> if the animation should play, <code>false</code>
+     *      if it shouldn't.
+     *  @property {boolean | undefined} animationLoop - <code>true</code> if the animation is continuously repeated in a
+     *      loop, <code>false</code> if it isn't.
+     *  @property {number | undefined} animationFirstFrame - The first frame to play in the animation.
+     *  @property {number | undefined} animationLastFrame - The last frame to play in the animation.
+     *  @property {boolean | undefined} animationHold - <code>true</code> if the rotations and translations of the last frame
+     *     played are maintained when the animation stops playing, <code>false</code> if they aren't.
+     */
+
+    /*@devdoc
      *  Information returned by {@link PacketScribe|reading} an {@link PacketType(1)|EntityData} packet.
      *  @typedef {object} PacketScribe.EntityDataDetails
      *  @property {Uuid} entityItemID - The ID of the entity.
@@ -769,20 +788,7 @@ const EntityData = new class {
      *  @property {boolean | undefined} useOriginalPivot - If <code>false</code>, the model will be centered based on its
      *      content, ignoring any offset in the model itself. If <code>true</code>, the model will respect its original offset.
      *      Currently, only pivots relative to <code>{x: 0, y: 0, z: 0}</code> are supported.
-     *  @property {string | undefined} animationURL - The URL of the glTF or FBX file that has the animation. glTF files may be
-     *      in JSON or binary format (".gltf" or ".glb" URLs respectively).
-     *  @property {boolean | undefined} animationAllowTranslation - <code>true</code> to enable translations contained in the
-     *      animation to be played, <code>false</code> to disable translations.
-     *  @property {number | undefined} animationFPS - The speed in frames/s that the animation is played at.
-     *  @property {number | undefined} animationFrameIndex - The current frame being played in the animation.
-     *  @property {boolean | undefined} animationPlaying - <code>true</code> if the animation should play, <code>false</code>
-     *      if it shouldn't.
-     *  @property {boolean | undefined} animationLoop - <code>true</code> if the animation is continuously repeated in a
-     *      loop, <code>false</code> if it isn't.
-     *  @property {number | undefined} animationFirstFrame - The first frame to play in the animation.
-     *  @property {number | undefined} animationLastFrame - The last frame to play in the animation.
-     *  @property {boolean | undefined} animationHold - <code>true</code> if the rotations and translations of the last frame
-     *     played are maintained when the animation stops playing, <code>false</code> if they aren't.
+     *  @property {AnimationProperties | undefined} animation - An animation to play on the model.
      */
 
     /*@devdoc
