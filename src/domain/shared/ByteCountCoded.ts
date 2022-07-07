@@ -32,8 +32,8 @@ class ByteCountCoded {
 
     /*@devdoc
      *  Decode the encoded data.
-     *  @param {DataView} data - The data to decode.
-     *  @param {number} size - The size of the data to decode.
+     *  @param {DataView} encodedBuffer - The data to decode.
+     *  @param {number} encodedSize - The maximum size of the data to decode.
      *  @returns {number} The number of bytes processed.
      */
     decode(encodedBuffer: DataView, encodedSize: number): number {

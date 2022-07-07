@@ -96,7 +96,7 @@ class PropertyFlags {
     /*@devdoc
      *  Decode the encoded property flags.
      *  @param {DataView} data - The data to decode.
-     *  @param {number} size - The size of the data to decode.
+     *  @param {number} size - The maximum size of the data to decode.
      *  @returns {number} The number of bytes processed.
      */
     decode(data: DataView, size: number): number {
