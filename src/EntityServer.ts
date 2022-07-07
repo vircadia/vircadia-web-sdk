@@ -127,7 +127,8 @@ class EntityServer extends AssignmentClient {
     /*@sdkdoc
      *  Triggered when new or changed entity data is received from the entity server.
      *  @callback EntityServer~entityData
-     *  @param {EntityDataDetails[]} entityData - The entity data information for one or more entities.
+     *  @param {EntityDataDetails[]} entityData - The entity data for one or more entities. Note that complete entity data is
+     *  provided for both new and changed entities.
      */
     get entityData(): Signal {
         return this.#_entityData.signal();

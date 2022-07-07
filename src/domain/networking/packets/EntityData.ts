@@ -552,7 +552,8 @@ type ModelEntityProperties = {
     relayParentJoints: boolean | undefined;
     blendShapeCoefficients: string | undefined;
     useOriginalPivot: boolean | undefined;
-} & AnimationProperties;
+    animation: AnimationProperties | undefined;
+};
 
 type EntityDataDetails = CommonEntityProperties & ModelEntityProperties;
 
@@ -788,7 +789,7 @@ const EntityData = new class {
      *  Reads an {@link PacketType(1)|EntityData} packet containing the details of one or more entities.
      *  @function PacketScribe.EntityData&period;read
      *  @read {DataView} data - The {@link Packets|EntityData} message data to read.
-     *  @returns {PacketScribe.EntityDataDetails[]} The entity data information for one or more entities.
+     *  @returns {PacketScribe.EntityDataDetails[]} The entity data for one or more entities.
      */
     read(data: DataView): EntityDataDetails[] {
         // C++ void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointer sourceNode)
@@ -2012,15 +2013,17 @@ const EntityData = new class {
                 relayParentJoints,
                 blendShapeCoefficients,
                 useOriginalPivot,
-                animationURL,
-                animationAllowTranslation,
-                animationFPS,
-                animationFrameIndex,
-                animationPlaying,
-                animationLoop,
-                animationFirstFrame,
-                animationLastFrame,
-                animationHold
+                animation: {
+                    animationURL,
+                    animationAllowTranslation,
+                    animationFPS,
+                    animationFrameIndex,
+                    animationPlaying,
+                    animationLoop,
+                    animationFirstFrame,
+                    animationLastFrame,
+                    animationHold
+                }
             }
         };
     }

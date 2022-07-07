@@ -75,7 +75,7 @@ class OctreePacketProcessor {
     /*@devdoc
      *  Triggered when an entity data packet is received.
      *  @callback OctreePacketProcessor.entityData
-     *  @param {EntityDataDetails[]} entityData - The entity data information for one or more entities.
+     *  @param {EntityDataDetails[]} entityData - The entity data for one or more entities.
      *  @returns {Signal}
      */
     get entityData(): Signal {
@@ -101,14 +101,14 @@ class OctreePacketProcessor {
             // WEBRTC TODO: Address further C++ code - process OctreeStats packet.
 
             // The stats message is always 222 bytes long.
-            const statsMessageLength = 222;
+            const STATS_MESSAGE_LENGTH = 222;
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-            const piggybackBytes = messageLocal.getMessage().byteLength - statsMessageLength;
+            const piggybackBytes = messageLocal.getMessage().byteLength - STATS_MESSAGE_LENGTH;
 
             if (piggybackBytes > 0) {
                 // eslint-disable-next-line @typescript-eslint/no-magic-numbers
                 const view = new DataView(
-                    messageLocal.getMessage().buffer.slice(messageLocal.getMessage().byteOffset + statsMessageLength)
+                    messageLocal.getMessage().buffer.slice(messageLocal.getMessage().byteOffset + STATS_MESSAGE_LENGTH)
                 );
                 const packet = NLPacket.fromReceivedPacket(view, piggybackBytes, sendingNode.getPublicSocket());
                 messageLocal = new ReceivedMessage(packet);
