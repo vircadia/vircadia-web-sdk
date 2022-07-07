@@ -20,28 +20,25 @@
         "build-prod": "npm-run-all -s \"clean-dist\" \"create-version\" \"build-wp-prod\"",
         "build-wp-prod": "webpack --mode production",
         "build-wp-dev": "webpack --mode development",
-
         "watch": "npm-run-all -s \"create-version\" \"watch-wp-dev\"",
         "watch-prod": "npm-run-all -s \"clean-dist\" \"create-version\" \"watch-wp-prod\"",
         "watch-wp-prod": "webpack --watch --mode production",
         "watch-wp-dev": "webpack --watch --mode development",
-
         "create-version": "node build_scripts/createVersion.js",
         "clean-dist": "node build_scripts/cleanDist.js",
         "clean": "tsc --build --clean",
         "lint": "eslint .",
         "lint-path": "eslint",
-
         "test": "jest",
         "test-watch": "jest --watch",
         "test-debug": "jest --detectOpenHandles",
-
         "sdkdoc": "rimraf ./docs/sdk && rimraf ./docs/build && tsc --resolveJsonModule --project tsconfig.jsdoc.json && jsdoc ./jsdoc/sdk-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-sdk.json --destination docs/sdk",
         "devdoc": "rimraf ./docs/dev && rimraf ./docs/build && tsc --resolveJsonModule --project tsconfig.jsdoc.json && jsdoc ./jsdoc/dev-mainpage.md ./docs/build --recurse --configure ./jsdoc/config-dev.json --destination docs/dev"
     },
     "devDependencies": {
         "@types/crypto-js": "^4.0.2",
         "@types/jest": "^26.0.24",
+        "@types/pako": "^2.0.0",
         "@typescript-eslint/eslint-plugin": "^4.33.0",
         "@typescript-eslint/parser": "^4.33.0",
         "eslint": "^7.30.0",
@@ -63,6 +60,7 @@
     "dependencies": {
         "core-js": "^3.19.1",
         "crypto-js": "^4.1.1",
+        "pako": "^2.0.4",
         "regenerator-runtime": "^0.13.7"
     }
 }
