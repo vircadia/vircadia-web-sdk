@@ -830,7 +830,6 @@ const EntityData = new class {
             // eslint-disable-next-line @typescript-eslint/init-declarations
             let sectionLength;
             if (packetIsCompressed) {
-                // 2 represents sizeof(OCTREE_PACKET_INTERNAL_SECTION_SIZE) in the C++ code.
                 if (entityMessage.byteLength > 2) {
                     sectionLength = entityMessage.getUint16(entityMessagePosition, UDT.LITTLE_ENDIAN);
                     entityMessagePosition += 2;
@@ -909,25 +908,27 @@ const EntityData = new class {
 
         let dataPosition = position;
 
-        // 1 represents sizeof(unsigned char) in the C++ code.
-        if (data.byteLength - dataPosition < 1) {
+        // Check space for mask bytes.
+        if (data.byteLength - dataPosition < 3) {  // eslint-disable-line @typescript-eslint/no-magic-numbers
             console.error("Not enough meaningful data.");
             return {
-                bytesRead: dataPosition - position,
+                bytesRead: data.byteLength - dataPosition,  // Assume we read the entire buffer.
                 entitiesDataDetails: []
             };
         }
 
-        // Skip over colorInPacketMask which is used for the management of the octree in the native client.
+        // Skip over reading colorInPacketMask byte and subsequent processing. This byte is always set to 0x00 in
+        // EntityTreeSendThread:: traverseTreeAndBuildNextPacketPayload().
         dataPosition += 1;
 
-        // WEBRTC TODO: Do not hardcode value.
-        // eslint-disable-next-line
-        // @ts-ignore
-        const bytesForMask = 2;
-        dataPosition += bytesForMask;
+        // Skip over childrenInTreeMask byte and subsequent processing. This byte is always sent because of the params value
+        // passed into EntityTreeSendThread::traverseTreeAndBuildNextPacketPayload(). This value is used in the client for
+        // octree management but it is not applicable the Web SDK.
+        dataPosition += 1;
 
-        // WEBRTC TODO: Address further C++ code.
+        // Skip over childInBufferMask byte and subsequent processing. This byte is always set to 0x00 in
+        // EntityTreeSendThread:: traverseTreeAndBuildNextPacketPayload().
+        dataPosition += 1;
 
         const parsedData = this.#readEntityDataFromBuffer(data, dataPosition);
         dataPosition += parsedData.bytesRead;
