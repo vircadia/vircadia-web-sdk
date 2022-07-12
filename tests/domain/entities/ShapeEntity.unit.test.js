@@ -27,7 +27,6 @@ describe("ShapeEntity - unit tests", () => {
         const propertyFlags = new PropertyFlags();
         propertyFlags.decode(encodedFlags, encodedFlags.byteLength);
 
-        // eslint-disable-next-line max-len
         const bufferHex = "00b4ef0000803f000000000000803f0000803f00000000000000000800547269616e676c65";
         bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
             return parseInt(hex, 16);
@@ -41,8 +40,7 @@ describe("ShapeEntity - unit tests", () => {
         expect(shapeEntity.properties.color.green).toBeCloseTo(180, 2);
         expect(shapeEntity.properties.color.blue).toBeCloseTo(239, 2);
         expect(shapeEntity.properties.alpha).toBe(1);
-        expect(shapeEntity.properties.pulse).toStrictEqual({ min: 0, max: 1, period: 1, colorMode: "none", alphaMode: "none" });
+        expect(shapeEntity.properties.shape).toBe("Triangle");
 
     });
-
 });

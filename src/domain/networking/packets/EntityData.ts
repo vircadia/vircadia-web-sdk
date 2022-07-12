@@ -12,7 +12,7 @@
 import { EntityPropertyFlags } from "../../entities/EntityPropertyFlags";
 import { EntityTypes } from "../../entities/EntityTypes";
 import ModelEntity, { ModelEntitySubclassData, AnimationProperties } from "../../entities/ModelEntity";
-import ShapeEntity, { ShapeEntitySubclassData, Shape, PulsePropertyGroup } from "../../entities/ShapeEntity";
+import ShapeEntity, { ShapeEntitySubclassData, Shape } from "../../entities/ShapeEntity";
 import AACube from "../../shared/AACube";
 import assert from "../../shared/assert";
 import ByteCountCoded from "../../shared/ByteCountCoded";
@@ -124,10 +124,8 @@ type EntityDataDetails = {
     animation?: AnimationProperties | undefined;
     shape?: Shape | undefined;
     alpha?: number | undefined;
-    pulse?: PulsePropertyGroup | undefined;
 };
 
-// TODO: Update doc? if there's a doc.
 type EntitySubclassData = ModelEntitySubclassData | ShapeEntitySubclassData;
 
 type ParsedData = {
@@ -137,11 +135,11 @@ type ParsedData = {
 
 
 const EntityData = new class {
-    // C++ N/A
+    // C++  N/A
 
-    // C++ OctreePacketData.h
+    // C++  OctreePacketData.h
     readonly #_PACKET_IS_COMPRESSED_BIT = 1;
-    // C++ OctalCode.h
+    // C++  OctalCode.h
     readonly #_OVERFLOWED_OCTCODE_BUFFER = -1;
     readonly #_UNKNOWN_OCTCODE_LENGTH = -2;
     // Header bytes
@@ -152,26 +150,6 @@ const EntityData = new class {
     //    PropertyFlags<>( everything ) [1-2 bytes]
     // ~27-35 bytes...
     readonly #_MINIMUM_HEADER_BYTES = 27;
-
-    // TODO: Move doc to ModelEntity.ts.
-    /*@devdoc
-     *  An animation is configured by the following properties.
-     *  @typedef {object} AnimationProperties
-     *  @property {string | undefined} animationURL - The URL of the glTF or FBX file that has the animation. glTF files may be
-     *      in JSON or binary format (".gltf" or ".glb" URLs respectively).
-     *  @property {boolean | undefined} animationAllowTranslation - <code>true</code> to enable translations contained in the
-     *      animation to be played, <code>false</code> to disable translations.
-     *  @property {number | undefined} animationFPS - The speed in frames/s that the animation is played at.
-     *  @property {number | undefined} animationFrameIndex - The current frame being played in the animation.
-     *  @property {boolean | undefined} animationPlaying - <code>true</code> if the animation should play, <code>false</code>
-     *      if it shouldn't.
-     *  @property {boolean | undefined} animationLoop - <code>true</code> if the animation is continuously repeated in a
-     *      loop, <code>false</code> if it isn't.
-     *  @property {number | undefined} animationFirstFrame - The first frame to play in the animation.
-     *  @property {number | undefined} animationLastFrame - The last frame to play in the animation.
-     *  @property {boolean | undefined} animationHold - <code>true</code> if the rotations and translations of the last frame
-     *     played are maintained when the animation stops playing, <code>false</code> if they aren't.
-     */
 
     /*@devdoc
      *  Information returned by {@link PacketScribe|reading} an {@link PacketType(1)|EntityData} packet.
@@ -324,48 +302,48 @@ const EntityData = new class {
      *      private key.
      *  @property {string | undefined} certificateType - Type of the certificate.
      *  @property {number | undefined} staticCertificateVersion - The version of the method used to generate the certificateID.
-     *  @property {number | undefined} shapeType - The shape of the collision hull used if collisions are enabled.
-     *  @property {string | undefined} compoundShapeURL - The model file to use for the compound shape if shapeType is
+     *  @property {number | undefined} [shapeType] - The shape of the collision hull used if collisions are enabled.
+     *  @property {string | undefined} [compoundShapeURL] - The model file to use for the compound shape if shapeType is
      *      "compound".
-     *  @property {Color | undefined} color - Currently not used.
-     *  @property {string | undefined} textures - A JSON string of texture name, URL pairs used when rendering the model in
+     *  @property {Color | undefined} [color] - Currently not used.
+     *  @property {string | undefined} [textures] - A JSON string of texture name, URL pairs used when rendering the model in
      *      place of the model's original textures. Use a texture name from the originalTextures property to override that
      *      texture.  Only the texture names and URLs to be overridden need be specified; original textures are used where there
      *      are no overrides. You can use JSON.stringify() to convert a JavaScript object of name, URL pairs into a JSON string.
-     *  @property {string | undefined} modelURL - The URL of the glTF, FBX, or OBJ model. glTF models may be in JSON or binary
+     *  @property {string | undefined} [modelURL] - The URL of the glTF, FBX, or OBJ model. glTF models may be in JSON or binary
      *      format (".gltf" or ".glb" URLs respectively). Baked models' URLs have ".baked" before the file type. Model files may
      *      also be compressed in GZ format, in which case the URL ends in ".gz".
-     *  @property {vec3 | undefined} modelScale - The scale factor applied to the model's dimensions.
-     *  @property {boolean | undefined} jointRotationsSet - <code>true</code> values for joints that have had rotations
+     *  @property {vec3 | undefined} [modelScale] - The scale factor applied to the model's dimensions.
+     *  @property {boolean | undefined} [jointRotationsSet] - <code>true</code> values for joints that have had rotations
      *      applied, <code>false</code> otherwise; Empty if none are applied or the model hasn't loaded.
-     *  @property {quat[] | undefined} jointRotations - Joint rotations applied to the model; Empty if none are applied or the
+     *  @property {quat[] | undefined} [jointRotations] - Joint rotations applied to the model; Empty if none are applied or the
      *      model hasn't loaded.
-     *  @property {boolean | undefined} jointTranslationsSet - <code>true</code> values for joints that have had translations
+     *  @property {boolean | undefined} [jointTranslationsSet] - <code>true</code> values for joints that have had translations
      *      applied, <code>false</code> otherwise; Empty if none are applied or the model hasn't loaded.
-     *  @property {vec3[] | undefined} jointTranslations - Joint translations applied to the model; Empty if none are applied or
-     *      the model hasn't loaded.
-     *  @property {boolean | undefined} groupCulled - <code>true</code> if the mesh parts of the model are LOD culled as a
+     *  @property {vec3[] | undefined} [jointTranslations] - Joint translations applied to the model; Empty if none are applied
+     *      or the model hasn't loaded.
+     *  @property {boolean | undefined} [groupCulled] - <code>true</code> if the mesh parts of the model are LOD culled as a
      *      group, <code>false</code> if separate mesh parts are LOD culled individually.
-     *  @property {boolean | undefined} relayParentJoints - <code>true</code> if when the entity is parented to an avatar,
+     *  @property {boolean | undefined} [relayParentJoints] - <code>true</code> if when the entity is parented to an avatar,
      *      the avatar's joint rotations are applied to the entity's joints; <code>false</code> if a parent avatar's joint
      *      rotations are not applied to the entity's joints.
-     *  @property {string | undefined} blendShapeCoefficients - A JSON string of a map of blendshape names to values. Only
+     *  @property {string | undefined} [blendShapeCoefficients] - A JSON string of a map of blendshape names to values. Only
      *      stores set values. When editing this property, only coefficients that you are editing will change; it will not
      *      explicitly reset other coefficients.
-     *  @property {boolean | undefined} useOriginalPivot - If <code>false</code>, the model will be centered based on its
+     *  @property {boolean | undefined} [useOriginalPivot] - If <code>false</code>, the model will be centered based on its
      *      content, ignoring any offset in the model itself. If <code>true</code>, the model will respect its original offset.
      *      Currently, only pivots relative to <code>{x: 0, y: 0, z: 0}</code> are supported.
-     *  @property {AnimationProperties | undefined} animation - An animation to play on the model.
+     *  @property {AnimationProperties | undefined} [animation] - An animation to play on the model.
      */
 
     /*@devdoc
      *  Reads an {@link PacketType(1)|EntityData} packet containing the details of one or more entities.
      *  @function PacketScribe.EntityData&period;read
-     *  @read {DataView} data - The {@link Packets|EntityData} message data to read.
+     *  @param {DataView} data - The {@link Packets|EntityData} message data to read.
      *  @returns {PacketScribe.EntityDataDetails[]} The entity data for one or more entities.
      */
     read(data: DataView): EntityDataDetails[] {
-        // C++ void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointer sourceNode)
+        // C++  void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointer sourceNode)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
@@ -373,8 +351,6 @@ const EntityData = new class {
 
         const flags = data.getUint8(dataPosition);
         dataPosition += 1;
-
-        /* eslint-disable @typescript-eslint/no-unused-vars */ // TODO: remove?
 
         // Skip over the sequence value which is used for safe landing.
         dataPosition += 2;
@@ -446,8 +422,8 @@ const EntityData = new class {
     }
 
     #readBitstreamToTree(data: DataView): ParsedData {
-        // C++ void Octree::readBitstreamToTree(const unsigned char * bitstream, uint64_t bufferSizeBytes,
-        //     ReadBitstreamToTreeParams& args)
+        // C++  void Octree::readBitstreamToTree(const unsigned char * bitstream, uint64_t bufferSizeBytes,
+        //      ReadBitstreamToTreeParams& args)
 
         let dataPosition = 0;
 
@@ -471,8 +447,8 @@ const EntityData = new class {
     }
 
     #readElementData(data: DataView, position: number): ParsedData {
-        // C++ int Octree::readElementData(const OctreeElementPointer& destinationElement, const unsigned char* nodeData,
-        //     int bytesAvailable, ReadBitstreamToTreeParams& args) {
+        // C++  int Octree::readElementData(const OctreeElementPointer& destinationElement, const unsigned char* nodeData,
+        //      int bytesAvailable, ReadBitstreamToTreeParams& args) {
 
         let dataPosition = position;
 
@@ -506,7 +482,7 @@ const EntityData = new class {
     }
 
     #readEntityDataFromBuffer(data: DataView, pos: number): ParsedData {
-        // C++ int EntityTree::readEntityDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
+        // C++  int EntityTree::readEntityDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //     ReadBitstreamToTreeParams& args)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
@@ -1337,7 +1313,7 @@ const EntityData = new class {
 
     // Implemented recursively in the C++ code, numberOfThreeBitSectionsInCode is here implemented iteratively.
     #numberOfThreeBitSectionsInCode(data: DataView, dataPosition: number, maxBytes: number): number {
-        // C++ int OctalCode::numberOfThreeBitSectionsInCode(const unsigned char* octalCode, int maxBytes)
+        // C++  int OctalCode::numberOfThreeBitSectionsInCode(const unsigned char* octalCode, int maxBytes)
 
         if (maxBytes === this.#_OVERFLOWED_OCTCODE_BUFFER) {
             return this.#_OVERFLOWED_OCTCODE_BUFFER;
@@ -1366,7 +1342,7 @@ const EntityData = new class {
     }
 
     #bytesRequiredForCodeLength(threeBitCodes: number): number { // eslint-disable-line class-methods-use-this
-        // C++ size_t OctalCode::bytesRequiredForCodeLength(unsigned char threeBitCodes)
+        // C++  size_t OctalCode::bytesRequiredForCodeLength(unsigned char threeBitCodes)
 
         if (threeBitCodes === 0) {
             return 1;

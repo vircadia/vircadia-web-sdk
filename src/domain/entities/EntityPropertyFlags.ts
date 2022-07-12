@@ -227,7 +227,7 @@
  *  @typedef {number} EntityPropertyFlags
  */
 enum EntityPropertyFlags {
-    // C++ EntityPropertyFlags.h
+    // C++  EntityPropertyFlags.h
 
     PROP_PAGED_PROPERTY,
     PROP_CUSTOM_PROPERTIES_INCLUDED,

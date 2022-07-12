@@ -18,7 +18,6 @@ import type { vec3 } from "../shared/Vec3";
 import { EntityPropertyFlags } from "./EntityPropertyFlags";
 
 
-// TODO: Spacing with import?
 type AnimationProperties = {
     animationURL: string | undefined;
     animationAllowTranslation: boolean | undefined;
@@ -55,15 +54,89 @@ type ModelEntitySubclassData = {
 };
 
 
-// TODO: class doc
-const ModelEntity = new class {
-    // C++ ModelEntityItem.h, cpp
+/*@devdoc
+ *  The <code>ModelEntity</code> class provides facilities for reading model entity properties.
+ *  @class ModelEntity
+ */
+class ModelEntity {
+    // C++  class ModelEntityItem : public EntityItem
 
+    /*@sdkdoc
+     *  An animation is configured by the following properties.
+     *  @typedef {object} AnimationProperties
+     *  @property {string | undefined} animationURL - The URL of the glTF or FBX file that has the animation. glTF files may be
+     *      in JSON or binary format (".gltf" or ".glb" URLs respectively).
+     *  @property {boolean | undefined} animationAllowTranslation - <code>true</code> to enable translations contained in the
+     *      animation to be played, <code>false</code> to disable translations.
+     *  @property {number | undefined} animationFPS - The speed in frames/s that the animation is played at.
+     *  @property {number | undefined} animationFrameIndex - The current frame being played in the animation.
+     *  @property {boolean | undefined} animationPlaying - <code>true</code> if the animation should play, <code>false</code>
+     *      if it shouldn't.
+     *  @property {boolean | undefined} animationLoop - <code>true</code> if the animation is continuously repeated in a
+     *      loop, <code>false</code> if it isn't.
+     *  @property {number | undefined} animationFirstFrame - The first frame to play in the animation.
+     *  @property {number | undefined} animationLastFrame - The last frame to play in the animation.
+     *  @property {boolean | undefined} animationHold - <code>true</code> if the rotations and translations of the last frame
+     *     played are maintained when the animation stops playing, <code>false</code> if they aren't.
+     */
+
+    /*@sdkdoc
+     *  The properties of a {@link ModelEntity|Model} entity.
+     *  @typedef {object} ModelEntityProperties
+     *  @property {number | undefined} shapeType - The shape of the collision hull used if collisions are enabled.
+     *  @property {string | undefined} compoundShapeURL - The model file to use for the compound shape if shapeType is
+     *      "compound".
+     *  @property {Color | undefined} color - Currently not used.
+     *  @property {string | undefined} textures - A JSON string of texture name, URL pairs used when rendering the model in
+     *      place of the model's original textures. Use a texture name from the originalTextures property to override that
+     *      texture.  Only the texture names and URLs to be overridden need be specified; original textures are used where there
+     *      are no overrides. You can use JSON.stringify() to convert a JavaScript object of name, URL pairs into a JSON string.
+     *  @property {string | undefined} modelURL - The URL of the glTF, FBX, or OBJ model. glTF models may be in JSON or binary
+     *      format (".gltf" or ".glb" URLs respectively). Baked models' URLs have ".baked" before the file type. Model files may
+     *      also be compressed in GZ format, in which case the URL ends in ".gz".
+     *  @property {vec3 | undefined} modelScale - The scale factor applied to the model's dimensions.
+     *  @property {boolean | undefined} jointRotationsSet - <code>true</code> values for joints that have had rotations
+     *      applied, <code>false</code> otherwise; Empty if none are applied or the model hasn't loaded.
+     *  @property {quat[] | undefined} jointRotations - Joint rotations applied to the model; Empty if none are applied or the
+     *      model hasn't loaded.
+     *  @property {boolean | undefined} jointTranslationsSet - <code>true</code> values for joints that have had translations
+     *      applied, <code>false</code> otherwise; Empty if none are applied or the model hasn't loaded.
+     *  @property {vec3[] | undefined} jointTranslations - Joint translations applied to the model; Empty if none are applied or
+     *      the model hasn't loaded.
+     *  @property {boolean | undefined} groupCulled - <code>true</code> if the mesh parts of the model are LOD culled as a
+     *      group, <code>false</code> if separate mesh parts are LOD culled individually.
+     *  @property {boolean | undefined} relayParentJoints - <code>true</code> if when the entity is parented to an avatar,
+     *      the avatar's joint rotations are applied to the entity's joints; <code>false</code> if a parent avatar's joint
+     *      rotations are not applied to the entity's joints.
+     *  @property {string | undefined} blendShapeCoefficients - A JSON string of a map of blendshape names to values. Only
+     *      stores set values. When editing this property, only coefficients that you are editing will change; it will not
+     *      explicitly reset other coefficients.
+     *  @property {boolean | undefined} useOriginalPivot - If <code>false</code>, the model will be centered based on its
+     *      content, ignoring any offset in the model itself. If <code>true</code>, the model will respect its original offset.
+     *      Currently, only pivots relative to <code>{x: 0, y: 0, z: 0}</code> are supported.
+     *  @property {AnimationProperties | undefined} animation - An animation to play on the model.
+     */
+
+    /*@devdoc
+     *  A wrapper for providing {@link ModelEntityProperties} and the number of bytes read.
+     *  @typedef {object} ModelEntitySubclassData
+     *  @property {number} bytesRead - The number of bytes read.
+     *  @property {ModelEntityProperties} properties - The model entity properties.
+     */
+
+    /*@devdoc
+     *  Reads, if present, model properties in an {@link PacketType(1)|EntityData} packet.
+     *  <p><em>Static</em></p>
+     *  @param {DataView} data - The {@link Packets|EntityData} message data to read.
+     *  @param {number} position - The position of the model properties in the {@link Packets|EntityData} message data.
+     *  @param {PropertyFlags} propertyFlags - The property flags.
+     *  @returns {ModelEntitySubclassData} The model properties and the number of bytes read.
+     */
     // eslint-disable-next-line max-len
-    readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): ModelEntitySubclassData { // eslint-disable-line class-methods-use-this
-        // C++ int ModelEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-        //     ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-        //     bool& somethingChanged)
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): ModelEntitySubclassData { // eslint-disable-line class-methods-use-this
+        // C++  int ModelEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
+        //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
+        //      bool& somethingChanged)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
@@ -329,7 +402,7 @@ const ModelEntity = new class {
         /* eslint-enable @typescript-eslint/no-magic-numbers */
     }
 
-}();
+}
 
 export default ModelEntity;
 export type { ModelEntitySubclassData, AnimationProperties };

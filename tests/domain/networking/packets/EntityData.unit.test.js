@@ -17,8 +17,6 @@ describe("EntityData - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-    // TODO: Refactor Model tests to combine them in a single test.
-    //       Or combine Shape and Model (and other types) in a single data packet and test.
     test("Can read a Model entity in a packet", () => {
         // eslint-disable-next-line max-len
         const bufferHex = "c030005f878ad79fe105001a010000023378da636030666064c85cb6c2caff93d3df6969e6756d5c5ab7041666755d9fff909501462b28fcff67ffffec7f30f86121ffff9f200316f0ff3f324f6d8783bd898afbc18dab2d1cce9e39630bc3ffebc110a4d61e86611609303c58b88a79238b4bd94a758d152c2faf784de8d1b27fdbe671f08c82b1c39a18433b46744b198122288248e663156bb047606450e5c2403e80faa4613f833c5c6c9a337e3da0c0c423c7c090c090515252506ca5af9f9c92a76ba8579659949c989299a8979c9fab5f5aac9baa6ba8ef9458959858a4ef585c9c5a52acef9b9f929a53acef969f9fa29f94595492919258199f9c989daa9f9e5392862aa4979e93843d345818aab96ab92081fac11112ca6032e0b03b03002d4487fd";

@@ -15,16 +15,30 @@ import PropertyFlags from "../shared/PropertyFlags";
 import { EntityPropertyFlags } from "./EntityPropertyFlags";
 
 
-// TODO: Move into its own module with PulsePropertyGroup?
-// TODO: doc
-enum PulseMode {
-    NONE = "none",
-    IN_PHASE = "in",
-    OUT_PHASE = "out"
-}
-
-// TODO: Move into shape module?
-// TODO: doc
+/*@sdkdoc
+ *  <table>
+ *      <thead>
+ *          <tr><th>Value</th><th>Dimensions</th><th>Notes</th></tr>
+ *      </thead>
+ *      <tbody>
+ *          <tr><td>"Circle"</td><td>2D</td><td>A circle oriented in 3D.</td></tr>
+ *          <tr><td>"Cone"</td><td>3D</td><td></td></tr>
+ *          <tr><td>"Cube"</td><td>3D</td><td></td></tr>
+ *          <tr><td>"Cylinder"</td><td>3D</td><td></td></tr>
+ *          <tr><td>"Dodecahedron"</td><td>3D</td><td></td></tr>
+ *          <tr><td>"Hexagon"</td><td>3D</td><td>A hexagonal prism.</td></tr>
+ *          <tr><td>"Icosahedron"</td><td>3D</td><td></td></tr>
+ *          <tr><td>"Octagon"</td><td>3D</td><td>An octagonal prism.</td></tr>
+ *          <tr><td>"Octahedron"</td><td>3D</td><td></td></tr>
+ *          <tr><td>"Quad"</td><td>2D</td><td>A square oriented in 3D.</td></tr>
+ *          <tr><td>"Sphere"</td><td>3D</td><td></td></tr>
+ *          <tr><td>"Tetrahedron"</td><td>3D</td><td></td></tr>
+ *          <tr><td>"Torus"</td><td>3D</td><td>Not implemented.</td></tr>
+ *          <tr><td>"Triangle"</td><td>3D</td><td>A triangular prism.</td></tr>
+ *      </tbody>
+ *  </table>
+ *  @typedef {string} Shape
+ */
 enum Shape {
     CIRCLE = "Circle",
     CONE = "Cone",
@@ -42,22 +56,10 @@ enum Shape {
     TRIANGLE = "Triangle"
 }
 
-// TODO: Move into its own module?
-// TODO: doc
-type PulsePropertyGroup = {
-    min: number | undefined;
-    max: number | undefined;
-    period: number | undefined;
-    colorMode: PulseMode | undefined;
-    alphaMode: PulseMode | undefined;
-};
-
-// TODO: doc
 type ShapeEntityProperties = {
     shape: Shape | undefined;
     color: Color | undefined;
     alpha: number | undefined;
-    pulse: PulsePropertyGroup | undefined;
 };
 
 type ShapeEntitySubclassData = {
@@ -65,10 +67,39 @@ type ShapeEntitySubclassData = {
     properties: ShapeEntityProperties;
 };
 
-const ShapeEntity = new class {
 
-    // eslint-disable-next-line max-len
-    readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): ShapeEntitySubclassData { // eslint-disable-line class-methods-use-this
+/*@devdoc
+ *  The <code>ShapeEntity</code> class provides facilities for reading shape entity properties.
+ *  @class ShapeEntity
+ */
+class ShapeEntity {
+    // C++  class ShapeEntityItem : public EntityItem
+
+    /*@sdkdoc
+     *  The properties of a {@link ShapeEntity|Shape} entity.
+     *  @typedef {object} ShapeEntityProperties
+     *  @property {Shape | undefined} shape - The shape of the entity.
+     *  @property {Color | undefined} color - The color of the entity.
+     *  @property {number | undefined} alpha - The opacity of the entity, range <code>0.0 – 1.0</code>.
+     */
+
+    /*@devdoc
+     *  A wrapper for providing {@link ShapeEntityProperties} and the number of bytes read.
+     *  @typedef {object} ShapeEntitySubclassData
+     *  @property {number} bytesRead - The number of bytes read.
+     *  @property {ShapeEntityProperties} properties - The shape entity properties.
+     */
+
+    /*@devdoc
+     *  Reads, if present, shape properties in an {@link PacketType(1)|EntityData} packet.
+     *  <p><em>Static</em></p>
+     *  @param {DataView} data - The {@link Packets|EntityData} message data to read.
+     *  @param {number} position - The position of the shape properties in the {@link Packets|EntityData} message data.
+     *  @param {PropertyFlags} propertyFlags - The property flags.
+     *  @returns {ShapeEntitySubclassData} The shape properties and the number of bytes read.
+     */
+    // eslint-disable-next-line class-methods-use-this
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): ShapeEntitySubclassData { // eslint-disable-line max-len
         // C++  int ShapeEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)
@@ -76,10 +107,6 @@ const ShapeEntity = new class {
         /* eslint-disable @typescript-eslint/no-magic-numbers */
 
         let dataPosition = position;
-
-        // TODO:
-        // 1. First, inline all properties.
-        // 2. Then separate properties into modules where needed.
 
         let color: Color | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
@@ -97,72 +124,8 @@ const ShapeEntity = new class {
             dataPosition += 4;
         }
 
-        // TODO: read pulse - PulsePropertyGroup
-        // TODO: Move into PulsePropertyGroup.readEntitySubclassDataFromBuffer().
-        let min: number | undefined = undefined; // TODO: remove once Pulse...readEntitySubclassData... is implemented
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PULSE_MIN)) {
-            min = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let max: number | undefined = undefined; // TODO: remove once Pulse...readEntitySubclassData... is implemented
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PULSE_MAX)) {
-            max = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let period: number | undefined = undefined; // TODO: remove once Pulse...readEntitySubclassData... is implemented
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PULSE_MAX)) {
-            period = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            dataPosition += 4;
-        }
-
-        let colorMode: PulseMode | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PULSE_COLOR_MODE)) {
-            const value = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
-            switch (value) {
-                case 0:
-                    colorMode = PulseMode.NONE;
-                    break;
-                case 1:
-                    colorMode = PulseMode.IN_PHASE;
-                    break;
-                case 2:
-                    colorMode = PulseMode.OUT_PHASE;
-                    break;
-                default:
-                    console.error("Invalid color mode!");
-            }
-            dataPosition += 4;
-        }
-
-        let alphaMode: PulseMode | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PULSE_ALPHA_MODE)) {
-            const value = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
-            switch (value) {
-                case 0:
-                    alphaMode = PulseMode.NONE;
-                    break;
-                case 1:
-                    alphaMode = PulseMode.IN_PHASE;
-                    break;
-                case 2:
-                    alphaMode = PulseMode.OUT_PHASE;
-                    break;
-                default:
-                    console.error("Invalid alpha mode!");
-            }
-            dataPosition += 4;
-        }
-
-        // TODO: Remove undefined?
-        const pulse: PulsePropertyGroup | undefined = {
-            min,
-            max,
-            period,
-            colorMode,
-            alphaMode
-        };
+        // Skip over pulseMode. It is deprecated.
+        dataPosition += 20;
 
         const textDecoder = new TextDecoder();
 
@@ -184,7 +147,6 @@ const ShapeEntity = new class {
             properties: {
                 color,
                 alpha,
-                pulse,
                 shape
             }
         };
@@ -192,7 +154,7 @@ const ShapeEntity = new class {
         /* eslint-enable @typescript-eslint/no-magic-numbers */
     }
 
-}();
+}
 
 export default ShapeEntity;
-export type { ShapeEntitySubclassData, Shape, PulsePropertyGroup };
+export type { ShapeEntitySubclassData, Shape };

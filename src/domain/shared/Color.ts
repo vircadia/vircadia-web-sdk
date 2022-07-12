@@ -9,7 +9,14 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-// TODO: Type doc? Check Vec3.ts. Create namespace?
+
+/*@devdoc
+ *  A color vector.
+ *  @typedef {object} Color
+ *  @property {number | undefined} red - Red component value. Integer in the range <code>0 - 255</code>.
+ *  @property {number | undefined} green - Green component value. Integer in the range <code>0 - 255</code>.
+ *  @property {number | undefined} blue - Blue component value. Integer in the range <code>0 - 255</code>.
+ */
 type Color = {
     red: number | undefined;
     green: number | undefined;
