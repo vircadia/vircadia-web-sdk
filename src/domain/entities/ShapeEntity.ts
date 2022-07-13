@@ -76,6 +76,14 @@ class ShapeEntity {
     // C++  class ShapeEntityItem : public EntityItem
 
     /*@sdkdoc
+     *  A color vector.
+     *  @typedef {object} color
+     *  @property {number} red - Red component value. Integer in the range <code>0 - 255</code>.
+     *  @property {number} green - Green component value. Integer in the range <code>0 - 255</code>.
+     *  @property {number} blue - Blue component value. Integer in the range <code>0 - 255</code>.
+     */
+
+    /*@sdkdoc
      *  The Shape {@link EntityTypes|entity type} displays an entity of a specified shape. It has properties in addition to the
      *      common {@link EntityProperties}.
      *  @typedef {object} ShapeEntityProperties
