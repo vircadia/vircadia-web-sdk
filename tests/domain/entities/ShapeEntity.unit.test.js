@@ -36,9 +36,9 @@ describe("ShapeEntity - unit tests", () => {
         const shapeEntity = ShapeEntity.readEntitySubclassDataFromBuffer(data, 0, propertyFlags);
 
         expect(shapeEntity.bytesRead).toBe(37);
-        expect(shapeEntity.properties.color.red).toBeCloseTo(0, 2);
-        expect(shapeEntity.properties.color.green).toBeCloseTo(180, 2);
-        expect(shapeEntity.properties.color.blue).toBeCloseTo(239, 2);
+        expect(shapeEntity.properties.color.red).toBe(0);
+        expect(shapeEntity.properties.color.green).toBe(180);
+        expect(shapeEntity.properties.color.blue).toBe(239);
         expect(shapeEntity.properties.alpha).toBe(1);
         expect(shapeEntity.properties.shape).toBe("Triangle");
 
