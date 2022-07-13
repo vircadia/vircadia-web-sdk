@@ -10,17 +10,17 @@
 //
 
 
-/*@devdoc
+/*@sdkdoc
  *  A color vector.
- *  @typedef {object} Color
- *  @property {number | undefined} red - Red component value. Integer in the range <code>0 - 255</code>.
- *  @property {number | undefined} green - Green component value. Integer in the range <code>0 - 255</code>.
- *  @property {number | undefined} blue - Blue component value. Integer in the range <code>0 - 255</code>.
+ *  @typedef {object} color
+ *  @property {number} red - Red component value. Integer in the range <code>0 - 255</code>.
+ *  @property {number} green - Green component value. Integer in the range <code>0 - 255</code>.
+ *  @property {number} blue - Blue component value. Integer in the range <code>0 - 255</code>.
  */
-type Color = {
-    red: number | undefined;
-    green: number | undefined;
-    blue: number | undefined;
+type color = {
+    red: number;
+    green: number;
+    blue: number;
 };
 
-export type { Color };
+export type { color };

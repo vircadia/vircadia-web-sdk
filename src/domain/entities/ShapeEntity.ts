@@ -10,7 +10,7 @@
 //
 
 import UDT from "../networking/udt/UDT";
-import type { Color } from "../shared/Color";
+import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
 import { EntityPropertyFlags } from "./EntityPropertyFlags";
 
@@ -58,7 +58,7 @@ enum Shape {
 
 type ShapeEntityProperties = {
     shape: Shape | undefined;
-    color: Color | undefined;
+    color: color | undefined;
     alpha: number | undefined;
 };
 
@@ -76,10 +76,11 @@ class ShapeEntity {
     // C++  class ShapeEntityItem : public EntityItem
 
     /*@sdkdoc
-     *  The properties of a {@link ShapeEntity|Shape} entity.
+     *  The Shape {@link EntityTypes|entity type} displays an entity of a specified shape. It has properties in addition to the
+     *      common {@link EntityProperties}.
      *  @typedef {object} ShapeEntityProperties
      *  @property {Shape | undefined} shape - The shape of the entity.
-     *  @property {Color | undefined} color - The color of the entity.
+     *  @property {color | undefined} color - The color of the entity.
      *  @property {number | undefined} alpha - The opacity of the entity, range <code>0.0 – 1.0</code>.
      */
 
@@ -108,7 +109,7 @@ class ShapeEntity {
 
         let dataPosition = position;
 
-        let color: Color | undefined = undefined;
+        let color: color | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
             color = {
                 red: data.getUint8(dataPosition),

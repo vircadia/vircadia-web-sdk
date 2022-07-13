@@ -602,7 +602,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].animation.animationLastFrame).toBeCloseTo(100000, 2);
         expect(info[0].animation.animationHold).toBe(false);
 
-        // Second Model Entity.
+        // Shape Entity.
         expect(info[1].entityItemID instanceof Uuid).toBe(true);
         expect(info[1].entityItemID.stringify().toString()).toBe("4c1db688-ba05-4b57-b451-9345486b786e");
         expect(info[1].entityType).toBe(3);

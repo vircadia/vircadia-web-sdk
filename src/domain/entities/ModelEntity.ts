@@ -10,7 +10,7 @@
 //
 
 import UDT from "../networking/udt/UDT";
-import type { Color } from "../shared/Color";
+import type { color } from "../shared/Color";
 import GLMHelpers from "../shared/GLMHelpers";
 import PropertyFlags from "../shared/PropertyFlags";
 import type { quat } from "../shared/Quat";
@@ -33,7 +33,7 @@ type AnimationProperties = {
 type ModelEntityProperties = {
     shapeType: number | undefined;
     compoundShapeURL: string | undefined;
-    color: Color | undefined;
+    color: color | undefined;
     textures: string | undefined;
     modelURL: string | undefined;
     modelScale: vec3 | undefined;
@@ -81,12 +81,14 @@ class ModelEntity {
      */
 
     /*@sdkdoc
-     *  The properties of a {@link ModelEntity|Model} entity.
+     * The Model {@link EntityTypes|entity type} displays a glTF, FBX, or OBJ model. When adding an entity, if no
+     *     <code>dimensions</code> value is specified then the model is automatically sized to its natural dimensions. It has
+     *     properties in addition to the common {@link EntityProperties}.
      *  @typedef {object} ModelEntityProperties
      *  @property {number | undefined} shapeType - The shape of the collision hull used if collisions are enabled.
      *  @property {string | undefined} compoundShapeURL - The model file to use for the compound shape if shapeType is
      *      "compound".
-     *  @property {Color | undefined} color - Currently not used.
+     *  @property {color | undefined} color - Currently not used.
      *  @property {string | undefined} textures - A JSON string of texture name, URL pairs used when rendering the model in
      *      place of the model's original textures. Use a texture name from the originalTextures property to override that
      *      texture.  Only the texture names and URLs to be overridden need be specified; original textures are used where there
@@ -163,7 +165,7 @@ class ModelEntity {
             }
         }
 
-        let color: Color | undefined = undefined;
+        let color: color | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
             color = {
                 red: data.getUint8(dataPosition),

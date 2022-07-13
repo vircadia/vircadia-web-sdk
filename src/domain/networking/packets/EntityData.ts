@@ -16,7 +16,7 @@ import ShapeEntity, { ShapeEntitySubclassData, Shape } from "../../entities/Shap
 import AACube from "../../shared/AACube";
 import assert from "../../shared/assert";
 import ByteCountCoded from "../../shared/ByteCountCoded";
-import type { Color } from "../../shared/Color";
+import type { color } from "../../shared/Color";
 import "../../shared/DataViewExtensions";
 import GLMHelpers from "../../shared/GLMHelpers";
 import PropertyFlags from "../../shared/PropertyFlags";
@@ -109,7 +109,7 @@ type EntityDataDetails = {
     staticCertificateVersion: number | undefined;
     shapeType?: number | undefined;
     compoundShapeURL?: string | undefined;
-    color?: Color | undefined;
+    color?: color | undefined;
     textures?: string | undefined;
     modelURL?: string | undefined;
     modelScale?: vec3 | undefined;
@@ -151,9 +151,9 @@ const EntityData = new class {
     // ~27-35 bytes...
     readonly #_MINIMUM_HEADER_BYTES = 27;
 
-    /*@devdoc
-     *  Information returned by {@link PacketScribe|reading} an {@link PacketType(1)|EntityData} packet.
-     *  @typedef {object} PacketScribe.EntityDataDetails
+    /*@sdkdoc
+     *  Entity properties common to all entities. Additionnaly, all {@link EntityTypes} have their own special properties.
+     *  @typedef {object} EntityProperties
      *  @property {Uuid} entityItemID - The ID of the entity.
      *  @property {EntityTypes} entityType - The entity's type. It cannot be changed after an entity is created.
      *  @property {bigint} createdFromBuffer - Timestamp for when the entity was created. Expressed in number of microseconds
@@ -302,38 +302,11 @@ const EntityData = new class {
      *      private key.
      *  @property {string | undefined} certificateType - Type of the certificate.
      *  @property {number | undefined} staticCertificateVersion - The version of the method used to generate the certificateID.
-     *  @property {number | undefined} [shapeType] - The shape of the collision hull used if collisions are enabled.
-     *  @property {string | undefined} [compoundShapeURL] - The model file to use for the compound shape if shapeType is
-     *      "compound".
-     *  @property {Color | undefined} [color] - Currently not used.
-     *  @property {string | undefined} [textures] - A JSON string of texture name, URL pairs used when rendering the model in
-     *      place of the model's original textures. Use a texture name from the originalTextures property to override that
-     *      texture.  Only the texture names and URLs to be overridden need be specified; original textures are used where there
-     *      are no overrides. You can use JSON.stringify() to convert a JavaScript object of name, URL pairs into a JSON string.
-     *  @property {string | undefined} [modelURL] - The URL of the glTF, FBX, or OBJ model. glTF models may be in JSON or binary
-     *      format (".gltf" or ".glb" URLs respectively). Baked models' URLs have ".baked" before the file type. Model files may
-     *      also be compressed in GZ format, in which case the URL ends in ".gz".
-     *  @property {vec3 | undefined} [modelScale] - The scale factor applied to the model's dimensions.
-     *  @property {boolean | undefined} [jointRotationsSet] - <code>true</code> values for joints that have had rotations
-     *      applied, <code>false</code> otherwise; Empty if none are applied or the model hasn't loaded.
-     *  @property {quat[] | undefined} [jointRotations] - Joint rotations applied to the model; Empty if none are applied or the
-     *      model hasn't loaded.
-     *  @property {boolean | undefined} [jointTranslationsSet] - <code>true</code> values for joints that have had translations
-     *      applied, <code>false</code> otherwise; Empty if none are applied or the model hasn't loaded.
-     *  @property {vec3[] | undefined} [jointTranslations] - Joint translations applied to the model; Empty if none are applied
-     *      or the model hasn't loaded.
-     *  @property {boolean | undefined} [groupCulled] - <code>true</code> if the mesh parts of the model are LOD culled as a
-     *      group, <code>false</code> if separate mesh parts are LOD culled individually.
-     *  @property {boolean | undefined} [relayParentJoints] - <code>true</code> if when the entity is parented to an avatar,
-     *      the avatar's joint rotations are applied to the entity's joints; <code>false</code> if a parent avatar's joint
-     *      rotations are not applied to the entity's joints.
-     *  @property {string | undefined} [blendShapeCoefficients] - A JSON string of a map of blendshape names to values. Only
-     *      stores set values. When editing this property, only coefficients that you are editing will change; it will not
-     *      explicitly reset other coefficients.
-     *  @property {boolean | undefined} [useOriginalPivot] - If <code>false</code>, the model will be centered based on its
-     *      content, ignoring any offset in the model itself. If <code>true</code>, the model will respect its original offset.
-     *      Currently, only pivots relative to <code>{x: 0, y: 0, z: 0}</code> are supported.
-     *  @property {AnimationProperties | undefined} [animation] - An animation to play on the model.
+     */
+
+    /*@devdoc
+     *  {@link EntityProperties} returned by {@link PacketScribe|reading} an {@link PacketType(1)|EntityData} packet.
+     *  @typedef {object} PacketScribe.EntityDataDetails
      */
 
     /*@devdoc
