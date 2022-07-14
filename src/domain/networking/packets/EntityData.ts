@@ -306,7 +306,7 @@ const EntityData = new class {
      *  @see {@link ShapeEntityProperties}
      */
 
-    /*@devdoc
+    /*@sdkdoc
      *  {@link EntityProperties} returned by {@link PacketScribe|reading} an {@link PacketType(1)|EntityData} packet.
      *  @typedef {object} EntityDataDetails
      */
