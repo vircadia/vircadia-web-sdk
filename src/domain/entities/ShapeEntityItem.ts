@@ -1,5 +1,5 @@
 //
-//  ShapeEntity.ts
+//  ShapeEntityItem.ts
 //
 //  Created by Julien Merzoug on 11 Jul 2022.
 //  Copyright 2022 Vircadia contributors.
@@ -16,6 +16,7 @@ import { EntityPropertyFlags } from "./EntityPropertyFlags";
 
 
 /*@sdkdoc
+ *  <p>A "Shape" {@link EntityType} may display as one of the following geometrical shapes:</p>
  *  <table>
  *      <thead>
  *          <tr><th>Value</th><th>Dimensions</th><th>Notes</th></tr>
@@ -69,14 +70,14 @@ type ShapeEntitySubclassData = {
 
 
 /*@devdoc
- *  The <code>ShapeEntity</code> class provides facilities for reading shape entity properties.
- *  @class ShapeEntity
+ *  The <code>ShapeEntityItem</code> class provides facilities for reading shape entity properties from a packet.
+ *  @class ShapeEntityItem
  */
-class ShapeEntity {
+class ShapeEntityItem {
     // C++  class ShapeEntityItem : public EntityItem
 
     /*@sdkdoc
-     *  A color vector.
+     *  A color value.
      *  @typedef {object} color
      *  @property {number} red - Red component value. Integer in the range <code>0 - 255</code>.
      *  @property {number} green - Green component value. Integer in the range <code>0 - 255</code>.
@@ -84,7 +85,7 @@ class ShapeEntity {
      */
 
     /*@sdkdoc
-     *  The Shape {@link EntityTypes|entity type} displays an entity of a specified shape. It has properties in addition to the
+     *  The Shape {@link EntityType|entity type} displays an entity of a specified shape. It has properties in addition to the
      *      common {@link EntityProperties}.
      *  @typedef {object} ShapeEntityProperties
      *  @property {Shape | undefined} shape - The shape of the entity.
@@ -165,5 +166,5 @@ class ShapeEntity {
 
 }
 
-export default ShapeEntity;
+export default ShapeEntityItem;
 export type { ShapeEntitySubclassData, Shape };

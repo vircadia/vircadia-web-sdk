@@ -1,5 +1,5 @@
 //
-//  ModelEntity.unit.test.js
+//  ModelEntityItem.unit.test.js
 //
 //  Created by Julien Merzoug on 11 Jul 2022.
 //  Copyright 2022 Vircadia contributors.
@@ -9,11 +9,11 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import ModelEntity from "../../../src/domain/entities/ModelEntity";
+import ModelEntityItem from "../../../src/domain/entities/ModelEntityItem";
 import PropertyFlags from "../../../src/domain/shared/PropertyFlags";
 
 
-describe("ModelEntity - unit tests", () => {
+describe("ModelEntityItem - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
@@ -34,7 +34,7 @@ describe("ModelEntity - unit tests", () => {
         }));
         const data = new DataView(bufferArray.buffer);
 
-        const modelEntity = ModelEntity.readEntitySubclassDataFromBuffer(data, 0, propertyFlags);
+        const modelEntity = ModelEntityItem.readEntitySubclassDataFromBuffer(data, 0, propertyFlags);
 
         expect(modelEntity.bytesRead).toBe(160);
         expect(modelEntity.properties.shapeType).toBe(0);

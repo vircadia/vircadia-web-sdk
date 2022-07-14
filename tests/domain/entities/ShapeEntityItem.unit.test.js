@@ -1,5 +1,5 @@
 //
-//  ShapeEntity.unit.test.js
+//  ShapeEntityItem.unit.test.js
 //
 //  Created by Julien Merzoug on 11 Jul 2022.
 //  Copyright 2022 Vircadia contributors.
@@ -9,7 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import ShapeEntity from "../../../src/domain/entities/ShapeEntity";
+import ShapeEntityItem from "../../../src/domain/entities/ShapeEntityItem";
 import PropertyFlags from "../../../src/domain/shared/PropertyFlags";
 
 
@@ -33,7 +33,7 @@ describe("ShapeEntity - unit tests", () => {
         }));
         const data = new DataView(bufferArray.buffer);
 
-        const shapeEntity = ShapeEntity.readEntitySubclassDataFromBuffer(data, 0, propertyFlags);
+        const shapeEntity = ShapeEntityItem.readEntitySubclassDataFromBuffer(data, 0, propertyFlags);
 
         expect(shapeEntity.bytesRead).toBe(37);
         expect(shapeEntity.properties.color.red).toBe(0);

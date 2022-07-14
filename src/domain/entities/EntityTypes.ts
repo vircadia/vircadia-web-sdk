@@ -10,8 +10,8 @@
 //
 
 /*@sdkdoc
- *  The <code>EntityTypes</code> namespace provides types for entities.
- *  @namespace EntityTypes
+ *  The <code>EntityType</code> namespace provides types for entities.
+ *  @namespace EntityType
  *  @property {number} Unknown - <code>0</code> - Default entity type.
  *  @property {number} Box - <code>1</code> - A rectangular prism. This is a synonym of <code>Shape</code> for the case where
  *      the entity's shape property value is <code>Cube</code>. If an entity is created with its type set to <code>Box</code> it
@@ -41,7 +41,7 @@
  *  @property {number} Material - <code>16</code> - Modifies the existing materials on entities and avatars.
  *  @property {number} NUM_TYPES - <code>17</code> - The number of entity types.
  */
-enum EntityTypes {
+enum EntityType {
     // C++ EntityTypes.EntityType_t
 
     Unknown = 0,
@@ -64,4 +64,4 @@ enum EntityTypes {
     NUM_TYPES
 }
 
-export { EntityTypes };
+export { EntityType };

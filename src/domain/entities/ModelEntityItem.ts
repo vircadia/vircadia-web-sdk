@@ -1,5 +1,5 @@
 //
-//  ModelEntity.ts
+//  ModelEntityItem.ts
 //
 //  Created by Julien Merzoug on 11 Jul 2022.
 //  Copyright 2022 Vircadia contributors.
@@ -55,10 +55,10 @@ type ModelEntitySubclassData = {
 
 
 /*@devdoc
- *  The <code>ModelEntity</code> class provides facilities for reading model entity properties.
- *  @class ModelEntity
+ *  The <code>ModelEntityItem</code> class provides facilities for reading model entity properties from a packet.
+ *  @class ModelEntityItem
  */
-class ModelEntity {
+class ModelEntityItem {
     // C++  class ModelEntityItem : public EntityItem
 
     /*@sdkdoc
@@ -81,7 +81,7 @@ class ModelEntity {
      */
 
     /*@sdkdoc
-     * The Model {@link EntityTypes|entity type} displays a glTF, FBX, or OBJ model. When adding an entity, if no
+     * The Model {@link EntityType|entity type} displays a glTF, FBX, or OBJ model. When adding an entity, if no
      *     <code>dimensions</code> value is specified then the model is automatically sized to its natural dimensions. It has
      *     properties in addition to the common {@link EntityProperties}.
      *  @typedef {object} ModelEntityProperties
@@ -406,5 +406,5 @@ class ModelEntity {
 
 }
 
-export default ModelEntity;
+export default ModelEntityItem;
 export type { ModelEntitySubclassData, AnimationProperties };

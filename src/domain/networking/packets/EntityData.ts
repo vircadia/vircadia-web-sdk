@@ -10,9 +10,9 @@
 //
 
 import { EntityPropertyFlags } from "../../entities/EntityPropertyFlags";
-import { EntityTypes } from "../../entities/EntityTypes";
-import ModelEntity, { ModelEntitySubclassData, AnimationProperties } from "../../entities/ModelEntity";
-import ShapeEntity, { ShapeEntitySubclassData, Shape } from "../../entities/ShapeEntity";
+import { EntityType } from "../../entities/EntityTypes";
+import ModelEntityItem, { ModelEntitySubclassData, AnimationProperties } from "../../entities/ModelEntityItem";
+import ShapeEntityItem, { ShapeEntitySubclassData, Shape } from "../../entities/ShapeEntityItem";
 import AACube from "../../shared/AACube";
 import assert from "../../shared/assert";
 import ByteCountCoded from "../../shared/ByteCountCoded";
@@ -30,7 +30,7 @@ import { ungzip } from "pako";
 
 type EntityDataDetails = {
     entityItemID: Uuid,
-    entityType: EntityTypes,
+    entityType: EntityType,
     createdFromBuffer: bigint,
     lastEdited: bigint,
     updateDelta: number,
@@ -152,10 +152,10 @@ const EntityData = new class {
     readonly #_MINIMUM_HEADER_BYTES = 27;
 
     /*@sdkdoc
-     *  Entity properties common to all entities. Additionnaly, all {@link EntityTypes} have their own special properties.
+     *  Entity properties common to all entities. Additionnaly, all {@link EntityType} have their own special properties.
      *  @typedef {object} EntityProperties
      *  @property {Uuid} entityItemID - The ID of the entity.
-     *  @property {EntityTypes} entityType - The entity's type. It cannot be changed after an entity is created.
+     *  @property {EntityType} entityType - The entity's type. It cannot be changed after an entity is created.
      *  @property {bigint} createdFromBuffer - Timestamp for when the entity was created. Expressed in number of microseconds
      *      since Unix epoch.
      *  @property {bigint} lastEdited - Timestamp for when the entity was last edited. Expressed in number of microseconds since
@@ -302,18 +302,20 @@ const EntityData = new class {
      *      private key.
      *  @property {string | undefined} certificateType - Type of the certificate.
      *  @property {number | undefined} staticCertificateVersion - The version of the method used to generate the certificateID.
+     *  @see {@link ModelEntityProperties}
+     *  @see {@link ShapeEntityProperties}
      */
 
     /*@devdoc
      *  {@link EntityProperties} returned by {@link PacketScribe|reading} an {@link PacketType(1)|EntityData} packet.
-     *  @typedef {object} PacketScribe.EntityDataDetails
+     *  @typedef {object} EntityDataDetails
      */
 
     /*@devdoc
      *  Reads an {@link PacketType(1)|EntityData} packet containing the details of one or more entities.
      *  @function PacketScribe.EntityData&period;read
      *  @param {DataView} data - The {@link Packets|EntityData} message data to read.
-     *  @returns {PacketScribe.EntityDataDetails[]} The entity data for one or more entities.
+     *  @returns {EntityDataDetails[]} The entity data for one or more entities.
      */
     read(data: DataView): EntityDataDetails[] {
         // C++  void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointer sourceNode)
@@ -497,7 +499,7 @@ const EntityData = new class {
             const entityType = codec.data;
 
             // WEBRTC TODO: Unnecessary check once all entity types are supported.
-            if (!(entityType === EntityTypes.Model || entityType === EntityTypes.Shape)) {
+            if (!(entityType === EntityType.Model || entityType === EntityType.Shape)) {
                 const errorMessage = `Entity type is not supported: ${entityType}`;
                 console.error(errorMessage);
                 throw new Error(errorMessage);
@@ -1177,11 +1179,11 @@ const EntityData = new class {
             // eslint-disable-next-line @typescript-eslint/init-declarations
             let subclassData: EntitySubclassData;
             switch (entityType) {
-                case EntityTypes.Shape:
-                    subclassData = ShapeEntity.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                case EntityType.Shape:
+                    subclassData = ShapeEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
-                case EntityTypes.Model:
-                    subclassData = ModelEntity.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                case EntityType.Model:
+                    subclassData = ModelEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
                 default:
                     // WEBRTC TODO: This line will be unreachable once all entity types are supported.

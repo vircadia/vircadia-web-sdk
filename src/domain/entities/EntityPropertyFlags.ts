@@ -148,7 +148,8 @@
  *          <tr><td>PROP_DERIVED_33</td><td>125</td><td>Derived 33 flag.</td></tr>
  *          <tr><td>PROP_DERIVED_34</td><td>126</td><td>Derived 34 flag.</td></tr>
  *          <tr><td>PROP_AFTER_LAST_ITEM</td><td>127</td><td>After last item flag.</td></tr>
- *          <tr><td>PROP_MAX_PARTICLES</td><td>{@link EntityPropertyFlags|PROP_DERIVED_0}</td><td>Max particles flag.</td></tr>
+ *          <tr><td>PROP_MAX_PARTICLES</td><td>{@link EntityPropertyFlags|PROP_DERIVED_0}</td><td>Max particles flag. First
+ *          ParticleEffect entity-specific property.</td></tr>
  *          <tr><td>PROP_LIFESPAN</td><td>{@link EntityPropertyFlags|PROP_DERIVED_1}</td><td>Lifespan flag.</td></tr>
  *          <tr><td>PROP_EMITTING_PARTICLES</td><td>{@link EntityPropertyFlags|PROP_DERIVED_2}</td><td>Emitting_particles flag.
  *          </td></tr>
@@ -189,7 +190,9 @@
  *          <tr><td>PROP_SPIN_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_29}</td><td>Spin spread flag.</td></tr>
  *          <tr><td>PROP_PARTICLE_ROTATE_WITH_ENTITY</td><td>{@link EntityPropertyFlags|PROP_DERIVED_30}</td><td>Particle rotate
  *          with entity flag.</td></tr>
- *          <tr><td>PROP_MODEL_URL</td><td>{@link EntityPropertyFlags|PROP_DERIVED_0}</td><td>Model url flag.</td></tr>
+ *          <tr><td>PROP_MODEL_URL</td><td>{@link EntityPropertyFlags|PROP_DERIVED_0}</td><td>Model url flag. First Model
+ *          entity-specific property.<br />
+ *          {@link ModelEntityItem|ModelEntity}</td></tr>
  *          <tr><td>PROP_MODEL_SCALE</td><td>{@link EntityPropertyFlags|PROP_DERIVED_1}</td><td>Model scale flag.</td></tr>
  *          <tr><td>PROP_JOINT_ROTATIONS_SET</td><td>{@link EntityPropertyFlags|PROP_DERIVED_2}</td><td>Joint rotations set
  *          flag.</td></tr>
@@ -221,6 +224,7 @@
  *          <tr><td>PROP_ANIMATION_LAST_FRAME</td><td>{@link EntityPropertyFlags|PROP_DERIVED_17}</td><td>Animation last frame
  *          flag.</td></tr>
  *          <tr><td>PROP_ANIMATION_HOLD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_18}</td><td>Animation hold flag.</td>
+ *          <tr><td>PROP_SHAPE</td><td>{@link EntityPropertyFlags|PROP_DERIVED_0}</td><td>Shape flag.</td>
  *          </tr>
  *      </tbody>
  *  </table>
@@ -259,6 +263,7 @@ enum EntityPropertyFlags {
     PROP_IGNORE_PICK_INTERSECTION,
     PROP_RENDER_WITH_ZONES,
     PROP_BILLBOARD_MODE,
+
     // Grab
     PROP_GRAB_GRABBABLE,
     PROP_GRAB_KINEMATIC,
@@ -273,6 +278,7 @@ enum EntityPropertyFlags {
     PROP_GRAB_EQUIPPABLE_INDICATOR_URL,
     PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE,
     PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET,
+
     // Physics
     PROP_DENSITY,
     PROP_VELOCITY,
@@ -289,6 +295,7 @@ enum EntityPropertyFlags {
     PROP_DYNAMIC,
     PROP_COLLISION_SOUND_URL,
     PROP_ACTION_DATA,
+
     // Cloning
     PROP_CLONEABLE,
     PROP_CLONE_LIFETIME,
@@ -296,10 +303,12 @@ enum EntityPropertyFlags {
     PROP_CLONE_DYNAMIC,
     PROP_CLONE_AVATAR_ENTITY,
     PROP_CLONE_ORIGIN_ID,
+
     // Scripts
     PROP_SCRIPT,
     PROP_SCRIPT_TIMESTAMP,
     PROP_SERVER_SCRIPTS,
+
     // Certifiable Properties
     PROP_ITEM_NAME,
     PROP_ITEM_DESCRIPTION,
@@ -313,12 +322,14 @@ enum EntityPropertyFlags {
     PROP_CERTIFICATE_ID,
     PROP_CERTIFICATE_TYPE,
     PROP_STATIC_CERTIFICATE_VERSION,
+
     // Used to convert values to and from scripts
     PROP_LOCAL_POSITION,
     PROP_LOCAL_ROTATION,
     PROP_LOCAL_VELOCITY,
     PROP_LOCAL_ANGULAR_VELOCITY,
     PROP_LOCAL_DIMENSIONS,
+
     // These properties are used by multiple subtypes but aren't in the base EntityItem.
     PROP_SHAPE_TYPE,
     PROP_COMPOUND_SHAPE_URL,
@@ -331,6 +342,7 @@ enum EntityPropertyFlags {
     PROP_PULSE_ALPHA_MODE,
     PROP_TEXTURES,
     // Add new shared EntityItem properties to the list above this line.
+
     // We need as many of these as the number of unique properties of a derived EntityItem class.
     PROP_DERIVED_0,
     PROP_DERIVED_1,
@@ -368,10 +380,12 @@ enum EntityPropertyFlags {
     PROP_DERIVED_33,
     PROP_DERIVED_34,
     PROP_AFTER_LAST_ITEM,
-    // Do not add props here unless you intentionally mean to reuse PROP_DERIVED_X indexes.
+
+    // WARNING! Do not add props here unless you intentionally mean to reuse PROP_DERIVED_X indexes.
     // These properties intentionally reuse the enum values for other properties which will never overlap with each other.
     // We do this so that we don't have to expand the size of the properties bitflags mask.
     // Only add properties here that are only used by one subclass.  Otherwise, they should go above to prevent collisions
+
     // Particles
     PROP_MAX_PARTICLES = PROP_DERIVED_0,
     PROP_LIFESPAN = PROP_DERIVED_1,
@@ -404,6 +418,7 @@ enum EntityPropertyFlags {
     PROP_SPIN_FINISH = PROP_DERIVED_28,
     PROP_SPIN_SPREAD = PROP_DERIVED_29,
     PROP_PARTICLE_ROTATE_WITH_ENTITY = PROP_DERIVED_30,
+
     // Model
     PROP_MODEL_URL = PROP_DERIVED_0,
     PROP_MODEL_SCALE = PROP_DERIVED_1,
@@ -415,6 +430,7 @@ enum EntityPropertyFlags {
     PROP_GROUP_CULLED = PROP_DERIVED_7,
     PROP_BLENDSHAPE_COEFFICIENTS = PROP_DERIVED_8,
     PROP_USE_ORIGINAL_PIVOT = PROP_DERIVED_9,
+
     // Animation
     PROP_ANIMATION_URL = PROP_DERIVED_10,
     PROP_ANIMATION_ALLOW_TRANSLATION = PROP_DERIVED_11,
@@ -425,6 +441,7 @@ enum EntityPropertyFlags {
     PROP_ANIMATION_FIRST_FRAME = PROP_DERIVED_16,
     PROP_ANIMATION_LAST_FRAME = PROP_DERIVED_17,
     PROP_ANIMATION_HOLD = PROP_DERIVED_18,
+
     // Shape
     PROP_SHAPE = PROP_DERIVED_0
 

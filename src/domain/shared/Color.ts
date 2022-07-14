@@ -10,6 +10,8 @@
 //
 
 
+// The JSDoc is in ShapeEntityItem.ts. The code in this file is entirely removed during the conversion to javascript, leaving no
+// module to which the JSDoc can be attached.
 type color = {
     red: number;
     green: number;
