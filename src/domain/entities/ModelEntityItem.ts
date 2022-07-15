@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import GLMHelpers from "../shared/GLMHelpers";
@@ -30,7 +31,7 @@ type AnimationProperties = {
     animationHold: boolean | undefined;
 };
 
-type ModelEntityProperties = {
+type ModelEntitySubclassProperties = {
     shapeType: number | undefined;
     compoundShapeURL: string | undefined;
     color: color | undefined;
@@ -48,9 +49,11 @@ type ModelEntityProperties = {
     animation: AnimationProperties | undefined;
 };
 
+type ModelEntityProperties = CommonEntityProperties & ModelEntitySubclassProperties;
+
 type ModelEntitySubclassData = {
     bytesRead: number;
-    properties: ModelEntityProperties;
+    properties: ModelEntitySubclassProperties;
 };
 
 
@@ -81,9 +84,9 @@ class ModelEntityItem {
      */
 
     /*@sdkdoc
-     * The Model {@link EntityType|entity type} displays a glTF, FBX, or OBJ model. When adding an entity, if no
-     *     <code>dimensions</code> value is specified then the model is automatically sized to its natural dimensions. It has
-     *     properties in addition to the common {@link EntityProperties}.
+     *  The Model {@link EntityType|entity type} displays a glTF, FBX, or OBJ model. When adding an entity, if no
+     *  <code>dimensions</code> value is specified then the model is automatically sized to its natural dimensions. It has
+     *  properties in addition to the common {@link EntityProperties}.
      *  @typedef {object} ModelEntityProperties
      *  @property {number | undefined} shapeType - The shape of the collision hull used if collisions are enabled.
      *  @property {string | undefined} compoundShapeURL - The model file to use for the compound shape if shapeType is
@@ -407,4 +410,4 @@ class ModelEntityItem {
 }
 
 export default ModelEntityItem;
-export type { ModelEntitySubclassData, AnimationProperties };
+export type { ModelEntitySubclassData, ModelEntityProperties, AnimationProperties };

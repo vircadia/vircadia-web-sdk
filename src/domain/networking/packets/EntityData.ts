@@ -11,12 +11,11 @@
 
 import { EntityPropertyFlags } from "../../entities/EntityPropertyFlags";
 import { EntityType } from "../../entities/EntityTypes";
-import ModelEntityItem, { ModelEntitySubclassData, AnimationProperties } from "../../entities/ModelEntityItem";
-import ShapeEntityItem, { ShapeEntitySubclassData, Shape } from "../../entities/ShapeEntityItem";
+import ModelEntityItem, { ModelEntityProperties, ModelEntitySubclassData } from "../../entities/ModelEntityItem";
+import ShapeEntityItem, { ShapeEntityProperties, ShapeEntitySubclassData } from "../../entities/ShapeEntityItem";
 import AACube from "../../shared/AACube";
 import assert from "../../shared/assert";
 import ByteCountCoded from "../../shared/ByteCountCoded";
-import type { color } from "../../shared/Color";
 import "../../shared/DataViewExtensions";
 import GLMHelpers from "../../shared/GLMHelpers";
 import PropertyFlags from "../../shared/PropertyFlags";
@@ -28,7 +27,7 @@ import UDT from "../udt/UDT";
 import { ungzip } from "pako";
 
 
-type EntityDataDetails = {
+type CommonEntityProperties = {
     entityItemID: Uuid,
     entityType: EntityType,
     createdFromBuffer: bigint,
@@ -107,30 +106,17 @@ type EntityDataDetails = {
     certificateID: string | undefined;
     certificateType: string | undefined;
     staticCertificateVersion: number | undefined;
-    shapeType?: number | undefined;
-    compoundShapeURL?: string | undefined;
-    color?: color | undefined;
-    textures?: string | undefined;
-    modelURL?: string | undefined;
-    modelScale?: vec3 | undefined;
-    jointRotationsSet?: boolean[] | undefined;
-    jointRotations?: quat[] | undefined;
-    jointTranslationsSet?: boolean[] | undefined;
-    jointTranslations?: vec3[] | undefined;
-    groupCulled?: boolean | undefined;
-    relayParentJoints?: boolean | undefined;
-    blendShapeCoefficients?: string | undefined;
-    useOriginalPivot?: boolean | undefined;
-    animation?: AnimationProperties | undefined;
-    shape?: Shape | undefined;
-    alpha?: number | undefined;
 };
+
+type EntityProperties = ModelEntityProperties | ShapeEntityProperties;
+
+type EntityDataDetails = EntityProperties[];
 
 type EntitySubclassData = ModelEntitySubclassData | ShapeEntitySubclassData;
 
 type ParsedData = {
     bytesRead: number;
-    entitiesDataDetails: EntityDataDetails[];
+    entitiesDataDetails: EntityDataDetails;
 };
 
 
@@ -152,8 +138,10 @@ const EntityData = new class {
     readonly #_MINIMUM_HEADER_BYTES = 27;
 
     /*@sdkdoc
-     *  Entity properties common to all entities. Additionnaly, all {@link EntityType} have their own special properties.
+     *  Different entity types have different properties: some common to all entities (listed in the table) and some specific to
+     *  each {@link EntityType} (linked to below).
      *  @typedef {object} EntityProperties
+     *
      *  @property {Uuid} entityItemID - The ID of the entity.
      *  @property {EntityType} entityType - The entity's type. It cannot be changed after an entity is created.
      *  @property {bigint} createdFromBuffer - Timestamp for when the entity was created. Expressed in number of microseconds
@@ -302,22 +290,23 @@ const EntityData = new class {
      *      private key.
      *  @property {string | undefined} certificateType - Type of the certificate.
      *  @property {number | undefined} staticCertificateVersion - The version of the method used to generate the certificateID.
+     *
      *  @see {@link ModelEntityProperties}
      *  @see {@link ShapeEntityProperties}
      */
 
     /*@sdkdoc
-     *  {@link EntityProperties} returned by {@link PacketScribe|reading} an {@link PacketType(1)|EntityData} packet.
-     *  @typedef {object} EntityDataDetails
+     *  Entity properties returned for an entity {@link PacketScribe|read} from an {@link PacketType(1)|EntityData} packet.
+     *  @typedef {EntityProperties[]} PacketScribe.EntityDataDetails
      */
 
     /*@devdoc
      *  Reads an {@link PacketType(1)|EntityData} packet containing the details of one or more entities.
      *  @function PacketScribe.EntityData&period;read
      *  @param {DataView} data - The {@link Packets|EntityData} message data to read.
-     *  @returns {EntityDataDetails[]} The entity data for one or more entities.
+     *  @returns {PacketScribe.EntityDataDetails} The entity data for one or more entities.
      */
-    read(data: DataView): EntityDataDetails[] {
+    read(data: DataView): EntityDataDetails {
         // C++  void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointer sourceNode)
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
@@ -339,7 +328,7 @@ const EntityData = new class {
 
         let error = false;
 
-        let entityDataDetails: EntityDataDetails[] = [];
+        let entityDataDetails: EntityDataDetails = [];
 
         while (data.byteLength - dataPosition > 0 && !error) {
             const entityMessage = new DataView(data.buffer.slice(data.byteOffset + dataPosition));
@@ -401,7 +390,7 @@ const EntityData = new class {
 
         let dataPosition = 0;
 
-        let entitiesDataDetails: EntityDataDetails[] = [];
+        let entitiesDataDetails: EntityDataDetails = [];
 
         while (dataPosition < data.byteLength) {
             const numberOfThreeBitSectionsInStream = this.#numberOfThreeBitSectionsInCode(data, dataPosition, data.byteLength);
@@ -487,7 +476,7 @@ const EntityData = new class {
             };
         }
 
-        const entitiesDataDetails: EntityDataDetails[] = [];
+        const entitiesDataDetails: EntityDataDetails = [];
         const codec = new ByteCountCoded();
 
         for (let i = 0; i < numberOfEntities; i++) {
@@ -1331,4 +1320,4 @@ const EntityData = new class {
 }();
 
 export default EntityData;
-export type { EntityDataDetails, EntitySubclassData };
+export type { EntityProperties, CommonEntityProperties, EntityDataDetails };

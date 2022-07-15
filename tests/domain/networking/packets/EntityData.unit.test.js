@@ -16,6 +16,7 @@ import Uuid from "../../../../src/domain/shared/Uuid";
 describe("EntityData - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
     test("Can read a Model entity in a packet", () => {
         // eslint-disable-next-line max-len
