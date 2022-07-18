@@ -75,7 +75,7 @@ class OctreePacketProcessor {
     /*@devdoc
      *  Triggered when an entity data packet is received.
      *  @callback OctreePacketProcessor.entityData
-     *  @param {EntityDataDetails[]} entityData - The entity data for one or more entities.
+     *  @param {PacketScribe.EntityDataDetails} entityData - The entity data for one or more entities.
      *  @returns {Signal}
      */
     get entityData(): Signal {
