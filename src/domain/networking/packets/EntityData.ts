@@ -15,6 +15,7 @@ import ImageEntityItem, { ImageEntityProperties, ImageEntitySubclassData } from 
 import ModelEntityItem, { ModelEntityProperties, ModelEntitySubclassData } from "../../entities/ModelEntityItem";
 import ShapeEntityItem, { ShapeEntityProperties, ShapeEntitySubclassData } from "../../entities/ShapeEntityItem";
 import TextEntityItem, { TextEntityProperties, TextEntitySubclassData } from "../../entities/TextEntityItem";
+import WebEntityItem, { WebEntityProperties, WebEntitySubclassData } from "../../entities/WebEntityItem";
 import AACube from "../../shared/AACube";
 import assert from "../../shared/assert";
 import ByteCountCoded from "../../shared/ByteCountCoded";
@@ -113,14 +114,16 @@ type CommonEntityProperties = {
 type EntityProperties = ModelEntityProperties
 | ShapeEntityProperties
 | TextEntityProperties
-| ImageEntityProperties;
+| ImageEntityProperties
+| WebEntityProperties;
 
 type EntityDataDetails = EntityProperties[];
 
 type EntitySubclassData = ModelEntitySubclassData
 | ShapeEntitySubclassData
 | TextEntitySubclassData
-| ImageEntitySubclassData;
+| ImageEntitySubclassData
+| WebEntitySubclassData;
 
 type ParsedData = {
     bytesRead: number;
@@ -500,6 +503,7 @@ const EntityData = new class {
                || entityType === EntityType.Shape
                || entityType === EntityType.Text
                || entityType === EntityType.Image
+               || entityType === EntityType.Web
             )) {
                 const errorMessage = `Entity type is not supported: ${entityType}`;
                 console.error(errorMessage);
@@ -1191,6 +1195,9 @@ const EntityData = new class {
                     break;
                 case EntityType.Image:
                     subclassData = ImageEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                    break;
+                case EntityType.Web:
+                    subclassData = WebEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
                 default:
                     // WEBRTC TODO: This line will be unreachable once all entity types are supported.
