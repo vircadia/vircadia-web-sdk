@@ -11,6 +11,7 @@
 
 import { EntityPropertyFlags } from "../../entities/EntityPropertyFlags";
 import { EntityType } from "../../entities/EntityTypes";
+import ImageEntityItem, { ImageEntityProperties, ImageEntitySubclassData } from "../../entities/ImageEntityItem";
 import ModelEntityItem, { ModelEntityProperties, ModelEntitySubclassData } from "../../entities/ModelEntityItem";
 import ShapeEntityItem, { ShapeEntityProperties, ShapeEntitySubclassData } from "../../entities/ShapeEntityItem";
 import TextEntityItem, { TextEntityProperties, TextEntitySubclassData } from "../../entities/TextEntityItem";
@@ -109,11 +110,17 @@ type CommonEntityProperties = {
     staticCertificateVersion: number | undefined;
 };
 
-type EntityProperties = ModelEntityProperties | ShapeEntityProperties | TextEntityProperties;
+type EntityProperties = ModelEntityProperties
+| ShapeEntityProperties
+| TextEntityProperties
+| ImageEntityProperties;
 
 type EntityDataDetails = EntityProperties[];
 
-type EntitySubclassData = ModelEntitySubclassData | ShapeEntitySubclassData | TextEntitySubclassData;
+type EntitySubclassData = ModelEntitySubclassData
+| ShapeEntitySubclassData
+| TextEntitySubclassData
+| ImageEntitySubclassData;
 
 type ParsedData = {
     bytesRead: number;
@@ -492,6 +499,7 @@ const EntityData = new class {
             if (!(entityType === EntityType.Model
                || entityType === EntityType.Shape
                || entityType === EntityType.Text
+               || entityType === EntityType.Image
             )) {
                 const errorMessage = `Entity type is not supported: ${entityType}`;
                 console.error(errorMessage);
@@ -1180,6 +1188,9 @@ const EntityData = new class {
                     break;
                 case EntityType.Text:
                     subclassData = TextEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                    break;
+                case EntityType.Image:
+                    subclassData = ImageEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
                 default:
                     // WEBRTC TODO: This line will be unreachable once all entity types are supported.
