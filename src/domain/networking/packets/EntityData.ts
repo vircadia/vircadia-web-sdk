@@ -13,6 +13,7 @@ import { EntityPropertyFlags } from "../../entities/EntityPropertyFlags";
 import { EntityType } from "../../entities/EntityTypes";
 import ModelEntityItem, { ModelEntityProperties, ModelEntitySubclassData } from "../../entities/ModelEntityItem";
 import ShapeEntityItem, { ShapeEntityProperties, ShapeEntitySubclassData } from "../../entities/ShapeEntityItem";
+import TextEntityItem, { TextEntityProperties, TextEntitySubclassData } from "../../entities/TextEntityItem";
 import AACube from "../../shared/AACube";
 import assert from "../../shared/assert";
 import ByteCountCoded from "../../shared/ByteCountCoded";
@@ -108,11 +109,11 @@ type CommonEntityProperties = {
     staticCertificateVersion: number | undefined;
 };
 
-type EntityProperties = ModelEntityProperties | ShapeEntityProperties;
+type EntityProperties = ModelEntityProperties | ShapeEntityProperties | TextEntityProperties;
 
 type EntityDataDetails = EntityProperties[];
 
-type EntitySubclassData = ModelEntitySubclassData | ShapeEntitySubclassData;
+type EntitySubclassData = ModelEntitySubclassData | ShapeEntitySubclassData | TextEntitySubclassData;
 
 type ParsedData = {
     bytesRead: number;
@@ -488,7 +489,10 @@ const EntityData = new class {
             const entityType = codec.data;
 
             // WEBRTC TODO: Unnecessary check once all entity types are supported.
-            if (!(entityType === EntityType.Model || entityType === EntityType.Shape)) {
+            if (!(entityType === EntityType.Model
+               || entityType === EntityType.Shape
+               || entityType === EntityType.Text
+            )) {
                 const errorMessage = `Entity type is not supported: ${entityType}`;
                 console.error(errorMessage);
                 throw new Error(errorMessage);
@@ -1174,6 +1178,9 @@ const EntityData = new class {
                 case EntityType.Model:
                     subclassData = ModelEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
+                case EntityType.Text:
+                    subclassData = TextEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                    break;
                 default:
                     // WEBRTC TODO: This line will be unreachable once all entity types are supported.
                     console.error("Entity type not supported: ", entityType);
@@ -1185,87 +1192,91 @@ const EntityData = new class {
 
             dataPosition += subclassData.bytesRead;
 
-            entitiesDataDetails.push({
-                entityItemID,
-                entityType,
-                createdFromBuffer,
-                lastEdited,
-                updateDelta,
-                simulatedDelta,
-                simOwnerData,
-                parentID,
-                parentJointIndex,
-                visible,
-                name,
-                locked,
-                userData,
-                privateUserData,
-                href,
-                description,
-                position,
-                dimensions,
-                rotation,
-                registrationPoint,
-                created,
-                lastEditedBy,
-                queryAACube,
-                canCastShadow,
-                renderLayer,
-                primitiveMode,
-                ignorePickIntersection,
-                renderWithZones,
-                billboardMode,
-                grabbable,
-                grabKinematic,
-                grabFollowsController,
-                triggerable,
-                grabEquippable,
-                delegateToParent,
-                equippableLeftPositionOffset,
-                equippableLeftRotationOffset,
-                equippableRightPositionOffset,
-                equippableRightRotationOffset,
-                equippableIndicatorURL,
-                equippableIndicatorScale,
-                equippableIndicatorOffset,
-                density,
-                velocity,
-                angularVelocity,
-                gravity,
-                acceleration,
-                damping,
-                angularDampling,
-                restitution,
-                friction,
-                lifetime,
-                collisionless,
-                collisionMask,
-                dynamic,
-                collisionSoundURL,
-                actionData,
-                cloneable,
-                cloneLifetime,
-                cloneLimit,
-                cloneDynamic,
-                cloneAvatarIdentity,
-                cloneOriginID,
-                script,
-                scriptTimestamp,
-                serverScripts,
-                itemName,
-                itemDescription,
-                itemCategories,
-                itemArtist,
-                itemLicense,
-                limitedRun,
-                marketplaceID,
-                editionNumber,
-                entityInstanceNumber,
-                certificateID,
-                certificateType,
-                staticCertificateVersion,
-                ...subclassData.properties
-            });
+            if (entityType === EntityType.Model || entityType === EntityType.Shape) {
+                entitiesDataDetails.push({
+                    entityItemID,
+                    entityType,
+                    createdFromBuffer,
+                    lastEdited,
+                    updateDelta,
+                    simulatedDelta,
+                    simOwnerData,
+                    parentID,
+                    parentJointIndex,
+                    visible,
+                    name,
+                    locked,
+                    userData,
+                    privateUserData,
+                    href,
+                    description,
+                    position,
+                    dimensions,
+                    rotation,
+                    registrationPoint,
+                    created,
+                    lastEditedBy,
+                    queryAACube,
+                    canCastShadow,
+                    renderLayer,
+                    primitiveMode,
+                    ignorePickIntersection,
+                    renderWithZones,
+                    billboardMode,
+                    grabbable,
+                    grabKinematic,
+                    grabFollowsController,
+                    triggerable,
+                    grabEquippable,
+                    delegateToParent,
+                    equippableLeftPositionOffset,
+                    equippableLeftRotationOffset,
+                    equippableRightPositionOffset,
+                    equippableRightRotationOffset,
+                    equippableIndicatorURL,
+                    equippableIndicatorScale,
+                    equippableIndicatorOffset,
+                    density,
+                    velocity,
+                    angularVelocity,
+                    gravity,
+                    acceleration,
+                    damping,
+                    angularDampling,
+                    restitution,
+                    friction,
+                    lifetime,
+                    collisionless,
+                    collisionMask,
+                    dynamic,
+                    collisionSoundURL,
+                    actionData,
+                    cloneable,
+                    cloneLifetime,
+                    cloneLimit,
+                    cloneDynamic,
+                    cloneAvatarIdentity,
+                    cloneOriginID,
+                    script,
+                    scriptTimestamp,
+                    serverScripts,
+                    itemName,
+                    itemDescription,
+                    itemCategories,
+                    itemArtist,
+                    itemLicense,
+                    limitedRun,
+                    marketplaceID,
+                    editionNumber,
+                    entityInstanceNumber,
+                    certificateID,
+                    certificateType,
+                    staticCertificateVersion,
+                    ...subclassData.properties
+                });
+            } else {
+                console.log("Entity type not supported");
+            }
         }
 
         /* eslint-disable @typescript-eslint/no-magic-numbers */
