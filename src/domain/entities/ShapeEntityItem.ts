@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
@@ -57,15 +58,17 @@ enum Shape {
     TRIANGLE = "Triangle"
 }
 
-type ShapeEntityProperties = {
+type ShapeEntitySubclassProperties = {
     shape: Shape | undefined;
     color: color | undefined;
     alpha: number | undefined;
 };
 
+type ShapeEntityProperties = CommonEntityProperties & ShapeEntitySubclassProperties;
+
 type ShapeEntitySubclassData = {
     bytesRead: number;
-    properties: ShapeEntityProperties;
+    properties: ShapeEntitySubclassProperties;
 };
 
 
@@ -86,7 +89,7 @@ class ShapeEntityItem {
 
     /*@sdkdoc
      *  The Shape {@link EntityType|entity type} displays an entity of a specified shape. It has properties in addition to the
-     *      common {@link EntityProperties}.
+     *  common {@link EntityProperties}.
      *  @typedef {object} ShapeEntityProperties
      *  @property {Shape | undefined} shape - The shape of the entity.
      *  @property {color | undefined} color - The color of the entity.
@@ -167,4 +170,4 @@ class ShapeEntityItem {
 }
 
 export default ShapeEntityItem;
-export type { ShapeEntitySubclassData, Shape };
+export type { ShapeEntitySubclassData, ShapeEntityProperties, Shape };

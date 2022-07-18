@@ -16,6 +16,7 @@ import Uuid from "../../../../src/domain/shared/Uuid";
 describe("EntityData - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
     test("Can read a Model entity in a packet", () => {
         // eslint-disable-next-line max-len
@@ -92,7 +93,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].equippableRightRotationOffset.y).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].equippableRightRotationOffset.z).toBeCloseTo(-0.0000152588, 8);
         expect(info[0].equippableRightRotationOffset.w).toBeCloseTo(1, 2);
-        expect(info[0].equippableIndicatorUrl).toBeUndefined();
+        expect(info[0].equippableIndicatorURL).toBeUndefined();
         expect(info[0].equippableIndicatorScale.x).toBeCloseTo(1, 2);
         expect(info[0].equippableIndicatorScale.y).toBeCloseTo(1, 2);
         expect(info[0].equippableIndicatorScale.z).toBeCloseTo(1, 2);
@@ -127,7 +128,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].cloneLimit).toBeCloseTo(0, 2);
         expect(info[0].cloneDynamic).toBe(false);
         expect(info[0].cloneAvatarIdentity).toBe(false);
-        expect(info[0].cloneOriginId).toBeUndefined();
+        expect(info[0].cloneOriginID).toBeUndefined();
         expect(info[0].script).toBeUndefined();
         expect(info[0].scriptTimestamp).toBe(0n);
         expect(info[0].serverScripts).toBeUndefined();
@@ -144,7 +145,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].certificateType).toBeUndefined();
         expect(info[0].staticCertificateVersion).toBe(0);
         expect(info[0].shapeType).toBe(0);
-        expect(info[0].compoundShapeUrl).toBeUndefined();
+        expect(info[0].compoundShapeURL).toBeUndefined();
         expect(info[0].color.red).toBe(255);
         expect(info[0].color.green).toBe(255);
         expect(info[0].color.blue).toBe(255);
@@ -163,7 +164,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].groupCulled).toBe(false);
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[0].useOriginalPivot).toBe(true);
-        expect(info[0].animation.animationUrl).toBeUndefined();
+        expect(info[0].animation.animationURL).toBeUndefined();
         expect(info[0].animation.animationAllowTranslation).toBe(false);
         expect(info[0].animation.animationFPS).toBeCloseTo(30, 2);
         expect(info[0].animation.animationFrameIndex).toBeCloseTo(0, 2);
@@ -227,7 +228,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].equippableLeftRotationOffset).toBeUndefined();
         expect(info[0].equippableRightPositionOffset).toBeUndefined();
         expect(info[0].equippableRightRotationOffset).toBeUndefined();
-        expect(info[0].equippableIndicatorUrl).toBeUndefined();
+        expect(info[0].equippableIndicatorURL).toBeUndefined();
         expect(info[0].equippableIndicatorScale).toBeUndefined();
         expect(info[0].equippableIndicatorOffset).toBeUndefined();
         expect(info[0].density).toBeUndefined();
@@ -254,7 +255,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].cloneLimit).toBeCloseTo(0, 2);
         expect(info[0].cloneDynamic).toBe(false);
         expect(info[0].cloneAvatarIdentity).toBe(false);
-        expect(info[0].cloneOriginId).toBeUndefined();
+        expect(info[0].cloneOriginID).toBeUndefined();
         expect(info[0].script).toBeUndefined();
         expect(info[0].scriptTimestamp).toBe(0n);
         expect(info[0].serverScripts).toBeUndefined();
@@ -271,7 +272,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].certificateType).toBeUndefined();
         expect(info[0].staticCertificateVersion).toBe(0);
         expect(info[0].shapeType).toBe(0);
-        expect(info[0].compoundShapeUrl).toBeUndefined();
+        expect(info[0].compoundShapeURL).toBeUndefined();
         expect(info[0].color.red).toBe(255);
         expect(info[0].color.green).toBe(255);
         expect(info[0].color.blue).toBe(255);
@@ -290,7 +291,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].groupCulled).toBe(false);
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[0].useOriginalPivot).toBe(true);
-        expect(info[0].animation.animationUrl).toBeUndefined();
+        expect(info[0].animation.animationURL).toBeUndefined();
         expect(info[0].animation.animationAllowTranslation).toBe(false);
         expect(info[0].animation.animationFPS).toBeCloseTo(30, 2);
         expect(info[0].animation.animationFrameIndex).toBeCloseTo(0, 2);
@@ -365,7 +366,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].equippableRightRotationOffset.y).toBeCloseTo(-0.0000152588, 8);
         expect(info[1].equippableRightRotationOffset.z).toBeCloseTo(-0.0000152588, 8);
         expect(info[1].equippableRightRotationOffset.w).toBeCloseTo(1, 2);
-        expect(info[1].equippableIndicatorUrl).toBeUndefined();
+        expect(info[1].equippableIndicatorURL).toBeUndefined();
         expect(info[1].equippableIndicatorScale.x).toBeCloseTo(1, 2);
         expect(info[1].equippableIndicatorScale.y).toBeCloseTo(1, 2);
         expect(info[1].equippableIndicatorScale.z).toBeCloseTo(1, 2);
@@ -400,7 +401,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].cloneLimit).toBeCloseTo(0, 2);
         expect(info[1].cloneDynamic).toBe(false);
         expect(info[1].cloneAvatarIdentity).toBe(false);
-        expect(info[1].cloneOriginId).toBeUndefined();
+        expect(info[1].cloneOriginID).toBeUndefined();
         expect(info[1].script).toBeUndefined();
         expect(info[1].scriptTimestamp).toBe(0n);
         expect(info[1].serverScripts).toBeUndefined();
@@ -417,7 +418,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].certificateType).toBeUndefined();
         expect(info[1].staticCertificateVersion).toBe(0);
         expect(info[1].shapeType).toBe(0);
-        expect(info[1].compoundShapeUrl).toBeUndefined();
+        expect(info[1].compoundShapeURL).toBeUndefined();
         expect(info[1].color.red).toBe(255);
         expect(info[1].color.green).toBe(255);
         expect(info[1].color.blue).toBe(255);
@@ -436,7 +437,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].groupCulled).toBe(false);
         expect(info[1].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[1].useOriginalPivot).toBe(true);
-        expect(info[1].animation.animationUrl).toBeUndefined();
+        expect(info[1].animation.animationURL).toBeUndefined();
         expect(info[1].animation.animationAllowTranslation).toBe(false);
         expect(info[1].animation.animationFPS).toBeCloseTo(30, 2);
         expect(info[1].animation.animationFrameIndex).toBeCloseTo(0, 2);
@@ -521,7 +522,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].equippableRightRotationOffset.x).toBeCloseTo(-0.000015, 6);
         expect(info[0].equippableRightRotationOffset.y).toBeCloseTo(-0.000015, 6);
         expect(info[0].equippableRightRotationOffset.z).toBeCloseTo(-0.000015, 6);
-        expect(info[0].equippableIndicatorUrl).toBeUndefined();
+        expect(info[0].equippableIndicatorURL).toBeUndefined();
         expect(info[0].equippableIndicatorScale.x).toBe(1);
         expect(info[0].equippableIndicatorScale.y).toBe(1);
         expect(info[0].equippableIndicatorScale.z).toBe(1);
@@ -556,7 +557,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].cloneLimit).toBeCloseTo(0, 2);
         expect(info[0].cloneDynamic).toBe(false);
         expect(info[0].cloneAvatarIdentity).toBe(false);
-        expect(info[0].cloneOriginId).toBeUndefined();
+        expect(info[0].cloneOriginID).toBeUndefined();
         expect(info[0].script).toBeUndefined();
         expect(info[0].scriptTimestamp).toBe(0n);
         expect(info[0].serverScripts).toBeUndefined();
@@ -573,7 +574,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].certificateType).toBeUndefined();
         expect(info[0].staticCertificateVersion).toBe(0);
         expect(info[0].shapeType).toBe(0);
-        expect(info[0].compoundShapeUrl).toBeUndefined();
+        expect(info[0].compoundShapeURL).toBeUndefined();
         expect(info[0].color.red).toBe(255);
         expect(info[0].color.green).toBe(255);
         expect(info[0].color.blue).toBe(255);
@@ -592,7 +593,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].groupCulled).toBe(false);
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[0].useOriginalPivot).toBe(true);
-        expect(info[0].animation.animationUrl).toBeUndefined();
+        expect(info[0].animation.animationURL).toBeUndefined();
         expect(info[0].animation.animationAllowTranslation).toBe(false);
         expect(info[0].animation.animationFPS).toBeCloseTo(30, 2);
         expect(info[0].animation.animationFrameIndex).toBeCloseTo(0, 2);
@@ -667,7 +668,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].equippableRightRotationOffset.y).toBeCloseTo(-0.0000152588, 8);
         expect(info[1].equippableRightRotationOffset.z).toBeCloseTo(-0.0000152588, 8);
         expect(info[1].equippableRightRotationOffset.w).toBeCloseTo(1, 2);
-        expect(info[1].equippableIndicatorUrl).toBeUndefined();
+        expect(info[1].equippableIndicatorURL).toBeUndefined();
         expect(info[1].equippableIndicatorScale.x).toBeCloseTo(1, 2);
         expect(info[1].equippableIndicatorScale.y).toBeCloseTo(1, 2);
         expect(info[1].equippableIndicatorScale.z).toBeCloseTo(1, 2);
@@ -702,7 +703,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].cloneLimit).toBeCloseTo(0, 2);
         expect(info[1].cloneDynamic).toBe(false);
         expect(info[1].cloneAvatarIdentity).toBe(false);
-        expect(info[1].cloneOriginId).toBeUndefined();
+        expect(info[1].cloneOriginID).toBeUndefined();
         expect(info[1].script).toBeUndefined();
         expect(info[1].scriptTimestamp).toBe(0n);
         expect(info[1].serverScripts).toBeUndefined();
