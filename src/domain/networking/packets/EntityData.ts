@@ -12,6 +12,7 @@
 import { EntityPropertyFlags } from "../../entities/EntityPropertyFlags";
 import { EntityType } from "../../entities/EntityTypes";
 import ImageEntityItem, { ImageEntityProperties, ImageEntitySubclassData } from "../../entities/ImageEntityItem";
+import LineEntityItem, { LineEntityProperties, LineEntitySubclassData } from "../../entities/LineEntityItem";
 import ModelEntityItem, { ModelEntityProperties, ModelEntitySubclassData } from "../../entities/ModelEntityItem";
 import PolyLineEntityItem, { PolyLineEntityProperties, PolyLineEntitySubclassData } from "../../entities/PolyLineEntityItem";
 import ShapeEntityItem, { ShapeEntityProperties, ShapeEntitySubclassData } from "../../entities/ShapeEntityItem";
@@ -117,6 +118,7 @@ type EntityProperties = ModelEntityProperties
 | TextEntityProperties
 | ImageEntityProperties
 | WebEntityProperties
+| LineEntityProperties
 | PolyLineEntityProperties;
 
 type EntityDataDetails = EntityProperties[];
@@ -126,6 +128,7 @@ type EntitySubclassData = ModelEntitySubclassData
 | TextEntitySubclassData
 | ImageEntitySubclassData
 | WebEntitySubclassData
+| LineEntitySubclassData
 | PolyLineEntitySubclassData;
 
 type ParsedData = {
@@ -507,6 +510,7 @@ const EntityData = new class {
                || entityType === EntityType.Text
                || entityType === EntityType.Image
                || entityType === EntityType.Web
+               || entityType === EntityType.Line
                || entityType === EntityType.PolyLine
             )) {
                 const errorMessage = `Entity type is not supported: ${entityType}`;
@@ -1202,6 +1206,9 @@ const EntityData = new class {
                     break;
                 case EntityType.Web:
                     subclassData = WebEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                    break;
+                case EntityType.Line:
+                    subclassData = LineEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
                 case EntityType.PolyLine:
                     subclassData = PolyLineEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
