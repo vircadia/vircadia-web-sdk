@@ -31,8 +31,7 @@ type ImageEntitySubclassData = {
 class ImageEntityItem {
     // C++  class ImageEntityItem : public EntityItem
 
-    // eslint-disable-next-line max-len
-    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): ImageEntitySubclassData { // eslint-disable-line class-methods-use-this
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): ImageEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int ImageEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

@@ -31,8 +31,7 @@ type WebEntitySubclassData = {
 class WebEntityItem {
     // C++  class WebEntityItem : public EntityItem
 
-    // eslint-disable-next-line max-len
-    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): WebEntitySubclassData { // eslint-disable-line class-methods-use-this
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): WebEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int WebEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

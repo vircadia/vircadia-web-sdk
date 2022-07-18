@@ -30,7 +30,7 @@ type LightEntitySubclassData = {
 class LightEntityItem {
     // C++  class LightEntityItem : public EntityItem
 
-    // eslint-disable-next-line  @typescript-eslint/ban-ts-comment
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): LightEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int LightEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,

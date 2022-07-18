@@ -20,6 +20,7 @@ import PolyLineEntityItem, { PolyLineEntityProperties, PolyLineEntitySubclassDat
 import ShapeEntityItem, { ShapeEntityProperties, ShapeEntitySubclassData } from "../../entities/ShapeEntityItem";
 import TextEntityItem, { TextEntityProperties, TextEntitySubclassData } from "../../entities/TextEntityItem";
 import WebEntityItem, { WebEntityProperties, WebEntitySubclassData } from "../../entities/WebEntityItem";
+import ZoneEntityItem, { ZoneEntityProperties, ZoneEntitySubclassData } from "../../entities/ZoneEntityItem";
 import AACube from "../../shared/AACube";
 import assert from "../../shared/assert";
 import ByteCountCoded from "../../shared/ByteCountCoded";
@@ -123,6 +124,7 @@ type EntityProperties = ModelEntityProperties
 | LineEntityProperties
 | PolyLineEntityProperties
 | LightEntityProperties
+| ZoneEntityProperties
 | MaterialEntityProperties;
 
 type EntityDataDetails = EntityProperties[];
@@ -135,6 +137,7 @@ type EntitySubclassData = ModelEntitySubclassData
 | LineEntitySubclassData
 | PolyLineEntitySubclassData
 | LightEntitySubclassData
+| ZoneEntitySubclassData
 | MaterialEntitySubclassData;
 
 type ParsedData = {
@@ -519,6 +522,7 @@ const EntityData = new class {
                || entityType === EntityType.Line
                || entityType === EntityType.PolyLine
                || entityType === EntityType.Light
+               || entityType === EntityType.Zone
                || entityType === EntityType.Material
             )) {
                 const errorMessage = `Entity type is not supported: ${entityType}`;
@@ -1223,6 +1227,9 @@ const EntityData = new class {
                     break;
                 case EntityType.Light:
                     subclassData = LightEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                    break;
+                case EntityType.Zone:
+                    subclassData = ZoneEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
                 case EntityType.Material:
                     subclassData = MaterialEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
