@@ -13,6 +13,7 @@ import { EntityPropertyFlags } from "../../entities/EntityPropertyFlags";
 import { EntityType } from "../../entities/EntityTypes";
 import ImageEntityItem, { ImageEntityProperties, ImageEntitySubclassData } from "../../entities/ImageEntityItem";
 import ModelEntityItem, { ModelEntityProperties, ModelEntitySubclassData } from "../../entities/ModelEntityItem";
+import PolyLineEntityItem, { PolyLineEntityProperties, PolyLineEntitySubclassData } from "../../entities/PolyLineEntityItem";
 import ShapeEntityItem, { ShapeEntityProperties, ShapeEntitySubclassData } from "../../entities/ShapeEntityItem";
 import TextEntityItem, { TextEntityProperties, TextEntitySubclassData } from "../../entities/TextEntityItem";
 import WebEntityItem, { WebEntityProperties, WebEntitySubclassData } from "../../entities/WebEntityItem";
@@ -115,7 +116,8 @@ type EntityProperties = ModelEntityProperties
 | ShapeEntityProperties
 | TextEntityProperties
 | ImageEntityProperties
-| WebEntityProperties;
+| WebEntityProperties
+| PolyLineEntityProperties;
 
 type EntityDataDetails = EntityProperties[];
 
@@ -123,7 +125,8 @@ type EntitySubclassData = ModelEntitySubclassData
 | ShapeEntitySubclassData
 | TextEntitySubclassData
 | ImageEntitySubclassData
-| WebEntitySubclassData;
+| WebEntitySubclassData
+| PolyLineEntitySubclassData;
 
 type ParsedData = {
     bytesRead: number;
@@ -504,6 +507,7 @@ const EntityData = new class {
                || entityType === EntityType.Text
                || entityType === EntityType.Image
                || entityType === EntityType.Web
+               || entityType === EntityType.PolyLine
             )) {
                 const errorMessage = `Entity type is not supported: ${entityType}`;
                 console.error(errorMessage);
@@ -1198,6 +1202,9 @@ const EntityData = new class {
                     break;
                 case EntityType.Web:
                     subclassData = WebEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                    break;
+                case EntityType.PolyLine:
+                    subclassData = PolyLineEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
                 default:
                     // WEBRTC TODO: This line will be unreachable once all entity types are supported.
