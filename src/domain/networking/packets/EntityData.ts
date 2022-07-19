@@ -11,11 +11,15 @@
 
 import { EntityPropertyFlags } from "../../entities/EntityPropertyFlags";
 import { EntityType } from "../../entities/EntityTypes";
+import GizmoEntityItem, { GizmoEntityProperties, GizmoEntitySubclassData } from "../../entities/GizmoEntityItem";
+import GridEntityItem, { GridEntityProperties, GridEntitySubclassData } from "../../entities/GridEntityItem";
 import ImageEntityItem, { ImageEntityProperties, ImageEntitySubclassData } from "../../entities/ImageEntityItem";
 import LightEntityItem, { LightEntityProperties, LightEntitySubclassData } from "../../entities/LightEntityItem";
 import LineEntityItem, { LineEntityProperties, LineEntitySubclassData } from "../../entities/LineEntityItem";
 import MaterialEntityItem, { MaterialEntityProperties, MaterialEntitySubclassData } from "../../entities/MaterialEntityItem";
 import ModelEntityItem, { ModelEntityProperties, ModelEntitySubclassData } from "../../entities/ModelEntityItem";
+import ParticleEffectEntityItem,
+{ ParticleEffectEntityProperties, ParticleEffectEntitySubclassData } from "../../entities/ParticleEffectEntityItem";
 import PolyLineEntityItem, { PolyLineEntityProperties, PolyLineEntitySubclassData } from "../../entities/PolyLineEntityItem";
 import PolyVoxEntityItem, { PolyVoxEntityProperties, PolyVoxEntitySubclassData } from "../../entities/PolyVoxEntityItem";
 import ShapeEntityItem, { ShapeEntityProperties, ShapeEntitySubclassData } from "../../entities/ShapeEntityItem";
@@ -122,9 +126,12 @@ type EntityProperties = ModelEntityProperties
 | TextEntityProperties
 | ImageEntityProperties
 | WebEntityProperties
+| ParticleEffectEntityProperties
 | LineEntityProperties
 | PolyLineEntityProperties
 | PolyVoxEntityProperties
+| GridEntityProperties
+| GizmoEntityProperties
 | LightEntityProperties
 | ZoneEntityProperties
 | MaterialEntityProperties;
@@ -136,9 +143,12 @@ type EntitySubclassData = ModelEntitySubclassData
 | TextEntitySubclassData
 | ImageEntitySubclassData
 | WebEntitySubclassData
+| ParticleEffectEntitySubclassData
 | LineEntitySubclassData
 | PolyLineEntitySubclassData
 | PolyVoxEntitySubclassData
+| GridEntitySubclassData
+| GizmoEntitySubclassData
 | LightEntitySubclassData
 | ZoneEntitySubclassData
 | MaterialEntitySubclassData;
@@ -522,9 +532,12 @@ const EntityData = new class {
                || entityType === EntityType.Text
                || entityType === EntityType.Image
                || entityType === EntityType.Web
+               || entityType === EntityType.ParticleEffect
                || entityType === EntityType.Line
                || entityType === EntityType.PolyLine
                || entityType === EntityType.PolyVox
+               || entityType === EntityType.Grid
+               || entityType === EntityType.Gizmo
                || entityType === EntityType.Light
                || entityType === EntityType.Zone
                || entityType === EntityType.Material
@@ -1223,6 +1236,9 @@ const EntityData = new class {
                 case EntityType.Web:
                     subclassData = WebEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
+                case EntityType.ParticleEffect:
+                    subclassData = ParticleEffectEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                    break;
                 case EntityType.Line:
                     subclassData = LineEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
@@ -1231,6 +1247,12 @@ const EntityData = new class {
                     break;
                 case EntityType.PolyVox:
                     subclassData = PolyVoxEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                    break;
+                case EntityType.Grid:
+                    subclassData = GridEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                    break;
+                case EntityType.Gizmo:
+                    subclassData = GizmoEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
                 case EntityType.Light:
                     subclassData = LightEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);

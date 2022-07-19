@@ -1,4 +1,3 @@
-// TODO: Do this entity type? It doesn't appear in the create menu of the interface.
 //
 //  PolyVoxEntityItem.ts
 //
