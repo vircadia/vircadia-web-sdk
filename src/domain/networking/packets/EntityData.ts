@@ -17,6 +17,7 @@ import LineEntityItem, { LineEntityProperties, LineEntitySubclassData } from "..
 import MaterialEntityItem, { MaterialEntityProperties, MaterialEntitySubclassData } from "../../entities/MaterialEntityItem";
 import ModelEntityItem, { ModelEntityProperties, ModelEntitySubclassData } from "../../entities/ModelEntityItem";
 import PolyLineEntityItem, { PolyLineEntityProperties, PolyLineEntitySubclassData } from "../../entities/PolyLineEntityItem";
+import PolyVoxEntityItem, { PolyVoxEntityProperties, PolyVoxEntitySubclassData } from "../../entities/PolyVoxEntityItem";
 import ShapeEntityItem, { ShapeEntityProperties, ShapeEntitySubclassData } from "../../entities/ShapeEntityItem";
 import TextEntityItem, { TextEntityProperties, TextEntitySubclassData } from "../../entities/TextEntityItem";
 import WebEntityItem, { WebEntityProperties, WebEntitySubclassData } from "../../entities/WebEntityItem";
@@ -123,6 +124,7 @@ type EntityProperties = ModelEntityProperties
 | WebEntityProperties
 | LineEntityProperties
 | PolyLineEntityProperties
+| PolyVoxEntityProperties
 | LightEntityProperties
 | ZoneEntityProperties
 | MaterialEntityProperties;
@@ -136,6 +138,7 @@ type EntitySubclassData = ModelEntitySubclassData
 | WebEntitySubclassData
 | LineEntitySubclassData
 | PolyLineEntitySubclassData
+| PolyVoxEntitySubclassData
 | LightEntitySubclassData
 | ZoneEntitySubclassData
 | MaterialEntitySubclassData;
@@ -521,6 +524,7 @@ const EntityData = new class {
                || entityType === EntityType.Web
                || entityType === EntityType.Line
                || entityType === EntityType.PolyLine
+               || entityType === EntityType.PolyVox
                || entityType === EntityType.Light
                || entityType === EntityType.Zone
                || entityType === EntityType.Material
@@ -1224,6 +1228,9 @@ const EntityData = new class {
                     break;
                 case EntityType.PolyLine:
                     subclassData = PolyLineEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+                    break;
+                case EntityType.PolyVox:
+                    subclassData = PolyVoxEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
                 case EntityType.Light:
                     subclassData = LightEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
