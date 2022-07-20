@@ -14,6 +14,7 @@ import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
 import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import PulsePropertyGroup from "./PulsePropertyGroup";
 
 
 /*@sdkdoc
@@ -137,8 +138,8 @@ class ShapeEntityItem {
             dataPosition += 4;
         }
 
-        // Skip over pulseMode. It is deprecated.
-        dataPosition += 20;
+        const pulseProperties = PulsePropertyGroup.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+        dataPosition += pulseProperties.bytesRead;
 
         const textDecoder = new TextDecoder();
 

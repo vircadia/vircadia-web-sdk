@@ -13,6 +13,7 @@ import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import PropertyFlags from "../shared/PropertyFlags";
 import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import PulsePropertyGroup from "./PulsePropertyGroup";
 
 
 // WEBRTC TODO: Replace Record<string, never> with TextEntityItem's special properties.
@@ -39,8 +40,8 @@ class TextEntityItem {
 
         let dataPosition = position;
 
-        // Skip over pulseMode. It is deprecated.
-        dataPosition += 20;
+        const pulseProperties = PulsePropertyGroup.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+        dataPosition += pulseProperties.bytesRead;
 
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXT)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
