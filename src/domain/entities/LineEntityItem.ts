@@ -50,7 +50,7 @@ class LineEntityItem {
 
             if (length > 0) {
                 // WEBRTC TODO: Read linePoints property.
-                dataPosition += length;
+                dataPosition += length * 12;
             }
         }
 
