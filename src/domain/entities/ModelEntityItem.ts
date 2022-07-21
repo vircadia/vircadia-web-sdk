@@ -221,10 +221,17 @@ class ModelEntityItem {
 
             if (length > 0) {
                 jointRotationsSet = [];
+                let bit = 0;
+                let current = 0;
                 for (let j = 0; j < length; j++) {
-                    jointRotationsSet.push(Boolean(data.getUint8(dataPosition + j)));
+                    if (bit === 0) {
+                        current = data.getUint8(dataPosition);
+                        dataPosition += 1;
+                    }
+                    const value = Boolean(current & 1 << bit);
+                    jointRotationsSet.push(value);
+                    bit = (bit + 1) % 8;
                 }
-                dataPosition += length;
             }
         }
 
@@ -238,11 +245,11 @@ class ModelEntityItem {
                 for (let j = 0; j < length; j++) {
                     jointRotations.push(
                         GLMHelpers.unpackOrientationQuatFromBytes(
-                            data, dataPosition + j * 8
+                            data, dataPosition
                         )
                     );
+                    dataPosition += 8;
                 }
-                dataPosition += length;
             }
         }
 
@@ -253,10 +260,17 @@ class ModelEntityItem {
 
             if (length > 0) {
                 jointTranslationsSet = [];
+                let bit = 0;
+                let current = 0;
                 for (let j = 0; j < length; j++) {
-                    jointTranslationsSet.push(Boolean(data.getUint8(dataPosition + j)));
+                    if (bit === 0) {
+                        current = data.getUint8(dataPosition);
+                        dataPosition += 1;
+                    }
+                    const value = Boolean(current & 1 << bit);
+                    jointTranslationsSet.push(value);
+                    bit = (bit + 1) % 8;
                 }
-                dataPosition += length;
             }
         }
 
@@ -270,14 +284,14 @@ class ModelEntityItem {
                 for (let j = 0; j < length; j++) {
                     jointTranslations.push(
                         {
-                            x: data.getFloat32(dataPosition + j * 12, UDT.LITTLE_ENDIAN),
-                            y: data.getFloat32(dataPosition + 4 + j * 12, UDT.LITTLE_ENDIAN),
-                            z: data.getFloat32(dataPosition + 8 + j * 12, UDT.LITTLE_ENDIAN)
+                            x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                            y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                            z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
                         }
                     );
 
+                    dataPosition += 12;
                 }
-                dataPosition += length;
             }
         }
 
