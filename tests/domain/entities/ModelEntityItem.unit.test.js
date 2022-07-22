@@ -28,7 +28,7 @@ describe("ModelEntityItem - unit tests", () => {
         propertyFlags.decode(encodedFlags, encodedFlags.byteLength);
 
         // eslint-disable-next-line max-len
-        const bufferHex = "000000000000ffffff0000600068747470733a2f2f63646e2d312e76697263616469612e636f6d2f75732d652d312f42617a6161722f4173736574732f4d6f64656c732f466f6f642f62697274686461795f63616b652f676c74662f62697274686461795f63616b652e676c620000803f0000803f0000803f0000000000000000000004007b0a7d0a010000000000f041000000000001000000000050c34700";
+        const bufferHex = "000000000000ffffff0000290068747470733a2f2f6d65746176657273652e617369612f617661746172732f6a756c69656e2e676c620000803f0000803f0000803f02000302005e97bcae1bc679dd83b038baecc3a0cd020003020000000041000010410000e040000020410000304100004041000004007b0a7d0a000000010000f041000000000001000000000050c34700";
         bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
             return parseInt(hex, 16);
         }));
@@ -36,7 +36,7 @@ describe("ModelEntityItem - unit tests", () => {
 
         const modelEntity = ModelEntityItem.readEntitySubclassDataFromBuffer(data, 0, propertyFlags);
 
-        expect(modelEntity.bytesRead).toBe(160);
+        expect(modelEntity.bytesRead).toBe(147);
         expect(modelEntity.properties.shapeType).toBe(0);
         expect(modelEntity.properties.compoundShapeURL).toBeUndefined();
         expect(modelEntity.properties.color.red).toBe(255);
@@ -44,21 +44,33 @@ describe("ModelEntityItem - unit tests", () => {
         expect(modelEntity.properties.color.blue).toBe(255);
         expect(modelEntity.properties.textures).toBeUndefined();
         expect(modelEntity.properties.modelURL).toBe(
-            "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
+            "https://metaverse.asia/avatars/julien.glb"
         );
         expect(modelEntity.properties.modelScale.x).toBeCloseTo(1, 2);
         expect(modelEntity.properties.modelScale.y).toBeCloseTo(1, 2);
         expect(modelEntity.properties.modelScale.z).toBeCloseTo(1, 2);
-        expect(modelEntity.properties.jointRotationsSet).toBeUndefined();
-        expect(modelEntity.properties.jointRotations).toBeUndefined();
-        expect(modelEntity.properties.jointTranslationsSet).toBeUndefined();
-        expect(modelEntity.properties.jointTranslations).toBeUndefined();
+        expect(modelEntity.properties.jointRotationsSet).toStrictEqual([true, true]);
+        expect(modelEntity.properties.jointRotations[0].x).toBeCloseTo(0.18257, 4);
+        expect(modelEntity.properties.jointRotations[0].y).toBeCloseTo(0.36513, 4);
+        expect(modelEntity.properties.jointRotations[0].z).toBeCloseTo(0.54772, 4);
+        expect(modelEntity.properties.jointRotations[0].w).toBeCloseTo(0.73028, 4);
+        expect(modelEntity.properties.jointRotations[1].x).toBeCloseTo(0.37901, 4);
+        expect(modelEntity.properties.jointRotations[1].y).toBeCloseTo(0.45485, 4);
+        expect(modelEntity.properties.jointRotations[1].z).toBeCloseTo(0.53066, 4);
+        expect(modelEntity.properties.jointRotations[1].w).toBeCloseTo(0.60646, 4);
+        expect(modelEntity.properties.jointTranslationsSet).toStrictEqual([true, true]);
+        expect(modelEntity.properties.jointTranslations[0].x).toBe(8);
+        expect(modelEntity.properties.jointTranslations[0].y).toBe(9);
+        expect(modelEntity.properties.jointTranslations[0].z).toBe(7);
+        expect(modelEntity.properties.jointTranslations[1].x).toBe(10);
+        expect(modelEntity.properties.jointTranslations[1].y).toBe(11);
+        expect(modelEntity.properties.jointTranslations[1].z).toBe(12);
         expect(modelEntity.properties.relayParentJoints).toBe(false);
         expect(modelEntity.properties.groupCulled).toBe(false);
         expect(modelEntity.properties.blendShapeCoefficients).toBe("{\n}\n");
-        expect(modelEntity.properties.useOriginalPivot).toBe(true);
+        expect(modelEntity.properties.useOriginalPivot).toBe(false);
         expect(modelEntity.properties.animation.animationURL).toBeUndefined();
-        expect(modelEntity.properties.animation.animationAllowTranslation).toBe(false);
+        expect(modelEntity.properties.animation.animationAllowTranslation).toBe(true);
         expect(modelEntity.properties.animation.animationFPS).toBeCloseTo(30, 2);
         expect(modelEntity.properties.animation.animationFrameIndex).toBeCloseTo(0, 2);
         expect(modelEntity.properties.animation.animationPlaying).toBe(false);
