@@ -20,7 +20,6 @@ type LightEntitySubclassProperties = Record<string, never>;
 // WEBRTC TODO: Make a union with LightEntitySubclassProperties.
 type LightEntityProperties = CommonEntityProperties;
 
-// WEBRTC TODO: Replace Record<string, never> with LightEntityProperties.
 type LightEntitySubclassData = {
     bytesRead: number;
     properties: LightEntitySubclassProperties;

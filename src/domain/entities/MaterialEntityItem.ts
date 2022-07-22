@@ -21,7 +21,6 @@ type MaterialEntitySubclassProperties = Record<string, never>;
 // WEBRTC TODO: Make a union with MaterialEntitySubclassProperties.
 type MaterialEntityProperties = CommonEntityProperties;
 
-// WEBRTC TODO: Replace Record<string, never> with MaterialEntityProperties.
 type MaterialEntitySubclassData = {
     bytesRead: number;
     properties: MaterialEntitySubclassProperties;

@@ -22,7 +22,6 @@ type WebEntitySubclassProperties = Record<string, never>;
 // WEBRTC TODO: Make a union with WebEntitySubclassProperties.
 type WebEntityProperties = CommonEntityProperties;
 
-// WEBRTC TODO: Replace Record<string, never> with WebEntityProperties.
 type WebEntitySubclassData = {
     bytesRead: number;
     properties: WebEntitySubclassProperties;

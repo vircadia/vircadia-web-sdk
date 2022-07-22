@@ -590,8 +590,6 @@ enum EntityPropertyFlags {
     PROP_MINOR_TICK_MARKS_LENGTH = PROP_DERIVED_16,
     PROP_MAJOR_TICK_MARKS_COLOR = PROP_DERIVED_17,
     PROP_MINOR_TICK_MARKS_COLOR = PROP_DERIVED_18
-
-    // WEBRTC TODO: Address further C++ code.
 }
 
 export { EntityPropertyFlags };

@@ -21,7 +21,6 @@ type GizmoEntitySubclassProperties = Record<string, never>;
 // WEBRTC TODO: Make a union with GizmoEntitySubclassProperties.
 type GizmoEntityProperties = CommonEntityProperties;
 
-// WEBRTC TODO: Replace Record<string, never> with GizmoEntityProperties.
 type GizmoEntitySubclassData = {
     bytesRead: number;
     properties: GizmoEntitySubclassProperties;

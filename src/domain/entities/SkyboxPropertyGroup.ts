@@ -43,7 +43,7 @@ class SkyboxPropertyGroup {
             dataPosition += 2;
 
             if (length > 0) {
-                // WEBRTC TODO: Read skyboxURL
+                // WEBRTC TODO: Read skyboxURL property.
                 dataPosition += length;
             }
         }

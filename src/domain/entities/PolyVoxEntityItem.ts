@@ -21,7 +21,6 @@ type PolyVoxEntitySubclassProperties = Record<string, never>;
 // WEBRTC TODO: Make a union with PolyVoxEntitySubclassProperties.
 type PolyVoxEntityProperties = CommonEntityProperties;
 
-// WEBRTC TODO: Replace Record<string, never> with PolyVoxEntityProperties.
 type PolyVoxEntitySubclassData = {
     bytesRead: number;
     properties: PolyVoxEntitySubclassProperties;

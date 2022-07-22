@@ -20,7 +20,6 @@ type LineEntitySubclassProperties = Record<string, never>;
 // WEBRTC TODO: Make a union with LineEntitySubclassProperties.
 type LineEntityProperties = CommonEntityProperties;
 
-// WEBRTC TODO: Replace Record<string, never> with LineEntityProperties.
 type LineEntitySubclassData = {
     bytesRead: number;
     properties: LineEntitySubclassProperties;

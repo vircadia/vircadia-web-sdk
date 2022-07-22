@@ -50,12 +50,12 @@ class RingGizmoPropertyGroup {
         }
 
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_INNER_START_COLOR)) {
-            // WEBRTC TODO: Read innerStart_color property.
+            // WEBRTC TODO: Read innerStartColor property.
             dataPosition += 3;
         }
 
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_INNER_END_COLOR)) {
-            // WEBRTC TODO: Read innerEnd_color property.
+            // WEBRTC TODO: Read innerEndColor property.
             dataPosition += 3;
         }
 

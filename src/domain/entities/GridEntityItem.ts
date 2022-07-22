@@ -21,7 +21,6 @@ type GridEntitySubclassProperties = Record<string, never>;
 // WEBRTC TODO: Make a union with GridEntitySubclassProperties.
 type GridEntityProperties = CommonEntityProperties;
 
-// WEBRTC TODO: Replace Record<string, never> with GridEntityProperties.
 type GridEntitySubclassData = {
     bytesRead: number;
     properties: GridEntitySubclassProperties;

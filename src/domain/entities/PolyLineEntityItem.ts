@@ -21,7 +21,6 @@ type PolyLineEntitySubclassProperties = Record<string, never>;
 // WEBRTC TODO: Make a union with PolyLineEntitySubclassProperties.
 type PolyLineEntityProperties = CommonEntityProperties;
 
-// WEBRTC TODO: Replace Record<string, never> with PolyLineEntityProperties.
 type PolyLineEntitySubclassData = {
     bytesRead: number;
     properties: PolyLineEntitySubclassProperties;
