@@ -526,29 +526,6 @@ const EntityData = new class {
             dataPosition += codec.decode(encodedData, encodedData.byteLength);
             const entityType = codec.data;
 
-            // WEBRTC TODO: Unnecessary check once all entity types are supported.
-            if (!(entityType === EntityType.Model
-               || entityType === EntityType.Box
-               || entityType === EntityType.Sphere
-               || entityType === EntityType.Shape
-               || entityType === EntityType.Text
-               || entityType === EntityType.Image
-               || entityType === EntityType.Web
-               || entityType === EntityType.ParticleEffect
-               || entityType === EntityType.Line
-               || entityType === EntityType.PolyLine
-               || entityType === EntityType.PolyVox
-               || entityType === EntityType.Grid
-               || entityType === EntityType.Gizmo
-               || entityType === EntityType.Light
-               || entityType === EntityType.Zone
-               || entityType === EntityType.Material
-            )) {
-                const errorMessage = `Entity type is not supported: ${entityType}`;
-                console.error(errorMessage);
-                throw new Error(errorMessage);
-            }
-
             const createdFromBuffer = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 8;
 
