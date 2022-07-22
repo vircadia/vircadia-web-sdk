@@ -528,6 +528,8 @@ const EntityData = new class {
 
             // WEBRTC TODO: Unnecessary check once all entity types are supported.
             if (!(entityType === EntityType.Model
+               || entityType === EntityType.Box
+               || entityType === EntityType.Sphere
                || entityType === EntityType.Shape
                || entityType === EntityType.Text
                || entityType === EntityType.Image
@@ -1221,6 +1223,8 @@ const EntityData = new class {
             // eslint-disable-next-line @typescript-eslint/init-declarations
             let subclassData: EntitySubclassData;
             switch (entityType) {
+                case EntityType.Box:
+                case EntityType.Sphere:
                 case EntityType.Shape:
                     subclassData = ShapeEntityItem.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
                     break;
@@ -1274,7 +1278,12 @@ const EntityData = new class {
 
             dataPosition += subclassData.bytesRead;
 
-            if (entityType === EntityType.Model || entityType === EntityType.Shape) {
+            // WEBRTC TODO: Unnecessary check once all entity types are supported.
+            if (entityType === EntityType.Model
+                || entityType === EntityType.Shape
+                || entityType === EntityType.Box
+                || entityType === EntityType.Sphere
+            ) {
                 entitiesDataDetails.push({
                     entityItemID,
                     entityType,

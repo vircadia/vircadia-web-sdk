@@ -543,6 +543,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                 })) {
                     const cols = document.getElementById(e.entityItemID.stringify()).children;
                     /* eslint-disable @typescript-eslint/no-magic-numbers */
+                    cols.item(1).innerHTML = e.entityType;
                     cols.item(2).innerHTML = e.position.x.toFixed(POS_DECIMAL_PLACES);
                     cols.item(3).innerHTML = e.position.y.toFixed(POS_DECIMAL_PLACES);
                     cols.item(4).innerHTML = e.position.z.toFixed(POS_DECIMAL_PLACES);
