@@ -1260,6 +1260,7 @@ const EntityData = new class {
                 || entityType === EntityType.Shape
                 || entityType === EntityType.Box
                 || entityType === EntityType.Sphere
+                || entityType === EntityType.Image
             ) {
                 entitiesDataDetails.push({
                     entityItemID,
