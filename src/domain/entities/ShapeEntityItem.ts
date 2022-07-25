@@ -90,7 +90,8 @@ class ShapeEntityItem {
 
     /*@sdkdoc
      *  The Shape {@link EntityType|entity type} displays an entity of a specified shape. It has properties in addition to the
-     *  common {@link EntityProperties}.
+     *  common {@link EntityProperties}. A property value may be undefined if it couldn't fit in the data packet sent by the
+     *      server.
      *  @typedef {object} ShapeEntityProperties
      *  @property {Shape | undefined} shape - The shape of the entity.
      *  @property {color | undefined} color - The color of the entity.

@@ -86,7 +86,8 @@ class ModelEntityItem {
     /*@sdkdoc
      *  The Model {@link EntityType|entity type} displays a glTF, FBX, or OBJ model. When adding an entity, if no
      *  <code>dimensions</code> value is specified then the model is automatically sized to its natural dimensions. It has
-     *  properties in addition to the common {@link EntityProperties}.
+     *  properties in addition to the common {@link EntityProperties}. A property value may be undefined if it couldn't fit in
+     *      the data packet sent by the server.
      *  @typedef {object} ModelEntityProperties
      *  @property {number | undefined} shapeType - The shape of the collision hull used if collisions are enabled.
      *  @property {string | undefined} compoundShapeURL - The model file to use for the compound shape if shapeType is
