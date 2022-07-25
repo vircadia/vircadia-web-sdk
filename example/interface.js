@@ -515,6 +515,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         entityServer = new EntityServer(contextID);
 
         const POS_DECIMAL_PLACES = 3;
+        const ENTITY_TYPE_INDEX = 1;
+        const X_INDEX = 2;
+        const Y_INDEX = 3;
+        const Z_INDEX = 4;
 
 
         // Status
@@ -538,16 +542,15 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         function onEntityData(data) {
 
             data.forEach((e) => {
+                // Update the type and position if an entity ID is already in our list. Create a new element otherwise.
                 if (entityIDsList.some((id) => {
                     return e.entityItemID.stringify() === id;
                 })) {
                     const cols = document.getElementById(e.entityItemID.stringify()).children;
-                    /* eslint-disable @typescript-eslint/no-magic-numbers */
-                    cols.item(1).innerHTML = e.entityType;
-                    cols.item(2).innerHTML = e.position.x.toFixed(POS_DECIMAL_PLACES);
-                    cols.item(3).innerHTML = e.position.y.toFixed(POS_DECIMAL_PLACES);
-                    cols.item(4).innerHTML = e.position.z.toFixed(POS_DECIMAL_PLACES);
-                    /* eslint-enable @typescript-eslint/no-magic-numbers */
+                    cols.item(ENTITY_TYPE_INDEX).innerHTML = e.entityType;
+                    cols.item(X_INDEX).innerHTML = e.position.x.toFixed(POS_DECIMAL_PLACES);
+                    cols.item(Y_INDEX).innerHTML = e.position.y.toFixed(POS_DECIMAL_PLACES);
+                    cols.item(Z_INDEX).innerHTML = e.position.z.toFixed(POS_DECIMAL_PLACES);
                 } else {
                     entityIDsList.push(e.entityItemID.stringify());
 
