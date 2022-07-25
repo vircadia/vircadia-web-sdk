@@ -123,9 +123,7 @@ class ImageEntityItem {
             dataPosition += 2;
 
             if (length > 0) {
-                imageURL = textDecoder.decode(
-                    new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
-                );
+                imageURL = textDecoder.decode(new Uint8Array(data.buffer, data.byteOffset + dataPosition, length));
                 dataPosition += length;
             }
         }

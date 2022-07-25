@@ -36,7 +36,6 @@ describe("ImageEntityItem - unit tests", () => {
 
         const imageEntity = ImageEntityItem.readEntitySubclassDataFromBuffer(data, 0, propertyFlags);
 
-        // TODO: Check for image props.
         expect(imageEntity.bytesRead).toBe(140);
         expect(imageEntity.properties.color.red).toBe(161);
         expect(imageEntity.properties.color.green).toBe(26);

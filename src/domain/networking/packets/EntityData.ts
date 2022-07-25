@@ -178,7 +178,8 @@ const EntityData = new class {
 
     /*@sdkdoc
      *  Different entity types have different properties: some common to all entities (listed in the table) and some specific to
-     *  each {@link EntityType} (linked to below).
+     *  each {@link EntityType} (linked to below). A property value may be undefined if it couldn't fit in the data packet sent
+     *      by the server.
      *  @typedef {object} EntityProperties
      *
      *  @property {Uuid} entityItemID - The ID of the entity.
@@ -1256,10 +1257,11 @@ const EntityData = new class {
             dataPosition += subclassData.bytesRead;
 
             // WEBRTC TODO: Unnecessary check once all entity types are supported.
-            if (entityType === EntityType.Model
-                || entityType === EntityType.Shape
-                || entityType === EntityType.Box
+            if (entityType === EntityType.Box
                 || entityType === EntityType.Sphere
+                || entityType === EntityType.Shape
+                || entityType === EntityType.Model
+                || entityType === EntityType.Text
                 || entityType === EntityType.Image
             ) {
                 entitiesDataDetails.push({
