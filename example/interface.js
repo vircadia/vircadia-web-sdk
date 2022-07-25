@@ -519,6 +519,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const X_INDEX = 2;
         const Y_INDEX = 3;
         const Z_INDEX = 4;
+        const DEFAULT_POSITION = { x: 0, y: 0, z: 0 };
 
 
         // Status
@@ -548,9 +549,12 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                 })) {
                     const cols = document.getElementById(e.entityItemID.stringify()).children;
                     cols.item(ENTITY_TYPE_INDEX).innerHTML = e.entityType;
-                    cols.item(X_INDEX).innerHTML = e.position.x.toFixed(POS_DECIMAL_PLACES);
-                    cols.item(Y_INDEX).innerHTML = e.position.y.toFixed(POS_DECIMAL_PLACES);
-                    cols.item(Z_INDEX).innerHTML = e.position.z.toFixed(POS_DECIMAL_PLACES);
+
+                    if (e.position) {
+                        cols.item(X_INDEX).innerHTML = e.position.x.toFixed(POS_DECIMAL_PLACES);
+                        cols.item(Y_INDEX).innerHTML = e.position.y.toFixed(POS_DECIMAL_PLACES);
+                        cols.item(Z_INDEX).innerHTML = e.position.z.toFixed(POS_DECIMAL_PLACES);
+                    }
                 } else {
                     entityIDsList.push(e.entityItemID.stringify());
 
@@ -562,7 +566,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                     td = document.createElement("td");
                     td.innerHTML = e.entityType;
                     tr.appendChild(td);
-                    const position = e.position;
+                    const position = e.position ?? DEFAULT_POSITION;
                     td = document.createElement("td");
                     td.className = "number";
                     td.innerHTML = position.x.toFixed(POS_DECIMAL_PLACES);
