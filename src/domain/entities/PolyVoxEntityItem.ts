@@ -49,7 +49,7 @@ class PolyVoxEntityItem {
             dataPosition += 2;
 
             if (length > 0) {
-                for (let j = 0; j < length; j++) {
+                for (let i = 0; i < length; i++) {
                     // WEBRTC TODO: Read voxelData property.
                     dataPosition += 1;
                 }

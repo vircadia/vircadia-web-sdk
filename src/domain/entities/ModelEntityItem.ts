@@ -223,7 +223,7 @@ class ModelEntityItem {
                 jointRotationsSet = [];
                 let bit = 0;
                 let current = 0;
-                for (let j = 0; j < length; j++) {
+                for (let i = 0; i < length; i++) {
                     if (bit === 0) {
                         current = data.getUint8(dataPosition);
                         dataPosition += 1;
@@ -242,7 +242,7 @@ class ModelEntityItem {
 
             if (length > 0) {
                 jointRotations = [];
-                for (let j = 0; j < length; j++) {
+                for (let i = 0; i < length; i++) {
                     jointRotations.push(
                         GLMHelpers.unpackOrientationQuatFromBytes(
                             data, dataPosition
@@ -262,7 +262,7 @@ class ModelEntityItem {
                 jointTranslationsSet = [];
                 let bit = 0;
                 let current = 0;
-                for (let j = 0; j < length; j++) {
+                for (let i = 0; i < length; i++) {
                     if (bit === 0) {
                         current = data.getUint8(dataPosition);
                         dataPosition += 1;
@@ -281,7 +281,7 @@ class ModelEntityItem {
 
             if (length > 0) {
                 jointTranslations = [];
-                for (let j = 0; j < length; j++) {
+                for (let i = 0; i < length; i++) {
                     jointTranslations.push(
                         {
                             x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),

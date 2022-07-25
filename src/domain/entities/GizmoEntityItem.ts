@@ -30,8 +30,6 @@ type GizmoEntitySubclassData = {
 class GizmoEntityItem {
     // C++  class GizmoEntityItem : public EntityItem
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): GizmoEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int GizmoEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
