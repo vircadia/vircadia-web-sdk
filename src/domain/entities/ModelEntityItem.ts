@@ -84,7 +84,7 @@ class ModelEntityItem {
      */
 
     /*@sdkdoc
-     *  The Model {@link EntityType|entity type} displays a glTF, FBX, or OBJ model. When adding an entity, if no
+     *  The "<code>Model</code>" {@link EntityType} displays a glTF, FBX, or OBJ model. When adding an entity, if no
      *  <code>dimensions</code> value is specified then the model is automatically sized to its natural dimensions. It has
      *  properties in addition to the common {@link EntityProperties}.
      *  @typedef {object} ModelEntityProperties

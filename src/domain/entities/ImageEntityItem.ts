@@ -58,7 +58,7 @@ class ImageEntityItem {
      */
 
     /*@sdkdoc
-     *  The <code>"Image"</code> {@link EntityType|entity type} displays an image on a 2D rectangle in the domain. It has
+     *  The <code>"Image"</code> {@link EntityType} displays an image on a 2D rectangle in the domain. It has
      *  properties in addition to the common {@link EntityProperties}.
      *  @typedef {object} ShapeEntityProperties
      *  @property {string} imageURL - The URL of the image to use.
