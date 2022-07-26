@@ -86,7 +86,8 @@ class ModelEntityItem {
     /*@sdkdoc
      *  The Model {@link EntityType|entity type} displays a glTF, FBX, or OBJ model. When adding an entity, if no
      *  <code>dimensions</code> value is specified then the model is automatically sized to its natural dimensions. It has
-     *  properties in addition to the common {@link EntityProperties}.
+     *  properties in addition to the common {@link EntityProperties}. A property value may be undefined if it couldn't fit in
+     *      the data packet sent by the server.
      *  @typedef {object} ModelEntityProperties
      *  @property {number | undefined} shapeType - The shape of the collision hull used if collisions are enabled.
      *  @property {string | undefined} compoundShapeURL - The model file to use for the compound shape if shapeType is
@@ -223,7 +224,7 @@ class ModelEntityItem {
                 jointRotationsSet = [];
                 let bit = 0;
                 let current = 0;
-                for (let j = 0; j < length; j++) {
+                for (let i = 0; i < length; i++) {
                     if (bit === 0) {
                         current = data.getUint8(dataPosition);
                         dataPosition += 1;
@@ -242,7 +243,7 @@ class ModelEntityItem {
 
             if (length > 0) {
                 jointRotations = [];
-                for (let j = 0; j < length; j++) {
+                for (let i = 0; i < length; i++) {
                     jointRotations.push(
                         GLMHelpers.unpackOrientationQuatFromBytes(
                             data, dataPosition
@@ -262,7 +263,7 @@ class ModelEntityItem {
                 jointTranslationsSet = [];
                 let bit = 0;
                 let current = 0;
-                for (let j = 0; j < length; j++) {
+                for (let i = 0; i < length; i++) {
                     if (bit === 0) {
                         current = data.getUint8(dataPosition);
                         dataPosition += 1;
@@ -281,7 +282,7 @@ class ModelEntityItem {
 
             if (length > 0) {
                 jointTranslations = [];
-                for (let j = 0; j < length; j++) {
+                for (let i = 0; i < length; i++) {
                     jointTranslations.push(
                         {
                             x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),

@@ -14,6 +14,7 @@ import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
 import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import PulsePropertyGroup from "./PulsePropertyGroup";
 
 
 /*@sdkdoc
@@ -89,7 +90,8 @@ class ShapeEntityItem {
 
     /*@sdkdoc
      *  The Shape {@link EntityType|entity type} displays an entity of a specified shape. It has properties in addition to the
-     *  common {@link EntityProperties}.
+     *  common {@link EntityProperties}. A property value may be undefined if it couldn't fit in the data packet sent by the
+     *      server.
      *  @typedef {object} ShapeEntityProperties
      *  @property {Shape | undefined} shape - The shape of the entity.
      *  @property {color | undefined} color - The color of the entity.
@@ -137,8 +139,8 @@ class ShapeEntityItem {
             dataPosition += 4;
         }
 
-        // Skip over pulseMode. It is deprecated.
-        dataPosition += 20;
+        const pulseProperties = PulsePropertyGroup.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+        dataPosition += pulseProperties.bytesRead;
 
         const textDecoder = new TextDecoder();
 
