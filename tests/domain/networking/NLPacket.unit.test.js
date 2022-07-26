@@ -60,6 +60,30 @@ describe("NLPacket - unit tests", () => {
         expect(error).toHaveBeenCalledTimes(0);
     });
 
+    test("Can create a packet from received data using new NLPacket()", () => {
+        const nlPacket = new NLPacket(dataView, dataView.byteLength, sockAddr);
+        expect(nlPacket.getDataSize()).toBe(dataView.byteLength);
+        const messageData = nlPacket.getMessageData();
+        expect(messageData.type).toBe(PacketType.DomainList);
+        expect(messageData.version).toBe(24);
+        expect(messageData.senderSockAddr.getPort()).toBe(7);
+        expect(messageData.sourceID).toBe(0);
+        expect(error).toHaveBeenCalledTimes(0);
+    });
+
+    test("Can create a packet from received data using fromReceivedPacket()", () => {
+        const nlPacket = NLPacket.fromReceivedPacket(dataView, dataView.byteLength, sockAddr);
+        expect(nlPacket instanceof NLPacket).toBe(true);
+        expect(nlPacket.getDataSize()).toBe(dataView.byteLength);
+        const messageData = nlPacket.getMessageData();
+        expect(messageData.type).toBe(PacketType.DomainList);
+        expect(messageData.version).toBe(24);
+        expect(messageData.senderSockAddr.getPort()).toBe(7);
+        expect(messageData.sourceID).toBe(0);
+        expect(error).toHaveBeenCalledTimes(0);
+    });
+
+
     test("Can create a packet using new NLPacket() with another packet", () => {
         const nlPacket = new NLPacket(testPacket);
         expect(nlPacket instanceof NLPacket).toBe(true);

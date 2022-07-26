@@ -37,6 +37,10 @@ This is handled by `OctreePacketProcessor::handleOctreePacket()`. The packet is 
 
 The `OctreePacketProcessor` runs in its own thread and updates the entity octree.
 
+The happy path for reading an `EntityData` packet starts at `OctreeProcessor::processDatagram` and then calls the following functions: `EntityTree::readBitstreamToTree` &rarr; `Octree::readBitstreamToTree` &rarr; `Octree::readElementData` &rarr; `EntityTreeElement::readElementDataFromBuffer` &rarr; `EntityTree::readEntityDataFromBuffer` &rarr; `EntityItem::readEntityDataFromBuffer`.
+
+Data for multiple entities may be included in the packet. Bytes are consumed until there are no entity data left read.
+
 ##### `EntityQueryInitialResultsComplete`
 
 This is handled by `OctreePacketProcessor::handleOctreePacket()`, as above.
@@ -91,11 +95,9 @@ Sent by `EntityServer.#sendNackPackets()` which is called in `EntityServer.updat
 
 This is handled by `OctreePacketProcessor.handleOctreePacket()`. The packet is not queued for later processing; instead, it is immediately processed by `OctreePacketProcessor.processPacket()`.
 
-The user application is notified of the new or changed entity via the `EntityServer.entityData` signal. This signal (unlike the scripting API's `Entities.addingEntity` signal) includes all the entity data (not just the entity ID) because the user application will want all the data in order to render it.
+The user application is notified of the new or changed entities via the `EntityServer.entityData` signal. This signal (unlike the scripting API's `Entities.addingEntity` signal) includes all the entity data provided (not just the entity ID) because the user application will want all the data in order to render it. When an entity is edited, all data concerning this entity is passed to the user application.
 
-_TO DO: Instead of an `EntityServer.entityData` signal should there be `entityAdded` and `entityUpdated` signals?_
-
-_TO DO: For entity edits, does the `EntityData` packet contain partial entity data, in which case the `EntityServer` may need to keep its own copy of all the entities in order to provide usable information in the API?_
+The Web SDK equivalent of the C++'s `OctreeProcessor::processDatagram` is `EntityData.read()`. It returns an array of entity properties, unlike the C++ code which traverses an octree and updates or creates new nodes as the data are read.
 
 
 ##### `EntityQueryInitialResultsComplete`

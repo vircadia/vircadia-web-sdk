@@ -46,7 +46,8 @@ import AssignmentClient from "./domain/AssignmentClient";
  *
  *  @property {number} maxOctreePacketsPerSecond - The maximum number of octree packets per second that the user client is
  *      willing to handle.
- *  @property {Signal<EntityServer~AddedEntityCallback>} addedEntity - Triggered when an entity data packet is received.
+ *  @property {Signal<EntityServer~entityData>} entityData - Triggered when new or changed entity data is received from the
+ *      entity server.
  */
 class EntityServer extends AssignmentClient {
 
@@ -91,13 +92,11 @@ class EntityServer extends AssignmentClient {
     #_nodeList: NodeList;
 
     #_octreeQuery = new OctreeQuery(true);
-    // eslint-disable-next-line
-    // @ts-ignore
     #_octreeProcessor;
     #_maxOctreePPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
     #_queryExpiry = 0;
     #_physicsEnabled = true;
-    #_addedEntity = new SignalEmitter();
+    #_entityData = new SignalEmitter();
 
 
     constructor(contextID: number) {
@@ -109,8 +108,8 @@ class EntityServer extends AssignmentClient {
 
         ContextManager.set(contextID, OctreePacketProcessor, contextID);
         this.#_octreeProcessor = ContextManager.get(contextID, OctreePacketProcessor) as OctreePacketProcessor;
-        this.#_octreeProcessor.addedEntity.connect(() => {
-            this.#_addedEntity.emit();
+        this.#_octreeProcessor.entityData.connect((data) => {
+            this.#_entityData.emit(data);
         });
 
         // C++  Application::Application()
@@ -126,11 +125,13 @@ class EntityServer extends AssignmentClient {
     }
 
     /*@sdkdoc
-     *  Triggered when an entity data packet is received.
-     *  @callback EntityServer~AddedEntityCallback
+     *  Triggered when new or changed entity data is received from the entity server.
+     *  @callback EntityServer~entityData
+     *  @param {EntityProperties[]} entityData - The entity properties for one or more entities. Note that complete entity
+     *      properties are provided for both new and changed entities.
      */
-    get addedEntity(): Signal {
-        return this.#_addedEntity.signal();
+    get entityData(): Signal {
+        return this.#_entityData.signal();
     }
 
 

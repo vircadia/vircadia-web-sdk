@@ -3,12 +3,14 @@
 //
 //  Created by David Rowe on 8 Jun 2021.
 //  Copyright 2021 Vircadia contributors.
+//  Copyright 2021 DigiSomni LLC.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
 import HMACAuth from "./HMACAuth";
+import SockAddr from "./SockAddr";
 import Packet from "./udt/Packet";
 import PacketType, { PacketTypeValue } from "./udt/PacketHeaders";
 import UDT from "./udt/UDT";
@@ -24,20 +26,25 @@ import assert from "../shared/assert";
  *  <p>C++ <code>NLPacket : public Packet</code></p>
  *  @class NLPacket
  *  @extends Packet
- *  @param {PacketType|Packet} type|packet - The type of NLPacket to create.
+ *  @param {PacketType|DataView|Packet} type|packet - The type of NLPacket to create.
+ *      <p>A Dataview to create the NLPacket from.</p>
  *      <p>A base Packet to create the NLPacket from.</p>
  *      <p>Note: The {@link MessageData} from the base packet is reused in-place, not copied.</p>
- *  @param {number|unused} size - The size of the packet in bytes. If <code>-1</code>, a packet of the maximum size is created
- *      (though not all of it need be sent). <strong>Default Value:</strong> <code>-1</code>
+ *  @param {number|number|unused} size - The size of the packet in bytes. If <code>-1</code>, a packet of the maximum size is
+ *      created (though not all of it need be sent). <strong>Default Value:</strong> <code>-1</code>
+ *      <p>The size of the packet in bytes.</p>
  *      <p>Unused.</p>
- *  @param {boolean|unused} isReliable - <code>true</code> if the packet is to be sent reliably, <code>false</code> if it isn't.
- *      <strong>Default Value:</strong> <code>false</code
+ *  @param {boolean|SockAddr|unused} isReliable - <code>true</code> if the packet is to be sent reliably, <code>false</code> if
+ *      it isn't. <strong>Default Value:</strong> <code>false</code
+ *      <p>The sender's IP address and port.</p>
  *      <p>Unused.</p>
- *  @param {boolean|unused} isPartOfMessage - <code>true</code> if the packet is part of a message, <code>false</code> if it
- *      isn't. <strong>Default Value:</strong> <code>false</code>
+ *  @param {boolean|unused|unused} isPartOfMessage - <code>true</code> if the packet is part of a message, <code>false</code> if
+ *      it isn't. <strong>Default Value:</strong> <code>false</code>
  *      <p>Unused.</p>
- *  @param {PacketVersion|unused} version - The version of the NLPacket to create. <strong>Default Value:</strong>
+ *      <p>Unused.</p>
+ *  @param {PacketVersion|unused|unused} version - The version of the NLPacket to create. <strong>Default Value:</strong>
  *      <code>0</code>
+ *      <p>Unused.</p>
  *      <p>Unused.</p>
  */
 class NLPacket extends Packet {
@@ -73,6 +80,20 @@ class NLPacket extends Packet {
     static fromBase(packet: Packet): NLPacket {
         // C++  NLPacket* fromBase(Packet* packet)
         return new NLPacket(packet);
+    }
+
+    /*@devdoc
+     *  Creates a new NLPacket from received data &mdash; an alternative to using <code>new NLPacket(...)</code>.
+     *  <p><em>Static</em></p>
+     *  @static
+     *  @param {DataView} data - The raw byte data of a new packet.
+     *  @param {number} size - The size of that data in bytes.
+     *  @param {SockAddr} senderSockAddr - The sender's IP address and port.
+     *  @returns {NLPacket} An NLPacket created from the received data.
+     */
+    static override fromReceivedPacket(data: DataView, size: number, senderSockAddr: SockAddr): NLPacket {
+        // C++  NLPacket fromReceivedPacket(std::unique_ptr<char[]> data, qint64 size, const SockAddr& senderSockAddr)
+        return new NLPacket(data, size, senderSockAddr);
     }
 
     /*@devdoc
@@ -147,13 +168,13 @@ class NLPacket extends Packet {
 
 
     constructor(
-        param0: number | Packet,
+        param0: number | DataView | Packet,
         param1: number | undefined = undefined,
-        param2: boolean | undefined = undefined,
+        param2: boolean | SockAddr | undefined = undefined,
         param3: boolean | undefined = undefined,
         param4: number | undefined = undefined) {
 
-        if (typeof param0 === "number") {
+        if (typeof param0 === "number" && (typeof param2 === "undefined" || typeof param2 === "boolean")) {
             // C++  NLPacket(PacketType type, qint64 size = -1, bool isReliable = false, bool isPartOfMessage = false,
             //               PacketVersion version = 0)
             const type = param0;
@@ -180,6 +201,19 @@ class NLPacket extends Packet {
             this._messageData.dataPosition = headerStart;  // Reset to start of header for #localHeaderSize().
             this.adjustPayloadStartAndCapacity(NLPacket.#localHeaderSize(this._messageData.type));
 
+        } else if (param0 instanceof DataView && typeof param1 === "number" && param2 instanceof SockAddr) {
+            // C++  NLPacket(std::unique_ptr<char[]> data, qint64 size, const SockAddr& senderSockAddr)
+            const data = param0;
+            const size = param1;
+            const senderSockAddr = param2;
+
+            super(data, size, senderSockAddr);
+            const headerStart = this._messageData.dataPosition;
+            this.#readType();
+            this.#readVersion();
+            this.#readSourceID();
+            this._messageData.dataPosition = headerStart;  // Reset to start of header for #localHeaderSize().
+            this.adjustPayloadStartAndCapacity(NLPacket.#localHeaderSize(this._messageData.type));
         } else {
             console.error("Invalid parameters in Packet constructor!", typeof param0, typeof param1, typeof param2,
                 typeof param3, typeof param4);
