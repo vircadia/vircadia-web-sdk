@@ -726,34 +726,6 @@ describe("EntityData - unit tests", () => {
         expect(info[1].shape).toBe("Triangle");
     });
 
-    test("Can skip over Image and Text entity types", () => {
-        const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
-
-        // Packet data containing an Image entity, a Text entity, a Model entity and a Shape entity.
-        // eslint-disable-next-line max-len
-        const bufferHex = "c00200855eed6838e405007f020000057a78da636050626061b8f3ab60a103bbaf64d7d4a33ff27d17aa1b3030303c307ac2ca60966d9b6101a419bcfeff6040008558868c929282622b7dfde4943c5d43bdb2cca2e4c494cc44bde4fc5cfdd262dd545d437da7c4aac4c4227dc7e2e2d49262fd90d48a92d2a2d4627d97d4b4c4d21ca088675e496a515a6272aa7e0a44283e3337313d552fab20fdb1acf4ab3616df098bd6b0fc5f7ff7927000d0ce1b20f75ccf83ba27eaff3ffbff67ff83c10fe6f7ff3f08326001ffff33723094006dd6cdcf4b858ab131242a8084dea9731f5073623eb0fea9c1beb43435fb593367da715d57b6f95f0f86ff814aed9130d87a01865671a3848b31feb75619cbb467ee0acf1715543ae0ab2d7580fd1efb7e734f737b467427300245500491ccc72ad6608fc0c8a0ca85817c00f545c37e0679b8d83467fc7a40418b4b0ed581dc0c1ea93939f9c0602d2e51ec3f546a3b47fce2f5c505f670a510d07fe8ab0d340a82f293f24bf21921b69c3de3630712def226e1bef90ecf57ddb32519b82cef4c16008a65cc7accca509e098df5be06e468b790ffff0f77b4272766a722453b0343ec81ebfb8cf24eef3f11e8617fe8fa363ba6a7c2769b666fb3c311e1609b051804d44edf4d11f148dcdf317391f45bfb4b7942fafb83d8dfeeef9067b5af4f611b29110e964a2039d7fbe6a7a4e614ebbbe5e7a7e82765169564a42456c68362463f3da7240d55482f3d27097b68b0305473d5724102f583232494c164c06177061fd96d1dbb58bdc3b7044e76f5c8aec84b80c55d5d1634d5587dfcff2f3f01574ae16428ce482c404d2ae69d8dfbbd75aeec1754d4b207a54e18262da99cd9327dff83f057fbcf4cfe6db72666a31d4aaa600400b74b614f";
-
-        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
-            return parseInt(hex, 16);
-        }));
-        const data = new DataView(bufferArray.buffer);
-
-        const info = EntityData.read(data);
-        expect(info).toHaveLength(2);
-
-        // Model Entity.
-        expect(info[0].entityItemID instanceof Uuid).toBe(true);
-        expect(info[0].entityItemID.stringify()).toBe("b4ec60df-37b8-49ea-8b9b-19000a39dc93");
-        expect(info[0].entityType).toBe(4);
-
-        // Shape Entity.
-        expect(info[1].entityItemID instanceof Uuid).toBe(true);
-        expect(info[1].entityItemID.stringify()).toBe("4c1db688-ba05-4b57-b451-9345486b786e");
-        expect(info[1].entityType).toBe(3);
-
-        log.mockReset();
-    });
-
     test("Can skip over Light and Web entity types", () => {
         const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
