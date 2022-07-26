@@ -143,25 +143,8 @@ class TextEntityItem {
 
         const textDecoder = new TextDecoder();
 
-        // pulse 000000000000803f0000803f0000000000000000
-        // text 0500 48656c6c6f
-        // lineHeight 8fc2753d
-        // textColor b81db8
-        //
-        // textAlpha e17a543f
-        // backgroundColor 000000
-        // backgroundAlpha 8fc2753f
-        // leftMargin 8fc2f53c
-        // rightMargin 8fc2753d
-        // topMargin cdcccc3d
-        // bottomMargin 0ad7a33d
-        // unlit 01
-        // font 0600 526f626f746f
-        // textEffect 01 000000785978cdcc4c3e00000000
-
         const pulseProperties = PulsePropertyGroup.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
         dataPosition += pulseProperties.bytesRead;
-        console.log(dataPosition); // TODO: remove
 
         let text: string | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXT)) {
