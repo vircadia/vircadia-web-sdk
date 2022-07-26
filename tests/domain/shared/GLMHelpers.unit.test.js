@@ -17,6 +17,19 @@ describe("GLMHelpers - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
+    test("Can read a quaternion from 8 bytes of packet data", () => {
+        const bufferHex = "0000e9b01f16a5b3ffff0000";
+        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        const data = new DataView(bufferArray.buffer);
+        const quat = GLMHelpers.unpackOrientationQuatFromBytes(data, 2);
+        expect(quat.x).toBeCloseTo(0.382134, 4);
+        expect(quat.y).toBeCloseTo(-0.827166, 4);
+        expect(quat.z).toBeCloseTo(0.403521, 4);
+        expect(quat.w).toBeCloseTo(1, 2);
+    });
+
     test("Can read a quaternion from 6 bytes of packet data", () => {
 
         // 30 deg yaw.

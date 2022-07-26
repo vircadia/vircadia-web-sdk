@@ -12,10 +12,12 @@
 import PacketScribe from "../networking/packets/PacketScribe";
 import PacketType from "../networking/udt/PacketHeaders";
 import ContextManager from "../shared/ContextManager";
+import NLPacket from "../networking/NLPacket";
 import Node from "../networking/Node";
 import NodeList from "../networking/NodeList";
 import PacketReceiver from "../networking/PacketReceiver";
 import ReceivedMessage from "../networking/ReceivedMessage";
+import assert from "../shared/assert";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 
 
@@ -25,7 +27,7 @@ import SignalEmitter, { Signal } from "../shared/SignalEmitter";
  *
  *  @class OctreePacketProcessor
  *  @property {string} contextItemType="OctreePacketProcessor" - The type name for use with the {@link ContextManager}.
- *  @property {Signal} addedEntity - Triggered when an entity data packet is received.
+ *  @property {Signal} entityData - Triggered when an entity data packet is received.
  *
  *  @param {number} contextID - The {@link ContextManager} context ID.
  */
@@ -41,7 +43,7 @@ class OctreePacketProcessor {
     #_nodeList;
     #_packetReceiver;
 
-    #_addedEntity = new SignalEmitter();
+    #_entityData = new SignalEmitter();
 
     #_haveWarnedOctreeStats = false;
     #_haveWarnedEntityErase = false;
@@ -72,36 +74,57 @@ class OctreePacketProcessor {
 
     /*@devdoc
      *  Triggered when an entity data packet is received.
-     *  @function OctreePacketProcessor.addedEntity
+     *  @callback OctreePacketProcessor.entityData
+     *  @param {PacketScribe.EntityDataDetails} entityData - The entity data for one or more entities.
      *  @returns {Signal}
      */
-    get addedEntity(): Signal {
-        return this.#_addedEntity.signal();
+    get entityData(): Signal {
+        return this.#_entityData.signal();
     }
 
     // Listener
-    // eslint-disable-next-line
-    // @ts-ignore
-    #processPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {// eslint-disable-line
+    #processPacket = (message: ReceivedMessage, sendingNode: Node | null): void => {
         // C++ void OctreePacketProcessor::processPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer sendingNode)
 
-        const packetType = message.getType();
+        assert(sendingNode !== null, "OctreePacketProcessor.processPacket()", "Sending node is missing.");
 
-        if (packetType === PacketType.OctreeStats) {
+        let messageLocal = message;
+
+        const octreePacketType = messageLocal.getType();
+
+        if (octreePacketType === PacketType.OctreeStats) {
             if (!this.#_haveWarnedOctreeStats) {
                 console.warn("OctreePacketProcessor: OctreeStats packet not processed.");
                 this.#_haveWarnedOctreeStats = true;
             }
-            // WEBRTC TODO: Address further C++ code.
-            return;
+
+            // WEBRTC TODO: Address further C++ code - process OctreeStats packet.
+
+            // The stats message is always 222 bytes long.
+            const STATS_MESSAGE_LENGTH = 222;
+            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+            const piggybackBytes = messageLocal.getMessage().byteLength - STATS_MESSAGE_LENGTH;
+
+            if (piggybackBytes > 0) {
+                // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+                const view = new DataView(
+                    messageLocal.getMessage().buffer.slice(messageLocal.getMessage().byteOffset + STATS_MESSAGE_LENGTH)
+                );
+                const packet = NLPacket.fromReceivedPacket(view, piggybackBytes, sendingNode.getPublicSocket());
+                messageLocal = new ReceivedMessage(packet);
+            } else {
+                return;
+            }
         }
 
+        const packetType = messageLocal.getType();
+
         switch (packetType) {
-            case PacketType.EntityData:
-                PacketScribe.EntityData.read();
-                // WEBRTC TODO: Emit data.
-                this.#_addedEntity.emit();
+            case PacketType.EntityData: {
+                const entityDataDetails = PacketScribe.EntityData.read(messageLocal.getMessage());
+                this.#_entityData.emit(entityDataDetails);
                 break;
+            }
             case PacketType.EntityErase:
                 if (!this.#_haveWarnedEntityErase) {
                     console.warn("OctreePacketProcessor: EntityErase packet not processed.");
