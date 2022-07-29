@@ -13,9 +13,9 @@ The SDK is written in TypeScript.
 - [Project Configuration](CONFIGURATION.md)
 - [Coding Standard](CODING_STANDARD.md)
 
-To learn more about using Vircadia's metaverse ecosystem, see the [Developer Documentation](https://docs.vircadia.dev).
+The SDK is published at NPM: https://www.npmjs.com/package/@vircadia/web-sdk
 
-For scripting API documentation, see the [Vircadia API Reference](https://apidocs.vircadia.dev).
+To learn more about using Vircadia's metaverse ecosystem, see the [Developer Documentation](https://docs.vircadia.dev).
 
 
 ## Prerequisites
@@ -32,7 +32,7 @@ https://nodejs.org/en/download/
 [Jest](https://jestjs.io/) is used for unit testing. It is included as an NPM dev dependency, however, you may also install it globally if you want
 to. 
 
-## Project setup
+## Project Setup
 
 ### Get the source
 
@@ -57,7 +57,7 @@ npm install
 ```
 Loads all the supporting NPM packages as defined in `package.json` into the `node_modules` directory.
 
-## Development and testing
+## Development and Testing
 
 ### Compile and minify for development
 ```
@@ -141,27 +141,4 @@ npm run sdkdoc
 Developer documentation (includes SDK API documentation):
 ```
 npm run devdoc
-```
-
-
-### Publish to NPM
-
-Build for release:
-```
-npm run clean
-npm run build-prod
-```
-
-Package for release:
-```
-npm pack
-```
-
-This creates the SDK package, `vircadia-web-sdk-vvvv.v.v.tgz`.
-
-Publish the package to https://npmjs.com:
-
-```
-npm login
-npm publish --access public
 ```
