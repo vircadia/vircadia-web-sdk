@@ -26,8 +26,10 @@
  *      {@link ShapeEntityProperties}
  *  @property {number} Model - <code>4</code> - A mesh model from a glTF, FBX, or OBJ file.<br />
  *      {@link ModelEntityProperties}
- *  @property {number} Text - <code>5</code> - A pane of text oriented in space.
- *  @property {number} Image - <code>6</code> - An image oriented in space.
+ *  @property {number} Text - <code>5</code> - A pane of text oriented in space.<br />
+ *      {@link TextEntityProperties}
+ *  @property {number} Image - <code>6</code> - An image oriented in space.<br />
+ *      {@link ImageEntityProperties}
  *  @property {number} Web - <code>7</code> - A browsable web page.
  *  @property {number} ParticleEffect - <code>8</code> - A particle system that can be used to simulate things such as fire,
  *      smoke, snow, magic spells, etc.

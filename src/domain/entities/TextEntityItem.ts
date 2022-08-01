@@ -11,7 +11,7 @@
 
 import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
-import type { color } from "../shared/Color";
+import { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
 import { EntityPropertyFlags } from "./EntityPropertyFlags";
 import PulsePropertyGroup from "./PulsePropertyGroup";
@@ -51,13 +51,12 @@ enum TextEffect {
  *          <tr><td>"right"</td><td>Text is aligned to the right side.</td></tr>
  *      </tbody>
  *  </table>
- *  @typedef {string} TextEffect
+ *  @typedef {string} TextAlignment
  */
 enum TextAlignment {
     LEFT = "left",
     CENTER = "center",
     RIGHT = "right"
-
 }
 
 type TextEntitySubclassProperties = {

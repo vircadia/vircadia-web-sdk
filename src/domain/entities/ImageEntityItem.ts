@@ -13,22 +13,16 @@ import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
+import { rect } from "../shared/Rect";
 import { EntityPropertyFlags } from "./EntityPropertyFlags";
 import PulsePropertyGroup from "./PulsePropertyGroup";
 
-
-type Rect = {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-};
 
 type ImageEntitySubclassProperties = {
     imageURL: string | undefined;
     emissive: boolean | undefined;
     keepAspectRatio: boolean | undefined;
-    subImage: Rect | undefined;
+    subImage: rect | undefined;
     color: color | undefined;
     alpha: number | undefined;
 };
@@ -50,7 +44,7 @@ class ImageEntityItem {
 
     /*@sdkdoc
      *  Defines a rectangular portion of an image or screen, or similar.
-     *  @typedef {object} Rect
+     *  @typedef {object} rect
      *  @property {number} x - Left, x-coordinate value.
      *  @property {number} y - Top, y-coordinate value.
      *  @property {number} width - Width of the rectangle.
@@ -60,14 +54,14 @@ class ImageEntityItem {
     /*@sdkdoc
      *  The <code>"Image"</code> {@link EntityType} displays an image on a 2D rectangle in the domain. It has
      *  properties in addition to the common {@link EntityProperties}.
-     *  @typedef {object} ShapeEntityProperties
-     *  @property {string} imageURL - The URL of the image to use.
-     *  @property {boolean} emissive - <code>true</code> if the image should be emissive (unlit), <code>false</code> if it
-     *      shouldn't.
-     *  @property {boolean} keepAspectRatio - <code>true</code> if the image should maintain its aspect ratio,
+     *  @typedef {object} ImageEntityProperties
+     *  @property {string | undefined} imageURL - The URL of the image to use.
+     *  @property {boolean | undefined} emissive - <code>true</code> if the image should be emissive (unlit), <code>false</code>
+     *      if it shouldn't.
+     *  @property {boolean | undefined} keepAspectRatio - <code>true</code> if the image should maintain its aspect ratio,
      *      <code>false</code> if it shouldn't.
-     *  @property {Rect} subImage - The portion of the image to display. If width or height are <code>0</code>, it defaults to
-     *      the full image in that dimension.
+     *  @property {rect | undefined} subImage - The portion of the image to display. If width or height are <code>0</code>, it
+     *      defaults to the full image in that dimension.
      *  @property {color | undefined} color - The color of the entity.
      *  @property {number | undefined} alpha - The opacity of the image.
      */
@@ -140,7 +134,7 @@ class ImageEntityItem {
             dataPosition += 1;
         }
 
-        let subImage: Rect | undefined = undefined;
+        let subImage: rect | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SUB_IMAGE)) {
             subImage = {
                 x: data.getUint32(dataPosition, UDT.LITTLE_ENDIAN),

@@ -331,8 +331,10 @@ const EntityData = new class {
      *  @property {string | undefined} certificateType - Type of the certificate.
      *  @property {number | undefined} staticCertificateVersion - The version of the method used to generate the certificateID.
      *
+     *  @see {@link ImageEntityProperties}
      *  @see {@link ModelEntityProperties}
      *  @see {@link ShapeEntityProperties}
+     *  @see {@link TextEntityProperties}
      */
 
     /*@sdkdoc
