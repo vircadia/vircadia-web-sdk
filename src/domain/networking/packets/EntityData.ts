@@ -331,8 +331,10 @@ const EntityData = new class {
      *  @property {string | undefined} certificateType - Type of the certificate.
      *  @property {number | undefined} staticCertificateVersion - The version of the method used to generate the certificateID.
      *
+     *  @see {@link ImageEntityProperties}
      *  @see {@link ModelEntityProperties}
      *  @see {@link ShapeEntityProperties}
+     *  @see {@link TextEntityProperties}
      */
 
     /*@sdkdoc
@@ -1257,10 +1259,12 @@ const EntityData = new class {
             dataPosition += subclassData.bytesRead;
 
             // WEBRTC TODO: Unnecessary check once all entity types are supported.
-            if (entityType === EntityType.Model
-                || entityType === EntityType.Shape
-                || entityType === EntityType.Box
+            if (entityType === EntityType.Box
                 || entityType === EntityType.Sphere
+                || entityType === EntityType.Shape
+                || entityType === EntityType.Model
+                || entityType === EntityType.Text
+                || entityType === EntityType.Image
             ) {
                 entitiesDataDetails.push({
                     entityItemID,
