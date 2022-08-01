@@ -24,8 +24,13 @@ import AssignmentClient from "./domain/AssignmentClient";
 
 /*@sdkdoc
  *  The <code>EntityServer</code> class provides the interface for working with entity server assignment clients.
- *  <p>Prerequisite: A {@link DomainServer} object must be created in order to set up the domain context.</p>
- *  <p>Prerequisite: A {@link Camera} object must be created for this class to use.</p>
+ *  <p>For a list of entity types, see {@link EntityType}.</p>
+ *  <p>For entity properties, see {@link EntityProperties}.</p>
+ *  <p>Prerequisites:<p>
+ *  <ul>
+ *      <li>A {@link DomainServer} object must be created in order to set up the domain context.</li>
+ *      <li>Prerequisite: A {@link Camera} object must be created for this class to use.</li>
+ *  </ul>
  *
  *  @class EntityServer
  *  @extends AssignmentClient
