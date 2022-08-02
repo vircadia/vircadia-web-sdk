@@ -38,7 +38,8 @@
  *  @property {number} PolyVox - <code>11</code> - A set of textured voxels.
  *  @property {number} Grid - <code>12</code> - A grid of lines in a plane.
  *  @property {number} Gizmo - <code>13</code> - A gizmo intended for UI.
- *  @property {number} Light - <code>14</code> - A local lighting effect.
+ *  @property {number} Light - <code>14</code> - A local lighting effect.<br />
+ *      {@link LightEntityProperties}
  *  @property {number} Zone - <code>15</code> - A volume of lighting effects and avatar permissions.
  *  @property {number} Material - <code>16</code> - Modifies the existing materials on entities and avatars.
  *  @property {number} NUM_TYPES - <code>17</code> - The number of entity types.

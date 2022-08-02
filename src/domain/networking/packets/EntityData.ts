@@ -332,6 +332,7 @@ const EntityData = new class {
      *  @property {number | undefined} staticCertificateVersion - The version of the method used to generate the certificateID.
      *
      *  @see {@link ImageEntityProperties}
+     *  @see {@link LightEntityProperties}
      *  @see {@link ModelEntityProperties}
      *  @see {@link ShapeEntityProperties}
      *  @see {@link TextEntityProperties}
@@ -1265,6 +1266,7 @@ const EntityData = new class {
                 || entityType === EntityType.Model
                 || entityType === EntityType.Text
                 || entityType === EntityType.Image
+                || entityType === EntityType.Light
             ) {
                 entitiesDataDetails.push({
                     entityItemID,

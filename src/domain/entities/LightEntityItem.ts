@@ -10,15 +10,22 @@
 //
 
 import { CommonEntityProperties } from "../networking/packets/EntityData";
+import UDT from "../networking/udt/UDT";
+import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
 import { EntityPropertyFlags } from "./EntityPropertyFlags";
 
 
-// WEBRTC TODO: Replace Record<string, never> with LightEntityItem's special properties.
-type LightEntitySubclassProperties = Record<string, never>;
+type LightEntitySubclassProperties = {
+    color: color | undefined,
+    isSpotlight: boolean | undefined,
+    intensity: number | undefined,
+    exponent: number | undefined,
+    cutoff: number | undefined,
+    falloffRadius: number | undefined
+};
 
-// WEBRTC TODO: Make a union with LightEntitySubclassProperties.
-type LightEntityProperties = CommonEntityProperties;
+type LightEntityProperties = CommonEntityProperties & LightEntitySubclassProperties;
 
 type LightEntitySubclassData = {
     bytesRead: number;
@@ -26,12 +33,45 @@ type LightEntitySubclassData = {
 };
 
 
+/*@devdoc
+ *  The <code>LightEntityItem</code> class provides facilities for reading Light entity properties from a packet.
+ *  @class LightEntityItem
+ */
 class LightEntityItem {
     // C++  class LightEntityItem : public EntityItem
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): LightEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
+    /*@sdkdoc
+     *  The <code>Light</code> {@link EntityType} provides a local lighting effect. Surfaces outside the entity's dimensions are
+     *  not lit by the light. It has properties in addition to the common
+     *  {@link EntityProperties}.
+     *  @typedef {object} LightEntityProperties
+     *  @property {color|undefined} color - The color of the light emitted.
+     *  @property {number|undefined} intensity - The brightness of the light.
+     *  @property {number|undefined} falloffRadius - The distance from the light's center at which intensity is reduced by 25%.
+     *  @property {boolean|undefined} isSpotlight - <code>true</code> if the light is directional, emitting along the entity's
+     *      local negative z-axis; <code>false</code> if the light is a point light which emanates in all directions.
+     *  @property {number|undefined} exponent - Affects the softness of the spotlight beam: the higher the value the softer the
+     *      beam.
+     *  @property {number|undefined} cutoff - Affects the size of the spotlight beam: the higher the value the larger the beam.
+     */
+
+    /*@devdoc
+     *  A wrapper for providing {@link LightEntityProperties} and the number of bytes read.
+     *  @typedef {object} LightEntitySubclassData
+     *  @property {number} bytesRead - The number of bytes read.
+     *  @property {LightEntityProperties} properties - The Light entity properties.
+     */
+
+    /*@devdoc
+     *  Reads, if present, image properties in an {@link PacketType(1)|EntityData} packet.
+     *  <p><em>Static</em></p>
+     *  @param {DataView} data - The {@link Packets|EntityData} message data to read.
+     *  @param {number} position - The position of the image properties in the {@link Packets|EntityData} message data.
+     *  @param {PropertyFlags} propertyFlags - The property flags.
+     *  @returns {ImageEntitySubclassData} The image properties and the number of bytes read.
+     */
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number,
+        propertyFlags: PropertyFlags): LightEntitySubclassData {
         // C++  int LightEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)
@@ -40,39 +80,56 @@ class LightEntityItem {
 
         let dataPosition = position;
 
+        let color: color | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
-            // WEB TODO: Read color property.
+            color = {
+                red: data.getUint8(dataPosition),
+                green: data.getUint8(dataPosition + 1),
+                blue: data.getUint8(dataPosition + 2)
+            };
             dataPosition += 3;
         }
 
+        let isSpotlight: boolean | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_IS_SPOTLIGHT)) {
-            // WEB TODO: Read isSpotlight property.
+            isSpotlight = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
+        let intensity: number | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_INTENSITY)) {
-            // WEB TODO: Read intensity property.
+            intensity = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
+        let exponent: number | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EXPONENT)) {
-            // WEB TODO: Read exponent property.
+            exponent = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
+        let cutoff: number | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CUTOFF)) {
-            // WEB TODO: Read cutoff property.
+            cutoff = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
+        let falloffRadius: number | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_FALLOFF_RADIUS)) {
-            // WEB TODO: Read falloffRadius property.
+            falloffRadius = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         return {
             bytesRead: dataPosition - position,
-            properties: {}
+            properties: {
+                color,
+                isSpotlight,
+                intensity,
+                exponent,
+                cutoff,
+                falloffRadius
+            }
         };
 
         /* eslint-enable @typescript-eslint/no-magic-numbers */
