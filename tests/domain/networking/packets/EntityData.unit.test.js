@@ -726,29 +726,6 @@ describe("EntityData - unit tests", () => {
         expect(info[1].shape).toBe("Triangle");
     });
 
-    test("Can skip over Light and Web entity types", () => {
-        const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
-
-        // Packet data containing an Light entity, a Web entity and a Model entity.
-        // eslint-disable-next-line max-len
-        const bufferHex = "c00000515ff77447e405005c020000058678da63606062606610752a55d0feefa6b1fdfccd695f2a7eca5b1cf24988717fc2ca5011209f08a2196668fcfff1ffbff97f3078a06027c88005fcffcfc8c99093999e51a29b9f970a17d67ccb78e04b4edb817b85abec5fb9953b8030034383c3ff7a30fc0f54620fc3308b0518148ee4e5a8ba789feffc75e0e4b523ef17cdf15f7be0cfd14f07142a990ff06fbae1c0886e3b2350044510c97cac620df6088c0caa5c18c807509f34ec6790878b4d73c6af0714a698a21ba436301a1b2f768038709a1388ce14bdf8b07ea51b6fe3c1f51931be4a9e05d34a4ec782c2cbc478711c38a218feffa9ff3f1b124f1fe4ef3fc01551ec0ce5a94928d134312973bf616edb8190f5f1f667cf9cb14f4b4bb3e7baae6c832d9a60d66246d321bd57fbfbcf2c3ef060a7c9de4fbf5ed90ffb689a193913e13654778a3264949414145be9eb9765162527a66426ea25e7e7eacb01a5b82041d1cee09b5f95999393a86faa67a0a0e19399575a61ade0989752949f99a260a66760ade0975a515aac60aae0549a9993a2ef1be4686ae1a7a9e0585090931a9e9ae49d59a26f6a6cae676ca6a0e1ed11e2eba3a39093999daae09e9a9c9dafa9e09c51949f9baa6f61ac67a067626860ac676864a4e09b9f949993aa109c9896589409d5bde54dc27df31d9eafba674b327059de992c00745ec6acc7ac0c0bafeccf0727acf6238894f50128eb802b657130242766a7a224add803d7f7f5dc6e3a20b28edbe1d0f56d764c4f85ed36cdde66872d69c12c166048fb2bff56d5dca3666b2b03e3c3875afc7942fafbaf38761fe038fcd5be3e856d18252d00e7784b49";
-
-        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
-            return parseInt(hex, 16);
-        }));
-        const data = new DataView(bufferArray.buffer);
-
-        const info = EntityData.read(data);
-        expect(info).toHaveLength(1);
-
-        // Model Entity.
-        expect(info[0].entityItemID instanceof Uuid).toBe(true);
-        expect(info[0].entityItemID.stringify()).toBe("b4ec60df-37b8-49ea-8b9b-19000a39dc93");
-        expect(info[0].entityType).toBe(4);
-
-        log.mockReset();
-    });
-
     test("Can skip over ParticleEffect and Zone entity types", () => {
         const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 

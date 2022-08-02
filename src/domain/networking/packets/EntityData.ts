@@ -178,8 +178,8 @@ const EntityData = new class {
 
     /*@sdkdoc
      *  Different entity types have different properties: some common to all entities (listed in the table) and some specific to
-     *  each {@link EntityType} (linked to below). A property value may be undefined if it couldn't fit in the data packet sent
-     *      by the server.
+     *  each {@link EntityType} (linked to below).
+     *  <p>A property value may be undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} EntityProperties
      *
      *  @property {Uuid} entityItemID - The ID of the entity.
@@ -336,6 +336,7 @@ const EntityData = new class {
      *  @see {@link ModelEntityProperties}
      *  @see {@link ShapeEntityProperties}
      *  @see {@link TextEntityProperties}
+     *  @see {@link WebEntityProperties}
      */
 
     /*@sdkdoc
@@ -1266,6 +1267,7 @@ const EntityData = new class {
                 || entityType === EntityType.Model
                 || entityType === EntityType.Text
                 || entityType === EntityType.Image
+                || entityType === EntityType.Web
                 || entityType === EntityType.Light
             ) {
                 entitiesDataDetails.push({

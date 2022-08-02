@@ -30,7 +30,8 @@
  *      {@link TextEntityProperties}
  *  @property {number} Image - <code>6</code> - An image oriented in space.<br />
  *      {@link ImageEntityProperties}
- *  @property {number} Web - <code>7</code> - A browsable web page.
+ *  @property {number} Web - <code>7</code> - A browsable web page.<br />
+ *      {@link WebEntityProperties}
  *  @property {number} ParticleEffect - <code>8</code> - A particle system that can be used to simulate things such as fire,
  *      smoke, snow, magic spells, etc.
  *  @property {number} Line - <code>9</code> - A sequence of one or more simple straight lines.
