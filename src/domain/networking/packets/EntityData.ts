@@ -192,144 +192,144 @@ const EntityData = new class {
      *      updated.
      *  @property {number} simulatedDelta - The delta between {@link EntityDataDetails|lastEdited} and the last time the entity
      *      was simulated.
-     *  @property {ArrayBuffer | undefined} simOwnerData - The simulation owner data.
-     *  @property {Uuid | null | undefined} parentID - The ID of the entity that the entity is parented to. <code>null</code>
+     *  @property {ArrayBuffer|undefined} simOwnerData - The simulation owner data.
+     *  @property {Uuid|null|undefined} parentID - The ID of the entity that the entity is parented to. <code>null</code>
      *      if the entity is not parented.
-     *  @property {number | undefined} parentJointIndex - The joint of the entity that the entity is parented to.
-     *  @property {boolean | undefined} visible - <code>true</code> if the entity is rendered, <code>false</code> if it
+     *  @property {number|undefined} parentJointIndex - The joint of the entity that the entity is parented to.
+     *  @property {boolean|undefined} visible - <code>true</code> if the entity is rendered, <code>false</code> if it
      *      isn't.
-     *  @property {string | undefined} name - The entity's name. Doesn't have to be unique.
-     *  @property {boolean | undefined} locked - <code>true</code> if properties other than locked cannot be changed and the
+     *  @property {string|undefined} name - The entity's name. Doesn't have to be unique.
+     *  @property {boolean|undefined} locked - <code>true</code> if properties other than locked cannot be changed and the
      *      entity cannot be deleted, <code>false</code> if all properties can be changed and the entity can be deleted.
-     *  @property {string | undefined} userData - Used to store extra data about the entity in JSON format.
-     *  @property {string | undefined} privateUserData - Like userData, but only accessible by server entity scripts, assignment
+     *  @property {string|undefined} userData - Used to store extra data about the entity in JSON format.
+     *  @property {string|undefined} privateUserData - Like userData, but only accessible by server entity scripts, assignment
      *      client scripts, and users who have "Can Get and Set Private User Data" permissions in the domain.
-     *  @property {string | undefined} href - A "hifi://" metaverse address that a user is teleported to when they click on the
+     *  @property {string|undefined} href - A "hifi://" metaverse address that a user is teleported to when they click on the
      *      entity.
-     *  @property {string | undefined} description - A description of the href property value.
-     *  @property {vec3 | undefined} position - The position of the entity in world coordinates.
-     *  @property {vec3 | undefined} dimensions - The dimensions of the entity. When adding an entity, if no dimensions value is
+     *  @property {string|undefined} description - A description of the href property value.
+     *  @property {vec3|undefined} position - The position of the entity in world coordinates.
+     *  @property {vec3|undefined} dimensions - The dimensions of the entity. When adding an entity, if no dimensions value is
      *      specified then the model is automatically sized to its natural dimensions.
-     *  @property {quat | undefined} rotation - The orientation of the entity in world coordinates.
-     *  @property {vec3 | undefined} registrationPoint - The point in the entity that is set to the entity's position and is
+     *  @property {quat|undefined} rotation - The orientation of the entity in world coordinates.
+     *  @property {vec3|undefined} registrationPoint - The point in the entity that is set to the entity's position and is
      *      rotated about.
-     *  @property {bigint | undefined} created - Timestamp for when the entity was created. Expressed in number of microseconds
+     *  @property {bigint|undefined} created - Timestamp for when the entity was created. Expressed in number of microseconds
      *      since Unix
-     *  @property {Uuid | undefined} lastEditedBy - The session ID of the avatar or agent that most recently created or edited
+     *  @property {Uuid|undefined} lastEditedBy - The session ID of the avatar or agent that most recently created or edited
      *      the entity.
-     *  @property {AACube | undefined} queryAACube - The axis-aligned cube that determines where the entity lives in the entity
+     *  @property {AACube|undefined} queryAACube - The axis-aligned cube that determines where the entity lives in the entity
      *      server's octree. The cube may be considerably larger than the entity in some situations, e.g., when the entity is
      *      grabbed by an avatar: the position of the entity is determined through avatar mixer updates and so the AA cube is
      *      expanded in order to reduce unnecessary entity server updates. Scripts should not change this property's value.
-     *  @property {boolean | undefined} canCastShadow - <code>true</code> if the entity can cast a shadow, <code>false</code>
+     *  @property {boolean|undefined} canCastShadow - <code>true</code> if the entity can cast a shadow, <code>false</code>
      *      if it can't.
-     *  @property {number | undefined} renderLayer - The layer that the entity renders in.
-     *  @property {number | undefined} primitiveMode - How the entity's geometry is rendered.
-     *  @property {boolean | undefined} ignorePickIntersection - <code>true</code> if Picks and RayPick ignore the entity,
+     *  @property {number|undefined} renderLayer - The layer that the entity renders in.
+     *  @property {number|undefined} primitiveMode - How the entity's geometry is rendered.
+     *  @property {boolean|undefined} ignorePickIntersection - <code>true</code> if Picks and RayPick ignore the entity,
      *      <code>false</code> if they don't.
-     *  @property {Uuid[] | undefined} renderWithZones - A list of entity IDs representing with which zones this entity should
+     *  @property {Uuid[]|undefined} renderWithZones - A list of entity IDs representing with which zones this entity should
      *      render. If it is empty, this entity will render normally. Otherwise, this entity will only render if your avatar is
      *      within one of the zones in this list.
-     *  @property {number | undefined} billboardMode - Whether the entity is billboarded to face the camera. Use the rotation
+     *  @property {number|undefined} billboardMode - Whether the entity is billboarded to face the camera. Use the rotation
      *      property to control which axis is facing you.
-     *  @property {boolean | undefined} grabbable - <code>true</code> if the entity can be grabbed, <code>false</code> if it
+     *  @property {boolean|undefined} grabbable - <code>true</code> if the entity can be grabbed, <code>false</code> if it
      *      can't be.
-     *  @property {boolean | undefined} grabKinematic - <code>true</code> if the entity will be updated in a kinematic manner
+     *  @property {boolean|undefined} grabKinematic - <code>true</code> if the entity will be updated in a kinematic manner
      *      when grabbed; <code>false</code> if it will be grabbed using a tractor action. A kinematic grab will make the item
      *      appear more tightly held but will cause it to behave poorly when interacting with dynamic entities.
-     *  @property {boolean | undefined} grabFollowsController - <code>true</code> if the entity will follow the motions of
+     *  @property {boolean|undefined} grabFollowsController - <code>true</code> if the entity will follow the motions of
      *      the hand controller even if the avatar's hand can't get to the implied position, <code>false</code> if it will
      *      follow the motions of the avatar's hand. This should be set true for tools, pens, etc. and <code>false</code> for
      *      things meant to decorate the hand.
-     *  @property {boolean | undefined} triggerable - <code>true</code> if the entity will receive calls to trigger
+     *  @property {boolean|undefined} triggerable - <code>true</code> if the entity will receive calls to trigger
      *      Controller entity methods, <code>false</code> if it won't.
-     *  @property {boolean | undefined} equippable - <code>true</code> if the entity can be equipped, <code>false</code> if
+     *  @property {boolean|undefined} equippable - <code>true</code> if the entity can be equipped, <code>false</code> if
      *      it cannot.
-     *  @property {boolean | undefined} delegateToParent - <code>true</code> if when the entity is grabbed, the grab will be
+     *  @property {boolean|undefined} delegateToParent - <code>true</code> if when the entity is grabbed, the grab will be
      *      transferred to its parent entity if there is one; <code>false</code> if the grab won't be transferred, so a child
      *      entity can be grabbed and moved relative to its parent.
-     *  @property {vec3 | undefined} equippableLeftPositionOffset - Positional offset from the left hand, when equipped.
-     *  @property {quat | undefined} equippableLeftRotationOffset - Rotational offset from the left hand, when equipped.
-     *  @property {vec3 | undefined} equippableRightPositionOffset - Positional offset from the right hand, when equipped.
-     *  @property {quat | undefined} equippableRightRotationOffset - Rotational offset from the right hand, when equipped.
-     *  @property {string | undefined} equippableIndicatorURL - If non-empty, this model will be used to indicate that an entity
+     *  @property {vec3|undefined} equippableLeftPositionOffset - Positional offset from the left hand, when equipped.
+     *  @property {quat|undefined} equippableLeftRotationOffset - Rotational offset from the left hand, when equipped.
+     *  @property {vec3|undefined} equippableRightPositionOffset - Positional offset from the right hand, when equipped.
+     *  @property {quat|undefined} equippableRightRotationOffset - Rotational offset from the right hand, when equipped.
+     *  @property {string|undefined} equippableIndicatorURL - If non-empty, this model will be used to indicate that an entity
      *      is equippable, rather than the default.
-     *  @property {vec3 | undefined} equippableIndicatorScale - If equippableIndicatorURL is non-empty, this controls the scale
+     *  @property {vec3|undefined} equippableIndicatorScale - If equippableIndicatorURL is non-empty, this controls the scale
      *      of the displayed indicator.
-     *  @property {vec3 | undefined} equippableIndicatorOffset - If equippableIndicatorURL is non-empty, this controls the
+     *  @property {vec3|undefined} equippableIndicatorOffset - If equippableIndicatorURL is non-empty, this controls the
      *      relative offset of the displayed object from the equippable entity.
-     *  @property {number | undefined} density - The density of the entity in <code>kg/m3</code>, range
+     *  @property {number|undefined} density - The density of the entity in <code>kg/m3</code>, range
      *      <code>100 – 10000</code>.
      *      Examples: <code>100</code> for balsa wood, <code>10000</code> for silver. The density is used in conjunction with
      *      the entity's bounding box volume to work out its mass in the application of physics.
-     *  @property {vec3 | undefined} velocity - The linear velocity of the entity in m/s with respect to world coordinates.
-     *  @property {vec3 | undefined} angularVelocity - The angular velocity of the entity in <code>rad/s</code> with respect to
+     *  @property {vec3|undefined} velocity - The linear velocity of the entity in m/s with respect to world coordinates.
+     *  @property {vec3|undefined} angularVelocity - The angular velocity of the entity in <code>rad/s</code> with respect to
      *      its axes, about its registration point.
-     *  @property {vec3 | undefined} gravity - The acceleration due to gravity in <code>m/s2</code> that the entity should move
+     *  @property {vec3|undefined} gravity - The acceleration due to gravity in <code>m/s2</code> that the entity should move
      *      with, in world coordinates. Use a value of <code>{ x: 0, y: -9.8, z: 0 }</code> to simulate Earth's gravity. Gravity
      *      is applied to an entity's motion only if its dynamic property is true. If changing an entity's gravity from
      *      {@link Vec3|ZERO}, you need to give it a small velocity in order to kick off physics simulation.
-     *  @property {vec3 | undefined} acceleration - The current, measured acceleration of the entity, in <code>m/s2</code>.
-     *  @property {number | undefined} damping - How much the linear velocity of an entity slows down over time, range
+     *  @property {vec3|undefined} acceleration - The current, measured acceleration of the entity, in <code>m/s2</code>.
+     *  @property {number|undefined} damping - How much the linear velocity of an entity slows down over time, range
      *      <code>0.0</code> – <code>1.0</code>. A higher damping value slows down the entity more quickly. The default value is
      *      for an exponential decay timescale of <code>2.0s</code>, where it takes <code>2.0s</code> for the movement to slow
      *      to <code>1/e = 0.368</code> of its initial value.
-     *  @property {number | undefined} angularDampling - How much the angular velocity of an entity slows down over time, range
+     *  @property {number|undefined} angularDampling - How much the angular velocity of an entity slows down over time, range
      *      <code>0.0 – 1.0</code>. A higher damping value slows down the entity more quickly. The default value is for an
      *      exponential decay timescale of <code>2.0s</code>, where it takes <code>2.0s</code> for the movement to slow to
      *      <code>1/e = 0.368</code> of its initial value.
-     *  @property {number | undefined} restitution - The "bounciness" of an entity when it collides, range
+     *  @property {number|undefined} restitution - The "bounciness" of an entity when it collides, range
      *      <code>0.0 – 0.99</code>. The higher the value, the more bouncy.
-     *  @property {number | undefined} friction - How much an entity slows down when it's moving against another, range
+     *  @property {number|undefined} friction - How much an entity slows down when it's moving against another, range
      *      <code>0.0 – 10.0</code>. The higher the value, the more quickly it slows down. Examples: <code>0.1</code> for ice,
      *      <code>0.9</code> for sandpaper.
-     *  @property {number | undefined} lifetime - How long an entity lives for, in seconds, before being automatically deleted.
+     *  @property {number|undefined} lifetime - How long an entity lives for, in seconds, before being automatically deleted.
      *      A value of -1 means that the entity lives for ever.
-     *  @property {boolean | undefined} collisionless - <code>true</code> if the entity shouldn't collide, <code>false</code>
+     *  @property {boolean|undefined} collisionless - <code>true</code> if the entity shouldn't collide, <code>false</code>
      *      if it collides with items per its {@link EntityData|collisionMask} property.
-     *  @property {number | undefined} collisionMask - What types of items the entity should collide with.
-     *  @property {boolean | undefined} dynamic - <code>true</code> if the entity's movement is affected by collisions,
+     *  @property {number|undefined} collisionMask - What types of items the entity should collide with.
+     *  @property {boolean|undefined} dynamic - <code>true</code> if the entity's movement is affected by collisions,
      *      <code>false</code> if it isn't.
-     *  @property {string | undefined} collisionSoundURL - The sound that's played when the entity experiences a collision.
-     *  @property {ArrayBuffer | undefined} actionData - Base-64 encoded compressed dump of the actions associated with the
+     *  @property {string|undefined} collisionSoundURL - The sound that's played when the entity experiences a collision.
+     *  @property {ArrayBuffer|undefined} actionData - Base-64 encoded compressed dump of the actions associated with the
      *      entity. This property is typically not used in scripts directly; rather, functions that manipulate an entity's
      *      actions update it. The size of this property increases with the number of actions. Because this property value has
      *      to fit within a Vircadia datagram packet, there is a limit to the number of actions that an entity can have; edits
      *      which would result in overflow are rejected.
-     *  @property {boolean | undefined} cloneable - <code>true</code> if the domain or avatar entity can be cloned,
+     *  @property {boolean|undefined} cloneable - <code>true</code> if the domain or avatar entity can be cloned,
      *      <code>false</code> if it can't be.
-     *  @property {number | undefined} cloneLifetime - The entity lifetime for clones created from this entity.
-     *  @property {number | undefined} cloneLimit - The total number of clones of this entity that can exist in the domain at
+     *  @property {number|undefined} cloneLifetime - The entity lifetime for clones created from this entity.
+     *  @property {number|undefined} cloneLimit - The total number of clones of this entity that can exist in the domain at
      *      any given time.
-     *  @property {boolean | undefined} cloneDynamic - <code>true</code> if clones created from this entity will have their
+     *  @property {boolean|undefined} cloneDynamic - <code>true</code> if clones created from this entity will have their
      *      dynamic property set to true, <code>false</code> if they won't.
-     *  @property {boolean | undefined} cloneAvatarIdentity - <code>true</code> if clones created from this entity will be
+     *  @property {boolean|undefined} cloneAvatarIdentity - <code>true</code> if clones created from this entity will be
      *      created as avatar entities, <code>false</code> if they won't be.
-     *  @property {Uuid | undefined} cloneOriginID - The ID of the entity that this entity was cloned from.
-     *  @property {string | undefined} script - The URL of the client entity script, if any, that is attached to the entity.
-     *  @property {bigint | undefined} scriptTimestamp - Used to indicate when the client entity script was loaded. Should be an
+     *  @property {Uuid|undefined} cloneOriginID - The ID of the entity that this entity was cloned from.
+     *  @property {string|undefined} script - The URL of the client entity script, if any, that is attached to the entity.
+     *  @property {bigint|undefined} scriptTimestamp - Used to indicate when the client entity script was loaded. Should be an
      *      integer number of milliseconds since Unix epoch. If you update the property's value, the script is re-downloaded and
      *      reloaded.
-     *  @property {string | undefined} serverScripts - The URL of the server entity script, if any, that is attached to the
+     *  @property {string|undefined} serverScripts - The URL of the server entity script, if any, that is attached to the
      *      entity.
-     *  @property {string | undefined} itemName - Certifiable name of the Marketplace item.
-     *  @property {string | undefined} itemDescription - Certifiable description of the Marketplace item.
-     *  @property {string | undefined} itemCategories - Certifiable category of the Marketplace item.
-     *  @property {string | undefined} itemArtist - Certifiable artist that created the Marketplace item.
-     *  @property {string | undefined} itemLicense - Certifiable license URL for the Marketplace item.
-     *  @property {number | undefined} limitedRun - Certifiable maximum integer number of editions (copies) of the Marketplace
+     *  @property {string|undefined} itemName - Certifiable name of the Marketplace item.
+     *  @property {string|undefined} itemDescription - Certifiable description of the Marketplace item.
+     *  @property {string|undefined} itemCategories - Certifiable category of the Marketplace item.
+     *  @property {string|undefined} itemArtist - Certifiable artist that created the Marketplace item.
+     *  @property {string|undefined} itemLicense - Certifiable license URL for the Marketplace item.
+     *  @property {number|undefined} limitedRun - Certifiable maximum integer number of editions (copies) of the Marketplace
      *      item allowed to be sold.
-     *  @property {string | undefined} marketplaceID - Certifiable UUID for the Marketplace item, as used in the URL of the
+     *  @property {string|undefined} marketplaceID - Certifiable UUID for the Marketplace item, as used in the URL of the
      *      item's download and its Marketplace Web page.
-     *  @property {number | undefined} editionNumber - Certifiable integer edition (copy) number or the Marketplace item. Each
+     *  @property {number|undefined} editionNumber - Certifiable integer edition (copy) number or the Marketplace item. Each
      *      copy sold in the Marketplace is numbered sequentially, starting at <code>1</code>.
-     *  @property {number | undefined} entityInstanceNumber - Certifiable integer instance number for identical entities in a
+     *  @property {number|undefined} entityInstanceNumber - Certifiable integer instance number for identical entities in a
      *      Marketplace item. A Marketplace item may have multiple, identical parts. If so, then each is numbered sequentially
      *      with an instance number.
-     *  @property {string | undefined} certificateID - Hash of the entity's static certificate JSON, signed by the artist's
+     *  @property {string|undefined} certificateID - Hash of the entity's static certificate JSON, signed by the artist's
      *      private key.
-     *  @property {string | undefined} certificateType - Type of the certificate.
-     *  @property {number | undefined} staticCertificateVersion - The version of the method used to generate the certificateID.
+     *  @property {string|undefined} certificateType - Type of the certificate.
+     *  @property {number|undefined} staticCertificateVersion - The version of the method used to generate the certificateID.
      *
      *  @see {@link ImageEntityProperties}
      *  @see {@link LightEntityProperties}

@@ -98,26 +98,26 @@ class TextEntityItem {
      *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
      *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} TextEntityProperties
-     *  @property {string | undefined} text - The text to display on the face of the entity. Text wraps if necessary to fit. New
+     *  @property {string|undefined} text - The text to display on the face of the entity. Text wraps if necessary to fit. New
      *      lines can be created using \n. Overflowing lines are not displayed.
-     *  @property {number | undefined} lineHeight - The height of each line of text (thus determining the font size).
-     *  @property {color | undefined} textEffectColor - The color of the text.
-     *  @property {number | undefined} textAlpha - The opacity of the text.
-     *  @property {number | undefined} backgroundAlpha - The opacity of the background.
-     *  @property {color | undefined} backgroundColor - The color of the background rectangle.
-     *  @property {number | undefined} leftMargin - The left margin, in meters.
-     *  @property {number | undefined} rightMargin - The right margin, in meters.
-     *  @property {number | undefined} topMargin - The top margin, in meters.
-     *  @property {number | undefined} bottomMargin - The bottom margin, in meters.
-     *  @property {boolean | undefined} unlit - <code>true</code> if the entity is unaffected by lighting, <code>false</code> if
+     *  @property {number|undefined} lineHeight - The height of each line of text (thus determining the font size).
+     *  @property {color|undefined} textEffectColor - The color of the text.
+     *  @property {number|undefined} textAlpha - The opacity of the text.
+     *  @property {number|undefined} backgroundAlpha - The opacity of the background.
+     *  @property {color|undefined} backgroundColor - The color of the background rectangle.
+     *  @property {number|undefined} leftMargin - The left margin, in meters.
+     *  @property {number|undefined} rightMargin - The right margin, in meters.
+     *  @property {number|undefined} topMargin - The top margin, in meters.
+     *  @property {number|undefined} bottomMargin - The bottom margin, in meters.
+     *  @property {boolean|undefined} unlit - <code>true</code> if the entity is unaffected by lighting, <code>false</code> if
      *      it is lit by the key light and local lights.
-     *  @property {string | undefined} font - The font to render the text with. It can be one of the following:
+     *  @property {string|undefined} font - The font to render the text with. It can be one of the following:
      *      "<code>Courier</code>", "<code>Inconsolata</code>", "<code>Roboto</code>", "<code>Timeless</code>", or a path to a
      *      .sdff file.
-     *  @property {TextEffect | undefined} textEffect - The effect that is applied to the text.
-     *  @property {color | undefined} textColor - The color of the effect.
-     *  @property {number | undefined} textEffectThickness - The magnitude of the text effect, range 0.0 – 0.5.
-     *  @property {TextAlignment | undefined} textAlignment - How the text is aligned against its background.
+     *  @property {TextEffect|undefined} textEffect - The effect that is applied to the text.
+     *  @property {color|undefined} textColor - The color of the effect.
+     *  @property {number|undefined} textEffectThickness - The magnitude of the text effect, range 0.0 – 0.5.
+     *  @property {TextAlignment|undefined} textAlignment - How the text is aligned against its background.
      */
 
     /*@devdoc
