@@ -42,8 +42,9 @@ class LightEntityItem {
 
     /*@sdkdoc
      *  The <code>Light</code> {@link EntityType} provides a local lighting effect. Surfaces outside the entity's dimensions are
-     *  not lit by the light. It has properties in addition to the common
-     *  {@link EntityProperties}.
+     *  not lit by the light.
+     *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
+     *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} LightEntityProperties
      *  @property {color|undefined} color - The color of the light emitted.
      *  @property {number|undefined} intensity - The brightness of the light.
@@ -63,12 +64,12 @@ class LightEntityItem {
      */
 
     /*@devdoc
-     *  Reads, if present, image properties in an {@link PacketType(1)|EntityData} packet.
+     *  Reads, if present, Light entity properties in an {@link PacketType(1)|EntityData} packet.
      *  <p><em>Static</em></p>
      *  @param {DataView} data - The {@link Packets|EntityData} message data to read.
-     *  @param {number} position - The position of the image properties in the {@link Packets|EntityData} message data.
+     *  @param {number} position - The position of the Light entity properties in the {@link Packets|EntityData} message data.
      *  @param {PropertyFlags} propertyFlags - The property flags.
-     *  @returns {ImageEntitySubclassData} The image properties and the number of bytes read.
+     *  @returns {LightEntitySubclassData} The Light entity properties and the number of bytes read.
      */
     static readEntitySubclassDataFromBuffer(data: DataView, position: number,
         propertyFlags: PropertyFlags): LightEntitySubclassData {

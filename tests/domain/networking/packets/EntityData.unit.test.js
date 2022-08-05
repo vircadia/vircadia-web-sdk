@@ -448,7 +448,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].animation.animationHold).toBe(false);
     });
 
-    test("Can read a model entity and a shape entity in the same packet", () => {
+    test("Can read a Model entity and a Shape entity in the same packet", () => {
         // eslint-disable-next-line max-len
         const bufferHex = "c0000000c6026c9ae30500a401000003f578da63606002c22d6f12ee9beff07cd53d5b9281cbf2ce64812487db69b31eb33214b077a683680686ffffecff9ffd0f063f2ce4ffff1364c002feff67e460484ecc4ed5cdcf4b858bc61eb8becf28eff4fe13811ef687ae6fb3637a2a6cb769f636bbfff560f81fa8c41e8661160b3008a89dbe9b22e291b8bf63e622e9b7f697f284f4f707b1bfdddf21cf6a5f9fc266cf886e392350044510c97cac620df6088c0caa5c18c807509f34ec6790878b4d73c6af0714a878e418181218324a4a0a8aadf4f59353f2740df5ca328b9213533213f592f373f54b8b7553750df59d12ab12138bf41d8b8b534b8af57df35352738af5ddf2f353f493328b4a3252122be34131a39f9e5392862aa4979e93843d345818aab96ab92081fac11112ca6032e0b03b838fecb68e5dacdee15b0227bb7a6457e425ccddf51e9c58e2f802b2c089663ecfff1fffff9b4352cd03fb05b8d20c2743714662016aa231ef6cdcefad7365bfa0a296fdd9333e76308c2dd1c02cc64c3467b64cdfff20fcd5fe33937fdbad89d96837fc13cd96f708b7a1ba938321a42833312f3d27150032cbedbe";
 

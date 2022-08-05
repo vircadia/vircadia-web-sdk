@@ -18,7 +18,7 @@ import PulsePropertyGroup from "./PulsePropertyGroup";
 
 
 /*@sdkdoc
- *  <p>A "Shape" {@link EntityType} may display as one of the following geometrical shapes:</p>
+ *  <p>A Shape {@link EntityType} may display as one of the following geometrical shapes:</p>
  *  <table>
  *      <thead>
  *          <tr><th>Value</th><th>Dimensions</th><th>Notes</th></tr>
@@ -74,7 +74,7 @@ type ShapeEntitySubclassData = {
 
 
 /*@devdoc
- *  The <code>ShapeEntityItem</code> class provides facilities for reading shape entity properties from a packet.
+ *  The <code>ShapeEntityItem</code> class provides facilities for reading Shape entity properties from a packet.
  *  @class ShapeEntityItem
  */
 class ShapeEntityItem {
@@ -89,9 +89,9 @@ class ShapeEntityItem {
      */
 
     /*@sdkdoc
-     *  The "<code>Shape</code>" {@link EntityType} displays an entity of a specified shape. It has properties in addition to
-     *  the common {@link EntityProperties}. A property value may be undefined if it couldn't fit in the data packet sent by the
-     *      server.
+     *  The <code>Shape</code> {@link EntityType} displays an entity of a specified shape.
+     *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
+     *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} ShapeEntityProperties
      *  @property {Shape | undefined} shape - The shape of the entity.
      *  @property {color | undefined} color - The color of the entity.
@@ -102,16 +102,16 @@ class ShapeEntityItem {
      *  A wrapper for providing {@link ShapeEntityProperties} and the number of bytes read.
      *  @typedef {object} ShapeEntitySubclassData
      *  @property {number} bytesRead - The number of bytes read.
-     *  @property {ShapeEntityProperties} properties - The shape entity properties.
+     *  @property {ShapeEntityProperties} properties - The Shape entity properties.
      */
 
     /*@devdoc
-     *  Reads, if present, shape properties in an {@link PacketType(1)|EntityData} packet.
+     *  Reads, if present, Shape entity properties in an {@link PacketType(1)|EntityData} packet.
      *  <p><em>Static</em></p>
      *  @param {DataView} data - The {@link Packets|EntityData} message data to read.
-     *  @param {number} position - The position of the shape properties in the {@link Packets|EntityData} message data.
+     *  @param {number} position - The position of the Shape entity properties in the {@link Packets|EntityData} message data.
      *  @param {PropertyFlags} propertyFlags - The property flags.
-     *  @returns {ShapeEntitySubclassData} The shape properties and the number of bytes read.
+     *  @returns {ShapeEntitySubclassData} The Shape entity properties and the number of bytes read.
      */
     // eslint-disable-next-line class-methods-use-this
     static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): ShapeEntitySubclassData { // eslint-disable-line max-len
@@ -140,6 +140,7 @@ class ShapeEntityItem {
         }
 
         const pulseProperties = PulsePropertyGroup.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+        // Ignore deprecated pulse property.
         dataPosition += pulseProperties.bytesRead;
 
         const textDecoder = new TextDecoder();

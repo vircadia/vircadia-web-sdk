@@ -42,4 +42,5 @@ describe("ShapeEntityItem - unit tests", () => {
         expect(shapeEntity.properties.alpha).toBe(1);
         expect(shapeEntity.properties.shape).toBe("Triangle");
     });
+
 });

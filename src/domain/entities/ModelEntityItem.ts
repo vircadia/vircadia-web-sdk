@@ -58,7 +58,7 @@ type ModelEntitySubclassData = {
 
 
 /*@devdoc
- *  The <code>ModelEntityItem</code> class provides facilities for reading model entity properties from a packet.
+ *  The <code>ModelEntityItem</code> class provides facilities for reading Model entity properties from a packet.
  *  @class ModelEntityItem
  */
 class ModelEntityItem {
@@ -84,10 +84,10 @@ class ModelEntityItem {
      */
 
     /*@sdkdoc
-     *  The "<code>Model</code>" {@link EntityType} displays a glTF, FBX, or OBJ model. When adding an entity, if no
-     *  <code>dimensions</code> value is specified then the model is automatically sized to its natural dimensions. It has
-     *  properties in addition to the common {@link EntityProperties}. A property value may be undefined if it couldn't fit in
-     *      the data packet sent by the server.
+     *  The <code>Model</code> {@link EntityType} displays a glTF, FBX, or OBJ model. When adding an entity, if no
+     *  <code>dimensions</code> value is specified then the model is automatically sized to its natural dimensions.
+     *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
+     *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} ModelEntityProperties
      *  @property {number | undefined} shapeType - The shape of the collision hull used if collisions are enabled.
      *  @property {string | undefined} compoundShapeURL - The model file to use for the compound shape if shapeType is
@@ -127,16 +127,16 @@ class ModelEntityItem {
      *  A wrapper for providing {@link ModelEntityProperties} and the number of bytes read.
      *  @typedef {object} ModelEntitySubclassData
      *  @property {number} bytesRead - The number of bytes read.
-     *  @property {ModelEntityProperties} properties - The model entity properties.
+     *  @property {ModelEntityProperties} properties - The Model entity properties.
      */
 
     /*@devdoc
-     *  Reads, if present, model properties in an {@link PacketType(1)|EntityData} packet.
+     *  Reads, if present, Model entity properties in an {@link PacketType(1)|EntityData} packet.
      *  <p><em>Static</em></p>
      *  @param {DataView} data - The {@link Packets|EntityData} message data to read.
-     *  @param {number} position - The position of the model properties in the {@link Packets|EntityData} message data.
+     *  @param {number} position - The position of the Model entity properties in the {@link Packets|EntityData} message data.
      *  @param {PropertyFlags} propertyFlags - The property flags.
-     *  @returns {ModelEntitySubclassData} The model properties and the number of bytes read.
+     *  @returns {ModelEntitySubclassData} The Model entity properties and the number of bytes read.
      */
     // eslint-disable-next-line max-len
     static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): ModelEntitySubclassData { // eslint-disable-line class-methods-use-this

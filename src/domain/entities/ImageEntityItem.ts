@@ -36,7 +36,7 @@ type ImageEntitySubclassData = {
 
 
 /*@devdoc
- *  The <code>ImageEntityItem</code> class provides facilities for reading image entity properties from a packet.
+ *  The <code>ImageEntityItem</code> class provides facilities for reading Image entity properties from a packet.
  *  @class ImageEntityItem
  */
 class ImageEntityItem {
@@ -52,8 +52,9 @@ class ImageEntityItem {
      */
 
     /*@sdkdoc
-     *  The <code>"Image"</code> {@link EntityType} displays an image on a 2D rectangle in the domain. It has
-     *  properties in addition to the common {@link EntityProperties}.
+     *  The <code>Image</code> {@link EntityType} displays an image on a 2D rectangle in the domain.
+     *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
+     *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} ImageEntityProperties
      *  @property {string | undefined} imageURL - The URL of the image to use.
      *  @property {boolean | undefined} emissive - <code>true</code> if the image should be emissive (unlit), <code>false</code>
@@ -70,16 +71,16 @@ class ImageEntityItem {
      *  A wrapper for providing {@link ImageEntityProperties} and the number of bytes read.
      *  @typedef {object} ImageEntitySubclassData
      *  @property {number} bytesRead - The number of bytes read.
-     *  @property {ImageEntityProperties} properties - The image entity properties.
+     *  @property {ImageEntityProperties} properties - The Image entity properties.
      */
 
     /*@devdoc
-     *  Reads, if present, image properties in an {@link PacketType(1)|EntityData} packet.
+     *  Reads, if present, Image entity properties in an {@link PacketType(1)|EntityData} packet.
      *  <p><em>Static</em></p>
      *  @param {DataView} data - The {@link Packets|EntityData} message data to read.
-     *  @param {number} position - The position of the image properties in the {@link Packets|EntityData} message data.
+     *  @param {number} position - The position of the Image entity properties in the {@link Packets|EntityData} message data.
      *  @param {PropertyFlags} propertyFlags - The property flags.
-     *  @returns {ImageEntitySubclassData} The image properties and the number of bytes read.
+     *  @returns {ImageEntitySubclassData} The Image entity properties and the number of bytes read.
      */
     static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): ImageEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int ImageEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
@@ -109,6 +110,7 @@ class ImageEntityItem {
         }
 
         const pulseProperties = PulsePropertyGroup.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+        // Ignore deprecated pulse property.
         dataPosition += pulseProperties.bytesRead;
 
         let imageURL: string | undefined = undefined;

@@ -46,4 +46,5 @@ describe("LightEntityItem - unit tests", () => {
         expect(lightEntity.properties.exponent).toBeCloseTo(0.9, 4);
         expect(lightEntity.properties.cutoff).toBeCloseTo(75.0, 4);
     });
+
 });
