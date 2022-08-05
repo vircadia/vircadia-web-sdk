@@ -448,7 +448,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].animation.animationHold).toBe(false);
     });
 
-    test("Can read a model entity and a shape entity in the same packet", () => {
+    test("Can read a Model entity and a Shape entity in the same packet", () => {
         // eslint-disable-next-line max-len
         const bufferHex = "c0000000c6026c9ae30500a401000003f578da63606002c22d6f12ee9beff07cd53d5b9281cbf2ce64812487db69b31eb33214b077a683680686ffffecff9ffd0f063f2ce4ffff1364c002feff67e460484ecc4ed5cdcf4b858bc61eb8becf28eff4fe13811ef687ae6fb3637a2a6cb769f636bbfff560f81fa8c41e8661160b3008a89dbe9b22e291b8bf63e622e9b7f697f284f4f707b1bfdddf21cf6a5f9fc266cf886e392350044510c97cac620df6088c0caa5c18c807509f34ec6790878b4d73c6af0714a878e418181218324a4a0a8aadf4f59353f2740df5ca328b9213533213f592f373f54b8b7553750df59d12ab12138bf41d8b8b534b8af57df35352738af5ddf2f353f493328b4a3252122be34131a39f9e5392862aa4979e93843d345818aab96ab92081fac11112ca6032e0b03b838fecb68e5dacdee15b0227bb7a6457e425ccddf51e9c58e2f802b2c089663ecfff1fffff9b4352cd03fb05b8d20c2743714662016aa231ef6cdcefad7365bfa0a296fdd9333e76308c2dd1c02cc64c3467b64cdfff20fcd5fe33937fdbad89d96837fc13cd96f708b7a1ba938321a42833312f3d27150032cbedbe";
 
@@ -724,29 +724,6 @@ describe("EntityData - unit tests", () => {
         expect(info[1].color.blue).toBe(239);
         expect(info[1].alpha).toBe(1);
         expect(info[1].shape).toBe("Triangle");
-    });
-
-    test("Can skip over Light and Web entity types", () => {
-        const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
-
-        // Packet data containing an Light entity, a Web entity and a Model entity.
-        // eslint-disable-next-line max-len
-        const bufferHex = "c00000515ff77447e405005c020000058678da63606062606610752a55d0feefa6b1fdfccd695f2a7eca5b1cf24988717fc2ca5011209f08a2196668fcfff1ffbff97f3078a06027c88005fcffcfc8c99093999e51a29b9f970a17d67ccb78e04b4edb817b85abec5fb9953b8030034383c3ff7a30fc0f54620fc3308b0518148ee4e5a8ba789feffc75e0e4b523ef17cdf15f7be0cfd14f07142a990ff06fbae1c0886e3b2350044510c97cac620df6088c0caa5c18c807509f34ec6790878b4d73c6af0714a698a21ba436301a1b2f768038709a1388ce14bdf8b07ea51b6fe3c1f51931be4a9e05d34a4ec782c2cbc478711c38a218feffa9ff3f1b124f1fe4ef3fc01551ec0ce5a94928d134312973bf616edb8190f5f1f667cf9cb14f4b4bb3e7baae6c832d9a60d66246d321bd57fbfbcf2c3ef060a7c9de4fbf5ed90ffb689a193913e13654778a3264949414145be9eb9765162527a66426ea25e7e7eacb01a5b82041d1cee09b5f95999393a86faa67a0a0e19399575a61ade0989752949f99a260a66760ade0975a515aac60aae0549a9993a2ef1be4686ae1a7a9e0585090931a9e9ae49d59a26f6a6cae676ca6a0e1ed11e2eba3a39093999daae09e9a9c9dafa9e09c51949f9baa6f61ac67a067626860ac676864a4e09b9f949993aa109c9896589409d5bde54dc27df31d9eafba674b327059de992c00745ec6acc7ac0c0bafeccf0727acf6238894f50128eb802b657130242766a7a224add803d7f7f5dc6e3a20b28edbe1d0f56d764c4f85ed36cdde66872d69c12c166048fb2bff56d5dca3666b2b03e3c3875afc7942fafbaf38761fe038fcd5be3e856d18252d00e7784b49";
-
-        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
-            return parseInt(hex, 16);
-        }));
-        const data = new DataView(bufferArray.buffer);
-
-        const info = EntityData.read(data);
-        expect(info).toHaveLength(1);
-
-        // Model Entity.
-        expect(info[0].entityItemID instanceof Uuid).toBe(true);
-        expect(info[0].entityItemID.stringify()).toBe("b4ec60df-37b8-49ea-8b9b-19000a39dc93");
-        expect(info[0].entityType).toBe(4);
-
-        log.mockReset();
     });
 
     test("Can skip over ParticleEffect and Zone entity types", () => {

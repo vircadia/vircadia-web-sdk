@@ -50,6 +50,7 @@ class GridEntityItem {
         }
 
         const pulseProperties = PulsePropertyGroup.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+        // Ignore deprecated pulse property.
         dataPosition += pulseProperties.bytesRead;
 
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRID_FOLLOW_CAMERA)) {

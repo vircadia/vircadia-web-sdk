@@ -48,4 +48,5 @@ describe("ImageEntityItem - unit tests", () => {
         expect(imageEntity.properties.keepAspectRatio).toBe(true);
         expect(imageEntity.properties.subImage).toStrictEqual({ x: 7, y: 19, width: 19, height: 19 });
     });
+
 });

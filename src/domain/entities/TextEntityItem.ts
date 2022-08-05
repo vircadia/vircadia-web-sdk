@@ -86,13 +86,17 @@ type TextEntitySubclassData = {
 };
 
 
+/*@devdoc
+ *  The <code>TextEntityItem</code> class provides facilities for reading Text entity properties from a packet.
+ *  @class TextEntityItem
+ */
 class TextEntityItem {
     // C++  class TextEntityItem : public EntityItem
 
     /*@sdkdoc
-     *  The "<code>Text</code>" {@link EntityType} displays a 2D rectangle of text in the domain. It has properties in addition
-     *      to the common {@link EntityProperties}. A property value may be undefined if it couldn't fit in the data packet sent
-     *      by the server.
+     *  The <code>Text</code> {@link EntityType} displays a 2D rectangle of text in the domain.
+     *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
+     *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} TextEntityProperties
      *  @property {string | undefined} text - The text to display on the face of the entity. Text wraps if necessary to fit. New
      *      lines can be created using \n. Overflowing lines are not displayed.
@@ -120,16 +124,16 @@ class TextEntityItem {
      *  A wrapper for providing {@link TextEntityProperties} and the number of bytes read.
      *  @typedef {object} TextEntitySubclassData
      *  @property {number} bytesRead - The number of bytes read.
-     *  @property {TextEntityProperties} properties - The text entity properties.
+     *  @property {TextEntityProperties} properties - The Text entity properties.
      */
 
     /*@devdoc
-     *  Reads, if present, text properties in an {@link PacketType(1)|EntityData} packet.
+     *  Reads, if present, Text entity properties in an {@link PacketType(1)|EntityData} packet.
      *  <p><em>Static</em></p>
      *  @param {DataView} data - The {@link Packets|EntityData} message data to read.
-     *  @param {number} position - The position of the text properties in the {@link Packets|EntityData} message data.
+     *  @param {number} position - The position of the Text entity properties in the {@link Packets|EntityData} message data.
      *  @param {PropertyFlags} propertyFlags - The property flags.
-     *  @returns {ModelEntitySubclassData} The model properties and the number of bytes read.
+     *  @returns {TextEntitySubclassData} The Text entity properties and the number of bytes read.
      */
     static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): TextEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int TextEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
@@ -143,6 +147,7 @@ class TextEntityItem {
         const textDecoder = new TextDecoder();
 
         const pulseProperties = PulsePropertyGroup.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+        // Ignore deprecated pulse property.
         dataPosition += pulseProperties.bytesRead;
 
         let text: string | undefined = undefined;

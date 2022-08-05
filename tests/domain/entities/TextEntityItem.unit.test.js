@@ -60,4 +60,5 @@ describe("TextEntityItem - unit tests", () => {
         expect(textEntity.properties.textEffectThickness).toBeCloseTo(0.200, 2);
         expect(textEntity.properties.textAlignment).toBe("left");
     });
+
 });
