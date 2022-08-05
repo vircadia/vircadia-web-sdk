@@ -9,6 +9,17 @@ This SDK provides interfaces to:
 
 <hr />
 
+The primary top-level namespaces and classes provided for an application to use are:
+- `Vircadia`
+- `DomainServer`
+- `AudioMixer`
+- `AvatarMixer`
+- `EntityServer`
+- `MessageMixer`
+- `Camera`
+
+<hr />
+
 To use the API, import the namespaces and classes that you want to use &mdash; either from the SDK package installed in your
 project or directly from the SDK TypeScript.
 
