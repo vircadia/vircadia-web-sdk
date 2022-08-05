@@ -38,11 +38,11 @@ describe("ModelEntityItem - unit tests", () => {
 
         expect(modelEntity.bytesRead).toBe(147);
         expect(modelEntity.properties.shapeType).toBe(0);
-        expect(modelEntity.properties.compoundShapeURL).toBeUndefined();
+        expect(modelEntity.properties.compoundShapeURL).toBe("");
         expect(modelEntity.properties.color.red).toBe(255);
         expect(modelEntity.properties.color.green).toBe(255);
         expect(modelEntity.properties.color.blue).toBe(255);
-        expect(modelEntity.properties.textures).toBeUndefined();
+        expect(modelEntity.properties.textures).toBe("");
         expect(modelEntity.properties.modelURL).toBe(
             "https://metaverse.asia/avatars/julien.glb"
         );
@@ -69,7 +69,7 @@ describe("ModelEntityItem - unit tests", () => {
         expect(modelEntity.properties.groupCulled).toBe(false);
         expect(modelEntity.properties.blendShapeCoefficients).toBe("{\n}\n");
         expect(modelEntity.properties.useOriginalPivot).toBe(false);
-        expect(modelEntity.properties.animation.animationURL).toBeUndefined();
+        expect(modelEntity.properties.animation.animationURL).toBe("");
         expect(modelEntity.properties.animation.animationAllowTranslation).toBe(true);
         expect(modelEntity.properties.animation.animationFPS).toBeCloseTo(30, 2);
         expect(modelEntity.properties.animation.animationFrameIndex).toBeCloseTo(0, 2);

@@ -160,12 +160,13 @@ class ModelEntityItem {
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COMPOUND_SHAPE_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
-
             if (length > 0) {
                 compoundShapeURL = textDecoder.decode(
                     new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
                 );
                 dataPosition += length;
+            } else {
+                compoundShapeURL = "";
             }
         }
 
@@ -183,12 +184,13 @@ class ModelEntityItem {
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXTURES)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
-
             if (length > 0) {
                 textures = textDecoder.decode(
                     new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
                 );
                 dataPosition += length;
+            } else {
+                textures = "";
             }
         }
 
@@ -196,12 +198,13 @@ class ModelEntityItem {
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
-
             if (length > 0) {
                 modelURL = textDecoder.decode(
                     new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
                 );
                 dataPosition += length;
+            } else {
+                modelURL = "";
             }
         }
 
@@ -312,12 +315,13 @@ class ModelEntityItem {
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BLENDSHAPE_COEFFICIENTS)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
-
             if (length > 0) {
                 blendShapeCoefficients = textDecoder.decode(
                     new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
                 );
                 dataPosition += length;
+            } else {
+                blendShapeCoefficients = "";
             }
         }
 
@@ -331,12 +335,13 @@ class ModelEntityItem {
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
-
             if (length > 0) {
                 animationURL = textDecoder.decode(
                     new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
                 );
                 dataPosition += length;
+            } else {
+                animationURL = "";
             }
         }
 

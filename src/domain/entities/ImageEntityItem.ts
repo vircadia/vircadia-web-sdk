@@ -117,10 +117,11 @@ class ImageEntityItem {
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_IMAGE_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
-
             if (length > 0) {
                 imageURL = textDecoder.decode(new Uint8Array(data.buffer, data.byteOffset + dataPosition, length));
                 dataPosition += length;
+            } else {
+                imageURL = "";
             }
         }
 
