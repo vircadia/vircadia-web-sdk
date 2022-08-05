@@ -30,7 +30,7 @@ const Quat = new class {
     /* eslint-disable class-methods-use-this */
 
     /*@sdkdoc
-     *  A quaternion value.
+     *  A quaternion value. See also: {@link Quat}.
      *  @typedef {object} quat
      *  @property {number} x - X-axis rotation value.
      *  @property {number} y - Y-axis rotation value.
