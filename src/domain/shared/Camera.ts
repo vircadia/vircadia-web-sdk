@@ -36,8 +36,8 @@ type ConicalViewFrustum = {
  *  @property {vec3} position - The position of the camera.
  *  @property {quat} orientation - The orientation of the camera.
  *  @property {number} fieldOfView - The vertical field of view, in radians.
- *  @property {number} aspectRatio - The aspect ratio (horizontal / vertical) of the field of view, range <code>0.01 &ndash;
- *      <code>100.0</code>.
+ *  @property {number} aspectRatio - The aspect ratio (horizontal / vertical) of the field of view, range <code>0.01</code>
+ *      &ndash; <code>100.0</code>.
  *  @property {number} farClip - The far clipping distance.
  *  @property {number} centerRadius - The radius of the "keyhole" sphere at the camera position. Avatars and entities within
  *      this sphere are treated as being within the camera's view.
