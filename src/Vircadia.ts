@@ -17,7 +17,6 @@ import versionInfo from "../VERSION.json";
  *  The <code>Vircadia</code> API provides information on the Vircadia SDK.
  *
  *  @namespace Vircadia
- *  @property {string} version - The version number of the SDK. <em>Read-only.</em>
  *  @property {string} version - The version number of the SDK. For example, <code>"2021.2.3"</code>.
  *      <em>Read-only.</em>
  *  @property {string} verboseVersion - The verbose version number of the SDK. For example,
