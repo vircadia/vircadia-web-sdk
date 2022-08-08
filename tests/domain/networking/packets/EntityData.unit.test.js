@@ -145,11 +145,11 @@ describe("EntityData - unit tests", () => {
         expect(info[0].certificateType).toBeUndefined();
         expect(info[0].staticCertificateVersion).toBe(0);
         expect(info[0].shapeType).toBe(0);
-        expect(info[0].compoundShapeURL).toBeUndefined();
+        expect(info[0].compoundShapeURL).toBe("");
         expect(info[0].color.red).toBe(255);
         expect(info[0].color.green).toBe(255);
         expect(info[0].color.blue).toBe(255);
-        expect(info[0].textures).toBeUndefined();
+        expect(info[0].textures).toBe("");
         expect(info[0].modelURL).toBe(
             "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
         );
@@ -164,7 +164,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].groupCulled).toBe(false);
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[0].useOriginalPivot).toBe(true);
-        expect(info[0].animation.animationURL).toBeUndefined();
+        expect(info[0].animation.animationURL).toBe("");
         expect(info[0].animation.animationAllowTranslation).toBe(false);
         expect(info[0].animation.animationFPS).toBeCloseTo(30, 2);
         expect(info[0].animation.animationFrameIndex).toBeCloseTo(0, 2);
@@ -272,11 +272,11 @@ describe("EntityData - unit tests", () => {
         expect(info[0].certificateType).toBeUndefined();
         expect(info[0].staticCertificateVersion).toBe(0);
         expect(info[0].shapeType).toBe(0);
-        expect(info[0].compoundShapeURL).toBeUndefined();
+        expect(info[0].compoundShapeURL).toBe("");
         expect(info[0].color.red).toBe(255);
         expect(info[0].color.green).toBe(255);
         expect(info[0].color.blue).toBe(255);
-        expect(info[0].textures).toBeUndefined();
+        expect(info[0].textures).toBe("");
         expect(info[0].modelURL).toBe(
             "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
         );
@@ -291,7 +291,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].groupCulled).toBe(false);
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[0].useOriginalPivot).toBe(true);
-        expect(info[0].animation.animationURL).toBeUndefined();
+        expect(info[0].animation.animationURL).toBe("");
         expect(info[0].animation.animationAllowTranslation).toBe(false);
         expect(info[0].animation.animationFPS).toBeCloseTo(30, 2);
         expect(info[0].animation.animationFrameIndex).toBeCloseTo(0, 2);
@@ -418,11 +418,11 @@ describe("EntityData - unit tests", () => {
         expect(info[1].certificateType).toBeUndefined();
         expect(info[1].staticCertificateVersion).toBe(0);
         expect(info[1].shapeType).toBe(0);
-        expect(info[1].compoundShapeURL).toBeUndefined();
+        expect(info[1].compoundShapeURL).toBe("");
         expect(info[1].color.red).toBe(255);
         expect(info[1].color.green).toBe(255);
         expect(info[1].color.blue).toBe(255);
-        expect(info[1].textures).toBeUndefined();
+        expect(info[1].textures).toBe("");
         expect(info[1].modelURL).toBe(
             "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
         );
@@ -437,7 +437,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].groupCulled).toBe(false);
         expect(info[1].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[1].useOriginalPivot).toBe(true);
-        expect(info[1].animation.animationURL).toBeUndefined();
+        expect(info[1].animation.animationURL).toBe("");
         expect(info[1].animation.animationAllowTranslation).toBe(false);
         expect(info[1].animation.animationFPS).toBeCloseTo(30, 2);
         expect(info[1].animation.animationFrameIndex).toBeCloseTo(0, 2);
@@ -574,11 +574,11 @@ describe("EntityData - unit tests", () => {
         expect(info[0].certificateType).toBeUndefined();
         expect(info[0].staticCertificateVersion).toBe(0);
         expect(info[0].shapeType).toBe(0);
-        expect(info[0].compoundShapeURL).toBeUndefined();
+        expect(info[0].compoundShapeURL).toBe("");
         expect(info[0].color.red).toBe(255);
         expect(info[0].color.green).toBe(255);
         expect(info[0].color.blue).toBe(255);
-        expect(info[0].textures).toBeUndefined();
+        expect(info[0].textures).toBe("");
         expect(info[0].modelURL).toBe(
             "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
         );
@@ -593,7 +593,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].groupCulled).toBe(false);
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[0].useOriginalPivot).toBe(true);
-        expect(info[0].animation.animationURL).toBeUndefined();
+        expect(info[0].animation.animationURL).toBe("");
         expect(info[0].animation.animationAllowTranslation).toBe(false);
         expect(info[0].animation.animationFPS).toBeCloseTo(30, 2);
         expect(info[0].animation.animationFrameIndex).toBeCloseTo(0, 2);

@@ -31,7 +31,7 @@ const Vec3 = new class {
     /* eslint-disable class-methods-use-this */
 
     /*@sdkdoc
-     *  A 3-dimensional vector value.
+     *  A 3-dimensional vector value. See also: {@link Vec3}.
      *  @typedef {object} vec3
      *  @property {number} x - X-axis value.
      *  @property {number} y - Y-axis value.

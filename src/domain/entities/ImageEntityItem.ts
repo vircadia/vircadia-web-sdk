@@ -56,15 +56,15 @@ class ImageEntityItem {
      *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
      *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} ImageEntityProperties
-     *  @property {string | undefined} imageURL - The URL of the image to use.
-     *  @property {boolean | undefined} emissive - <code>true</code> if the image should be emissive (unlit), <code>false</code>
+     *  @property {string|undefined} imageURL - The URL of the image to use.
+     *  @property {boolean|undefined} emissive - <code>true</code> if the image should be emissive (unlit), <code>false</code>
      *      if it shouldn't.
-     *  @property {boolean | undefined} keepAspectRatio - <code>true</code> if the image should maintain its aspect ratio,
+     *  @property {boolean|undefined} keepAspectRatio - <code>true</code> if the image should maintain its aspect ratio,
      *      <code>false</code> if it shouldn't.
-     *  @property {rect | undefined} subImage - The portion of the image to display. If width or height are <code>0</code>, it
+     *  @property {rect|undefined} subImage - The portion of the image to display. If width or height are <code>0</code>, it
      *      defaults to the full image in that dimension.
-     *  @property {color | undefined} color - The color of the entity.
-     *  @property {number | undefined} alpha - The opacity of the image.
+     *  @property {color|undefined} color - The color of the entity.
+     *  @property {number|undefined} alpha - The opacity of the image.
      */
 
     /*@devdoc
@@ -117,10 +117,11 @@ class ImageEntityItem {
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_IMAGE_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
-
             if (length > 0) {
                 imageURL = textDecoder.decode(new Uint8Array(data.buffer, data.byteOffset + dataPosition, length));
                 dataPosition += length;
+            } else {
+                imageURL = "";
             }
         }
 

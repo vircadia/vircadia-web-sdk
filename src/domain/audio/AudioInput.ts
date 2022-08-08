@@ -21,7 +21,7 @@ import SignalEmitter, { Signal } from "../shared/SignalEmitter";
  *  audio mixer.
  *  <p>C++: QAudioInput, QIODevice</p>
  *  @class AudioInput
- *  @property {MediaStream | null} audioInput - The user client's audio input stream.
+ *  @property {MediaStream|null} audioInput - The user client's audio input stream.
  *      <em>Write-only.</em>
  *      <p>This must be set to a non-null value only when the audio input isn't running (hasn't been started or has been
  *      stopped). Setting to <code>null</code> stops the audio input if it is running.</p>
