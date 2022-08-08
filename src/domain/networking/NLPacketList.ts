@@ -25,7 +25,7 @@ import Uuid from "../shared/Uuid";
  *
  *  @class NLPacketList
  *  @param {PacketType} packetType - The type of packet list to create.
- *  @param {ArrayBuffer | null} [extendedHeader=null] - An optional extended header to include as part of each packet in the
+ *  @param {ArrayBuffer|null} [extendedHeader=null] - An optional extended header to include as part of each packet in the
  *      list.
  *  @param {boolean} [isReliable=false] - <code>true</code> if the packet list is to be sent reliably, <code>false</code> if
  *      it isn't.
@@ -41,7 +41,7 @@ class NLPacketList {
      *  @function NLPacketList.create
      *  @static
      *  @param {PacketType} packetType - The type of packet list to create.
-     *  @param {ArrayBuffer | null} [extendedHeader=null] - An extended header to included as part of the packet.
+     *  @param {ArrayBuffer|null} [extendedHeader=null] - An extended header to included as part of the packet.
      *  @param {boolean} [isReliable=false] - <code>true</code> if the packet list is to be sent reliably, <code>false</code> if
      *      it isn't.
      *  @param {boolean} [isOrdered=false] - <code>true</code> if the packet list is to be sent in order, <code>false</code> if

@@ -13,7 +13,7 @@ import ShapeEntityItem from "../../../src/domain/entities/ShapeEntityItem";
 import PropertyFlags from "../../../src/domain/shared/PropertyFlags";
 
 
-describe("ShapeEntity - unit tests", () => {
+describe("ShapeEntityItem - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
@@ -42,4 +42,5 @@ describe("ShapeEntity - unit tests", () => {
         expect(shapeEntity.properties.alpha).toBe(1);
         expect(shapeEntity.properties.shape).toBe("Triangle");
     });
+
 });

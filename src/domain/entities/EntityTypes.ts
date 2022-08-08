@@ -26,9 +26,12 @@
  *      {@link ShapeEntityProperties}
  *  @property {number} Model - <code>4</code> - A mesh model from a glTF, FBX, or OBJ file.<br />
  *      {@link ModelEntityProperties}
- *  @property {number} Text - <code>5</code> - A pane of text oriented in space.
- *  @property {number} Image - <code>6</code> - An image oriented in space.
- *  @property {number} Web - <code>7</code> - A browsable web page.
+ *  @property {number} Text - <code>5</code> - A pane of text oriented in space.<br />
+ *      {@link TextEntityProperties}
+ *  @property {number} Image - <code>6</code> - An image oriented in space.<br />
+ *      {@link ImageEntityProperties}
+ *  @property {number} Web - <code>7</code> - A browsable web page.<br />
+ *      {@link WebEntityProperties}
  *  @property {number} ParticleEffect - <code>8</code> - A particle system that can be used to simulate things such as fire,
  *      smoke, snow, magic spells, etc.
  *  @property {number} Line - <code>9</code> - A sequence of one or more simple straight lines.
@@ -36,7 +39,8 @@
  *  @property {number} PolyVox - <code>11</code> - A set of textured voxels.
  *  @property {number} Grid - <code>12</code> - A grid of lines in a plane.
  *  @property {number} Gizmo - <code>13</code> - A gizmo intended for UI.
- *  @property {number} Light - <code>14</code> - A local lighting effect.
+ *  @property {number} Light - <code>14</code> - A local lighting effect.<br />
+ *      {@link LightEntityProperties}
  *  @property {number} Zone - <code>15</code> - A volume of lighting effects and avatar permissions.
  *  @property {number} Material - <code>16</code> - Modifies the existing materials on entities and avatars.
  *  @property {number} NUM_TYPES - <code>17</code> - The number of entity types.

@@ -11,12 +11,14 @@ This SDK provides interfaces to:
 
 <hr />
 
-The top-level namespaces and classes provided for an application to use are, per the _Vircadia Web SDK Reference_:
+The primary top-level namespaces and classes provided for an application to use are, per the _Vircadia Web SDK Reference_:
 - `Vircadia`
 - `DomainServer`
 - `AudioMixer`
 - `AvatarMixer`
+- `EntityServer`
 - `MessageMixer`
+- `Camera`
 
 <hr />
 

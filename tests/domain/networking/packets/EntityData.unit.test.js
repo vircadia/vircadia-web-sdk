@@ -145,11 +145,11 @@ describe("EntityData - unit tests", () => {
         expect(info[0].certificateType).toBeUndefined();
         expect(info[0].staticCertificateVersion).toBe(0);
         expect(info[0].shapeType).toBe(0);
-        expect(info[0].compoundShapeURL).toBeUndefined();
+        expect(info[0].compoundShapeURL).toBe("");
         expect(info[0].color.red).toBe(255);
         expect(info[0].color.green).toBe(255);
         expect(info[0].color.blue).toBe(255);
-        expect(info[0].textures).toBeUndefined();
+        expect(info[0].textures).toBe("");
         expect(info[0].modelURL).toBe(
             "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
         );
@@ -164,7 +164,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].groupCulled).toBe(false);
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[0].useOriginalPivot).toBe(true);
-        expect(info[0].animation.animationURL).toBeUndefined();
+        expect(info[0].animation.animationURL).toBe("");
         expect(info[0].animation.animationAllowTranslation).toBe(false);
         expect(info[0].animation.animationFPS).toBeCloseTo(30, 2);
         expect(info[0].animation.animationFrameIndex).toBeCloseTo(0, 2);
@@ -272,11 +272,11 @@ describe("EntityData - unit tests", () => {
         expect(info[0].certificateType).toBeUndefined();
         expect(info[0].staticCertificateVersion).toBe(0);
         expect(info[0].shapeType).toBe(0);
-        expect(info[0].compoundShapeURL).toBeUndefined();
+        expect(info[0].compoundShapeURL).toBe("");
         expect(info[0].color.red).toBe(255);
         expect(info[0].color.green).toBe(255);
         expect(info[0].color.blue).toBe(255);
-        expect(info[0].textures).toBeUndefined();
+        expect(info[0].textures).toBe("");
         expect(info[0].modelURL).toBe(
             "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
         );
@@ -291,7 +291,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].groupCulled).toBe(false);
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[0].useOriginalPivot).toBe(true);
-        expect(info[0].animation.animationURL).toBeUndefined();
+        expect(info[0].animation.animationURL).toBe("");
         expect(info[0].animation.animationAllowTranslation).toBe(false);
         expect(info[0].animation.animationFPS).toBeCloseTo(30, 2);
         expect(info[0].animation.animationFrameIndex).toBeCloseTo(0, 2);
@@ -418,11 +418,11 @@ describe("EntityData - unit tests", () => {
         expect(info[1].certificateType).toBeUndefined();
         expect(info[1].staticCertificateVersion).toBe(0);
         expect(info[1].shapeType).toBe(0);
-        expect(info[1].compoundShapeURL).toBeUndefined();
+        expect(info[1].compoundShapeURL).toBe("");
         expect(info[1].color.red).toBe(255);
         expect(info[1].color.green).toBe(255);
         expect(info[1].color.blue).toBe(255);
-        expect(info[1].textures).toBeUndefined();
+        expect(info[1].textures).toBe("");
         expect(info[1].modelURL).toBe(
             "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
         );
@@ -437,7 +437,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].groupCulled).toBe(false);
         expect(info[1].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[1].useOriginalPivot).toBe(true);
-        expect(info[1].animation.animationURL).toBeUndefined();
+        expect(info[1].animation.animationURL).toBe("");
         expect(info[1].animation.animationAllowTranslation).toBe(false);
         expect(info[1].animation.animationFPS).toBeCloseTo(30, 2);
         expect(info[1].animation.animationFrameIndex).toBeCloseTo(0, 2);
@@ -448,7 +448,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].animation.animationHold).toBe(false);
     });
 
-    test("Can read a model entity and a shape entity in the same packet", () => {
+    test("Can read a Model entity and a Shape entity in the same packet", () => {
         // eslint-disable-next-line max-len
         const bufferHex = "c0000000c6026c9ae30500a401000003f578da63606002c22d6f12ee9beff07cd53d5b9281cbf2ce64812487db69b31eb33214b077a683680686ffffecff9ffd0f063f2ce4ffff1364c002feff67e460484ecc4ed5cdcf4b858bc61eb8becf28eff4fe13811ef687ae6fb3637a2a6cb769f636bbfff560f81fa8c41e8661160b3008a89dbe9b22e291b8bf63e622e9b7f697f284f4f707b1bfdddf21cf6a5f9fc266cf886e392350044510c97cac620df6088c0caa5c18c807509f34ec6790878b4d73c6af0714a878e418181218324a4a0a8aadf4f59353f2740df5ca328b9213533213f592f373f54b8b7553750df59d12ab12138bf41d8b8b534b8af57df35352738af5ddf2f353f493328b4a3252122be34131a39f9e5392862aa4979e93843d345818aab96ab92081fac11112ca6032e0b03b838fecb68e5dacdee15b0227bb7a6457e425ccddf51e9c58e2f802b2c089663ecfff1fffff9b4352cd03fb05b8d20c2743714662016aa231ef6cdcefad7365bfa0a296fdd9333e76308c2dd1c02cc64c3467b64cdfff20fcd5fe33937fdbad89d96837fc13cd96f708b7a1ba938321a42833312f3d27150032cbedbe";
 
@@ -574,11 +574,11 @@ describe("EntityData - unit tests", () => {
         expect(info[0].certificateType).toBeUndefined();
         expect(info[0].staticCertificateVersion).toBe(0);
         expect(info[0].shapeType).toBe(0);
-        expect(info[0].compoundShapeURL).toBeUndefined();
+        expect(info[0].compoundShapeURL).toBe("");
         expect(info[0].color.red).toBe(255);
         expect(info[0].color.green).toBe(255);
         expect(info[0].color.blue).toBe(255);
-        expect(info[0].textures).toBeUndefined();
+        expect(info[0].textures).toBe("");
         expect(info[0].modelURL).toBe(
             "https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Models/Food/birthday_cake/gltf/birthday_cake.glb"
         );
@@ -593,7 +593,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].groupCulled).toBe(false);
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[0].useOriginalPivot).toBe(true);
-        expect(info[0].animation.animationURL).toBeUndefined();
+        expect(info[0].animation.animationURL).toBe("");
         expect(info[0].animation.animationAllowTranslation).toBe(false);
         expect(info[0].animation.animationFPS).toBeCloseTo(30, 2);
         expect(info[0].animation.animationFrameIndex).toBeCloseTo(0, 2);
@@ -724,57 +724,6 @@ describe("EntityData - unit tests", () => {
         expect(info[1].color.blue).toBe(239);
         expect(info[1].alpha).toBe(1);
         expect(info[1].shape).toBe("Triangle");
-    });
-
-    test("Can skip over Image and Text entity types", () => {
-        const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
-
-        // Packet data containing an Image entity, a Text entity, a Model entity and a Shape entity.
-        // eslint-disable-next-line max-len
-        const bufferHex = "c00200855eed6838e405007f020000057a78da636050626061b8f3ab60a103bbaf64d7d4a33ff27d17aa1b3030303c307ac2ca60966d9b6101a419bcfeff6040008558868c929282622b7dfde4943c5d43bdb2cca2e4c494cc44bde4fc5cfdd262dd545d437da7c4aac4c4227dc7e2e2d49262fd90d48a92d2a2d4627d97d4b4c4d21ca088675e496a515a6272aa7e0a44283e3337313d552fab20fdb1acf4ab3616df098bd6b0fc5f7ff7927000d0ce1b20f75ccf83ba27eaff3ffbff67ff83c10fe6f7ff3f08326001ffff33723094006dd6cdcf4b858ab131242a8084dea9731f5073623eb0fea9c1beb43435fb593367da715d57b6f95f0f86ff814aed9130d87a01865671a3848b31feb75619cbb467ee0acf1715543ae0ab2d7580fd1efb7e734f737b467427300245500491ccc72ad6608fc0c8a0ca85817c00f545c37e0679b8d83467fc7a40418b4b0ed581dc0c1ea93939f9c0602d2e51ec3f546a3b47fce2f5c505f670a510d07fe8ab0d340a82f293f24bf21921b69c3de3630712def226e1bef90ecf57ddb32519b82cef4c16008a65cc7accca509e098df5be06e468b790ffff0f77b4272766a722453b0343ec81ebfb8cf24eef3f11e8617fe8fa363ba6a7c2769b666fb3c311e1609b051804d44edf4d11f148dcdf317391f45bfb4b7942fafb83d8dfeeef9067b5af4f611b29110e964a2039d7fbe6a7a4e614ebbbe5e7a7e82765169564a42456c68362463f3da7240d55482f3d27097b68b0305473d5724102f583232494c164c06177061fd96d1dbb58bdc3b7044e76f5c8aec84b80c55d5d1634d5587dfcff2f3f01574ae16428ce482c404d2ae69d8dfbbd75aeec1754d4b207a54e18262da99cd9327dff83f057fbcf4cfe6db72666a31d4aaa600400b74b614f";
-
-        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
-            return parseInt(hex, 16);
-        }));
-        const data = new DataView(bufferArray.buffer);
-
-        const info = EntityData.read(data);
-        expect(info).toHaveLength(2);
-
-        // Model Entity.
-        expect(info[0].entityItemID instanceof Uuid).toBe(true);
-        expect(info[0].entityItemID.stringify()).toBe("b4ec60df-37b8-49ea-8b9b-19000a39dc93");
-        expect(info[0].entityType).toBe(4);
-
-        // Shape Entity.
-        expect(info[1].entityItemID instanceof Uuid).toBe(true);
-        expect(info[1].entityItemID.stringify()).toBe("4c1db688-ba05-4b57-b451-9345486b786e");
-        expect(info[1].entityType).toBe(3);
-
-        log.mockReset();
-    });
-
-    test("Can skip over Light and Web entity types", () => {
-        const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
-
-        // Packet data containing an Light entity, a Web entity and a Model entity.
-        // eslint-disable-next-line max-len
-        const bufferHex = "c00000515ff77447e405005c020000058678da63606062606610752a55d0feefa6b1fdfccd695f2a7eca5b1cf24988717fc2ca5011209f08a2196668fcfff1ffbff97f3078a06027c88005fcffcfc8c99093999e51a29b9f970a17d67ccb78e04b4edb817b85abec5fb9953b8030034383c3ff7a30fc0f54620fc3308b0518148ee4e5a8ba789feffc75e0e4b523ef17cdf15f7be0cfd14f07142a990ff06fbae1c0886e3b2350044510c97cac620df6088c0caa5c18c807509f34ec6790878b4d73c6af0714a698a21ba436301a1b2f768038709a1388ce14bdf8b07ea51b6fe3c1f51931be4a9e05d34a4ec782c2cbc478711c38a218feffa9ff3f1b124f1fe4ef3fc01551ec0ce5a94928d134312973bf616edb8190f5f1f667cf9cb14f4b4bb3e7baae6c832d9a60d66246d321bd57fbfbcf2c3ef060a7c9de4fbf5ed90ffb689a193913e13654778a3264949414145be9eb9765162527a66426ea25e7e7eacb01a5b82041d1cee09b5f95999393a86faa67a0a0e19399575a61ade0989752949f99a260a66760ade0975a515aac60aae0549a9993a2ef1be4686ae1a7a9e0585090931a9e9ae49d59a26f6a6cae676ca6a0e1ed11e2eba3a39093999daae09e9a9c9dafa9e09c51949f9baa6f61ac67a067626860ac676864a4e09b9f949993aa109c9896589409d5bde54dc27df31d9eafba674b327059de992c00745ec6acc7ac0c0bafeccf0727acf6238894f50128eb802b657130242766a7a224add803d7f7f5dc6e3a20b28edbe1d0f56d764c4f85ed36cdde66872d69c12c166048fb2bff56d5dca3666b2b03e3c3875afc7942fafbaf38761fe038fcd5be3e856d18252d00e7784b49";
-
-        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
-            return parseInt(hex, 16);
-        }));
-        const data = new DataView(bufferArray.buffer);
-
-        const info = EntityData.read(data);
-        expect(info).toHaveLength(1);
-
-        // Model Entity.
-        expect(info[0].entityItemID instanceof Uuid).toBe(true);
-        expect(info[0].entityItemID.stringify()).toBe("b4ec60df-37b8-49ea-8b9b-19000a39dc93");
-        expect(info[0].entityType).toBe(4);
-
-        log.mockReset();
     });
 
     test("Can skip over ParticleEffect and Zone entity types", () => {

@@ -66,6 +66,7 @@ class ParticleEffectEntityItem {
         }
 
         const pulseProperties = PulsePropertyGroup.readEntitySubclassDataFromBuffer(data, dataPosition, propertyFlags);
+        // Ignore deprecated pulse property.
         dataPosition += pulseProperties.bytesRead;
 
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXTURES)) {
