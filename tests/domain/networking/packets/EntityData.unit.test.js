@@ -726,6 +726,40 @@ describe("EntityData - unit tests", () => {
         expect(info[1].shape).toBe("Triangle");
     });
 
+    test("Can read a Material entity", () => {
+        // eslint-disable-next-line max-len
+        const bufferHex = "c0010063b8d95f00e605002f010000026e78da636038c9c0c47031ede2d3ca692e47565b07ff56dabde69502030383c3bfa7ac0c1bf38f45313c636560e83cf3ff07030430ff7f60bf800109fc0702060cd0dfdfcfc0d0600fe18068189b81818d21b82023b52875ca533b39df7c97d6f57752fc78161933b2c0ac7db2785e34c45a83ff7feaffcffe0f061f18e43f08625a2480e1fcffff1991153854b9c0f0d933676c61f87f3d18829c6e8f84c10e1060d059b4618edb0907a64efeb4dd125f62b6edbf57e902c367d3aa5c18d19dc10814411144321fab182c4c10e102014097920fa0be68d8cf200f179be68c5f0ff6f8e361c84d2c492dca4ccc71492c4904893001fd6700093d1f3b20b64f4b4b03dae5e0a8c650ad04535cac6455ad949893949a92af64156da067a963a06701c486b1b5b58c00bfaf9a03";
+        // Sphere and Material entity. The Material entity is parented to the Sphere entity.
+
+        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        const data = new DataView(bufferArray.buffer);
+
+        const info = EntityData.read(data);
+        expect(info).toHaveLength(2);
+
+        // Sphere entity.
+        expect(info[0].entityItemID.stringify()).toBe("d166d1e5-7996-44c4-ab3b-53fb22bbacea");
+        expect(info[0].entityType).toBe(2);
+
+        // Material entity.
+        expect(info[1].entityItemID.stringify()).toBe("94e53e1e-4d6f-4485-afdc-644e0ca23301");
+        expect(info[1].entityType).toBe(16);
+        expect(info[1].parentID).toStrictEqual(info[0].entityItemID);
+        expect(info[1].materialURL).toBe("materialData");
+        expect(info[1].materialMappingMode).toBe(0);
+        expect(info[1].priority).toBe(2);
+        expect(info[1].parentMaterialName).toBe("0");
+        expect(info[1].materialMappingPos.x).toBeCloseTo(0.1, 6);
+        expect(info[1].materialMappingPos.y).toBeCloseTo(0.2, 6);
+        expect(info[1].materialMappingScale.x).toBeCloseTo(0.8, 6);
+        expect(info[1].materialMappingScale.y).toBeCloseTo(0.9, 6);
+        expect(info[1].materialMappingRot).toBe(12);
+        expect(info[1].materialData).toBe("{\"materials\":{\"albedo\":[0.9,0.8,0.1]}}");
+        expect(info[1].materialRepeat).toBe(true);
+    });
+
     test("Can skip over ParticleEffect and Zone entity types", () => {
         const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
@@ -749,7 +783,7 @@ describe("EntityData - unit tests", () => {
         log.mockReset();
     });
 
-    test("Can skip over Line and Material entity types", () => {
+    test("Can skip over Line entity types", () => {
         const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
         // Packet data containing an Line entity, a Material entity and a Shape entity.
@@ -762,12 +796,17 @@ describe("EntityData - unit tests", () => {
         const data = new DataView(bufferArray.buffer);
 
         const info = EntityData.read(data);
-        expect(info).toHaveLength(1);
+        expect(info).toHaveLength(2);
 
-        // Shape Entity.
+        // Material entity.
         expect(info[0].entityItemID instanceof Uuid).toBe(true);
-        expect(info[0].entityItemID.stringify()).toBe("4c1db688-ba05-4b57-b451-9345486b786e");
-        expect(info[0].entityType).toBe(3);
+        expect(info[0].entityItemID.stringify()).toBe("dc8db060-e139-4788-8498-98877edf1e99");
+        expect(info[0].entityType).toBe(16);
+
+        // Shape entity.
+        expect(info[1].entityItemID instanceof Uuid).toBe(true);
+        expect(info[1].entityItemID.stringify()).toBe("4c1db688-ba05-4b57-b451-9345486b786e");
+        expect(info[1].entityType).toBe(3);
 
         log.mockReset();
     });

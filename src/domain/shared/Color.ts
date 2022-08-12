@@ -10,12 +10,16 @@
 //
 
 
-// The JSDoc is in ShapeEntityItem.ts. The code in this file is entirely removed during the conversion to JavaScript, leaving no
-// module to which the JSDoc can be attached.
+//  The JSDoc is in ShapeEntityItem.ts. The code in this file is entirely removed during the conversion to JavaScript, leaving
+//  no module to which the JSDoc can be attached.
 type color = {
     red: number;
     green: number;
     blue: number;
 };
 
-export type { color };
+//  The JSDoc is in MaterialEntityItem.ts. The code in this file is entirely removed during the conversion to JavaScript,
+//  leaving no module to which the JSDoc can be attached.
+type rgbs = number[];
+
+export type { color, rgbs };

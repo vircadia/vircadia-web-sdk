@@ -337,6 +337,7 @@ const EntityData = new class {
      *  @see {@link ShapeEntityProperties}
      *  @see {@link TextEntityProperties}
      *  @see {@link WebEntityProperties}
+     *  @see {@link MaterialEntityProperties}
      */
 
     /*@sdkdoc
@@ -1269,6 +1270,7 @@ const EntityData = new class {
                 || entityType === EntityType.Image
                 || entityType === EntityType.Web
                 || entityType === EntityType.Light
+                || entityType === EntityType.Material
             ) {
                 entitiesDataDetails.push({
                     entityItemID,
