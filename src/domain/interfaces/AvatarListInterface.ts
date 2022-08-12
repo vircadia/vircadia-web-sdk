@@ -56,8 +56,8 @@ class AvatarListInterface {
     /*@sdkdoc
      *  Gets an object for working with an avatar in the domain.
      *  @param {Uuid} id - The session ID of the avatar.
-     *      <p>The user client's avatar may be retrieved using its session ID or {@link Uuid|Uuid.AVATAR_SELF_ID} &mdash; this
-     *      is an alternative to using the more capable {@link AvatarMixer|AvatarMixer.myAvatar} interface.</p>
+     *      <p>The user client's avatar may be retrieved using its session ID or {@link Uuid(1)|Uuid.AVATAR_SELF_ID} &mdash;
+     *      this is an alternative to using the more capable {@link AvatarMixer|AvatarMixer.myAvatar} interface.</p>
      *  @returns {ScriptAvatar} A new object for working with the specified avatar.
      */
     getAvatar(id: Uuid): ScriptAvatar {

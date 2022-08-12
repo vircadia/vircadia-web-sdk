@@ -232,8 +232,8 @@ class MyAvatar extends Avatar {
      *  Sets the user client's (avatar's) session UUID and updates avatar attachments' links to it.
      *  @function MyAvatar.setSessionUUID
      *  @type {Slot}
-     *  @param {Uuid} sessionUUID - The session UUID. If {@link Uuid|Uuid.NULL} then the session UUID is set to
-     *      {@link Uuid|Uuid.AVATAR_SELF_ID}.
+     *  @param {Uuid} sessionUUID - The session UUID. If {@link Uuid(1)|Uuid.NULL} then the session UUID is set to
+     *      {@link Uuid(1)|Uuid.AVATAR_SELF_ID}.
      */
     // Slot
     override setSessionUUID = (sessionUUID: Uuid): void => {
