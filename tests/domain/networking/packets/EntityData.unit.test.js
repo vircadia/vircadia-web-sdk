@@ -753,6 +753,28 @@ describe("EntityData - unit tests", () => {
         expect(info[0].userAgent).toBe("Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.122 Mobile Safari/537.36");
     });
 
+    test("Can read a Light entity", () => {
+        // eslint-disable-next-line max-len
+        const bufferHex = "c001004eb8bf9306e605005b000000006c78da636038c9c0c8902d1ed29cb3d5b57c09f3ba9a69ed1daa169bd2d912d99eb13274f0f74e04d10c4d02ff7f304000e3ff070a760c70f01f08183080deac798c67cfcc7188e96fb2676098eb74f64c8f3d0097c71e79";
+        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        const data = new DataView(bufferArray.buffer);
+
+        const info = EntityData.read(data);
+        expect(info).toHaveLength(1);
+        expect(info[0].entityItemID.stringify()).toBe("6b175483-6cb5-4577-a403-ae7c96878825");
+        expect(info[0].entityType).toBe(14);
+        expect(info[0].color.red).toBe(46);
+        expect(info[0].color.green).toBe(154);
+        expect(info[0].color.blue).toBe(158);
+        expect(info[0].intensity).toBeCloseTo(4.9, 4);
+        expect(info[0].falloffRadius).toBeCloseTo(1.1, 4);
+        expect(info[0].isSpotlight).toBe(true);
+        expect(info[0].exponent).toBeCloseTo(1.02, 4);
+        expect(info[0].cutoff).toBeCloseTo(78.5, 4);
+    });
+
     test("Can read a Material entity", () => {
         // eslint-disable-next-line max-len
         const bufferHex = "c0010063b8d95f00e605002f010000026e78da636038c9c0c47031ede2d3ca692e47565b07ff56dabde69502030383c3bfa7ac0c1bf38f45313c636560e83cf3ff07030430ff7f60bf800109fc0702060cd0dfdfcfc0d0600fe18068189b81818d21b82023b52875ca533b39df7c97d6f57752fc78161933b2c0ac7db2785e34c45a83ff7feaffcffe0f061f18e43f08625a2480e1fcffff1991153854b9c0f0d933676c61f87f3d18829c6e8f84c10e1060d059b4618edb0907a64efeb4dd125f62b6edbf57e902c367d3aa5c18d19dc10814411144321fab182c4c10e102014097920fa0be68d8cf200f179be68c5f0ff6f8e361c84d2c492dca4ccc71492c4904893001fd6700093d1f3b20b64f4b4b03dae5e0a8c650ad04535cac6455ad949893949a92af64156da067a963a06701c486b1b5b58c00bfaf9a03";
