@@ -38,6 +38,35 @@ const Vec3 = new class {
      *  @property {number} z - Z-axis value.
      */
 
+    // Documentation for vec2 provided here so that it is compiled.
+    /*@sdkdoc
+     *  A 2-dimensional vector value.
+     *  @typedef {object} vec2
+     *  @property {number} x - X-axis value.
+     *  @property {number} y - Y-axis value.
+     */
+
+    // Documentation for mat4 provided here so that it is compiled.
+    /*@sdkdoc
+     * A 4 x 4 matrix, typically containing a scale, rotation, and translation transform.
+     * @typedef {object} mat4
+     * @property {number} r0c0 - Row 0, column 0 value.
+     * @property {number} r1c0 - Row 1, column 0 value.
+     * @property {number} r2c0 - Row 2, column 0 value.
+     * @property {number} r3c0 - Row 3, column 0 value.
+     * @property {number} r0c1 - Row 0, column 1 value.
+     * @property {number} r1c1 - Row 1, column 1 value.
+     * @property {number} r2c1 - Row 2, column 1 value.
+     * @property {number} r3c1 - Row 3, column 1 value.
+     * @property {number} r0c2 - Row 0, column 2 value.
+     * @property {number} r1c2 - Row 1, column 2 value.
+     * @property {number} r2c2 - Row 2, column 2 value.
+     * @property {number} r3c2 - Row 3, column 2 value.
+     * @property {number} r0c3 - Row 0, column 3 value.
+     * @property {number} r1c3 - Row 1, column 3 value.
+     * @property {number} r2c3 - Row 2, column 3 value.
+     * @property {number} r3c3 - Row 3, column 3 value.
+     */
 
     readonly #_EPSILON = 0.000001;
 

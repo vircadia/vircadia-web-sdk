@@ -42,7 +42,8 @@
  *  @property {number} Light - <code>14</code> - A local lighting effect.<br />
  *      {@link LightEntityProperties}
  *  @property {number} Zone - <code>15</code> - A volume of lighting effects and avatar permissions.
- *  @property {number} Material - <code>16</code> - Modifies the existing materials on entities and avatars.
+ *  @property {number} Material - <code>16</code> - Modifies the existing materials on entities and avatars.<br />
+ *      {@link MaterialEntityProperties}
  *  @property {number} NUM_TYPES - <code>17</code> - The number of entity types.
  */
 enum EntityType {
