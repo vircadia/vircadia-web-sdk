@@ -726,6 +726,33 @@ describe("EntityData - unit tests", () => {
         expect(info[1].shape).toBe("Triangle");
     });
 
+    test("Can read a Web entity", () => {
+        // eslint-disable-next-line max-len
+        const bufferHex = "c00100dc79c06b03e6050065010000025878da636038c9c0c8e0f566ba77ea3fd70dedae7fe72d79b0e150c1ee557c37989eb132f8f4d8653203690686ff7feaffcffe0f061fe4ef3f1064c002feff6744e21db1fee592abf0cb6597dc2f97b367ced8a7a5a5d9735d57b6f95f0f86ff814aec6118669f00c3dccec3754ac51eb326ac79df5030bdfb702a50371ff32f9768c65f2e9f7ebdb26744b7941128822288643e56b1067b044606552e0ce403a84f1af633c8c3c5a639e3d7030a4b4cd12bcbaf80420ac24175a7284346494941b195be7e59665172624a66a25e727eaebe1c508a9f111c14ed0cbef95599393989faa67a060a1a3e9979a515d60a8e792945f999290a667a06d60a7ea915a5c50aa60a4ea5993929fabe418ea6167e9a0a8e050539a9e1a949de9925faa6c6e67ac6660a1ade1e21be3e3a0a3999d9a90aeea9c9d9f99a0ace1945f9b9a9fa16c67a067a268606c67a8646460abef9499939a90ac1896989459950dd00545d922c";
+        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        const data = new DataView(bufferArray.buffer);
+
+        const info = EntityData.read(data);
+        expect(info).toHaveLength(1);
+        expect(info[0].entityItemID.stringify()).toBe("4aec974b-65fe-45b0-8745-fd9ea4e0b0c2");
+        expect(info[0].entityType).toBe(7);
+        expect(info[0].sourceURL).toBe("https://vircadia.com/");
+        expect(info[0].color.red).toBe(212);
+        expect(info[0].color.green).toBe(167);
+        expect(info[0].color.blue).toBe(212);
+        expect(info[0].alpha).toBeCloseTo(0.9, 5);
+        expect(info[0].dpi).toBe(30);
+        expect(info[0].scriptURL).toBe("");
+        expect(info[0].maxFPS).toBe(15);
+        expect(info[0].inputMode).toBe(1);
+        expect(info[0].showKeyboardFocusHighlight).toBe(true);
+        expect(info[0].useBackground).toBe(true);
+        // eslint-disable-next-line max-len
+        expect(info[0].userAgent).toBe("Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.122 Mobile Safari/537.36");
+    });
+
     test("Can read a Material entity", () => {
         // eslint-disable-next-line max-len
         const bufferHex = "c0010063b8d95f00e605002f010000026e78da636038c9c0c47031ede2d3ca692e47565b07ff56dabde69502030383c3bfa7ac0c1bf38f45313c636560e83cf3ff07030430ff7f60bf800109fc0702060cd0dfdfcfc0d0600fe18068189b81818d21b82023b52875ca533b39df7c97d6f57752fc78161933b2c0ac7db2785e34c45a83ff7feaffcffe0f061f18e43f08625a2480e1fcffff1991153854b9c0f0d933676c61f87f3d18829c6e8f84c10e1060d059b4618edb0907a64efeb4dd125f62b6edbf57e902c367d3aa5c18d19dc10814411144321fab182c4c10e102014097920fa0be68d8cf200f179be68c5f0ff6f8e361c84d2c492dca4ccc71492c4904893001fd6700093d1f3b20b64f4b4b03dae5e0a8c650ad04535cac6455ad949893949a92af64156da067a963a06701c486b1b5b58c00bfaf9a03";
