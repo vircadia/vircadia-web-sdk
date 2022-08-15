@@ -61,6 +61,7 @@ type MaterialEntitySubclassData = {
 
 /*@devdoc
  *  The <code>MaterialEntityItem</code> class provides facilities for reading Material entity properties from a packet.
+ *  <p>C++: <code>class MaterialEntityItem : public EntityItem</code></p>
  *  @class MaterialEntityItem
  */
 class MaterialEntityItem {

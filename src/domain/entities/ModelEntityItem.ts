@@ -60,6 +60,7 @@ type ModelEntitySubclassData = {
 
 /*@devdoc
  *  The <code>ModelEntityItem</code> class provides facilities for reading Model entity properties from a packet.
+ *  <p>C++: <code>class MomdelEntityItem : public EntityItem</code></p>
  *  @class ModelEntityItem
  */
 class ModelEntityItem {

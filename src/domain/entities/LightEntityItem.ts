@@ -35,6 +35,7 @@ type LightEntitySubclassData = {
 
 /*@devdoc
  *  The <code>LightEntityItem</code> class provides facilities for reading Light entity properties from a packet.
+ *  <p>C++: <code>class LightEntityItem : public EntityItem</code></p>
  *  @class LightEntityItem
  */
 class LightEntityItem {

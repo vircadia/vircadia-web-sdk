@@ -59,6 +59,7 @@ type WebEntitySubclassData = {
 
 /*@devdoc
  *  The <code>WebEntityItem</code> class provides facilities for reading Web entity properties from a packet.
+ *  <p>C++: <code>class WebEntityItem : public EntityItem</code></p>
  *  @class WebEntityItem
  */
 class WebEntityItem {

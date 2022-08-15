@@ -37,6 +37,7 @@ type ImageEntitySubclassData = {
 
 /*@devdoc
  *  The <code>ImageEntityItem</code> class provides facilities for reading Image entity properties from a packet.
+ *  <p>C++: <code>class ImageEntityItem : public EntityItem</code></p>
  *  @class ImageEntityItem
  */
 class ImageEntityItem {
