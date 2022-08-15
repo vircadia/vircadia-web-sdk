@@ -337,6 +337,7 @@ const EntityData = new class {
      *  @see {@link ShapeEntityProperties}
      *  @see {@link TextEntityProperties}
      *  @see {@link WebEntityProperties}
+     *  @see {@link ZoneEntityProperties}
      *  @see {@link MaterialEntityProperties}
      */
 
@@ -1270,6 +1271,7 @@ const EntityData = new class {
                 || entityType === EntityType.Image
                 || entityType === EntityType.Web
                 || entityType === EntityType.Light
+                || entityType === EntityType.Zone
                 || entityType === EntityType.Material
             ) {
                 entitiesDataDetails.push({

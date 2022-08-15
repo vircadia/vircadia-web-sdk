@@ -10,6 +10,9 @@
 //
 
 import EntityData from "../../../../src/domain/networking/packets/EntityData";
+import AvatarPriorityMode from "../../../../src/domain/shared/AvatarPriorityMode";
+import ComponentMode from "../../../../src/domain/shared/ComponentMode";
+import ShapeType from "../../../../src/domain/shared/ShapeType";
 import Uuid from "../../../../src/domain/shared/Uuid";
 
 
@@ -809,7 +812,46 @@ describe("EntityData - unit tests", () => {
         expect(info[1].materialRepeat).toBe(true);
     });
 
-    test("Can skip over ParticleEffect and Zone entity types", () => {
+    test("Can read a Zone entity", () => {
+        // eslint-disable-next-line max-len
+        const bufferHex = "c0000088a9dc6128e605008e010000041d78da636038c9c0c490efda6374b2d17766d3ce95bb4f962ebe56c1c0c070427a052bc395dc706ef567ac0c0c5b36fcff7ffcffcffdffc1808d11441e1064c000020c9eda1cb70bd97cf4fab3f75e7cb03a73d3ffff8c6c0cc1d99549f9158c305535491db64ebb6aed0f4ddc7d609fbd8c1b830304c7d8ff7748b9b9b81fa8c41e09839d22c09077ddfa77918f4fe614458fed7e32ebbbd604b01fb3f0673f969ac17eec6340bb1b866318a1180efed783e17f5c620df6088c0caa5c18c807505f34ec6790878b4d73c6af0714bc0c58fd039683b9f0338be97e20b6678458a1e004c48eb20c89250556fa29f9b9899979fa79a949a53989bac5e008d02bc84b076a27a002e4df86599bff3fdd0c3476812390f070460b0c9040839db1b1b17d5a5a9a3d23349099a0183ddcd19384032c4e6f96409357d8ff1fffff9b4312d703fb0582d8c3848187c1bd28bf342f45a12027312f156ec53ad9e3db1f9ce2d9cfc020610109850670683cacff0782ffc94b4e8cc33d39316c798f701baa3b59189c4b935201a499e4ee";
+        // Zone and box entity.
+
+        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        const data = new DataView(bufferArray.buffer);
+
+        const info = EntityData.read(data);
+        expect(info).toHaveLength(2);
+
+        // Zone entity.
+        expect(info[0].entityItemID.stringify()).toBe("6f458c32-c981-4d99-82b9-a9bbc975a3d6");
+        expect(info[0].entityType).toBe(15);
+        expect(info[0].shapeType).toBe(ShapeType.BOX);
+        expect(info[0].compoundShapeURL).toBe("");
+        expect(info[0].flyingAllowed).toBe(true);
+        expect(info[0].ghostingAllowed).toBe(true);
+        expect(info[0].filterURL).toBe("");
+        expect(info[0].keyLightMode).toBe(ComponentMode.INHERIT);
+        expect(info[0].skyboxMode).toBe(ComponentMode.ENABLED);
+        expect(info[0].skybox.color).toStrictEqual({ red: 255, green: 255, blue: 255 });
+        expect(info[0].skybox.url).toBe("atp:/domain/nebula-skybox.png");
+        expect(info[0].ambientLightMode).toBe(ComponentMode.ENABLED);
+        expect(info[0].ambientLight.intensity).toBeCloseTo(10.0, 4);
+        expect(info[0].ambientLight.url).toBe("atp:/domain/nebula-skybox.png");
+        expect(info[0].hazeMode).toBe(ComponentMode.DISABLED);
+        expect(info[0].bloomMode).toBe(ComponentMode.DISABLED);
+        expect(info[0].avatarPriority).toBe(AvatarPriorityMode.INHERIT);
+        expect(info[0].screenshare).toBe(ComponentMode.INHERIT);
+
+        // Box entity.
+        expect(info[1].entityItemID.stringify()).toBe("492b08db-7106-4c2e-8f6b-bdd1e0ab69b2");
+        expect(info[1].entityType).toBe(1);
+
+    });
+
+    test("Can skip over ParticleEffect entity type", () => {
         const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
         // Packet data containing an ParticleEffect entity, a Zone entity and a Model entity.
@@ -822,12 +864,17 @@ describe("EntityData - unit tests", () => {
         const data = new DataView(bufferArray.buffer);
 
         const info = EntityData.read(data);
-        expect(info).toHaveLength(1);
+        expect(info).toHaveLength(2);
+
+        // Zone Entity.
+        expect(info[0].entityItemID instanceof Uuid).toBe(true);
+        expect(info[0].entityItemID.stringify()).toBe("af15143b-7e98-4508-80b9-511b99b8832b");
+        expect(info[0].entityType).toBe(15);
 
         // Model Entity.
-        expect(info[0].entityItemID instanceof Uuid).toBe(true);
-        expect(info[0].entityItemID.stringify()).toBe("b4ec60df-37b8-49ea-8b9b-19000a39dc93");
-        expect(info[0].entityType).toBe(4);
+        expect(info[1].entityItemID instanceof Uuid).toBe(true);
+        expect(info[1].entityItemID.stringify()).toBe("b4ec60df-37b8-49ea-8b9b-19000a39dc93");
+        expect(info[1].entityType).toBe(4);
 
         log.mockReset();
     });
