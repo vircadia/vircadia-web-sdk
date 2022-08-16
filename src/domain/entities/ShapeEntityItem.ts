@@ -75,6 +75,7 @@ type ShapeEntitySubclassData = {
 
 /*@devdoc
  *  The <code>ShapeEntityItem</code> class provides facilities for reading Shape entity properties from a packet.
+ *  <p>C++: <code>class ShapeEntityItem : public EntityItem</code></p>
  *  @class ShapeEntityItem
  */
 class ShapeEntityItem {

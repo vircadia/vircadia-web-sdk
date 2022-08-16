@@ -15,6 +15,7 @@ import type { color } from "../shared/Color";
 import GLMHelpers from "../shared/GLMHelpers";
 import PropertyFlags from "../shared/PropertyFlags";
 import type { quat } from "../shared/Quat";
+import ShapeType from "../shared/ShapeType";
 import type { vec3 } from "../shared/Vec3";
 import { EntityPropertyFlags } from "./EntityPropertyFlags";
 
@@ -32,7 +33,7 @@ type AnimationProperties = {
 };
 
 type ModelEntitySubclassProperties = {
-    shapeType: number | undefined;
+    shapeType: ShapeType | undefined;
     compoundShapeURL: string | undefined;
     color: color | undefined;
     textures: string | undefined;
@@ -59,6 +60,7 @@ type ModelEntitySubclassData = {
 
 /*@devdoc
  *  The <code>ModelEntityItem</code> class provides facilities for reading Model entity properties from a packet.
+ *  <p>C++: <code>class MomdelEntityItem : public EntityItem</code></p>
  *  @class ModelEntityItem
  */
 class ModelEntityItem {
@@ -89,9 +91,9 @@ class ModelEntityItem {
      *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
      *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} ModelEntityProperties
-     *  @property {number|undefined} shapeType - The shape of the collision hull used if collisions are enabled.
+     *  @property {ShapeType|undefined} shapeType - The shape of the collision hull used if collisions are enabled.
      *  @property {string|undefined} compoundShapeURL - The model file to use for the compound shape if shapeType is
-     *      "compound".
+     *      <code>COMPOUND</code>.
      *  @property {color|undefined} color - Currently not used.
      *  @property {string|undefined} textures - A JSON string of texture name, URL pairs used when rendering the model in
      *      place of the model's original textures. Use a texture name from the originalTextures property to override that
@@ -150,7 +152,7 @@ class ModelEntityItem {
 
         const textDecoder = new TextDecoder();
 
-        let shapeType: number | undefined = undefined;
+        let shapeType: ShapeType | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SHAPE_TYPE)) {
             shapeType = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;

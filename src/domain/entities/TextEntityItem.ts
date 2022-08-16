@@ -88,6 +88,7 @@ type TextEntitySubclassData = {
 
 /*@devdoc
  *  The <code>TextEntityItem</code> class provides facilities for reading Text entity properties from a packet.
+ *  <p>C++: <code>class TextEntityItem : public EntityItem</code></p>
  *  @class TextEntityItem
  */
 class TextEntityItem {

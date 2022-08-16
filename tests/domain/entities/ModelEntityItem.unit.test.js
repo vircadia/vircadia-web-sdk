@@ -11,6 +11,7 @@
 
 import ModelEntityItem from "../../../src/domain/entities/ModelEntityItem";
 import PropertyFlags from "../../../src/domain/shared/PropertyFlags";
+import ShapeType from "../../../src/domain/shared/ShapeType";
 
 
 describe("ModelEntityItem - unit tests", () => {
@@ -37,15 +38,13 @@ describe("ModelEntityItem - unit tests", () => {
         const modelEntity = ModelEntityItem.readEntitySubclassDataFromBuffer(data, 0, propertyFlags);
 
         expect(modelEntity.bytesRead).toBe(147);
-        expect(modelEntity.properties.shapeType).toBe(0);
+        expect(modelEntity.properties.shapeType).toBe(ShapeType.NONE);
         expect(modelEntity.properties.compoundShapeURL).toBe("");
         expect(modelEntity.properties.color.red).toBe(255);
         expect(modelEntity.properties.color.green).toBe(255);
         expect(modelEntity.properties.color.blue).toBe(255);
         expect(modelEntity.properties.textures).toBe("");
-        expect(modelEntity.properties.modelURL).toBe(
-            "https://metaverse.asia/avatars/julien.glb"
-        );
+        expect(modelEntity.properties.modelURL).toBe("https://metaverse.asia/avatars/julien.glb");
         expect(modelEntity.properties.modelScale.x).toBeCloseTo(1, 2);
         expect(modelEntity.properties.modelScale.y).toBeCloseTo(1, 2);
         expect(modelEntity.properties.modelScale.z).toBeCloseTo(1, 2);
