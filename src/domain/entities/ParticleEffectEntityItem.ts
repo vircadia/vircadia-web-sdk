@@ -153,12 +153,12 @@ class ParticleEffectEntityItem {
      *  @property {number} radiusSpread=0 - The spread in radius that each particle is given. For example, if
      *      <code>particleRadius == 0.5</code> and <code>radiusSpread == 0.25</code>, each particle will have a radius in the
      *      range <code>0.25</code> &ndash; <code>0.75</code>.
-     *  @property {Color} color=255,255,255 - The color of each particle at the middle of its life.
-     *  @property {ColorFloat} colorStart=NaN,NaN,NaN - The color of each particle at the start of its life. If any of the
+     *  @property {color} color=255,255,255 - The color of each particle at the middle of its life.
+     *  @property {color} colorStart=NaN,NaN,NaN - The color of each particle at the start of its life. If any of the
      *      component values are undefined, the <code>color</code> value is used.
-     *  @property {ColorFloat} colorFinish=NaN,NaN,NaN - The color of each particle at the end of its life. If any of the
+     *  @property {color} colorFinish=NaN,NaN,NaN - The color of each particle at the end of its life. If any of the
      *      component values are undefined, the <code>color</code> value is used.
-     *  @property {Color} colorSpread=0,0,0 - The spread in color that each particle is given. For example, if
+     *  @property {color} colorSpread=0,0,0 - The spread in color that each particle is given. For example, if
      *      <code>color == {red: 100, green: 100, blue: 100}</code> and <code>colorSpread ==
      *      {red: 10, green: 25, blue: 50}</code>, each particle will have a color in the range
      *      <code>{red: 90, green: 75, blue: 50}</code> &ndash; <code>{red: 110, green: 125, blue: 150}</code>.
