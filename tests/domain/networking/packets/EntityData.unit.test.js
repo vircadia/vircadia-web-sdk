@@ -756,6 +756,27 @@ describe("EntityData - unit tests", () => {
         expect(info[0].userAgent).toBe("Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.122 Mobile Safari/537.36");
     });
 
+    test("Can read a ParticleEffect entity", () => {
+        // eslint-disable-next-line max-len
+        const bufferHex = "c00100c8a4560358e6050021010000017d78da636038c9c0c8a034495c6ffd5957ed953b6746a728dabfe46060607810f68c95812f8283210248334ce6f8ffbf810102e4fff1ff07821f0c7000e23260007630e96257c5c0d0600f1102d130360343024346494941b195be7e724a9eaea15e59665172624a66a25e727eae7e69b16eaaaea1be536255626291be6371716a49b17e486a454969516ab1be4b6a5a62690e50c433af24b5282d3139553f0522145f90585492999c93aa579097ce0fb1c8819181e18003c8eab3677cec7457e52e676cb4fa04928038c7c1e1ec9933b685b65ef687bf9eb0ef3fc47a202dad0de44c1006cb41b08f1d10db02f5d8218b89b0723130683b3330843841e877405a03480b39c394403dfcc0fe4de00edb6a113dbb1d72acf68c0014c87322";
+        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        const data = new DataView(bufferArray.buffer);
+
+        const info = EntityData.read(data);
+        expect(info).toHaveLength(1);
+        expect(info[0].entityItemID.stringify()).toBe("2292172e-afcd-452b-a9b9-995b64213fe9");
+        expect(info[0].entityType).toBe(8);
+        expect(info[0].shapeType).toBe(ShapeType.CYLINDER_Y);
+        expect(info[0].compoundShapeURL).toBe("");
+        expect(info[0].color).toStrictEqual({ red: 68, green: 62, blue: 122 });
+        expect(info[0].alpha).toBe(1);
+        expect(info[0].textures)
+            .toBe("https://cdn-1.vircadia.com/us-e-1/Bazaar/Assets/Textures/Defaults/Interface/default_particle.png");
+        expect(info[0].maxParticles).toBe(15);
+    });
+
     test("Can read a Light entity", () => {
         // eslint-disable-next-line max-len
         const bufferHex = "c001004eb8bf9306e605005b000000006c78da636038c9c0c8902d1ed29cb3d5b57c09f3ba9a69ed1daa169bd2d912d99eb13274f0f74e04d10c4d02ff7f304000e3ff070a760c70f01f08183080deac798c67cfcc7188e96fb2676098eb74f64c8f3d0097c71e79";
@@ -849,34 +870,6 @@ describe("EntityData - unit tests", () => {
         expect(info[1].entityItemID.stringify()).toBe("492b08db-7106-4c2e-8f6b-bdd1e0ab69b2");
         expect(info[1].entityType).toBe(1);
 
-    });
-
-    test("Can skip over ParticleEffect entity type", () => {
-        const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
-
-        // Packet data containing an ParticleEffect entity, a Zone entity and a Model entity.
-        // eslint-disable-next-line max-len
-        const bufferHex = "c00000567f0ab947e40500b8020000058478da6360606260663896a1b4fad64bbf07d323369b46b6d46fe0d83bfdcf4af727ac0ccfae4b6e01d10caf3b043efdffdfffff73fd7f10f8c70f227f08326001ffff330a33142416956426e7a4eaa6a6a5a52697e8e6e7a5c2152c3eedb06f0afbdc03feebb7d847d4fe7780e1fff560f81fa8c41e86610e116038ba74c53eaf3feee17b4adbf7177de9c95a20b2eee04be3b307f997cf3ac8f249d58911dd1d8c4011144124f3b18a35d8233032a872e1baae6cc3401e80faa4613f833c5c6c9a337e3da0b0c514e50793ab5556735d5f6c0d1142756d024346494941b195be7e724a9eaea15e59665172624a66a25e727eae7e69b16eaaaea1be536255626291be6371716a49b17e486a454969516ab1be4b6a5a62690e50c433af24b5282d3139553f0522140f8b49bd82bc742eb03d07ec81c1bac1e1ec191f7b10666de06a106ef8f7bfff50a92dd06936c0c0b28539ebf0570f87dbfc9e074034445c01a4cf5633a61fa4d6f6ec9933b687bfaeb00389bd09b4b0030adab132b13330083a438c00d10c407cc001442f9bed620d1207c507667caf1715b1ae9be1cad1b033507ae68e66ed0abe4ff18b4089e797a23f381131f4f2fcff7ffcffcffde034fc9f8d11441ec095883918aa80a91625e53efdb47c7f6e7edb81832b96d801bde208c3d8522ecc72cc947ba44ffea0dc09df838ad9ac077f6b2e70a465ca65201f502fe53281c92b4e57602efcca62baff238b29281d81ac507002a52306064e6e2188abf5bd92cf2c8e0032c181e301b674d9ec23d6502f81041aec8c8d8dedd3d2d2ec41a1c5c480896160cb9b84fbe63b3c5f75cf9664e0b2bc335900289631eb312bc3c22bfbf3c1c9a2fdc8c7ffffb41c702784e4c46cd484107be0fabe9edb4d0744d6713b1cbabecd8ee9a9b0dda6d9dbecb025049875020c697fe5dfaa9a7bd46c6d65607cf8508b1f1ac700d0276b30";
-
-        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
-            return parseInt(hex, 16);
-        }));
-        const data = new DataView(bufferArray.buffer);
-
-        const info = EntityData.read(data);
-        expect(info).toHaveLength(2);
-
-        // Zone Entity.
-        expect(info[0].entityItemID instanceof Uuid).toBe(true);
-        expect(info[0].entityItemID.stringify()).toBe("af15143b-7e98-4508-80b9-511b99b8832b");
-        expect(info[0].entityType).toBe(15);
-
-        // Model Entity.
-        expect(info[1].entityItemID instanceof Uuid).toBe(true);
-        expect(info[1].entityItemID.stringify()).toBe("b4ec60df-37b8-49ea-8b9b-19000a39dc93");
-        expect(info[1].entityType).toBe(4);
-
-        log.mockReset();
     });
 
     test("Can skip over Line entity types", () => {

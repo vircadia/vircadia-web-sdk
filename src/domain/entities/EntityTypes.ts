@@ -33,7 +33,8 @@
  *  @property {number} Web - <code>7</code> - A browsable web page.<br />
  *      {@link WebEntityProperties}
  *  @property {number} ParticleEffect - <code>8</code> - A particle system that can be used to simulate things such as fire,
- *      smoke, snow, magic spells, etc.
+ *      smoke, snow, magic spells, etc.<br />
+ *      {@link ParticleEffectEntityProperties}
  *  @property {number} Line - <code>9</code> - A sequence of one or more simple straight lines.
  *  @property {number} PolyLine - <code>10</code> - A sequence of one or more textured straight lines.
  *  @property {number} PolyVox - <code>11</code> - A set of textured voxels.
