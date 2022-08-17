@@ -24,8 +24,8 @@ import PulsePropertyGroup from "./PulsePropertyGroup";
  *          <tr><th>Name</th><th>Value</th><th>Description</th></tr>
  *      </thead>
  *      <tbody>
- *          <tr><td>Touch<td><code>0</code></td><td>Events are processed as touch events.</td></tr>
- *          <tr><td>Mouse<td><code>1</code></td><td>Events are processed as mouse events.</td></tr>
+ *          <tr><td>TOUCH<td><code>0</code></td><td>Events are processed as touch events.</td></tr>
+ *          <tr><td>MOUSE<td><code>1</code></td><td>Events are processed as mouse events.</td></tr>
  *      </tbody>
  *  </table>
  *  @typedef {number} WebInputMode
@@ -73,26 +73,26 @@ class WebEntityItem {
      *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
      *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} WebEntityProperties
-     *  @property {string|undefined} sourceURL - The URL of the web page to display. This value does not change as you or others
-     *      navigate on the Web entity.
-     *  @property {color|undefined} color - The color of the web surface. This color tints the web page displayed: the pixel
-     *      colors on the web page are multiplied by the property color. For example, a value of <code>{ red: 255, green: 0,
-     *      blue: 0 }</code> lets only the red channel of pixels' colors through.
-     *  @property {number|undefined} alpha - The opacity of the web surface.
-     *  @property {number|undefined} dpi - The resolution to display the page at, in dots per inch. If you convert this to dots
-     *      per meter (multiply by <code>1 / 0.0254 = 39.3701</code>) then multiply </code>dimensions.x</code> and
+     *  @property {string|undefined} sourceURL="" - The URL of the web page to display. This value does not change as you or
+     *      others navigate on the Web entity.
+     *  @property {color|undefined} color=255,255,255 - The color of the web surface. This color tints the web page displayed:
+     *      the pixel colors on the web page are multiplied by the property color. For example, a value of
+     *      <code>{ red: 255, green: 0, blue: 0 }</code> lets only the red channel of pixels' colors through.
+     *  @property {number|undefined} alpha=1.0 - The opacity of the web surface.
+     *  @property {number|undefined} dpi=30 - The resolution to display the page at, in dots per inch. If you convert this to
+     *      dots per meter (multiply by <code>1 / 0.0254 = 39.3701</code>) then multiply </code>dimensions.x</code> and
      *      <code>dimensions.y</code> by that value you get the resolution in pixels.
-     *  @property {string|undefined} scriptURL - The URL of a JavaScript file to inject into the web page.
-     *  @property {number|undefined} maxFPS - The maximum update rate for the web content, in frames/second.
-     *  @property {WebInputMode|undefined} inputMode - The user input mode to use.
-     *  @property {boolean|undefined} showKeyboardFocusHighlight - <code>true</code> if the entity is highlighted when it has
-     *      keyboard focus, <code>false</code> if it isn't.
-     *  @property {boolean|undefined} useBackground - <code>true</code> if the web entity should have a background,
+     *  @property {string|undefined} scriptURL="" - The URL of a JavaScript file to inject into the web page.
+     *  @property {number|undefined} maxFPS=10 - The maximum update rate for the web content, in frames/second.
+     *  @property {WebInputMode|undefined} inputMode=TOUCH - The user input mode to use.
+     *  @property {boolean|undefined} showKeyboardFocusHighlight=true - <code>true</code> if the entity is highlighted when it
+     *      has keyboard focus, <code>false</code> if it isn't.
+     *  @property {boolean|undefined} useBackground=true - <code>true</code> if the web entity should have a background,
      *      <code>false</code> if the web entity's background should be transparent. The web page must have CSS properties for
      *      transparency set on the <code>background-color</code> for this property to have an effect.
-     *  @property {string|undefined} userAgent - The user agent for the web entity to use when visiting web pages. Default
-     *      value: <code>Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko)
-     *      Chrome/69.0.3497.113 Mobile Safari/537.36</code>.
+     *  @property {string|undefined} userAgent="Mozilla/5.0..." - The user agent for the web entity to use when visiting web
+     *      pages. Default value: <code>Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like
+     *      Gecko) Chrome/69.0.3497.113 Mobile Safari/537.36</code>.
      */
 
     /*@devdoc

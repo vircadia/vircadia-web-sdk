@@ -69,20 +69,20 @@ class ModelEntityItem {
     /*@sdkdoc
      *  An animation is configured by the following properties.
      *  @typedef {object} AnimationProperties
-     *  @property {string|undefined} animationURL - The URL of the glTF or FBX file that has the animation. glTF files may be
+     *  @property {string|undefined} animationURL="" - The URL of the glTF or FBX file that has the animation. glTF files may be
      *      in JSON or binary format (".gltf" or ".glb" URLs respectively).
-     *  @property {boolean|undefined} animationAllowTranslation - <code>true</code> to enable translations contained in the
+     *  @property {boolean|undefined} animationAllowTranslation=true - <code>true</code> to enable translations contained in the
      *      animation to be played, <code>false</code> to disable translations.
-     *  @property {number|undefined} animationFPS - The speed in frames/s that the animation is played at.
-     *  @property {number|undefined} animationFrameIndex - The current frame being played in the animation.
-     *  @property {boolean|undefined} animationPlaying - <code>true</code> if the animation should play, <code>false</code>
-     *      if it shouldn't.
-     *  @property {boolean|undefined} animationLoop - <code>true</code> if the animation is continuously repeated in a
+     *  @property {number|undefined} animationFPS=30 - The speed in frames/s that the animation is played at.
+     *  @property {number|undefined} animationFirstFrame=0 - The first frame to play in the animation.
+     *  @property {number|undefined} animationLastFrame=100000 - The last frame to play in the animation.
+     *  @property {number|undefined} animationFrameIndex=0 - The current frame being played in the animation.
+     *  @property {boolean|undefined} animationPlaning=false - <code>true</code> if the animation should play,
+     *      <code>false</code> if it shouldn't.
+     *  @property {boolean|undefined} animationLoop=true - <code>true</code> if the animation is continuously repeated in a
      *      loop, <code>false</code> if it isn't.
-     *  @property {number|undefined} animationFirstFrame - The first frame to play in the animation.
-     *  @property {number|undefined} animationLastFrame - The last frame to play in the animation.
-     *  @property {boolean|undefined} animationHold - <code>true</code> if the rotations and translations of the last frame
-     *     played are maintained when the animation stops playing, <code>false</code> if they aren't.
+     *  @property {boolean|undefined} animationHold=false - <code>true</code> if the rotations and translations of the last
+     *      frame played are maintained when the animation stops playing, <code>false</code> if they aren't.
      */
 
     /*@sdkdoc
@@ -91,37 +91,38 @@ class ModelEntityItem {
      *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
      *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} ModelEntityProperties
-     *  @property {ShapeType|undefined} shapeType - The shape of the collision hull used if collisions are enabled.
-     *  @property {string|undefined} compoundShapeURL - The model file to use for the compound shape if shapeType is
+     *  @property {ShapeType|undefined} shapeType=NONE - The shape of the collision hull used if collisions are enabled.
+     *  @property {string|undefined} compoundShapeURL="" - The model file to use for the compound shape if shapeType is
      *      <code>COMPOUND</code>.
-     *  @property {color|undefined} color - Currently not used.
-     *  @property {string|undefined} textures - A JSON string of texture name, URL pairs used when rendering the model in
+     *  @property {color|undefined} color=255,255,255 - <em>Currently not used.</em>
+     *  @property {string|undefined} textures="" - A JSON string of texture name, URL pairs used when rendering the model in
      *      place of the model's original textures. Use a texture name from the originalTextures property to override that
      *      texture.  Only the texture names and URLs to be overridden need be specified; original textures are used where there
      *      are no overrides. You can use JSON.stringify() to convert a JavaScript object of name, URL pairs into a JSON string.
-     *  @property {string|undefined} modelURL - The URL of the glTF, FBX, or OBJ model. glTF models may be in JSON or binary
+     *  @property {string|undefined} modelURL="" - The URL of the glTF, FBX, or OBJ model. glTF models may be in JSON or binary
      *      format (".gltf" or ".glb" URLs respectively). Baked models' URLs have ".baked" before the file type. Model files may
      *      also be compressed in GZ format, in which case the URL ends in ".gz".
-     *  @property {vec3|undefined} modelScale - The scale factor applied to the model's dimensions.
-     *  @property {boolean|undefined} jointRotationsSet - <code>true</code> values for joints that have had rotations
-     *      applied, <code>false</code> otherwise; Empty if none are applied or the model hasn't loaded.
-     *  @property {quat[]|undefined} jointRotations - Joint rotations applied to the model; Empty if none are applied or the
-     *      model hasn't loaded.
-     *  @property {boolean|undefined} jointTranslationsSet - <code>true</code> values for joints that have had translations
-     *      applied, <code>false</code> otherwise; Empty if none are applied or the model hasn't loaded.
-     *  @property {vec3[]|undefined} jointTranslations - Joint translations applied to the model; Empty if none are applied or
-     *      the model hasn't loaded.
-     *  @property {boolean|undefined} groupCulled - <code>true</code> if the mesh parts of the model are LOD culled as a
+     *  @property {vec3|undefined} modelScale=1.0,1.0,1.0 - The scale factor applied to the model's dimensions.
+     *      <p class="important">Deprecated: This property is deprecated and will be removed.</p>
+     *  @property {boolean[]|undefined} jointRotationsSet=[]] - <code>true</code> values for joints that have had rotations
+     *      applied, <code>false</code> otherwise; empty array if none are applied or the model hasn't loaded.
+     *  @property {quat[]|undefined} jointRotations=[]] - Joint rotations applied to the model; empty array if none are applied
+     *      or the model hasn't loaded.
+     *  @property {boolean|undefined} jointTranslationsSet=[]] - <code>true</code> values for joints that have had translations
+     *      applied, <code>false</code> otherwise; empty array if none are applied or the model hasn't loaded.
+     *  @property {vec3[]|undefined} jointTranslations=[]] - Joint translations applied to the model; empty array if none are
+     *      applied or the model hasn't loaded.
+     *  @property {boolean|undefined} groupCulled=false - <code>true</code> if the mesh parts of the model are LOD culled as a
      *      group, <code>false</code> if separate mesh parts are LOD culled individually.
-     *  @property {boolean|undefined} relayParentJoints - <code>true</code> if when the entity is parented to an avatar,
+     *  @property {boolean|undefined} relayParentJoints=false - <code>true</code> if when the entity is parented to an avatar,
      *      the avatar's joint rotations are applied to the entity's joints; <code>false</code> if a parent avatar's joint
      *      rotations are not applied to the entity's joints.
-     *  @property {string|undefined} blendShapeCoefficients - A JSON string of a map of blendshape names to values. Only
-     *      stores set values. When editing this property, only coefficients that you are editing will change; it will not
+     *  @property {string|undefined} blendShapeCoefficients="{\n}\n" - A JSON string of a map of blendshape names to values.
+     *      Only stores set values. When editing this property, only coefficients that you are editing will change; it will not
      *      explicitly reset other coefficients.
-     *  @property {boolean|undefined} useOriginalPivot - If <code>false</code>, the model will be centered based on its
+     *  @property {boolean|undefined} useOriginalPivot=false - If <code>false</code>, the model will be centered based on its
      *      content, ignoring any offset in the model itself. If <code>true</code>, the model will respect its original offset.
-     *      Currently, only pivots relative to <code>{x: 0, y: 0, z: 0}</code> are supported.
+     *      Currently, only pivots relative to <code>{ x: 0, y: 0, z: 0 }</code> are supported.
      *  @property {AnimationProperties|undefined} animation - An animation to play on the model.
      */
 

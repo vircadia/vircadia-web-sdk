@@ -37,9 +37,9 @@ class SkyboxPropertyGroup {
     /*@sdkdoc
      *  Defines the skybox of a zone.
      *  @typedef {object} SkyboxProperties
-     *  @property {color|undefined} [color=0,0,0] - Sets the color of the sky if <code>url</code? is <code>""</code>,
+     *  @property {color|undefined} color=0,0,0 - Sets the color of the sky if <code>url</code? is <code>""</code>,
      *      otherwise modifies the color of the cube map image.
-     *  @property {string|undefined} [url=""] - A cube map image that is used to render the sky.
+     *  @property {string|undefined} url="" - A cube map image that is used to render the sky.
      */
 
     /*@devdoc

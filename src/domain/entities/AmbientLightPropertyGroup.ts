@@ -37,8 +37,8 @@ class AmbientLightPropertyGroup {
     /*@sdkdoc
      *  Defines the ambient light in a zone.
      *  @typedef {object} AmbientLightProperties
-     *  @property {number|undefined} [intensity=0.5] - The intensity of the light.
-     *  @property {string|undefined} [url=""] - A cube map image that defines the color of the light coming from each direction.
+     *  @property {number|undefined} intensity=0.5 - The intensity of the light.
+     *  @property {string|undefined} url="" - A cube map image that defines the color of the light coming from each direction.
      *      If <code>""</code> then the entity's skybox <code>url</code> property value is used, unless that also is
      *      <code>""</code> in which case the entity's <code>ambientLightMode</code> property is set to <code>INHERIT</code>.
      */

@@ -127,9 +127,9 @@ class MaterialEntityItem {
      *      sRGB.<br />
      *      Set to <code>"fallthrough"</code> to fall through to the material below. <code>"hifi_pbr"</code> and
      *      <code>"hifi_shader_simple"</code> models only.
-     *  @property {number|string} [roughness] - The roughness, range <code>0.0</code> &ndash; <code>1.0</code>.<br />
+     *  @property {number|string} [roughness=1.0] - The roughness, range <code>0.0</code> &ndash; <code>1.0</code>.<br />
      *      Set to <code>"fallthrough"</code> to fall through to the material below. <code>"hifi_pbr"</code> model only.
-     *  @property {number|string} [metallic] - The metallicness, range <code>0.0</code> &ndash; <code>1.0</code>.<br />
+     *  @property {number|string} [metallic=0.0] - The metallicness, range <code>0.0</code> &ndash; <code>1.0</code>.<br />
      *      Set to <code>"fallthrough"</code> to fall through to the material below. <code>"hifi_pbr"</code> model only.<br />
      *  @property {number|string} [scattering] - The scattering, range <code>0.0</code> &ndash; <code>1.0</code>.
      *      Set to <code>"fallthrough"</code> to fall through to the material below. <code>"hifi_pbr"</code> model only.
@@ -229,7 +229,7 @@ class MaterialEntityItem {
      *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
      *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} MaterialEntityProperties
-     *  @property {string|undefined} [materialURL=""] - One of the following:
+     *  @property {string|undefined} materialURL="" - One of the following:
      *      <ul>
      *          <li>The URL to a {@link MaterialResource}. If you append <code>"#name"</code> to the URL, the material with that
      *              name will be applied to the entity.</li>
@@ -238,11 +238,11 @@ class MaterialEntityItem {
      *          <li>The ID of another Material entity, in which case this material will act as a copy of that material, with its
      *              own unique material transform, priority, etc.</li>
      *      </ul>
-     *  @property {string|undefined} [materialData=""] - {@link MaterialResource} data stored in a JSON string.
-     *  @property {number|undefined} [priority=0] - The priority for applying the material to its parent. Only the highest
+     *  @property {string|undefined} materialData="" - {@link MaterialResource} data stored in a JSON string.
+     *  @property {number|undefined} priority=0 - The priority for applying the material to its parent. Only the highest
      *      priority material is applied, with materials of the same priority randomly assigned. Materials that come with the
      *      model have a priority of <code>0</code>.
-     *  @property {string|undefined} [parentMaterialName="0"] - Selects the mesh part or parts within the parent to which to
+     *  @property {string|undefined} parentMaterialName="0" - Selects the mesh part or parts within the parent to which to
      *      apply the material. If in the format <code>"mat::string"</code>, all mesh parts with material name
      *      <code>"string"</code> are replaced. If <code>"all"</code>, then all mesh parts are replaced. Otherwise the property
      *      value is parsed as an unsigned integer, specifying the mesh part index to modify.
@@ -251,16 +251,16 @@ class MaterialEntityItem {
      *      <code>"mat::"</code>. For example, <code>"[0,1,mat::string,mat::string2]"</code> will replace mesh parts 0 and 1,
      *      and any mesh parts with material <code>"string"</code> or <code>"string2"</code>. Do not put spaces around the
      *      commas. Invalid values are parsed to <code>"0"</code>.</p>
-     *  @property {MaterialMappingMode|undefined} [materialMappingMode=0] - How the material is mapped to the entity. If
+     *  @property {MaterialMappingMode|undefined} materialMappingMode=UV - How the material is mapped to the entity. If
      *      <code>UV</code> mode, the material is evaluated within the UV space of the mesh it is applied to. If
      *      <code>PROJECTED</code> mode, the 3D transform (position, rotation, and dimensions) of the Material entity is used to
      *      evaluate the texture coordinates for the material.
-     *  @property {vec2|undefined} [materialMappingPos=0.0,0.0] - Offset position in UV-space of the top left of the material,
+     *  @property {vec2|undefined} materialMappingPos=0.0,0.0 - Offset position in UV-space of the top left of the material,
      *      range <code>{ x: 0, y: 0 }</code> &ndash; <code>{ x: 1, y: 1 }</code>.
-     *  @property {vec2|undefined} [materialMappingScale=1.0,1.0] - How much to scale the material within the parent's UV-space.
-     *  @property {number|undefined} [materialMappingRot=UV] - How much to rotate the material within the parent's UV-space, in
+     *  @property {vec2|undefined} materialMappingScale=1.0,1.0 - How much to scale the material within the parent's UV-space.
+     *  @property {number|undefined} materialMappingRot=UV - How much to rotate the material within the parent's UV-space, in
      *      degrees.
-     *  @property {boolean|undefined} [materialRepeat=true] - <code>true</code> if the material repeats, <code>false</code> if
+     *  @property {boolean|undefined} materialRepeat=true - <code>true</code> if the material repeats, <code>false</code> if
      *      it doesn't. If <code>false</code>, fragments outside of texCoord 0 &ndash; 1 will be discarded. Works in both
      *      <code>UV</code> and <code>PROJECTED</code> mapping modes.
      */

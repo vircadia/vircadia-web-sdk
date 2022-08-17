@@ -37,9 +37,9 @@ class BloomPropertyGroup {
     /*@sdkdoc
      *  Defines the bloom in a zone.
      *  @typedef {object} BloomProperties
-     *  @property {number|undefined} [intensity=0.25] - The intensity of the bloom effect.
-     *  @property {number|undefined} [threshold=0.7] - The threshold for the bloom effect.
-     *  @property {number|undefined} [size=0.9] - The size of the bloom effect.
+     *  @property {number|undefined} intensity=0.25 - The intensity of the bloom effect.
+     *  @property {number|undefined} threshold=0.7 - The threshold for the bloom effect.
+     *  @property {number|undefined} size=0.9 - The size of the bloom effect.
      */
 
     /*@devdoc
