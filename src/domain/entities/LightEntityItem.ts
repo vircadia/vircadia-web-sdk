@@ -47,14 +47,16 @@ class LightEntityItem {
      *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
      *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} LightEntityProperties
-     *  @property {color|undefined} color - The color of the light emitted.
-     *  @property {number|undefined} intensity - The brightness of the light.
-     *  @property {number|undefined} falloffRadius - The distance from the light's center at which intensity is reduced by 25%.
-     *  @property {boolean|undefined} isSpotlight - <code>true</code> if the light is directional, emitting along the entity's
-     *      local negative z-axis; <code>false</code> if the light is a point light which emanates in all directions.
-     *  @property {number|undefined} exponent - Affects the softness of the spotlight beam: the higher the value the softer the
+     *  @property {color|undefined} color=255,255,255 - The color of the light emitted.
+     *  @property {number|undefined} intensity=1.0 - The brightness of the light.
+     *  @property {number|undefined} falloffRadius=0.1 - The distance from the light's center at which intensity is reduced by
+     *      25%.
+     *  @property {boolean|undefined} isSpotlight=false - <code>true</code> if the light is directional, emitting along the
+     *      entity's local negative z-axis; <code>false</code> if the light is a point light which emanates in all directions.
+     *  @property {number|undefined} exponent=0 - Affects the softness of the spotlight beam: the higher the value the softer
+     *      the beam.
+     *  @property {number|undefined} cutoff=1.57 - Affects the size of the spotlight beam: the higher the value the larger the
      *      beam.
-     *  @property {number|undefined} cutoff - Affects the size of the spotlight beam: the higher the value the larger the beam.
      */
 
     /*@devdoc

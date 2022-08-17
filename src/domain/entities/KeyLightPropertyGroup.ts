@@ -43,15 +43,15 @@ class KeyLightPropertyGroup {
     /*@sdkdoc
      *  Defines the key light in a zone.
      *  @typedef {object} KeyLightProperties
-     *  @property {color|undefined} [color=255,255,255] - The color of the light.
-     *  @property {number|undefined} [intensity=1] - The intensity of the light.
-     *  @property {vec3|undefined} [direction=0,-1,0] - The direction the light is shining.
-     *  @property {boolean|undefined} [castShadows=false] - <code>true</code> if shadows are cast, <code>false</code> if they
+     *  @property {color|undefined} color=255,255,255 - The color of the light.
+     *  @property {number|undefined} intensity=1 - The intensity of the light.
+     *  @property {vec3|undefined} direction=0,-1,0 - The direction the light is shining.
+     *  @property {boolean|undefined} castShadows=false - <code>true</code> if shadows are cast, <code>false</code> if they
      *      aren't. Shadows are cast by avatars, plus Model and Shape entities that have their <code>canCastShadow</code>
      *      property set to true.
-     *  @property {number|undefined} [shadowBias=0.5] - The bias of the shadows cast by the light, range <code>0.0</code>
+     *  @property {number|undefined} shadowBias=0.5 - The bias of the shadows cast by the light, range <code>0.0</code>
      *      &ndash; <code>1.0</code>. This fine-tunes shadows cast by the light, to prevent shadow acne and peter panning.
-     *  @property {number|undefined} [shadowMaxDistance=40.0] - The maximum distance from the camera position at which shadows
+     *  @property {number|undefined} shadowMaxDistance=40.0 - The maximum distance from the camera position at which shadows
      *      will be computed, range <code>1.0</code> &ndash; <code>250.0</code>. Higher values cover more of the scene but with
      *      less precision.
      */

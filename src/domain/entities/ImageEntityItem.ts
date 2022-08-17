@@ -57,15 +57,15 @@ class ImageEntityItem {
      *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
      *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} ImageEntityProperties
-     *  @property {string|undefined} imageURL - The URL of the image to use.
-     *  @property {boolean|undefined} emissive - <code>true</code> if the image should be emissive (unlit), <code>false</code>
-     *      if it shouldn't.
-     *  @property {boolean|undefined} keepAspectRatio - <code>true</code> if the image should maintain its aspect ratio,
+     *  @property {string|undefined} imageURL="" - The URL of the image to use.
+     *  @property {boolean|undefined} emissive=false - <code>true</code> if the image should be emissive (unlit),
      *      <code>false</code> if it shouldn't.
-     *  @property {rect|undefined} subImage - The portion of the image to display. If width or height are <code>0</code>, it
-     *      defaults to the full image in that dimension.
-     *  @property {color|undefined} color - The color of the entity.
-     *  @property {number|undefined} alpha - The opacity of the image.
+     *  @property {boolean|undefined} keepAspectRatio=true - <code>true</code> if the image should maintain its aspect ratio,
+     *      <code>false</code> if it shouldn't.
+     *  @property {rect|undefined} subImage=0,0,0,0 - The portion of the image to display. If width or height are
+     *      <code>0</code>, it defaults to the full image in that dimension.
+     *  @property {color|undefined} color=255,255,255 - The color of the entity.
+     *  @property {number|undefined} alpha=1.0 - The opacity of the image.
      */
 
     /*@devdoc

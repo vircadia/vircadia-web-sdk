@@ -94,9 +94,9 @@ class ShapeEntityItem {
      *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
      *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} ShapeEntityProperties
-     *  @property {Shape|undefined} shape - The shape of the entity.
-     *  @property {color|undefined} color - The color of the entity.
-     *  @property {number|undefined} alpha - The opacity of the entity, range <code>0.0 – 1.0</code>.
+     *  @property {Shape|undefined} shape="Sphere" - The shape of the entity.
+     *  @property {color|undefined} color=255,255,255 - The color of the entity.
+     *  @property {number|undefined} alpha=1.0 - The opacity of the entity, range <code>0.0 – 1.0</code>.
      */
 
     /*@devdoc

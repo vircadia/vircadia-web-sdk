@@ -16,7 +16,6 @@ import PropertyFlags from "../shared/PropertyFlags";
 import { EntityPropertyFlags } from "./EntityPropertyFlags";
 import PulsePropertyGroup from "./PulsePropertyGroup";
 
-
 /*@sdkdoc
  *  <p>A Text entity may use one of the following effects:</p>
  *  <table>
@@ -62,10 +61,10 @@ enum TextAlignment {
 type TextEntitySubclassProperties = {
     text: string | undefined;
     lineHeight: number | undefined;
-    textEffectColor: color | undefined;
+    textColor: color | undefined;
     textAlpha: number | undefined;
-    backgroundAlpha: number | undefined;
     backgroundColor: color | undefined;
+    backgroundAlpha: number | undefined;
     leftMargin: number | undefined;
     rightMargin: number | undefined;
     topMargin: number | undefined;
@@ -73,7 +72,7 @@ type TextEntitySubclassProperties = {
     unlit: boolean | undefined;
     font: string | undefined;
     textEffect: TextEffect | undefined;
-    textColor: color | undefined;
+    textEffectColor: color | undefined;
     textEffectThickness: number | undefined;
     textAlignment: TextAlignment | undefined;
 };
@@ -99,26 +98,27 @@ class TextEntityItem {
      *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
      *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} TextEntityProperties
-     *  @property {string|undefined} text - The text to display on the face of the entity. Text wraps if necessary to fit. New
-     *      lines can be created using \n. Overflowing lines are not displayed.
-     *  @property {number|undefined} lineHeight - The height of each line of text (thus determining the font size).
-     *  @property {color|undefined} textEffectColor - The color of the text.
-     *  @property {number|undefined} textAlpha - The opacity of the text.
-     *  @property {number|undefined} backgroundAlpha - The opacity of the background.
-     *  @property {color|undefined} backgroundColor - The color of the background rectangle.
-     *  @property {number|undefined} leftMargin - The left margin, in meters.
-     *  @property {number|undefined} rightMargin - The right margin, in meters.
-     *  @property {number|undefined} topMargin - The top margin, in meters.
-     *  @property {number|undefined} bottomMargin - The bottom margin, in meters.
-     *  @property {boolean|undefined} unlit - <code>true</code> if the entity is unaffected by lighting, <code>false</code> if
-     *      it is lit by the key light and local lights.
-     *  @property {string|undefined} font - The font to render the text with. It can be one of the following:
+     *  @property {string|undefined} text="" - The text to display on the face of the entity. Text wraps if necessary to fit.
+     *      New lines can be created using \n. Overflowing lines are not displayed.
+     *  @property {number|undefined} lineHeight=0.1 - The height of each line of text (thus determining the font size).
+     *  @property {color|undefined} textColor=255,255,255 - The color of the text.
+     *  @property {number|undefined} textAlpha=1.0 - The opacity of the text.
+     *  @property {color|undefined} backgroundColor=0,0,0 - The color of the background rectangle.
+     *  @property {number|undefined} backgroundAlpha=1.0 - The opacity of the background.
+
+     *  @property {number|undefined} leftMargin=0.0 - The left margin, in meters.
+     *  @property {number|undefined} rightMargin=0.0 - The right margin, in meters.
+     *  @property {number|undefined} topMargin=0.0 - The top margin, in meters.
+     *  @property {number|undefined} bottomMargin=0.0 - The bottom margin, in meters.
+     *  @property {boolean|undefined} unlit=false - <code>true</code> if the entity is unaffected by lighting,
+     *      <code>false</code> if it is lit by the key light and local lights.
+     *  @property {string|undefined} font="" - The font to render the text with. It can be one of the following:
      *      "<code>Courier</code>", "<code>Inconsolata</code>", "<code>Roboto</code>", "<code>Timeless</code>", or a path to a
      *      .sdff file.
-     *  @property {TextEffect|undefined} textEffect - The effect that is applied to the text.
-     *  @property {color|undefined} textColor - The color of the effect.
-     *  @property {number|undefined} textEffectThickness - The magnitude of the text effect, range 0.0 – 0.5.
-     *  @property {TextAlignment|undefined} textAlignment - How the text is aligned against its background.
+     *  @property {TextEffect|undefined} textEffect="none" - The effect that is applied to the text.
+     *  @property {color|undefined} textEffectColor=255,255,255 - The color of the text.
+     *  @property {number|undefined} textEffectThickness=0.2 - The magnitude of the text effect, range 0.0 – 0.5.
+     *  @property {TextAlignment|undefined} textAlignment="left" - How the text is aligned against its background.
      */
 
     /*@devdoc

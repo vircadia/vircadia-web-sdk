@@ -64,27 +64,27 @@ class ZoneEntityItem {
      *  <p>It has properties in addition to the {@link EntityProperties|common EntityProperties}. A property value may be
      *  undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} ZoneEntityProperties
-     *  @property {ShapeType|undefined} [shapeType=BOX] - The shape of the volume in which the zone's lighting effects and
+     *  @property {ShapeType|undefined} shapeType=BOX - The shape of the volume in which the zone's lighting effects and
      *      avatar permissions have effect. Reverts to the default value if set to <code>NONE</code>, or set to
      *      <code>COMPOUND</code> and <code>compoundShapeURL</code> is <code>""</code>.
-     *  @property {string|undefined} [compoundShapeURL=""] - The model file to use for the compound shape if
+     *  @property {string|undefined} compoundShapeURL="" - The model file to use for the compound shape if
      *      <code>shapeType</code> is <code>COMPOUND</code>.
-     *  @property {ComponentMode|undefined} [keyLightMode=INHERIT] - Configures the key light in the zone.
-     *  @property {KeyLightProperties|undefined} [keyLight] - The key light properties of the zone.
-     *  @property {ComponentMode|undefined} [ambientLightMode=INHERIT] - Configures the ambient light in the zone.
-     *  @property {AmbientLightProperties|undefined} [ambientLight] - The ambient light properties of the zone.
-     *  @property {ComponentMode|undefined} [skyboxMode=INHERIT] - Configures the skybox displayed in the zone.
-     *  @property {SkyboxProperties|undefined} [skybox] - The skybox properties of the zone.
-     *  @property {ComponentMode|undefined} [hazeMode=INHERIT] - Configures the haze in the zone.
-     *  @property {HazeProperties|undefined} [haze] - The haze properties of the zone.
-     *  @property {ComponentMode|undefined} [bloomMode=INHERIT] - Configures the bloom in the zone.
-     *  @property {BloomProperties|undefined} [bloom] - The bloom properties of the zone.
-     *  @property {boolean|undefined} [flyingAllowed=true] - <code>true</code> if visitors can fly in the zone;
+     *  @property {ComponentMode|undefined} keyLightMode=INHERIT - Configures the key light in the zone.
+     *  @property {KeyLightProperties|undefined} keyLight - The key light properties of the zone.
+     *  @property {ComponentMode|undefined} ambientLightMode=INHERIT - Configures the ambient light in the zone.
+     *  @property {AmbientLightProperties|undefined} ambientLight - The ambient light properties of the zone.
+     *  @property {ComponentMode|undefined} skyboxMode=INHERIT - Configures the skybox displayed in the zone.
+     *  @property {SkyboxProperties|undefined} skybox - The skybox properties of the zone.
+     *  @property {ComponentMode|undefined} hazeMode=INHERIT - Configures the haze in the zone.
+     *  @property {HazeProperties|undefined} haze - The haze properties of the zone.
+     *  @property {ComponentMode|undefined} bloomMode=INHERIT - Configures the bloom in the zone.
+     *  @property {BloomProperties|undefined} bloom - The bloom properties of the zone.
+     *  @property {boolean|undefined} flyingAllowed=true - <code>true</code> if visitors can fly in the zone;
      *      <code>false</code> if they cannot. Only works for domain entities.
-     *  @property {boolean|undefined} [ghostingAllowed=true] - <code>true</code> if visitors with avatar collisions turned off
+     *  @property {boolean|undefined} ghostingAllowed=true - <code>true</code> if visitors with avatar collisions turned off
      *      will not collide with content in the zone; <code>false</code> if visitors will always collide with content in the
      *      zone. Only works for domain entities.
-     *  @property {string|undefined} [filterURL=""] - The URL of a JavaScript file that filters changes to properties of
+     *  @property {string|undefined} filterURL="" - The URL of a JavaScript file that filters changes to properties of
      *      entities within the zone. It is periodically executed for each entity in the zone. It can, for example, be used to
      *      not allow changes to certain properties:
      *      <pre>
@@ -94,9 +94,9 @@ class ZoneEntityItem {
      *          return properties;
      *      }
      *      </pre>
-     *  @property {AvatarPriorityMode|undefined} [avatarPriority=INHERIT] - Configures the priority of updates from avatars in
+     *  @property {AvatarPriorityMode|undefined} avatarPriority=INHERIT - Configures the priority of updates from avatars in
      *      the zone to other clients.
-     *  @property {ComponentMode|undefined} [screenshare=INHERIT] - Configures screen-sharing in the zone.
+     *  @property {ComponentMode|undefined} screenshare=INHERIT - Configures screen-sharing in the zone.
      */
     // WEBRTC TODO: Add the following to the Zone entity description once implemented:
     //              Avatar interaction events such as {@link Entities.enterEntity} are also often used with a Zone entity.

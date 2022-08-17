@@ -47,29 +47,29 @@ class HazePropertyGroup {
     /*@sdkdoc
      *  Defines the haze in a zone.
      *  @typedef {object} HazeProperties
-     *  @property {number|undefined} [range=1000] - The horizontal distance at which visibility is reduced to 95%; i.e., 95% of
+     *  @property {number|undefined} range=1000 - The horizontal distance at which visibility is reduced to 95%; i.e., 95% of
      *      each pixel's color is haze.
-     *  @property {color|undefined} [color=128,154,179] - The color of the haze when looking away from the key light.
-     *  @property {boolean|undefined} [enableGlare=false] - <code>true</code> if the haze is colored with glare from the key
+     *  @property {color|undefined} color=128,154,179 - The color of the haze when looking away from the key light.
+     *  @property {boolean|undefined} enableGlare=false - <code>true</code> if the haze is colored with glare from the key
      *      light, <code>false</code> if it isn't. If <code>true</code>, then <code>glareColor</code> and
      *      <code>glareAngle</code> are used.
-     *  @property {color|undefined} [glareColor=255,229,179] - The color of the haze when looking towards the key light.
-     *  @property {number|undefined} [glareAngle=20] - The angle in degrees across the circle around the key light that the
+     *  @property {color|undefined} glareColor=255,229,179 - The color of the haze when looking towards the key light.
+     *  @property {number|undefined} glareAngle=20 - The angle in degrees across the circle around the key light that the
      *      glare color and haze color are blended 50/50.
-     *  @property {boolean|undefined} [altitudeEffect=false] - <code>true</code> if haze decreases with altitude as defined by
+     *  @property {boolean|undefined} altitudeEffect=false - <code>true</code> if haze decreases with altitude as defined by
      *      the entity's local coordinate system, <code>false</code> if it doesn't. If <code>true</code>, then <code>base</code>
      *      and <code>ceiling</code> are used.
-     *  @property {number|undefined} [base=0] - The y-axis value in the entity's local coordinate system at which the haze
+     *  @property {number|undefined} base=0 - The y-axis value in the entity's local coordinate system at which the haze
      *      density starts reducing with altitude.
-     *  @property {number|undefined} [ceiling=200] - The y-axis value in the entity's local coordinate system at which the haze
+     *  @property {number|undefined} ceiling=200 - The y-axis value in the entity's local coordinate system at which the haze
      *      density has reduced to 5%.
-     *  @property {number|undefined} [backgroundBlend=0] - The proportion of the skybox image to show through the haze:
+     *  @property {number|undefined} backgroundBlend=0 - The proportion of the skybox image to show through the haze:
      *      <code>0.0</code> displays no skybox image; <code>1.0</code> displays no haze.
-     *  @property {boolean|undefined} [attenuateKeyLight=false] - <code>true</code> if the haze attenuates the key light,
+     *  @property {boolean|undefined} attenuateKeyLight=false - <code>true</code> if the haze attenuates the key light,
      *      <code>false</code> if it doesn't. If <code>true</code>, then <code>keyLightRange</code> and
      *      <code>keyLightAltitude</code> are used.
-     *  @property {number|undefined} [keyLightRange=1000] - The distance at which the haze attenuates the key light by 95%.
-     *  @property {number|undefined} [keyLightAltitude=200] - The altitude at which the haze starts attenuating the key light
+     *  @property {number|undefined} keyLightRange=1000 - The distance at which the haze attenuates the key light by 95%.
+     *  @property {number|undefined} keyLightAltitude=200 - The altitude at which the haze starts attenuating the key light
      *      (i.e., the altitude at which the distance starts being calculated).
      */
 
