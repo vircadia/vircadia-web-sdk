@@ -386,7 +386,7 @@ class NodeList extends LimitedNodeList {
 
         // The web client uses the domain URL rather than IP address.
         const domainURL = this.#_domainHandler.getURL();
-        if (!domainURL || this.#_domainHandler.checkInPacketTimeout()) {
+        if (domainURL.isEmpty() || !domainURL.isValid() || this.#_domainHandler.checkInPacketTimeout()) {
             return;
         }
 
