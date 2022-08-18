@@ -208,6 +208,10 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        this.#_domainHandler.clearPendingCheckins();
+
+        // WEBRTC TODO: Address further C++ code.
+
         this.setSessionLocalID(info.newLocalID);
         this.setSessionUUID(info.newUUID);
 
@@ -391,7 +395,7 @@ class NodeList extends LimitedNodeList {
         // Open a WebRTC data channel to the domain server if not already open.
         const domainServerSocketState = this._nodeSocket.getSocketState(domainURL, NodeType.DomainServer);
         if (domainServerSocketState !== Socket.CONNECTED) {
-            console.log("[networking] Opening domain server connection. Will not send domain server check-in.");
+            console.log("[networking] Domain server not connected. Will not send domain server check-in.");
             if (domainServerSocketState === Socket.UNCONNECTED) {
                 this._nodeSocket.openSocket(domainURL, NodeType.DomainServer, (socketID: number) => {
                     this.#_domainHandler.setPort(socketID);

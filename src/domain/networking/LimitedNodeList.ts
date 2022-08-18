@@ -642,6 +642,19 @@ class LimitedNodeList {
         return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
     }
 
+    /*@devdoc
+     *  Sets whether outgoing network traffic should be dropped.
+     *  @param {boolean} squelchOutgoingNodeTraffic - <code>true</code> if outgoing packets should be dropped,
+     *      <code>false</code> if they should be sent.
+     */
+    // @ts-ignore
+    setDropOutgoingNodeTraffic(squelchOutgoingNodeTraffic: boolean): void {
+        // C++  void setDropOutgoingNodeTraffic(bool squelchOutgoingNodeTraffic)
+
+        // WEBRTC TODO: Address further C++ code.
+
+    }
+
 
     /*@devdoc
      *  Checks whether an address is belongs to a node. Used as a {@link Socket~connectionCreationFilterOperator}.

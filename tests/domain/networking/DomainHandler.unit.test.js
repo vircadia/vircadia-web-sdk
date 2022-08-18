@@ -115,5 +115,37 @@ describe("DomainHandler - integration tests", () => {
         }, 100);
     });
 
+    test("Can get and clear silent domain check-ins count", () => {
+        // Start at 0.
+        expect(domainHandler.getCheckInPacketsSinceLastReply()).toBe(0);
+
+        // Increment by 1.
+        expect(domainHandler.checkInPacketTimeout()).toBe(false);
+        expect(domainHandler.getCheckInPacketsSinceLastReply()).toBe(1);
+
+        // Clear.
+        domainHandler.clearPendingCheckins();
+        expect(domainHandler.getCheckInPacketsSinceLastReply()).toBe(0);
+    });
+
+    test("The limit of silent domain check-ins triggers a signal", (done) => {
+        domainHandler.limitOfSilentDomainCheckInsReached.connect(() => {
+            expect(domainHandler.getCheckInPacketsSinceLastReply()).toBe(6);
+            domainHandler.clearPendingCheckins();
+            done();
+        });
+
+        // Start at 0.
+        domainHandler.clearPendingCheckins();
+
+        // increment by N.
+        expect(domainHandler.checkInPacketTimeout()).toBe(false);
+        expect(domainHandler.checkInPacketTimeout()).toBe(false);
+        expect(domainHandler.checkInPacketTimeout()).toBe(false);
+        expect(domainHandler.checkInPacketTimeout()).toBe(false);
+        expect(domainHandler.checkInPacketTimeout()).toBe(false);
+        expect(domainHandler.checkInPacketTimeout()).toBe(true);
+    });
+
     log.mockReset();
 });
