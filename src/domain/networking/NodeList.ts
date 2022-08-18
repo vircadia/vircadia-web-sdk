@@ -208,7 +208,9 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        // This is a packet from the domain server; resume normal connection.
         this.#_domainHandler.clearPendingCheckins();
+        this.setDropOutgoingNodeTraffic(false);
 
         // WEBRTC TODO: Address further C++ code.
 

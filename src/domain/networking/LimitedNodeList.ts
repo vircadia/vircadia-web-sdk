@@ -141,6 +141,8 @@ class LimitedNodeList {
 
     #_nodeHash: Map<bigint, Node> = new Map();  // Map<Uuid, Node>
 
+    #_dropOutgoingNodeTraffic = false;
+
     #_uuidChanged = new SignalEmitter();
     #_nodeAdded = new SignalEmitter();
     #_nodeActivated = new SignalEmitter();
@@ -239,7 +241,15 @@ class LimitedNodeList {
         const sockAddr = param1;
         assert(sockAddr.getType() === SocketType.WebRTC, "Destination is not a WebRTC socket!");
 
-        // WEBRTC TODO: Address further C++ code.
+        if (this.#_dropOutgoingNodeTraffic) {
+            const destinationNode = this.findNodeWithAddr(sockAddr);
+
+            // findNodeWithAddr() returns null for the address of the domain server.
+            if (destinationNode !== null) {
+                // This only suppresses individual unreliable packets, not unreliable packet lists.
+                return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
+            }
+        }
 
         this.#fillPacketHeader(packet, hmacAuth);
 
@@ -643,16 +653,13 @@ class LimitedNodeList {
     }
 
     /*@devdoc
-     *  Sets whether outgoing network traffic should be dropped.
-     *  @param {boolean} squelchOutgoingNodeTraffic - <code>true</code> if outgoing packets should be dropped,
-     *      <code>false</code> if they should be sent.
+     *  Sets whether outgoing network traffic not destined for the domain server should be dropped.
+     *  @param {boolean} squelchOutgoingNodeTraffic - <code>true</code> if outgoing packets not destined for the domain server
+     *      should be dropped, <code>false</code> if they should be sent.
      */
-    // @ts-ignore
     setDropOutgoingNodeTraffic(squelchOutgoingNodeTraffic: boolean): void {
         // C++  void setDropOutgoingNodeTraffic(bool squelchOutgoingNodeTraffic)
-
-        // WEBRTC TODO: Address further C++ code.
-
+        this.#_dropOutgoingNodeTraffic = squelchOutgoingNodeTraffic;
     }
 
 
