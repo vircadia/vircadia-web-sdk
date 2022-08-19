@@ -43,6 +43,8 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.DomainServerPathQuery.write).toBe("function");
         expect(typeof PacketScribe.DomainServerPathResponse).toBe("object");
         expect(typeof PacketScribe.DomainServerPathResponse.read).toBe("function");
+        expect(typeof PacketScribe.DomainServerAddedNode).toBe("object");
+        expect(typeof PacketScribe.DomainServerAddedNode.read).toBe("function");
         expect(typeof PacketScribe.SetAvatarTraits).toBe("object");
         expect(typeof PacketScribe.SetAvatarTraits.write).toBe("function");
         expect(typeof PacketScribe.AvatarIdentity).toBe("object");

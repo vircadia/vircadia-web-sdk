@@ -190,8 +190,9 @@ const enum PacketTypeValue {
  *      response to a DomainServerPathQuery packet, to provide the position and orientation set for a path in the domain.<br />
  *      {@link PacketScribe.DomainServerPathResponseDetails}
  *  @property {PacketType} DomainServerAddedNode - <code>21</code> - The Domain Server sends this to user clients when an
- *      assignment client start up, and to assignment clients and when another assignment client starts up or a user connects to
- *      the domain.
+ *      assignment client starts up and the user client has registered interest in that assignment client node type, and to
+ *      assignment clients when another assignment client starts up or a user connects to the domain.<br />
+ *      {@link PacketScribe.DomainServerAddedNodeDetails}
  *  @property {PacketType} ICEServerPeerInformation - <code>22</code>
  *  @property {PacketType} ICEServerQuery - <code>23</code>
  *  @property {PacketType} OctreeStats - <code>24</code>
