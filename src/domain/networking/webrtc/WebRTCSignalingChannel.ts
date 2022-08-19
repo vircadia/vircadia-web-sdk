@@ -225,7 +225,10 @@ class WebRTCSignalingChannel {
     close(): void {
         if (this.#_websocket) {
             this.#_websocket.close();
-            this.#_websocket = null;
+            const WEBSOCKET_RELEASE_DELAY = 100;  // Delay releasing the WebSocket so that callbacks can be called.
+            setTimeout(() => {
+                this.#_websocket = null;
+            }, WEBSOCKET_RELEASE_DELAY);
         }
     }
 
