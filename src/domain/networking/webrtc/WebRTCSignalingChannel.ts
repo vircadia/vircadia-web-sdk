@@ -225,7 +225,7 @@ class WebRTCSignalingChannel {
     close(): void {
         if (this.#_websocket) {
             this.#_websocket.close();
-            // WEBRTC FIXME: Set _websocket = null once the WebSocket has closed.
+            this.#_websocket = null;
         }
     }
 
