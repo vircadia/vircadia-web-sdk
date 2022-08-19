@@ -515,8 +515,15 @@ class NodeList extends LimitedNodeList {
 
         }
 
-        // WEBRTC TODO: Address further C++ code.
+        // Send duplicate check-ins in the exponentially increasing sequence 1, 1, 2, 4, ... for increased resilience.
+        const MAX_CHECKINS_TOGETHER = 20;
+        const outstandingCheckins = this.#_domainHandler.getCheckInPacketsSinceLastReply();
 
+        let checkinCount = outstandingCheckins > 1 ? 2 ** (outstandingCheckins - 2) : 1;
+        checkinCount = Math.min(checkinCount, MAX_CHECKINS_TOGETHER);
+        for (let i = 1; i < checkinCount; i += 1) {
+            this.sendPacket(packet, domainSockAddr);
+        }
         this.sendPacket(packet, domainSockAddr);
     };
 
