@@ -268,7 +268,7 @@ class WebRTCDataChannel {
                     this.#_peerConnection?.connectionState);
             }
             let errorMessage = "";
-            switch (this.#_peerConnection ? this.#_peerConnection.connectionState : "") {
+            switch (this.#_peerConnection ? this.#_peerConnection.connectionState : "nopeer") {
                 case "new":
                 case "connecting":
                     // The connection is being established.
@@ -287,6 +287,10 @@ class WebRTCDataChannel {
                     if (this.#_oncloseCallback) {
                         this.#_oncloseCallback();
                     }
+                    break;
+                case "nopeer":
+                    // There is no peer connection.
+                    // The connection will already have been closed so ignore.
                     break;
                 default:
                     // Unexpected condition.
