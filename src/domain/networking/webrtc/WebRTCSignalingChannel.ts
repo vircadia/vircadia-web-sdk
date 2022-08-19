@@ -225,7 +225,10 @@ class WebRTCSignalingChannel {
     close(): void {
         if (this.#_websocket) {
             this.#_websocket.close();
-            // WEBRTC FIXME: Set _websocket = null once the WebSocket has closed.
+            const WEBSOCKET_RELEASE_DELAY = 100;  // Delay releasing the WebSocket so that callbacks can be called.
+            setTimeout(() => {
+                this.#_websocket = null;
+            }, WEBSOCKET_RELEASE_DELAY);
         }
     }
 

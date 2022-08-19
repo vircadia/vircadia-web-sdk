@@ -165,7 +165,6 @@ class DomainServer {
         });
         domainHandler.disconnectedFromDomain.connect(() => {
             if (this.#_state !== DomainServer.DISCONNECTED) {
-                this.#stopDomainServerCheckins();
                 this.#setState(DomainServer.DISCONNECTED);
             }
         });
@@ -177,6 +176,12 @@ class DomainServer {
         this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
         this.#_nodeList.nodeKilled.connect(this.#nodeKilled);
         this.#_nodeList.uuidChanged.connect(this.#setSessionUUID);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_nodeList.getDomainHandler().limitOfSilentDomainCheckInsReached.connect(() => {
+            this.#_nodeList.reset("Domain checkin limit");
+        });
 
         // WEBRTC TODO: Address further C++ code.
 

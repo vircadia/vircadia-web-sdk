@@ -107,6 +107,16 @@ class LimitedNodeList {
 
     static readonly INVALID_PORT = -1;
 
+    /**
+     *  Gets a string representing the connect reason value.
+     *  @param {number} connectReason - The connect reason value.
+     *  @returns {string} A string representing the connect reason value.
+     */
+    static connectReasonToString(connectReason: number): string {
+        // C++  N/A
+        return ["Connect", "SilentDomainDisconnect", "Awake"][connectReason] ?? "Invalid";
+    }
+
 
     protected _nodeSocket = new Socket();
     protected _localSockAddr = new SockAddr();
@@ -140,6 +150,8 @@ class LimitedNodeList {
     #_sessionLocalID: LocalID = 0;
 
     #_nodeHash: Map<bigint, Node> = new Map();  // Map<Uuid, Node>
+
+    #_dropOutgoingNodeTraffic = false;
 
     #_uuidChanged = new SignalEmitter();
     #_nodeAdded = new SignalEmitter();
@@ -239,7 +251,15 @@ class LimitedNodeList {
         const sockAddr = param1;
         assert(sockAddr.getType() === SocketType.WebRTC, "Destination is not a WebRTC socket!");
 
-        // WEBRTC TODO: Address further C++ code.
+        if (this.#_dropOutgoingNodeTraffic) {
+            const destinationNode = this.findNodeWithAddr(sockAddr);
+
+            // findNodeWithAddr() returns null for the address of the domain server.
+            if (destinationNode !== null) {
+                // This only suppresses individual unreliable packets, not unreliable packet lists.
+                return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
+            }
+        }
 
         this.#fillPacketHeader(packet, hmacAuth);
 
@@ -640,6 +660,16 @@ class LimitedNodeList {
         console.log(`[networking] LimitedNodeList.sendPacketList called without active socket for node
             ${destinationNode.getUUID().stringify()}. Not sending.`);
         return LimitedNodeList.#ERROR_SENDING_PACKET_BYTES;
+    }
+
+    /*@devdoc
+     *  Sets whether outgoing network traffic not destined for the domain server should be dropped.
+     *  @param {boolean} squelchOutgoingNodeTraffic - <code>true</code> if outgoing packets not destined for the domain server
+     *      should be dropped, <code>false</code> if they should be sent.
+     */
+    setDropOutgoingNodeTraffic(squelchOutgoingNodeTraffic: boolean): void {
+        // C++  void setDropOutgoingNodeTraffic(bool squelchOutgoingNodeTraffic)
+        this.#_dropOutgoingNodeTraffic = squelchOutgoingNodeTraffic;
     }
 
 

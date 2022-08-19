@@ -314,6 +314,15 @@ describe("LimitedNodeList - integration tests", () => {
         expect(limitedNodeList.nodeWithLocalID(AUDIO_MIXER_NODE_INFO.sessionLocalID) instanceof Node).toBe(true);
     });
 
+    test("Can get the string representation of ConnectReason values", () => {
+        expect(LimitedNodeList.connectReasonToString(LimitedNodeList.ConnectReason.Awake)).toBe("Awake");
+        expect(LimitedNodeList.connectReasonToString(LimitedNodeList.ConnectReason.Connect)).toBe("Connect");
+        expect(LimitedNodeList.connectReasonToString(LimitedNodeList.ConnectReason.SilentDomainDisconnect))
+            .toBe("SilentDomainDisconnect");
+        expect(LimitedNodeList.connectReasonToString(-1)).toBe("Invalid");
+        expect(LimitedNodeList.connectReasonToString(27)).toBe("Invalid");
+    });
+
     // The following items are tested elsewhere:
     // - sendPacket() - Tested implicitly by NodeList integration test.
     // - sendUnreliablePacket() - Tested implicitly by NodeList integration test.

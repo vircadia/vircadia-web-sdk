@@ -90,6 +90,9 @@ class DomainHandler {
         readonly NotAuthorizedDomain = 7;
     }();
 
+    static readonly #SILENT_DOMAIN_TRAFFIC_DROP_MIN = 2;
+    static readonly #MAX_SILENT_DOMAIN_SERVER_CHECK_INS = 5;
+
 
     #_domainURL = new Url();
     #_sockAddr = new SockAddr();  // For WebRTC, the port is the critical part.
@@ -99,10 +102,12 @@ class DomainHandler {
 
     #_errorDomainURL = new Url();
     #_domainConnectionRefusals: Set<string> = new Set();
+    #_checkInPacketsSinceLastReply = 0;
 
     #_connectedToDomain = new SignalEmitter();
     #_disconnectedFromDomain = new SignalEmitter();
     #_domainConnectionRefused = new SignalEmitter();
+    #_limitOfSilentDomainCheckInsReached = new SignalEmitter();
 
     #_pendingPath = "";
 
@@ -273,8 +278,24 @@ class DomainHandler {
     }
 
     /*@devdoc
-     *  Gets whether the client's connection to the domain server has timed out &mdash; it hasn't been responding to
-     *  DomainConnectRequest and DomainListRequest packets for a while.
+     *  Gets the number of check-in packets sent since the last reply from the domain server.
+     *  @returns {number} The number of check-in packets sent since the last reply from the domain server.
+     */
+    getCheckInPacketsSinceLastReply(): number {
+        return this.#_checkInPacketsSinceLastReply;
+    }
+
+    /*@devdoc
+     *  Clears the count of check-in packets sent since the last reply from the domain server.
+     */
+    clearPendingCheckins(): void {
+        this.#_checkInPacketsSinceLastReply = 0;
+    }
+
+    /*@devdoc
+     *  Checks whether the client's connection to the domain server has timed out &mdash; it hasn't been responding to
+     *  DomainConnectRequest and DomainListRequest packets for a while. Triggers
+     *  {@link DomainHandler.limitOfSilentDomainCheckInsReached|limitOfSilentDomainCheckInsReached} when timed out.
      *  @returns {boolean} <code>true</code> if the client's connection to the domain server has timed out, <code>false</code>
      *      if it hasn't.
      */
@@ -282,10 +303,27 @@ class DomainHandler {
     checkInPacketTimeout(): boolean {
         // C++  bool checkInPacketTimeout()
 
-        // WEBRTC TODO: Address further C++ code. And add an integration test.
+        this.#_checkInPacketsSinceLastReply += 1;
+
+        if (this.#_checkInPacketsSinceLastReply > 1) {
+            console.log("[networking] Silent domain checkins:", this.#_checkInPacketsSinceLastReply);
+        }
+
+        if (this.#_checkInPacketsSinceLastReply > DomainHandler.#SILENT_DOMAIN_TRAFFIC_DROP_MIN) {
+            console.log("[networking]", this.#_checkInPacketsSinceLastReply,
+                "seconds since last domain check-in; squelching traffic");
+            this.#_nodeList.setDropOutgoingNodeTraffic(true);
+        }
+
+        if (this.#_checkInPacketsSinceLastReply > DomainHandler.#MAX_SILENT_DOMAIN_SERVER_CHECK_INS) {
+            console.log("[networking] Limit of silent domain check-ins reached");
+            this.#_limitOfSilentDomainCheckInsReached.emit();
+            return true;
+        }
 
         return false;
     }
+
 
     /*@devdoc
      *  Disconnects from the domain and restart the connection process.
@@ -295,6 +333,10 @@ class DomainHandler {
         // C++  void softReset(QString reason) {
         console.log("[networking] Resetting current domain connection information.");
         this.disconnect(reason);
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_checkInPacketsSinceLastReply = 0;
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -309,6 +351,10 @@ class DomainHandler {
      */
     processDomainServerConnectionDeniedPacket = (message: ReceivedMessage): void => {
         // C++  void DomainHandler::processDomainServerConnectionDeniedPacket(ReceivedMessage* message)
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_checkInPacketsSinceLastReply = 0;
 
         const info = PacketScribe.DomainConnectionDenied.read(message.getMessage());
         const sanitizedExtraInfo = info.extraInfo.toLowerCase().startsWith("http") ? "" : info.extraInfo;
@@ -434,8 +480,18 @@ class DomainHandler {
      *  @returns {Signal}
      */
     get domainConnectionRefused(): Signal {
-        // C++  void domainConnectionRefused(QString reasonMessage, int reasonCode, const QString& extraInfo);
+        // C++  void domainConnectionRefused(QString reasonMessage, int reasonCode, const QString& extraInfo)
         return this.#_domainConnectionRefused.signal();
+    }
+
+    /*@devdoc
+     *  Triggered when the maximum number of check-in packets have been sent without reply.
+     *  @function DomainHandler.limitOfSilentDomainCheckInsReached
+     *  @returns {Signal}
+     */
+    get limitOfSilentDomainCheckInsReached(): Signal {
+        // C++  void limitOfSilentDomainCheckInsReached()
+        return this.#_limitOfSilentDomainCheckInsReached.signal();
     }
 
 
