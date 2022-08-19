@@ -107,6 +107,16 @@ class LimitedNodeList {
 
     static readonly INVALID_PORT = -1;
 
+    /**
+     *  Gets a string representing the connect reason value.
+     *  @param {number} connectReason - The connect reason value.
+     *  @returns {string} A string representing the connect reason value.
+     */
+    static connectReasonToString(connectReason: number): string {
+        // C++  N/A
+        return ["Connect", "SilentDomainDisconnect", "Awake"][connectReason] ?? "Invalid";
+    }
+
 
     protected _nodeSocket = new Socket();
     protected _localSockAddr = new SockAddr();

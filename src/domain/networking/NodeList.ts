@@ -100,6 +100,12 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        this.#_domainHandler.limitOfSilentDomainCheckInsReached.connect(() => {
+            if (this.#_connectReason !== LimitedNodeList.ConnectReason.Awake) {
+                this.#_connectReason = LimitedNodeList.ConnectReason.SilentDomainDisconnect;
+            }
+        });
+
         this._packetReceiver.registerListener(PacketType.DomainList,
             PacketReceiver.makeUnsourcedListenerReference(this.processDomainList));
         this._packetReceiver.registerListener(PacketType.Ping,
@@ -205,6 +211,15 @@ class NodeList extends LimitedNodeList {
         // WEBRTC TODO: This should involve a NLPacketList, not just a single NLPacket.
 
         const info = PacketScribe.DomainList.read(message.getMessage());
+
+        // WEBRTC TODO: Address further C++ code.
+
+        if (info.newConnection) {
+
+            // WEBRTC TODO: Address further C++ code.
+
+            this.#_connectReason = LimitedNodeList.ConnectReason.Connect;
+        }
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -382,7 +397,9 @@ class NodeList extends LimitedNodeList {
     sendDomainServerCheckIn = (): void => {
         // C++  void sendDomainServerCheckIn()
 
-        // WEBRTC TODO: Address further C++ code.
+        // C++ _sendDomainServerCheckInEnabled code is N/A because it's relevant only to Android.
+
+        // WEBRTC TODO: Address further C++ code - shutting down.
 
         // The web client uses the domain URL rather than IP address.
         const domainURL = this.#_domainHandler.getURL();
@@ -397,7 +414,6 @@ class NodeList extends LimitedNodeList {
         // Open a WebRTC data channel to the domain server if not already open.
         const domainServerSocketState = this._nodeSocket.getSocketState(domainURL, NodeType.DomainServer);
         if (domainServerSocketState !== Socket.CONNECTED) {
-            console.log("[networking] Domain server not connected. Will not send domain server check-in.");
             if (domainServerSocketState === Socket.UNCONNECTED) {
                 this._nodeSocket.openSocket(domainURL, NodeType.DomainServer, (socketID: number) => {
                     this.#_domainHandler.setPort(socketID);
@@ -411,12 +427,15 @@ class NodeList extends LimitedNodeList {
         const domainSockAddr = this.#_domainHandler.getSockAddr();
 
         if (!isDomainConnected) {
+            const hostname = this.#_domainHandler.getURL().host();
+            const connectReason = LimitedNodeList.connectReasonToString(this.#_connectReason);
+            console.log("[networking] Sending connect request ( REASON:", connectReason, ") to domain-server at", hostname);
 
-            // WEBRTC TODO: Address further C++ code.
+            // WEBRTC TODO: Address further C++ code - localhost port.
 
         }
 
-        // WEBRTC TODO: Address further C++ code.
+        // WEBRTC TODO: Address further C++ code - user name signature.
 
         // Data common to DomainConnectRequest and DomainListRequest.
         const currentTime = BigInt(Date.now().valueOf());
