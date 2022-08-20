@@ -113,6 +113,8 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        this._packetReceiver.registerListener(PacketType.DomainServerAddedNode,
+            PacketReceiver.makeUnsourcedListenerReference(this.processDomainServerAddedNode));
         this._packetReceiver.registerListener(PacketType.DomainConnectionDenied,
             PacketReceiver.makeUnsourcedListenerReference(this.#_domainHandler.processDomainServerConnectionDeniedPacket));
 
@@ -256,6 +258,25 @@ class NodeList extends LimitedNodeList {
             this.addNewNode(node);
         }
 
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|DomainServerAddedNode} message received from the doman server.
+     *  @function NodeList.processDomainServerAddedNode
+     *  @type {Listener}
+     *  @param {ReceivedMessage} message - The DomainServerAddedNode message.
+     */
+    processDomainServerAddedNode = (message: ReceivedMessage): void => {
+        // C++  void processDomainServerAddedNode(QSharedPointer<ReceivedMessage> message)
+
+        const info = PacketScribe.DomainServerAddedNode.read(message.getMessage());
+
+        // If the public socket address is 0 then it's reachable at the same IP as the domain server.
+        if (info.publicSocket.getAddress() === 0) {
+            info.publicSocket.setAddress(this.#_domainHandler.getSockAddr().getAddress());
+        }
+
+        this.addNewNode(info);
     };
 
     /*@devdoc
