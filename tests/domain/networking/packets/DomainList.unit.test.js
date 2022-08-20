@@ -47,8 +47,4 @@ describe("DomainList - unit tests", () => {
         expect(node.connectionSecretUUID instanceof Uuid).toBe(true);
     });
 
-    test("Can obtain assignment client details from a DomainList packet", () => {
-        expect(true).toBe(true);
-    });
-
 });

@@ -384,7 +384,6 @@ class WebRTCDataChannel {
 
         // Respond to signaling channel messages.
         this.#_signalingChannel.addEventListener("message", this.#onSignalingChannelMessage);
-            NodeType.getNodeTypeName(this.#_nodeType), this.#_id);
 
         // Start the WebRTC connection process.
         void this.#start();
