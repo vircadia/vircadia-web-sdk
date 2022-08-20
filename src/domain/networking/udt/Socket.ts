@@ -167,6 +167,9 @@ class Socket {
         if (connectionErased && UDT.UDT_CONNECTION_DEBUG) {
             console.log("[networking] Socket.cleanupConnection called for connection to", sockAddr.toString());
         }
+
+        // Close WebDTC data channel.
+        this.#_webrtcSocket.disconnectFromHost(sockAddr.getPort());
     }
 
     /*@devdoc
