@@ -334,6 +334,13 @@ class WebRTCDataChannel {
             this.#_dataChannel = null;
             if (this.#_peerConnection) {
                 this.#_peerConnection.close();
+
+                // FIXME: The close() call doesn't cause this.#_peerConnection state change event to fire so replicate close()
+                // code here.
+                this.#_peerConnection = null;
+                if (this.#_oncloseCallback) {
+                    this.#_oncloseCallback();
+                }
             }
         };
 
