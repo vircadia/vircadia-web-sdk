@@ -122,6 +122,8 @@ class WebRTCSignalingChannel {
 
     #_websocket: WebSocket | null = null;
 
+    #_eventCallbacks: Map<EventCallback | MessageEventCallback | CloseEventCallback, (event: Event) => void> = new Map();
+
 
     constructor(websocketURL: string) {
         if (typeof websocketURL !== "string" || websocketURL === "") {
@@ -179,7 +181,7 @@ class WebRTCSignalingChannel {
      */
     addEventListener(eventName: string, callback: EventCallback | MessageEventCallback | CloseEventCallback): void {
         if (this.#_websocket) {
-            this.#_websocket.addEventListener(eventName, function (event) {
+            const handlerMethod = (event: Event): void => {
                 switch (event.type) {
                     case "open":
                     case "error":
@@ -195,7 +197,27 @@ class WebRTCSignalingChannel {
                         <EventCallback><unknown>callback(<any>event);
                         break;
                 }
-            });
+            };
+            this.#_websocket.addEventListener(eventName, handlerMethod);
+            this.#_eventCallbacks.set(callback, handlerMethod);
+        }
+    }
+
+    /*@devdoc
+     *  Removes a function set to be called upon the occurrence of an <code>"open"</code>, <code>"message"</code>,
+     *  <code>"error"</code>, or <code>"close"</code> event.
+     *  @param {string} eventName - <code>"open"</code>, <code>"message"</code>, <code>"error"</code>, or <code>"close"</code>.
+     *  @param {WebRTCSignalingChannel~onOpenCallback|WebRTCSignalingChannel~onMessageCallback
+     *      |WebRTCSignalingChannel~onErrorCallback|WebRTCSignalingChannel~onCloseCallback} callback - The function called each
+     *      time the event occurs.
+     */
+    removeEventListener(eventName: string, callback: EventCallback | MessageEventCallback | CloseEventCallback): void {
+        if (this.#_websocket) {
+            const callbackMethod = this.#_eventCallbacks.get(callback);
+            if (callbackMethod) {
+                this.#_websocket.removeEventListener(eventName, callbackMethod);
+                this.#_eventCallbacks.delete(callback);
+            }
         }
     }
 
