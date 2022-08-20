@@ -226,6 +226,7 @@ class WebRTCDataChannel {
      */
     close(): void {
         this.#_readyState = WebRTCDataChannel.CLOSING;
+        this.#_signalingChannel?.removeEventListener("message", this.#onSignalingChannelMessage);
         if (this.#_dataChannel) {
             this.#_dataChannel.close();
         }
