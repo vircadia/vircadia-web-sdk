@@ -288,6 +288,9 @@ class WebRTCDataChannel {
                     // One or more transports has terminated or is in error, or the peer connection has gone away.
                     if (this.#_readyState !== WebRTCDataChannel.CLOSED) {
                         this.#_readyState = WebRTCDataChannel.CLOSED;
+                        if (this.#_peerConnection) {
+                            this.#_peerConnection.close();
+                        }
                         this.#_peerConnection = null;
                         if (this.#_oncloseCallback) {
                             this.#_oncloseCallback();
