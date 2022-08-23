@@ -261,7 +261,7 @@ class NodeList extends LimitedNodeList {
     };
 
     /*@devdoc
-     *  Processes a {@link PacketType(1)|DomainServerAddedNode} message received from the doman server.
+     *  Processes a {@link PacketType(1)|DomainServerAddedNode} message received from the domain server.
      *  @function NodeList.processDomainServerAddedNode
      *  @type {Listener}
      *  @param {ReceivedMessage} message - The DomainServerAddedNode message.

@@ -168,7 +168,7 @@ class Socket {
             console.log("[networking] Socket.cleanupConnection called for connection to", sockAddr.toString());
         }
 
-        // Close WebDTC data channel.
+        // Close WebRTC data channel.
         this.#_webrtcSocket.disconnectFromHost(sockAddr.getPort());
     }
 

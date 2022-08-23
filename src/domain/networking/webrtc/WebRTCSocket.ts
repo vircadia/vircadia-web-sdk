@@ -314,7 +314,7 @@ class WebRTCSocket {
     }
 
     #closeWebRTCDataChannel(socketID: number): void {
-        // C++  WebRFTC-specific method.
+        // C++  WebRTC-specific method.
         const channel = this.#_webrtcDataChannelsByChannelID.get(socketID);
         if (channel) {
             channel.webrtcDataChannel.close();
