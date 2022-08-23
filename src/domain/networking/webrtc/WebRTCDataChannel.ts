@@ -128,6 +128,8 @@ class WebRTCDataChannel {
     #_dataChannelID = 0;
     #_readyState = WebRTCDataChannel.CLOSED;
 
+    #_savedICECandidates: RTCIceCandidateInit[] = [];
+
     #_onopenCallback: OnOpenCallback | null = null;
     #_onmessageCallback: OnMessageCallback | null = null;
     #_oncloseCallback: OnCloseCallback | null = null;
@@ -282,16 +284,18 @@ class WebRTCDataChannel {
                 case "disconnected":
                 case "failed":
                 case "closed":
-                    // One or more transports has terminated or is in error.
-                    this.#_readyState = WebRTCDataChannel.CLOSED;
-                    this.#_peerConnection = null;
-                    if (this.#_oncloseCallback) {
-                        this.#_oncloseCallback();
-                    }
-                    break;
                 case "nopeer":
-                    // There is no peer connection.
-                    // The connection will already have been closed so ignore.
+                    // One or more transports has terminated or is in error, or the peer connection has gone away.
+                    if (this.#_readyState !== WebRTCDataChannel.CLOSED) {
+                        this.#_readyState = WebRTCDataChannel.CLOSED;
+                        if (this.#_peerConnection) {
+                            this.#_peerConnection.close();
+                        }
+                        this.#_peerConnection = null;
+                        if (this.#_oncloseCallback) {
+                            this.#_oncloseCallback();
+                        }
+                    }
                     break;
                 default:
                     // Unexpected condition.
@@ -358,6 +362,7 @@ class WebRTCDataChannel {
         // Don't set the local description until we have the remote answer because setting the local description triggers ICE
         // candidate gathering and the remote isn't ready to handle them yet.
         this.#_haveSetRemoteDescription = false;
+        this.#_savedICECandidates = [];
 
         // Send offer to domain server.
         if (this.#_DEBUG) {
@@ -429,6 +434,18 @@ class WebRTCDataChannel {
 
                         await this.#_peerConnection.setRemoteDescription(description);
                         this.#_haveSetRemoteDescription = true;
+
+                        if (this.#_savedICECandidates.length > 0) {
+                            if (this.#_DEBUG) {
+                                console.debug(`[webrtc] [${this.#_nodeTypeName}] Add saved ICE candidates.`);
+                            }
+                            for (const iceCandidate of this.#_savedICECandidates) {
+                                void this.#_peerConnection.addIceCandidate(iceCandidate);
+                            }
+                            this.#_savedICECandidates = [];
+                        }
+
+
                     } else {
                         const errorMessage = `WebRTCDataChannel: Unexpected answer! ${description.type}`;
                         console.error(errorMessage);
@@ -446,8 +463,11 @@ class WebRTCDataChannel {
                     }
                     if (this.#_peerConnection && this.#_haveSetRemoteDescription) {
                         await this.#_peerConnection.addIceCandidate(candidate);
-                    } else if (this.#_DEBUG) {
-                        console.debug(`[webrtc] [${this.#_nodeTypeName}] Skipped adding ICE candidate.`);
+                    } else {
+                        if (this.#_DEBUG) {
+                            console.debug(`[webrtc] [${this.#_nodeTypeName}] Save ICE candidate for later.`);
+                        }
+                        this.#_savedICECandidates.push(candidate);
                     }
                 } else if (echo) {
                     // Ignore signaling channel "echo" messages.
