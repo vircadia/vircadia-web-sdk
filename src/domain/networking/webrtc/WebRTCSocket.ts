@@ -173,6 +173,21 @@ class WebRTCSocket {
     }
 
     /*@devdoc
+     *  Closes a specific connection and clears the receive queue of messages to that connection.
+     *  @param {number} socketID - The WebRTC data channel ID of the socket connection.
+     */
+    disconnectFromHost(socketID: number): void {
+        this.#closeWebRTCDataChannel(socketID);
+
+        // Clear receive queue or messages from the connection.
+        for (let i = this.#_receivedQueue.length - 1; i >= 0; i--) {
+            if (this.#_receivedQueue[i]?.channelID === socketID) {
+                this.#_receivedQueue.splice(i, 1);
+            }
+        }
+    }
+
+    /*@devdoc
      *  Immediately closes all connections and clears the receive queue and without waiting for any outgoing data to complete
      *  being sent.
      */
@@ -296,6 +311,16 @@ class WebRTCSocket {
             this.#_receivedQueue.push({ channelID, message });
             this.#_readyRead.emit();
         };
+    }
+
+    #closeWebRTCDataChannel(socketID: number): void {
+        // C++  WebRTC-specific method.
+        const channel = this.#_webrtcDataChannelsByChannelID.get(socketID);
+        if (channel) {
+            channel.webrtcDataChannel.close();
+            this.#_webrtcDataChannelsByNodeType.delete(channel.nodeType);
+            this.#_webrtcDataChannelsByChannelID.delete(socketID);
+        }
     }
 
     #closeWebRTCDataChannels(): void {

@@ -58,7 +58,8 @@ class LimitedNodeList {
     // C++  LimitedNodeList : public QObject, public Dependency
 
     /*@devdoc
-     *  Assignment client node information received in {@link PacketScribe.DomainListDetails} packet data.
+     *  Assignment client node information received in {@link PacketScribe.DomainListDetails} and
+     *  {@link PacketScribe.DomainServerAddedNodeDetails} packet data.
      *  @typedef {object} LimitedNodeList.NewNodeInfo
      *  @property {NodeType} type - The type of node.
      *  @property {Uuid} uuid - The UUID of the node.

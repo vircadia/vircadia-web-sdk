@@ -87,7 +87,6 @@ describe("WebRTCDataChannel - integration tests", () => {
     });
 
     test("Data channel ready states reflect connection status", () => {
-        expect.assertions(4);
         expect(initialChannelReadyState).toBe(WebRTCDataChannel.CONNECTING);
         expect(openChannelReadyState).toBe(WebRTCDataChannel.OPEN);
         expect(closingChannelReadyState).toBe(WebRTCDataChannel.CLOSING);
