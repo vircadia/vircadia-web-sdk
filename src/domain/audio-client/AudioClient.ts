@@ -151,6 +151,8 @@ class AudioClient {
      *  @function AudioClient.switchInputDevice
      *  @param {MediaStream|null} inputDevice - The audio input stream from the user client to be sent to the audio mixer.
      *      <code>null</code> for no input device.
+     *  @returns {Promise<boolean>} <code>true</code> if successfully switched to the given input device, <code>false</code> if
+     *      unsuccessful.
      */
     async switchInputDevice(inputDevice: MediaStream | null): Promise<boolean> {
         // C++  bool AudioClient::switchAudioDevice(QAudio::Mode mode, const HifiAudioDeviceInfo& deviceInfo)
@@ -159,7 +161,11 @@ class AudioClient {
         //      The method has been renamed accordingly.
         //      The deviceInfo parameter has been repurposed to be an input MediaStream or null.
         this.#_inputDevice = inputDevice;
-        return this.#switchInputToAudioDevice(inputDevice);
+        const success = await this.#switchInputToAudioDevice(inputDevice);
+        if (this.#_isMuted) {
+            void this.#switchInputToAudioDevice(null);
+        }
+        return success;
     }
 
 
