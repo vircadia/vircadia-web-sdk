@@ -72,6 +72,13 @@ describe("AvatarData - unit tests", () => {
         }, 10);
     });
 
+    test("Can set and get the audio loudness", () => {
+        const avatarData = new AvatarData(contextID);
+        expect(avatarData.getAudioLoudness()).toBe(0);
+        avatarData.setAudioLoudness(12);
+        expect(avatarData.getAudioLoudness()).toBe(12);
+    });
+
     test("Cannot limit the avatar height per the domain", (done) => {
         // This because at the AvatarData class level the target scale cannot be changed.
         const avatarData = new AvatarData(contextID);

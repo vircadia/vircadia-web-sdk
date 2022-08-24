@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AudioClient from "../audio-client/AudioClient";
 import Avatar from "../avatar-renderer/Avatar";
 import ClientTraitsHandler from "../avatars/ClientTraitsHandler";
 import NodeList from "../networking/NodeList";
@@ -87,10 +88,15 @@ class MyAvatar extends Avatar {
 
     #_scaleChanged = new SignalEmitter();
 
+    #_audioClient: AudioClient | undefined = undefined;
+    #_contextID;
+
 
     constructor(contextID: number) {
         // C++  Avatar()
         super(contextID);
+
+        this.#_contextID = contextID;
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -114,6 +120,27 @@ class MyAvatar extends Avatar {
     get scaleChanged(): Signal {
         // C++  void scaleChanged();
         return this.#_scaleChanged.signal();
+    }
+
+
+    /*@devdoc
+     *  Game loop update.
+     */
+    update(/* deltaTime: number */): void {
+        // C++  void MyAvatar:: update(float deltaTime)
+
+        // WEBRTC TODO: Address further C++ code.
+
+        // Cache the AudioClient when and if it is available.
+        if (!this.#_audioClient && ContextManager.has(this.#_contextID, AudioClient)) {
+            this.#_audioClient = ContextManager.get(this.#_contextID, AudioClient) as AudioClient;
+        }
+        if (this.#_audioClient) {
+            this.setAudioLoudness(this.#_audioClient.getLastInputLoudness());
+        }
+
+        // WEBRTC TODO: Address further C++ code.
+
     }
 
 

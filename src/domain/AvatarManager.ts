@@ -89,6 +89,12 @@ class AvatarManager extends AvatarHashMap {
     updateMyAvatar(/* deltaTime: number */): void {
         // C++  void AvatarManager::updateMyAvatar(float deltaTime)
 
+        // WebRTC TODO: Address further C++ code.
+
+        this.#_myAvatar.update(/* deltaTime */);
+
+        // WebRTC TODO: Address further C++ code.
+
         const now = Date.now();
         const deltaTime = now - this.#_lastSendAvatarDataTime;
 
