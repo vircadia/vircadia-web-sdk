@@ -68,7 +68,8 @@ const ContextManager = new class {
      *  @param {number} contextID - The ID of the context.
      *  @param {ContextManager.DependencyType} dependencyType - The type of the object to get.
      *  @returns {object} The requested object.
-     *  @throws Throws an error if the context ID is invalid or an object of the specified type cannot be found in the context.
+     *  @throws Throws an error if the context ID or dependency type is invalid, or an object of the specified type cannot be
+     *      found in the context.
      */
     // Errors are thrown because this is internal code and it is reasonable to expect that it is correctly used.
     get(contextID: number, dependencyType: DependencyType): DependencyObject {
@@ -94,7 +95,8 @@ const ContextManager = new class {
      *  @param {ContextManager.DependencyType} dependencyType - The type of the new object to create and add. The new object is
      *      created using <code>new()</code>.
      *  @param {...any} dependencyParams - Optional parameters to use when creating the new object.
-     *  @throws Throws an error of the context ID is invalid or an object of the specified type already exists in the context.
+     *  @throws Throws an error of the context ID or dependency type is invalid, or an object of the specified type already
+     *      exists in the context.
      */
     // Errors are thrown because this is internal code and it is reasonable to expect that it is correctly used.
     set(contextID: number, dependencyType: DependencyType, ...args: unknown[]): void {
@@ -111,6 +113,28 @@ const ContextManager = new class {
         }
         const newDependency = new dependencyType(...args);  // eslint-disable-line new-cap
         context.set(contextItemType, newDependency);
+    }
+
+    /*@devdoc
+     *  Creates and adds a new object to a context.
+     *  @function ContextManager.set
+     *  @param {number} contextID - The ID of the context.
+     *  @param {ContextManager.DependencyType} dependencyType - The type of the new object to create and add. The new object is
+     *      created using <code>new()</code>.
+     *  @returns {boolean} <code>true</code> if an object of the dependency type exists in the context, <code>false</code> if it
+     *      doesn't.
+     *  @throws Throws an error of the context ID or dependency type is invalid.
+     */
+    has(contextID: number, dependencyType: DependencyType): boolean {
+        const context = this.#_contexts[contextID];
+        if (!context) {
+            throw Error(`ContextManager.has(): Cannot find context ${contextID}!`);
+        }
+        const contextItemType = dependencyType.contextItemType;
+        if (typeof contextItemType !== "string" || contextItemType.length === 0) {
+            throw Error(`ContextManager.has(): Cannot find an object without a valid contextItemType property!`);
+        }
+        return context.get(contextItemType) !== undefined;
     }
 
 }();
