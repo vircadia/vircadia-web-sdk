@@ -521,6 +521,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const Z_INDEX = 4;
         const DEFAULT_POSITION = { x: 0, y: 0, z: 0 };
 
+        const entitiesCount = document.getElementById("entitiesCount");
+        const entityListBody = document.querySelector("#entityList > tbody");
+        let entityIDsList = [];
+
 
         // Status
 
@@ -528,17 +532,19 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         function onStateChanged(state) {
             statusText.value = EntityServer.stateToString(state);
+            if (state === EntityServer.UNAVAILABLE || state === EntityServer.DISCONNECTED) {
+                while (entityListBody.hasChildNodes()) {
+                    entityListBody.removeChild(entityListBody.firstChild);
+                }
+                entityIDsList = [];
+                entitiesCount.value = 0;
+            }
         }
         onStateChanged(entityServer.state);
         entityServer.onStateChanged = onStateChanged;
 
 
         // Entity List
-
-        const entitiesCount = document.getElementById("entitiesCount");
-        const entityListBody = document.querySelector("#entityList > tbody");
-
-        const entityIDsList = [];
 
         function onEntityData(data) {
 
