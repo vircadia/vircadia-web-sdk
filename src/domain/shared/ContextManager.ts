@@ -116,11 +116,10 @@ const ContextManager = new class {
     }
 
     /*@devdoc
-     *  Creates and adds a new object to a context.
-     *  @function ContextManager.set
+     *  Checks whether an object exists in a context.
+     *  @function ContextManager.has
      *  @param {number} contextID - The ID of the context.
-     *  @param {ContextManager.DependencyType} dependencyType - The type of the new object to create and add. The new object is
-     *      created using <code>new()</code>.
+     *  @param {ContextManager.DependencyType} dependencyType - The type of object to check for.
      *  @returns {boolean} <code>true</code> if an object of the dependency type exists in the context, <code>false</code> if it
      *      doesn't.
      *  @throws Throws an error of the context ID or dependency type is invalid.
