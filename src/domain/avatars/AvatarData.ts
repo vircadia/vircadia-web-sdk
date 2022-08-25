@@ -759,11 +759,21 @@ class AvatarData extends SpatiallyNestable {
             // WEBRTC TODO: Address further C++ code - avatar orientation update rate.
         }
 
-        if (avatarData.avatarScale) {
+        if (avatarData.avatarScale !== undefined) {
             if (!isNaN(avatarData.avatarScale)) {
                 this.setTargetScale(avatarData.avatarScale);
 
                 // WEBRTC TODO: Address further C++ code - avatar scale rate and update rate.
+            }
+        }
+
+        // WEBRTC TODO: Address further C++ code - further avatar properties.
+
+        if (avatarData.audioLoudness !== undefined) {
+            if (!isNaN(avatarData.audioLoudness)) {
+                this.setAudioLoudness(avatarData.audioLoudness);
+
+                // WEBRTC TODO: Address further C++ code - audio loudness rate and update rate.
             }
         }
 
