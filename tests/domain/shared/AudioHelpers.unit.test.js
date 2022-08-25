@@ -22,4 +22,10 @@ describe("AudioHelpers - unit tests", () => {
         expect(AudioHelpers.packFloatGainToByte(1000)).toBe(255);
     });
 
+    test("unpackFloatGainFromByte - unit tests", () => {
+        expect(AudioHelpers.unpackFloatGainFromByte(164)).toBeCloseTo(0.167881, 5);
+        expect(AudioHelpers.unpackFloatGainFromByte(16)).toBeCloseTo(3.34964e-05, 5);
+        expect(AudioHelpers.unpackFloatGainFromByte(0)).toBe(0);
+    });
+
 });

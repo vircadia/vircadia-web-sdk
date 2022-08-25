@@ -36,6 +36,7 @@ class AudioHelpers {
      *  @returns {number} The single byte representation of the gain value.
      */
     static packFloatGainToByte(gain: number): number {
+        // C++  uint8_t packFloatGainToByte(float gain)
 
         // WEBRTC TODO: Consider implementing fastLog2() and using instead of Math methods.
         const f = Math.log2(gain) * GAIN_CONVERSION_RATIO + GAIN_CONVERSION_OFFSET;
@@ -44,6 +45,21 @@ class AudioHelpers {
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         const byte = Math.max(0, Math.min(i, 255));  // Clamp.
         return byte;
+    }
+
+
+    /*@devdoc
+     *  Unpacks an audio gain from a single byte.
+     *  @param {number} byte - The single byte representation of the gain value.
+     *  @returns {number} The gain value.
+     */
+    static unpackFloatGainFromByte(byte: number): number {
+        // C++  float unpackFloatGainFromByte(uint8_t byte)
+
+        const gain = byte === 0
+            ? 0.0
+            : 2.0 ** ((byte - GAIN_CONVERSION_OFFSET) / GAIN_CONVERSION_RATIO);
+        return gain;
     }
 
 }

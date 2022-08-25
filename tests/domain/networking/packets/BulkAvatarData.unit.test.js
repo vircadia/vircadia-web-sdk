@@ -113,6 +113,26 @@ describe("BulkAvatarData - unit tests", () => {
         expect(bulkAvatarDetail.avatarScale).toBeCloseTo(1.48717, 5);
     });
 
+    test("Can read a BulkAvatarData message that has audio loudness", () => {
+        // eslint-disable-next-line max-len
+        const RECEIVED_MESSAGE = "6953b53928d94bf89d575f80b8cd953c21000000803f0000004000004040a4";
+        const MESSAGE_START = 0;
+
+        const arrayBuffer = new ArrayBuffer(RECEIVED_MESSAGE.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(RECEIVED_MESSAGE.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer, MESSAGE_START);
+
+        const bulkAvatarDetails = BulkAvatarData.read(dataView);
+        expect(bulkAvatarDetails).toHaveLength(1);
+
+        const bulkAvatarDetail = bulkAvatarDetails[0];
+        expect(bulkAvatarDetail.sessionUUID.stringify()).toBe("6953b539-28d9-4bf8-9d57-5f80b8cd953c");
+        expect(bulkAvatarDetail.audioLoudness).toBeCloseTo(171.91, 2);
+    });
+
     test("Can read a BulkAvatarData message that has joint default flags", () => {
         // eslint-disable-next-line max-len
         const RECEIVED_MESSAGE = "7cd12a580e0d45b6a1e6aad6ab0c84bfff31e292abbf89a6ac3f967a15c06b9d8e3e7dfd823f6b9d8e3ec0f0f33b1035cfbdf0c2e83cbfff3fff2ccf7212d12951c6d38a0d4099a6e94600bfff3fff2ccfb805e392abbf80ba47be777a15c0f00400000000000000000000000000000000ffff5800f0ffffffffffffffffffa267c0ce40043e55db873899462ce6cc36544d5ed4ed337f475dafcb2ee5475dafcb2ee543b6d91648993631eaa44b1f2ed0c9c44a363431a4f950893431a4f95089a9bdbf2d408dab3dbedc409cacbfbe8940abb75dc0053f60c546c0433e5f42558a78401642558a7840163fde8a6b42583fde8a6b4258c2400a883f61c2400a883f61c0950a954246c0950a954246c546c0433e5fc546c0433e5fc546c0433e5fc546c0433e5fee5c6aa25aa8034cd77e445156220d7d489d510a1f0c524438972dde56dc358e315e5945430535985d0d430535985d0d4f2d1d645eb94bec1c636b7948341b6d72f948341b6d72f951c41d3960404bdf1a9f6c34468419cb799c468419cb799c50a71d9a5b3f4db61c206a4548a11af6745648a11af6745653641f13564d511a1d796096514a1d7b6177514a1d7b61770e02639d20df25b2763a4b9429e677a047a52ce97ac34c8b42d171f052144881754a4d9b3f20730954713f20730954717ad1ceae213874bcc62d16c46cf6bd710c926cf6bd710c927926d310216c737dc97b18bb6b2ac0660d7b6b2ac0660d7b2f837bca5a7a748dc6e616ff6dfdbdfa0f346dfdbdfa0f342a2e7aab52ed7767c9ec1c497465c6a917277465c6a9172702b0040000000000000000b8981344302c00401af52500f80991fbc2fef5ff00000000a60400003e01f5ff000058ff0f000000000000000000fd4ffbffffffffffffffff";
