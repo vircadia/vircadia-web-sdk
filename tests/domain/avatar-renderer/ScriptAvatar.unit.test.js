@@ -36,6 +36,7 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.isValid).toBe(false);
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
+        expect(scriptAvatar.audioLoudness).toBe(0);
         expect(scriptAvatar.skeletonModelURL).toBe("");
         expect(scriptAvatar.skeleton).toEqual([]);
         expect(scriptAvatar.scale).toEqual(0.0);
@@ -70,6 +71,7 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.isValid).toBe(false);
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
+        expect(scriptAvatar.audioLoudness).toBe(0);
         expect(scriptAvatar.skeletonModelURL).toBe("");
         expect(scriptAvatar.skeleton).toEqual([]);
         expect(scriptAvatar.scale).toEqual(0.0);
