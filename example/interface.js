@@ -229,14 +229,15 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const POS_DECIMAL_PLACES = 3;
         const YAW_DECIMAL_PLACES = 1;
         const SESSION_DISPLAY_NAME_INDEX = 1;
-        const X_INDEX = 2;
-        const Y_INDEX = 3;
-        const Z_INDEX = 4;
-        const YAW_INDEX = 5;
-        const SKELETON_MODEL_URL_INDEX = 6;
-        const SKELETON_SCALE_INDEX = 7;
-        const SKELETON_JOINTS_COUNT_INDEX = 8;
-        const HEAD_PITCH_INDEX = 9;
+        const AUDIO_LOUDNESS_INDEX = 2;
+        const X_INDEX = 3;
+        const Y_INDEX = 4;
+        const Z_INDEX = 5;
+        const YAW_INDEX = 6;
+        const SKELETON_MODEL_URL_INDEX = 7;
+        const SKELETON_SCALE_INDEX = 8;
+        const SKELETON_JOINTS_COUNT_INDEX = 9;
+        const HEAD_PITCH_INDEX = 10;
 
         const RAD_TO_DEG = 180.0 / Math.PI;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
@@ -411,6 +412,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             td = document.createElement("td");
             td.innerHTML = avatar.sessionDisplayName;
             tr.appendChild(td);
+            td = document.createElement("td");
+            td.className = "number";
+            td.innerHTML = avatar.audioLoudness.toFixed(0);
+            tr.appendChild(td);
             const position = avatar.position;
             td = document.createElement("td");
             td.className = "number";
@@ -495,6 +500,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         avatarMixerGameLoop = () => {
             avatarMixer.update();
             for (const value of avatars.values()) {
+                value.tr.childNodes[AUDIO_LOUDNESS_INDEX].innerHTML = value.avatar.audioLoudness.toFixed(0);
                 const position = value.avatar.position;
                 value.tr.childNodes[X_INDEX].innerHTML = position.x.toFixed(POS_DECIMAL_PLACES);
                 value.tr.childNodes[Y_INDEX].innerHTML = position.y.toFixed(POS_DECIMAL_PLACES);
