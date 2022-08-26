@@ -230,14 +230,15 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const YAW_DECIMAL_PLACES = 1;
         const SESSION_DISPLAY_NAME_INDEX = 1;
         const AUDIO_LOUDNESS_INDEX = 2;
-        const X_INDEX = 3;
-        const Y_INDEX = 4;
-        const Z_INDEX = 5;
-        const YAW_INDEX = 6;
-        const SKELETON_MODEL_URL_INDEX = 7;
-        const SKELETON_SCALE_INDEX = 8;
-        const SKELETON_JOINTS_COUNT_INDEX = 9;
-        const HEAD_PITCH_INDEX = 10;
+        const AUDIO_GAIN_INDEX = 3;
+        const X_INDEX = 4;
+        const Y_INDEX = 5;
+        const Z_INDEX = 6;
+        const YAW_INDEX = 7;
+        const SKELETON_MODEL_URL_INDEX = 8;
+        const SKELETON_SCALE_INDEX = 9;
+        const SKELETON_JOINTS_COUNT_INDEX = 10;
+        const HEAD_PITCH_INDEX = 11;
 
         const RAD_TO_DEG = 180.0 / Math.PI;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
@@ -399,6 +400,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             }
         }
 
+        function onGainChanged(input, sessionID) {
+            domainServer.users.setAvatarGain(sessionID, parseInt(input.value, 10));
+        }
+
         function onAvatarAdded(sessionID) {
 
             avatarsCount.value = avatarMixer.avatarList.count;
@@ -416,6 +421,23 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             td.className = "number";
             td.innerHTML = avatar.audioLoudness.toFixed(0);
             tr.appendChild(td);
+
+            td = document.createElement("td");
+            td.className = "input";
+            const gain = document.createElement("input");
+            gain.type = "number";
+            gain.className = "narrow align-right";
+            if (sessionID.value() === Uuid.AVATAR_SELF_ID) {
+                gain.disabled = true;
+            } else {
+                gain.value = domainServer.users.getAvatarGain(sessionID);
+                gain.onblur = (event) => {
+                    onGainChanged(event.target, sessionID);
+                };
+            }
+            td.appendChild(gain);
+            tr.appendChild(td);
+
             const position = avatar.position;
             td = document.createElement("td");
             td.className = "number";
