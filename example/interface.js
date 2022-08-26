@@ -231,14 +231,15 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const SESSION_DISPLAY_NAME_INDEX = 1;
         const AUDIO_LOUDNESS_INDEX = 2;
         // const AUDIO_GAIN_INDEX = 3;
-        const X_INDEX = 4;
-        const Y_INDEX = 5;
-        const Z_INDEX = 6;
-        const YAW_INDEX = 7;
-        const SKELETON_MODEL_URL_INDEX = 8;
-        const SKELETON_SCALE_INDEX = 9;
-        const SKELETON_JOINTS_COUNT_INDEX = 10;
-        const HEAD_PITCH_INDEX = 11;
+        // const AUDIO_MUTE_INDEX = 4;
+        const X_INDEX = 5;
+        const Y_INDEX = 6;
+        const Z_INDEX = 7;
+        const YAW_INDEX = 8;
+        const SKELETON_MODEL_URL_INDEX = 9;
+        const SKELETON_SCALE_INDEX = 10;
+        const SKELETON_JOINTS_COUNT_INDEX = 11;
+        const HEAD_PITCH_INDEX = 12;
 
         const RAD_TO_DEG = 180.0 / Math.PI;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
@@ -409,6 +410,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             domainServer.users.setAvatarGain(sessionID, gain);
         }
 
+        function onMuteClicked(checkbox, sessionID) {
+            domainServer.users.setPersonalMute(sessionID, checkbox.checked);
+        }
+
         function onAvatarAdded(sessionID) {
 
             avatarsCount.value = avatarMixer.avatarList.count;
@@ -441,6 +446,20 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             }
             td.appendChild(gain);
             tr.appendChild(td);
+            td = document.createElement("td");
+            const mute = document.createElement("input");
+            mute.type = "checkbox";
+            mute.className = "checkbox";
+            if (sessionID.value() === Uuid.AVATAR_SELF_ID) {
+                mute.disabled = true;
+            } else {
+                mute.checked = domainServer.users.getPersonalMute(sessionID);
+                mute.onclick = (event) => {
+                    onMuteClicked(event.target, sessionID);
+                };
+            }
+            td.appendChild(mute);
+            tr.appendChild(td);
             const position = avatar.position;
             td = document.createElement("td");
             td.className = "number";
@@ -471,17 +490,17 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             td.className = "number";
             tr.appendChild(td);
             td = document.createElement("td");
-            const cb = document.createElement("input");
-            cb.type = "checkbox";
-            cb.className = "checkbox";
+            const echo = document.createElement("input");
+            echo.type = "checkbox";
+            echo.className = "checkbox";
             if (sessionID.value() === Uuid.AVATAR_SELF_ID) {
-                cb.disabled = true;
+                echo.disabled = true;
             } else {
-                cb.onclick = (event) => {
+                echo.onclick = (event) => {
                     onEchoClicked(event.target, sessionID);
                 };
             }
-            td.appendChild(cb);
+            td.appendChild(echo);
             tr.appendChild(td);
             avatarListBody.appendChild(tr);
 
