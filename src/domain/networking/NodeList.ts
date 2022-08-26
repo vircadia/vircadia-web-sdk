@@ -581,9 +581,9 @@ class NodeList extends LimitedNodeList {
                 this.sendPacket(packet, audioMixer);
 
                 if (nodeID.value() === Uuid.NULL) {
-                    console.debug(`[networking] Sending a set MASTER avatar gain packet with gain ${gain}.`);
+                    console.debug(`[networking] Setting master avatar gain to ${gain}.`);
                 } else {
-                    console.debug(`[networking] Sending a set avatar gain packet to ${nodeID.toString()} with gain ${gain}.`);
+                    console.debug(`[networking] Setting avatar gain to ${gain} for ${nodeID.toString()}.`);
                     this.#_avatarGainMap.set(nodeID.value(), gain);
                 }
 

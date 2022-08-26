@@ -42,7 +42,7 @@ class UsersInterface {
         // C++  void UsersScriptingInterface::setAvatarGain(const QUuid& nodeID, float gain)
 
         if (!(id instanceof Uuid)) {
-            console.error("[UsersInterface] Tried to set avatar gain for invalid session ID value.");
+            console.error("[UsersInterface] Tried to set avatar gain for invalid user session ID value.");
             return;
         }
         if (typeof gain !== "number") {
@@ -67,10 +67,10 @@ class UsersInterface {
      *  @returns {number} The user's gain, in dB. <code>0</code> if an invalid session ID.
      */
     getAvatarGain(id: Uuid): number {
-        // C++  float UsersScriptingInterface:: getAvatarGain(const QUuid& nodeID)
+        // C++  float UsersScriptingInterface::getAvatarGain(const QUuid& nodeID)
 
         if (!(id instanceof Uuid)) {
-            console.error("[UsersInterface] Tried to get avatar gain for invalid session ID value.");
+            console.error("[UsersInterface] Tried to get avatar gain for invalid user session ID value.");
             return 0;
         }
 
