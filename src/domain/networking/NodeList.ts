@@ -20,6 +20,7 @@ import DomainHandler from "./DomainHandler";
 import FingerprintUtils from "./FingerprintUtils";
 import LimitedNodeList from "./LimitedNodeList";
 import NLPacket from "./NLPacket";
+import NLPacketList from "./NLPacketList";
 import Node from "./Node";
 import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
@@ -54,6 +55,7 @@ class NodeList extends LimitedNodeList {
 
     #_avatarGain = 0.0;  // dB
     #_avatarGainMap: Map<bigint, number> = new Map();
+    #_personalMutedNodeIDs: Set<bigint> = new Set();
 
     // Context objects.
     #_addressManager;
@@ -398,6 +400,7 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        this.#_personalMutedNodeIDs.clear();
         this.#_avatarGainMap.clear();
 
         if (!skipDomainHandlerReset) {
@@ -609,6 +612,52 @@ class NodeList extends LimitedNodeList {
         return 0.0;
     }
 
+    /*@devdoc
+     *  Mutes or un-mutes another user. Muting makes you unable to hear them and them unable to hear you.
+     *  @param {Uuid} nodeID - The user's session ID.
+     *  @param {boolean} muteEnabled - <code>true</code> to mute, <code>false</code> to un-mute.
+     */
+    personalMuteNodeBySessionID(nodeID: Uuid, muteEnabled: boolean): void {
+        // C++  void NodeList::personalMuteNodeBySessionID(const QUuid& nodeID, bool muteEnabled)
+        // cannot personal mute yourself, or nobody
+        if (nodeID.value() !== Uuid.NULL && this.getSessionUUID().value() !== nodeID.value()) {
+            const audioMixer = this.soloNodeOfType(NodeType.AudioMixer);
+            if (audioMixer) {
+                if (this.isIgnoringNode(nodeID)) {
+                    console.log("[networking] You can't personally mute or unmute a user you're already ignoring.)");
+                } else {
+                    console.log(`[networking] Sending request to ${muteEnabled ? "mute" : "unmute"} ${nodeID.stringify()}.`);
+
+                    const personalMutePacket = PacketScribe.NodeIgnoreRequest.write({
+                        nodeID: nodeID.value(),
+                        muteEnabled
+                    }) as NLPacket;
+                    this.sendPacket(personalMutePacket, audioMixer);
+
+                    if (muteEnabled) {
+                        this.#_personalMutedNodeIDs.add(nodeID.value());
+                    } else {
+                        this.#_personalMutedNodeIDs.delete(nodeID.value());
+                    }
+                }
+            } else {
+                console.warn("[networking] Couldn't find audio mixer to send personal mute request to.");
+            }
+        } else {
+            console.warn("[networking] Cannot mute a user with an invalid ID or an ID which matches the current session ID.");
+        }
+    }
+
+    /*@sdkdoc
+      *  Gets whether or not you have muted another user. Muting makes you unable to hear them and them unable to hear you.
+      *  @param {Uuid} nodeID - The user's session ID.
+      *  @returns {boolean} <code>true</code> if the user is muted, <code>false</code> if they aren't.
+      */
+    isPersonalMutingNode(nodeID: Uuid): boolean {
+        // C++  bool NodeList::isPersonalMutingNode(const QUuid& nodeID) const
+        return this.#_personalMutedNodeIDs.has(nodeID.value());
+    }
+
 
     // eslint-disable-next-line
     // @ts-ignore
@@ -731,14 +780,42 @@ class NodeList extends LimitedNodeList {
     #maybeSendIgnoreSetToNode = (newNode: Node): void => {  // eslint-disable-line @typescript-eslint/no-unused-vars
         // C++  void NodeList::maybeSendIgnoreSetToNode(Node* newNode)
 
-        // WEBRTC TODO: Address further C++.
+        if (newNode.getType() === NodeType.AudioMixer) {
 
-        // Also send the current avatar gain.
-        if (this.#_avatarGain !== 0.0) {
-            this.setAvatarGain(new Uuid(Uuid.NULL), this.#_avatarGain);
+            // WEBRTC TODO: Address further C++.
+
+            // Send muted nodes.
+            if (this.#_personalMutedNodeIDs.size > 0) {
+                const nodeIDs: bigint[] = [];
+                for (const nodeID of this.#_personalMutedNodeIDs) {
+                    nodeIDs.push(nodeID);
+                }
+
+                const muteEnabled = true;
+
+                const personalMutePacketList = PacketScribe.NodeIgnoreRequest.write({
+                    nodeIDs,
+                    muteEnabled
+                }) as NLPacketList;
+                this.sendPacketList(personalMutePacketList, newNode);
+            }
+
+            // WEBRTC TODO: Address further C++.
+
+            // Send avatar gain.
+            if (this.#_avatarGain !== 0.0) {
+                this.setAvatarGain(new Uuid(Uuid.NULL), this.#_avatarGain);
+            }
+
+            // WEBRTC TODO: Address further C++.
+
         }
 
-        // WEBRTC TODO: Address further C++.
+        if (newNode.getType() === NodeType.AvatarMixer) {
+
+            // WEBRTC TODO: Address further C++.
+
+        }
 
     };
 

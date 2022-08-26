@@ -84,6 +84,43 @@ class UsersInterface {
 
         return this.#_nodeList.getAvatarGain(id);
     }
+
+    /*@sdkdoc
+     *  Mutes or un-mutes another user. Muting makes you unable to hear them and them unable to hear you.
+     *  @param {Uuid} id - The user's session ID.
+     *  @param {boolean} mute - <code>true</code> to mute, <code>false</code> to un-mute.
+     */
+    setPersonalMute(id: Uuid, mute: boolean): void {
+        // C++  void UsersScriptingInterface::personalMute(const QUuid& nodeID, bool muteEnabled) {
+
+        if (!(id instanceof Uuid)) {
+            console.error("[UsersInterface] Tried to set personal mute for invalid user session ID value.");
+            return;
+        }
+        if (typeof mute !== "boolean") {
+            console.error("[UsersInterface] Tried to set personal mute with invalid mute value.");
+            return;
+        }
+
+        this.#_nodeList.personalMuteNodeBySessionID(id, mute);
+    }
+
+    /*@sdkdoc
+      *  Gets whether or not you have muted another user. Muting makes you unable to hear them and them unable to hear you.
+      *  @param {Uuid} id - The user's session ID.
+      *  @returns {boolean} <code>true</code> if the user is muted, <code>false</code> if they aren't.
+      */
+    getPersonalMute(id: Uuid): boolean {
+        // C++  bool UsersScriptingInterface::getPersonalMuteStatus(const QUuid& nodeID)
+
+        if (!(id instanceof Uuid)) {
+            console.error("[UsersInterface] Tried to get personal mute for invalid user session ID value.");
+            return false;
+        }
+
+        return this.#_nodeList.isPersonalMutingNode(id);
+    }
+
 }
 
 export default UsersInterface;
