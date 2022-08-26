@@ -11,6 +11,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import UsersInterface from "./domain/interfaces/UsersInterface";
 import AddressManager from "./domain/networking/AddressManager";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
@@ -86,6 +87,9 @@ type OnStateChanged = (state: ConnectionState, info: string) => void;
  *  @property {DomainServer~onStateChanged|null} onStateChanged - Sets a single function to be called when the state of the
  *      connection to the domain server changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
+ *
+ *  @property {UsersInterface} users - Properties and methods for working with users in the domain.
+ *      <em>Read-only.</em>
  */
 class DomainServer {
     // C++  Application.cpp
@@ -143,6 +147,8 @@ class DomainServer {
     #_sessionUUID = new Uuid();
     #_sessionUUIDChanged = new SignalEmitter();
 
+    #_usersInterface: UsersInterface;
+
     #_DEBUG = false;
 
 
@@ -197,6 +203,7 @@ class DomainServer {
 
         // WEBRTC TODO: Address further C++ code.
 
+        this.#_usersInterface = new UsersInterface(contextID);
     }
 
 
@@ -247,6 +254,11 @@ class DomainServer {
      */
     get sessionUUIDChanged(): Signal {
         return this.#_sessionUUIDChanged.signal();
+    }
+
+
+    get users(): UsersInterface {
+        return this.#_usersInterface;
     }
 
 

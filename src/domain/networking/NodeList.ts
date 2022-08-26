@@ -52,6 +52,9 @@ class NodeList extends LimitedNodeList {
 
     #_domainHandler: DomainHandler;
 
+    #_avatarGain = 0.0;  // dB
+    #_avatarGainMap: Map<bigint, number> = new Map();
+
     // Context objects.
     #_addressManager;
 
@@ -395,6 +398,8 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        this.#_avatarGainMap.clear();
+
         if (!skipDomainHandlerReset) {
             this.#_domainHandler.softReset(reason);
         }
@@ -588,6 +593,62 @@ class NodeList extends LimitedNodeList {
     }
 
 
+    /*@devdoc
+     *  Sets an avatar's gain (volume) or the master avatar gain, for the audio that's received from them.
+     *  @param {Uuid} id - The avatar's session ID, or <code>Uuid.NULL</code> to set the master gain.
+     *  @param {number} gain - The gain to set, in dB.
+     */
+    setAvatarGain(id: Uuid, gain: number): void {
+        // C++  void NodeList::setAvatarGain(const QUuid& nodeID, float gain)
+
+        if (id.value() === Uuid.NULL) {
+            this.#_avatarGain = gain;
+        }
+
+        // Cannot set gain of yourself.
+        if (this.getSessionUUID().value() !== id.value()) {
+            const audioMixer = this.soloNodeOfType(NodeType.AudioMixer);
+            if (audioMixer) {
+
+                const packet = PacketScribe.PerAvatarGainSet.write({
+                    id,
+                    gain
+                });
+                this.sendPacket(packet, audioMixer);
+
+                if (id.value() === Uuid.NULL) {
+                    console.debug(`[networking] Sending a set MASTER avatar gain packet with gain ${gain}.`);
+                } else {
+                    console.debug(`[networking] Sending a set avatar gain packet to ${Uuid.toString()} with gain ${gain}.`);
+                    this.#_avatarGainMap.set(id.value(), gain);
+                }
+
+            } else {
+                console.warn("[networking] Couldn't find audio mixer to send a set avatar gain request to.");
+            }
+        } else {
+            console.warn("[networking] Cannot set avatar gain for current session ID.");
+        }
+    }
+
+    /*@devdoc
+     *  Gets an avatar's gain (volume) or the master avatar gain, for the audio that's received from them.
+     *  @param {Uuid} id - The avatar's session ID, or <code>Uuid.NULL</code> to get the master gain.
+     *  @returns {number} The avatar or master gain, in dB, or <code>0</code> if the avatar's session ID cannot be found.
+     */
+    getAvatarGain(id: Uuid): number {
+        // C++  float NodeList::getAvatarGain(const QUuid& nodeID)
+        if (id.value() === Uuid.NULL) {
+            return this.#_avatarGain;
+        }
+        const gain = this.#_avatarGainMap.get(id.value());
+        if (gain !== undefined) {
+            return gain;
+        }
+        return 0.0;
+    }
+
+
     // Slot.
     #startNodeHolePunch = (node: Node): void => {
         // C++  void startNodeHolePunch(const Node* node);
@@ -669,6 +730,13 @@ class NodeList extends LimitedNodeList {
     // @ts-ignore
     #maybeSendIgnoreSetToNode = (newNode: Node): void => {  // eslint-disable-line @typescript-eslint/no-unused-vars
         // C++  void NodeList::maybeSendIgnoreSetToNode(Node* newNode)
+
+        // WEBRTC TODO: Address further C++.
+
+        // Also send the current avatar gain.
+        if (this.#_avatarGain !== 0.0) {
+            this.setAvatarGain(new Uuid(Uuid.NULL), this.#_avatarGain);
+        }
 
         // WEBRTC TODO: Address further C++.
 

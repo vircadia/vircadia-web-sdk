@@ -53,7 +53,6 @@ describe("NodeList - integration tests", () => {
 
     // Suppress console messages from being displayed.
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
-    const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
 
 
     test("Reports that it is not being used for the domain server connection", () => {
@@ -91,7 +90,29 @@ describe("NodeList - integration tests", () => {
         expect(nodeList.soloNodeOfType(AUDIO_MIXER_NODE_INFO.type)).toBeNull();
     });
 
+    test("Can set the avatar gain", () => {
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+        const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
 
-    warn.mockReset();
+        // Master gain.
+        nodeList.setSessionUUID(new Uuid(100));
+        nodeList.setAvatarGain(new Uuid(Uuid.NULL), 3);
+        expect(warn).toHaveBeenCalledTimes(1);  // Audio mixer not found.
+        expect(error).toHaveBeenCalledTimes(0);
+
+        // Avatar gain - own avatar.
+        nodeList.setAvatarGain(new Uuid(100), 3);
+        expect(warn).toHaveBeenCalledTimes(2);  // Own avatar ID.
+        expect(error).toHaveBeenCalledTimes(0);
+
+        // Avatar gain - other avatar.
+        nodeList.setAvatarGain(new Uuid(200), 3);
+        expect(warn).toHaveBeenCalledTimes(3);  // Audio mixer not found.
+        expect(error).toHaveBeenCalledTimes(0);
+
+        warn.mockReset();
+        error.mockReset();
+    });
+
     log.mockReset();
 });
