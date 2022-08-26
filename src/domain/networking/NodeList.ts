@@ -619,7 +619,7 @@ class NodeList extends LimitedNodeList {
                 if (id.value() === Uuid.NULL) {
                     console.debug(`[networking] Sending a set MASTER avatar gain packet with gain ${gain}.`);
                 } else {
-                    console.debug(`[networking] Sending a set avatar gain packet to ${Uuid.toString()} with gain ${gain}.`);
+                    console.debug(`[networking] Sending a set avatar gain packet to ${id.toString()} with gain ${gain}.`);
                     this.#_avatarGainMap.set(id.value(), gain);
                 }
 
