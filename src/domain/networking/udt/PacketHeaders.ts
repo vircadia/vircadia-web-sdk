@@ -150,6 +150,7 @@ const enum PacketTypeValue {
  *      {@link PacketScribe.PingReplyDetails}
  *  @property {PacketType} KillAvatar - <code>5</code> - The avatar mixer sends this to the user client when another user client
  *      disconnects from the domain.<br />
+ *      <em>Reliable.</em><br />
  *      {@link PacketScribe.KillAvatarDetails}
  *  @property {PacketType} AvatarData - <code>6</code> - The user client sends this to the avatar mixer with details of the user
  *      client's avatar.<br />
@@ -185,9 +186,11 @@ const enum PacketTypeValue {
  *  @property {PacketType} AudioStreamStats - <code>18</code>
  *  @property {PacketType} DomainServerPathQuery - <code>19</code> - The user client sends this to the Domain Server to get the
  *      position and orientation set for a path in the domain.<br />
+ *      <em>Reliable.</em><br />
  *      {@link PacketScribe.DomainServerPathQueryDetails}
  *  @property {PacketType} DomainServerPathResponse - <code>20</code> - The Domain Server sends this to the user client in
  *      response to a DomainServerPathQuery packet, to provide the position and orientation set for a path in the domain.<br />
+ *      <em>Reliable.</em><br />
  *      {@link PacketScribe.DomainServerPathResponseDetails}
  *  @property {PacketType} DomainServerAddedNode - <code>21</code> - The Domain Server sends this to user clients when an
  *      assignment client starts up and the user client has registered interest in that assignment client node type, and to
@@ -198,6 +201,7 @@ const enum PacketTypeValue {
  *  @property {PacketType} OctreeStats - <code>24</code>
  *  @property {PacketType} SetAvatarTraits - <code>25</code> - The user client sends this to the Avatar Mixer to update it with
  *      avatar traits: skeleton model URL, skeleton data, avatar entities, or avatar grab data.<br />
+ *      <em>Reliable.</em><br />
  *      {@link PacketScribe.SetAvatarTraitsDetails}
  *  @property {PacketType} InjectorGainSet - <code>26</code>
  *  @property {PacketType} AssignmentClientStatus - <code>27</code>
@@ -208,7 +212,7 @@ const enum PacketTypeValue {
  *      <em>Reliable. Ordered.</em><br />
  *      {@link PacketScribe.AvatarIdentityDetails}
  *  @property {PacketType} NodeIgnoreRequest - <code>30</code> - The user client sends this to the Audio Mixer or Avatar Mixer
- *      to mute a user.<br />
+ *      to mute a user or users.<br />
  *      <em>Reliable. Ordered.</em><br />
  *      {@link PacketScribe.NodeIgnoreRequestDetails}
  *  @property {PacketType} DomainConnectRequest - <code>31</code> - The user client sends this to the Domain Server to initiate
@@ -225,6 +229,7 @@ const enum PacketTypeValue {
  *  @property {PacketType} ICEPingReply - <code>40</code>
  *  @property {PacketType} EntityData - <code>41</code> - The Domain Server sends this to the user client in response to an
  *      EntityQuery packet.<br />
+ *      <em>Reliable.</em><br />
  *      {@link PacketScribe.EntityDataDetails}
  *  @property {PacketType} EntityQuery - <code>42</code> - The user client sends this to the Entity Server to request details of
  *      the entities in view. The Domain Server responds with EntityData packets.<br />
@@ -283,6 +288,7 @@ const enum PacketTypeValue {
  *  @property {PacketType} RequestsDomainListData - <code>73</code>
  *  @property {PacketType} PerAvatarGainSet - <code>74</code> - The user clients sends this to the audio mixer to set an
  *      avatar's gain (volume) or the master avatar gain, for the audio that's sent to the client.<br />
+ *      <em>Reliable.</em><br />
  *      {@link PacketScribe.PerAvatarGainSetDetails}
  *  @property {PacketType} EntityScriptGetStatus - <code>75</code>
  *  @property {PacketType} EntityScriptGetStatusReply - <code>76</code>
@@ -316,6 +322,7 @@ const enum PacketTypeValue {
  *  @property {PacketType} AudioSoloRequest - <code>101</code>
  *  @property {PacketType} BulkAvatarTraitsAck - <code>102</code> - The user client sends this to the avatar mixer to
  *      acknowledge the receipt of a BulkAvatarTraits message.<br />
+ *      <em>Reliable.</em><br />
  *      {@link PacketScribe.BulkAvatarTraitsAckDetails}
  *  @property {PacketType} StopInjector - <code>103</code>
  *  @property {PacketType} AvatarZonePresence - <code>104</code>
