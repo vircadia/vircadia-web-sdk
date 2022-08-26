@@ -1,5 +1,5 @@
 //
-//  MyAvatarInterface.unit.test.js
+//  AvatarListInterface.unit.test.js
 //
 //  Created by David Rowe on 31 Oct 2021.
 //  Copyright 2021 Vircadia contributors.

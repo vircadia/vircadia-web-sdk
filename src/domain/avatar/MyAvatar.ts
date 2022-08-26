@@ -29,7 +29,7 @@ type DomainSettings = {
 
 
 /*@devdoc
- *  The <code>MyAvatar</code> class is concerned with the operation of user client's avatar.
+ *  The <code>MyAvatar</code> class is concerned with the operation of the user client's avatar.
  *  <p>C++: <code>class MyAvatar : public Avatar</code></p>
  *  @class MyAvatar
  *  @extends Avatar

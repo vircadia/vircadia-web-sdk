@@ -230,7 +230,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const YAW_DECIMAL_PLACES = 1;
         const SESSION_DISPLAY_NAME_INDEX = 1;
         const AUDIO_LOUDNESS_INDEX = 2;
-        const AUDIO_GAIN_INDEX = 3;
+        // const AUDIO_GAIN_INDEX = 3;
         const X_INDEX = 4;
         const Y_INDEX = 5;
         const Z_INDEX = 6;
@@ -426,7 +426,6 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             td.className = "number";
             td.innerHTML = avatar.audioLoudness.toFixed(0);
             tr.appendChild(td);
-
             td = document.createElement("td");
             td.className = "input";
             const gain = document.createElement("input");
@@ -442,7 +441,6 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             }
             td.appendChild(gain);
             tr.appendChild(td);
-
             const position = avatar.position;
             td = document.createElement("td");
             td.className = "number";

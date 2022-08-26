@@ -33,7 +33,8 @@ class UsersInterface {
 
 
     /*@sdkdoc
-     *  Sets a user's gain (volume) for the audio received from them.
+     *  Sets a user's gain (volume) for the audio received from them. Typical range: <code>-60</code>dB &ndash;
+     *  <code>+20</code>db.
      *  @param {Uuid} id - The user's session ID.
      *  @param {number} gain - The gain to set, in dB.
      */

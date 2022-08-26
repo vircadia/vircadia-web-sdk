@@ -23,6 +23,7 @@ describe("AudioHelpers - unit tests", () => {
     });
 
     test("unpackFloatGainFromByte - unit tests", () => {
+        expect(AudioHelpers.unpackFloatGainFromByte(255)).toBeCloseTo(31.6229, 3);
         expect(AudioHelpers.unpackFloatGainFromByte(164)).toBeCloseTo(0.167881, 5);
         expect(AudioHelpers.unpackFloatGainFromByte(16)).toBeCloseTo(3.34964e-05, 5);
         expect(AudioHelpers.unpackFloatGainFromByte(0)).toBe(0);
