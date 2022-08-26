@@ -26,6 +26,7 @@ import DomainServerAddedNode from "./DomainServerAddedNode";
 import DomainConnectionDenied from "./DomainConnectionDenied";
 import SetAvatarTraits from "./SetAvatarTraits";
 import AvatarIdentity from "./AvatarIdentity";
+import NodeIgnoreRequest from "./NodeIgnoreRequest";
 import DomainConnectRequest from "./DomainConnectRequest";
 import EntityData from "./EntityData";
 import EntityQuery from "./EntityQuery";
@@ -82,6 +83,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.AvatarIdentity&period;read|AvatarIdentity&period;read}
  *  @property {function} AvatarIdentity.write -
  *      {@link PacketScribe.AvatarIdentity&period;write|AvatarIdentity&period;write}
+ *  @property {function} NodeIgnoreRequest.write -
+ *      {@link PacketScribe.NodeIgnoreRequest&period;write|NodeIgnoreRequest&period;write}
  *  @property {function} DomainConnectRequest.write -
  *      {@link PacketScribe.DomainConnectRequest&period;write|DomainConnectRequest&period;write}
  *  @property {function} EntityData.read -
@@ -137,6 +140,7 @@ const PacketScribe = {
     DomainServerAddedNode,
     SetAvatarTraits,
     AvatarIdentity,
+    NodeIgnoreRequest,
     DomainConnectRequest,
     EntityData,
     EntityQuery,

@@ -17,7 +17,7 @@ import NLPacket from "../NLPacket";
 
 
 type PerAvatarGainSetDetails = {
-    id: Uuid,
+    nodeID: Uuid,
     gain: number
 };
 
@@ -27,7 +27,7 @@ const PerAvatarGainSet = new class {
     /*@devdoc
      *  Information needed for {@link PacketScribe|writing} an {@link PacketType(1)|PerAvatarGainSet} packet.
      *  @typedef {object} PacketScribe.PerAvatarGainSetDetails
-     *  @property {Uuid} id - The avatar's session ID, or <code>Uuid.NULL</code> to set the master avatar gain.
+     *  @property {Uuid} nodeID - The avatar's session ID, or <code>Uuid.NULL</code> to set the master avatar gain.
      *  @property {number} gain - The gain to set, in dB.
      */
 
@@ -48,7 +48,7 @@ const PerAvatarGainSet = new class {
         const data = messageData.data;
         let dataPosition = messageData.dataPosition;
 
-        data.setBigUint128(dataPosition, info.id.value(), UDT.BIG_ENDIAN);
+        data.setBigUint128(dataPosition, info.nodeID.value(), UDT.BIG_ENDIAN);
         dataPosition += 16;
 
         data.setUint8(dataPosition, AudioHelpers.packFloatGainToByte(2 ** (info.gain / 6.02059991)));

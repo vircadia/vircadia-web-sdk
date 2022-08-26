@@ -207,7 +207,10 @@ const enum PacketTypeValue {
  *      information for avatars in the domain.<br />
  *      <em>Reliable. Ordered.</em><br />
  *      {@link PacketScribe.AvatarIdentityDetails}
- *  @property {PacketType} NodeIgnoreRequest - <code>30</code>
+ *  @property {PacketType} NodeIgnoreRequest - <code>30</code> - The user client sends this to the Audio Mixer or Avatar Mixer
+ *      to mute a user.<br />
+ *      <em>Reliable. Ordered.</em><br />
+ *      {@link PacketScribe.NodeIgnoreRequestDetails}
  *  @property {PacketType} DomainConnectRequest - <code>31</code> - The user client sends this to the Domain Server to initiate
  *      connection to the domain. The Domain Server responds with a DomainList or DomainConnectionDenied packet.<br />
  *      {@link PacketScribe.DomainConnectRequestDetails}
@@ -624,6 +627,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.AvatarIdentity:
                 return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
+            case this.NodeIgnoreRequest:
+                return 18;  // eslint-disable-line @typescript-eslint/no-magic-numbers
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
             case this.EntityData:

@@ -1,7 +1,7 @@
 //
 //  PerAvatarGainSet.unit.test.js
 //
-//  Created by David Rowe on 10 May 2022.
+//  Created by David Rowe on 26 Aug 2022.
 //  Copyright 2022 Vircadia contributors.
 //  Copyright 2022 DigiSomni LLC.
 //
@@ -23,7 +23,7 @@ describe("PerAvatarGainSet - unit tests", () => {
     test("Can write an PerAvatarGainSet packet that sets the master avatar gain", () => {
         const EXPECTED_PACKET = "000000404a16000000000000000000000000000000000000000000000000000000000000000000009b";
         const packet = PerAvatarGainSet.write({
-            id: new Uuid(Uuid.NULL),
+            nodeID: new Uuid(Uuid.NULL),
             gain: -20
         });
 
@@ -40,7 +40,7 @@ describe("PerAvatarGainSet - unit tests", () => {
     test("Can write an PerAvatarGainSet packet that sets an individual avatar gain", () => {
         const EXPECTED_PACKET = "000000404a1600000000000000000000000000000000000050a1ad59a845492392428c602162b54ad7";
         const packet = PerAvatarGainSet.write({
-            id: new Uuid(BigInt("0x50a1ad59a845492392428c602162b54a")),
+            nodeID: new Uuid(BigInt("0x50a1ad59a845492392428c602162b54a")),
             gain: 10
         });
 

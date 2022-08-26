@@ -556,32 +556,32 @@ class NodeList extends LimitedNodeList {
 
     /*@devdoc
      *  Sets an avatar's gain (volume) or the master avatar gain, for the audio that's received from them.
-     *  @param {Uuid} id - The avatar's session ID, or <code>Uuid.NULL</code> to set the master gain.
+     *  @param {Uuid} nodeID - The avatar's session ID, or <code>Uuid.NULL</code> to set the master gain.
      *  @param {number} gain - The gain to set, in dB.
      */
-    setAvatarGain(id: Uuid, gain: number): void {
+    setAvatarGain(nodeID: Uuid, gain: number): void {
         // C++  void NodeList::setAvatarGain(const QUuid& nodeID, float gain)
 
-        if (id.value() === Uuid.NULL) {
+        if (nodeID.value() === Uuid.NULL) {
             this.#_avatarGain = gain;
         }
 
         // Cannot set gain of yourself.
-        if (this.getSessionUUID().value() !== id.value()) {
+        if (this.getSessionUUID().value() !== nodeID.value()) {
             const audioMixer = this.soloNodeOfType(NodeType.AudioMixer);
             if (audioMixer) {
 
                 const packet = PacketScribe.PerAvatarGainSet.write({
-                    id,
+                    nodeID,
                     gain
                 });
                 this.sendPacket(packet, audioMixer);
 
-                if (id.value() === Uuid.NULL) {
+                if (nodeID.value() === Uuid.NULL) {
                     console.debug(`[networking] Sending a set MASTER avatar gain packet with gain ${gain}.`);
                 } else {
-                    console.debug(`[networking] Sending a set avatar gain packet to ${id.toString()} with gain ${gain}.`);
-                    this.#_avatarGainMap.set(id.value(), gain);
+                    console.debug(`[networking] Sending a set avatar gain packet to ${nodeID.toString()} with gain ${gain}.`);
+                    this.#_avatarGainMap.set(nodeID.value(), gain);
                 }
 
             } else {
@@ -594,15 +594,15 @@ class NodeList extends LimitedNodeList {
 
     /*@devdoc
      *  Gets an avatar's gain (volume) or the master avatar gain, for the audio that's received from them.
-     *  @param {Uuid} id - The avatar's session ID, or <code>Uuid.NULL</code> to get the master gain.
+     *  @param {Uuid} nodeID - The avatar's session ID, or <code>Uuid.NULL</code> to get the master gain.
      *  @returns {number} The avatar or master gain, in dB, or <code>0</code> if the avatar's session ID cannot be found.
      */
-    getAvatarGain(id: Uuid): number {
+    getAvatarGain(nodeID: Uuid): number {
         // C++  float NodeList::getAvatarGain(const QUuid& nodeID)
-        if (id.value() === Uuid.NULL) {
+        if (nodeID.value() === Uuid.NULL) {
             return this.#_avatarGain;
         }
-        const gain = this.#_avatarGainMap.get(id.value());
+        const gain = this.#_avatarGainMap.get(nodeID.value());
         if (gain !== undefined) {
             return gain;
         }
