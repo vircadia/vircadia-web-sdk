@@ -401,7 +401,12 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         }
 
         function onGainChanged(input, sessionID) {
-            domainServer.users.setAvatarGain(sessionID, parseInt(input.value, 10));
+            const MIN_GAIN = -60.0;
+            const MAX_GAIN = 20.0;
+            const BASE_10 = 10;
+            const gain = Math.max(MIN_GAIN, Math.min(parseFloat(input.value, BASE_10), MAX_GAIN));
+            input.value = gain;
+            domainServer.users.setAvatarGain(sessionID, gain);
         }
 
         function onAvatarAdded(sessionID) {
