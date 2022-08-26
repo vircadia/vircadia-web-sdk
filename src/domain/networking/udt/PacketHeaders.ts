@@ -278,7 +278,9 @@ const enum PacketTypeValue {
  *      avatars in the client's view or views.<br />
  *      {@link PacketScribe.AvatarQueryDetails}
  *  @property {PacketType} RequestsDomainListData - <code>73</code>
- *  @property {PacketType} PerAvatarGainSet - <code>74</code>
+ *  @property {PacketType} PerAvatarGainSet - <code>74</code> - The user clients sends this to the audio mixer to set an
+ *      avatar's gain (volume) or the master avatar gain, for the audio that's sent to the client.<br />
+ *      {@link PacketScribe.PerAvatarGainSetDetails}
  *  @property {PacketType} EntityScriptGetStatus - <code>75</code>
  *  @property {PacketType} EntityScriptGetStatusReply - <code>76</code>
  *  @property {PacketType} ReloadEntityServerScript - <code>77</code>
@@ -648,6 +650,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.AvatarQuery:
                 return this.#_AvatarQueryVersion.ConicalFrustums;
+            case this.PerAvatarGainSet:
+                return DEFAULT_VERSION;
             case this.EntityQueryInitialResultsComplete:
                 return this.#_EntityVersion.ParticleSpin;
             case this.BulkAvatarTraits:
