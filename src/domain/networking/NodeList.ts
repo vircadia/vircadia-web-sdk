@@ -554,45 +554,6 @@ class NodeList extends LimitedNodeList {
     };
 
 
-    // eslint-disable-next-line
-    // @ts-ignore
-    #activateSocketFromNodeCommunication(message: ReceivedMessage, sendingNode: Node) {  // eslint-disable-line
-        // C++  void activateSocketFromNodeCommunication(ReceivedMessage& message, const Node* sendingNode)
-
-        // WebRTC: Just use the node's public socket for WebRTC, for now.
-        if (sendingNode.getActiveSocket() === null) {
-            sendingNode.activatePublicSocket();
-        }
-
-        // WEBRTC TODO: Address public, local, and symmetric sockets w.r.t. WebRTC and the Web SDK.
-
-        // WEBRTC TODO: Address further C++ code. Audio mixer.
-    }
-
-    #sendDSPathQuery(newPath: string): void {
-        // C++  void NodeList::sendDSPathQuery(const QString& newPath) {
-
-        // Only send a path query if we're connected to the domain server.
-        if (this._nodeSocket.getSocketState(this.#_domainHandler.getURL(), NodeType.DomainServer) === Socket.CONNECTED) {
-
-            const pathQueryPacket = PacketScribe.DomainServerPathQuery.write({
-                path: newPath
-            });
-
-            // Only send packet if the path was written.
-            if (pathQueryPacket.getMessageData().packetSize
-                > NLPacket.totalNLHeaderSize(PacketType.DomainServerPathQuery, false)) {
-                console.log("[networking] Sending a path query for", newPath, "to domain server at",
-                    this.#_domainHandler.getSockAddr().toString());
-                this.sendPacket(pathQueryPacket, this.#_domainHandler.getSockAddr());
-            } else {
-                console.log(`[Networking] Path too long for path query packet:`, newPath);
-            }
-
-        }
-    }
-
-
     /*@devdoc
      *  Sets an avatar's gain (volume) or the master avatar gain, for the audio that's received from them.
      *  @param {Uuid} id - The avatar's session ID, or <code>Uuid.NULL</code> to set the master gain.
@@ -646,6 +607,45 @@ class NodeList extends LimitedNodeList {
             return gain;
         }
         return 0.0;
+    }
+
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    #activateSocketFromNodeCommunication(message: ReceivedMessage, sendingNode: Node) {  // eslint-disable-line
+        // C++  void activateSocketFromNodeCommunication(ReceivedMessage& message, const Node* sendingNode)
+
+        // WebRTC: Just use the node's public socket for WebRTC, for now.
+        if (sendingNode.getActiveSocket() === null) {
+            sendingNode.activatePublicSocket();
+        }
+
+        // WEBRTC TODO: Address public, local, and symmetric sockets w.r.t. WebRTC and the Web SDK.
+
+        // WEBRTC TODO: Address further C++ code. Audio mixer.
+    }
+
+    #sendDSPathQuery(newPath: string): void {
+        // C++  void NodeList::sendDSPathQuery(const QString& newPath) {
+
+        // Only send a path query if we're connected to the domain server.
+        if (this._nodeSocket.getSocketState(this.#_domainHandler.getURL(), NodeType.DomainServer) === Socket.CONNECTED) {
+
+            const pathQueryPacket = PacketScribe.DomainServerPathQuery.write({
+                path: newPath
+            });
+
+            // Only send packet if the path was written.
+            if (pathQueryPacket.getMessageData().packetSize
+                > NLPacket.totalNLHeaderSize(PacketType.DomainServerPathQuery, false)) {
+                console.log("[networking] Sending a path query for", newPath, "to domain server at",
+                    this.#_domainHandler.getSockAddr().toString());
+                this.sendPacket(pathQueryPacket, this.#_domainHandler.getSockAddr());
+            } else {
+                console.log(`[Networking] Path too long for path query packet:`, newPath);
+            }
+
+        }
     }
 
 
