@@ -331,7 +331,7 @@ class AvatarHashMap {
         // C++  void handleRemovedAvatar(const Avatar* removedAvatar,
         //          KillAvatarReason removalReason = KillAvatarReason::NoReason);
 
-        // WEBRTC TODO: Address further C++ code - avatar traits;
+        this.#_processedTraitVersions.delete(removedAvatar.getID());
 
         console.log("[avatars] Removed avatar with UUID", removedAvatar.getSessionUUID().stringify(), "from AvatarHashMap",
             removalReason);
