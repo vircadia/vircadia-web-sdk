@@ -231,15 +231,16 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const SESSION_DISPLAY_NAME_INDEX = 1;
         const AUDIO_LOUDNESS_INDEX = 2;
         // const AUDIO_GAIN_INDEX = 3;
-        // const AUDIO_MUTE_INDEX = 4;
-        const X_INDEX = 5;
-        const Y_INDEX = 6;
-        const Z_INDEX = 7;
-        const YAW_INDEX = 8;
-        const SKELETON_MODEL_URL_INDEX = 9;
-        const SKELETON_SCALE_INDEX = 10;
-        const SKELETON_JOINTS_COUNT_INDEX = 11;
-        const HEAD_PITCH_INDEX = 12;
+        // const AVATAR_MUTE_INDEX = 4;
+        // const AVATAR_IGNORE_INDEX = 5;
+        const X_INDEX = 6;
+        const Y_INDEX = 7;
+        const Z_INDEX = 8;
+        const YAW_INDEX = 9;
+        const SKELETON_MODEL_URL_INDEX = 10;
+        const SKELETON_SCALE_INDEX = 11;
+        const SKELETON_JOINTS_COUNT_INDEX = 12;
+        const HEAD_PITCH_INDEX = 13;
 
         const RAD_TO_DEG = 180.0 / Math.PI;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
@@ -414,6 +415,11 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             domainServer.users.setPersonalMute(sessionID, checkbox.checked);
         }
 
+        function onIgnoreClicked(checkbox, sessionID, muteCheckbox) {
+            domainServer.users.setPersonalIgnore(sessionID, checkbox.checked);
+            muteCheckbox.value = domainServer.users.getPersonalMute(sessionID);
+        }
+
         function onAvatarAdded(sessionID) {
 
             avatarsCount.value = avatarMixer.avatarList.count;
@@ -459,6 +465,20 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                 };
             }
             td.appendChild(mute);
+            tr.appendChild(td);
+            td = document.createElement("td");
+            const ignore = document.createElement("input");
+            ignore.type = "checkbox";
+            ignore.className = "checkbox";
+            if (sessionID.value() === Uuid.AVATAR_SELF_ID) {
+                ignore.disabled = true;
+            } else {
+                ignore.checked = domainServer.users.getPersonalIgnore(sessionID);
+                ignore.onclick = (event) => {
+                    onIgnoreClicked(event.target, sessionID, mute);
+                };
+            }
+            td.appendChild(ignore);
             tr.appendChild(td);
             const position = avatar.position;
             td = document.createElement("td");
