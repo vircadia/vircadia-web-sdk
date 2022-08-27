@@ -11,6 +11,7 @@
 
 import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Uuid from "../shared/Uuid";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
@@ -53,9 +54,12 @@ class NodeList extends LimitedNodeList {
 
     #_domainHandler: DomainHandler;
 
-    #_avatarGain = 0.0;  // dB
-    #_avatarGainMap: Map<bigint, number> = new Map();
+    #_ignoredNodeIDs: Set<bigint> = new Set();
     #_personalMutedNodeIDs: Set<bigint> = new Set();
+    #_avatarGainMap: Map<bigint, number> = new Map();
+    #_avatarGain = 0.0;  // dB
+
+    #_ignoredNode = new SignalEmitter();
 
     // Context objects.
     #_addressManager;
@@ -183,16 +187,6 @@ class NodeList extends LimitedNodeList {
     getNodeInterestSet(): Set<NodeTypeValue> {
         // C++  NodeSet& getNodeInterestSet() const { return _nodeTypesOfInterest; }
         return this.#_nodeTypesOfInterest;
-    }
-
-    // eslint-disable-next-line
-    // @ts-ignore
-    isIgnoringNode(nodeID: Uuid): boolean {  // eslint-disable-line
-        //  C++ bool isIgnoringNode(const QUuid& nodeID)
-
-        // WEBRTC TODO: Address further C++ code - ignore specified nodes.
-
-        return false;
     }
 
     // eslint-disable-next-line
@@ -398,8 +392,7 @@ class NodeList extends LimitedNodeList {
 
         super.reset(reason);
 
-        // WEBRTC TODO: Address further C++ code.
-
+        this.#_ignoredNodeIDs.clear();
         this.#_personalMutedNodeIDs.clear();
         this.#_avatarGainMap.clear();
 
@@ -612,14 +605,90 @@ class NodeList extends LimitedNodeList {
         return 0.0;
     }
 
+    /**
+     *  Ignores or un-ignores another user. Ignoring makes you unable to see or hear them and them unable to see or hear you.
+     *  @param {Uuid} nodeID - The user's session ID.
+     *  @param {boolean} ignoreEnabled - <code>true</code> to ignore, <code>false</code> to un-ignore.
+     */
+    ignoreNodeBySessionID(nodeID: Uuid, ignoreEnabled: boolean): void {
+        // C++  void ignoreNodeBySessionID(const QUuid& nodeID, bool ignoreEnabled) {
+
+        // Cannot ignore yourself or nobody.
+        if (nodeID.value() !== Uuid.NULL && this.getSessionUUID().value() !== nodeID.value()) {
+
+            // Send an ignore packet to each node type that uses it.
+            const nodeTypes = [
+                NodeType.AudioMixer,
+                NodeType.AvatarMixer
+            ];
+            for (const nodeType of nodeTypes) {
+                const node = this.soloNodeOfType(nodeType);
+                if (node !== null) {
+                    console.log(`[networking] Sending request to ${ignoreEnabled ? "ignore" : "un-ignore"}`,
+                        `${nodeID.stringify()}.`);
+                    const ignorePacket = PacketScribe.NodeIgnoreRequest.write({
+                        nodeID: nodeID.value(),
+                        ignore: ignoreEnabled
+                    }) as NLPacket;
+                    this.sendPacket(ignorePacket, node);
+                } else {
+                    console.warn(`[networking] Couldn't find ${NodeType.getNodeTypeName(nodeType).toLowerCase()} to send`,
+                        `personal ignore request to.`);
+                }
+            }
+
+            if (ignoreEnabled) {
+                this.#_ignoredNodeIDs.add(nodeID.value());
+                this.#_personalMutedNodeIDs.add(nodeID.value());
+                this.#_ignoredNode.emit(nodeID, true);
+            } else {
+                this.#_ignoredNodeIDs.delete(nodeID.value());
+                this.#_personalMutedNodeIDs.delete(nodeID.value());
+                this.#_ignoredNode.emit(nodeID, false);
+            }
+
+        } else {
+            console.warn("[networking] Cannot ignore a user with an invalid ID or an ID which matches the current session ID.");
+        }
+    }
+
+    /**
+     *  Removes a user from personal ignore and muted sets.
+     *  @param {Uuid} nodeID - The user's session ID.
+     */
+    removeFromIgnoreMuteSets(nodeID: Uuid): void {
+        // C++  void NodeList::removeFromIgnoreMuteSets(const QUuid& nodeID)
+
+        // Don't remove yourself or nobody.
+        const nodeIDValue = nodeID.value();
+        if (nodeIDValue !== Uuid.NULL && this.getSessionUUID().value() !== nodeIDValue) {
+            this.#_ignoredNodeIDs.delete(nodeIDValue);
+            this.#_personalMutedNodeIDs.delete(nodeIDValue);
+        }
+    }
+
+    /*@sdkdoc
+      *  Gets whether or not you are ignoring another user. Ignoring makes you unable to see of hear them and them unable to see
+      *  of hear you.
+      *  @param {Uuid} nodeID - The user's session ID.
+      *  @returns {boolean} <code>true</code> if the user is being ignored, <code>false</code> if they aren't.
+      */
+    isIgnoringNode(nodeID: Uuid): boolean {  // eslint-disable-line
+        //  C++ bool isIgnoringNode(const QUuid& nodeID)
+
+        return this.#_ignoredNodeIDs.has(nodeID.value());
+    }
+
     /*@devdoc
-     *  Mutes or un-mutes another user. Muting makes you unable to hear them and them unable to hear you.
+     *  Mutes or un-mutes another user. Muting makes you unable to hear them and them unable to hear you. You can't mute or
+     *  un-mute a user that is already being ignored.
      *  @param {Uuid} nodeID - The user's session ID.
      *  @param {boolean} muteEnabled - <code>true</code> to mute, <code>false</code> to un-mute.
      */
     personalMuteNodeBySessionID(nodeID: Uuid, muteEnabled: boolean): void {
         // C++  void NodeList::personalMuteNodeBySessionID(const QUuid& nodeID, bool muteEnabled)
-        // cannot personal mute yourself, or nobody
+
+        // Cannot personal mute yourself or nobody.
         if (nodeID.value() !== Uuid.NULL && this.getSessionUUID().value() !== nodeID.value()) {
             const audioMixer = this.soloNodeOfType(NodeType.AudioMixer);
             if (audioMixer) {
@@ -630,7 +699,7 @@ class NodeList extends LimitedNodeList {
 
                     const personalMutePacket = PacketScribe.NodeIgnoreRequest.write({
                         nodeID: nodeID.value(),
-                        muteEnabled
+                        ignore: muteEnabled
                     }) as NLPacket;
                     this.sendPacket(personalMutePacket, audioMixer);
 
@@ -656,6 +725,19 @@ class NodeList extends LimitedNodeList {
     isPersonalMutingNode(nodeID: Uuid): boolean {
         // C++  bool NodeList::isPersonalMutingNode(const QUuid& nodeID) const
         return this.#_personalMutedNodeIDs.has(nodeID.value());
+    }
+
+
+    /*@devdoc
+     *  Triggered when a user is ignored or un-ignored.
+     *  @function NodeList.ignoredNode
+     *  @param {Uuid} nodeID - The user's session ID.
+     *  @param {boolean} ignored - <code>true</code> if ignored, <code>false</code> to un-ignored.
+     *  @returns {Signal}
+     */
+    get ignoredNode(): Signal {
+        // C++  void ignoredNode(const QUuid& nodeID, bool enabled);
+        return this.#_ignoredNode.signal();
     }
 
 
@@ -782,8 +864,6 @@ class NodeList extends LimitedNodeList {
 
         if (newNode.getType() === NodeType.AudioMixer) {
 
-            // WEBRTC TODO: Address further C++.
-
             // Send muted nodes.
             if (this.#_personalMutedNodeIDs.size > 0) {
                 const nodeIDs: bigint[] = [];
@@ -795,25 +875,41 @@ class NodeList extends LimitedNodeList {
 
                 const personalMutePacketList = PacketScribe.NodeIgnoreRequest.write({
                     nodeIDs,
-                    muteEnabled
+                    ignore: muteEnabled
                 }) as NLPacketList;
                 this.sendPacketList(personalMutePacketList, newNode);
             }
 
-            // WEBRTC TODO: Address further C++.
+            // WEBRTC TODO: Address further C++. Ignore radius.
 
             // Send avatar gain.
             if (this.#_avatarGain !== 0.0) {
                 this.setAvatarGain(new Uuid(Uuid.NULL), this.#_avatarGain);
             }
 
-            // WEBRTC TODO: Address further C++.
+            // WEBRTC TODO: Address further C++. Injector gain.
 
         }
 
         if (newNode.getType() === NodeType.AvatarMixer) {
 
-            // WEBRTC TODO: Address further C++.
+            // Send ignored nodes.
+            if (this.#_ignoredNodeIDs.size > 0) {
+                const nodeIDs: bigint[] = [];
+                for (const nodeID of this.#_ignoredNodeIDs) {
+                    nodeIDs.push(nodeID);
+                }
+
+                const muteEnabled = true;
+
+                const ignorePacketList = PacketScribe.NodeIgnoreRequest.write({
+                    nodeIDs,
+                    ignore: muteEnabled
+                }) as NLPacketList;
+                this.sendPacketList(ignorePacketList, newNode);
+            }
+
+            // WEBRTC TODO: Address further C++. Ignore radius.
 
         }
 

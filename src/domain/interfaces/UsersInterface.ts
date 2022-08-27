@@ -87,6 +87,7 @@ class UsersInterface {
 
     /*@sdkdoc
      *  Mutes or un-mutes another user. Muting makes you unable to hear them and them unable to hear you.
+     *  <p>Note: You can't mute or un-mute a user you're ignoring using <code>setPersonalIgnore()</code>.</p>
      *  @param {Uuid} id - The user's session ID.
      *  @param {boolean} mute - <code>true</code> to mute, <code>false</code> to un-mute.
      */
@@ -119,6 +120,44 @@ class UsersInterface {
         }
 
         return this.#_nodeList.isPersonalMutingNode(id);
+    }
+
+    /*@sdkdoc
+     *  Ignores or un-ignores another user (and mutes or un-mutes the other user). Ignoring makes you unable to see or hear them
+     *  and them unable to see or hear you.
+     *  @param {Uuid} id - The user's session ID.
+     *  @param {boolean} mute - <code>true</code> to ignore, <code>false</code> to un-ignore.
+     */
+    setPersonalIgnore(id: Uuid, ignore: boolean): void {
+        // C++  void UsersScriptingInterface::ignore(const QUuid& nodeID, bool ignoreEnabled)
+
+        if (!(id instanceof Uuid)) {
+            console.error("[UsersInterface] Tried to set personal ignore for invalid user session ID value.");
+            return;
+        }
+        if (typeof ignore !== "boolean") {
+            console.error("[UsersInterface] Tried to set personal ignore with invalid ignore value.");
+            return;
+        }
+
+        this.#_nodeList.ignoreNodeBySessionID(id, ignore);
+    }
+
+    /*@sdkdoc
+      *  Gets whether or not you are ignoring another user. Ignoring makes you unable to see or hear them and them unable to see
+      *  or hear you.
+      *  @param {Uuid} id - The user's session ID.
+      *  @returns {boolean} <code>true</code> if the user is being ignored, <code>false</code> if they aren't.
+      */
+    getPersonalIgnore(id: Uuid): boolean {
+        // C++  bool UsersScriptingInterface::getIgnoreStatus(const QUuid& nodeID)
+
+        if (!(id instanceof Uuid)) {
+            console.error("[UsersInterface] Tried to get personal ignore for invalid user session ID value.");
+            return false;
+        }
+
+        return this.#_nodeList.isIgnoringNode(id);
     }
 
 }

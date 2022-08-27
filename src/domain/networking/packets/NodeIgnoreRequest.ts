@@ -20,7 +20,7 @@ import assert from "../../shared/assert";
 type NodeIgnoreRequestDetails = {
     nodeID?: bigint
     nodeIDs?: bigint[],
-    muteEnabled: boolean
+    ignore: boolean
 };
 
 
@@ -32,7 +32,7 @@ const NodeIgnoreRequest = new class {
      *  @typedef {object} PacketScribe.NodeIgnoreRequestDetails
      *  @property {bigint} nodeID - The session ID value of a single avatar.
      *  @property {bigint[]} nodeIDs - The session ID values of possibly multiple avatars.
-     *  @property {boolean} muteEnabled - <code>true</code> to mute the avatar or avatars, <code>false</code> to unumte.
+     *  @property {boolean} ignore - <code>true</code> to ignore the avatar or avatars, <code>false</code> to unumte.
      */
 
 
@@ -60,7 +60,7 @@ const NodeIgnoreRequest = new class {
             const data = messageData.data;
             let dataPosition = messageData.dataPosition;
 
-            data.setUint8(dataPosition, info.muteEnabled ? 1 : 0);
+            data.setUint8(dataPosition, info.ignore ? 1 : 0);
             dataPosition += 1;
 
             data.setBigUint128(dataPosition, info.nodeID, UDT.BIG_ENDIAN);
@@ -80,7 +80,7 @@ const NodeIgnoreRequest = new class {
         assert(info.nodeID === undefined);
         const packetList = NLPacketList.create(PacketType.NodeIgnoreRequest, null, true, true);
 
-        packetList.writePrimitive(info.muteEnabled);
+        packetList.writePrimitive(info.ignore);
 
         for (const nodeID of info.nodeIDs) {
             packetList.writePrimitive(nodeID);

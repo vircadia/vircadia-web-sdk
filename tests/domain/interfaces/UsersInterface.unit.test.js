@@ -73,7 +73,7 @@ describe("UsersInterface - unit tests", () => {
         domainServer.users.setPersonalMute(new Uuid(100), true);
         domainServer.users.setPersonalMute(new Uuid(100), false);
         expect(error).toHaveBeenCalledTimes(0);
-        expect(warn).toHaveBeenCalledTimes(2);  // Unknown avatar ID.
+        expect(warn).toHaveBeenCalledTimes(2);  // No audio mixer.
 
         // Errors
         domainServer.users.setPersonalMute("", 3);
@@ -101,6 +101,49 @@ describe("UsersInterface - unit tests", () => {
         expect(isMuted).toBe(false);
         expect(error).toHaveBeenCalledTimes(1);
         isMuted = domainServer.users.getPersonalMute("");
+        expect(isMuted).toBe(false);
+        expect(error).toHaveBeenCalledTimes(2);
+
+        error.mockReset();
+    });
+
+    test("Error logged if try to set personal ignore for invalid session ID or mute values", () => {
+        const domainServer = new DomainServer();
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+        const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
+
+        // OK
+        domainServer.users.setPersonalIgnore(new Uuid(100), true);
+        domainServer.users.setPersonalIgnore(new Uuid(100), false);
+        expect(error).toHaveBeenCalledTimes(0);
+        expect(warn).toHaveBeenCalledTimes(4);  // No audio or avatar mixers.
+
+        // Errors
+        domainServer.users.setPersonalIgnore("", 3);
+        expect(error).toHaveBeenCalledTimes(1);
+        domainServer.users.setPersonalIgnore(Uuid.NULL, 3);
+        expect(error).toHaveBeenCalledTimes(2);
+        domainServer.users.setPersonalIgnore(new Uuid(100), 3);
+        expect(error).toHaveBeenCalledTimes(3);
+
+        warn.mockReset();
+        error.mockReset();
+    });
+
+    test("Error logged if try to get personal ignore for invalid session ID", () => {
+        const domainServer = new DomainServer();
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+
+        // OK
+        let isMuted = domainServer.users.getPersonalIgnore(new Uuid(100));
+        expect(isMuted).toBe(false);
+        expect(error).toHaveBeenCalledTimes(0);
+
+        // Errors
+        isMuted = domainServer.users.getPersonalIgnore(Uuid.NULL);
+        expect(isMuted).toBe(false);
+        expect(error).toHaveBeenCalledTimes(1);
+        isMuted = domainServer.users.getPersonalIgnore("");
         expect(isMuted).toBe(false);
         expect(error).toHaveBeenCalledTimes(2);
 

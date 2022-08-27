@@ -29,7 +29,7 @@ describe("NodeIgnoreRequest - unit tests", () => {
         const EXPECTED_PACKET = "000000401e1200000000000000000000000000000000000001b26d558149994ecd964b6250817a06c3";
         const packet = NodeIgnoreRequest.write({
             nodeID: new Uuid("0xb26d558149994ecd964b6250817a06c3"),
-            muteEnabled: true
+            ignore: true
         });
 
         expect(packet instanceof NLPacket).toBe(true);
@@ -47,7 +47,7 @@ describe("NodeIgnoreRequest - unit tests", () => {
         const EXPECTED_PACKET = "0000006000000000000000001e1200000000000000000000000000000000000001e722537059c6486d9944eb49a3d1ea2b64b12743cc9d406e80af4dcf0deaa26e";
         const packetList = NodeIgnoreRequest.write({
             nodeIDs: [BigInt("0xe722537059c6486d9944eb49a3d1ea2b"), BigInt("0x64b12743cc9d406e80af4dcf0deaa26e")],
-            muteEnabled: true
+            ignore: true
         });
         packetList.closeCurrentPacket();
 
