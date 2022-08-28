@@ -70,6 +70,8 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.SelectedAudioFormat.read).toBe("function");
         expect(typeof PacketScribe.AvatarQuery).toBe("object");
         expect(typeof PacketScribe.AvatarQuery.write).toBe("function");
+        expect(typeof PacketScribe.RequestsDomainListData).toBe("object");
+        expect(typeof PacketScribe.RequestsDomainListData.write).toBe("function");
         expect(typeof PacketScribe.BulkAvatarTraits).toBe("object");
         expect(typeof PacketScribe.BulkAvatarTraits.read).toBe("function");
     });

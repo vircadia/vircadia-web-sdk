@@ -285,7 +285,11 @@ const enum PacketTypeValue {
  *  @property {PacketType} AvatarQuery - <code>72</code> - The user client sends this to the avatar mixer to seek details of
  *      avatars in the client's view or views.<br />
  *      {@link PacketScribe.AvatarQueryDetails}
- *  @property {PacketType} RequestsDomainListData - <code>73</code>
+ *  @property {PacketType} RequestsDomainListData - <code>73</code> - The user clients sends this to the audio mixer and avatar
+ *      mixer to tell them whether or not to continue sending data from ignored avatars or avatars that have ignored the
+ *      client.<br />
+ *      <em>Reliable.</em><br />
+ *      {@link PacketScribe.RequestsDomainListDataDetails}
  *  @property {PacketType} PerAvatarGainSet - <code>74</code> - The user clients sends this to the audio mixer to set an
  *      avatar's gain (volume) or the master avatar gain, for the audio that's sent to the client.<br />
  *      <em>Reliable.</em><br />
@@ -662,6 +666,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.AvatarQuery:
                 return this.#_AvatarQueryVersion.ConicalFrustums;
+            case this.RequestsDomainListData:
+                return DEFAULT_VERSION;
             case this.PerAvatarGainSet:
                 return DEFAULT_VERSION;
             case this.EntityQueryInitialResultsComplete:
