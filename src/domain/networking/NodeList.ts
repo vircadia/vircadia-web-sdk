@@ -658,13 +658,12 @@ class NodeList extends LimitedNodeList {
         if (nodeID.value() !== Uuid.NULL && this.getSessionUUID().value() !== nodeID.value()) {
 
             // Send an ignore packet to each node type that uses it.
-            const nodeTypes = [
-                NodeType.AudioMixer,
-                NodeType.AvatarMixer
-            ];
-            for (const nodeType of nodeTypes) {
-                const node = this.soloNodeOfType(nodeType);
-                if (node !== null) {
+            this.eachMatchingNode(
+                (node: Node) => {
+                    const nodeType = node.getType();
+                    return nodeType === NodeType.AvatarMixer || nodeType === NodeType.AudioMixer;
+                },
+                (node: Node) => {
                     console.log(`[networking] Sending request to ${ignoreEnabled ? "ignore" : "un-ignore"}`,
                         `${nodeID.stringify()}.`);
                     const ignorePacket = PacketScribe.NodeIgnoreRequest.write({
@@ -672,11 +671,8 @@ class NodeList extends LimitedNodeList {
                         ignore: ignoreEnabled
                     }) as NLPacket;
                     this.sendPacket(ignorePacket, node);
-                } else {
-                    console.warn(`[networking] Couldn't find ${NodeType.getNodeTypeName(nodeType).toLowerCase()} to send`,
-                        `personal ignore request to.`);
                 }
-            }
+            );
 
             if (ignoreEnabled) {
                 this.#_ignoredNodeIDs.add(nodeID.value());
