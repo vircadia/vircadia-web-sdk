@@ -389,12 +389,20 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         // Avatar List
 
+        const showExtraDataCheckbox = document.getElementById("showExtraData");
+
         const avatarsCount = document.getElementById("avatarsCount");
         avatarsCount.value = avatarMixer.avatarList.count;
 
         const avatarListBody = document.querySelector("#avatarList > tbody");
 
         const avatars = new Map();  // <sessionID, { avatar, tr, headJoint }>
+
+        domainServer.users.wantIgnored = showExtraDataCheckbox.checked;
+        function onShowExtraDataClick() {
+            domainServer.users.wantIgnored = showExtraDataCheckbox.checked;
+        }
+        showExtraDataCheckbox.addEventListener("click", onShowExtraDataClick);
 
         function onEchoClicked(checkbox, sessionID) {
             if (doppelganger !== null) {
@@ -417,7 +425,8 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         function onIgnoreClicked(checkbox, sessionID, muteCheckbox) {
             domainServer.users.setPersonalIgnore(sessionID, checkbox.checked);
-            muteCheckbox.value = domainServer.users.getPersonalMute(sessionID);
+            muteCheckbox.checked = domainServer.users.getPersonalMute(sessionID);
+            muteCheckbox.disabled = checkbox.checked;
         }
 
         function onAvatarAdded(sessionID) {
@@ -460,6 +469,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                 mute.disabled = true;
             } else {
                 mute.checked = domainServer.users.getPersonalMute(sessionID);
+                mute.disabled = domainServer.users.getPersonalIgnore(sessionID);
                 mute.onclick = (event) => {
                     onMuteClicked(event.target, sessionID);
                 };
