@@ -204,5 +204,13 @@ describe("NodeList - integration tests", () => {
         expect(nodeList.isPersonalMutingNode(new Uuid(300))).toBe(false);
     });
 
+    test("Can get and set requesting extra data", () => {
+        expect(nodeList.getRequestsDomainListData()).toBe(false);
+        nodeList.setRequestsDomainListData(true);
+        expect(nodeList.getRequestsDomainListData()).toBe(true);
+        nodeList.setRequestsDomainListData(false);
+        expect(nodeList.getRequestsDomainListData()).toBe(false);
+    });
+
     log.mockReset();
 });

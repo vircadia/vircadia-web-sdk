@@ -116,7 +116,7 @@ describe("UsersInterface - unit tests", () => {
         domainServer.users.setPersonalIgnore(new Uuid(100), true);
         domainServer.users.setPersonalIgnore(new Uuid(100), false);
         expect(error).toHaveBeenCalledTimes(0);
-        expect(warn).toHaveBeenCalledTimes(4);  // No audio or avatar mixers.
+        expect(warn).toHaveBeenCalledTimes(0);
 
         // Errors
         domainServer.users.setPersonalIgnore("", 3);
@@ -148,6 +148,15 @@ describe("UsersInterface - unit tests", () => {
         expect(error).toHaveBeenCalledTimes(2);
 
         error.mockReset();
+    });
+
+    test("Can toggle wantIgnored", () => {
+        const domainServer = new DomainServer();
+        expect(domainServer.users.wantIgnored).toBe(false);
+        domainServer.users.wantIgnored = true;
+        expect(domainServer.users.wantIgnored).toBe(true);
+        domainServer.users.wantIgnored = false;
+        expect(domainServer.users.wantIgnored).toBe(false);
     });
 
 });

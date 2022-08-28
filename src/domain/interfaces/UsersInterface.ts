@@ -20,6 +20,10 @@ import Uuid from "../shared/Uuid";
  *  @namespace UsersInterface
  *  @comment Don't document the constructor because it shouldn't be used in the SDK.
  *
+ *  @property {boolean} wantIgnored=false - <code>true</code> to make the audio and avatar mixers to continue sending data from
+ *      ignored users or users that have ignored the client, <code>false</code> to have them not to send such data.
+ *      <p>Note: The audio mixer only continues to send audio from ignored or ignoring users if the client is an admin in the
+ *      domain (can kick avatars).</p>
  */
 class UsersInterface {
     // C++  class UsersScriptingInterface : public QObject, public Dependency
@@ -29,6 +33,17 @@ class UsersInterface {
 
     constructor(contextID: number) {
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
+    }
+
+
+    get wantIgnored(): boolean {
+        // C++  bool UsersScriptingInterface::getRequestsDomainListData()
+        return this.#_nodeList.getRequestsDomainListData();
+    }
+
+    set wantIgnored(wantIgnored: boolean) {
+        // C++ void UsersScriptingInterface::setRequestsDomainListData(bool isRequesting)
+        this.#_nodeList.setRequestsDomainListData(wantIgnored);
     }
 
 

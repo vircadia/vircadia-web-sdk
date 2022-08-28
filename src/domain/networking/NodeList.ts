@@ -54,6 +54,8 @@ class NodeList extends LimitedNodeList {
 
     #_domainHandler: DomainHandler;
 
+    #_requestsDomainListData = false;
+
     #_ignoredNodeIDs: Set<bigint> = new Set();
     #_personalMutedNodeIDs: Set<bigint> = new Set();
     #_avatarGainMap: Map<bigint, number> = new Map();
@@ -189,14 +191,53 @@ class NodeList extends LimitedNodeList {
         return this.#_nodeTypesOfInterest;
     }
 
-    // eslint-disable-next-line
-    // @ts-ignore
-    getRequestsDomainListData(): boolean {  // eslint-disable-line
+    /**
+     *  Gets whether the audio mixer and avatar mixer have been told to continue to send data from ignored avatars or avatars
+     *  that have ignored the client.
+     *  <p>Note: Audio mixer only continues to send audio from ignored or ignoring avatars if the client is an admin in the
+     *  domain (can kick avatars).</p>
+     *  @returns {boolean} <code>true</code> if the audio and avatar mixers have been told to continue sending data from ignored
+     *      or ignoring avatars, <code>false</code> if they haven't or have been told not to.
+     */
+    getRequestsDomainListData(): boolean {
         // C++  bool getRequestsDomainListData()
 
-        // WEBRTC TODO: Address further C++ code - request domain list data.
+        return this.#_requestsDomainListData;
+    }
 
-        return false;
+    /**
+     *  Tells the audio mixer to continue to send audio from avatars that have been ignored or that have ignored the client,
+     *  provided that the client is an admin in the domain (can kick avatars).
+     *  <p>Tells the avatar mixer to continue to send data from avatars that have been ignored or that have ignored the
+     *  client.</p>
+     *  @param {boolean} isRequesting - <code>true</code> to tell the audio and avatar mixers to continue sending data from
+     *      ignored or ignoring avatars, <code>false</code> to tell them to stop sending.
+     */
+    setRequestsDomainListData(isRequesting: boolean): void {
+        // C++  void setRequestsDomainListData(bool isRequesting)
+
+        if (this.#_requestsDomainListData === isRequesting) {
+            return;
+        }
+
+        this.eachMatchingNode(
+            (node: Node) => {
+                const nodeType = node.getType();
+                return nodeType === NodeType.AvatarMixer || nodeType === NodeType.AudioMixer;
+            },
+            (node: Node) => {
+                const packet = PacketScribe.RequestsDomainListData.write({
+                    isRequesting
+                });
+                this.sendPacket(packet, node);
+            }
+        );
+
+        /*
+        // Tell the avatar mixer and audio mixer whether I want to receive any additional data to which I might be entitled
+        */
+
+        this.#_requestsDomainListData = isRequesting;
     }
 
 
