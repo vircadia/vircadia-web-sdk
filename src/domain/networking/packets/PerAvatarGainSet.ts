@@ -26,7 +26,7 @@ type PerAvatarGainSetDetails = {
 const PerAvatarGainSet = new class {
 
     /*@devdoc
-     *  Information needed for {@link PacketScribe|writing} an {@link PacketType(1)|PerAvatarGainSet} packet.
+     *  Information needed for {@link PacketScribe|writing} a {@link PacketType(1)|PerAvatarGainSet} packet.
      *  @typedef {object} PacketScribe.PerAvatarGainSetDetails
      *  @property {Uuid} nodeID - The avatar's session ID, or <code>Uuid.NULL</code> to set the master avatar gain.
      *  @property {number} gain - The gain to set, in dB.
@@ -34,7 +34,7 @@ const PerAvatarGainSet = new class {
 
 
     /*@devdoc
-     *  Writes an {@link PacketType(1)|PerAvatarGainSet} packet, ready for sending.
+     *  Writes a {@link PacketType(1)|PerAvatarGainSet} packet, ready for sending.
      *  @function PacketScribe.PerAvatarGainSet&period;write
      *  @param {PacketScribe.PerAvatarGainSetDetails} info - The information needed for writing the packet.
      *  @returns {NLPacket} The packet, ready for sending.

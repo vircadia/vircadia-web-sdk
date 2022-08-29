@@ -20,7 +20,7 @@ type RequestsDomainListDataDetails = {
 const RequestsDomainListData = new class {
 
     /*@devdoc
-     *  Information needed for {@link PacketScribe|writing} an {@link PacketType(1)|RequestsDomainListData} packet.
+     *  Information needed for {@link PacketScribe|writing} a {@link PacketType(1)|RequestsDomainListData} packet.
      *  @typedef {object} PacketScribe.RequestsDomainListDataDetails
      *  @property {boolean} isRequesting - <code>true</code> to tell the audio and avatar mixers to continue sending data from
      *      ignored avatars or avatars that have ignored the client, <code>false</code> to tell them to stop sending.
@@ -30,7 +30,7 @@ const RequestsDomainListData = new class {
 
 
     /*@devdoc
-     *  Writes an {@link PacketType(1)|RequestsDomainListData} packet, ready for sending.
+     *  Writes a {@link PacketType(1)|RequestsDomainListData} packet, ready for sending.
      *  @function PacketScribe.RequestsDomainListData&period;write
      *  @param {PacketScribe.RequestsDomainListDataDetails} info - The information needed for writing the packet.
      *  @returns {NLPacket} The packet, ready for sending.

@@ -27,7 +27,7 @@ type NodeIgnoreRequestDetails = {
 const NodeIgnoreRequest = new class {
 
     /*@devdoc
-     *  Information needed for {@link PacketScribe|writing} an {@link PacketType(1)|NodeIgnoreRequest} packet.
+     *  Information needed for {@link PacketScribe|writing} n {@link PacketType(1)|NodeIgnoreRequest} packet.
      *  Exactly one of either <code>nodeID</code> or <code>nodeIDs</code> must be specified.
      *  @typedef {object} PacketScribe.NodeIgnoreRequestDetails
      *  @property {bigint} nodeID - The session ID value of a single avatar.
@@ -37,7 +37,7 @@ const NodeIgnoreRequest = new class {
 
 
     /*@devdoc
-     *  Writes an {@link PacketType(1)|NodeIgnoreRequest} packet or packet list, ready for sending. A packet is returned if
+     *  Writes a {@link PacketType(1)|NodeIgnoreRequest} packet or packet list, ready for sending. A packet is returned if
      *  <code>nodeID</code> is specified; a packet list is returned if <code>nodeIDs</code> is specified.
      *  @function PacketScribe.NodeIgnoreRequest&period;write
      *  @param {PacketScribe.NodeIgnoreRequestDetails} info - The information needed for writing the packet.
