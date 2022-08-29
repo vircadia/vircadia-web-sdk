@@ -13,6 +13,7 @@ import Uuid from "../../shared/Uuid";
 import UDT from "../udt/UDT";
 import AvatarDataPacket from "../../avatars/AvatarDataPacket";
 import assert from "../../shared/assert";
+import AudioHelpers from "../../shared/AudioHelpers";
 import GLMHelpers from "../../shared/GLMHelpers";
 import { quat } from "../../shared/Quat";
 import Vec3, { vec3 } from "../../shared/Vec3";
@@ -25,6 +26,7 @@ type BulkAvatarDataDetails = {
     globalPosition: vec3 | undefined,
     localOrientation: quat | undefined,
     avatarScale: number | undefined,
+    audioLoudness: number | undefined,
     jointRotationsValid: boolean[] | undefined
     jointRotations: quat[] | undefined,
     jointTranslationsValid: boolean[] | undefined
@@ -56,6 +58,9 @@ const BulkAvatarData = new class {
      *  @property {quat|undefined} localOrientation - The avatar's orientation.
      *      <p>Is <code>undefined</code> if not included in the packet.</p>
      *  @property {number|undefined} avatarScale - The avatar's scale.
+     *      <p>Is <code>undefined</code> if not included in the packet.</p>
+     *  @property {number|undefined} audioLoudness - The instantaneous loudness of the audio input that the avatar is injecting
+     *      into the domain.
      *      <p>Is <code>undefined</code> if not included in the packet.</p>
      *  @property {boolean[]|undefined} jointRotationsValid - A flag for each joint where <code>true</code> means that a
      *      rotation value is included in <code>jointRotations</code>, <code>false</code> means that no value is included in
@@ -100,6 +105,7 @@ const BulkAvatarData = new class {
 
         const BITS_IN_BYTE = 8;
         const TRANSLATION_COMPRESSION_RADIX = 14;
+        const AUDIO_LOUDNESS_SCALE = 1024.0;
 
         const avatarDataDetailsList: BulkAvatarDataDetails[] = [];
 
@@ -154,7 +160,6 @@ const BulkAvatarData = new class {
 
             let avatarScale: number | undefined = undefined;
             if (hasAvatarScale) {
-                // WEBRTC TODO: Address further code - avatar scale.
                 avatarScale = GLMHelpers.unpackFloatRatioFromTwoByte(data, dataPosition);
                 dataPosition += 2;
             }
@@ -164,8 +169,9 @@ const BulkAvatarData = new class {
                 dataPosition += 12;
             }
 
+            let audioLoudness: number | undefined = undefined;
             if (hasAudioLoudness) {
-                // WEBRTC TODO: Address further code - avatar audio loudness.
+                audioLoudness = AudioHelpers.unpackFloatGainFromByte(data.getUint8(dataPosition)) * AUDIO_LOUDNESS_SCALE;
                 dataPosition += 1;
             }
 
@@ -323,6 +329,7 @@ const BulkAvatarData = new class {
                 globalPosition,
                 localOrientation,
                 avatarScale,
+                audioLoudness,
                 jointRotationsValid,
                 jointRotations,
                 jointTranslationsValid,

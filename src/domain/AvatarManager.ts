@@ -22,8 +22,8 @@ import Uuid from "./shared/Uuid";
 
 
 /*@devdoc
- *  The <code>AvatarManager</code> class is concerned with operations on that the user client knows about in the domain (has
- *  been sent data on by the avatar mixer).
+ *  The <code>AvatarManager</code> class is concerned with operations on avatars that the user client knows about in the domain
+ *  (has been sent data on by the avatar mixer).
  *  <p>C++: <code>AvatarManager</code></p>
  *  @class AvatarManager
  *  @extends AvatarHashMap
@@ -54,6 +54,17 @@ class AvatarManager extends AvatarHashMap {
 
         // Context
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
+
+        // When we hear that the user has ignored an avatar by session UUID, immediately remove that avatar instead of waiting
+        // for the absence of packets from avatar mixer.
+        this.#_nodeList.ignoredNode.connect((nodeID: Uuid, ignored: boolean) => {
+            if (ignored) {
+                this.removeAvatar(nodeID, KillAvatarReason.AvatarIgnored);
+            }
+
+            // WEBRTC TODO: Address further C++ code. Avatar orb.
+
+        });
 
         this.#_nodeList.nodeActivated.connect(this.nodeActivated);
 
@@ -88,6 +99,12 @@ class AvatarManager extends AvatarHashMap {
      */
     updateMyAvatar(/* deltaTime: number */): void {
         // C++  void AvatarManager::updateMyAvatar(float deltaTime)
+
+        // WebRTC TODO: Address further C++ code.
+
+        this.#_myAvatar.update(/* deltaTime */);
+
+        // WebRTC TODO: Address further C++ code.
 
         const now = Date.now();
         const deltaTime = now - this.#_lastSendAvatarDataTime;
@@ -184,7 +201,7 @@ class AvatarManager extends AvatarHashMap {
     protected override newSharedAvatar(sessionUUID: Uuid): AvatarData {
         // C++  AvatarData* newSharedAvatar(const QUuid& sessionUUID)
 
-        // WEBRTC TODO: Address further C++ code - use OtherAvatar instead of Avatar?
+        // WEBRTC TODO: Address further C++ code. Use OtherAvatar instead of Avatar.
 
         const otherAvatar = new Avatar(this.#_contextID);
         otherAvatar.setSessionUUID(sessionUUID);
@@ -207,11 +224,22 @@ class AvatarManager extends AvatarHashMap {
         // C++  void handleRemovedAvatar(const Avatar* removedAvatar,
         //          KillAvatarReason removalReason = KillAvatarReason::NoReason);
 
+        // WEBRTC TODO: Address further C++ code. Cast removedAvatar to OtherAvatar.
+
         super.handleRemovedAvatar(removedAvatar, removalReason);
 
-        // WEBRTC TODO: Address further C++ code - grabs, die, physics, orb.
+        // WEBRTC TODO: Address further C++ code. Grabs, die, physics, orb.
 
-        // WEBRTC TODO: Address further C++ code - remove avatar entities from tree and scene.
+        if (removalReason !== KillAvatarReason.AvatarDisconnected) {
+
+            // WEBRTC TOOD: Address further C++ code. Ignore radius, remove from scene.
+
+        } else {
+            this.#_nodeList.removeFromIgnoreMuteSets(removedAvatar.getSessionUUID());
+
+            // WEBRTC TODO: Address further C++ code. Disconnected API signal. Remove from scene.
+
+        }
 
     }
 

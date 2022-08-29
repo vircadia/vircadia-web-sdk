@@ -136,6 +136,9 @@ class AvatarData extends SpatiallyNestable {
     #_avatarSkeletonData: SkeletonJoint[] = [];
     #_skeletonChanged = new SignalEmitter();  // No C++ equivalent.
 
+    #_audioLoudness = 0;
+    #_audioLoudnessChanged = 0;
+
     // C++  _jointData
     #_jointRotations: (quat | null)[] = [];
     #_jointTranslations: (vec3 | null)[] = [];
@@ -296,6 +299,28 @@ class AvatarData extends SpatiallyNestable {
     getSkeletonModelURL(): string | null {
         // WEBRTC TODO: return the default avatar URL if null.
         return this.#_skeletonModelURL;
+    }
+
+    /*@devdoc
+     *  Gets the instantaneous loudness of the audio input that the avatar is injecting into the domain.
+     *  @returns {number} The instantaneous loudness of the audio input that the avatar is injecting into the domain.
+     */
+    getAudioLoudness(): number {
+        // C++  float getAudioLoudness()
+        return this.#_audioLoudness;
+    }
+
+    /*@devdoc
+     *  Sets the instantaneous loudness of the audio input that the avatar is injecting into the domain.
+     *  @param {number} audioLoudness - The instantaneous loudness of the audio input that the avatar is injecting into the
+     *      domain.
+     */
+    setAudioLoudness(audioLoudness: number): void {
+        // C++  void setAudioLoudness(float audioLoudness)
+        if (audioLoudness !== this.#_audioLoudness) {
+            this.#_audioLoudnessChanged = Date.now();
+        }
+        this.#_audioLoudness = audioLoudness;
     }
 
     /*@devdoc
@@ -655,6 +680,7 @@ class AvatarData extends SpatiallyNestable {
             globalPosition: this._globalPosition,
             localOrientation: sendAll || this.rotationChangedSince(lastSentTime) ? this.getOrientationOutbound() : undefined,
             avatarScale: sendAll || this.#avatarScaleChangedSince(lastSentTime) ? this.getDomainLimitedScale() : undefined,
+            audioLoudness: sendAll || this.#audioLoudnessChangedSince(lastSentTime) ? this.getAudioLoudness() : undefined,
             jointRotations: this.#_jointRotations,  // sendMinimum is implemented in PacketScribe.AvatarData.write().
             jointTranslations: this.#_jointTranslations
         };
@@ -733,11 +759,21 @@ class AvatarData extends SpatiallyNestable {
             // WEBRTC TODO: Address further C++ code - avatar orientation update rate.
         }
 
-        if (avatarData.avatarScale) {
+        if (avatarData.avatarScale !== undefined) {
             if (!isNaN(avatarData.avatarScale)) {
                 this.setTargetScale(avatarData.avatarScale);
 
                 // WEBRTC TODO: Address further C++ code - avatar scale rate and update rate.
+            }
+        }
+
+        // WEBRTC TODO: Address further C++ code - further avatar properties.
+
+        if (avatarData.audioLoudness !== undefined) {
+            if (!isNaN(avatarData.audioLoudness)) {
+                this.setAudioLoudness(avatarData.audioLoudness);
+
+                // WEBRTC TODO: Address further C++ code - audio loudness rate and update rate.
             }
         }
 
@@ -1032,6 +1068,11 @@ class AvatarData extends SpatiallyNestable {
     #avatarScaleChangedSince(time: number): boolean {
         // C++  bool avatarScaleChangedSince(quint64 time)
         return this._avatarScaleChanged >= time;
+    }
+
+    #audioLoudnessChangedSince(time: number): boolean {
+        // C++  bool audioLoudnessChangedSince(quint64 time)
+        return this.#_audioLoudnessChanged >= time;
     }
 
     #resetJoints(): void {

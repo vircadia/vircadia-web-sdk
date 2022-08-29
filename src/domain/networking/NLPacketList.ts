@@ -118,12 +118,12 @@ class NLPacketList {
 
     /*@devdoc
      *  Writes a "primitive" value to the current packet.
-     *  @param {number|boolean|Uuid} value - The value to write.
+     *  @param {number|bigint|boolean|Uuid} value - The value to write.
      *  @param {number|undefined|undefined} bytes=4 - The number of bytes to write the number value into.
      *  @param {boolean|undefined|undefined} littleEndian=true - Whether to write the number in little- or big-endian format.
      *  @returns {number} The number of bytes written.
      */
-    writePrimitive(value: number | boolean | Uuid, bytes?: number, littleEndian?: boolean): number {
+    writePrimitive(value: number | bigint | boolean | Uuid, bytes?: number, littleEndian?: boolean): number {
         // C++  qint64 ExtendedIODevice::writePrimitive(const T& data)
         const DEFAULT_NUM_BYTES = 4;
         const isLittleEndian = littleEndian === undefined || littleEndian;
@@ -141,6 +141,9 @@ class NLPacketList {
                     return this.#writeData(this.#_uint32Array.slice(0, bytes), bytes);
                 }
                 return this.#writeData(this.#_uint32Array.slice(-bytes), bytes);
+            case "bigint":
+                this.#_uuidData.setBigUint128(0, value, UDT.BIG_ENDIAN);
+                return this.#writeData(this.#_uuidArray, this.#UUID_LENGTH);
             case "boolean":
                 this.#_booleanData.setUint8(0, value ? 1 : 0);
                 return this.#writeData(this.#_booleanArray, this.#BOOLEAN_LENGTH);

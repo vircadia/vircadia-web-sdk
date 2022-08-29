@@ -158,6 +158,13 @@ describe("DomainServer - unit tests", () => {
         expect(domainServer.sessionUUID.value()).toBe(Uuid.NULL);
     });
 
+    test("Can access the users interface", () => {
+        const domainServer = new DomainServer();
+        expect(typeof domainServer.users).toBe("object");
+        expect(typeof domainServer.users.getAvatarGain).toBe("function");
+        expect(typeof domainServer.users.setAvatarGain).toBe("function");
+    });
+
 
     log.mockReset();
 });

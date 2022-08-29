@@ -72,6 +72,13 @@ describe("ContextManager - unit tests", () => {
         expect(objectX).toBe(objectA);
     });
 
+    test("Can determine whether or not the context includes an object", () => {
+        const contextID = ContextManager.createContext();
+        expect(ContextManager.has(contextID, A)).toBe(false);
+        ContextManager.set(contextID, A);
+        expect(ContextManager.has(contextID, A)).toBe(true);
+    });
+
     test("Can include parameters when adding a dependency", () => {
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, B, contextID, "hello");

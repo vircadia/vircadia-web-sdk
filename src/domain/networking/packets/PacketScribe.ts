@@ -26,6 +26,7 @@ import DomainServerAddedNode from "./DomainServerAddedNode";
 import DomainConnectionDenied from "./DomainConnectionDenied";
 import SetAvatarTraits from "./SetAvatarTraits";
 import AvatarIdentity from "./AvatarIdentity";
+import NodeIgnoreRequest from "./NodeIgnoreRequest";
 import DomainConnectRequest from "./DomainConnectRequest";
 import EntityData from "./EntityData";
 import EntityQuery from "./EntityQuery";
@@ -37,6 +38,8 @@ import MessagesUnsubscribe from "../packets/MessagesUnsubscribe";
 import NegotiateAudioFormat from "./NegotiateAudioFormat";
 import SelectedAudioFormat from "./SelectedAudioFormat";
 import AvatarQuery from "./AvatarQuery";
+import RequestsDomainListData from "./RequestsDomainListData";
+import PerAvatarGainSet from "./PerAvatarGainSet";
 import BulkAvatarTraits from "./BulkAvatarTraits";
 import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
 
@@ -81,6 +84,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.AvatarIdentity&period;read|AvatarIdentity&period;read}
  *  @property {function} AvatarIdentity.write -
  *      {@link PacketScribe.AvatarIdentity&period;write|AvatarIdentity&period;write}
+ *  @property {function} NodeIgnoreRequest.write -
+ *      {@link PacketScribe.NodeIgnoreRequest&period;write|NodeIgnoreRequest&period;write}
  *  @property {function} DomainConnectRequest.write -
  *      {@link PacketScribe.DomainConnectRequest&period;write|DomainConnectRequest&period;write}
  *  @property {function} EntityData.read -
@@ -105,6 +110,10 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.SelectedAudioFormat&period;read|SelectedAudioFormat&period;read}
  *  @property {function} AvatarQuery.write -
  *      {@link PacketScribe.AvatarQuery&period;write|AvatarQuery&period;write}
+ *  @property {function} RequestsDomainListData.write -
+ *      {@link PacketScribe.RequestsDomainListData&period;write|RequestsDomainListData&period;write}
+ *  @property {function} PerAvatarGainSet.write -
+ *      {@link PacketScribe.PerAvatarGainSet&period;write|PerAvatarGainSet&period;write}
  *  @property {function} BulkAvatarTraits.read -
  *      {@link PacketScribe.BulkAvatarTraits&period;read|BulkAvatarTraits&period;read}
  *  @property {function} BulkAvatarTraitsAck.write -
@@ -134,6 +143,7 @@ const PacketScribe = {
     DomainServerAddedNode,
     SetAvatarTraits,
     AvatarIdentity,
+    NodeIgnoreRequest,
     DomainConnectRequest,
     EntityData,
     EntityQuery,
@@ -145,6 +155,8 @@ const PacketScribe = {
     NegotiateAudioFormat,
     SelectedAudioFormat,
     AvatarQuery,
+    RequestsDomainListData,
+    PerAvatarGainSet,
     BulkAvatarTraits,
     BulkAvatarTraitsAck
 };

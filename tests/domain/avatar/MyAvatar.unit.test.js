@@ -11,6 +11,10 @@
 
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
+import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
+AudioWorkletsMock.mock();
+
+
 import MyAvatar from "../../../src/domain/avatar/MyAvatar";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodeList from "../../../src/domain/networking/NodeList";

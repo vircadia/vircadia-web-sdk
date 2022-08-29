@@ -11,6 +11,10 @@
 
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
+import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
+AudioWorkletsMock.mock();
+
+
 import DomainServer from "../../../src/DomainServer";
 import AvatarManager from "../../../src/domain/AvatarManager";
 import ScriptAvatar from "../../../src/domain/avatar-renderer/ScriptAvatar";
@@ -32,6 +36,7 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.isValid).toBe(false);
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
+        expect(scriptAvatar.audioLoudness).toBe(0);
         expect(scriptAvatar.skeletonModelURL).toBe("");
         expect(scriptAvatar.skeleton).toEqual([]);
         expect(scriptAvatar.scale).toEqual(0.0);
@@ -66,6 +71,7 @@ describe("ScriptAvatar - unit tests", () => {
         expect(scriptAvatar.isValid).toBe(false);
         expect(scriptAvatar.displayName).toBe("");
         expect(scriptAvatar.sessionDisplayName).toBe("");
+        expect(scriptAvatar.audioLoudness).toBe(0);
         expect(scriptAvatar.skeletonModelURL).toBe("");
         expect(scriptAvatar.skeleton).toEqual([]);
         expect(scriptAvatar.scale).toEqual(0.0);

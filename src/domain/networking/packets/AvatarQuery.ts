@@ -31,7 +31,7 @@ const AvatarQuery = new class {
 
 
     /*@devdoc
-     *  Writes an {@link PacketType(1)|AvatarIdentity} packet, ready for sending.
+     *  Writes an {@link PacketType(1)|AvatarQuery} packet, ready for sending.
      *  @function PacketScribe.AvatarQuery&period;write
      *  @param {PacketScribe.AvatarQueryDetails} info - The information needed for writing the packet.
      *  @returns {NLPacket} The packet, ready for sending.

@@ -138,4 +138,25 @@ describe("AvatarData - unit tests", () => {
 
     });
 
+    test("Can write an AvatarData packet - audio loudness", () => {
+        // eslint-disable-next-line max-len
+        const EXPECTED_PACKET = "000000000636000000000000000000000000000000000000bd0021000000803f0000004000004040ba";
+        const packet = AvatarData.write({
+            sequenceNumber: 189,
+            dataDetail: 2,
+            lastSentTime: Date.now(),
+            globalPosition: { x: 1, y: 2, z: 3 },
+            audioLoudness: 618.481
+        });
+        expect(packet instanceof NLPacket).toBe(true);
+        expect(packet.getType()).toBe(PacketType.AvatarData);
+        const packetSize = packet.getDataSize();
+        expect(packetSize).toBe(packet.getMessageData().dataPosition);
+        expect(packetSize).toBeGreaterThan(0);
+        expect(packetSize).toBeLessThan(UDT.MAX_PACKET_SIZE);
+
+        expect(buffer2hex(packet.getMessageData().buffer.slice(0, packetSize))).toBe(EXPECTED_PACKET);
+        expect(packetSize).toBe(EXPECTED_PACKET.length / 2);
+    });
+
 });

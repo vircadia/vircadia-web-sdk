@@ -61,6 +61,21 @@ class AudioClient {
     static readonly #RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES = 100;
 
 
+    static #computeLoudness(pcmData: Int16Array | null): number {
+        // C++  float computeLoudness(int16_t* samples, int numSamples)
+
+        if (pcmData === null || pcmData.length === 0) {
+            return 0;
+        }
+
+        let loudness = 0;
+        for (const value of pcmData) {
+            loudness += Math.abs(value);
+        }
+        return loudness / pcmData.length;
+    }
+
+
     // Context
     #_nodeList;
     #_packetReceiver;
@@ -71,6 +86,8 @@ class AudioClient {
     #_isStereoInput = false;
     #_isMuted = false;
     #_inputDevice: MediaStream | null = null;  // Web SDK-specific member.
+    #_lastInputLoudness = 0.0;
+    #_lastRawInputLoudness = 0.0;
 
     #_dummyAudioInputTimer: ReturnType<typeof setTimeout> | null = null;
     #_outgoingAvatarAudioSequenceNumber = 0;
@@ -134,6 +151,8 @@ class AudioClient {
      *  @function AudioClient.switchInputDevice
      *  @param {MediaStream|null} inputDevice - The audio input stream from the user client to be sent to the audio mixer.
      *      <code>null</code> for no input device.
+     *  @returns {Promise<boolean>} <code>true</code> if successfully switched to the given input device, <code>false</code> if
+     *      unsuccessful.
      */
     async switchInputDevice(inputDevice: MediaStream | null): Promise<boolean> {
         // C++  bool AudioClient::switchAudioDevice(QAudio::Mode mode, const HifiAudioDeviceInfo& deviceInfo)
@@ -142,7 +161,11 @@ class AudioClient {
         //      The method has been renamed accordingly.
         //      The deviceInfo parameter has been repurposed to be an input MediaStream or null.
         this.#_inputDevice = inputDevice;
-        return this.#switchInputToAudioDevice(inputDevice);
+        const success = await this.#switchInputToAudioDevice(inputDevice);
+        if (this.#_isMuted) {
+            void this.#switchInputToAudioDevice(null);
+        }
+        return success;
     }
 
 
@@ -191,6 +214,15 @@ class AudioClient {
     setPositionGetter(positionGetter: AudioPositionGetter): void {
         // C++  void setPositionGetter(AudioPositionGetter positionGetter)
         this.#_positionGetter = positionGetter;
+    }
+
+    /*@devdoc
+     *  Gets the last audio input loudness.
+     *  @returns {number} The last audio input loudness.
+     */
+    getLastInputLoudness(): number {
+        // C++  float getLastInputLoudness() const
+        return this.#_lastInputLoudness;
     }
 
 
@@ -332,6 +364,11 @@ class AudioClient {
         // The inputReceived signal is solely used for avatar recordings, the scripting API, and the audioscope.
 
         // WEBRTC TODO: Address further C++ code.
+        const audioGateOpen = true;
+
+        // Loudness after mute/gate.
+        this.#_lastInputLoudness = this.#_isMuted || !audioGateOpen ? 0.0 : this.#_lastRawInputLoudness;
+
 
         const packetType = audioBuffer === null || this.#_isMuted
             ? PacketType.SilentAudioFrame
@@ -509,6 +546,12 @@ class AudioClient {
 
         while (this.#_audioInput.hasPendingFrame()) {
             const pcmData = this.#_audioInput.readFrame();
+
+            // WEBRTC TODO: Address further C++ code.
+
+            if (!this.#_audioInput.hasPendingFrame()) {  // Shouldn't hit this condition but in case we're bogged down.
+                this.#_lastRawInputLoudness = AudioClient.#computeLoudness(pcmData);
+            }
 
             // WEBRTC TODO: Address further C++ code.
 

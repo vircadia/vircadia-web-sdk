@@ -12,6 +12,7 @@
 import { AvatarDataDetail } from "../../avatars/AvatarData";
 import AvatarDataPacket from "../../avatars/AvatarDataPacket";
 import assert from "../../shared/assert";
+import AudioHelpers from "../../shared/AudioHelpers";
 import BitVectorHelpers from "../../shared/BitVectorHelpers";
 import GLMHelpers from "../../shared/GLMHelpers";
 import Quat, { quat } from "../../shared/Quat";
@@ -40,6 +41,7 @@ type AvatarDataDetails = {
     globalPosition: vec3 | undefined,
     localOrientation: quat | undefined,
     avatarScale: number | undefined,
+    audioLoudness: number | undefined,
     jointRotations: Array<quat | null> | undefined,  // C++ doesn't have undefined case but it's useful for unit tests.
     jointTranslations: Array<vec3 | null> | undefined,    // Ditto.
     lastSentJointRotations: Array<quat | null> | undefined,
@@ -67,6 +69,8 @@ const AvatarData = new class {
      *  @property {number|undefined} avatarScale - The target scale of the avatar. The target scale is the desired scale of the
      *      avatar without any restrictions on permissible scale values imposed by the domain.<br />
      *      Should be <code>undefined</code> if not known or the value hasn't changed since the last time the packet was sent.
+     *  @property {number|undefined} audioLoudness - The instantaneous loudness of the audio input that the avatar is injecting
+     *      into the domain.
      *  @property {Array<quat|null>|undefined} jointRotations - The joint rotations relative to avatar space (i.e., not relative
      *      to parent bones). Set a rotation to <code>null</code> if the avatar's default pose's rotation should be used.
      *      May be <code>undefined</code> if the joints are not known.
@@ -121,6 +125,7 @@ const AvatarData = new class {
 
         const TRANSLATION_COMPRESSION_RADIX = 14;
         const BITS_IN_BYTE = 8;
+        const AUDIO_LOUDNESS_SCALE = 1024.0;
 
         const packet = NLPacket.create(PacketType.AvatarData);
         const messageData = packet.getMessageData();
@@ -164,7 +169,7 @@ const AvatarData = new class {
                 const hasAvatarBoundingBox = false;
                 let hasAvatarScale = false;
                 const hasLookAtPosition = false;
-                const hasAudioLoudness = false;
+                let hasAudioLoudness = false;
                 const hasSensorToWorldMatrix = false;
                 let hasJointData = false;
                 let hasJointDefaultPoseFlags = false;
@@ -182,7 +187,7 @@ const AvatarData = new class {
                 if (sendPALMinimum) {
                     // This shouldn't occur in the client.
                     console.error("Invalid client code path!");
-                    // hasAudioLoudness = true;
+                    hasAudioLoudness = true;
                 } else {
 
                     // The C++ code is included here, commented out, so that the native client logic can be seen.
@@ -209,6 +214,7 @@ const AvatarData = new class {
 
                     hasAvatarOrientation = info.localOrientation !== undefined;
                     hasAvatarScale = info.avatarScale !== undefined;
+                    hasAudioLoudness = info.audioLoudness !== undefined;
                     hasJointData = !sendMinimum;  // Joint data is always included in AvatarDataDetails but may not be wanted.
                     hasJointDefaultPoseFlags = hasJointData;
 
@@ -300,7 +306,14 @@ const AvatarData = new class {
             }
 
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_LOOK_AT_POSITION.
-            // WEBRTC TODO: Address further C++ code - PACKET_HAS_AUDIO_LOUDNESS.
+
+            if (avatarSpace(AvatarDataPacket.PACKET_HAS_AUDIO_LOUDNESS, 1)) {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                data.setUint8(dataPosition, AudioHelpers.packFloatGainToByte(info.audioLoudness! / AUDIO_LOUDNESS_SCALE));
+                dataPosition += 1;
+                // WEBRTC TODO: Address further C++ code - Outbound data rate.
+            }
+
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_SENSOR_TO_WORLD_MATRIX.
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_ADDITIONAL_FLAGS.
             // WEBRTC TODO: Address further C++ code - PACKET_HAS_PARENT_INFO.

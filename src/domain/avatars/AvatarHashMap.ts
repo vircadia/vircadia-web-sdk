@@ -181,8 +181,7 @@ class AvatarHashMap {
                 }
 
                 // Process if not an ignored avatar or have requested domain list data.
-                if (identityUUID !== null && (!this.#_nodeList.isIgnoringNode(identityUUID)
-                        || this.#_nodeList.getRequestsDomainListData())) {
+                if (!this.#_nodeList.isIgnoringNode(identityUUID) || this.#_nodeList.getRequestsDomainListData()) {
                     const isNewAvatar = false;
                     const avatar: AvatarData = this.#newOrExistingAvatar(identityUUID, sendingNode, { value: isNewAvatar });
                     const identityChanged = false;

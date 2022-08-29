@@ -229,14 +229,18 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const POS_DECIMAL_PLACES = 3;
         const YAW_DECIMAL_PLACES = 1;
         const SESSION_DISPLAY_NAME_INDEX = 1;
-        const X_INDEX = 2;
-        const Y_INDEX = 3;
-        const Z_INDEX = 4;
-        const YAW_INDEX = 5;
-        const SKELETON_MODEL_URL_INDEX = 6;
-        const SKELETON_SCALE_INDEX = 7;
-        const SKELETON_JOINTS_COUNT_INDEX = 8;
-        const HEAD_PITCH_INDEX = 9;
+        const AUDIO_LOUDNESS_INDEX = 2;
+        // const AUDIO_GAIN_INDEX = 3;
+        // const AVATAR_MUTE_INDEX = 4;
+        // const AVATAR_IGNORE_INDEX = 5;
+        const X_INDEX = 6;
+        const Y_INDEX = 7;
+        const Z_INDEX = 8;
+        const YAW_INDEX = 9;
+        const SKELETON_MODEL_URL_INDEX = 10;
+        const SKELETON_SCALE_INDEX = 11;
+        const SKELETON_JOINTS_COUNT_INDEX = 12;
+        const HEAD_PITCH_INDEX = 13;
 
         const RAD_TO_DEG = 180.0 / Math.PI;  // eslint-disable-line @typescript-eslint/no-magic-numbers
 
@@ -385,6 +389,8 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         // Avatar List
 
+        const showExtraDataCheckbox = document.getElementById("showExtraData");
+
         const avatarsCount = document.getElementById("avatarsCount");
         avatarsCount.value = avatarMixer.avatarList.count;
 
@@ -392,10 +398,35 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         const avatars = new Map();  // <sessionID, { avatar, tr, headJoint }>
 
+        domainServer.users.wantIgnored = showExtraDataCheckbox.checked;
+        function onShowExtraDataClick() {
+            domainServer.users.wantIgnored = showExtraDataCheckbox.checked;
+        }
+        showExtraDataCheckbox.addEventListener("click", onShowExtraDataClick);
+
         function onEchoClicked(checkbox, sessionID) {
             if (doppelganger !== null) {
                 doppelganger.toggle(checkbox, sessionID);
             }
+        }
+
+        function onGainChanged(input, sessionID) {
+            const MIN_GAIN = -60.0;
+            const MAX_GAIN = 20.0;
+            const BASE_10 = 10;
+            const gain = Math.max(MIN_GAIN, Math.min(parseFloat(input.value, BASE_10), MAX_GAIN));
+            input.value = gain;
+            domainServer.users.setAvatarGain(sessionID, gain);
+        }
+
+        function onMuteClicked(checkbox, sessionID) {
+            domainServer.users.setPersonalMute(sessionID, checkbox.checked);
+        }
+
+        function onIgnoreClicked(checkbox, sessionID, muteCheckbox) {
+            domainServer.users.setPersonalIgnore(sessionID, checkbox.checked);
+            muteCheckbox.checked = domainServer.users.getPersonalMute(sessionID);
+            muteCheckbox.disabled = checkbox.checked;
         }
 
         function onAvatarAdded(sessionID) {
@@ -410,6 +441,54 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             tr.appendChild(td);
             td = document.createElement("td");
             td.innerHTML = avatar.sessionDisplayName;
+            tr.appendChild(td);
+            td = document.createElement("td");
+            td.className = "number";
+            td.innerHTML = avatar.audioLoudness.toFixed(0);
+            tr.appendChild(td);
+            td = document.createElement("td");
+            td.className = "input";
+            const gain = document.createElement("input");
+            gain.type = "number";
+            gain.className = "narrow align-right";
+            if (sessionID.value() === Uuid.AVATAR_SELF_ID) {
+                gain.disabled = true;
+            } else {
+                gain.value = domainServer.users.getAvatarGain(sessionID);
+                gain.onblur = (event) => {
+                    onGainChanged(event.target, sessionID);
+                };
+            }
+            td.appendChild(gain);
+            tr.appendChild(td);
+            td = document.createElement("td");
+            const mute = document.createElement("input");
+            mute.type = "checkbox";
+            mute.className = "checkbox";
+            if (sessionID.value() === Uuid.AVATAR_SELF_ID) {
+                mute.disabled = true;
+            } else {
+                mute.checked = domainServer.users.getPersonalMute(sessionID);
+                mute.disabled = domainServer.users.getPersonalIgnore(sessionID);
+                mute.onclick = (event) => {
+                    onMuteClicked(event.target, sessionID);
+                };
+            }
+            td.appendChild(mute);
+            tr.appendChild(td);
+            td = document.createElement("td");
+            const ignore = document.createElement("input");
+            ignore.type = "checkbox";
+            ignore.className = "checkbox";
+            if (sessionID.value() === Uuid.AVATAR_SELF_ID) {
+                ignore.disabled = true;
+            } else {
+                ignore.checked = domainServer.users.getPersonalIgnore(sessionID);
+                ignore.onclick = (event) => {
+                    onIgnoreClicked(event.target, sessionID, mute);
+                };
+            }
+            td.appendChild(ignore);
             tr.appendChild(td);
             const position = avatar.position;
             td = document.createElement("td");
@@ -441,17 +520,17 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             td.className = "number";
             tr.appendChild(td);
             td = document.createElement("td");
-            const cb = document.createElement("input");
-            cb.type = "checkbox";
-            cb.className = "checkbox";
+            const echo = document.createElement("input");
+            echo.type = "checkbox";
+            echo.className = "checkbox";
             if (sessionID.value() === Uuid.AVATAR_SELF_ID) {
-                cb.disabled = true;
+                echo.disabled = true;
             } else {
-                cb.onclick = (event) => {
+                echo.onclick = (event) => {
                     onEchoClicked(event.target, sessionID);
                 };
             }
-            td.appendChild(cb);
+            td.appendChild(echo);
             tr.appendChild(td);
             avatarListBody.appendChild(tr);
 
@@ -495,6 +574,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         avatarMixerGameLoop = () => {
             avatarMixer.update();
             for (const value of avatars.values()) {
+                value.tr.childNodes[AUDIO_LOUDNESS_INDEX].innerHTML = value.avatar.audioLoudness.toFixed(0);
                 const position = value.avatar.position;
                 value.tr.childNodes[X_INDEX].innerHTML = position.x.toFixed(POS_DECIMAL_PLACES);
                 value.tr.childNodes[Y_INDEX].innerHTML = position.y.toFixed(POS_DECIMAL_PLACES);

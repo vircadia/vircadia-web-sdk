@@ -1,5 +1,5 @@
 //
-//  MyAvatarInterface.unit.test.js
+//  AvatarListInterface.unit.test.js
 //
 //  Created by David Rowe on 31 Oct 2021.
 //  Copyright 2021 Vircadia contributors.
@@ -10,6 +10,10 @@
 //
 
 /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
+AudioWorkletsMock.mock();
+
 
 import AvatarManager from "../../../src/domain/AvatarManager";
 import AvatarListInterface from "../../../src/domain/interfaces/AvatarListInterface";

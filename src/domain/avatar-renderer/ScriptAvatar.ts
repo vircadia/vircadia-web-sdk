@@ -37,6 +37,9 @@ import Vec3, { vec3 } from "../shared/Vec3";
  *  @property {Signal<ScriptAvatar~sessionDisplayNameChanged>} sessionDisplayNameChanged - Triggered when the session display
  *      name changes.
  *      <em>Read-only.</em>
+ *  @property {number} audioLoudness - The instantaneous loudness of the audio input that the avatar is injecting into the
+ *      domain.
+ *      <em>Read-only.</em>
  *  @property {string} skeletonModelURL - The URL of the avatar's FST, glTF, or FBX model file.
  *      <em>Read-only.</em>
  *  @property {Signal<ScriptAvatar~skeletonModelURLChanged>} skeletonModelURLChanged - Triggered when the skeleton model URL
@@ -144,6 +147,17 @@ class ScriptAvatar {
             }
         }
         return new SignalEmitter().signal();
+    }
+
+    get audioLoudness(): number {
+        // C++  float ScriptAvatarData::getAudioLoudness()
+        if (this.#_avatarData) {
+            const avatar = this.#_avatarData.deref();
+            if (avatar) {
+                return avatar.getAudioLoudness();
+            }
+        }
+        return 0;
     }
 
     get skeletonModelURL(): string {
