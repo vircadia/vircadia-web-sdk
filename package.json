@@ -1,6 +1,6 @@
 {
     "name": "@vircadia/web-sdk",
-    "version": "2022.1.10",
+    "version": "2022.1.11",
     "productName": "Vircadia Web SDK",
     "description": "Vircadia Web SDK for virtual worlds.",
     "author": "David Rowe <david@ctrlaltstudio.com>",
