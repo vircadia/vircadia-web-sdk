@@ -90,8 +90,8 @@ class DomainHandler {
         readonly NotAuthorizedDomain = 7;
     }();
 
-    static readonly #SILENT_DOMAIN_TRAFFIC_DROP_MIN = 1;  // Lower value than C++ so that fail and recover faster.
-    static readonly #MAX_SILENT_DOMAIN_SERVER_CHECK_INS = 2;  // Ditto.
+    static readonly #SILENT_DOMAIN_TRAFFIC_DROP_MIN = 2;
+    static readonly #MAX_SILENT_DOMAIN_SERVER_CHECK_INS = 5;
 
 
     #_domainURL = new Url();
