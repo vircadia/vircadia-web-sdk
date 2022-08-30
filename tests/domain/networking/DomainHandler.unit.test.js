@@ -130,7 +130,7 @@ describe("DomainHandler - integration tests", () => {
 
     test("The limit of silent domain check-ins triggers a signal", (done) => {
         domainHandler.limitOfSilentDomainCheckInsReached.connect(() => {
-            expect(domainHandler.getCheckInPacketsSinceLastReply()).toBe(3);
+            expect(domainHandler.getCheckInPacketsSinceLastReply()).toBe(6);
             domainHandler.clearPendingCheckins();
             done();
         });
@@ -139,6 +139,9 @@ describe("DomainHandler - integration tests", () => {
         domainHandler.clearPendingCheckins();
 
         // increment by N.
+        expect(domainHandler.checkInPacketTimeout()).toBe(false);
+        expect(domainHandler.checkInPacketTimeout()).toBe(false);
+        expect(domainHandler.checkInPacketTimeout()).toBe(false);
         expect(domainHandler.checkInPacketTimeout()).toBe(false);
         expect(domainHandler.checkInPacketTimeout()).toBe(false);
         expect(domainHandler.checkInPacketTimeout()).toBe(true);
