@@ -275,7 +275,11 @@ class WebRTCDataChannel {
                 case "new":
                 case "connecting":
                     // The connection is being established.
-                    this.#_readyState = WebRTCDataChannel.CONNECTING;
+                    // However, the data channel may already be open by the time this peer connection event is processed so
+                    // don't overwrite any OPEN state.
+                    if (this.#_readyState !== WebRTCDataChannel.OPEN) {
+                        this.#_readyState = WebRTCDataChannel.CONNECTING;
+                    }
                     break;
                 case "connected":
                     // The connection has become fully connected.
