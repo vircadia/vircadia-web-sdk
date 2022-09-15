@@ -23,10 +23,12 @@ import PacketScribe from "../networking/packets/PacketScribe";
 import PacketType, { PacketTypeValue } from "../networking/udt/PacketHeaders";
 import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
+import Quat, { quat } from "../shared/Quat";
 import Vec3, { vec3 } from "../shared/Vec3";
 
 
 type AudioPositionGetter = () => vec3;
+type AudioOrientationGetter = () => quat;
 
 
 /*@devdoc
@@ -53,6 +55,12 @@ class AudioClient {
      *  A callback that returns the user client's current audio position in the domain.
      *  @callback AudioPositionGetter
      *  @returns {vec3} The position of the user client's audio.
+     */
+
+    /*@sdkdoc
+     *  A callback that returns the user client's current audio orientation in the domain.
+     *  @callback AudioOrientationGetter
+     *  @returns {quat} The orientation of the user client's audio.
      */
 
 
@@ -95,9 +103,9 @@ class AudioClient {
     #_receivedAudioStream;
 
     #_positionGetter: AudioPositionGetter;
+    #_orientationGetter: AudioOrientationGetter;
 
     // WEBRTC TODO: Set these via the API.
-    #_audioOrientation = { x: 0, y: 0, z: 0, w: 1.0 };
     #_avatarBoundingBoxCorner = { x: -0.5, y: 0.0, z: -0.5 };
     #_avatarBoundingBoxScale = { x: 1, y: 2, z: 1 };
 
@@ -115,6 +123,9 @@ class AudioClient {
         this.#_audioInput = new AudioInput();
         this.#_positionGetter = () => {
             return Vec3.ZERO;
+        };
+        this.#_orientationGetter = () => {
+            return Quat.IDENTITY;
         };
 
         // This field is not a MixedProcessedAudioStream in the Web SDK version of AudioClient because the features of
@@ -214,6 +225,16 @@ class AudioClient {
     setPositionGetter(positionGetter: AudioPositionGetter): void {
         // C++  void setPositionGetter(AudioPositionGetter positionGetter)
         this.#_positionGetter = positionGetter;
+    }
+
+    /*@devdoc
+     *  Sets the function that the AudioClient should call in order to get the orientation of the user client's audio.
+     *  @param {AudioOrientationGetter} orientationGetter - The function to call in order to obtain the orientation of the user
+     *      client's audio.
+     */
+    setOrientationGetter(orientationGetter: AudioOrientationGetter): void {
+        // C++  void setOrientationGetter(AudioOrientationGetter orientationGetter)
+        this.#_orientationGetter = orientationGetter;
     }
 
     /*@devdoc
@@ -421,7 +442,7 @@ class AudioClient {
                     ? AudioConstants.NETWORK_FRAME_SAMPLES_STEREO
                     : AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL,
                 audioPosition: this.#_positionGetter(),
-                audioOrientation: this.#_audioOrientation,
+                audioOrientation: this.#_orientationGetter(),
                 avatarBoundingBoxCorner: this.#_avatarBoundingBoxCorner,
                 avatarBoundingBoxScale: this.#_avatarBoundingBoxScale
             });
@@ -432,7 +453,7 @@ class AudioClient {
                 codecName: this.#_selectedCodecName,
                 isStereo: this.#_isStereoInput,
                 audioPosition: this.#_positionGetter(),
-                audioOrientation: this.#_audioOrientation,
+                audioOrientation: this.#_orientationGetter(),
                 avatarBoundingBoxCorner: this.#_avatarBoundingBoxCorner,
                 avatarBoundingBoxScale: this.#_avatarBoundingBoxScale,
                 audioBuffer
@@ -562,4 +583,4 @@ class AudioClient {
 }
 
 export default AudioClient;
-export type { AudioPositionGetter };
+export type { AudioPositionGetter, AudioOrientationGetter };
