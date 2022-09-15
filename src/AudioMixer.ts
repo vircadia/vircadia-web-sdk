@@ -16,8 +16,9 @@ import AudioOutput from "./domain/audio/AudioOutput";
 import AudioClient from "./domain/audio-client/AudioClient";
 import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
+import Quat from "./domain/shared/Quat";
 import Vec3 from "./domain/shared/Vec3";
-import type { AudioPositionGetter } from "./domain/audio-client/AudioClient";
+import type { AudioPositionGetter, AudioOrientationGetter } from "./domain/audio-client/AudioClient";
 
 
 /*@sdkdoc
@@ -56,6 +57,9 @@ import type { AudioPositionGetter } from "./domain/audio-client/AudioClient";
  *      <p>When muted, processing of audio input is suspended. This halts hardware processing, reducing CPU/battery usage.</p>
  *  @property {AudioPositionGetter} positionGetter - The function the <code>AudioMixer</code> code should call in order to get
  *      the current position of the user client's audio.
+ *      <em>Write-only.</em>
+ *  @property {AudioOrientationGetter} orientationGetter - The function the <code>AudioMixer</code> code should call in order to
+ *      get the current orientation of the user client's audio.
  *      <em>Write-only.</em>
  *
  *  @property {string} audioWorkletRelativePath="" - The relative path to the SDK's audio worklet JavaScript files,
@@ -161,6 +165,24 @@ class AudioMixer extends AssignmentClient {
             return;
         }
         this.#_audioClient.setPositionGetter(positionGetter);
+    }
+
+    set orientationGetter(orientationGetter: AudioOrientationGetter) {
+        if (typeof orientationGetter !== "function") {
+            console.error("Tried to set an invalid AudioMixer.orientationGetter value! Getter is not a function.");
+            this.#_audioClient.setOrientationGetter(() => {
+                return Quat.IDENTITY;
+            });
+            return;
+        }
+        if (!Quat.valid(orientationGetter())) {
+            console.error("Tried to set an invalid AudioMixer.orientationGetter value! Getter doesn't return a quat.");
+            this.#_audioClient.setOrientationGetter(() => {
+                return Quat.IDENTITY;
+            });
+            return;
+        }
+        this.#_audioClient.setOrientationGetter(orientationGetter);
     }
 
     get audioWorkletRelativePath(): string {

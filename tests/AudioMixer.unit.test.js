@@ -30,7 +30,7 @@ describe("AudioMixer - unit tests", () => {
         expect(audioMixer.state).toBe(AudioMixer.UNAVAILABLE);
     });
 
-    test("Can set an audio getter function", () => {
+    test("Can set an audio position getter function", () => {
         const domainServer = new DomainServer();
         const audioMixer = new AudioMixer(domainServer.contextID);
         const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
@@ -48,6 +48,30 @@ describe("AudioMixer - unit tests", () => {
         // Valid function.
         audioMixer.positionGetter = () => {
             return { x: 1, y: 2, z: 3 };
+        };
+        expect(error).toHaveBeenCalledTimes(2);
+
+        error.mockReset();
+    });
+
+    test("Can set an audio orientation getter function", () => {
+        const domainServer = new DomainServer();
+        const audioMixer = new AudioMixer(domainServer.contextID);
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+
+        // Not a function.
+        audioMixer.orientationGetter = {};
+        expect(error).toHaveBeenCalledTimes(1);
+
+        // Invalid function.
+        audioMixer.orientationGetter = () => {
+            return { x: 1, y: 2, z: 3 };
+        };
+        expect(error).toHaveBeenCalledTimes(2);
+
+        // Valid function.
+        audioMixer.orientationGetter = () => {
+            return { x: 1, y: 2, z: 3, w: 4 };
         };
         expect(error).toHaveBeenCalledTimes(2);
 

@@ -845,6 +845,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return avatarMixer.myAvatar.position;
     };
+    audioMixer.orientationGetter = () => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return avatarMixer.myAvatar.orientation;
+    };
 
     // Game Loop
     (function () {
