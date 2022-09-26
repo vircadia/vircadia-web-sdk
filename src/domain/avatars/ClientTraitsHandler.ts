@@ -96,7 +96,7 @@ class ClientTraitsHandler {
         // C++ void markTraitUpdated(AvatarTraits::TraitType updatedTrait)
 
         // WEBRTC TODO: Enable other trait types.
-        if (updatedTrait !== AvatarTraits.SkeletonModelURL) {
+        if (updatedTrait !== AvatarTraits.SkeletonModelURL && updatedTrait !== AvatarTraits.SkeletonData) {
             console.error("Trait not implemented for updating:", updatedTrait);
             return;
         }
