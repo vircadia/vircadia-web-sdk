@@ -128,7 +128,7 @@ const AvatarTraits = new class {
      *  An avatar trait.
      *  @typedef {object} AvatarTraits.AvatarTraitValue
      *  @property {AvatarTraits.TraitType} type - The type of trait.
-     *  @property {number} version - The version number of the trait value for the avatar's connection to the avcatar mixer.
+     *  @property {number} version - The version number of the trait value for the avatar's connection to the avatar mixer.
      *      This is incremented each time that the trait value is changed.
      *  @property {AvatarTraits.TraitValue} value - The trait value.
      */

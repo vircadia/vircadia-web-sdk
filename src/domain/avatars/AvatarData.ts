@@ -375,7 +375,7 @@ class AvatarData extends SpatiallyNestable {
 
         // Need to call markTraitUpdated() here because there is no equivalent of C++'s Rig and sendSkeletonData().
         if (this._clientTraitsHandler) {
-            this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonModelURL);
+            this._clientTraitsHandler.markTraitUpdated(AvatarTraits.SkeletonData);
         }
 
         this.#_avatarSkeletonData = skeletonData;
