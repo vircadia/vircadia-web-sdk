@@ -58,6 +58,7 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
 
         // If we've reached the maximum buffer size, skip some of the audio blocks.
         if (this._audioBuffer.length > this.MAX_AUDIO_BUFFER_LENGTH) {
+            // console.log("AudioOutputProcessor: Overflowed", this.MAX_AUDIO_BUFFER_LENGTH);
             while (this._audioBuffer.length > this.MIN_AUDIO_BUFFER_LENGTH) {
                 this._audioBuffer.shift();
             }
@@ -80,6 +81,8 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
      *  @param {Float32Array[][]} inputList - Input PCM audio samples. <em>Not used.</em>
      *  @param {Float32Array[][]} outputList - Output PCM audio samples.
      *  @param {Record<string, Float32Array>} parameters - Processing parameters. <em>Not used.</em>
+     *  @returns {boolean} <code>true</code> to keep the processor node alive, <code>false</code> to let the browser terminate
+     *      the node.
      */
     // eslint-disable-next-line
     // @ts-ignore
