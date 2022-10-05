@@ -28,10 +28,11 @@
 class AudioOutputProcessor extends AudioWorkletProcessor {
 
     // Buffer blocks of audio data so that they can be played back smoothly.
-    // FIXME: All these fields should be private (#s) but Firefox is handling transpiled code with them (Sep 2021).
+    // FIXME: All these fields should be private (#s) but Firefox isn't handling transpiled code with them (Sep 2021).
     _audioBuffer: Int16Array[] = [];
-    readonly MAX_AUDIO_BUFFER_LENGTH = 16;  // The maximum number of audio blocks to buffer.
-    readonly MIN_AUDIO_BUFFER_LENGTH = 4;  // The minimum number of audio blocks to have before starting to play them.
+    // MAX_AUDIO_BUFFER_LENGTH = AudioClient.#RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES
+    readonly MAX_AUDIO_BUFFER_LENGTH = 100;  // The maximum number of audio blocks to buffer
+    readonly MIN_AUDIO_BUFFER_LENGTH = 50;  // The minimum number of audio blocks to have before starting to play them.
     _isPlaying = false;  // Is playing audio blocks from the buffer.
 
 
@@ -57,6 +58,7 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
 
         // If we've reached the maximum buffer size, skip some of the audio blocks.
         if (this._audioBuffer.length > this.MAX_AUDIO_BUFFER_LENGTH) {
+            // console.log("AudioOutputProcessor: Overflowed", this.MAX_AUDIO_BUFFER_LENGTH);
             while (this._audioBuffer.length > this.MIN_AUDIO_BUFFER_LENGTH) {
                 this._audioBuffer.shift();
             }
@@ -79,6 +81,8 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
      *  @param {Float32Array[][]} inputList - Input PCM audio samples. <em>Not used.</em>
      *  @param {Float32Array[][]} outputList - Output PCM audio samples.
      *  @param {Record<string, Float32Array>} parameters - Processing parameters. <em>Not used.</em>
+     *  @returns {boolean} <code>true</code> to keep the processor node alive, <code>false</code> to let the browser terminate
+     *      the node.
      */
     // eslint-disable-next-line
     // @ts-ignore
