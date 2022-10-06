@@ -81,8 +81,7 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
      *  @param {Float32Array[][]} inputList - Input PCM audio samples. <em>Not used.</em>
      *  @param {Float32Array[][]} outputList - Output PCM audio samples.
      *  @param {Record<string, Float32Array>} parameters - Processing parameters. <em>Not used.</em>
-     *  @returns {boolean} <code>true</code> to keep the processor node alive, <code>false</code> to let the browser terminate
-     *      the node.
+     *  @returns {boolean} <code>true</code> to keep the processor node alive.
      */
     // eslint-disable-next-line
     // @ts-ignore

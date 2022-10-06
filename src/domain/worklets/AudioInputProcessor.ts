@@ -89,6 +89,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
      *  @param {Float32Array[][]} inputList - Input PCM audio samples.
      *  @param {Float32Array[][]} outputList - Output PCM audio samples. <em>Not used.</em>
      *  @param {Record<string, Float32Array>} parameters - Processing parameters. <em>Not used.</em>
+     *  @returns {boolean} <code>true</code> to keep the processor node alive.
      */
     // eslint-disable-next-line
     // @ts-ignore
