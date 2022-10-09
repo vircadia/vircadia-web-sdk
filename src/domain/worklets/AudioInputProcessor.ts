@@ -95,7 +95,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
 
     /*@devdoc
      *  Called by the Web Audio pipeline to handle the next block of input audio samples, converting them to int16 samples at a
-     *  24000kHz sample rate and outputting them 240 at a time by posting a message on the AudioWorkletProcessor port.
+     *  24000Hz sample rate and outputting them 240 frames at a time by posting a message on the AudioWorkletProcessor port.
      *  @param {Float32Array[][]} inputList - Input PCM audio samples. An array of inputs, each of which is an array of
      *      channels, each of which has 128 float32 samples in the range <code>-1.0</code> &ndash; <code>1.0</code>.
      *  @param {Float32Array[][]} outputList - Output PCM audio samples. <em>Not used.</em>
@@ -130,13 +130,15 @@ class AudioInputProcessor extends AudioWorkletProcessor {
 
     _convert = (input: Array<Float32Array>) => {
         // A straight conversion from float32 to int16 values, posting the output buffer when full.
-        const inputSize = (input[0] as Float32Array).length;
-        for (let i = 0; i < inputSize; i++) {
+        const BYTES_PER_INT16_SAMPLE = 2;
+        const BYTES_PER_INT16_FRAME = this._channelCount * BYTES_PER_INT16_SAMPLE;
 
-            const rawIndex = this._outputIndex * Int16Array.BYTES_PER_ELEMENT * this._channelCount;
-            for (let channel = 0; channel < this._channelCount; ++channel) {
+        for (let i = 0, inputSize = (input[0] as Float32Array).length; i < inputSize; i++) {
+
+            const rawIndex = this._outputIndex * BYTES_PER_INT16_FRAME;
+            for (let channel = 0; channel < this._channelCount; channel++) {
                 const inputSample = (input[channel] as Float32Array)[i] as number;
-                const rawChannel = channel * Int16Array.BYTES_PER_ELEMENT;
+                const rawChannel = channel * BYTES_PER_INT16_SAMPLE;
                 this._outputView.setInt16(rawIndex + rawChannel, inputSample * this.FLOAT_TO_INT, this.LITTLE_ENDIAN);
             }
 
