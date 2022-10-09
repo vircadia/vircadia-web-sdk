@@ -44,10 +44,16 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     _outputIndex = 0;
 
     _inputSampleRate: number;
-    _resampleRatio = 1;
-    _inputSampleCount = 0;
-    _inputAccumulator = [0.0, 0.0];
     _inputFraction = 0.0;
+    _inputSampleCount = 0;
+
+    // Downsampling.
+    _downsampleRatio = 1.0;
+    _inputAccumulator = [0.0, 0.0];
+
+    // Upsampling.
+    _upsampleRatio = 1.0;
+    _lastInputValues = [0.0, 0.0];
 
     _processor: ((input: Array<Float32Array>) => void) | null;
     _haveReportedUpSampleError = false;
@@ -63,11 +69,14 @@ class AudioInputProcessor extends AudioWorkletProcessor {
         if (this._inputSampleRate === AudioConstants.SAMPLE_RATE) {
             this._processor = this._convert;
         } else if (this._inputSampleRate > AudioConstants.SAMPLE_RATE) {
-            this._processor = this._downSample;
+            this._processor = this._downsample;
+            this._downsampleRatio = AudioConstants.SAMPLE_RATE / this._inputSampleRate;  // < 1.0
+            this._inputFraction = 0.0;
         } else {
-            this._processor = this._upSample;
+            this._processor = this._upsample;
+            this._upsampleRatio = this._inputSampleRate / AudioConstants.SAMPLE_RATE;  // < 1.0
+            this._inputFraction = this._upsampleRatio;
         }
-        this._resampleRatio = AudioConstants.SAMPLE_RATE / this._inputSampleRate;
 
         this._outputSize = this._channelCount === 1
             ? AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL
@@ -124,8 +133,9 @@ class AudioInputProcessor extends AudioWorkletProcessor {
 
     _resetInput() {
         this._inputSampleCount = 0;
-        this._inputAccumulator = [0.0, 0.0];
         this._inputFraction = 0.0;
+        this._inputAccumulator = [0.0, 0.0];
+        // Do not reset this._lastInputValue.
     }
 
     _convert = (input: Array<Float32Array>) => {
@@ -152,7 +162,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
 
     };
 
-    _downSample = (input: Array<Float32Array>) => {
+    _downsample = (input: Array<Float32Array>) => {
         // A simple low-pass filter that assigns proportions of each input sample to output samples, posting the output buffer
         // when full. Values are resynchronized every second to avoid error accumulation.
         const BYTES_PER_INT16_SAMPLE = 2;
@@ -163,14 +173,14 @@ class AudioInputProcessor extends AudioWorkletProcessor {
         for (let i = 0, inputSize = (input[0] as Float32Array).length; i < inputSize; i++) {
             this._inputSampleCount += 1;
 
-            if (this._inputFraction + this._resampleRatio < 1.0 && this._inputSampleCount !== this._inputSampleRate) {
+            if (this._inputFraction + this._downsampleRatio < 1.0 && this._inputSampleCount !== this._inputSampleRate) {
                 // End of input sample < end of output sample, provided that it's not the final sample in a second (avoid
                 // possible accumulated error condition).
 
                 for (let channel = 0; channel < this._channelCount; channel++) {
                     // Add whole of input to input accumulator.
                     this._inputAccumulator[channel] += (input[channel] as Float32Array)[i] as number;
-                    this._inputFraction += this._resampleRatio;
+                    this._inputFraction += this._downsampleRatio;
                 }
 
             } else {
@@ -179,18 +189,18 @@ class AudioInputProcessor extends AudioWorkletProcessor {
                 const rawIndex = this._outputIndex * BYTES_PER_INT16_FRAME;
                 for (let channel = 0; channel < this._channelCount; channel++) {
                     // Add proportion of input to input accumulator.
-                    const proportion = (1 - this._inputFraction) / this._resampleRatio;
+                    const proportion = (1 - this._inputFraction) / this._downsampleRatio;
                     const value = (input[channel] as Float32Array)[i] as number;
                     this._inputAccumulator[channel] += proportion * value;
 
                     // Convert and write output.
                     const rawChannel = channel * BYTES_PER_INT16_SAMPLE;
                     this._outputView.setInt16(rawIndex + rawChannel,
-                        this._inputAccumulator[channel]! * this._resampleRatio * this.FLOAT_TO_INT, this.LITTLE_ENDIAN);
+                        this._inputAccumulator[channel]! * this._downsampleRatio * this.FLOAT_TO_INT, this.LITTLE_ENDIAN);
 
                     // Set input accumulator to remainder of input.
                     const remainder = 1.0 - proportion;
-                    this._inputFraction = remainder * this._resampleRatio;
+                    this._inputFraction = remainder * this._downsampleRatio;
                     this._inputAccumulator[channel] = remainder * value;
                 }
 
@@ -212,11 +222,64 @@ class AudioInputProcessor extends AudioWorkletProcessor {
         }
     };
 
-    _upSample = (/* input: Array<Float32Array> */) => {
-        if (!this._haveReportedUpSampleError) {
-            console.error("Upsampling audio input not implemented!");
-            this._haveReportedUpSampleError = true;
+    _upsample = (input: Array<Float32Array>) => {
+        // A simple linear interpolation resampler.
+        const BYTES_PER_INT16_SAMPLE = 2;
+        const BYTES_PER_INT16_FRAME = this._channelCount * BYTES_PER_INT16_SAMPLE;
+
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+        const inputSize = (input[0] as Float32Array).length;
+        let inputIndex = 0;
+        let inputValues = [];
+        for (let channel = 0; channel < this._channelCount; channel++) {
+            inputValues.push((input[channel] as Float32Array)[0] as number);
         }
+
+        // Process input into output
+        while (inputIndex < inputSize) {
+
+            // Calculate output value = last-input-value + fraction * (this-input-value - last-input-value).
+            const rawIndex = this._outputIndex * BYTES_PER_INT16_FRAME;
+            for (let channel = 0; channel < this._channelCount; channel++) {
+                const rawChannel = channel * BYTES_PER_INT16_SAMPLE;
+                const lastValue = this._lastInputValues[channel]!;
+                const nextValue = inputValues[channel]!;
+                this._outputView.setInt16(rawIndex + rawChannel,
+                    lastValue + this._inputFraction * (nextValue - lastValue) * this.FLOAT_TO_INT, this.LITTLE_ENDIAN);
+            }
+            this._outputIndex += 1;
+
+            // Post output if buffer full.
+            if (this._outputIndex === this._outputSampleSize) {
+                this.port.postMessage(this._output.buffer, [this._output.buffer]);
+                this._resetOutput();
+            }
+
+            this._inputFraction += this._upsampleRatio;
+            if (this._inputFraction > 1.0) {
+
+                // Advance to the next pair of inputs.
+                this._lastInputValues = inputValues;
+                inputIndex += 1;
+                if (inputIndex < inputSize) {
+                    this._inputSampleCount += 1;
+                    inputValues = [];
+                    for (let channel = 0; channel < this._channelCount; channel++) {
+                        inputValues.push((input[channel] as Float32Array)[inputIndex] as number);
+                    }
+                }
+
+                this._inputFraction -= 1.0;
+            }
+
+            // Reset input each second to avoid accumulated errors.
+            if (this._inputSampleCount === this._inputSampleRate) {
+                this._resetInput();
+            }
+        }
+
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
     };
 
 }
