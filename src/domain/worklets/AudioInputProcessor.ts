@@ -55,7 +55,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     _upsampleRatio = 1.0;
     _lastInputValues = [0.0, 0.0];
 
-    _processor: ((input: Array<Float32Array>) => void) | null;
+    _processor: ((input: Array<Float32Array>) => void);
     _haveReportedUpSampleError = false;
 
 
@@ -118,9 +118,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
             return true;
         }
 
-        if (this._processor) {
-            this._processor(inputList[0]);
-        }
+        this._processor(inputList[0]);
 
         return true;
     }
@@ -223,7 +221,8 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     };
 
     _upsample = (input: Array<Float32Array>) => {
-        // A simple linear interpolation resampler.
+        // A simple linear interpolation resampler, posting the output buffer when full. Values are resynchronized every second
+        // to avoid error accumulation.
         const BYTES_PER_INT16_SAMPLE = 2;
         const BYTES_PER_INT16_FRAME = this._channelCount * BYTES_PER_INT16_SAMPLE;
 
@@ -236,7 +235,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
             inputValues.push((input[channel] as Float32Array)[0] as number);
         }
 
-        // Process input into output
+        // Process input into output.
         while (inputIndex < inputSize) {
 
             // Calculate output value = last-input-value + fraction * (this-input-value - last-input-value).
