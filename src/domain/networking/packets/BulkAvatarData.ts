@@ -236,6 +236,7 @@ const BulkAvatarData = new class {
                 }
 
                 jointRotations = new Array(jointRotationsValidCount) as Array<quat>;
+                // The Web SDK doesn't load avatars so don't need to map remote avatar's joints to locally loaded avatar.
                 let j = 0;
                 for (let i = 0; i < numJoints; i++) {
                     if (jointRotationsValid[i]) {
@@ -268,6 +269,7 @@ const BulkAvatarData = new class {
                 dataPosition += 4;
 
                 jointTranslations = new Array(jointTranslationsValidCount) as Array<vec3>;
+                // The Web SDK doesn't load avatars so don't need to map remote avatar's joints to locally loaded avatar.
                 j = 0;
                 for (let i = 0; i < numJoints; i++) {
                     if (jointTranslationsValid[i]) {
@@ -292,6 +294,7 @@ const BulkAvatarData = new class {
             if (hasJointDefaultPoseFlags) {
                 const numJoints = data.getUint8(dataPosition);
                 dataPosition += 1;
+                // The Web SDK doesn't load avatars so don't need to map remote avatar's joints to locally loaded avatar.
 
                 jointRotationsUseDefault = new Array(numJoints) as Array<boolean>;
                 {
