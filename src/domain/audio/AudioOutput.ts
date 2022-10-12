@@ -31,8 +31,9 @@ import assert from "../shared/assert";
  *  @property {string} audioWorkletRelativePath="" - The relative path to the SDK's audio worklet JavaScript files,
  *      <code>vircadia-audio-input.js</code> and <code>vircadia-audio-output.js</code>.
  *      <p>The URLs used to load these files are reported in the log. Depending on where these files are deployed, their URLs
- *      may need to be adjusted.  If used, must start with a <code>"."</code> and end with a <code>"/"</code>.</p>
+ *      may need to be adjusted. If used, must start with a <code>"."</code> and end with a <code>"/"</code>.</p>
  *      <p><em>Write-only.</em></p>
+ *  @property {number} bufferSize - The number of bytes currently being buffered for audio output.
  */
 class AudioOutput {
     //  C++ N/A - This is a Web SDK-specific class.
@@ -55,6 +56,8 @@ class AudioOutput {
     #_outputArrayLength = this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE;
     #_outputOffset = 0;  // The next write position.
 
+    #_outputBufferSize = 0;  // Bytes.
+
     #_audioWorkletRelativePath = "";
 
 
@@ -68,7 +71,13 @@ class AudioOutput {
     }
 
     set audioWorkletRelativePath(relativePath: string) {
+        // C++  N/A
         this.#_audioWorkletRelativePath = relativePath;
+    }
+
+    get bufferSize(): number {
+        // C++  N/A
+        return this.#_outputBufferSize;
     }
 
 
@@ -147,6 +156,18 @@ class AudioOutput {
         this.#_outputOffset = index;  // Starting point for next packet of audio.
     }
 
+    /*@devdoc
+     *  Handles the information received back from the {@link AudioOutputProcessor}.
+     *  @function AudioOutput.processAudioOutputMessage
+     *  @param {MessageEvent<number>} message - The number of blocks of audio data in the output buffer.
+     *  @returns {Slot}
+     */
+    processAudioOutputMessage = (message: MessageEvent<number>): void => {
+        // C++  N/A
+
+        this.#_outputBufferSize = message.data * this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE;
+    };
+
 
     // Sets up the AudioContext etc.
     async #setUpAudioContext(): Promise<void> {
@@ -180,6 +201,7 @@ class AudioOutput {
             channelCountMode: "explicit"
         });
         this.#_audioWorkletPort = this.#_audioWorkletNode.port;
+        this.#_audioWorkletPort.onmessage = this.processAudioOutputMessage;
 
         // Wire up the nodes.
         this.#_oscillatorNode.connect(this.#_audioWorkletNode);

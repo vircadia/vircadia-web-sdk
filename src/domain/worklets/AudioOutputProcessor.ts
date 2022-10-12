@@ -47,6 +47,7 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
      *  Takes incoming audio blocks posted to the audio worklet's message port and queues them in a ring buffer for playing.
      *  If too many audio blocks are queued, some of the older ones are discarded.
      *  If too few audio blocks are queued, playing is paused while a minimum number of audio blocks are accumulated.
+     *  The number of audio blocks buffered is posted on the message port.
      *  @function AudioOutputProcessor.onMessage
      *  @param {MessageEvent} message - The message posted to the audio worklet, with <code>message.data</code> being an
      *      <code>Int16Array</code> of PCM audio samples, ready to play.
@@ -71,6 +72,9 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
                 this._isPlaying = true;
             }
         }
+
+        // Report the number of audio blocks buffered.
+        this.port.postMessage(this._audioBuffer.length);
     };
 
 
