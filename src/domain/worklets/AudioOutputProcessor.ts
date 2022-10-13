@@ -34,6 +34,7 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
     readonly MAX_AUDIO_BUFFER_LENGTH = 180;  // The maximum number of audio blocks to buffer
     readonly MIN_AUDIO_BUFFER_LENGTH = 90;  // The minimum number of audio blocks to have before starting to play them.
     _isPlaying = false;  // Is playing audio blocks from the buffer.
+    _haveLoggedOverflow = false;
 
 
     constructor(options?: AudioWorkletNodeOptions) {
@@ -57,20 +58,22 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
         const audioBlock = new Int16Array(message.data);
         this._audioBuffer.push(audioBlock);
 
-        // If we've reached the maximum buffer size, skip some of the audio blocks.
+        // If we've surpassed the maximum buffer size, skip some older audio blocks.
         if (this._audioBuffer.length > this.MAX_AUDIO_BUFFER_LENGTH) {
-            // console.log("AudioOutputProcessor: Overflowed", this.MAX_AUDIO_BUFFER_LENGTH);
-            while (this._audioBuffer.length > this.MIN_AUDIO_BUFFER_LENGTH) {
+            // The incoming audio stream should be <= the rate of consumption so only skip the minimum number of blocks.
+            while (this._audioBuffer.length > this.MAX_AUDIO_BUFFER_LENGTH) {
                 this._audioBuffer.shift();
+            }
+            if (!this._haveLoggedOverflow) {
+                console.log("AudioOutputProcessor: Buffer overflowed.");
+                this._haveLoggedOverflow = true;
             }
         }
 
         // Start playing if not playing and we now have enough audio blocks.
-        if (!this._isPlaying) {
-            if (this._audioBuffer.length >= this.MIN_AUDIO_BUFFER_LENGTH) {
-                // console.log("AudioOutputProcessor: Start playing");
-                this._isPlaying = true;
-            }
+        if (!this._isPlaying && this._audioBuffer.length >= this.MIN_AUDIO_BUFFER_LENGTH) {
+            // console.log("AudioOutputProcessor: Start playing.");
+            this._isPlaying = true;
         }
 
         // Report the number of audio blocks buffered.
@@ -99,8 +102,9 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
             audioBlock = this._audioBuffer.shift();
             this.port.postMessage(this._audioBuffer.length);
             if (audioBlock === undefined) {
-                // console.log("AudioOutputProcessor: Stop playing");
+                // console.log("AudioOutputProcessor: Stop playing.");
                 this._isPlaying = false;
+                this._haveLoggedOverflow = false;
             }
         }
 
