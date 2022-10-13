@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AudioConstants from "../audio/AudioConstants";
 import AudioOutput from "../audio/AudioOutput";
 import ReceivedMessage from "../networking/ReceivedMessage";
 import { MixedAudioDetails } from "../networking/packets/MixedAudio";
@@ -16,6 +17,7 @@ import PacketScribe from "../networking/packets/PacketScribe";
 import { SilentAudioFrameDetails } from "../networking/packets/SilentAudioFrame";
 import PacketType from "../networking/udt/PacketHeaders";
 import UDT from "../networking/udt/UDT";
+import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
 
 
@@ -25,9 +27,9 @@ import ContextManager from "../shared/ContextManager";
  *  @class InboundAudioStream
  *  @param {number} contextID - The {@link ContextManager} context ID.
  *  @param {number} numChannels - The number of audio channels. <code>2</code> for stereo.
- *  @param {number} numFrames - The number of samples in a network packet per channel.
- *  @param {number} numBlocks - The number of network packets to handle in the audio ring buffer.
- *  @param {number} numStaticJitterBlocks - The number of network packets to handle in the jitter buffer. <code>-1</code> for
+ *  @param {number} numFrames - The number of samples in a network packet per channel. <code>240</code>.
+ *  @param {number} numBlocks - The maximum number of audio blocks to handle in the audio ring buffer.
+ *  @param {number} numStaticJitterBlocks - The target number of audio blocks to have in the jitter buffer. <code>-1</code> for
  *      a dynamic jitter buffer.
  */
 class InboundAudioStream {
@@ -35,6 +37,9 @@ class InboundAudioStream {
 
     // Context.
     #_audioOutput;
+
+    #_staticJitterBufferSize: number;  // Number of audio blocks.
+    #_jitterBufferSamplesPerBlock;
 
     #_selectedCodecName = "";
     #_decoder = null;
@@ -47,6 +52,11 @@ class InboundAudioStream {
 
         // Context.
         this.#_audioOutput = ContextManager.get(contextID, AudioOutput) as AudioOutput;
+
+        this.#_staticJitterBufferSize = numStaticJitterBlocks === -1 ? Math.floor(numBlocks / 2) : numStaticJitterBlocks;
+
+        assert(numChannels === 2);
+        this.#_jitterBufferSamplesPerBlock = numChannels * AudioConstants.AUDIO_WORKLET_BLOCK_SIZE;
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -75,7 +85,7 @@ class InboundAudioStream {
 
         if (message.getType() === PacketType.SilentAudioFrame) {
             // Possibly drop some of the samples in order to catch up to the desired jitter buffer size.
-            this.#writeDroppableSilentFrames((info as SilentAudioFrameDetails).numSilentSamples);
+            this.#writeDroppableSilentSamples((info as SilentAudioFrameDetails).numSilentSamples);
         } else {
             const selectedPCM = this.#_selectedCodecName === "pcm" || this.#_selectedCodecName === "";
             const packetPCM = info.codecName === "pcm" || info.codecName === "";
@@ -121,17 +131,23 @@ class InboundAudioStream {
 
 
     // eslint-disable-next-line class-methods-use-this
-    #writeDroppableSilentFrames(silentFrames: number): void {
+    #writeDroppableSilentSamples(silentSamples: number): void {
         // C++  int writeDroppableSilentFrames(int silentFrames)
 
         // WEBRTC TODO: Address further C++ code. Fade toward silence.
 
-        // WEBRTC TODO: Address further C++ code. Only write as many silent frames as the AudioOutputProcessor's jitter buffer
-        // warrants.
+        // Write silent samples if jitter buffer size less than its desired size.
+        if (this.#_audioOutput.bufferSize < this.#_staticJitterBufferSize) {
+            const desiredSilentSamples = (this.#_staticJitterBufferSize - this.#_audioOutput.bufferSize)
+                * this.#_jitterBufferSamplesPerBlock;
+            const numSamplesToWrite = Math.min(silentSamples, desiredSilentSamples);
 
-        // Write silent audio frames.
-        const silentBuffer = new Int16Array(silentFrames);  // Is initialized to 0s.
-        this.#_audioOutput.writeData(silentBuffer);
+            const silentBuffer = new Int16Array(numSamplesToWrite);  // Is initialized to 0s.
+            this.#_audioOutput.writeData(silentBuffer);
+        }
+
+        // WEBRTC TODO: Address further C++ code. Dynamic jitter buffer.
+
     }
 
     #parseAudioData(packetData: DataView): number {

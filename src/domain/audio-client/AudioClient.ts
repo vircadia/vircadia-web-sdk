@@ -66,7 +66,9 @@ class AudioClient {
 
     static readonly contextItemType = "AudioClient";
 
-    static readonly #RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES = 100;
+    // C++  RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES = 100.
+    //      Multiplied by 240 / 128 because native client has 240 samples per block whereas audio worklet has 128.
+    static readonly #RECEIVED_AUDIO_STREAM_CAPACITY_BLOCKS = 180;  // = AudioOutputProcessor.MAX_AUDIO_BUFFER_LENGTH
 
 
     static #computeLoudness(pcmData: Int16Array | null): number {
@@ -131,7 +133,7 @@ class AudioClient {
         // This field is not a MixedProcessedAudioStream in the Web SDK version of AudioClient because the features of
         // MixedProcessedAudioStream haven't been needed so far.
         this.#_receivedAudioStream = new InboundAudioStream(contextID, AudioConstants.STEREO,
-            AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL, AudioClient.#RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES, -1);
+            AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL, AudioClient.#RECEIVED_AUDIO_STREAM_CAPACITY_BLOCKS, -1);
 
         // C++  Application::Application()
         this.#start();

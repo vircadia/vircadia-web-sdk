@@ -33,7 +33,7 @@ import assert from "../shared/assert";
  *      <p>The URLs used to load these files are reported in the log. Depending on where these files are deployed, their URLs
  *      may need to be adjusted. If used, must start with a <code>"."</code> and end with a <code>"/"</code>.</p>
  *      <p><em>Write-only.</em></p>
- *  @property {number} bufferSize - The number of bytes currently being buffered for audio output.
+ *  @property {number} bufferSize - The number of blocks currently being buffered for output by the audio worklet.
  */
 class AudioOutput {
     //  C++ N/A - This is a Web SDK-specific class.
@@ -51,9 +51,9 @@ class AudioOutput {
 
     // FIXME: The AudioWorkletProcessor data blocks size may change and even be variable in the future.
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletProcessor/process
-    readonly #AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE = 256;  // 128 samples for each of two channels.
-    #_outputArray = new Int16Array(this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE);
-    #_outputArrayLength = this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE;
+    readonly #_AUDIO_WORKLET_BLOCK_SAMPLES = AudioConstants.AUDIO_WORKLET_BLOCK_SIZE * 2;  // Stereo.
+    #_outputArray = new Int16Array(this.#_AUDIO_WORKLET_BLOCK_SAMPLES);
+    #_outputArrayLength = this.#_AUDIO_WORKLET_BLOCK_SAMPLES;
     #_outputOffset = 0;  // The next write position.
 
     #_outputBufferSize = 0;  // Bytes.
@@ -147,7 +147,7 @@ class AudioOutput {
                 // present (Sep 2021).
                 this.#_audioWorkletPort.postMessage(outputArray.buffer, [this.#_outputArray.buffer]);
 
-                this.#_outputArray = new Int16Array(this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE);
+                this.#_outputArray = new Int16Array(this.#_AUDIO_WORKLET_BLOCK_SAMPLES);
                 outputArray = this.#_outputArray;
                 index = 0;
             }
@@ -159,13 +159,13 @@ class AudioOutput {
     /*@devdoc
      *  Handles the information received back from the {@link AudioOutputProcessor}.
      *  @function AudioOutput.processAudioOutputMessage
-     *  @param {MessageEvent<number>} message - The number of blocks of audio data in the output buffer.
+     *  @param {MessageEvent<number>} message - The number of blocks of data in the audio worklet's output buffer.
      *  @returns {Slot}
      */
     processAudioOutputMessage = (message: MessageEvent<number>): void => {
         // C++  N/A
 
-        this.#_outputBufferSize = message.data * this.#AUDIOWORKLETPROCESSOR_DATA_BLOCKS_SIZE;
+        this.#_outputBufferSize = message.data;
     };
 
 

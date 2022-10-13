@@ -26,6 +26,8 @@
  *
  *  @property {number} NETWORK_FRAME_SECS - <code>0.01</code> - The interval between audio network packets, in seconds.
  *  @property {number} NETWORK_FRAME_MSECS - <code>10</code> - The interval between audio network packets, in milliseconds.
+ *
+ *  @property {number} AUDIO_WORKLET_BLOCK_SIZE - <code>128</code> - The number of frames in and audio worklet audio block.
  */
 const AudioConstants = new class {
     // C++  AudioConstants
@@ -41,6 +43,8 @@ const AudioConstants = new class {
 
     readonly NETWORK_FRAME_SECS = this.NETWORK_FRAME_SAMPLES_PER_CHANNEL / this.SAMPLE_RATE;
     readonly NETWORK_FRAME_MSECS = this.NETWORK_FRAME_SECS * 1000;
+
+    readonly AUDIO_WORKLET_BLOCK_SIZE = 128;  // 128 frames of samples.
 
 }();
 
