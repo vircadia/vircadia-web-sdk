@@ -142,3 +142,9 @@ Developer documentation (includes SDK API documentation):
 ```
 npm run devdoc
 ```
+
+### To Update Contributors
+
+```
+npm run update-contributors
+```
