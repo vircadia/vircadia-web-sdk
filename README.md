@@ -143,7 +143,9 @@ Developer documentation (includes SDK API documentation):
 npm run devdoc
 ```
 
-### To Update Contributors
+### Update contributors
+
+Update contributors list in package.json:
 
 ```
 npm run update-contributors
