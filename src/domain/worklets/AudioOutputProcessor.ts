@@ -30,9 +30,9 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
     // Buffer blocks of audio data so that they can be played back smoothly.
     // FIXME: All these fields should be private (#s) but Firefox isn't handling transpiled code with them (Sep 2021).
     _audioBuffer: Int16Array[] = [];
-    // MAX_AUDIO_BUFFER_LENGTH = AudioClient.#RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES
-    readonly MAX_AUDIO_BUFFER_LENGTH = 100;  // The maximum number of audio blocks to buffer
-    readonly MIN_AUDIO_BUFFER_LENGTH = 50;  // The minimum number of audio blocks to have before starting to play them.
+    // MAX_AUDIO_BUFFER_LENGTH = AudioClient.#RECEIVED_AUDIO_STREAM_CAPACITY_BLOCKS
+    readonly MAX_AUDIO_BUFFER_LENGTH = 180;  // The maximum number of audio blocks to buffer
+    readonly MIN_AUDIO_BUFFER_LENGTH = 90;  // The minimum number of audio blocks to have before starting to play them.
     _isPlaying = false;  // Is playing audio blocks from the buffer.
 
 
@@ -47,6 +47,7 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
      *  Takes incoming audio blocks posted to the audio worklet's message port and queues them in a ring buffer for playing.
      *  If too many audio blocks are queued, some of the older ones are discarded.
      *  If too few audio blocks are queued, playing is paused while a minimum number of audio blocks are accumulated.
+     *  The number of audio blocks buffered is posted on the message port.
      *  @function AudioOutputProcessor.onMessage
      *  @param {MessageEvent} message - The message posted to the audio worklet, with <code>message.data</code> being an
      *      <code>Int16Array</code> of PCM audio samples, ready to play.
@@ -71,6 +72,9 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
                 this._isPlaying = true;
             }
         }
+
+        // Report the number of audio blocks buffered.
+        this.port.postMessage(this._audioBuffer.length);
     };
 
 
@@ -93,6 +97,7 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
         let audioBlock: Int16Array | undefined = undefined;
         if (this._isPlaying) {
             audioBlock = this._audioBuffer.shift();
+            this.port.postMessage(this._audioBuffer.length);
             if (audioBlock === undefined) {
                 // console.log("AudioOutputProcessor: Stop playing");
                 this._isPlaying = false;
