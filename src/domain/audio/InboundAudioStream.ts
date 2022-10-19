@@ -171,6 +171,18 @@ class InboundAudioStream {
         this.#_selectedCodecName = "";
     }
 
+    /*@devdoc
+     *  Resets audio output processing.
+     */
+    reset(): void {
+        // C++  void reset()
+
+        // WEBRTC TODO: Address further C++ code.
+
+        // Web SDK specific.
+        this.#_lastSequenceNumber = -1;
+    }
+
 
     // eslint-disable-next-line class-methods-use-this
     #writeDroppableSilentSamples(silentSamples: number): void {
