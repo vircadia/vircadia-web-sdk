@@ -164,7 +164,7 @@ class InboundAudioStream {
      *  Removes any current codec, if any, currently being used for processing the audio date received from the audio mixer.
      */
     cleanupCodec(): void {
-        // C++  void InboundAudioStream::cleanupCodec()
+        // C++  void cleanupCodec()
 
         // WEBRTC TODO: Address further C++ code.
 
