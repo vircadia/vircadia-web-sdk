@@ -545,6 +545,9 @@ class AudioClient {
 
         // C++  void Application::nodeActivated(Node* node)
         this.#negotiateAudioFormat();
+
+        // Web SDK specific. Reset to cleanly handle new connection.
+        this.#_receivedAudioStream.reset();
     };
 
     // Slot
