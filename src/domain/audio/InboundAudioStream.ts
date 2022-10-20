@@ -140,7 +140,7 @@ class InboundAudioStream {
         // WEBRTC TODO: Address further C++ code. Handle late packets.
         // These aren't handled in the C++ either.
         // In practice they seem not to occur; more common is packets being dropped.
-        // Could buffer a small number of packets here and insert late packets, before passing packeton onto the jitter buffer.
+        // Could buffer a small number of packets here and insert late packets, before passing them to the jitter buffer.
 
         // WEBRTC TODO: Address further C++ code. Jitter buffer sizing.
 
