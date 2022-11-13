@@ -596,9 +596,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         const POS_DECIMAL_PLACES = 3;
         const ENTITY_TYPE_INDEX = 1;
-        const X_INDEX = 2;
-        const Y_INDEX = 3;
-        const Z_INDEX = 4;
+        const NAME_INDEX = 2;
+        const X_INDEX = 3;
+        const Y_INDEX = 4;
+        const Z_INDEX = 5;
         const DEFAULT_POSITION = { x: 0, y: 0, z: 0 };
 
         const entitiesCount = document.getElementById("entitiesCount");
@@ -629,13 +630,17 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         function onEntityData(data) {
 
             data.forEach((e) => {
-                // Update the type and position if an entity ID is already in our list. Create a new element otherwise.
+                // Update properties if the entity is already in our list. Create a new element otherwise.
                 if (entityIDsList.some((id) => {
                     return e.entityItemID.stringify() === id;
                 })) {
                     const cols = document.getElementById(e.entityItemID.stringify()).children;
-                    cols.item(ENTITY_TYPE_INDEX).innerHTML = e.entityType;
-
+                    if (e.entityType) {
+                        cols.item(ENTITY_TYPE_INDEX).innerHTML = e.entityType;
+                    }
+                    if (e.name) {
+                        cols.item(NAME_INDEX).innerHTML = e.name;
+                    }
                     if (e.position) {
                         cols.item(X_INDEX).innerHTML = e.position.x.toFixed(POS_DECIMAL_PLACES);
                         cols.item(Y_INDEX).innerHTML = e.position.y.toFixed(POS_DECIMAL_PLACES);
@@ -651,6 +656,9 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                     tr.appendChild(td);
                     td = document.createElement("td");
                     td.innerHTML = e.entityType;
+                    tr.appendChild(td);
+                    td = document.createElement("td");
+                    td.innerHTML = e.name;
                     tr.appendChild(td);
                     const position = e.position ?? DEFAULT_POSITION;
                     td = document.createElement("td");
