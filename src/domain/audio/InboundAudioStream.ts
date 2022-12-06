@@ -191,6 +191,7 @@ class InboundAudioStream {
             }
         }
 
+        // Could buffer a small number of packets here and insert late packets, before passing them to the jitter buffer.
         // WEBRTC TODO: Address further C++ code. Jitter buffer sizing.
 
         return messageLength;

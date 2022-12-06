@@ -570,7 +570,7 @@ const EntityData = new class {
             }
 
             let parentID: Uuid | null | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER)) {
+            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PARENT_ID)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -766,7 +766,6 @@ const EntityData = new class {
                         dataPosition += 16;
                     }
                 }
-
             }
 
             let billboardMode: number | undefined = undefined;
@@ -998,7 +997,6 @@ const EntityData = new class {
                         dataPosition += 1;
                     }
                     actionData = buffer;
-
                 }
             }
 
