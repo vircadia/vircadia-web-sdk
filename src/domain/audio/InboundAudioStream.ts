@@ -140,7 +140,11 @@ class InboundAudioStream {
             console.debug("$$$$$$$ Ramp up volume of this message.");
 
             // TODO: Ramp up volume of this message - scale samples.
-
+            const audioBuffer = (info as MixedAudioDetails).audioBuffer;
+            for (let i = 0, length = audioBuffer.byteLength; i < length; i += 2) {
+                const scale = i / (length-2);
+                audioBuffer.setInt16(i, audioBuffer.getInt16(i, UDT.LITTLE_ENDIAN) * scale, UDT.LITTLE_ENDIAN);
+            }
         }
 
         // Buffer the current message and retrieve the previous.
@@ -159,8 +163,14 @@ class InboundAudioStream {
 
         // Ramp down the volume of previous message if the current message is early.
         if (isMessageEarly && previousMessage.messageType === PacketType.MixedAudio) {
+            console.debug("$$$$$$$ Ramp down volume of previous message.");
 
             // TODO: Ramp down volume of this message - scale samples.
+            const audioBuffer = (previousMessage.info as MixedAudioDetails).audioBuffer;
+            for (let i = 0, length = audioBuffer.byteLength; i < length; i += 2) {
+                const scale = 1 - i / (length-2);
+                audioBuffer.setInt16(i, audioBuffer.getInt16(i, UDT.LITTLE_ENDIAN) * scale, UDT.LITTLE_ENDIAN);
+            }
 
         }
 
