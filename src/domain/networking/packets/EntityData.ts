@@ -45,8 +45,8 @@ type CommonEntityProperties = {
     entityType: EntityType,
     createdFromBuffer: bigint,
     lastEdited: bigint,
-    updateDelta: number,
-    simulatedDelta: number,
+    updateDelta: bigint,
+    simulatedDelta: bigint,
     simOwnerData: ArrayBuffer | undefined;
     parentID: Uuid | null | undefined;
     parentJointIndex: number | undefined;
@@ -532,7 +532,7 @@ const EntityData = new class {
 
             let encodedData = new DataView(data.buffer, data.byteOffset + dataPosition);
             dataPosition += codec.decode(encodedData, encodedData.byteLength);
-            const entityType = codec.data;
+            const entityType = Number(codec.data);
 
             const createdFromBuffer = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 8;
