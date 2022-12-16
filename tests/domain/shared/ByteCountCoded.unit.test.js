@@ -80,6 +80,28 @@ describe("ByteCountCoded - unit tests", () => {
 
         expect(bytesWritten).toBe(3);
         expect(reEncodedHex).toBe(bufferHexExact);
+
+        // Zero decoding.
+        bufferHex = "000e80ffff8fff";
+        bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        data = new DataView(bufferArray.buffer);
+        codec = new ByteCountCoded();
+        bytesConsumed = codec.decode(data, bufferArray.length);
+
+        expect(bytesConsumed).toBe(1);
+        expect(codec.data).toBe(0n);
+
+        // Zero encoding.
+        bufferHexExact = "00";
+        codec.data = 0n;
+        reEncodedArray = new Uint8Array(bufferHexExact.length / 2);
+        bytesWritten = codec.encode(new DataView(reEncodedArray.buffer));
+        reEncodedHex = Buffer.from(reEncodedArray).toString('hex');
+
+        expect(bytesWritten).toBe(1);
+        expect(reEncodedHex).toBe(bufferHexExact);
     });
 
 });
