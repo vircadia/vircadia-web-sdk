@@ -195,7 +195,7 @@ class ByteCountCoded {
             temp = temp >> 1n;
         }
 
-        return Math.ceil(bitPosition / this.#BITS_IN_BYTE);
+        return numberOfBytes;
     }
 }
 
