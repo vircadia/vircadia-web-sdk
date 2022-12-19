@@ -674,6 +674,16 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                     td.innerHTML = position.z.toFixed(POS_DECIMAL_PLACES);
                     tr.appendChild(td);
                     entityListBody.appendChild(tr);
+                    td = document.createElement("td");
+                    const eraseButton = document.createElement("button");
+                    eraseButton.innerHTML = "Erase";
+                    eraseButton.onclick = () => {
+                        const id = e.entityItemID;
+                        console.log("ERASING: ", id.stringify());
+                        entityServer.sendEntityErasePacket(id);
+                    };
+                    td.appendChild(eraseButton);
+                    tr.appendChild(td);
                 }
             });
 

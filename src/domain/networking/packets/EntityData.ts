@@ -36,6 +36,7 @@ import { quat } from "../../shared/Quat";
 import Uuid from "../../shared/Uuid";
 import { vec3 } from "../../shared/Vec3";
 import UDT from "../udt/UDT";
+/* import { PacketTypeValue } from "../udt/PacketHeaders"; */
 
 import { ungzip } from "pako";
 
@@ -1408,6 +1409,28 @@ const EntityData = new class {
         return 1 + Math.ceil(threeBitCodes * 3 / 8.0);
     }
 
+    encodeEraseEntityMessage(id: Uuid, data: DataView): number {
+        // C++  bool EntityItemProperties::encodeEraseEntityMessage(const EntityItemID& entityItemID, QByteArray& buffer)
+
+        if (data.byteLength < 2 + Uuid.NUM_BYTES_RFC4122_UUID)
+        {
+        console.debug("ERROR - encodeEraseEntityMessage() called with buffer that is too small!");
+            return 0;
+        }
+
+
+        let dataPosition = 0;
+        data.setUint16(dataPosition, 1, UDT.LITTLE_ENDIAN); // only one id in this message
+        dataPosition += 2;
+
+        data.setBigUint128(dataPosition, id.value(), UDT.BIG_ENDIAN);
+        dataPosition += Uuid.NUM_BYTES_RFC4122_UUID;
+
+        return dataPosition;
+    }
+
+    /* encodeEntityEditPacket(type: PacketTypeValue.EntityEdit | PacketTypeValue.EntityAdd, properties: EntityProperties, data: DataView): number { */
+    /* } */
 
 }();
 

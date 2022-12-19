@@ -20,6 +20,8 @@ import Camera from "./domain/shared/Camera";
 import ContextManager from "./domain/shared/ContextManager";
 import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
 import AssignmentClient from "./domain/AssignmentClient";
+import EntityEditPacketSender from "./domain/entities/EntityEditPacketSender";
+import Uuid from "./domain/shared/Uuid";
 
 
 /*@sdkdoc
@@ -98,6 +100,7 @@ class EntityServer extends AssignmentClient {
 
     #_octreeQuery = new OctreeQuery(true);
     #_octreeProcessor;
+    #_entityEditpacketSender;
     #_maxOctreePPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
     #_queryExpiry = 0;
     #_physicsEnabled = true;
@@ -112,10 +115,13 @@ class EntityServer extends AssignmentClient {
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
 
         ContextManager.set(contextID, OctreePacketProcessor, contextID);
+        ContextManager.set(contextID, EntityEditPacketSender, contextID);
         this.#_octreeProcessor = ContextManager.get(contextID, OctreePacketProcessor) as OctreePacketProcessor;
         this.#_octreeProcessor.entityData.connect((data) => {
             this.#_entityData.emit(data);
         });
+
+        this.#_entityEditpacketSender = ContextManager.get(contextID, EntityEditPacketSender) as EntityEditPacketSender;
 
         // C++  Application::Application()
         this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
@@ -156,6 +162,9 @@ class EntityServer extends AssignmentClient {
         }
     }
 
+    sendEntityErasePacket(packetID: Uuid) {
+        this.#_entityEditpacketSender.sendEraseEntityMessage(packetID);
+    }
 
     // Sends an EntityQuery packet to the entity server.
     #queryOctree(serverType: NodeTypeValue): void {
