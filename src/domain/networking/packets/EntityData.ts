@@ -36,7 +36,6 @@ import { quat } from "../../shared/Quat";
 import Uuid from "../../shared/Uuid";
 import { vec3 } from "../../shared/Vec3";
 import UDT from "../udt/UDT";
-/* import { PacketTypeValue } from "../udt/PacketHeaders"; */
 
 import { ungzip } from "pako";
 
@@ -49,6 +48,7 @@ type CommonEntityProperties = {
     updateDelta: bigint,
     simulatedDelta: bigint,
     simOwnerData: ArrayBuffer | undefined;
+    // TODO: null UUID as indicated by isNull method in native codebase is simply UUID with value 0n, we should have the same method and eliminate the extraneous null state here
     parentID: Uuid | null | undefined;
     parentJointIndex: number | undefined;
     visible: boolean | undefined;
@@ -90,7 +90,7 @@ type CommonEntityProperties = {
     gravity: vec3 | undefined;
     acceleration: vec3 | undefined;
     damping: number | undefined;
-    angularDampling: number | undefined;
+    angularDamping: number | undefined;
     restitution: number | undefined;
     friction: number | undefined;
     lifetime: number | undefined;
@@ -103,7 +103,7 @@ type CommonEntityProperties = {
     cloneLifetime: number | undefined;
     cloneLimit: number | undefined;
     cloneDynamic: boolean | undefined;
-    cloneAvatarIdentity: boolean | undefined;
+    cloneAvatarEntity: boolean | undefined;
     cloneOriginID: Uuid | undefined;
     script: string | undefined;
     scriptTimestamp: bigint | undefined;
@@ -275,7 +275,7 @@ const EntityData = new class {
      *      <code>0.0</code> – <code>1.0</code>. A higher damping value slows down the entity more quickly. The default value is
      *      for an exponential decay timescale of <code>2.0s</code>, where it takes <code>2.0s</code> for the movement to slow
      *      to <code>1/e = 0.368</code> of its initial value.
-     *  @property {number|undefined} angularDampling - How much the angular velocity of an entity slows down over time, range
+     *  @property {number|undefined} angularDamping - How much the angular velocity of an entity slows down over time, range
      *      <code>0.0 – 1.0</code>. A higher damping value slows down the entity more quickly. The default value is for an
      *      exponential decay timescale of <code>2.0s</code>, where it takes <code>2.0s</code> for the movement to slow to
      *      <code>1/e = 0.368</code> of its initial value.
@@ -304,7 +304,7 @@ const EntityData = new class {
      *      any given time.
      *  @property {boolean|undefined} cloneDynamic - <code>true</code> if clones created from this entity will have their
      *      dynamic property set to true, <code>false</code> if they won't.
-     *  @property {boolean|undefined} cloneAvatarIdentity - <code>true</code> if clones created from this entity will be
+     *  @property {boolean|undefined} cloneAvatarEntity - <code>true</code> if clones created from this entity will be
      *      created as avatar entities, <code>false</code> if they won't be.
      *  @property {Uuid|undefined} cloneOriginID - The ID of the entity that this entity was cloned from.
      *  @property {string|undefined} script - The URL of the client entity script, if any, that is attached to the entity.
@@ -930,9 +930,9 @@ const EntityData = new class {
                 dataPosition += 4;
             }
 
-            let angularDampling: number | undefined = undefined;
+            let angularDamping: number | undefined = undefined;
             if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_DAMPING)) {
-                angularDampling = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                angularDamping = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
@@ -1025,9 +1025,9 @@ const EntityData = new class {
                 dataPosition += 1;
             }
 
-            let cloneAvatarIdentity: boolean | undefined = undefined;
+            let cloneAvatarEntity: boolean | undefined = undefined;
             if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_AVATAR_ENTITY)) {
-                cloneAvatarIdentity = Boolean(data.getUint8(dataPosition));
+                cloneAvatarEntity = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
@@ -1324,7 +1324,7 @@ const EntityData = new class {
                     gravity,
                     acceleration,
                     damping,
-                    angularDampling,
+                    angularDamping,
                     restitution,
                     friction,
                     lifetime,
@@ -1337,7 +1337,7 @@ const EntityData = new class {
                     cloneLifetime,
                     cloneLimit,
                     cloneDynamic,
-                    cloneAvatarIdentity,
+                    cloneAvatarEntity,
                     cloneOriginID,
                     script,
                     scriptTimestamp,
@@ -1429,8 +1429,969 @@ const EntityData = new class {
         return dataPosition;
     }
 
-    /* encodeEntityEditPacket(type: PacketTypeValue.EntityEdit | PacketTypeValue.EntityAdd, properties: EntityProperties, data: DataView): number { */
-    /* } */
+    encodeEntityEditPacket(properties: EntityProperties, data: DataView): number {
+        // C++ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketType command, EntityItemID id,
+        // const EntityItemProperties& properties, QByteArray& buffer, EntityPropertyFlags requestedProperties,
+        // EntityPropertyFlags& didntFitProperties)
+
+        let dataPosition = 0;
+
+        // write root/null octcode
+        if (data.byteLength - dataPosition < 1) {
+            console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for octcode!");
+            return 0;
+        }
+        data.setUint8(dataPosition, 0);
+        dataPosition += 1;
+
+        // Last Edited quint64 always first, before any other details, which allows us easy access to adjusting this
+        // timestamp for clock skew
+        if (data.byteLength - dataPosition < 8) {
+            console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for last edited timestamp!");
+            return 0;
+        }
+        data.setBigUint64(dataPosition, properties.lastEdited, UDT.LITTLE_ENDIAN);
+        dataPosition += 8;
+
+        // write UUID
+        if (data.byteLength - dataPosition < Uuid.NUM_BYTES_RFC4122_UUID) {
+            console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity ID!");
+            return 0;
+        }
+        data.setBigUint128(dataPosition, properties.entityItemID.value(), UDT.BIG_ENDIAN);
+        dataPosition += Uuid.NUM_BYTES_RFC4122_UUID;
+
+        // write byte count encoded type
+        const codec = new ByteCountCoded();
+        codec.data = BigInt(properties.entityType);
+        let encodedTypeSize = codec.encode(new DataView(data.buffer, data.byteOffset + dataPosition));
+        if (data.byteLength - dataPosition < encodedTypeSize) {
+            console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for byte count encoded type!");
+            return 0;
+        }
+        dataPosition += encodedTypeSize;
+
+        // write byte count encoded update delta time
+        codec.data = BigInt(properties.updateDelta);
+        let encodedUpdateDeltaSize = codec.encode(new DataView(data.buffer, data.byteOffset + dataPosition));
+        if (data.byteLength - dataPosition < encodedUpdateDeltaSize) {
+            console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for byte count encoded update delta time!");
+            return 0;
+        }
+        dataPosition += encodedUpdateDeltaSize;
+
+        const propertyFlags = new PropertyFlags();
+
+        let dataPositionAfterFlags = 0;
+        const dataAfterFlags = new DataView(new ArrayBuffer(data.byteLength - dataPosition));
+
+        // encode data after flags separately since flags size depends on the included properties (which also could be only some of the requested properties)
+        if (properties.simOwnerData !== undefined) {
+            const written = this.#_encodeArrayBuffer(dataPositionAfterFlags, dataAfterFlags, properties.simOwnerData);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for simulation owner data!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER, true);
+            }
+        }
+
+        if (properties.parentID !== undefined) {
+            const written = this.#_encodeUUID(dataPositionAfterFlags, dataAfterFlags, properties.parentID);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for parent ID!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_PARENT_ID, true);
+            }
+        }
+
+        if (properties.parentJointIndex !== undefined) {
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < 2) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for parent joint index!");
+                return 0;
+            }
+            dataAfterFlags.setUint16(dataPositionAfterFlags, properties.parentJointIndex, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += 2;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_PARENT_JOINT_INDEX, true);
+        }
+
+        if (properties.visible !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity visibility!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.visible ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_VISIBLE, true);
+        }
+
+        if (properties.name !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.name);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                // TODO: add to a didntFitProperties object and continue instead of reporting an error
+                // similarly for other optional properties
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity name!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_NAME, true);
+            }
+        }
+
+        if (properties.locked !== undefined) {
+            const totalSize = 0;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity locked state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.locked ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_LOCKED, true);
+        }
+
+        if (properties.userData !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.userData);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for user data!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_USER_DATA, true);
+            }
+        }
+
+        if (properties.privateUserData !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.privateUserData);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for private user data!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_PRIVATE_USER_DATA, true);
+            }
+        }
+
+        if (properties.href !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.href);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for href!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HREF, true);
+            }
+        }
+
+        if (properties.description !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.description);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity description!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_DESCRIPTION, true);
+            }
+        }
+
+        if (properties.position !== undefined) {
+            const written = this.#_encodeVec3(dataPositionAfterFlags, dataAfterFlags, properties.position);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity position!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_POSITION, true);
+            }
+        }
+
+        if (properties.dimensions !== undefined) {
+            const written = this.#_encodeVec3(dataPositionAfterFlags, dataAfterFlags, properties.dimensions);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity position!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_DIMENSIONS, true);
+            }
+        }
+
+        if (properties.rotation) {
+            const totalSize = 8;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity rotation!");
+                return 0;
+            }
+            GLMHelpers.packOrientationQuatToBytes(dataAfterFlags, dataPositionAfterFlags, properties.rotation);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ROTATION, true);
+        }
+
+        if (properties.registrationPoint !== undefined) {
+            const written = this.#_encodeVec3(dataPositionAfterFlags, dataAfterFlags, properties.registrationPoint);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity position!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_REGISTRATION_POINT, true);
+            }
+        }
+
+        if (properties.created) {
+            const totalSize = 8;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity created timestamp!");
+                return 0;
+            }
+            dataAfterFlags.setBigUint64(dataPositionAfterFlags, properties.created, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_CREATED, true);
+        }
+
+        if (properties.lastEditedBy) {
+            const written = this.#_encodeUUID(dataPositionAfterFlags, dataAfterFlags, properties.lastEditedBy);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for last editor ID!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_LAST_EDITED_BY, true);
+            }
+        }
+
+        if (properties.queryAACube) {
+            const written = this.#_encodeVec3(dataPositionAfterFlags, dataAfterFlags, properties.queryAACube.corner);
+            dataPositionAfterFlags += written;
+
+            const scaleSize = 4;
+            if (written === 0 || dataAfterFlags.byteLength - dataPositionAfterFlags < scaleSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for query axis aligned cube!");
+                return 0;
+            } else {
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, properties.queryAACube.scale, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += scaleSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_QUERY_AA_CUBE, true);
+            }
+        }
+
+        if (properties.canCastShadow !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity shadow casting state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.canCastShadow ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_CAN_CAST_SHADOW, true);
+        }
+
+        if (properties.renderLayer !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for render layer!");
+                return 0;
+            }
+            dataAfterFlags.setUint32(dataPositionAfterFlags, properties.renderLayer, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_RENDER_LAYER, true);
+        }
+
+        if (properties.primitiveMode !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for primitive mode!");
+                return 0;
+            }
+            dataAfterFlags.setUint32(dataPositionAfterFlags, properties.primitiveMode, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_PRIMITIVE_MODE, true);
+        }
+
+        if (properties.ignorePickIntersection !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity pick intersection ignore state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.ignorePickIntersection ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_IGNORE_PICK_INTERSECTION, true);
+        }
+
+        if (properties.renderWithZones !== undefined) {
+            const lengthSize = 2;
+            const totalSize = lengthSize + properties.renderWithZones.length * Uuid.NUM_BYTES_RFC4122_UUID;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for render zone IDs!");
+                return 0;
+            }
+
+            dataAfterFlags.setUint16(dataPositionAfterFlags, properties.renderWithZones.length, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += lengthSize;
+
+            for (var id of properties.renderWithZones) {
+                dataPositionAfterFlags += this.#_encodeUUID(dataPositionAfterFlags, dataAfterFlags, id);
+            }
+
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_RENDER_WITH_ZONES, true);
+        }
+
+        if (properties.billboardMode !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for billboard mode!");
+                return 0;
+            }
+            dataAfterFlags.setUint32(dataPositionAfterFlags, properties.billboardMode, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_BILLBOARD_MODE, true);
+        }
+
+        if (properties.grabbable !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity grabbable state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.grabbable ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_GRABBABLE, true);
+        }
+
+        if (properties.grabKinematic !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity grab kinematic state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.grabKinematic ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_KINEMATIC, true);
+        }
+
+        if (properties.grabFollowsController !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity grab controller following state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.grabFollowsController ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_FOLLOWS_CONTROLLER, true);
+        }
+
+        if (properties.triggerable !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity triggerable state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.triggerable ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_TRIGGERABLE, true);
+        }
+
+        if (properties.grabEquippable !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity grab equippable state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.grabEquippable ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE, true);
+        }
+
+        if (properties.delegateToParent !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity grab equippable state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.delegateToParent ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_DELEGATE_TO_PARENT, true);
+        }
+
+        if (properties.equippableLeftPositionOffset !== undefined) {
+            const written = this.#_encodeVec3(dataPositionAfterFlags, dataAfterFlags, properties.equippableLeftPositionOffset);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity equippable left position offset!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET, true);
+            }
+        }
+
+        if (properties.equippableLeftRotationOffset) {
+            const totalSize = 8;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity equippable left rotation offset!");
+                return 0;
+            }
+            GLMHelpers.packOrientationQuatToBytes(dataAfterFlags, dataPositionAfterFlags, properties.equippableLeftRotationOffset);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET, true);
+        }
+
+        if (properties.equippableRightPositionOffset !== undefined) {
+            const written = this.#_encodeVec3(dataPositionAfterFlags, dataAfterFlags, properties.equippableRightPositionOffset);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity equippable right position offset!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET, true);
+            }
+        }
+
+        if (properties.equippableRightRotationOffset) {
+            const totalSize = 8;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity equippable right rotation offset!");
+                return 0;
+            }
+            GLMHelpers.packOrientationQuatToBytes(dataAfterFlags, dataPositionAfterFlags, properties.equippableRightRotationOffset);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET, true);
+        }
+
+        if (properties.equippableIndicatorURL !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.equippableIndicatorURL);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for equippable indicator URL!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_URL, true);
+            }
+        }
+
+        if (properties.equippableIndicatorScale !== undefined) {
+            const written = this.#_encodeVec3(dataPositionAfterFlags, dataAfterFlags, properties.equippableIndicatorScale);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity equippable indicator scale!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE, true);
+            }
+        }
+
+        if (properties.equippableIndicatorOffset !== undefined) {
+            const written = this.#_encodeVec3(dataPositionAfterFlags, dataAfterFlags, properties.equippableIndicatorOffset);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity equippable indicator offset!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET, true);
+            }
+        }
+
+        if (properties.density !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for density!");
+                return 0;
+            }
+            dataAfterFlags.setFloat32(dataPositionAfterFlags, properties.density, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_DENSITY, true);
+        }
+
+        if (properties.angularVelocity !== undefined) {
+            const written = this.#_encodeVec3(dataPositionAfterFlags, dataAfterFlags, properties.angularVelocity);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for angular velocity!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ANGULAR_VELOCITY, true);
+            }
+        }
+
+        if (properties.gravity !== undefined) {
+            const written = this.#_encodeVec3(dataPositionAfterFlags, dataAfterFlags, properties.gravity);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for gravity!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GRAVITY, true);
+            }
+        }
+
+        if (properties.acceleration !== undefined) {
+            const written = this.#_encodeVec3(dataPositionAfterFlags, dataAfterFlags, properties.acceleration);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for acceleration!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ACCELERATION, true);
+            }
+        }
+
+        if (properties.damping !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for damping!");
+                return 0;
+            }
+            dataAfterFlags.setFloat32(dataPositionAfterFlags, properties.damping, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_DAMPING, true);
+        }
+
+        if (properties.angularDamping !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for angular damping!");
+                return 0;
+            }
+            dataAfterFlags.setFloat32(dataPositionAfterFlags, properties.angularDamping, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ANGULAR_DAMPING, true);
+        }
+
+        if (properties.restitution !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for restitution!");
+                return 0;
+            }
+            dataAfterFlags.setFloat32(dataPositionAfterFlags, properties.restitution, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_RESTITUTION, true);
+        }
+
+        if (properties.friction !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for friction!");
+                return 0;
+            }
+            dataAfterFlags.setFloat32(dataPositionAfterFlags, properties.friction, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_FRICTION, true);
+        }
+
+        if (properties.lifetime !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for lifetime!");
+                return 0;
+            }
+            dataAfterFlags.setFloat32(dataPositionAfterFlags, properties.lifetime, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_LIFETIME, true);
+        }
+
+        if (properties.collisionless !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for collisionless state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.collisionless ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_COLLISIONLESS, true);
+        }
+
+        if (properties.collisionMask !== undefined) {
+            const totalSize = 2;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for collision mask!");
+                return 0;
+            }
+            dataAfterFlags.setUint16(dataPositionAfterFlags, properties.collisionMask, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_COLLISION_MASK, true);
+        }
+
+        if (properties.dynamic !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for dynamic state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.dynamic ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_DYNAMIC, true);
+        }
+
+        if (properties.collisionSoundURL !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.collisionSoundURL);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for collision sound URL!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_COLLISION_SOUND_URL, true);
+            }
+        }
+
+        if (properties.actionData !== undefined) {
+            const written = this.#_encodeArrayBuffer(dataPositionAfterFlags, dataAfterFlags, properties.actionData);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for action data!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ACTION_DATA, true);
+            }
+        }
+
+        if (properties.cloneable !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for cloneable state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.cloneable ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_CLONEABLE, true);
+        }
+
+        if (properties.cloneLifetime !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for clone lifetime!");
+                return 0;
+            }
+            dataAfterFlags.setFloat32(dataPositionAfterFlags, properties.cloneLifetime, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_CLONE_LIFETIME, true);
+        }
+
+        if (properties.cloneLimit !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for clone limit!");
+                return 0;
+            }
+            dataAfterFlags.setFloat32(dataPositionAfterFlags, properties.cloneLimit, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_CLONE_LIMIT, true);
+        }
+
+        if (properties.cloneDynamic !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for clone dynamic state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.cloneDynamic ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_CLONE_DYNAMIC, true);
+        }
+
+        if (properties.cloneAvatarEntity !== undefined) {
+            const totalSize = 1;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for clone avatar identity state!");
+                return 0;
+            }
+            dataAfterFlags.setUint8(dataPositionAfterFlags, properties.cloneAvatarEntity ? 1 : 0);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_CLONE_AVATAR_ENTITY, true);
+        }
+
+        if (properties.cloneOriginID !== undefined) {
+            const written = this.#_encodeUUID(dataPositionAfterFlags, dataAfterFlags, properties.cloneOriginID);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for clone origin ID!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_CLONE_ORIGIN_ID, true);
+            }
+        }
+
+        if (properties.script !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.script);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity script!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_SCRIPT, true);
+            }
+        }
+
+        if (properties.scriptTimestamp) {
+            const totalSize = 8;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity script timestamp!");
+                return 0;
+            }
+            dataAfterFlags.setBigUint64(dataPositionAfterFlags, properties.scriptTimestamp, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_SCRIPT_TIMESTAMP, true);
+        }
+
+        if (properties.serverScripts !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.serverScripts);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity server scripts!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_SERVER_SCRIPTS, true);
+            }
+        }
+
+        if (properties.itemName !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.itemName);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for item name!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ITEM_NAME, true);
+            }
+        }
+
+        if (properties.itemDescription !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.itemDescription);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for item description!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ITEM_DESCRIPTION, true);
+            }
+        }
+
+        if (properties.itemCategories !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.itemCategories);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for item categories!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ITEM_CATEGORIES, true);
+            }
+        }
+
+        if (properties.itemArtist !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.itemArtist);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for item artist!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ITEM_ARTIST, true);
+            }
+        }
+
+        if (properties.itemLicense !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.itemLicense);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for item license!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ITEM_LICENSE, true);
+            }
+        }
+
+        if (properties.limitedRun !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for limited run number!");
+                return 0;
+            }
+            dataAfterFlags.setUint32(dataPositionAfterFlags, properties.limitedRun, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_LIMITED_RUN, true);
+        }
+
+        if (properties.marketplaceID !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.marketplaceID);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for marketplaceID!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_MARKETPLACE_ID, true);
+            }
+        }
+
+        if (properties.editionNumber !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for edition number!");
+                return 0;
+            }
+            dataAfterFlags.setUint32(dataPositionAfterFlags, properties.editionNumber, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_EDITION_NUMBER, true);
+        }
+
+        if (properties.entityInstanceNumber !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity instance number!");
+                return 0;
+            }
+            dataAfterFlags.setUint32(dataPositionAfterFlags, properties.entityInstanceNumber, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ENTITY_INSTANCE_NUMBER, true);
+        }
+
+        if (properties.certificateID !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.certificateID);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for certificate ID!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_ID, true);
+            }
+        }
+
+        if (properties.certificateType !== undefined) {
+            const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, properties.certificateType);
+            dataPositionAfterFlags += written;
+            if (written === 0) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for certificate type!");
+                return 0;
+            } else {
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_TYPE, true);
+            }
+        }
+
+        if (properties.staticCertificateVersion !== undefined) {
+            const totalSize = 4;
+            if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for static certificate version!");
+                return 0;
+            }
+            dataAfterFlags.setUint32(dataPositionAfterFlags, properties.staticCertificateVersion, UDT.LITTLE_ENDIAN);
+            dataPositionAfterFlags += totalSize;
+            propertyFlags.setHasProperty(EntityPropertyFlags.PROP_STATIC_CERTIFICATE_VERSION, true);
+        }
+
+        // shape properties
+        if (properties.entityType === EntityType.Box ||
+           properties.entityType === EntityType.Sphere ||
+           properties.entityType === EntityType.Shape)
+        {
+            const shapeProperties = properties as ShapeEntityProperties;
+
+            if (shapeProperties.color !== undefined) {
+                const totalSize = 3;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for shape color!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, shapeProperties.color.red);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 1, shapeProperties.color.green);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 2, shapeProperties.color.blue);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ALPHA, true);
+            }
+
+            if (shapeProperties.alpha !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for shape alpha!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, shapeProperties.alpha, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_ALPHA, true);
+            }
+
+            if (shapeProperties.shape !== undefined) {
+                const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, shapeProperties.shape);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for entity shape!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_SHAPE, true);
+                }
+            }
+
+
+        }
+
+        // write property flags followed by the property data
+
+        const propertyFlagsSize = propertyFlags.encode(new DataView(data.buffer, data.byteOffset + dataPosition));
+        if (data.byteLength - (dataPosition + dataPositionAfterFlags) < propertyFlagsSize) {
+            console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for byte count encoded property flags!");
+            return 0;
+        }
+        console.log(propertyFlags);
+        dataPosition += propertyFlagsSize;
+
+        const uint8Data = new Uint8Array(data.buffer, data.byteOffset + dataPosition);
+        const uint8DataAfterFlags = new Uint8Array(dataAfterFlags.buffer, dataAfterFlags.byteOffset, dataPositionAfterFlags);
+        uint8Data.set(uint8DataAfterFlags);
+        dataPosition += dataPositionAfterFlags;
+
+        return dataPosition;
+    }
+
+    #_encodeString(dataPosition: number, data: DataView, value: string): number {
+        const textEncoder = new TextEncoder();
+        const encoded = textEncoder.encode(value);
+        const totalSize = 2 + encoded.byteLength;
+        if (data.byteLength - dataPosition < totalSize) {
+            return 0;
+        }
+        data.setUint16(dataPosition, encoded.byteLength, UDT.LITTLE_ENDIAN);
+        const uint8Data = new Uint8Array(data.buffer, data.byteOffset + dataPosition + 2);
+        uint8Data.set(encoded);
+        return totalSize;
+    }
+
+    #_encodeVec3(dataPosition: number, data: DataView, value: vec3): number {
+        const totalSize = 12;
+        if (data.byteLength - dataPosition < totalSize) {
+            return 0;
+        }
+        data.setFloat32(dataPosition, value.x, UDT.LITTLE_ENDIAN);
+        data.setFloat32(dataPosition + 4, value.y, UDT.LITTLE_ENDIAN);
+        data.setFloat32(dataPosition + 8, value.z, UDT.LITTLE_ENDIAN);
+        return totalSize;
+    }
+
+    #_encodeUUID(dataPosition: number, data: DataView, id: Uuid | null): number {
+        const isNull = id === null || id.value() == 0n;
+        const idSize = isNull ? 0 : Uuid.NUM_BYTES_RFC4122_UUID;
+        const totalSize = 2 + idSize;
+        if (data.byteLength - dataPosition < totalSize) {
+            return 0;
+        }
+
+        data.setUint16(dataPosition, idSize, UDT.LITTLE_ENDIAN);
+        if (!isNull && id !== null) {
+            data.setBigUint128(dataPosition + 2, id.value(), UDT.BIG_ENDIAN);
+        }
+
+        return totalSize;
+    }
+
+    #_encodeArrayBuffer(dataPosition: number, data: DataView, buffer: ArrayBuffer): number {
+        const totalSize = 2 + buffer.byteLength;
+        if (data.byteLength - dataPosition < totalSize) {
+            return 0;
+        }
+        data.setUint16(dataPosition, buffer.byteLength, UDT.LITTLE_ENDIAN);
+        const uint8Data = new Uint8Array(data.buffer, data.byteOffset + dataPosition + 2);
+        uint8Data.set(new Uint8Array(buffer));
+        return totalSize;
+    }
 
 }();
 

@@ -22,6 +22,8 @@ import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
 import AssignmentClient from "./domain/AssignmentClient";
 import EntityEditPacketSender from "./domain/entities/EntityEditPacketSender";
 import Uuid from "./domain/shared/Uuid";
+import PacketType from "./domain/networking/udt/PacketHeaders";
+import { EntityProperties } from "./domain/networking/packets/EntityData"
 
 
 /*@sdkdoc
@@ -163,7 +165,15 @@ class EntityServer extends AssignmentClient {
     }
 
     sendEntityErasePacket(packetID: Uuid) {
-        this.#_entityEditpacketSender.sendEraseEntityMessage(packetID);
+        this.#_entityEditpacketSender.sendErasePacket(packetID);
+    }
+
+    sendEntityAddPacket(properties: EntityProperties) {
+        this.#_entityEditpacketSender.sendEditPacket(PacketType.EntityAdd, properties);
+    }
+
+    sendEntityEditPacket(properties: EntityProperties) {
+        this.#_entityEditpacketSender.sendEditPacket(PacketType.EntityEdit, properties);
     }
 
     // Sends an EntityQuery packet to the entity server.

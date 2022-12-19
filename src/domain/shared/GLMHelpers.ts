@@ -58,6 +58,18 @@ const GLMHelpers = new class {
         /* eslint-enable @typescript-eslint/no-magic-numbers */
     }
 
+    packOrientationQuatToBytes(data: DataView, dataPosition: number, quatInput: quat) {
+
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+        data.setUint16(dataPosition, (quatInput.x + 1) / 2 * this.#_UINT16_MAX, UDT.LITTLE_ENDIAN);
+        data.setUint16(dataPosition + 2, (quatInput.y + 1) / 2 * this.#_UINT16_MAX, UDT.LITTLE_ENDIAN);
+        data.setUint16(dataPosition + 4, (quatInput.z + 1) / 2 * this.#_UINT16_MAX, UDT.LITTLE_ENDIAN);
+        data.setUint16(dataPosition + 6, (quatInput.w + 1) / 2 * this.#_UINT16_MAX, UDT.LITTLE_ENDIAN);
+
+        /* eslint-enable @typescript-eslint/no-magic-numbers */
+    }
+
     /*@devdoc
      *  Writes a quaternion value to a packet, packing it into 6 bytes.
      *  @function GLMHelpers.packOrientationQuatToSixBytes

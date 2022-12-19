@@ -642,6 +642,8 @@ const PacketType = new class {
                 return 18;  // eslint-disable-line @typescript-eslint/no-magic-numbers
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
+            case this.EntityEdit:
+            case this.EntityAdd:
             case this.EntityData:
                 return this.#_EntityVersion.LAST_PACKET_TYPE;
             case this.EntityQuery:
