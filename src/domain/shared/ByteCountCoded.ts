@@ -177,7 +177,12 @@ class ByteCountCoded {
             let original = encodedBuffer.getUint8(bytePosition);
             let bitOffset = bitPosition % this.#BITS_IN_BYTE;
             let shiftBy = this.#BITS_IN_BYTE - 1 - bitOffset; // reverse bit order
-            encodedBuffer.setUint8(bytePosition, original | (bitValue << shiftBy));
+            let mask = bitValue << shiftBy
+            if (bitValue) {
+                encodedBuffer.setUint8(bytePosition, original | mask);
+            } else {
+                encodedBuffer.setUint8(bytePosition, original & ~mask);
+            }
             ++bitPosition;
         };
 
