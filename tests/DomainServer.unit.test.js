@@ -11,6 +11,8 @@
 
 import DomainServer from "../src/DomainServer";
 import Uuid from "../src/domain/shared/Uuid";
+import AccountInterface from "../src/domain/interfaces/AccountInterface";
+import UsersInterface from "../src/domain/interfaces/UsersInterface";
 
 
 describe("DomainServer - unit tests", () => {
@@ -158,13 +160,17 @@ describe("DomainServer - unit tests", () => {
         expect(domainServer.sessionUUID.value()).toBe(Uuid.NULL);
     });
 
+    test("Can access the account interface", () => {
+        const domainServer = new DomainServer();
+        expect(domainServer.account instanceof AccountInterface).toBe(true);
+    });
+
     test("Can access the users interface", () => {
         const domainServer = new DomainServer();
-        expect(typeof domainServer.users).toBe("object");
+        expect(domainServer.users instanceof UsersInterface).toBe(true);
         expect(typeof domainServer.users.getAvatarGain).toBe("function");
         expect(typeof domainServer.users.setAvatarGain).toBe("function");
     });
-
 
     log.mockReset();
 });

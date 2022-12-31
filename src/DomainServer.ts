@@ -11,7 +11,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountInterface from "./domain/interfaces/AccountInterface";
 import UsersInterface from "./domain/interfaces/UsersInterface";
+import AccountManager from "./domain/networking/AccountManager";
 import AddressManager from "./domain/networking/AddressManager";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
@@ -88,6 +90,8 @@ type OnStateChanged = (state: ConnectionState, info: string) => void;
  *      connection to the domain server changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  *
+ *  @property {AccountInterface} account - Properties and methods for working with the user's account in the domain.
+ *      <em>Read-only.</em>
  *  @property {UsersInterface} users - Properties and methods for working with users in the domain.
  *      <em>Read-only.</em>
  */
@@ -147,6 +151,7 @@ class DomainServer {
     #_sessionUUID = new Uuid();
     #_sessionUUIDChanged = new SignalEmitter();
 
+    #_accountInterface: AccountInterface;
     #_usersInterface: UsersInterface;
 
     #_DEBUG = false;
@@ -156,6 +161,7 @@ class DomainServer {
         // C++  Application::Application()
 
         const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AccountManager);
         ContextManager.set(contextID, AddressManager);
         ContextManager.set(contextID, NodeList, contextID);
 
@@ -203,6 +209,7 @@ class DomainServer {
 
         // WEBRTC TODO: Address further C++ code.
 
+        this.#_accountInterface = new AccountInterface(contextID);
         this.#_usersInterface = new UsersInterface(contextID);
     }
 
@@ -256,6 +263,10 @@ class DomainServer {
         return this.#_sessionUUIDChanged.signal();
     }
 
+
+    get account(): AccountInterface {
+        return this.#_accountInterface;
+    }
 
     get users(): UsersInterface {
         return this.#_usersInterface;
