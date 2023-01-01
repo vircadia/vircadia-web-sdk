@@ -15,6 +15,7 @@ AudioWorkletsMock.mock();
 
 import AudioOutput from "../../../src/domain/audio/AudioOutput";
 import AudioClient from "../../../src/domain/audio-client/AudioClient";
+import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodeList from "../../../src/domain/networking/NodeList";
 import ContextManager from "../../../src/domain/shared/ContextManager";
@@ -26,6 +27,7 @@ describe("AudioClient - unit tests", () => {
 
     test("The AudioClient can be obtained from the ContextManager", () => {
         const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AccountManager);
         ContextManager.set(contextID, AddressManager);
         ContextManager.set(contextID, NodeList, contextID);
         ContextManager.set(contextID, AudioOutput);

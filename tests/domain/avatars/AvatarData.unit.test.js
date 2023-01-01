@@ -14,6 +14,7 @@ AudioWorkletsMock.mock();
 
 
 import AvatarData from "../../../src/domain/avatars/AvatarData";
+import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodeList from "../../../src/domain/networking/NodeList";
 import AvatarConstants from "../../../src/domain/shared/AvatarConstants";
@@ -26,6 +27,7 @@ describe("AvatarData - unit tests", () => {
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AccountManager);
     ContextManager.set(contextID, AddressManager);
     ContextManager.set(contextID, NodeList, contextID);
 

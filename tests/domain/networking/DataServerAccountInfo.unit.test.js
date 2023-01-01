@@ -17,10 +17,12 @@ describe("DataServerAccountInfo - unit tests", () => {
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     test("Can set the username", () => {
+        const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
         const dataServerAccountInfo = new DataServerAccountInfo();
         expect(dataServerAccountInfo.getUsername()).toEqual("");
         dataServerAccountInfo.setUsername("something");
         expect(dataServerAccountInfo.getUsername()).toEqual("something");
+        log.mockReset();
     });
 
     test("Can set the access token", () => {

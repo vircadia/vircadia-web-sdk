@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import DomainHandler from "../../../src/domain/networking/DomainHandler";
 import NodeList from "../../../src/domain/networking/NodeList";
@@ -29,6 +30,7 @@ describe("DomainHandler - integration tests", () => {
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
     const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AccountManager);  // Required by NodeList.
     ContextManager.set(contextID, AddressManager);  // Required by NodeList.
     ContextManager.set(contextID, NodeList, contextID);
     const domainHandler = ContextManager.get(contextID, NodeList).getDomainHandler();

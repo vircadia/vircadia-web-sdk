@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountManager from "../../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../../src/domain/networking/AddressManager";
 import NLPacket from "../../../../src/domain/networking/NLPacket";
 import NodeList from "../../../../src/domain/networking/NodeList";
@@ -26,6 +27,7 @@ describe("DomainConnectRequest - unit tests", () => {
 
     // Context is required for LimitedNodeList.
     const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AccountManager);
     ContextManager.set(contextID, AddressManager);
     ContextManager.set(contextID, NodeList, contextID);
 

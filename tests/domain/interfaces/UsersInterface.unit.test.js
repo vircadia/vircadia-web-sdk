@@ -11,6 +11,7 @@
 
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
+import UsersInterface from "../../../src/domain/interfaces/UsersInterface";
 import Uuid from "../../../src/domain/shared/Uuid";
 import DomainServer from "../../../src/DomainServer";
 
@@ -19,7 +20,7 @@ describe("UsersInterface - unit tests", () => {
 
     test("Can access the users interface", () => {
         const domainServer = new DomainServer();
-        expect(typeof domainServer.users).toBe("object");
+        expect(domainServer.users instanceof UsersInterface).toBe(true);
     });
 
     test("Error logged if try to set avatar gain for invalid session ID or gain values", () => {

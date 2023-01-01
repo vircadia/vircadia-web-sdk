@@ -11,6 +11,7 @@
 
 import AvatarData from "../../../src/domain/avatars/AvatarData";
 import ClientTraitsHandler from "../../../src/domain/avatars/ClientTraitsHandler";
+import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodeList from "../../../src/domain/networking/NodeList";
 import ContextManager from "../../../src/domain/shared/ContextManager";
@@ -18,6 +19,7 @@ import ContextManager from "../../../src/domain/shared/ContextManager";
 
 describe("ClientTraitsHandler - unit tests", () => {
     const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AccountManager);
     ContextManager.set(contextID, AddressManager);
     ContextManager.set(contextID, NodeList, contextID);
 
