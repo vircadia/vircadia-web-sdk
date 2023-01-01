@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import DomainHandler from "../../../src/domain/networking/DomainHandler";
 import Node from "../../../src/domain/networking/Node";
@@ -67,6 +68,7 @@ describe("NodeList - integration tests", () => {
     AVATAR_MIXER_NODE_INFO.localSocket.setPort(PORT_104);
 
     const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AccountManager);  // Required by NodeList.
     ContextManager.set(contextID, AddressManager);  // Required by NodeList.
     ContextManager.set(contextID, NodeList, contextID);
     const nodeList = ContextManager.get(contextID, NodeList);

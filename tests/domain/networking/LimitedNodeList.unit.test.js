@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import Node from "../../../src/domain/networking/Node";
 import NodeList from "../../../src/domain/networking/NodeList";
@@ -27,6 +28,7 @@ describe("LimitedNodeList - integration tests", () => {
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
     const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AccountManager);  // Required by NodeList.
     ContextManager.set(contextID, AddressManager);  // Required by NodeList.
     ContextManager.set(contextID, NodeList, contextID);  // Required by PacketReceiver.
 

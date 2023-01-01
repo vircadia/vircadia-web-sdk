@@ -63,6 +63,18 @@ class AccountManager {
     }
 
 
+    constructor() {
+        // C++  AccountManager(bool accountSettingsEnabled, UserAgentGetter userAgentGetter)
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_loginComplete.connect(this.#uploadPublicKey);
+
+        // WEBRTC TODO: Address further C++ code.
+
+    }
+
+
     /*@devdoc
      *  Sets the user's username.
      *  @param {string} username - The user's username.
@@ -129,6 +141,14 @@ class AccountManager {
         // WEBRTC TODO: Address further C++ code.
 
     }
+
+
+    #uploadPublicKey = (): void => {
+        // C++  void uploadPublicKey()
+
+        console.error("Not implemented: AccountManager.#uploadPublicKey()");
+
+    };
 
 }
 

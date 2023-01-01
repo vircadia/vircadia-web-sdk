@@ -16,6 +16,7 @@ import Uuid from "../shared/Uuid";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
 import Socket from "./udt/Socket";
+import AccountManager from "./AccountManager";
 import AddressManager from "./AddressManager";
 import DomainHandler from "./DomainHandler";
 import FingerprintUtils from "./FingerprintUtils";
@@ -90,11 +91,24 @@ class NodeList extends LimitedNodeList {
         // a connection.
         this.#_domainHandler.connectedToDomain.connect(this.#sendPendingDSPathQuery);
 
+        // WEBRTC TODO: Address further C++ code.
+
+        // Clear our NodeList when the domain changes.
+        this.#_domainHandler.disconnectedFromDomain.connect(this.#resetFromDomainHandler);
 
         // WEBRTC TODO: Address further C++ code.
 
-        // clear our NodeList when the domain changes
-        this.#_domainHandler.disconnectedFromDomain.connect(this.#resetFromDomainHandler);
+        const accountManager = ContextManager.get(contextID, AccountManager) as AccountManager;
+
+        // Clear out NodeList when login is finished and we know our new username.
+        accountManager.usernameChanged.connect(() => {
+            this.reset("Username change");
+        });
+
+        // Clear our NodeList when logout is requested.
+        accountManager.logoutComplete.connect(() => {
+            this.reset("Logged out");
+        });
 
         // WEBRTC TODO: Address further C++ code.
 
