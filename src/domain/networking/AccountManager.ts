@@ -22,6 +22,8 @@ import DataServerAccountInfo from "./DataServerAccountInfo";
  *      <em>Read-only.</em>
  *  @property {Signal<AccountManager~LoginComplete>} loginComplete - Triggered when the user completes their login.
  *      <em>Read-only.</em>
+ *  @property {Signal<AccountManager~LogoutComplete>} logoutComplete - Triggered when the user logs out.
+ *      <em>Read-only.</em>
  */
 class AccountManager {
     // C++  class AccountManager : public QObject, public Dependency
@@ -32,6 +34,7 @@ class AccountManager {
     #_accountInfo = new DataServerAccountInfo();
     #_usernameChanged = new SignalEmitter();
     #_loginComplete = new SignalEmitter();
+    #_logoutComplete = new SignalEmitter();
 
 
     /*@sdkdoc
@@ -49,6 +52,14 @@ class AccountManager {
      */
     get loginComplete(): Signal {
         return this.#_loginComplete.signal();
+    }
+
+    /*@sdkdoc
+     *  Called when the user logs out.
+     *  @callback AccountManager~LogoutComplete
+     */
+    get logoutComplete(): Signal {
+        return this.#_logoutComplete.signal();
     }
 
 
@@ -96,6 +107,29 @@ class AccountManager {
         // WEBRTC TODO: Address further C++ code.
 
     }
+
+    /*@devdoc
+     *  Logs the user out.
+     */
+    logout(): void {
+        // C++  void AccountManager::logout()
+
+        // WEBRTC TODO: Address further C++ code.
+
+        // A logout means we want to delete the DataServerAccountInfo we currently have.
+        this.#_accountInfo = new DataServerAccountInfo();
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_logoutComplete.emit();
+
+        // The username has been cleared.
+        this.#_usernameChanged.emit("");
+
+        // WEBRTC TODO: Address further C++ code.
+
+    }
+
 }
 
 export default AccountManager;

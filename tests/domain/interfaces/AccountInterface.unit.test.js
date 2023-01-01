@@ -94,4 +94,21 @@ describe("AccountInterface - unit tests", () => {
         error.mockReset();
     });
 
+    test("Can log out when logged in", () => {
+        const accountInterface = new AccountInterface(contextID);
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+        accountInterface.login("me", validOAuthJSON);
+        accountInterface.logout();
+        expect(error).toHaveBeenCalledTimes(0);
+        error.mockReset();
+    });
+
+    test("Can log out when not logged in", () => {
+        const accountInterface = new AccountInterface(contextID);
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+        accountInterface.logout();
+        expect(error).toHaveBeenCalledTimes(0);
+        error.mockReset();
+    });
+
 });

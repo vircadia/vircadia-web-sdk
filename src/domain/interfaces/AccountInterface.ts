@@ -36,7 +36,7 @@ type OAuthJSON = {
 class AccountInterface {
     // C++  class AccountServicesScriptingInterface : public QObject
 
-    /*@devdoc
+    /*@sdkdoc
      *  Metaverse OAuth login details.
      *  @typedef {object} OAuthJSON
      *  @property {string} [access_token] - Access token.
@@ -63,6 +63,7 @@ class AccountInterface {
      *  @param {OAuthJSON} oAuthJSON - The metaverse OAuth login details.
      */
     login(username: string, oAuthJSON: OAuthJSON): void {
+        // C++  bool AccountServicesScriptingInterface::checkAndSignalForAccessToken()
         // C++  void AccountManager::requestAccessTokenFinished()
         if (typeof username !== "string" || username.length === 0) {
             console.error("[AccountInterface] Tried to set login for invalid username.");
@@ -81,6 +82,14 @@ class AccountInterface {
 
         this.#_accountManager.setUsername(username);
         this.#_accountManager.setAccessTokenFromJSON(oAuthJSON);
+    }
+
+    /*@sdkdoc
+     *  Logs the user out.
+     */
+    logout(): void {
+        // C++  AccountServicesScriptingInterface:: logOut()
+        this.#_accountManager.logout();
     }
 
 }
