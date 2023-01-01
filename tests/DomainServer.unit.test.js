@@ -163,6 +163,7 @@ describe("DomainServer - unit tests", () => {
     test("Can access the account interface", () => {
         const domainServer = new DomainServer();
         expect(domainServer.account instanceof AccountInterface).toBe(true);
+        expect(typeof domainServer.account.login).toBe("function");
     });
 
     test("Can access the users interface", () => {
