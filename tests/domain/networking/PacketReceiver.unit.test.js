@@ -20,6 +20,9 @@ import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Uuid from "../../../src/domain/shared/Uuid";
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 
 describe("PacketReceiver - unit tests", () => {
 
@@ -43,7 +46,7 @@ describe("PacketReceiver - unit tests", () => {
     sockAddr.setPort(7);
 
     const contextID = ContextManager.createContext();
-    ContextManager.set(contextID, AccountManager);  // Required by NodeList.
+    ContextManager.set(contextID, AccountManager, contextID);  // Required by NodeList.
     ContextManager.set(contextID, AddressManager);  // Required by NodeList.
     ContextManager.set(contextID, NodeList, contextID);
 

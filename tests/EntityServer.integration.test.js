@@ -13,9 +13,12 @@ import Camera from "../src/Camera";
 import DomainServer from "../src/DomainServer";
 import EntityServer from "../src/EntityServer";
 
-import TestConfig from "./test.config.js";
-
 import "wrtc";  // WebRTC Node.js package.
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
+import TestConfig from "./test.config.js";
 
 
 // Time needs to be allowed for the WebRTC RTCPeerConnection from one test to be closed before creating a new one in the

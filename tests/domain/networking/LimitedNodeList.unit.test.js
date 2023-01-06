@@ -21,6 +21,9 @@ import SockAddr from "../../../src/domain/networking/SockAddr";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Uuid from "../../../src/domain/shared/Uuid";
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 
 describe("LimitedNodeList - integration tests", () => {
 
@@ -28,7 +31,7 @@ describe("LimitedNodeList - integration tests", () => {
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
     const contextID = ContextManager.createContext();
-    ContextManager.set(contextID, AccountManager);  // Required by NodeList.
+    ContextManager.set(contextID, AccountManager, contextID);  // Required by NodeList.
     ContextManager.set(contextID, AddressManager);  // Required by NodeList.
     ContextManager.set(contextID, NodeList, contextID);  // Required by PacketReceiver.
 

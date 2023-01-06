@@ -20,6 +20,9 @@ import SockAddr from "../../../src/domain/networking/SockAddr";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Uuid from "../../../src/domain/shared/Uuid";
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 
 describe("NodeList - integration tests", () => {
 
@@ -68,7 +71,7 @@ describe("NodeList - integration tests", () => {
     AVATAR_MIXER_NODE_INFO.localSocket.setPort(PORT_104);
 
     const contextID = ContextManager.createContext();
-    ContextManager.set(contextID, AccountManager);  // Required by NodeList.
+    ContextManager.set(contextID, AccountManager, contextID);  // Required by NodeList.
     ContextManager.set(contextID, AddressManager);  // Required by NodeList.
     ContextManager.set(contextID, NodeList, contextID);
     const nodeList = ContextManager.get(contextID, NodeList);

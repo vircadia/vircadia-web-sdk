@@ -58,7 +58,7 @@ class AccountInterface {
 
 
     /*@sdkdoc
-     *  Logs the user in with a username and OAuth received from the metaverse server.
+     *  Logs the user into the domain server with a username and OAuth received from the metaverse server.
      *  @param {string} username - The user's username.
      *  @param {OAuthJSON} oAuthJSON - The metaverse OAuth login details.
      */
@@ -85,11 +85,20 @@ class AccountInterface {
     }
 
     /*@sdkdoc
-     *  Logs the user out.
+     *  Logs the user out of the domain server.
      */
     logout(): void {
-        // C++  AccountServicesScriptingInterface:: logOut()
+        // C++  AccountServicesScriptingInterface::logOut()
         this.#_accountManager.logout();
+    }
+
+    /*@sdkdoc
+     *  Gets whether the user is logged into the domain server.
+     *  @returns {boolean} <code>true</code> if the user is logged into the domain server, <code>false</code> if they're not.
+     */
+    isLoggedIn(): boolean {
+        // C++  bool AccountServicesScriptingInterface::isLoggedIn() {
+        return this.#_accountManager.isLoggedIn();
     }
 
 }

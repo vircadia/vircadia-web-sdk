@@ -9,10 +9,16 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountManagerMock from "../mocks/domain/networking/AccountManager.mock.js";
+AccountManagerMock.mock();
+
 import DomainServer from "../src/DomainServer";
 import Uuid from "../src/domain/shared/Uuid";
 import AccountInterface from "../src/domain/interfaces/AccountInterface";
 import UsersInterface from "../src/domain/interfaces/UsersInterface";
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 
 describe("DomainServer - unit tests", () => {
@@ -171,6 +177,18 @@ describe("DomainServer - unit tests", () => {
         expect(domainServer.users instanceof UsersInterface).toBe(true);
         expect(typeof domainServer.users.getAvatarGain).toBe("function");
         expect(typeof domainServer.users.setAvatarGain).toBe("function");
+    });
+
+    test("Can get and set the metaverse server URL", () => {
+        const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
+        const domainServer = new DomainServer();
+        expect(domainServer.metaverseServerURL).toEqual("https://metaverse.vircadia.com/live");
+        domainServer.metaverseServerURL = "https://metaverse.vircadia.com/other";
+        expect(domainServer.metaverseServerURL).toEqual("https://metaverse.vircadia.com/other");
+        expect(error).toHaveBeenCalledTimes(0);
+        domainServer.metaverseServerURL = "x";  // Invalid URL.
+        expect(domainServer.metaverseServerURL).toEqual("");
+        expect(error).toHaveBeenCalledTimes(1);
     });
 
     log.mockReset();

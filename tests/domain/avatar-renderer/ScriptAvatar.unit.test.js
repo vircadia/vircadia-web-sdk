@@ -11,9 +11,10 @@
 
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
+import AccountManagerMock from "../../../mocks/domain/networking/AccountManager.mock.js";
+AccountManagerMock.mock();
 import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
-
 
 import DomainServer from "../../../src/DomainServer";
 import AvatarManager from "../../../src/domain/AvatarManager";
@@ -23,6 +24,9 @@ import ContextManager from "../../../src/domain/shared/ContextManager";
 import Quat from "../../../src/domain/shared/Quat";
 import Uuid from "../../../src/domain/shared/Uuid";
 import Vec3 from "../../../src/domain/shared/Vec3";
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 
 describe("ScriptAvatar - unit tests", () => {

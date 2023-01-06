@@ -12,7 +12,6 @@
 import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
 
-
 import AvatarData from "../../../src/domain/avatars/AvatarData";
 import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
@@ -21,13 +20,16 @@ import AvatarConstants from "../../../src/domain/shared/AvatarConstants";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import { Uuid } from "../../../src/Vircadia";
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 
 describe("AvatarData - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     const contextID = ContextManager.createContext();
-    ContextManager.set(contextID, AccountManager);
+    ContextManager.set(contextID, AccountManager, contextID);
     ContextManager.set(contextID, AddressManager);
     ContextManager.set(contextID, NodeList, contextID);
 

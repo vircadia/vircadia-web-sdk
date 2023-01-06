@@ -15,11 +15,13 @@ import AccountInterface from "./domain/interfaces/AccountInterface";
 import UsersInterface from "./domain/interfaces/UsersInterface";
 import AccountManager from "./domain/networking/AccountManager";
 import AddressManager from "./domain/networking/AddressManager";
+import MetaverseAPI from "./domain/networking/MetaverseAPI";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
 import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
+import Url from "./domain/shared/Url";
 import Uuid from "./domain/shared/Uuid";
 
 
@@ -90,6 +92,8 @@ type OnStateChanged = (state: ConnectionState, info: string) => void;
  *      connection to the domain server changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  *
+ *  @property {string} metaverseServerURL="https://metaverse.vircadia.com/live" - The URL of the metaverse server used for the
+ *      domain. <code>""</code> if an invalid URL is set.
  *  @property {AccountInterface} account - Properties and methods for working with the user's account in the domain.
  *      <em>Read-only.</em>
  *  @property {UsersInterface} users - Properties and methods for working with users in the domain.
@@ -146,7 +150,9 @@ class DomainServer {
     // Context objects.
     #_contextID;
     #_nodeList: NodeList;
+    #_accountManager: AccountManager;
     #_addressManager: AddressManager;
+    #_metaverseAPI: MetaverseAPI;
 
     #_sessionUUID = new Uuid();
     #_sessionUUIDChanged = new SignalEmitter();
@@ -161,13 +167,23 @@ class DomainServer {
         // C++  Application::Application()
 
         const contextID = ContextManager.createContext();
-        ContextManager.set(contextID, AccountManager);
+        ContextManager.set(contextID, AccountManager, contextID);
         ContextManager.set(contextID, AddressManager);
         ContextManager.set(contextID, NodeList, contextID);
+        ContextManager.set(contextID, MetaverseAPI);
 
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
+        this.#_accountManager = ContextManager.get(contextID, AccountManager) as AccountManager;
         this.#_addressManager = ContextManager.get(contextID, AddressManager) as AddressManager;
+        this.#_metaverseAPI = ContextManager.get(contextID, MetaverseAPI) as MetaverseAPI;
         this.#_contextID = contextID;
+
+        // WEBRTC TODO: Address further C++ code.
+
+        this.#_accountManager.setAuthURL(this.#_metaverseAPI.getCurrentMetaverseServerURL());
+        if (!this.#_accountManager.hasKeyPair()) {
+            this.#_accountManager.generateNewUserKeypair();
+        }
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -263,6 +279,19 @@ class DomainServer {
         return this.#_sessionUUIDChanged.signal();
     }
 
+
+    get metaverseServerURL(): string {
+        return this.#_metaverseAPI.getCurrentMetaverseServerURL().toString();
+    }
+
+    set metaverseServerURL(address: string) {
+        const url = new Url(address);
+        if (!url.isValid()) {
+            console.error("ERROR: Set DomainServer.metaverseServerURL to an invalid address:", address);
+        }
+        this.#_metaverseAPI.setBaseUrl(url);
+        this.#_accountManager.updateAuthURLFromMetaverseServerURL();
+    }
 
     get account(): AccountInterface {
         return this.#_accountInterface;

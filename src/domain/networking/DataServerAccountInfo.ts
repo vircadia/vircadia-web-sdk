@@ -10,6 +10,7 @@
 //
 
 import { OAuthJSON } from "../interfaces/AccountInterface";
+import Uuid from "../shared/Uuid";
 import OAuthAccessToken from "./OAuthAccessToken";
 
 
@@ -23,7 +24,32 @@ class DataServerAccountInfo {
 
     #_username = "";
     #_accessToken = new OAuthAccessToken({});
+    #_privateKey = new Uint8Array();
 
+
+    #_domainID = new Uuid();
+    #_temporaryDomainID = new Uuid();
+    #_temporaryDomainApiKey = "";
+    #_EMPTY_KEY = "";
+
+
+    /*@devdoc
+     *  Gets the current domain ID.
+     *  @returns {Uuid} The current domain ID.
+     */
+    getDomainID(): Uuid {
+        // C++  const QUuid& getDomainID()
+        return this.#_domainID;
+    }
+
+    /*@devdoc
+     *  Sets the current domain ID.
+     *  @param {Uuid} domainID - The current domain ID.
+     */
+    setDomainID(domainID: Uuid): void {
+        // C++  void setDomainID(const QUuid& domainID)
+        this.#_domainID = domainID;
+    }
 
     /*@devdoc
      *  Gets the user's username.
@@ -47,6 +73,17 @@ class DataServerAccountInfo {
     }
 
     /*@devdoc
+     *  Gets the temporary key for a domain.
+     *  @param {Uuid} domainID - The domain to get the temporary key for.
+     */
+    getTemporaryDomainKey(domainID: Uuid): string {
+        // C++  const QString& getTemporaryDomainKey(const QUuid& domainID)
+        // Always returns EMPTY_KEY for user client.
+        return domainID.value() === this.#_temporaryDomainID.value() ? this.#_temporaryDomainApiKey : this.#_EMPTY_KEY;
+    }
+
+
+    /*@devdoc
      *  Gets the current OAuth access token.
      *  @returns {OAuthAccessToken} The current OAuth access token.
      */
@@ -62,6 +99,24 @@ class DataServerAccountInfo {
     setAccessTokenFromJSON(jsonObject: OAuthJSON): void {
         // C++  void setAccessTokenFromJSON(const QJsonObject& jsonObject)
         this.#_accessToken = new OAuthAccessToken(jsonObject);
+    }
+
+    /*@devdoc
+     *  Gets whether there is a private key.
+     *  @returns {boolean} <code>true</code> if there is a private key, <code>false</code> if there isn't.
+     */
+    hasPrivateKey(): boolean {
+        // C++  bool hasPrivateKey()
+        return this.#_privateKey.length > 0;
+    }
+
+    /*@devdoc
+     *  Sets a private key.
+     *  @param {Uint8Array} privateKey - The private key. Use an empty (zero-length) value to clear the private key.
+     */
+    setPrivateKey(privateKey: Uint8Array): void {
+        // C++  void setPrivateKey(const QByteArray& privateKey)
+        this.#_privateKey = privateKey;
     }
 
 }

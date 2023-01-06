@@ -65,6 +65,7 @@ class NodeList extends LimitedNodeList {
     #_ignoredNode = new SignalEmitter();
 
     // Context objects.
+    #_accountManager;
     #_addressManager;
 
 
@@ -98,15 +99,18 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        const accountManager = ContextManager.get(contextID, AccountManager) as AccountManager;
+        this.#_accountManager = ContextManager.get(contextID, AccountManager) as AccountManager;
+
+        // Assume that we may need to send a new DS check in anytime a new keypair is generated.
+        this.#_accountManager.newKeypair.connect(this.sendDomainServerCheckIn);
 
         // Clear out NodeList when login is finished and we know our new username.
-        accountManager.usernameChanged.connect(() => {
-            this.reset("Username change");
+        this.#_accountManager.usernameChanged.connect(() => {
+            this.reset("Username changed");
         });
 
         // Clear our NodeList when logout is requested.
-        accountManager.logoutComplete.connect(() => {
+        this.#_accountManager.logoutComplete.connect(() => {
             this.reset("Logged out");
         });
 
@@ -522,6 +526,7 @@ class NodeList extends LimitedNodeList {
 
         const nodeTypesOfInterest = this.#_nodeTypesOfInterest;
         const placeName = this.#_addressManager.getPlaceName();
+
         let username = undefined;
         let usernameSignature = undefined;
         const domainUsername = undefined;

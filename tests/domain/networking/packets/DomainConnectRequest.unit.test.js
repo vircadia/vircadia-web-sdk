@@ -22,12 +22,15 @@ import PacketType, { protocolVersionsSignature } from "../../../../src/domain/ne
 import ContextManager from "../../../../src/domain/shared/ContextManager";
 import Uuid from "../../../../src/domain/shared/Uuid";
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 
 describe("DomainConnectRequest - unit tests", () => {
 
     // Context is required for LimitedNodeList.
     const contextID = ContextManager.createContext();
-    ContextManager.set(contextID, AccountManager);
+    ContextManager.set(contextID, AccountManager, contextID);
     ContextManager.set(contextID, AddressManager);
     ContextManager.set(contextID, NodeList, contextID);
 

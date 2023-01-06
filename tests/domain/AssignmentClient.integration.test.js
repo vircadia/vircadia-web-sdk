@@ -13,9 +13,12 @@ import DomainServer from "../../src/DomainServer";
 import AssignmentClient from "../../src/domain/AssignmentClient";
 import NodeType from "../../src/domain/networking/NodeType";
 
-import TestConfig from "../test.config.js";
-
 import "wrtc";  // WebRTC Node.js package.
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
+import TestConfig from "../test.config.js";
 
 
 // Time needs to be allowed for the WebRTC RTCPeerConnection from one test to be closed before creating a new one in the

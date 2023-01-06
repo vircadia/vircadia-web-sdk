@@ -38,7 +38,7 @@ class OAuthAccessToken {
         // C++  OAuthAccessToken(const QJsonObject& jsonObject)
         this.#_token = jsonObject.access_token ?? "";
         this.#_refreshToken = jsonObject.refresh_token ?? "";
-        this.#_expiryTimestamp = jsonObject.expires_in ?? -1;
+        this.#_expiryTimestamp = jsonObject.expires_in ? Date.now() + jsonObject.expires_in : -1;
         this.#_tokenType = jsonObject.token_type ?? "";
     }
 
@@ -57,6 +57,26 @@ class OAuthAccessToken {
     get tokenType(): string {
         return this.#_tokenType;
     }
+
+
+    /*@devdoc
+     *  Gets whether the token, if it has an expiry, has expired.
+     *  @returns {boolean} <code>true<code> if the token has an expiry and it has expired, <code>false</code> if not.
+     */
+    isExpired(): boolean {
+        // C++  bool isExpired() const
+        return this.#_expiryTimestamp !== -1 && this.#_expiryTimestamp <= Date.now();
+    }
+
+    /*@devdoc
+     *  Gets the authorization header value - <code>"Bearer "</code> followed by the token.
+     *  @returns {string} The authorization header value.
+     */
+    authorizationHeaderValue(): string {
+        // C++  QByteArray authorizationHeaderValue() const
+        return "Bearer " + this.#_token;
+    }
+
 
 }
 

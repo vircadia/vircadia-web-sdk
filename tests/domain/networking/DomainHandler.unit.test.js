@@ -18,6 +18,9 @@ import SignalEmitter from "../../../src/domain/shared/SignalEmitter";
 import Url from "../../../src/domain/shared/Url";
 import Uuid from "../../../src/domain/shared/Uuid";
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import TestConfig from "../../test.config.js";
 
 
@@ -30,7 +33,7 @@ describe("DomainHandler - integration tests", () => {
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
     const contextID = ContextManager.createContext();
-    ContextManager.set(contextID, AccountManager);  // Required by NodeList.
+    ContextManager.set(contextID, AccountManager, contextID);  // Required by NodeList.
     ContextManager.set(contextID, AddressManager);  // Required by NodeList.
     ContextManager.set(contextID, NodeList, contextID);
     const domainHandler = ContextManager.get(contextID, NodeList).getDomainHandler();

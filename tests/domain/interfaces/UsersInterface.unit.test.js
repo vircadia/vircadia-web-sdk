@@ -9,14 +9,20 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* eslint-disable @typescript-eslint/no-magic-numbers */
+import AccountManagerMock from "../../../mocks/domain/networking/AccountManager.mock.js";
+AccountManagerMock.mock();
 
 import UsersInterface from "../../../src/domain/interfaces/UsersInterface";
 import Uuid from "../../../src/domain/shared/Uuid";
 import DomainServer from "../../../src/DomainServer";
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 
 describe("UsersInterface - unit tests", () => {
+
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
 
     test("Can access the users interface", () => {
         const domainServer = new DomainServer();
