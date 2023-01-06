@@ -47,6 +47,25 @@ class Uuid extends BigInt {
     static readonly AVATAR_SELF_ID = BigInt(1);
 
 
+    /*@sdkdoc
+     *  Creates a new UUID.
+     *  <p><em>Static</em></p>
+     *  @function Uuid(1).createUuid
+     *  @static
+     *  @returns {Uuid} A new UUID.
+     */
+    static createUuid(): Uuid {
+        const uuid = crypto.randomUUID() as string;  // eslint-disable-line @typescript-eslint/no-unsafe-call
+        const chars = uuid.replaceAll("-", "");
+        let value = 0n;
+        for (let i = 0, length = chars.length; i < length; i += 2) {
+            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+            value = value * 256n + BigInt(parseInt(chars.slice(i, i + 2), 16));
+        }
+        return new Uuid(value);
+    }
+
+
     constructor(value: bigint = 0) {
         // C++  QUuid()
 
@@ -74,7 +93,7 @@ class Uuid extends BigInt {
     }
 
     /*@sdkdoc
-     *  Gets the UUID value formatted as a hexadecimal string with <code>-</code> separators.
+     *  Gets the UUID value formatted as a hexadecimal string with <code>-</code> separators but without curly braces.
      *  @function Uuid(1).stringify
      *  @returns {string} The UUID value formatted as <code>nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn</code>.
      */
