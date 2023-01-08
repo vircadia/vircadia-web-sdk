@@ -27,6 +27,38 @@ describe("Uuid - unit tests", () => {
         expect(url.toString()).toBe("");
     });
 
+    test("Can create a URL from another", () => {
+        // Empty URL.
+        let urlA = new Url();
+        expect(urlA.isEmpty()).toBe(true);
+        expect(urlA.isValid()).toBe(false);
+        let urlB = new Url(urlA);
+        expect(urlB.isEmpty()).toBe(true);
+        expect(urlB.isValid()).toBe(false);
+
+        // Invalid URL.
+        const INVALID_URL = "abc";
+        urlA = new Url(INVALID_URL);
+        expect(urlA.isValid()).toBe(false);
+        expect(urlA.isEmpty()).toBe(false);
+        expect(urlA.toString()).toBe(INVALID_URL);
+        urlB = new Url(urlA);
+        expect(urlB.isValid()).toBe(false);
+        expect(urlB.isEmpty()).toBe(false);
+        expect(urlB.toString()).toBe(INVALID_URL);
+
+        // Valid URL.
+        const VALID_URL = "xyz://a.b.com:123/upath/vpath";
+        urlA = new Url(VALID_URL);
+        expect(urlA.isValid()).toBe(true);
+        expect(urlA.isEmpty()).toBe(false);
+        expect(urlA.toString()).toBe(VALID_URL);
+        urlB = new Url(urlA);
+        expect(urlB.isValid()).toBe(true);
+        expect(urlB.isEmpty()).toBe(false);
+        expect(urlB.toString()).toBe(VALID_URL);
+    });
+
     test("Can get the string representation of the URL", () => {
         const VALID_URL = "xyz://a.b.com:123/upath/vpath";
         const validURL = new Url(VALID_URL);

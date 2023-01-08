@@ -13,7 +13,7 @@
  *  The <code>Url</code> class provides a Qt-style URL facility.
  *  <p>C++: <code>QUrl</code></p>
  *  @class Url
- *  @param {string} [url] - A string representation of a URL.
+ *  @param {string|Url} [url] - A string representation of a URL or another <code>Url</code>.
  */
 class Url {
     // C++  Qt's QUrl class.
@@ -22,11 +22,15 @@ class Url {
     #_url: URL | null;  // The JavaScript URL value if the raw value is a valid URL.
 
 
-    constructor(url?: string) {
-        this.#_raw = url ?? null;
-        if (url !== undefined) {
+    constructor(url?: Url | string) {
+        if (url instanceof Url) {
+            this.#_raw = !url.isEmpty() ? url.toString() : null;
+        } else {
+            this.#_raw = url ?? null;
+        }
+        if (this.#_raw !== null) {
             try {
-                this.#_url = new URL(url);
+                this.#_url = new URL(this.#_raw);
             } catch (e) {
                 this.#_url = null;
             }
