@@ -60,8 +60,10 @@
     "wrtc": "^0.4.7"
   },
   "dependencies": {
+    "axios": "^1.2.2",
     "core-js": "^3.19.1",
     "crypto-js": "^4.1.1",
+    "form-data": "^4.0.0",
     "pako": "^2.0.4",
     "regenerator-runtime": "^0.13.7"
   },

@@ -43,4 +43,20 @@ describe("MetaverseAPI - unit tests", () => {
         expect(metaverseAPI.getCurrentMetaverseServerURLPath(true)).toBe("/somewhere/else/");
     });
 
+    test("The metaverse server URL returned by \"get\" is a copy", () => {
+        const metaverseAPI = new MetaverseAPI();
+        const SOME_URL_STRING = "https://something.com/somewhere";
+        const SOME_URL = new Url(SOME_URL_STRING);
+        metaverseAPI.setBaseUrl(SOME_URL);
+
+        let metaverseServerURL = metaverseAPI.getCurrentMetaverseServerURL();
+        expect(metaverseServerURL.toString()).toBe(SOME_URL_STRING);
+
+        metaverseServerURL.setPath("/nowhere");
+        expect(metaverseServerURL.toString()).toBe(SOME_URL_STRING.replace("somewhere", "nowhere"));
+
+        metaverseServerURL = metaverseAPI.getCurrentMetaverseServerURL();
+        expect(metaverseServerURL.toString()).toBe(SOME_URL_STRING);
+    });
+
 });

@@ -61,7 +61,7 @@ class MetaverseAPI {
      *  @returns {Url} The metaverse server URL.
      */
     getCurrentMetaverseServerURL(): Url {
-        return this.getBaseUrl();
+        return new Url(this.getBaseUrl());
     }
 
     /*@devdoc
