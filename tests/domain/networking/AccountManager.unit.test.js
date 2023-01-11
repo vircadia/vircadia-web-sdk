@@ -51,6 +51,19 @@ describe("AccountManager - unit tests", () => {
         expect(accountManager.getAuthURL().toString()).toBe("https://abc.def/ghi");
     });
 
+    test("The authURL returned is a copy", () => {
+        const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AccountManager, contextID);
+        const accountManager = ContextManager.get(contextID, AccountManager);
+        accountManager.setAuthURL(new Url("https://abc.def/ghi"));
+        const authURL1 = accountManager.getAuthURL();
+        const authURL2 = accountManager.getAuthURL();
+        expect(authURL1.toString()).toBe(authURL2.toString());
+        expect(authURL1).not.toBe(authURL2);
+        authURL1.setPath("/jkl");
+        expect(authURL1.toString()).not.toBe(authURL2.toString());
+    });
+
     test("Can update the authURL from the metaverse server", () => {
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, AccountManager, contextID);
@@ -146,6 +159,11 @@ describe("AccountManager - unit tests", () => {
         const accountManager = ContextManager.get(contextID, AccountManager);
         /* eslint-disable camelcase */
 
+        let errorMessage = "";
+        const error = jest.spyOn(console, "error").mockImplementation((...message) => {
+            errorMessage = message.join(" ");
+        });
+
         // Invalid if there is no access token.
         expect(accountManager.hasValidAccessToken()).toBe(false);
 
@@ -166,6 +184,9 @@ describe("AccountManager - unit tests", () => {
             refresh_token: "ijkl"
         });
         expect(accountManager.hasValidAccessToken()).toBe(true);
+
+        expect(errorMessage).toBe("[networking] AccountManager.refreshAccessToken() not implemented!");
+        error.mockReset();
 
         /* eslint-enable camelcase */
     });
@@ -219,9 +240,7 @@ describe("AccountManager - unit tests", () => {
         ContextManager.set(contextID, AccountManager, contextID);
         const accountManager = ContextManager.get(contextID, AccountManager);
         expect(accountManager.hasKeyPair()).toBe(false);
-
-        console.warn("Test not fully implemented");
-
+        // True case only occurs after public key has been successfully uploaded to the metaverse server.
     });
 
     test("The temporary domain key is \"\"", () => {
@@ -249,6 +268,19 @@ describe("AccountManager - unit tests", () => {
         expect(accountManager.getMetaverseServerURLPath(true)).toBe("/live/");
     });
 
+    test("The metaverse server URL returned is a copy", () => {
+        const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AccountManager, contextID);
+        ContextManager.set(contextID, MetaverseAPI);
+        const accountManager = ContextManager.get(contextID, AccountManager);
+        const metaverseServerURL1 = accountManager.getMetaverseServerURL();
+        const metaverseServerURL2 = accountManager.getMetaverseServerURL();
+        expect(metaverseServerURL1.toString()).toBe(metaverseServerURL2.toString());
+        expect(metaverseServerURL1).not.toBe(metaverseServerURL2);
+        metaverseServerURL1.setPath("/a/b/c");
+        expect(metaverseServerURL1.toString()).not.toBe(metaverseServerURL2.toString());
+    });
+
     test("Can create a request", () => {
         /* eslint-disable @typescript-eslint/no-unsafe-assignment */
         const contextID = ContextManager.createContext();
@@ -256,8 +288,8 @@ describe("AccountManager - unit tests", () => {
         ContextManager.set(contextID, MetaverseAPI);
         const accountManager = ContextManager.get(contextID, AccountManager);
         const request = accountManager.createRequest("/api/v1/user/heartbeat", AccountManagerAuth.Optional);
-        expect(request.headers["HFM-SessionID"]).toBe(accountManager.getSessionID().stringify());
-        expect(request.url).toBe("https://metaverse.vircadia.com/live/api/v1/user/heartbeat");
+        expect(request.rawHeaders().get("HFM-SessionID")).toBe(accountManager.getSessionID().stringify());
+        expect(request.url().toString()).toBe("https://metaverse.vircadia.com/live/api/v1/user/heartbeat");
         /* eslint-enable @typescript-eslint/no-unsafe-assignment */
     });
 

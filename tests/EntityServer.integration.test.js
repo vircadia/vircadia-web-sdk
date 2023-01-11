@@ -48,6 +48,11 @@ describe("EntityServer - integration tests", () => {
     // Suppress console.log messages from being displayed.
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
     const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
+    const error = jest.spyOn(console, "error").mockImplementation((...message) => {
+        const errorMessage = message.join(" ");
+        // eslint-disable-next-line
+        expect(errorMessage).toBe("[networking] Public key upload to metaverse failed: https://metaverse.vircadia.com/live/api/v1/user/public_key Not authenticated");
+    });
 
 
     test("States when connect to and disconnect from a domain", (done) => {
@@ -75,6 +80,7 @@ describe("EntityServer - integration tests", () => {
     });
 
 
+    error.mockReset();
     warn.mockReset();
     log.mockReset();
 });
