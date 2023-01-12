@@ -449,7 +449,9 @@ class NodeList extends LimitedNodeList {
     override reset = (reason: string, skipDomainHandlerReset = false): void => {
         // C++  void reset(QString reason, bool skipDomainHandlerReset = false);
 
-        super.reset(reason);
+        // C++ calls super.reset() here but the Web SDK defers this call to below so that a DomainDisconnectRequest can be sent
+        // by DomainHandler.softReset() before super.reset() clears all connections.
+        // super.reset(reason);
 
         this.#_ignoredNodeIDs.clear();
         this.#_personalMutedNodeIDs.clear();
@@ -458,6 +460,8 @@ class NodeList extends LimitedNodeList {
         if (!skipDomainHandlerReset) {
             this.#_domainHandler.softReset(reason);
         }
+
+        super.reset(reason);
 
         // WEBRTC TODO: Address further C++ code.
 
