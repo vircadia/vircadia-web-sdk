@@ -13,14 +13,14 @@ import assert from "../../shared/assert";
 
 
 /*@devdoc
- *  {@link PacketType(1)|Packet types}, <code>Unknown</code>, <code>StunResponse</code>, <code>...</code>, are represented as
- *  unsigned 8-bit numbers in the protocol packets.
+ *  {@link PacketType(1)|Packet types}, <code>Unknown</code>, <code>DomainConnectRequestPending</code>, <code>...</code>, are
+ *  represented as unsigned 8-bit numbers in the protocol packets.
  *  @typedef {number} PacketType
  */
 // Could just define `type PacketTypeValue = number` however using an object improves type safety.
 const enum PacketTypeValue {
     Unknown,                            // 0
-    StunResponse,
+    DomainConnectRequestPending,
     DomainList,
     Ping,
     PingReply,
@@ -139,7 +139,11 @@ const enum PacketTypeValue {
  *  @namespace PacketType
  *  @variation 1
  *  @property {PacketType} Unknown - <code>0</code>
- *  @property {PacketType} StunResponse - <code>1</code>
+ *  @property {PacketType} DomainConnectRequestPending - <code>1</code> - The user client may send this to the Domain Server
+ *      as a synonym for sending a <code>DomainConnectRequest</code> packet. This is provided as packet <code>1</code> for a
+ *      future version of the protocol so that protocol breaks can be better handled.<br />
+ *      The Domain Server responds with a DomainList or DomainConnectionDenied packet.<br />
+ *      {@link PacketScribe.DomainConnectRequestDetails}
  *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to the user client in response to a
  *      DomainConnectRequest or DomainListRequest packet, if the client is authorized to connect to the domain.<br />
  *      {@link PacketScribe.DomainListDetails}
@@ -339,7 +343,7 @@ const PacketType = new class {
 
     // Property values are manually added because doing so provides additional type safety compared to adding at runtime.
     readonly Unknown = PacketTypeValue.Unknown;
-    readonly StunResponse = PacketTypeValue.StunResponse;
+    readonly DomainConnectRequestPending = PacketTypeValue.DomainConnectRequestPending;
     readonly DomainList = PacketTypeValue.DomainList;
     readonly Ping = PacketTypeValue.Ping;
     readonly PingReply = PacketTypeValue.PingReply;
@@ -461,7 +465,7 @@ const PacketType = new class {
 
     // Packets that don't include the local node ID of the sending node.
     readonly #_nonSourcedPackets = new Set([
-        PacketTypeValue.StunResponse,
+        PacketTypeValue.DomainConnectRequestPending,
         PacketTypeValue.CreateAssignment,
         PacketTypeValue.RequestAssignment,
         PacketTypeValue.DomainServerRequireDTLS,
@@ -602,6 +606,8 @@ const PacketType = new class {
         // C++  PacketVersion versionForPacketType(PacketType packetType)
         const DEFAULT_VERSION = 22;
         switch (packetType) {
+            case this.DomainConnectRequestPending:
+                return DEFAULT_VERSION;
             case this.DomainList:
                 return this.#_DomainListVersion.SocketTypes;
             case this.Ping:
