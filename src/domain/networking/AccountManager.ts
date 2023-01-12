@@ -442,16 +442,15 @@ class AccountManager {
         void this.#generateNewKeypair();
     }
 
-
     /*@devdoc
-     *  Gets the user's session ID on the domain.
-     *  @returns {Uuid} The user's session ID on the domain.
+     *  Gets the user's metaverse server session ID.
+     *  <p>Note: The metaverse server session ID is not currently used.</p>
+     *  @returns {Uuid} The user's metaverse server session ID.
      */
     getSessionID(): Uuid {
         // C++  QUuid getSessionID() const
         return this.#_sessionID;
     }
-
 
     /*@devdoc
      *  Gets the metaverse server URL.
