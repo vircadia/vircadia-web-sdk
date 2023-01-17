@@ -10,7 +10,9 @@
 //
 
 import { OAuthJSON } from "../interfaces/AccountInterface";
+import "../shared/DataViewExtensions";
 import Uuid from "../shared/Uuid";
+import UDT from "./udt/UDT";
 import OAuthAccessToken from "./OAuthAccessToken";
 
 
@@ -25,7 +27,6 @@ class DataServerAccountInfo {
     #_username = "";
     #_accessToken = new OAuthAccessToken({});
     #_privateKey = new Uint8Array();
-
 
     #_domainID = new Uuid();
     #_temporaryDomainID = new Uuid();
@@ -73,6 +74,33 @@ class DataServerAccountInfo {
     }
 
     /*@devdoc
+     *  Gets the signature of the user name plus the connection token provided by the domain server.
+     *  @async
+     *  @param {Uuid} connectionToken - The connection token provided by the domain server.
+     *  @returns {Uint8Array} The signature of the user name plus the connection token.
+     */
+    async getUsernameSignature(connectionToken: Uuid): Promise<Uint8Array> {
+        // C++  QByteArray getUsernameSignature(const QUuid& connectionToken)
+
+        // plaintext = lowercaseUsername + connectionToken
+        const lowercaseUsername = new TextEncoder().encode(this.#_username.toLowerCase());
+        const plaintext = new Uint8Array(lowercaseUsername.length + Uuid.NUM_BYTES_RFC4122_UUID);
+        plaintext.set(lowercaseUsername);
+        new DataView(plaintext.buffer).setBigUint128(lowercaseUsername.length, connectionToken.value(), UDT.BIG_ENDIAN);
+
+        const signature = await this.signPlaintext(plaintext);
+        if (signature.length > 0) {
+            console.log("[networking] Returning username", this.#_username, "signed with connection UUID",
+                connectionToken.stringify());
+        } else {
+            console.log("[networking] Error signing username with connection token.",
+                "Will re-attempt on next domain-server check in.");
+        }
+
+        return signature;
+    }
+
+    /*@devdoc
      *  Gets the temporary key for a domain.
      *  @param {Uuid} domainID - The domain to get the temporary key for.
      */
@@ -117,6 +145,33 @@ class DataServerAccountInfo {
     setPrivateKey(privateKey: Uint8Array): void {
         // C++  void setPrivateKey(const QByteArray& privateKey)
         this.#_privateKey = privateKey;
+    }
+
+    /*@devdoc
+     *  Signs a plain text item with the private key.
+     *  @async
+     *  @param {Uint8Array} plaintext - The plain text item to sign.
+     *  @returns {Uint8Array} The signature of the plain text signed with the private key.
+     */
+    async signPlaintext(plaintext: Uint8Array): Promise<Uint8Array> {
+        // C++  QByteArray signPlaintext(const QByteArray& plaintext)
+        if (this.#_privateKey.length > 0) {
+            const cryptoKey = await crypto.subtle.importKey(
+                "pkcs8",
+                this.#_privateKey,
+                {
+                    name: "RSASSA-PKCS1-v1_5",
+                    hash: "SHA-256"
+                },
+                false,
+                ["sign"]
+            );
+
+            // Unlike the C++, we don't hash the plaintext ourselves because crypto.suble.sign() hashes it for us.
+            const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", cryptoKey, plaintext);
+            return new Uint8Array(signature);
+        }
+        return new Uint8Array();
     }
 
 }
