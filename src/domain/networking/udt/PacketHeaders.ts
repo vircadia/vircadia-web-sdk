@@ -241,7 +241,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} EntityAdd - <code>43</code>
  *  @property {PacketType} EntityErase - <code>44</code>
  *  @property {PacketType} EntityEdit - <code>45</code>
- *  @property {PacketType} DomainServerConnectionToken - <code>46</code>
+ *  @property {PacketType} DomainServerConnectionToken - <code>46</code> - The Domain Server sends this to the client when the
+ *      client tries to log into the domain.<br />
+ *      {@link PacketScribe.DomainServerConnectionTokenDetails}
  *  @property {PacketType} DomainSettingsRequest - <code>47</code>
  *  @property {PacketType} DomainSettings - <code>48</code>
  *  @property {PacketType} AssetGet - <code>49</code>
@@ -648,13 +650,15 @@ const PacketType = new class {
                 return 18;  // eslint-disable-line @typescript-eslint/no-magic-numbers
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
+            case this.AudioEnvironment:
+                return DEFAULT_VERSION;
             case this.EntityData:
                 return this.#_EntityVersion.LAST_PACKET_TYPE;
             case this.EntityQuery:
                 return this.#_EntityQueryPacketVersion.ConicalFrustums;
             case this.EntityErase:
                 return DEFAULT_VERSION;
-            case this.AudioEnvironment:
+            case this.DomainServerConnectionToken:
                 return DEFAULT_VERSION;
             case this.DomainDisconnectRequest:
                 return DEFAULT_VERSION;

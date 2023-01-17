@@ -53,6 +53,12 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.NodeIgnoreRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainConnectRequest).toBe("object");
         expect(typeof PacketScribe.DomainConnectRequest.write).toBe("function");
+        expect(typeof PacketScribe.EntityData).toBe("object");
+        expect(typeof PacketScribe.EntityData.read).toBe("function");
+        expect(typeof PacketScribe.EntityQuery).toBe("object");
+        expect(typeof PacketScribe.EntityQuery.write).toBe("function");
+        expect(typeof PacketScribe.DomainServerConnectionToken).toBe("object");
+        expect(typeof PacketScribe.DomainServerConnectionToken.read).toBe("function");
         expect(typeof PacketScribe.DomainDisconnectRequest).toBe("object");
         expect(typeof PacketScribe.DomainDisconnectRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainServerRemovedNode).toBe("object");
