@@ -22,17 +22,17 @@
  *
  *  @class Uuid
  *  @variation 1
- *  @param {bigint} [value=0] - The UUID value. If not specified, a UUID with value of <code>Uuid.NULL</code> is created.
+ *  @param {bigint|string} [value=0] - The UUID value. If not specified, a UUID with value of <code>Uuid.NULL</code> is created.
  *
  *  @property {number} NUM_BYTES_RFC4122_UUID=16 - The number of bytes in a UUID when represented in RFC4122 format.
  *      <em>Read-only.</em>
  *      <p><em>Static</em></p>
  *      @static
- *  @property {Uuid} NULL=0 - The null UUID, <code>{00000000-0000-0000-0000-000000000000}</code>.
+ *  @property {Uuid} NULL=0 - The null UUID, <code>00000000-0000-0000-0000-000000000000</code>.
  *      <em>Read-only.</em>
  *      <p><em>Static</em></p>
  *      @static
- *  @property {Uuid} AVATAR_SELF_ID=1 - The null UUID, <code>{00000000-0000-0000-0000-000000000001}</code>.
+ *  @property {Uuid} AVATAR_SELF_ID=1 - The null UUID, <code>00000000-0000-0000-0000-000000000001</code>.
  *      <em>Read-only.</em>
  *      <p><em>Static</em></p>
  *      @static
@@ -66,11 +66,16 @@ class Uuid extends BigInt {
     }
 
 
-    constructor(value: bigint = 0) {
+    constructor(value: bigint | string = 0) {
         // C++  QUuid()
 
+        let bigintValue = value;
+        if (typeof bigintValue === "string") {
+            bigintValue = "0x" + bigintValue.replaceAll("-", "");
+        }
+
         // Work around BigInt not working with the "new" operator.
-        const obj = <BigInt>Object(BigInt(value));
+        const obj = <BigInt>Object(BigInt(bigintValue));
         Object.setPrototypeOf(obj, new.target.prototype);
         return obj;  // eslint-disable-line no-constructor-return
     }

@@ -29,9 +29,14 @@ describe("Uuid - unit tests", () => {
     });
 
     test("Can initialize with a specified value", () => {
-        // eslint-disable-next-line newline-per-chained-call
+        /* eslint-disable newline-per-chained-call */
         expect(new Uuid(217897985291723272451165858623432009288n).valueOf().toString(16))
             .toBe("a3eda01ec4de456dbf07858a26c5a648");
+        expect(new Uuid("a3eda01ec4de456dbf07858a26c5a648").valueOf().toString(16))
+            .toBe("a3eda01ec4de456dbf07858a26c5a648");
+        expect(new Uuid("a3eda01e-c4de-456d-bf07-858a26c5a648").valueOf().toString(16))
+            .toBe("a3eda01ec4de456dbf07858a26c5a648");
+        /* eslint-enable newline-per-chained-call */
     });
 
     test("Can get the underlying bigint primitive value", () => {
