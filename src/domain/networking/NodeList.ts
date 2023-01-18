@@ -102,7 +102,9 @@ class NodeList extends LimitedNodeList {
         this.#_accountManager = ContextManager.get(contextID, AccountManager) as AccountManager;
 
         // Assume that we may need to send a new DS check in anytime a new keypair is generated.
-        this.#_accountManager.newKeypair.connect(this.sendDomainServerCheckIn);
+        this.#_accountManager.newKeypair.connect(() => {
+            void this.sendDomainServerCheckIn();
+        });
 
         // Clear out NodeList when login is finished and we know our new username.
         this.#_accountManager.usernameChanged.connect(() => {
@@ -374,7 +376,7 @@ class NodeList extends LimitedNodeList {
         this.#_domainHandler.setConnectionToken(info.connectionToken);
 
         this.#_domainHandler.clearPendingCheckins();
-        this.sendDomainServerCheckIn();
+        void this.sendDomainServerCheckIn();
     };
 
     /*@devdoc
@@ -502,7 +504,7 @@ class NodeList extends LimitedNodeList {
      *  @function NodeList.sendDomainServerCheckIn
      *  @type {Slot}
      */
-    sendDomainServerCheckIn = (): void => {
+    sendDomainServerCheckIn = async (): Promise<void> => {
         // C++  void sendDomainServerCheckIn()
 
         // C++ _sendDomainServerCheckInEnabled code is N/A because it's relevant only to Android.
@@ -543,7 +545,15 @@ class NodeList extends LimitedNodeList {
 
         }
 
-        // WEBRTC TODO: Address further C++ code - user name signature.
+        const connectionToken = this.#_domainHandler.getConnectionToken();
+        const requiresUsernameSignature = !isDomainConnected && connectionToken.value() !== Uuid.NULL;
+        if (requiresUsernameSignature && !this.#_accountManager.getAccountInfo().hasPrivateKey()) {
+            console.log("[networking] A keypair is required to present a username signature to the domain-server",
+                "but no keypair is present. Waiting for keypair generation to complete.");
+            this.#_accountManager.generateNewUserKeypair();
+            // Don't send the check in packet - wait for the new public key to be available to the domain server first.
+            return;
+        }
 
         // Data common to DomainConnectRequest and DomainListRequest.
         const currentTime = BigInt(Date.now().valueOf());
@@ -562,6 +572,15 @@ class NodeList extends LimitedNodeList {
             username = "";
             usernameSignature = new Uint8Array(new ArrayBuffer(0));
 
+            // Metaverse account.
+            const accountInfo = this.#_accountManager.getAccountInfo();
+            username = accountInfo.getUsername();
+            // If this is a connect request, and we can present a username signature, send it along.
+            if (requiresUsernameSignature && accountInfo.hasPrivateKey()) {
+                usernameSignature = await accountInfo.getUsernameSignature(connectionToken);
+            }
+
+            // Domain account.
             // WEBRTC TODO: Address further C++ code.
 
         }

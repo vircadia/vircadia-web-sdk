@@ -399,7 +399,7 @@ class DomainServer {
         }, DomainServer.#DOMAIN_SERVER_CHECK_IN_MSECS);
 
         // Perform this send.
-        this.#_nodeList.sendDomainServerCheckIn();
+        void this.#_nodeList.sendDomainServerCheckIn();
     }
 
     #stopDomainServerCheckins(): void {

@@ -96,6 +96,15 @@ describe("AccountManager - unit tests", () => {
         accountManager.setUsername("newusername");
     });
 
+    test("Can get the user's account info", () => {
+        const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AccountManager, contextID);
+        const accountManager = ContextManager.get(contextID, AccountManager);
+        accountManager.setUsername("someusername");
+        const accountInfo = accountManager.getAccountInfo();
+        expect(accountInfo.getUsername()).toBe("someusername");
+    });
+
     test("Can set an access token", (done) => {
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, AccountManager, contextID);

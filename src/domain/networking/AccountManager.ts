@@ -318,6 +318,14 @@ class AccountManager {
     }
 
     /*@devdoc
+     *  Gets the user's account info.
+     *  @returns {DataServerAccountInfo} The user's account info.
+     */
+    getAccountInfo(): DataServerAccountInfo {
+        return this.#_accountInfo;
+    }
+
+    /*@devdoc
      *  Sets the access token from a JSON object.
      *  @param {OAuthJSON} json - The JSON object containing the access token details.
      */
