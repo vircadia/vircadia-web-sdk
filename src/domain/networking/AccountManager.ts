@@ -671,7 +671,6 @@ class AccountManager {
                 if (keyPair.publicKey !== undefined && keyPair.privateKey !== undefined) {
                     let publicKey = new Uint8Array(await crypto.subtle.exportKey("spki", keyPair.publicKey));
                     publicKey = AccountManager.#extractBitString(publicKey);
-
                     const privateKey = new Uint8Array(await crypto.subtle.exportKey("pkcs8", keyPair.privateKey));
                     this.#processGeneratedKeypair(publicKey, privateKey);
                 } else {

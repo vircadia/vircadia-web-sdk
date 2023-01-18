@@ -90,7 +90,7 @@ describe("AccountManager - unit tests", () => {
             expect(accountManager.getUsername()).toBe("newusername");
             expect(log).toHaveBeenCalledTimes(1);
             expect(logMessage).toBe("[networking] Username changed to newusername");
-            log.mockReset();
+            log.mockRestore();
             done();
         });
         accountManager.setUsername("newusername");
@@ -100,7 +100,13 @@ describe("AccountManager - unit tests", () => {
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, AccountManager, contextID);
         const accountManager = ContextManager.get(contextID, AccountManager);
+        let logMessage = "";
+        const log = jest.spyOn(console, "log").mockImplementation((...message) => {
+            logMessage = message.join(" ");
+        });
         accountManager.setUsername("someusername");
+        expect(logMessage).toBe("[networking] Username changed to someusername");
+        log.mockRestore();
         const accountInfo = accountManager.getAccountInfo();
         expect(accountInfo.getUsername()).toBe("someusername");
     });
@@ -195,7 +201,7 @@ describe("AccountManager - unit tests", () => {
         expect(accountManager.hasValidAccessToken()).toBe(true);
 
         expect(errorMessage).toBe("[networking] AccountManager.refreshAccessToken() not implemented!");
-        error.mockReset();
+        error.mockRestore();
 
         /* eslint-enable camelcase */
     });
