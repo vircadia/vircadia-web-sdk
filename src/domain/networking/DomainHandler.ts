@@ -98,7 +98,8 @@ class DomainHandler {
     #_sockAddr = new SockAddr();  // For WebRTC, the port is the critical part.
     #_isConnected = false;
     #_localID = 0;
-    #_uuid = new Uuid(Uuid.NULL);
+    #_uuid = new Uuid();
+    #_connectionToken = new Uuid();
 
     #_errorDomainURL = new Url();
     #_domainConnectionRefusals: Set<string> = new Set();
@@ -210,6 +211,24 @@ class DomainHandler {
     isConnected(): boolean {
         // C++  bool isConnected()
         return this.#_isConnected;
+    }
+
+    /*@devdoc
+     *  Gets the token for the domain connection.
+     *  @returns {Uuid} The domain connection token.
+     */
+    getConnectionToken(): Uuid {
+        // C++  const QUuid& getConnectionToken() const
+        return this.#_connectionToken;
+    }
+
+    /*@devdoc
+     *  Sets the token for the domain connection.
+     *  @param {Uuid} connectionToken - The domain connection token.
+     */
+    setConnectionToken(connectionToken: Uuid): void {
+        // C++  void setConnectionToken(const QUuid& connectionToken)
+        this.#_connectionToken = connectionToken;
     }
 
     /*@devdoc

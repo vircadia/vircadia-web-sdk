@@ -20,6 +20,12 @@ import SockAddr from "../../../src/domain/networking/SockAddr";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Uuid from "../../../src/domain/shared/Uuid";
 
+import NLPacket from "../../../src/domain/networking/NLPacket";
+import Packet from "../../../src/domain/networking/udt/Packet";
+import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
+import ReceivedMessage from "../../../src/domain/networking/ReceivedMessage";
+
+
 import { webcrypto } from "crypto";
 globalThis.crypto = webcrypto;
 
@@ -135,8 +141,8 @@ describe("NodeList - integration tests", () => {
         expect(warn).toHaveBeenCalledTimes(3);  // Audio mixer not found.
         expect(error).toHaveBeenCalledTimes(0);
 
-        warn.mockReset();
-        error.mockReset();
+        warn.mockRestore();
+        error.mockRestore();
     });
 
     test("Can ignore and un-ignore a user", (done) => {
@@ -217,5 +223,38 @@ describe("NodeList - integration tests", () => {
         expect(nodeList.getRequestsDomainListData()).toBe(false);
     });
 
-    log.mockReset();
+    test("Can process a DomainServerConnectionToken packet", () => {
+        const PACKET_HEX = "010000002e16cc4032f528fb46d8b2c7443664e27abf";
+        const arrayBuffer = new ArrayBuffer(PACKET_HEX.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(PACKET_HEX.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer);
+        const sockAddr = new SockAddr();
+        sockAddr.setPort(7);
+        const packet = new Packet(dataView, dataView.byteLength, sockAddr);
+        const nlPacket = new NLPacket(packet);
+        expect(nlPacket.getType()).toBe(PacketType.DomainServerConnectionToken);
+        const receivedMessage = new ReceivedMessage(nlPacket);
+
+        const domainHandler = nodeList.getDomainHandler();  // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+        expect(domainHandler.getConnectionToken().value()).toBe(Uuid.NULL);
+        expect(domainHandler.getSockAddr().isNull()).toBe(true);
+
+        // No action when SockAddr is null.
+        nodeList.processDomainServerConnectionTokenPacket(receivedMessage);
+        expect(domainHandler.getConnectionToken().value()).toBe(Uuid.NULL);
+
+        // Action when SockAddr has been set.
+        domainHandler.setPort(7);
+        expect(domainHandler.getSockAddr().isNull()).toBe(false);
+        nodeList.processDomainServerConnectionTokenPacket(receivedMessage);
+        expect(domainHandler.getConnectionToken().stringify()).toBe("cc4032f5-28fb-46d8-b2c7-443664e27abf");
+    });
+
+    afterAll(() => {
+        log.mockRestore();
+    });
+
 });

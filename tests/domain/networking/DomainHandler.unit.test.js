@@ -152,5 +152,12 @@ describe("DomainHandler - integration tests", () => {
         expect(domainHandler.checkInPacketTimeout()).toBe(true);
     });
 
+    test("Can set and get the connection token", () => {
+        expect(domainHandler.getConnectionToken().value()).toBe(Uuid.NULL);
+        const connectionToken = Uuid.createUuid();
+        domainHandler.setConnectionToken(connectionToken);
+        expect(domainHandler.getConnectionToken().value()).toBe(connectionToken.value());
+    });
+
     log.mockReset();
 });

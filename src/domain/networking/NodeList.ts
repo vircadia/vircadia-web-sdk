@@ -144,6 +144,8 @@ class NodeList extends LimitedNodeList {
 
         this._packetReceiver.registerListener(PacketType.DomainServerAddedNode,
             PacketReceiver.makeUnsourcedListenerReference(this.processDomainServerAddedNode));
+        this._packetReceiver.registerListener(PacketType.DomainServerConnectionToken,
+            PacketReceiver.makeUnsourcedListenerReference(this.processDomainServerConnectionTokenPacket));
         this._packetReceiver.registerListener(PacketType.DomainConnectionDenied,
             PacketReceiver.makeUnsourcedListenerReference(this.#_domainHandler.processDomainServerConnectionDeniedPacket));
 
@@ -352,6 +354,27 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|DomainServerConnectionToken} message received from the domain server.
+     *  @function NodeList.processDomainServerConnectionTokenPacket
+     *  @type {Listener}
+     *  @param {ReceivedMessage} message - The DomainServerConnectionToken message.
+     */
+    processDomainServerConnectionTokenPacket = (message: ReceivedMessage): void => {
+        // C++  void processDomainServerConnectionTokenPacket(ReceivedMessage* message)
+
+        // Don't process if not connected to the domain server.
+        if (this.#_domainHandler.getSockAddr().isNull()) {
+            return;
+        }
+
+        const info = PacketScribe.DomainServerConnectionToken.read(message.getMessage());
+        this.#_domainHandler.setConnectionToken(info.connectionToken);
+
+        this.#_domainHandler.clearPendingCheckins();
+        this.sendDomainServerCheckIn();
     };
 
     /*@devdoc
