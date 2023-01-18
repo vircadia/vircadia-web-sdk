@@ -93,6 +93,15 @@ class Uuid extends BigInt {
     }
 
     /*@sdkdoc
+     *  Gets whether the UUID value is null.
+     *  @function Uuid(1).isNull
+     *  @returns {boolean} <code>true</code> if the UUID values is <code>Uuid.NULL</code>, <code>false</code> if it isn't.
+     */
+    isNull(): boolean {
+        return this.value() === Uuid.NULL;
+    }
+
+    /*@sdkdoc
      *  Gets the UUID value formatted as a hexadecimal string with <code>-</code> separators but without curly braces.
      *  @function Uuid(1).stringify
      *  @returns {string} The UUID value formatted as <code>nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn</code>.

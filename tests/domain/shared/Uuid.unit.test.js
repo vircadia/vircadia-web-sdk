@@ -65,4 +65,15 @@ describe("Uuid - unit tests", () => {
         expect(uuidA.value()).not.toBe(uuidB.value());
     });
 
+    test("Can check whether a UUID value is null", () => {
+        let uuid = new Uuid();
+        expect(uuid.isNull()).toBe(true);
+        uuid = new Uuid(0n);
+        expect(uuid.isNull()).toBe(true);
+        uuid = new Uuid(1n);
+        expect(uuid.isNull()).toBe(false);
+        uuid = Uuid.createUuid();
+        expect(uuid.isNull()).toBe(false);
+    });
+
 });

@@ -546,7 +546,7 @@ class NodeList extends LimitedNodeList {
         }
 
         const connectionToken = this.#_domainHandler.getConnectionToken();
-        const requiresUsernameSignature = !isDomainConnected && connectionToken.value() !== Uuid.NULL;
+        const requiresUsernameSignature = !isDomainConnected && !connectionToken.isNull();
         if (requiresUsernameSignature && !this.#_accountManager.getAccountInfo().hasPrivateKey()) {
             console.log("[networking] A keypair is required to present a username signature to the domain-server",
                 "but no keypair is present. Waiting for keypair generation to complete.");
@@ -664,7 +664,7 @@ class NodeList extends LimitedNodeList {
     setAvatarGain(nodeID: Uuid, gain: number): void {
         // C++  void NodeList::setAvatarGain(const QUuid& nodeID, float gain)
 
-        if (nodeID.value() === Uuid.NULL) {
+        if (nodeID.isNull()) {
             this.#_avatarGain = gain;
         }
 
@@ -679,7 +679,7 @@ class NodeList extends LimitedNodeList {
                 });
                 this.sendPacket(packet, audioMixer);
 
-                if (nodeID.value() === Uuid.NULL) {
+                if (nodeID.isNull()) {
                     console.debug(`[networking] Setting master avatar gain to ${gain}.`);
                 } else {
                     console.debug(`[networking] Setting avatar gain to ${gain} for ${nodeID.toString()}.`);
@@ -701,7 +701,7 @@ class NodeList extends LimitedNodeList {
      */
     getAvatarGain(nodeID: Uuid): number {
         // C++  float NodeList::getAvatarGain(const QUuid& nodeID)
-        if (nodeID.value() === Uuid.NULL) {
+        if (nodeID.isNull()) {
             return this.#_avatarGain;
         }
         const gain = this.#_avatarGainMap.get(nodeID.value());
@@ -720,7 +720,7 @@ class NodeList extends LimitedNodeList {
         // C++  void ignoreNodeBySessionID(const QUuid& nodeID, bool ignoreEnabled) {
 
         // Cannot ignore yourself or nobody.
-        if (nodeID.value() !== Uuid.NULL && this.getSessionUUID().value() !== nodeID.value()) {
+        if (!nodeID.isNull() && this.getSessionUUID().value() !== nodeID.value()) {
 
             // Send an ignore packet to each node type that uses it.
             this.eachMatchingNode(
@@ -791,7 +791,7 @@ class NodeList extends LimitedNodeList {
         // C++  void NodeList::personalMuteNodeBySessionID(const QUuid& nodeID, bool muteEnabled)
 
         // Cannot personal mute yourself or nobody.
-        if (nodeID.value() !== Uuid.NULL && this.getSessionUUID().value() !== nodeID.value()) {
+        if (!nodeID.isNull() && this.getSessionUUID().value() !== nodeID.value()) {
             const audioMixer = this.soloNodeOfType(NodeType.AudioMixer);
             if (audioMixer) {
                 if (this.isIgnoringNode(nodeID)) {

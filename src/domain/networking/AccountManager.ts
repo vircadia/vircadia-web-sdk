@@ -715,7 +715,7 @@ class AccountManager {
 
         let uploadPath = "";
         const domainID = this.#_accountInfo.getDomainID();
-        if (domainID.value() === Uuid.NULL) {
+        if (domainID.isNull()) {
             uploadPath = USER_PUBLIC_KEY_UPDATE_PATH;
         } else {
             uploadPath = DOMAIN_PUBLIC_KEY_UPDATE_PATH.replace("%1", domainID.stringify());
@@ -731,7 +731,7 @@ class AccountManager {
             // Node.
             part.set("public_key", Buffer.from(this.#_pendingPublicKey));
         }
-        if (domainID.value() !== Uuid.NULL) {
+        if (!domainID.isNull()) {
             const key = this.getTemporaryDomainKey(domainID);
             part.set("api_key", key);
         }
