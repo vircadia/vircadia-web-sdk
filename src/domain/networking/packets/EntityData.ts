@@ -2850,7 +2850,7 @@ const EntityData = new class {
                 propertyFlags.setHasProperty(EntityPropertyFlags.PROP_USE_ORIGINAL_PIVOT, true);
             }
 
-            if (modelProperties.animation !== undefined &&  modelProperties.animation.animationURL !== undefined) {
+            if (modelProperties.animation !== undefined && modelProperties.animation.animationURL !== undefined) {
                 const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, modelProperties.animation.animationURL);
                 dataPositionAfterFlags += written;
                 if (written === 0) {
@@ -2951,6 +2951,279 @@ const EntityData = new class {
 
         }
 
+        // light properties
+        if (properties.entityType === EntityType.Light) {
+            const lightProperties = properties as LightEntityProperties;
+
+            if (lightProperties.color !== undefined) {
+                const totalSize = 3;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for light color!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, lightProperties.color.red);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 1, lightProperties.color.green);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 2, lightProperties.color.blue);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_COLOR, true);
+            }
+
+            if (lightProperties.isSpotlight !== undefined) {
+                const totalSize = 1;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for light spotlight state!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, lightProperties.isSpotlight ? 1 : 0);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_IS_SPOTLIGHT, true);
+            }
+
+            if (lightProperties.intensity !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for light intensity!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, lightProperties.intensity, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_INTENSITY, true);
+            }
+
+            if (lightProperties.exponent !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for light exponent!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, lightProperties.exponent, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_EXPONENT, true);
+            }
+
+            if (lightProperties.cutoff !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for light cutoff!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, lightProperties.cutoff, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_CUTOFF, true);
+            }
+
+            if (lightProperties.falloffRadius !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for light falloff radius!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, lightProperties.falloffRadius, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_FALLOFF_RADIUS, true);
+            }
+
+        }
+
+        // text properties
+        if (properties.entityType === EntityType.Text) {
+            const textProperties = properties as TextEntityProperties;
+
+            if (textProperties.text !== undefined) {
+                const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, textProperties.text);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text string!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_TEXT, true);
+                }
+            }
+
+            if (textProperties.lineHeight !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text line height!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, textProperties.lineHeight, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_LINE_HEIGHT, true);
+            }
+
+            if (textProperties.textColor !== undefined) {
+                const totalSize = 3;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text color!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, textProperties.textColor.red);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 1, textProperties.textColor.green);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 2, textProperties.textColor.blue);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_TEXT_COLOR, true);
+            }
+
+            if (textProperties.textAlpha !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text alpha!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, textProperties.textAlpha, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_LINE_HEIGHT, true);
+            }
+
+            if (textProperties.backgroundColor !== undefined) {
+                const totalSize = 3;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text background color!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, textProperties.backgroundColor.red);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 1, textProperties.backgroundColor.green);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 2, textProperties.backgroundColor.blue);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_BACKGROUND_COLOR, true);
+            }
+
+            if (textProperties.backgroundAlpha !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text background alpha!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, textProperties.backgroundAlpha, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_BACKGROUND_ALPHA, true);
+            }
+
+            if (textProperties.leftMargin !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text left margin!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, textProperties.leftMargin, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_LEFT_MARGIN, true);
+            }
+
+            if (textProperties.rightMargin !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text right margin!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, textProperties.rightMargin, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_RIGHT_MARGIN, true);
+            }
+
+            if (textProperties.topMargin !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text top margin!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, textProperties.topMargin, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_TOP_MARGIN, true);
+            }
+
+            if (textProperties.bottomMargin !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text bottom margin!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, textProperties.bottomMargin, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_BOTTOM_MARGIN, true);
+            }
+
+            if (textProperties.unlit !== undefined) {
+                const totalSize = 1;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text unlit state!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, textProperties.unlit ? 1 : 0);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_UNLIT, true);
+            }
+
+            if (textProperties.font !== undefined) {
+                const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, textProperties.font);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text font!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_FONT, true);
+                }
+            }
+
+            if (textProperties.textEffect !== undefined)
+            {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text effect!");
+                    return 0;
+                }
+                const value = textProperties.textEffect == "none" ? 0 :
+                    textProperties.textEffect == "outline" ? 1 :
+                    textProperties.textEffect == "outline fill" ? 2 :
+                    textProperties.textEffect == "shadow" ? 3 :
+                    0;
+                dataAfterFlags.setUint32(dataPositionAfterFlags, value, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_SHAPE_TYPE, true);
+            }
+
+            if (textProperties.textEffectColor !== undefined) {
+                const totalSize = 3;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text effect color!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, textProperties.textEffectColor.red);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 1, textProperties.textEffectColor.green);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 2, textProperties.textEffectColor.blue);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_TEXT_EFFECT_COLOR, true);
+            }
+
+            if (textProperties.textEffectThickness !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text effect thickness!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, textProperties.textEffectThickness, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_TEXT_EFFECT_THICKNESS, true);
+            }
+
+            if (textProperties.textAlignment !== undefined)
+            {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for text alignment!");
+                    return 0;
+                }
+                const value = textProperties.textAlignment == "left" ? 0 :
+                    textProperties.textAlignment == "center" ? 1 :
+                    textProperties.textAlignment == "right" ? 2 :
+                    0;
+                dataAfterFlags.setUint32(dataPositionAfterFlags, value, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_TEXT_ALIGNMENT, true);
+            }
+
+        }
+
         // shape properties
         if (properties.entityType === EntityType.Box ||
            properties.entityType === EntityType.Sphere ||
@@ -2992,7 +3265,6 @@ const EntityData = new class {
                     propertyFlags.setHasProperty(EntityPropertyFlags.PROP_SHAPE, true);
                 }
             }
-
 
         }
 
