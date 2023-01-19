@@ -12,6 +12,7 @@
 import AccountManager from "../networking/AccountManager";
 import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
+import { Signal } from "../shared/SignalEmitter";
 
 
 type OAuthJSON = {
@@ -32,9 +33,12 @@ type OAuthJSON = {
  *  @namespace AccountInterface
  *  @comment Don't document the constructor because it shouldn't be used in the SDK.
  *
+ *  @property {Signal<AccountInterface~authRequired>} authRequired - Triggered when the user needs to authenticate with the
+ *      metaverse in order to connect to the domain.
  */
 class AccountInterface {
     // C++  class AccountServicesScriptingInterface : public QObject
+    //      class AccountManager : public QObject, public Dependency
 
     /*@sdkdoc
      *  Metaverse OAuth login details.
@@ -99,6 +103,16 @@ class AccountInterface {
     isLoggedIn(): boolean {
         // C++  bool AccountServicesScriptingInterface::isLoggedIn() {
         return this.#_accountManager.isLoggedIn();
+    }
+
+
+    /*@sdkdoc
+     *  Triggered when the user needs to authenticate with the metaverse  in order to connect to the domain.
+     *  @callback AccountInterface~authRequired
+     */
+    get authRequired(): Signal {
+        // C++  void AccountManager::authRequired()
+        return this.#_accountManager.authRequired;
     }
 
 }

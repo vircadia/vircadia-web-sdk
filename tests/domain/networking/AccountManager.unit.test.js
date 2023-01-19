@@ -206,6 +206,49 @@ describe("AccountManager - unit tests", () => {
         /* eslint-enable camelcase */
     });
 
+    test("Can check and signal for an access token", (done) => {
+        const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AccountManager, contextID);
+        const accountManager = ContextManager.get(contextID, AccountManager);
+        /* eslint-disable camelcase */
+
+        let errorMessage = "";
+        const error = jest.spyOn(console, "error").mockImplementation((...message) => {
+            errorMessage = message.join(" ");
+        });
+
+        let hasToken = true;
+
+        accountManager.authRequired.connect(() => {
+            expect(hasToken).toBe(false);
+            expect(errorMessage).toBe("[networking] AccountManager.refreshAccessToken() not implemented!");
+            error.mockRestore();
+            done();
+        });
+
+        // No signal if have current access token.
+        accountManager.setAccessTokenFromJSON({
+            access_token: "abcd",
+            token_type: "efgh",
+            expires_in: 5000,  // 5 seconds away.
+            refresh_token: "ijkl"
+        });
+        hasToken = accountManager.checkAndSignalForAccessToken();
+        expect(hasToken).toBe(true);
+
+        // Signal if no current access token.
+        accountManager.setAccessTokenFromJSON({
+            access_token: "abcd",
+            token_type: "efgh",
+            expires_in: -1,
+            refresh_token: "ijkl"
+        });
+        hasToken = accountManager.checkAndSignalForAccessToken();
+        expect(hasToken).toBe(false);
+
+        /* eslint-enable camelcase */
+    });
+
     test("Can get whether the user is logged in", () => {
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, AccountManager, contextID);

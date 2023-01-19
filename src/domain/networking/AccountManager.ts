@@ -50,13 +50,16 @@ type CallbackParameters = {
  *  @class AccountManager
  *  @param {number} contextID - The {@link ContextManager} context ID.
  *
- *  @property {Signal<AccountManager~UsernameChanged>} usernameChanged - Triggered when the username changes.
+ *  @property {Signal<AccountManager~authRequired>} authRequired - Triggered when the user needs to authenticate with the
+ *      metaverse in order to connect to the domain.
  *      <em>Read-only.</em>
- *  @property {Signal<AccountManager~LoginComplete>} loginComplete - Triggered when the user completes their login.
+ *  @property {Signal<AccountManager~usernameChanged>} usernameChanged - Triggered when the username changes.
  *      <em>Read-only.</em>
- *  @property {Signal<AccountManager~LogoutComplete>} logoutComplete - Triggered when the user logs out.
+ *  @property {Signal<AccountManager~loginComplete>} loginComplete - Triggered when the user completes their login.
  *      <em>Read-only.</em>
- *  @property {Signal<AccountManager~NewKeypair>} newKeypair - Triggered when a new key pair for the user has been uploaded to
+ *  @property {Signal<AccountManager~logoutComplete>} logoutComplete - Triggered when the user logs out.
+ *      <em>Read-only.</em>
+ *  @property {Signal<AccountManager~newKeypair>} newKeypair - Triggered when a new key pair for the user has been uploaded to
  *      the metaverse.
  *      <em>Read-only.</em>
  */
@@ -178,6 +181,7 @@ class AccountManager {
     #_contextID: number;
 
     #_accountInfo = new DataServerAccountInfo();
+    #_authRequired = new SignalEmitter();
     #_usernameChanged = new SignalEmitter();
     #_loginComplete = new SignalEmitter();
     #_logoutComplete = new SignalEmitter();
@@ -197,8 +201,16 @@ class AccountManager {
 
 
     /*@sdkdoc
+     *  Called when the user needs to authenticate with the metaverse in order to connect to the domain.
+     *  @callback AccountManager~authRequired
+     */
+    get authRequired(): Signal {
+        return this.#_authRequired.signal();
+    }
+
+    /*@sdkdoc
      *  Called when the username changes.
-     *  @callback AccountManager~UsernameChanged
+     *  @callback AccountManager~usernameChanged
      *  @param {string} username - The new username.
      */
     get usernameChanged(): Signal {
@@ -207,7 +219,7 @@ class AccountManager {
 
     /*@sdkdoc
      *  Called when the user completes their login.
-     *  @callback AccountManager~LoginComplete
+     *  @callback AccountManager~loginComplete
      *  @param {Url} authURL -  The authentication URL on the metaverse server.
      */
     get loginComplete(): Signal {
@@ -216,7 +228,7 @@ class AccountManager {
 
     /*@sdkdoc
      *  Called when a new key pair for the user has been uploaded to the metaverse.
-     *  @callback AccountManager~NewKeypair
+     *  @callback AccountManager~newKeypair
      */
     get newKeypair(): Signal {
         return this.#_newKeypair.signal();
@@ -224,7 +236,7 @@ class AccountManager {
 
     /*@sdkdoc
      *  Called when the user logs out.
-     *  @callback AccountManager~LogoutComplete
+     *  @callback AccountManager~logoutComplete
      */
     get logoutComplete(): Signal {
         return this.#_logoutComplete.signal();
@@ -389,6 +401,24 @@ class AccountManager {
         }
 
         return true;
+    }
+
+    /*@devdoc
+     *  Checks whether there is a valid access token for the metaverse server, and if not then emits an
+     *  {@link AccountManager~authRequired} signal.
+     *  @returns {boolean} <code>true</code> if there is a valid access token, <code>false<code> if there isn't.
+     */
+    checkAndSignalForAccessToken(): boolean {
+        // C++  bool checkAndSignalForAccessToken()
+        const hasToken = this.hasValidAccessToken();
+        if (!hasToken) {
+            const SIGNAL_DELAY = 500;
+            setTimeout(() => {
+                this.#_authRequired.emit();
+            }, SIGNAL_DELAY);
+        }
+
+        return hasToken;
     }
 
 

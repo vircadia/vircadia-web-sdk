@@ -55,6 +55,11 @@ describe("AccountInterface - unit tests", () => {
         expect(domainServer.account instanceof AccountInterface).toBe(true);
     });
 
+    test("Can access the signals", () => {
+        const accountInterface = new AccountInterface(contextID);
+        expect(typeof accountInterface.authRequired.connect).toBe("function");
+    });
+
     test("Error if try to login with invalid username", () => {
         const accountInterface = new AccountInterface(contextID);
         const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
