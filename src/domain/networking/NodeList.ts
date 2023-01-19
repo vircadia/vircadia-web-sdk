@@ -76,7 +76,7 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.#_domainHandler = new DomainHandler(this);
+        this.#_domainHandler = new DomainHandler(contextID, this);
 
         // WEBRTC TODO: Address further C++ code.
 

@@ -26,7 +26,7 @@ const DomainConnectionDenied = new class {
     /*@devdoc
      *  Information returned by {@link PacketScribe|reading} a {@link PacketType(1)|DomainConnectionDenied} packet.
      *  @typedef {object} PacketScribe.DomainConnectionDeniedDetails
-     *  @property {ComainHandler.ConnectionRefusedReason} reasonCode - The reason that the client was refused connection to the
+     *  @property {DomainHandler.ConnectionRefusedReason} reasonCode - The reason that the client was refused connection to the
      *      domain.
      *  @property {string} reasonMessage - A description of the reason.
      *  @property {string} etraInfo - Extra information about the reason.
