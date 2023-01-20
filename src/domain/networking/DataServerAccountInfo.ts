@@ -18,8 +18,8 @@ import OAuthAccessToken from "./OAuthAccessToken";
 
 /*@devdoc
  *  The <code>DataServerAccountInfo</code> class is used to hold information about the user's metaverse account.
+ *  <p>C++: <code>class DataServerAccountInfo : public QObject</code></p>
  *  @class DataServerAccountInfo
- *
  */
 class DataServerAccountInfo {
     // C++  class DataServerAccountInfo : public QObject

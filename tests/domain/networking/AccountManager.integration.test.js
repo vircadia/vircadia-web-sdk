@@ -29,12 +29,12 @@ describe("AccountManager - integration tests", () => {
         expect(accountManager.hasKeyPair()).toBe(false);
         // Public key upload to metaverse should fail because we're not authenticated.
         const log = jest.spyOn(console, "log").mockImplementation(/* no-op */);
-        const error = jest.spyOn(console, "error").mockImplementation((...message) => {
+        const warn = jest.spyOn(console, "warn").mockImplementation((...message) => {
             const errorMessage = message.join(" ");
             expect(errorMessage.startsWith("[networking] Public key upload to metaverse failed")).toBe(true);
             expect(errorMessage.endsWith("Not authenticated")).toBe(true);
             expect(accountManager.hasKeyPair()).toBe(false);  // Only true if public key has been uploaded to the metaverse.
-            error.mockReset();
+            warn.mockReset();
             log.mockReset();
             done();
         });

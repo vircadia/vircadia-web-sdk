@@ -169,7 +169,7 @@ describe("DomainHandler - integration tests", () => {
 
     test("Can process a DomainConnectionDenied message", (done) => {
         // eslint-disable-next-line max-len
-        const MESSAGE_TEXT = "070000001013034600596f75206c61636b20746865207265717569726564206d6574617665727365207065726d697373696f6e7320746f20636f6e6e65637420746f207468697320646f6d61696e2e0000"
+        const MESSAGE_TEXT = "070000001013034600596f75206c61636b20746865207265717569726564206d6574617665727365207065726d697373696f6e7320746f20636f6e6e65637420746f207468697320646f6d61696e2e0000";
         const arrayBuffer = new ArrayBuffer(MESSAGE_TEXT.length / 2);
         const uint8Array = new Uint8Array(arrayBuffer);
         for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {

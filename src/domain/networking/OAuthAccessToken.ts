@@ -14,6 +14,7 @@ import { OAuthJSON } from "../interfaces/AccountInterface";
 
 /*@devdoc
  *  The <code>OAuthAccessToken</code> class implements an OAuth access token.
+ *  <p>C++: <code>class OAuthAccessToken : public QObject</code></p>
  *  @class OAuthAccessToken
  *  @param {OAuthJSON} jsonObject - A OAuth JSON object to create the access token from.
  *
