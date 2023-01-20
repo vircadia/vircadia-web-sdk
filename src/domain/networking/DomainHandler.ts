@@ -303,8 +303,9 @@ class DomainHandler {
             this.#sendDisconnectPacket();
         }
 
-        // clear member variables that hold the connection state to a domain
-        this.#_uuid = new Uuid(Uuid.NULL);
+        // Clear member variables that hold the connection state to a domain.
+        this.#_uuid = new Uuid();
+        this.#_connectionToken = new Uuid();
 
         // WEBRTC TODO: Address further C++ code.
 
