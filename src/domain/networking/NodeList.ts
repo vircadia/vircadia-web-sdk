@@ -287,11 +287,41 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        if (this.#_domainHandler.getSockAddr().isNull()) {
+            console.warn("[networking] Ignoring DomainList packet while not connected to a domain server");
+            // WEBRTC TODO: Address further C++ code - extra console info.
+            return;
+        }
+
+        // WEBRTC TODO: Address further C++ code - ping lag console warning.
+
         // This is a packet from the domain server; resume normal connection.
         this.#_domainHandler.clearPendingCheckins();
         this.setDropOutgoingNodeTraffic(false);
 
         // WEBRTC TODO: Address further C++ code.
+
+        if (this.#_domainHandler.isConnected() && this.#_domainHandler.getUUID().value() !== info.domainUUID.value()) {
+            console.warn("[networking] Ignoring DomainList packet from", info.domainUUID.stringify(), "while connected to",
+                this.#_domainHandler.getUUID().stringify());
+            // WEBRTC TODO: Address further C++ code - extra console info.
+            return;
+        }
+
+        // When connected, if the session ID or local ID were not null and changed then we should reset.
+        const currentLocalID = this.getSessionLocalID();
+        const currentSessionID = this.getSessionUUID();
+        if (this.#_domainHandler.isConnected()
+            && (currentLocalID !== Node.NULL_LOCAL_ID && info.newLocalID !== currentLocalID
+                || !currentSessionID.isNull() && info.newUUID.value() !== currentSessionID.value())) {
+            // Reset the NodeList but don't do a domain handler reset since we're about to process a good domain list.
+            this.reset("Local ID or Session ID changed while connected to domain - forcing NodeList reset", true);
+
+            // Tell the domain handler that we're no longer connected so that it can re-perform actions as if just connected.
+            this.#_domainHandler.setIsConnected(false);
+            // Clear any reliable connections using old ID.
+            this._nodeSocket.clearConnections();
+        }
 
         this.setSessionLocalID(info.newLocalID);
         this.setSessionUUID(info.newUUID);
