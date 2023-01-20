@@ -793,7 +793,7 @@ class AccountManager {
     #publicKeyUploadFailed = (reply: NetworkReply): void => {
         // C++  void AccountManager:: publicKeyUploadFailed(QNetworkReply* reply)
 
-        console.error("[networking] Public key upload to metaverse failed:", reply.url().toString(), reply.errorString());
+        console.warn("[networking] Public key upload to metaverse failed:", reply.url().toString(), reply.errorString());
         this.#_isWaitingForKeypairResponse = false;
     };
 

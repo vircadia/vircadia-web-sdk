@@ -35,6 +35,7 @@ type OAuthJSON = {
  *
  *  @property {Signal<AccountInterface~authRequired>} authRequired - Triggered when the user needs to authenticate with the
  *      metaverse in order to connect to the domain.
+ *      <p>The {@link DomainServer}'s <code>state</code> will be <code>REFUSED</code>.</p>
  */
 class AccountInterface {
     // C++  class AccountServicesScriptingInterface : public QObject

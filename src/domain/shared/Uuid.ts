@@ -66,7 +66,7 @@ class Uuid extends BigInt {
     }
 
 
-    constructor(value: bigint | string = 0) {
+    constructor(value: bigint | string = Uuid.NULL) {
         // C++  QUuid()
 
         let bigintValue = value;
