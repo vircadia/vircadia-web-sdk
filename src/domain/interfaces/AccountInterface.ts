@@ -12,7 +12,7 @@
 import AccountManager from "../networking/AccountManager";
 import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
-import { Signal } from "../shared/SignalEmitter";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 
 
 type OAuthJSON = {
@@ -54,11 +54,15 @@ class AccountInterface {
 
 
     #_accountManager: AccountManager;
+    #_authRequired = new SignalEmitter();
 
 
     constructor(contextID: number) {
         this.#_accountManager = ContextManager.get(contextID, AccountManager) as AccountManager;
         assert(this.#_accountManager !== undefined);
+        this.#_accountManager.authRequired.connect(() => {
+            this.#_authRequired.emit();
+        });
     }
 
 
@@ -113,7 +117,7 @@ class AccountInterface {
      */
     get authRequired(): Signal {
         // C++  void AccountManager::authRequired()
-        return this.#_accountManager.authRequired;
+        return this.#_authRequired.signal();
     }
 
 }
