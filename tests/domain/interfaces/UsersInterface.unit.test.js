@@ -29,6 +29,11 @@ describe("UsersInterface - unit tests", () => {
         expect(domainServer.users instanceof UsersInterface).toBe(true);
     });
 
+    test("Can access the signals", () => {
+        const domainServer = new DomainServer();
+        expect(typeof domainServer.users.canKickChanged.connect).toBe("function");
+    });
+
     test("Error logged if try to set avatar gain for invalid session ID or gain values", () => {
         const domainServer = new DomainServer();
         const error = jest.spyOn(console, "error").mockImplementation(() => { /* no-op */ });
@@ -164,6 +169,11 @@ describe("UsersInterface - unit tests", () => {
         expect(domainServer.users.wantIgnored).toBe(true);
         domainServer.users.wantIgnored = false;
         expect(domainServer.users.wantIgnored).toBe(false);
+    });
+
+    test("Can get the canKick property", () => {
+        const domainServer = new DomainServer();
+        expect(domainServer.users.canKick).toBe(false);
     });
 
 });
