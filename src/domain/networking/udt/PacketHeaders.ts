@@ -209,7 +209,10 @@ const enum PacketTypeValue {
  *      {@link PacketScribe.SetAvatarTraitsDetails}
  *  @property {PacketType} InjectorGainSet - <code>26</code>
  *  @property {PacketType} AssignmentClientStatus - <code>27</code>
- *  @property {PacketType} NoisyMute - <code>28</code>
+ *  @property {PacketType} NoisyMute - <code>28</code> - The Avatar Mixer sends this to the user client, instructing the client
+ *      to mute its audio input. This may be due to the client's background audio being too loud or an admin muting the user in
+ *      the domain.<br />
+ *      This packet contains no content.
  *  @property {PacketType} AvatarIdentity - <code>29</code> - The user client sends this to the Avatar Mixer to update it with
  *      current user avatar identity information. The Avatar Mixer sends this to the user client to update it with identify
  *      information for avatars in the domain.<br />
@@ -646,6 +649,8 @@ const PacketType = new class {
             case this.OctreeStats:
                 return DEFAULT_VERSION;
             case this.SetAvatarTraits:
+                return DEFAULT_VERSION;
+            case this.NoisyMute:
                 return DEFAULT_VERSION;
             case this.AvatarIdentity:
                 return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;

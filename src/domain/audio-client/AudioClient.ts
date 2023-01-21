@@ -24,6 +24,7 @@ import PacketType, { PacketTypeValue } from "../networking/udt/PacketHeaders";
 import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
 import Quat, { quat } from "../shared/Quat";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Vec3, { vec3 } from "../shared/Vec3";
 
 
@@ -44,6 +45,9 @@ type AudioOrientationGetter = () => quat;
  *      <p>The URLs used to load these files are reported in the log. Depending on where these files are deployed, their URLs
  *      may need to be adjusted.  If used, must start with a <code>"."</code> and end with a <code>"/"</code>.</p>
  *      <p><em>Write-only.</em></p>
+ *
+ *  @property {Signal<AudioClient~mutedByMixer>} mutedByMixer - Triggered when the audio mixer has made the client mute its
+ *      audio input &mdash; either because the background noise is too loud or an admin has muted the user.
  *
  *  @param {number} contextID - The {@link ContextManager} context ID.
  */
@@ -115,6 +119,8 @@ class AudioClient {
     #_haveWarnedAudioEnvironment = false;
     #_haveWarnedAudioStreamStats = false;
 
+    #_mutedByMixer = new SignalEmitter();
+
 
     constructor(contextID: number) {
 
@@ -141,16 +147,25 @@ class AudioClient {
         this.#_nodeList.nodeKilled.connect(this.#nodeKilled);
 
         // C++  AudioClient::AudioClient()
-        this.#_packetReceiver.registerListener(PacketType.SelectedAudioFormat,
-            PacketReceiver.makeUnsourcedListenerReference(this.#handleSelectedAudioFormat));
-        this.#_packetReceiver.registerListener(PacketType.SilentAudioFrame,
-            PacketReceiver.makeUnsourcedListenerReference(this.#handleAudioDataPacket));
-        this.#_packetReceiver.registerListener(PacketType.MixedAudio,
-            PacketReceiver.makeUnsourcedListenerReference(this.#handleAudioDataPacket));
+
+        // WEBRTC TODO: Address further C++ code.
+
         this.#_packetReceiver.registerListener(PacketType.AudioStreamStats,
             PacketReceiver.makeSourcedListenerReference(this.#processStreamStatsPacket));
         this.#_packetReceiver.registerListener(PacketType.AudioEnvironment,
             PacketReceiver.makeUnsourcedListenerReference(this.#handleAudioEnvironmentDataPacket));
+        this.#_packetReceiver.registerListener(PacketType.SilentAudioFrame,
+            PacketReceiver.makeUnsourcedListenerReference(this.#handleAudioDataPacket));
+        this.#_packetReceiver.registerListener(PacketType.MixedAudio,
+            PacketReceiver.makeUnsourcedListenerReference(this.#handleAudioDataPacket));
+        this.#_packetReceiver.registerListener(PacketType.NoisyMute,
+            PacketReceiver.makeUnsourcedListenerReference(this.#handleNoisyMutePacket));
+        // WEBRTC TODO: Address further C++ code.
+        this.#_packetReceiver.registerListener(PacketType.SelectedAudioFormat,
+            PacketReceiver.makeUnsourcedListenerReference(this.#handleSelectedAudioFormat));
+
+        // WEBRTC TODO: Address further C++ code.
+
     }
 
 
@@ -246,6 +261,17 @@ class AudioClient {
     getLastInputLoudness(): number {
         // C++  float getLastInputLoudness() const
         return this.#_lastInputLoudness;
+    }
+
+
+    /*@devdoc
+     *  Triggered when the audio mixer has made the client mute its audio input &mdash; either because the background noise is
+     *  too loud or an admin has muted the user.
+     *  @function AudioClient~mutedByMixer
+     *  @returns {Signal}
+     */
+    get mutedByMixer(): Signal {
+        return this.#_mutedByMixer.signal();
     }
 
 
@@ -532,6 +558,19 @@ class AudioClient {
 
         // WEBRTC TODO: Address further C++ code.
 
+    };
+
+    // Listener
+    // eslint-disable-next-line
+    // @ts-ignore
+    #handleNoisyMutePacket = (message: ReceivedMessage): void => {  // eslint-disable-line
+        // C++  void handleNoisyMutePacket(ReceivedMessage* message)
+        if (!this.#_isMuted) {
+            this.setMuted(true);
+
+            // have the audio scripting interface emit a signal to say we were muted by the mixer
+            this.#_mutedByMixer.emit();
+        }
     };
 
 

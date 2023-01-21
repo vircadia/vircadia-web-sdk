@@ -220,6 +220,11 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             audioMixer.inputMuted = micMutedCheckbox.checked;
         }
         micMutedCheckbox.addEventListener("click", onMicMutecCheckboxClick);
+
+        audioMixer.mutedByMixer.connect(() => {
+            micMutedCheckbox.checked = true;
+        });
+
     }());
 
     // Avatar Mixer
