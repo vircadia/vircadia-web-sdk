@@ -38,6 +38,7 @@ import MessagesSubscribe from "../packets/MessagesSubscribe";
 import MessagesUnsubscribe from "../packets/MessagesUnsubscribe";
 import NegotiateAudioFormat from "./NegotiateAudioFormat";
 import SelectedAudioFormat from "./SelectedAudioFormat";
+import NodeMuteRequest from "./NodeMuteRequest";
 import AvatarQuery from "./AvatarQuery";
 import RequestsDomainListData from "./RequestsDomainListData";
 import PerAvatarGainSet from "./PerAvatarGainSet";
@@ -111,6 +112,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.NegotiateAudioFormat&period;write|NegotiateAudioFormat&period;write}
  *  @property {function} SelectedAudioFormat.read -
  *      {@link PacketScribe.SelectedAudioFormat&period;read|SelectedAudioFormat&period;read}
+ *  @property {function} NodeMuteRequest.write -
+ *      {@link PacketScribe.NodeMuteRequest&period;write|NodeMuteRequest&period;write}
  *  @property {function} AvatarQuery.write -
  *      {@link PacketScribe.AvatarQuery&period;write|AvatarQuery&period;write}
  *  @property {function} RequestsDomainListData.write -
@@ -158,6 +161,7 @@ const PacketScribe = {
     MessagesUnsubscribe,
     NegotiateAudioFormat,
     SelectedAudioFormat,
+    NodeMuteRequest,
     AvatarQuery,
     RequestsDomainListData,
     PerAvatarGainSet,
