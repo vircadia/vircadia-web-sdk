@@ -176,4 +176,19 @@ describe("UsersInterface - unit tests", () => {
         expect(domainServer.users.canKick).toBe(false);
     });
 
+    test("Can call the mute method", () => {
+        let lastWarning = "";
+        const warn = jest.spyOn(console, "warn").mockImplementation((message) => {
+            lastWarning = message;  // eslint-disable-line
+        });
+        expect(warn).toHaveBeenCalledTimes(0);
+
+        const domainServer = new DomainServer();
+        domainServer.users.mute(new Uuid());
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(lastWarning).toContain("[networking] muteNodeBySessionID called with an invalid ID");
+
+        warn.mockRestore();
+    });
+
 });

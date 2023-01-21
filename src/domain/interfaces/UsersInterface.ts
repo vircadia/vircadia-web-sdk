@@ -190,6 +190,16 @@ class UsersInterface {
         return this.#_nodeList.isIgnoringNode(id);
     }
 
+    /*@sdkdoc
+     *  Mutes another user's microphone for everyone. The mute is not permanent: the user can unmute themselves.
+     *  <p>This method only works if you're an administrator of the domain.</p>
+     *  @param {Uuid} sessionID - The session ID of the user to mute.
+     */
+    mute(sessionID: Uuid): void {
+        // C++  void UsersScriptingInterface::mute(const QUuid& nodeID);
+        this.#_nodeList.muteNodeBySessionID(sessionID);
+    }
+
 
     /*@sdkdoc
      *  Triggered when the user's ability to kick (ban) users changes.

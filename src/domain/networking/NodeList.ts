@@ -858,6 +858,32 @@ class NodeList extends LimitedNodeList {
         return this.#_personalMutedNodeIDs.has(nodeID.value());
     }
 
+    /*@devdoc
+     *  Mutes another node's microphone for everyone. The mute is not permanent: the node can unmute themselves.
+     *  <p>This method only works if you're an administrator of the domain.</p>
+     *  @param {Uuid} nodeID - The session ID of the node to mute.
+     */
+    muteNodeBySessionID(nodeID: Uuid): void {
+        // C++  void muteNodeBySessionID(const QUuid& nodeID)
+        if (!nodeID.isNull() && nodeID.value() !== Uuid.AVATAR_SELF_ID && this.getSessionUUID().value() !== nodeID.value()) {
+            if (this.getThisNodeCanKick()) {
+                const audioMixer = this.soloNodeOfType(NodeType.AudioMixer);
+                if (audioMixer) {
+                    const mutePacket = PacketScribe.NodeMuteRequest.write({
+                        nodeID
+                    });
+                    console.log("[networking] Sending packet to mute node:", nodeID.stringify());
+                    this.sendPacket(mutePacket, audioMixer);
+                } else {
+                    console.warn("[networking] Couldn't find audio mixer to send node mute request to.");
+                }
+            } else {
+                console.warn("[networking] You do not have permissions to mute in this domain.");
+            }
+        } else {
+            console.warn("[networking] muteNodeBySessionID called with an invalid ID or the current session's ID.");
+        }
+    }
 
     /*@devdoc
      *  Triggered when a user is ignored or un-ignored.
