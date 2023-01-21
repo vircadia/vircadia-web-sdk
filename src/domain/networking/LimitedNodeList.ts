@@ -766,7 +766,7 @@ class LimitedNodeList {
      *  @returns {Signal}
      */
     get nodeAdded(): Signal {
-        // C++  void nodeAdded(Node* node);
+        // C++  void nodeAdded(Node* node)
         return this.#_nodeAdded.signal();
     }
 
@@ -777,7 +777,7 @@ class LimitedNodeList {
      *  @returns {Signal}
      */
     get nodeActivated(): Signal {
-        // C++  void nodeActivated(Node* node);
+        // C++  void nodeActivated(Node* node)
         return this.#_nodeActivated.signal();
     }
 
@@ -788,7 +788,7 @@ class LimitedNodeList {
      *  @returns {Signal}
      */
     get nodeSocketUpdated(): Signal {
-        // C++  void nodeSocketUpdated(Node* node);
+        // C++  void nodeSocketUpdated(Node* node)
         return this.#_nodeSocketUpdated.signal();
     }
 
@@ -799,7 +799,7 @@ class LimitedNodeList {
      *  @returns {Signal}
      */
     get nodeKilled(): Signal {
-        // C++  void nodeKilled(Node* node);
+        // C++  void nodeKilled(Node* node)
         return this.#_nodeKilled.signal();
     }
 
