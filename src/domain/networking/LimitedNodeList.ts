@@ -161,6 +161,9 @@ class LimitedNodeList {
     #_nodeKilled = new SignalEmitter();
     #_packetVersionMismatch = new SignalEmitter();
 
+    #_permissions = new NodePermissions();
+    #_canKickChanged = new SignalEmitter();
+
 
     constructor(contextID: number) {
         // C++  LimitedNodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
@@ -713,6 +716,38 @@ class LimitedNodeList {
 
 
     /*@devdoc
+     *  Sets the node's permissions on the domain.
+     *  @param {NodePermissions} newPermissions - The node's new permissions on the domain.
+     */
+    setPermissions(newPermissions: NodePermissions): void {
+        // C++  void setPermissions(const NodePermissions& newPermissions)
+        const originalPermissions = this.#_permissions;
+
+        this.#_permissions = newPermissions;
+
+        // WEBRTC TODO: Address further C++ code.
+
+        if (originalPermissions.can(NodePermissions.Permission.canKick)
+                !== newPermissions.can(NodePermissions.Permission.canKick)) {
+            this.#_canKickChanged.emit(this.#_permissions.can(NodePermissions.Permission.canKick));
+        }
+
+        // WEBRTC TODO: Address further C++ code.
+
+    }
+
+    /*@devdoc
+     *  Gets whether the node has permissions on the domain to kick (ban) users.
+     *  @returns {boolean} <code>true</code> if the node has permissions on the domain to kick (ban) users, <code>false</code>
+     *      if it doesn't.
+     */
+    getThisNodeCanKick(): boolean {
+        // C++  bool getThisNodeCanKick() const
+        return this.#_permissions.can(NodePermissions.Permission.canKick);
+    }
+
+
+    /*@devdoc
      *  Triggered when the user client's session UUID changes.
      *  @function LimitedNodeList.uuidChanged
      *  @param {Uuid} newUUID - The new session UUID. {@link Uuid(1)|Uuid.NULL} if not connected to a domain.
@@ -779,6 +814,18 @@ class LimitedNodeList {
     get packetVersionMismatch(): Signal {
         // C++  void packetVersionMismatch(PacketType type, const SockAddr& senderSockAddr, const QUuid& senderUUID)
         return this.#_packetVersionMismatch.signal();
+    }
+
+    /*@devdoc
+     *  Triggered when the node's kick permissions on the domain changes.
+     *  @function LimitedNodeList.canKickChanged
+     *  @param {boolean} canKick - <code>true</code> if the node has permissions on the domain to kick (ban) users,
+     *      <code>false</code> if it doesn't.
+     *  @returns {Signal}
+     */
+    get canKickChanged(): Signal {
+        // C++  void canKickChanged(bool canKick)
+        return this.#_canKickChanged.signal();
     }
 
 

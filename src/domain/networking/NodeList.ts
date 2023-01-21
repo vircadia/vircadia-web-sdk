@@ -337,8 +337,7 @@ class NodeList extends LimitedNodeList {
 
         }
 
-        // WEBRTC TODO: Address further C++ code.
-
+        this.setPermissions(info.newPermissions);
         this.setAuthenticatePackets(info.isAuthenticated);
 
         for (const node of info.nodes) {
