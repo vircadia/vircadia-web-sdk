@@ -286,7 +286,10 @@ const enum PacketTypeValue {
  *      use.<br />
  *      {@link PacketScribe.SelectedAudioFormatDetails}
  *  @property {PacketType} MoreEntityShapes - <code>66</code>
- *  @property {PacketType} NodeKickRequest - <code>67</code>
+ *  @property {PacketType} NodeKickRequest - <code>67</code> - The user client sends this to the domain server to kick (ban)
+ *      another user from the domain.<br />
+ *      <em>Reliable.</em><br />
+ *      {@link PacketScribe.NodeKickRequestDetails}
  *  @property {PacketType} NodeMuteRequest - <code>68</code> - The user client sends this to the audio mixer to mute another
  *      user for everyone.<br />
  *      <em>Reliable.</em><br />
@@ -681,6 +684,8 @@ const PacketType = new class {
             case this.NegotiateAudioFormat:
                 return DEFAULT_VERSION;
             case this.SelectedAudioFormat:
+                return DEFAULT_VERSION;
+            case this.NodeKickRequest:
                 return DEFAULT_VERSION;
             case this.NodeMuteRequest:
                 return DEFAULT_VERSION;

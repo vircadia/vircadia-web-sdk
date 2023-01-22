@@ -9,6 +9,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+type BanFlagsValue = number;
+
 
 /*@devdoc
  *  The <code>ModerationFlags</code> namespace provides values for different methods of kicking (banning) users from a domain.
@@ -16,13 +18,20 @@
  *  @namespace ModerationFlags
  *  @comment Don't document the constructor because it shouldn't be used in the SDK.
  *
- *  @property {ModerationFlags.BanFlags} BanFlags - Ban flag values. A ban value is the sum of the relevant flag values.
+ *  @property {ModerationFlags.BanFlags} BanFlags - Ban flag values. A {@link ModerationFlags.BanFlagsValue}  value is the sum
+ *      of the relevant flag values.
  */
 class ModerationFlags {
     // C++  class ModerationFlags
 
     /*@devdoc
-     *  A set of flags for moderating ban actions. A ban value is the sum of the relevant flag values.
+     *  A ban value is the sum of relevant {@link ModerationFlags.BanFlags} values.
+     *  @typedef {number} ModerationFlags.BanFlagsValue
+     */
+
+    /*@devdoc
+     *  A set of flags for moderating ban actions. A {@link ModerationFlags.BanFlagsValue} value is the sum of the relevant flag
+     *  values.
      *  @typedef {object} ModerationFlags.BanFlags
      *  @property {number} NO_BAN - Don't ban the user when kicking. <em>This does not currently have an effect.</em><br />
      *      <strong>Value:</strong> <code>0</code>
@@ -40,9 +49,9 @@ class ModerationFlags {
         BAN_BY_IP: 4
     };
 
-    /*@sdkdoc
+    /*@devdoc
      *  Gets the default ban methods, namely ban by username and machine fingerprint.
-     *  @returns {number} The default ban methods.
+     *  @returns {ModerationFlags.BanFlagsValue} The default ban methods.
      */
     static getDefaultBanFlags(): number {
         return ModerationFlags.BanFlags.BAN_BY_USERNAME + ModerationFlags.BanFlags.BAN_BY_FINGERPRINT;
@@ -51,3 +60,4 @@ class ModerationFlags {
 }
 
 export default ModerationFlags;
+export type { BanFlagsValue };
