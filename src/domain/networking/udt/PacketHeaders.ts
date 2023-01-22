@@ -13,14 +13,14 @@ import assert from "../../shared/assert";
 
 
 /*@devdoc
- *  {@link PacketType(1)|Packet types}, <code>Unknown</code>, <code>StunResponse</code>, <code>...</code>, are represented as
- *  unsigned 8-bit numbers in the protocol packets.
+ *  {@link PacketType(1)|Packet types}, <code>Unknown</code>, <code>DomainConnectRequestPending</code>, <code>...</code>, are
+ *  represented as unsigned 8-bit numbers in the protocol packets.
  *  @typedef {number} PacketType
  */
 // Could just define `type PacketTypeValue = number` however using an object improves type safety.
 const enum PacketTypeValue {
     Unknown,                            // 0
-    StunResponse,
+    DomainConnectRequestPending,
     DomainList,
     Ping,
     PingReply,
@@ -139,7 +139,11 @@ const enum PacketTypeValue {
  *  @namespace PacketType
  *  @variation 1
  *  @property {PacketType} Unknown - <code>0</code>
- *  @property {PacketType} StunResponse - <code>1</code>
+ *  @property {PacketType} DomainConnectRequestPending - <code>1</code> - The user client may send this to the Domain Server
+ *      as a synonym for sending a <code>DomainConnectRequest</code> packet. This is provided as packet <code>1</code> for a
+ *      future version of the protocol so that protocol breaks can be better handled.<br />
+ *      The Domain Server responds with a DomainList or DomainConnectionDenied packet.<br />
+ *      {@link PacketScribe.DomainConnectRequestDetails}
  *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to the user client in response to a
  *      DomainConnectRequest or DomainListRequest packet, if the client is authorized to connect to the domain.<br />
  *      {@link PacketScribe.DomainListDetails}
@@ -237,7 +241,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} EntityAdd - <code>43</code>
  *  @property {PacketType} EntityErase - <code>44</code>
  *  @property {PacketType} EntityEdit - <code>45</code>
- *  @property {PacketType} DomainServerConnectionToken - <code>46</code>
+ *  @property {PacketType} DomainServerConnectionToken - <code>46</code> - The Domain Server sends this to the client when the
+ *      client tries to log into the domain.<br />
+ *      {@link PacketScribe.DomainServerConnectionTokenDetails}
  *  @property {PacketType} DomainSettingsRequest - <code>47</code>
  *  @property {PacketType} DomainSettings - <code>48</code>
  *  @property {PacketType} AssetGet - <code>49</code>
@@ -339,7 +345,7 @@ const PacketType = new class {
 
     // Property values are manually added because doing so provides additional type safety compared to adding at runtime.
     readonly Unknown = PacketTypeValue.Unknown;
-    readonly StunResponse = PacketTypeValue.StunResponse;
+    readonly DomainConnectRequestPending = PacketTypeValue.DomainConnectRequestPending;
     readonly DomainList = PacketTypeValue.DomainList;
     readonly Ping = PacketTypeValue.Ping;
     readonly PingReply = PacketTypeValue.PingReply;
@@ -461,7 +467,7 @@ const PacketType = new class {
 
     // Packets that don't include the local node ID of the sending node.
     readonly #_nonSourcedPackets = new Set([
-        PacketTypeValue.StunResponse,
+        PacketTypeValue.DomainConnectRequestPending,
         PacketTypeValue.CreateAssignment,
         PacketTypeValue.RequestAssignment,
         PacketTypeValue.DomainServerRequireDTLS,
@@ -602,6 +608,8 @@ const PacketType = new class {
         // C++  PacketVersion versionForPacketType(PacketType packetType)
         const DEFAULT_VERSION = 22;
         switch (packetType) {
+            case this.DomainConnectRequestPending:
+                return DEFAULT_VERSION;
             case this.DomainList:
                 return this.#_DomainListVersion.SocketTypes;
             case this.Ping:
@@ -642,13 +650,15 @@ const PacketType = new class {
                 return 18;  // eslint-disable-line @typescript-eslint/no-magic-numbers
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
+            case this.AudioEnvironment:
+                return DEFAULT_VERSION;
             case this.EntityData:
                 return this.#_EntityVersion.LAST_PACKET_TYPE;
             case this.EntityQuery:
                 return this.#_EntityQueryPacketVersion.ConicalFrustums;
             case this.EntityErase:
                 return DEFAULT_VERSION;
-            case this.AudioEnvironment:
+            case this.DomainServerConnectionToken:
                 return DEFAULT_VERSION;
             case this.DomainDisconnectRequest:
                 return DEFAULT_VERSION;

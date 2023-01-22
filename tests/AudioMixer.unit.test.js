@@ -9,12 +9,16 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountManagerMock from "../mocks/domain/networking/AccountManager.mock.js";
+AccountManagerMock.mock();
 import AudioWorkletsMock from "../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
 
-
 import DomainServer from "../src/DomainServer";
 import AudioMixer from "../src/AudioMixer";
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 
 describe("AudioMixer - unit tests", () => {

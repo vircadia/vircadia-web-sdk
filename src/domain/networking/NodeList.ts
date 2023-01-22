@@ -16,6 +16,7 @@ import Uuid from "../shared/Uuid";
 import PacketScribe from "./packets/PacketScribe";
 import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
 import Socket from "./udt/Socket";
+import AccountManager from "./AccountManager";
 import AddressManager from "./AddressManager";
 import DomainHandler from "./DomainHandler";
 import FingerprintUtils from "./FingerprintUtils";
@@ -64,6 +65,7 @@ class NodeList extends LimitedNodeList {
     #_ignoredNode = new SignalEmitter();
 
     // Context objects.
+    #_accountManager;
     #_addressManager;
 
 
@@ -74,7 +76,7 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.#_domainHandler = new DomainHandler(this);
+        this.#_domainHandler = new DomainHandler(contextID, this);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -90,11 +92,29 @@ class NodeList extends LimitedNodeList {
         // a connection.
         this.#_domainHandler.connectedToDomain.connect(this.#sendPendingDSPathQuery);
 
+        // WEBRTC TODO: Address further C++ code.
+
+        // Clear our NodeList when the domain changes.
+        this.#_domainHandler.disconnectedFromDomain.connect(this.#resetFromDomainHandler);
 
         // WEBRTC TODO: Address further C++ code.
 
-        // clear our NodeList when the domain changes
-        this.#_domainHandler.disconnectedFromDomain.connect(this.#resetFromDomainHandler);
+        this.#_accountManager = ContextManager.get(contextID, AccountManager) as AccountManager;
+
+        // Assume that we may need to send a new DS check in anytime a new keypair is generated.
+        this.#_accountManager.newKeypair.connect(() => {
+            void this.sendDomainServerCheckIn();
+        });
+
+        // Clear out NodeList when login is finished and we know our new username.
+        this.#_accountManager.usernameChanged.connect(() => {
+            this.reset("Username changed");
+        });
+
+        // Clear our NodeList when logout is requested.
+        this.#_accountManager.logoutComplete.connect(() => {
+            this.reset("Logged out");
+        });
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -126,6 +146,8 @@ class NodeList extends LimitedNodeList {
 
         this._packetReceiver.registerListener(PacketType.DomainServerAddedNode,
             PacketReceiver.makeUnsourcedListenerReference(this.processDomainServerAddedNode));
+        this._packetReceiver.registerListener(PacketType.DomainServerConnectionToken,
+            PacketReceiver.makeUnsourcedListenerReference(this.processDomainServerConnectionTokenPacket));
         this._packetReceiver.registerListener(PacketType.DomainConnectionDenied,
             PacketReceiver.makeUnsourcedListenerReference(this.#_domainHandler.processDomainServerConnectionDeniedPacket));
 
@@ -265,11 +287,41 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        if (this.#_domainHandler.getSockAddr().isNull()) {
+            console.warn("[networking] Ignoring DomainList packet while not connected to a domain server");
+            // WEBRTC TODO: Address further C++ code - extra console info.
+            return;
+        }
+
+        // WEBRTC TODO: Address further C++ code - ping lag console warning.
+
         // This is a packet from the domain server; resume normal connection.
         this.#_domainHandler.clearPendingCheckins();
         this.setDropOutgoingNodeTraffic(false);
 
         // WEBRTC TODO: Address further C++ code.
+
+        if (this.#_domainHandler.isConnected() && this.#_domainHandler.getUUID().value() !== info.domainUUID.value()) {
+            console.warn("[networking] Ignoring DomainList packet from", info.domainUUID.stringify(), "while connected to",
+                this.#_domainHandler.getUUID().stringify());
+            // WEBRTC TODO: Address further C++ code - extra console info.
+            return;
+        }
+
+        // When connected, if the session ID or local ID were not null and changed then we should reset.
+        const currentLocalID = this.getSessionLocalID();
+        const currentSessionID = this.getSessionUUID();
+        if (this.#_domainHandler.isConnected()
+            && (currentLocalID !== Node.NULL_LOCAL_ID && info.newLocalID !== currentLocalID
+                || !currentSessionID.isNull() && info.newUUID.value() !== currentSessionID.value())) {
+            // Reset the NodeList but don't do a domain handler reset since we're about to process a good domain list.
+            this.reset("Local ID or Session ID changed while connected to domain - forcing NodeList reset", true);
+
+            // Tell the domain handler that we're no longer connected so that it can re-perform actions as if just connected.
+            this.#_domainHandler.setIsConnected(false);
+            // Clear any reliable connections using old ID.
+            this._nodeSocket.clearConnections();
+        }
 
         this.setSessionLocalID(info.newLocalID);
         this.setSessionUUID(info.newUUID);
@@ -334,6 +386,27 @@ class NodeList extends LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+    };
+
+    /*@devdoc
+     *  Processes a {@link PacketType(1)|DomainServerConnectionToken} message received from the domain server.
+     *  @function NodeList.processDomainServerConnectionTokenPacket
+     *  @type {Listener}
+     *  @param {ReceivedMessage} message - The DomainServerConnectionToken message.
+     */
+    processDomainServerConnectionTokenPacket = (message: ReceivedMessage): void => {
+        // C++  void processDomainServerConnectionTokenPacket(ReceivedMessage* message)
+
+        // Don't process if not connected to the domain server.
+        if (this.#_domainHandler.getSockAddr().isNull()) {
+            return;
+        }
+
+        const info = PacketScribe.DomainServerConnectionToken.read(message.getMessage());
+        this.#_domainHandler.setConnectionToken(info.connectionToken);
+
+        this.#_domainHandler.clearPendingCheckins();
+        void this.sendDomainServerCheckIn();
     };
 
     /*@devdoc
@@ -431,7 +504,9 @@ class NodeList extends LimitedNodeList {
     override reset = (reason: string, skipDomainHandlerReset = false): void => {
         // C++  void reset(QString reason, bool skipDomainHandlerReset = false);
 
-        super.reset(reason);
+        // C++ calls super.reset() here but the Web SDK defers this call to below so that a DomainDisconnectRequest can be sent
+        // by DomainHandler.softReset() before super.reset() clears all connections.
+        // super.reset(reason);
 
         this.#_ignoredNodeIDs.clear();
         this.#_personalMutedNodeIDs.clear();
@@ -440,6 +515,8 @@ class NodeList extends LimitedNodeList {
         if (!skipDomainHandlerReset) {
             this.#_domainHandler.softReset(reason);
         }
+
+        super.reset(reason);
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -457,7 +534,7 @@ class NodeList extends LimitedNodeList {
      *  @function NodeList.sendDomainServerCheckIn
      *  @type {Slot}
      */
-    sendDomainServerCheckIn = (): void => {
+    sendDomainServerCheckIn = async (): Promise<void> => {
         // C++  void sendDomainServerCheckIn()
 
         // C++ _sendDomainServerCheckInEnabled code is N/A because it's relevant only to Android.
@@ -498,7 +575,15 @@ class NodeList extends LimitedNodeList {
 
         }
 
-        // WEBRTC TODO: Address further C++ code - user name signature.
+        const connectionToken = this.#_domainHandler.getConnectionToken();
+        const requiresUsernameSignature = !isDomainConnected && !connectionToken.isNull();
+        if (requiresUsernameSignature && !this.#_accountManager.getAccountInfo().hasPrivateKey()) {
+            console.log("[networking] A keypair is required to present a username signature to the domain-server",
+                "but no keypair is present. Waiting for keypair generation to complete.");
+            this.#_accountManager.generateNewUserKeypair();
+            // Don't send the check in packet - wait for the new public key to be available to the domain server first.
+            return;
+        }
 
         // Data common to DomainConnectRequest and DomainListRequest.
         const currentTime = BigInt(Date.now().valueOf());
@@ -508,6 +593,7 @@ class NodeList extends LimitedNodeList {
 
         const nodeTypesOfInterest = this.#_nodeTypesOfInterest;
         const placeName = this.#_addressManager.getPlaceName();
+
         let username = undefined;
         let usernameSignature = undefined;
         const domainUsername = undefined;
@@ -516,6 +602,15 @@ class NodeList extends LimitedNodeList {
             username = "";
             usernameSignature = new Uint8Array(new ArrayBuffer(0));
 
+            // Metaverse account.
+            const accountInfo = this.#_accountManager.getAccountInfo();
+            username = accountInfo.getUsername();
+            // If this is a connect request, and we can present a username signature, send it along.
+            if (requiresUsernameSignature && accountInfo.hasPrivateKey()) {
+                usernameSignature = await accountInfo.getUsernameSignature(connectionToken);
+            }
+
+            // Domain account.
             // WEBRTC TODO: Address further C++ code.
 
         }
@@ -599,7 +694,7 @@ class NodeList extends LimitedNodeList {
     setAvatarGain(nodeID: Uuid, gain: number): void {
         // C++  void NodeList::setAvatarGain(const QUuid& nodeID, float gain)
 
-        if (nodeID.value() === Uuid.NULL) {
+        if (nodeID.isNull()) {
             this.#_avatarGain = gain;
         }
 
@@ -614,7 +709,7 @@ class NodeList extends LimitedNodeList {
                 });
                 this.sendPacket(packet, audioMixer);
 
-                if (nodeID.value() === Uuid.NULL) {
+                if (nodeID.isNull()) {
                     console.debug(`[networking] Setting master avatar gain to ${gain}.`);
                 } else {
                     console.debug(`[networking] Setting avatar gain to ${gain} for ${nodeID.toString()}.`);
@@ -636,7 +731,7 @@ class NodeList extends LimitedNodeList {
      */
     getAvatarGain(nodeID: Uuid): number {
         // C++  float NodeList::getAvatarGain(const QUuid& nodeID)
-        if (nodeID.value() === Uuid.NULL) {
+        if (nodeID.isNull()) {
             return this.#_avatarGain;
         }
         const gain = this.#_avatarGainMap.get(nodeID.value());
@@ -655,7 +750,7 @@ class NodeList extends LimitedNodeList {
         // C++  void ignoreNodeBySessionID(const QUuid& nodeID, bool ignoreEnabled) {
 
         // Cannot ignore yourself or nobody.
-        if (nodeID.value() !== Uuid.NULL && this.getSessionUUID().value() !== nodeID.value()) {
+        if (!nodeID.isNull() && this.getSessionUUID().value() !== nodeID.value()) {
 
             // Send an ignore packet to each node type that uses it.
             this.eachMatchingNode(
@@ -726,7 +821,7 @@ class NodeList extends LimitedNodeList {
         // C++  void NodeList::personalMuteNodeBySessionID(const QUuid& nodeID, bool muteEnabled)
 
         // Cannot personal mute yourself or nobody.
-        if (nodeID.value() !== Uuid.NULL && this.getSessionUUID().value() !== nodeID.value()) {
+        if (!nodeID.isNull() && this.getSessionUUID().value() !== nodeID.value()) {
             const audioMixer = this.soloNodeOfType(NodeType.AudioMixer);
             if (audioMixer) {
                 if (this.isIgnoringNode(nodeID)) {

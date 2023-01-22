@@ -12,9 +12,11 @@
 import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
 
-
 import SpatiallyNestable, { NestableType } from "../../../src/domain/shared/SpatiallyNestable";
 import { Uuid } from "../../../src/Vircadia";
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 
 describe("SpatiallyNestable - unit tests", () => {

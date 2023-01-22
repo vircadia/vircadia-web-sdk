@@ -18,7 +18,7 @@ describe("PacketType - unit tests", () => {
 
     test("PacketType values can be accessed", () => {
         expect(PacketType.Unknown).toBe(0);
-        expect(PacketType.StunResponse).toBe(1);
+        expect(PacketType.DomainConnectRequestPending).toBe(1);
         expect(PacketType.DomainListRequest).toBe(13);
         expect(PacketType.WebRTCSignaling).toBe(105);
     });

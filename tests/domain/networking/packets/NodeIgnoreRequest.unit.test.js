@@ -28,7 +28,7 @@ describe("NodeIgnoreRequest - unit tests", () => {
     test("Can write an NodeIgnoreRequest NLPacket that ignores a single node", () => {
         const EXPECTED_PACKET = "000000401e1200000000000000000000000000000000000001b26d558149994ecd964b6250817a06c3";
         const packet = NodeIgnoreRequest.write({
-            nodeID: new Uuid("0xb26d558149994ecd964b6250817a06c3"),
+            nodeID: new Uuid(BigInt("0xb26d558149994ecd964b6250817a06c3")),
             ignore: true
         });
 

@@ -172,7 +172,7 @@ class AvatarHashMap {
         const avatarIdentityDetailsList = PacketScribe.AvatarIdentity.read(message.getMessage());
         for (const avatarIdentityDetails of avatarIdentityDetailsList) {
             let identityUUID = avatarIdentityDetails.sessionUUID;
-            if (identityUUID.value() !== Uuid.NULL) {
+            if (!identityUUID.isNull()) {
 
                 // Replace MyAvatar's UUID with null.
                 const me = this._avatarHash.get(Uuid.NULL);

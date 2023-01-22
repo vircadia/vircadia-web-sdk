@@ -100,7 +100,7 @@ class HMACAuth {
      */
     setKey(uuidKey: Uuid): boolean {
         // C++  bool setKey(const QUuid& uidKey)
-        if (uuidKey.value() !== Uuid.NULL) {
+        if (!uuidKey.isNull()) {
             const KEY_BYTES = 16;
             const keyBytes = new Uint8Array(KEY_BYTES);
             const dataView = new DataView(keyBytes.buffer);

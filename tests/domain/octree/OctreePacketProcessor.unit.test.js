@@ -9,16 +9,21 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import NodeList from "../../../src/domain/networking/NodeList";
 import OctreePacketProcessor from "../../../src/domain/octree/OctreePacketProcessor";
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 
 describe("OctreePacketProcessor - unit tests", () => {
 
     test("The OctreePacketProcessor can be obtained from the ContextManager", () => {
         const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AccountManager, contextID);
         ContextManager.set(contextID, AddressManager);
         ContextManager.set(contextID, NodeList, contextID);
         ContextManager.set(contextID, OctreePacketProcessor, contextID);

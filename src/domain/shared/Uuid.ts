@@ -22,17 +22,17 @@
  *
  *  @class Uuid
  *  @variation 1
- *  @param {bigint} [value=0] - The UUID value. If not specified, a UUID with value of <code>Uuid.NULL</code> is created.
+ *  @param {bigint|string} [value=0] - The UUID value. If not specified, a UUID with value of <code>Uuid.NULL</code> is created.
  *
  *  @property {number} NUM_BYTES_RFC4122_UUID=16 - The number of bytes in a UUID when represented in RFC4122 format.
  *      <em>Read-only.</em>
  *      <p><em>Static</em></p>
  *      @static
- *  @property {Uuid} NULL=0 - The null UUID, <code>{00000000-0000-0000-0000-000000000000}</code>.
+ *  @property {Uuid} NULL=0 - The null UUID, <code>00000000-0000-0000-0000-000000000000</code>.
  *      <em>Read-only.</em>
  *      <p><em>Static</em></p>
  *      @static
- *  @property {Uuid} AVATAR_SELF_ID=1 - The null UUID, <code>{00000000-0000-0000-0000-000000000001}</code>.
+ *  @property {Uuid} AVATAR_SELF_ID=1 - The null UUID, <code>00000000-0000-0000-0000-000000000001</code>.
  *      <em>Read-only.</em>
  *      <p><em>Static</em></p>
  *      @static
@@ -47,11 +47,35 @@ class Uuid extends BigInt {
     static readonly AVATAR_SELF_ID = BigInt(1);
 
 
-    constructor(value: bigint = 0) {
+    /*@sdkdoc
+     *  Creates a new UUID.
+     *  <p><em>Static</em></p>
+     *  @function Uuid(1).createUuid
+     *  @static
+     *  @returns {Uuid} A new UUID.
+     */
+    static createUuid(): Uuid {
+        const uuid = crypto.randomUUID() as string;  // eslint-disable-line @typescript-eslint/no-unsafe-call
+        const chars = uuid.replaceAll("-", "");
+        let value = 0n;
+        for (let i = 0, length = chars.length; i < length; i += 2) {
+            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+            value = value * 256n + BigInt(parseInt(chars.slice(i, i + 2), 16));
+        }
+        return new Uuid(value);
+    }
+
+
+    constructor(value: bigint | string = Uuid.NULL) {
         // C++  QUuid()
 
+        let bigintValue = value;
+        if (typeof bigintValue === "string") {
+            bigintValue = "0x" + bigintValue.replaceAll("-", "");
+        }
+
         // Work around BigInt not working with the "new" operator.
-        const obj = <BigInt>Object(BigInt(value));
+        const obj = <BigInt>Object(BigInt(bigintValue));
         Object.setPrototypeOf(obj, new.target.prototype);
         return obj;  // eslint-disable-line no-constructor-return
     }
@@ -74,7 +98,16 @@ class Uuid extends BigInt {
     }
 
     /*@sdkdoc
-     *  Gets the UUID value formatted as a hexadecimal string with <code>-</code> separators.
+     *  Gets whether the UUID value is null.
+     *  @function Uuid(1).isNull
+     *  @returns {boolean} <code>true</code> if the UUID values is <code>Uuid.NULL</code>, <code>false</code> if it isn't.
+     */
+    isNull(): boolean {
+        return this.value() === Uuid.NULL;
+    }
+
+    /*@sdkdoc
+     *  Gets the UUID value formatted as a hexadecimal string with <code>-</code> separators but without curly braces.
      *  @function Uuid(1).stringify
      *  @returns {string} The UUID value formatted as <code>nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn</code>.
      */

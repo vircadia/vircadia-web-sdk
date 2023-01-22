@@ -11,15 +11,19 @@
 
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
+import AccountManagerMock from "../../../mocks/domain/networking/AccountManager.mock.js";
+AccountManagerMock.mock();
 import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
-
 
 import MyAvatarInterface from "../../../src/domain/interfaces/MyAvatarInterface";
 import AvatarConstants from "../../../src/domain/shared/AvatarConstants";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import AvatarManager from "../../../src/domain/AvatarManager";
 import DomainServer from "../../../src/DomainServer";
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 
 describe("MyAvatarInterface - unit tests", () => {
