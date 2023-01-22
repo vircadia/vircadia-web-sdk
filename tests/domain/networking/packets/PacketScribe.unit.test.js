@@ -74,6 +74,10 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.NegotiateAudioFormat.write).toBe("function");
         expect(typeof PacketScribe.SelectedAudioFormat).toBe("object");
         expect(typeof PacketScribe.SelectedAudioFormat.read).toBe("function");
+        expect(typeof PacketScribe.NodeKickRequest).toBe("object");
+        expect(typeof PacketScribe.NodeKickRequest.write).toBe("function");
+        expect(typeof PacketScribe.NodeMuteRequest).toBe("object");
+        expect(typeof PacketScribe.NodeMuteRequest.write).toBe("function");
         expect(typeof PacketScribe.AvatarQuery).toBe("object");
         expect(typeof PacketScribe.AvatarQuery.write).toBe("function");
         expect(typeof PacketScribe.RequestsDomainListData).toBe("object");

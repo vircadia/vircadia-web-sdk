@@ -9,22 +9,20 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import Packet from "../../../src/domain/networking/udt/Packet";
+import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
 import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import DomainHandler from "../../../src/domain/networking/DomainHandler";
+import NLPacket from "../../../src/domain/networking/NLPacket";
 import Node from "../../../src/domain/networking/Node";
 import NodePermissions from "../../../src/domain/networking/NodePermissions";
 import NodeList from "../../../src/domain/networking/NodeList";
 import NodeType from "../../../src/domain/networking/NodeType";
+import ReceivedMessage from "../../../src/domain/networking/ReceivedMessage";
 import SockAddr from "../../../src/domain/networking/SockAddr";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Uuid from "../../../src/domain/shared/Uuid";
-
-import NLPacket from "../../../src/domain/networking/NLPacket";
-import Packet from "../../../src/domain/networking/udt/Packet";
-import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
-import ReceivedMessage from "../../../src/domain/networking/ReceivedMessage";
-
 
 import { webcrypto } from "crypto";
 globalThis.crypto = webcrypto;
@@ -251,6 +249,108 @@ describe("NodeList - integration tests", () => {
         expect(domainHandler.getSockAddr().isNull()).toBe(false);
         nodeList.processDomainServerConnectionTokenPacket(receivedMessage);
         expect(domainHandler.getConnectionToken().stringify()).toBe("cc4032f5-28fb-46d8-b2c7-443664e27abf");
+    });
+
+    test("Can mute a node", () => {
+        const warn = jest.spyOn(console, "warn").mockImplementation(/* no-op */);
+        expect(warn).toHaveBeenCalledTimes(0);
+        const nodePermissions = new NodePermissions();
+        nodePermissions.permissions = 0b111111111111;
+        nodeList.setPermissions(nodePermissions);
+        nodeList.muteNodeBySessionID(Uuid.createUuid());
+        expect(warn).toHaveBeenCalledTimes(0);
+        warn.mockRestore();
+    });
+
+    test("Cannot mute a node if node ID is null, node ID is own ID, self ID, not an admin, or no audio mixer", () => {
+        let lastWarning = "";
+        const warn = jest.spyOn(console, "warn").mockImplementation((message) => {
+            lastWarning = message;  // eslint-disable-line
+        });
+        expect(warn).toHaveBeenCalledTimes(0);
+
+        const nodePermissions = new NodePermissions();
+        nodePermissions.permissions = 0b111111111111;
+        nodeList.setPermissions(nodePermissions);
+
+        // Null ID.
+        nodeList.muteNodeBySessionID(new Uuid());
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(lastWarning).toContain("[networking] muteNodeBySessionID called with an invalid ID");
+
+        // Own ID.
+        nodeList.muteNodeBySessionID(nodeList.getSessionUUID());
+        expect(warn).toHaveBeenCalledTimes(2);
+        expect(lastWarning).toContain("[networking] muteNodeBySessionID called with an invalid ID");
+
+        // Self ID.
+        nodeList.muteNodeBySessionID(new Uuid(Uuid.AVATAR_SELF_ID));
+        expect(warn).toHaveBeenCalledTimes(3);
+        expect(lastWarning).toContain("[networking] muteNodeBySessionID called with an invalid ID");
+
+        // Not an admin.
+        nodePermissions.permissions = 0b000000000001;
+        nodeList.setPermissions(nodePermissions);
+        nodeList.muteNodeBySessionID(Uuid.createUuid());
+        expect(warn).toHaveBeenCalledTimes(4);
+        expect(lastWarning).toContain("[networking] You do not have permissions to mute");
+
+        // No audio mixer.
+        nodePermissions.permissions = 0b111111111111;
+        nodeList.setPermissions(nodePermissions);
+        nodeList.reset();
+        nodeList.muteNodeBySessionID(Uuid.createUuid());
+        expect(warn).toHaveBeenCalledTimes(5);
+        expect(lastWarning).toContain("[networking] Couldn't find audio mixer");
+
+        warn.mockRestore();
+    });
+
+    test("Can kick a node", () => {
+        const warn = jest.spyOn(console, "warn").mockImplementation(/* no-op */);
+        expect(warn).toHaveBeenCalledTimes(0);
+        const nodePermissions = new NodePermissions();
+        nodePermissions.permissions = 0b111111111111;
+        nodeList.setPermissions(nodePermissions);
+        nodeList.kickNodeBySessionID(Uuid.createUuid());
+        expect(warn).toHaveBeenCalledTimes(0);
+        warn.mockRestore();
+    });
+
+    test("Cannot kick a node if node ID is null, node ID is own ID, self ID, or not an admin", () => {
+        let lastWarning = "";
+        const warn = jest.spyOn(console, "warn").mockImplementation((message) => {
+            lastWarning = message;  // eslint-disable-line
+        });
+        expect(warn).toHaveBeenCalledTimes(0);
+
+        const nodePermissions = new NodePermissions();
+        nodePermissions.permissions = 0b111111111111;
+        nodeList.setPermissions(nodePermissions);
+
+        // Null ID.
+        nodeList.kickNodeBySessionID(new Uuid());
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(lastWarning).toContain("[networking] kickNodeBySessionID called with an invalid ID");
+
+        // Own ID.
+        nodeList.kickNodeBySessionID(nodeList.getSessionUUID());
+        expect(warn).toHaveBeenCalledTimes(2);
+        expect(lastWarning).toContain("[networking] kickNodeBySessionID called with an invalid ID");
+
+        // Self ID.
+        nodeList.kickNodeBySessionID(new Uuid(Uuid.AVATAR_SELF_ID));
+        expect(warn).toHaveBeenCalledTimes(3);
+        expect(lastWarning).toContain("[networking] kickNodeBySessionID called with an invalid ID");
+
+        // Not an admin.
+        nodePermissions.permissions = 0b000000000001;
+        nodeList.setPermissions(nodePermissions);
+        nodeList.kickNodeBySessionID(Uuid.createUuid());
+        expect(warn).toHaveBeenCalledTimes(4);
+        expect(lastWarning).toContain("[networking] You do not have permissions to kick");
+
+        warn.mockRestore();
     });
 
     afterAll(() => {

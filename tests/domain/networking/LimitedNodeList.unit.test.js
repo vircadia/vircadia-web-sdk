@@ -328,6 +328,20 @@ describe("LimitedNodeList - integration tests", () => {
         expect(LimitedNodeList.connectReasonToString(27)).toBe("Invalid");
     });
 
+    test("Can set and get domain permissions", (done) => {
+        const limitedNodeList = new LimitedNodeList(contextID);
+        limitedNodeList.canKickChanged.connect(() => {
+            expect(limitedNodeList.getThisNodeCanKick()).toBe(true);
+            done();
+        });
+
+        expect(limitedNodeList.getThisNodeCanKick()).toBe(false);
+        const newPermissions = new NodePermissions();
+        newPermissions.permissions = NodePermissions.Permission.canKick;
+        limitedNodeList.setPermissions(newPermissions);
+    });
+
+
     // The following items are tested elsewhere:
     // - sendPacket() - Tested implicitly by NodeList integration test.
     // - sendUnreliablePacket() - Tested implicitly by NodeList integration test.

@@ -99,6 +99,11 @@ describe("AudioMixer - unit tests", () => {
         error.mockReset();
     });
 
+    test("Can access the \"mutedByClient\" signal", () => {
+        const domainServer = new DomainServer();
+        const audioMixer = new AudioMixer(domainServer.contextID);
+        expect(typeof audioMixer.mutedByMixer.connect).toBe("function");
+    });
 
     log.mockReset();
 });

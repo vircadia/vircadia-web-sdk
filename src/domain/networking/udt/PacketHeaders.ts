@@ -209,7 +209,10 @@ const enum PacketTypeValue {
  *      {@link PacketScribe.SetAvatarTraitsDetails}
  *  @property {PacketType} InjectorGainSet - <code>26</code>
  *  @property {PacketType} AssignmentClientStatus - <code>27</code>
- *  @property {PacketType} NoisyMute - <code>28</code>
+ *  @property {PacketType} NoisyMute - <code>28</code> - The Avatar Mixer sends this to the user client, instructing the client
+ *      to mute its audio input. This may be due to the client's background audio being too loud or an admin muting the user in
+ *      the domain.<br />
+ *      This packet contains no content.
  *  @property {PacketType} AvatarIdentity - <code>29</code> - The user client sends this to the Avatar Mixer to update it with
  *      current user avatar identity information. The Avatar Mixer sends this to the user client to update it with identify
  *      information for avatars in the domain.<br />
@@ -283,8 +286,14 @@ const enum PacketTypeValue {
  *      use.<br />
  *      {@link PacketScribe.SelectedAudioFormatDetails}
  *  @property {PacketType} MoreEntityShapes - <code>66</code>
- *  @property {PacketType} NodeKickRequest - <code>67</code>
- *  @property {PacketType} NodeMuteRequest - <code>68</code>
+ *  @property {PacketType} NodeKickRequest - <code>67</code> - The user client sends this to the domain server to kick (ban)
+ *      another user from the domain.<br />
+ *      <em>Reliable.</em><br />
+ *      {@link PacketScribe.NodeKickRequestDetails}
+ *  @property {PacketType} NodeMuteRequest - <code>68</code> - The user client sends this to the audio mixer to mute another
+ *      user for everyone.<br />
+ *      <em>Reliable.</em><br />
+ *      {@link PacketScribe.NodeMuteRequestDetails}
  *  @property {PacketType} RadiusIgnoreRequest - <code>69</code>
  *  @property {PacketType} UsernameFromIDRequest - <code>70</code>
  *  @property {PacketType} UsernameFromIDReply - <code>71</code>
@@ -644,6 +653,8 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.SetAvatarTraits:
                 return DEFAULT_VERSION;
+            case this.NoisyMute:
+                return DEFAULT_VERSION;
             case this.AvatarIdentity:
                 return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.NodeIgnoreRequest:
@@ -673,6 +684,10 @@ const PacketType = new class {
             case this.NegotiateAudioFormat:
                 return DEFAULT_VERSION;
             case this.SelectedAudioFormat:
+                return DEFAULT_VERSION;
+            case this.NodeKickRequest:
+                return DEFAULT_VERSION;
+            case this.NodeMuteRequest:
                 return DEFAULT_VERSION;
             case this.AvatarQuery:
                 return this.#_AvatarQueryVersion.ConicalFrustums;
