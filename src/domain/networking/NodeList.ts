@@ -28,6 +28,7 @@ import NodeType, { NodeTypeValue } from "./NodeType";
 import PacketReceiver from "./PacketReceiver";
 import ReceivedMessage from "./ReceivedMessage";
 import SockAddr from "./SockAddr";
+import ModerationFlags, { BanFlagsValue } from "../shared/ModerationFlags";
 
 
 /*@devdoc
@@ -882,6 +883,25 @@ class NodeList extends LimitedNodeList {
             }
         } else {
             console.warn("[networking] muteNodeBySessionID called with an invalid ID or the current session's ID.");
+        }
+    }
+
+    kickNodeBySessionID(nodeID: Uuid, banFlags: BanFlagsValue = ModerationFlags.getDefaultBanFlags()): void {
+        // C++  void kickNodeBySessionID(const QUuid& nodeID, unsigned int banFlags)
+        if (!nodeID.isNull() && nodeID.value() !== Uuid.AVATAR_SELF_ID && this.getSessionUUID().value() !== nodeID.value()) {
+            if (this.getThisNodeCanKick()) {
+                // setup the packet
+                const kickPacket = PacketScribe.NodeKickRequest.write({
+                    nodeID,
+                    banFlags
+                });
+                console.log("[networking] Sending packet to kick node:", nodeID.stringify());
+                this.sendPacket(kickPacket, this.#_domainHandler.getSockAddr());
+            } else {
+                console.warn("[networking] You do not have permissions to kick in this domain.");
+            }
+        } else {
+            console.warn("[networking] kickNodeBySessionID called with an invalid ID or the current session's ID.");
         }
     }
 

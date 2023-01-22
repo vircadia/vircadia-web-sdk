@@ -11,6 +11,7 @@
 
 import NodeList from "../networking/NodeList";
 import ContextManager from "../shared/ContextManager";
+import ModerationFlags, { BanFlagsValue } from "../shared/ModerationFlags";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Uuid from "../shared/Uuid";
 
@@ -198,6 +199,19 @@ class UsersInterface {
     mute(sessionID: Uuid): void {
         // C++  void UsersScriptingInterface::mute(const QUuid& nodeID);
         this.#_nodeList.muteNodeBySessionID(sessionID);
+    }
+
+    /*@sdkdoc
+     *  Kicks and bans a user. This removes them from the server and prevents them from returning. By default, the ban is by
+     *  username (if available) and by machine fingerprint.
+     *  <p>This method only works if you're an administrator of the domain.</p>
+     *  @param {Uuid} sessionID - The session ID of the user to kick.
+     *  @param {ModerationFlags.BanFlagsValue} banFlags=3 - The methods of banning to use.
+     */
+    kick(sessionID: Uuid, banFlags: BanFlagsValue | undefined): void {
+        // C++  void UsersScriptingInterface::kick(const QUuid& nodeID,
+        //      unsigned int banFlags = ModerationFlags:: getDefaultBanFlags())
+        this.#_nodeList.kickNodeBySessionID(sessionID, banFlags ?? ModerationFlags.getDefaultBanFlags());
     }
 
 

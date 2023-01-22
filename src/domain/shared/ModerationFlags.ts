@@ -12,9 +12,8 @@
 type BanFlagsValue = number;
 
 
-/*@devdoc
+/*@sdkdoc
  *  The <code>ModerationFlags</code> namespace provides values for different methods of kicking (banning) users from a domain.
- *  <p>C++: <code>class ModerationFlags</code></p>
  *  @namespace ModerationFlags
  *  @comment Don't document the constructor because it shouldn't be used in the SDK.
  *
@@ -24,12 +23,12 @@ type BanFlagsValue = number;
 class ModerationFlags {
     // C++  class ModerationFlags
 
-    /*@devdoc
+    /*@sdkdoc
      *  A ban value is the sum of relevant {@link ModerationFlags.BanFlags} values.
      *  @typedef {number} ModerationFlags.BanFlagsValue
      */
 
-    /*@devdoc
+    /*@sdkdoc
      *  A set of flags for moderating ban actions. A {@link ModerationFlags.BanFlagsValue} value is the sum of the relevant flag
      *  values.
      *  @typedef {object} ModerationFlags.BanFlags
@@ -49,7 +48,7 @@ class ModerationFlags {
         BAN_BY_IP: 4
     };
 
-    /*@devdoc
+    /*@sdkdoc
      *  Gets the default ban methods, namely ban by username and machine fingerprint.
      *  @returns {ModerationFlags.BanFlagsValue} The default ban methods.
      */

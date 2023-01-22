@@ -306,6 +306,53 @@ describe("NodeList - integration tests", () => {
         warn.mockRestore();
     });
 
+    test("Can kick a node", () => {
+        const warn = jest.spyOn(console, "warn").mockImplementation(/* no-op */);
+        expect(warn).toHaveBeenCalledTimes(0);
+        const nodePermissions = new NodePermissions();
+        nodePermissions.permissions = 0b111111111111;
+        nodeList.setPermissions(nodePermissions);
+        nodeList.kickNodeBySessionID(Uuid.createUuid());
+        expect(warn).toHaveBeenCalledTimes(0);
+        warn.mockRestore();
+    });
+
+    test("Cannot kick a node if node ID is null, node ID is own ID, self ID, or not an admin", () => {
+        let lastWarning = "";
+        const warn = jest.spyOn(console, "warn").mockImplementation((message) => {
+            lastWarning = message;  // eslint-disable-line
+        });
+        expect(warn).toHaveBeenCalledTimes(0);
+
+        const nodePermissions = new NodePermissions();
+        nodePermissions.permissions = 0b111111111111;
+        nodeList.setPermissions(nodePermissions);
+
+        // Null ID.
+        nodeList.kickNodeBySessionID(new Uuid());
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(lastWarning).toContain("[networking] kickNodeBySessionID called with an invalid ID");
+
+        // Own ID.
+        nodeList.kickNodeBySessionID(nodeList.getSessionUUID());
+        expect(warn).toHaveBeenCalledTimes(2);
+        expect(lastWarning).toContain("[networking] kickNodeBySessionID called with an invalid ID");
+
+        // Self ID.
+        nodeList.kickNodeBySessionID(new Uuid(Uuid.AVATAR_SELF_ID));
+        expect(warn).toHaveBeenCalledTimes(3);
+        expect(lastWarning).toContain("[networking] kickNodeBySessionID called with an invalid ID");
+
+        // Not an admin.
+        nodePermissions.permissions = 0b000000000001;
+        nodeList.setPermissions(nodePermissions);
+        nodeList.kickNodeBySessionID(Uuid.createUuid());
+        expect(warn).toHaveBeenCalledTimes(4);
+        expect(lastWarning).toContain("[networking] You do not have permissions to kick");
+
+        warn.mockRestore();
+    });
+
     afterAll(() => {
         log.mockRestore();
     });

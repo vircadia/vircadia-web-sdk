@@ -419,6 +419,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             domainServer.users.mute(sessionID);
         }
 
+        function onAdminKickClicked(sessionID) {
+            domainServer.users.kick(sessionID);
+        }
+
         function onGainChanged(input, sessionID) {
             const MIN_GAIN = -60.0;
             const MAX_GAIN = 20.0;
@@ -550,6 +554,16 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                 onAdminMuteClicked(sessionID);
             };
             td.appendChild(adminMute);
+            tr.appendChild(td);
+            td = document.createElement("td");
+            const adminKick = document.createElement("input");
+            adminKick.type = "button";
+            adminKick.value = "Kick";
+            adminKick.className = "narrow";
+            adminKick.onclick = () => {
+                onAdminKickClicked(sessionID);
+            };
+            td.appendChild(adminKick);
             tr.appendChild(td);
             avatarListBody.appendChild(tr);
 

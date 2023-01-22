@@ -191,4 +191,21 @@ describe("UsersInterface - unit tests", () => {
         warn.mockRestore();
     });
 
+
+    test("Can call the kick method", () => {
+        let lastWarning = "";
+        const warn = jest.spyOn(console, "warn").mockImplementation((message) => {
+            lastWarning = message;  // eslint-disable-line
+        });
+        expect(warn).toHaveBeenCalledTimes(0);
+
+        const domainServer = new DomainServer();
+        domainServer.users.kick(new Uuid(), domainServer.users.BAN_BY_USERNAME);
+        domainServer.users.kick(new Uuid());
+        expect(warn).toHaveBeenCalledTimes(2);
+        expect(lastWarning).toContain("[networking] kickNodeBySessionID called with an invalid ID");
+
+        warn.mockRestore();
+    });
+
 });
