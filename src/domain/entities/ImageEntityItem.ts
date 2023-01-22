@@ -143,8 +143,8 @@ class ImageEntityItem {
             subImage = {
                 x: data.getUint32(dataPosition, UDT.LITTLE_ENDIAN),
                 y: data.getUint32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                width: data.getUint32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                height: data.getUint32(dataPosition + 4, UDT.LITTLE_ENDIAN)
+                width: data.getUint32(dataPosition + 8, UDT.LITTLE_ENDIAN),
+                height: data.getUint32(dataPosition + 12, UDT.LITTLE_ENDIAN)
             };
             dataPosition += 16;
         }
