@@ -309,6 +309,8 @@ class NodeList extends LimitedNodeList {
             return;
         }
 
+        // FIXME: Connection is not re-established after resetting here.
+        /*
         // When connected, if the session ID or local ID were not null and changed then we should reset.
         const currentLocalID = this.getSessionLocalID();
         const currentSessionID = this.getSessionUUID();
@@ -323,6 +325,7 @@ class NodeList extends LimitedNodeList {
             // Clear any reliable connections using old ID.
             this._nodeSocket.clearConnections();
         }
+        */
 
         this.setSessionLocalID(info.newLocalID);
         this.setSessionUUID(info.newUUID);
