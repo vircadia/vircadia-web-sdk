@@ -3224,6 +3224,439 @@ const EntityData = new class {
 
         }
 
+        // zone properties
+        if (properties.entityType === EntityType.Zone) {
+            const zoneProperties = properties as ZoneEntityProperties;
+
+            if (zoneProperties.shapeType !== undefined)
+            {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone shape type!");
+                    return 0;
+                }
+                dataAfterFlags.setUint32(dataPositionAfterFlags, zoneProperties.shapeType, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_SHAPE_TYPE, true);
+            }
+
+            if (zoneProperties.compoundShapeURL !== undefined)
+            {
+                const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, zoneProperties.compoundShapeURL);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone compound shape URL!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_COMPOUND_SHAPE_URL, true);
+                }
+            }
+
+            if (zoneProperties.keyLight !== undefined && zoneProperties.keyLight.color !== undefined) {
+                const totalSize = 3;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone keylight color!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, zoneProperties.keyLight.color.red);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 1, zoneProperties.keyLight.color.green);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 2, zoneProperties.keyLight.color.blue);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_KEYLIGHT_COLOR, true);
+            }
+
+            if (zoneProperties.keyLight !== undefined && zoneProperties.keyLight.intensity !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone keylight intensity!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.keyLight.intensity, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_KEYLIGHT_INTENSITY, true);
+            }
+
+            if (zoneProperties.keyLight !== undefined && zoneProperties.keyLight.direction !== undefined) {
+                const written = this.#_encodeVec3(dataPositionAfterFlags, dataAfterFlags, zoneProperties.keyLight.direction);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone keylight direction!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_KEYLIGHT_DIRECTION, true);
+                }
+            }
+
+            if (zoneProperties.keyLight !== undefined && zoneProperties.keyLight.castShadows !== undefined) {
+                const totalSize = 1;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone keylight shadow casting state!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, zoneProperties.keyLight.castShadows ? 1 : 0);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_KEYLIGHT_CAST_SHADOW, true);
+            }
+
+            if (zoneProperties.keyLight !== undefined && zoneProperties.keyLight.shadowBias !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone keylight shadow bias!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.keyLight.shadowBias, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_KEYLIGHT_SHADOW_BIAS, true);
+            }
+
+            if (zoneProperties.keyLight !== undefined && zoneProperties.keyLight.shadowMaxDistance !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone keylight shadow max distance!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.keyLight.shadowMaxDistance, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_KEYLIGHT_SHADOW_MAX_DISTANCE, true);
+            }
+
+            if (zoneProperties.ambientLight !== undefined && zoneProperties.ambientLight.intensity !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone ambient light intensity!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.ambientLight.intensity, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_AMBIENT_LIGHT_INTENSITY, true);
+            }
+
+            if (zoneProperties.ambientLight !== undefined && zoneProperties.ambientLight.url !== undefined)
+            {
+                const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, zoneProperties.ambientLight.url);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone ambient light URL!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_AMBIENT_LIGHT_URL, true);
+                }
+            }
+
+            if (zoneProperties.skybox !== undefined && zoneProperties.skybox.color !== undefined) {
+                const totalSize = 3;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone skybox color!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, zoneProperties.skybox.color.red);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 1, zoneProperties.skybox.color.green);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 2, zoneProperties.skybox.color.blue);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_SKYBOX_COLOR, true);
+            }
+
+            if (zoneProperties.skybox !== undefined && zoneProperties.skybox.url !== undefined)
+            {
+                const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, zoneProperties.skybox.url);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone skybox URL!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_SKYBOX_URL, true);
+                }
+            }
+
+            if (zoneProperties.haze !== undefined && zoneProperties.haze.range !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze range!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.haze.range, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_RANGE, true);
+            }
+
+            if (zoneProperties.haze !== undefined && zoneProperties.haze.color !== undefined) {
+                const totalSize = 3;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze color!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, zoneProperties.haze.color.red);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 1, zoneProperties.haze.color.green);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 2, zoneProperties.haze.color.blue);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_COLOR, true);
+            }
+
+            if (zoneProperties.haze !== undefined && zoneProperties.haze.glareColor !== undefined) {
+                const totalSize = 3;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze glare color!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, zoneProperties.haze.glareColor.red);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 1, zoneProperties.haze.glareColor.green);
+                dataAfterFlags.setUint8(dataPositionAfterFlags + 2, zoneProperties.haze.glareColor.blue);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_GLARE_COLOR, true);
+            }
+
+            if (zoneProperties.haze !== undefined && zoneProperties.haze.enableGlare !== undefined) {
+                const totalSize = 1;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze enable glare state!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, zoneProperties.haze.enableGlare ? 1 : 0);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_ENABLE_GLARE, true);
+            }
+
+            if (zoneProperties.haze !== undefined && zoneProperties.haze.glareAngle !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze glare angle!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.haze.glareAngle, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_GLARE_ANGLE, true);
+            }
+
+            if (zoneProperties.haze !== undefined && zoneProperties.haze.altitudeEffect !== undefined) {
+                const totalSize = 1;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze altitude effect state!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, zoneProperties.haze.altitudeEffect ? 1 : 0);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_ALTITUDE_EFFECT, true);
+            }
+
+            if (zoneProperties.haze !== undefined && zoneProperties.haze.ceiling !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze ceiling!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.haze.ceiling, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_CEILING, true);
+            }
+
+            if (zoneProperties.haze !== undefined && zoneProperties.haze.base !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze base!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.haze.base, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_BASE_REF, true);
+            }
+
+            if (zoneProperties.haze !== undefined && zoneProperties.haze.backgroundBlend !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze background blend!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.haze.backgroundBlend, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_BACKGROUND_BLEND, true);
+            }
+
+            if (zoneProperties.haze !== undefined && zoneProperties.haze.attenuateKeyLight !== undefined) {
+                const totalSize = 1;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze keylight attenuation state!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, zoneProperties.haze.attenuateKeyLight ? 1 : 0);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_ATTENUATE_KEYLIGHT, true);
+            }
+
+            if (zoneProperties.haze !== undefined && zoneProperties.haze.keyLightRange !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze keylight range!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.haze.keyLightRange, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_KEYLIGHT_RANGE, true);
+            }
+
+            if (zoneProperties.haze !== undefined && zoneProperties.haze.keyLightAltitude !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze keylight altitude!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.haze.keyLightAltitude, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_KEYLIGHT_ALTITUDE, true);
+            }
+
+            if (zoneProperties.bloom !== undefined && zoneProperties.bloom.intensity !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone bloom intensity!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.bloom.intensity, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_BLOOM_INTENSITY, true);
+            }
+
+            if (zoneProperties.bloom !== undefined && zoneProperties.bloom.threshold !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone bloom threshold!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.bloom.threshold, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_BLOOM_THRESHOLD, true);
+            }
+
+            if (zoneProperties.bloom !== undefined && zoneProperties.bloom.size !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone bloom size!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, zoneProperties.bloom.size, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_BLOOM_SIZE, true);
+            }
+
+            if (zoneProperties.flyingAllowed !== undefined) {
+                const totalSize = 1;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone flying allowed state!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, zoneProperties.flyingAllowed ? 1 : 0);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_FLYING_ALLOWED, true);
+            }
+
+            if (zoneProperties.ghostingAllowed !== undefined) {
+                const totalSize = 1;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone ghosting allowed state!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, zoneProperties.ghostingAllowed ? 1 : 0);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_GHOSTING_ALLOWED, true);
+            }
+
+            if (zoneProperties.filterURL !== undefined)
+            {
+                const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, zoneProperties.filterURL);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone filter URL!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_FILTER_URL, true);
+                }
+            }
+
+            if (zoneProperties.keyLightMode !== undefined)
+            {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone keylight mode!");
+                    return 0;
+                }
+                dataAfterFlags.setUint32(dataPositionAfterFlags, zoneProperties.keyLightMode, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_KEY_LIGHT_MODE, true);
+            }
+
+            if (zoneProperties.ambientLightMode !== undefined)
+            {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone ambient light mode!");
+                    return 0;
+                }
+                dataAfterFlags.setUint32(dataPositionAfterFlags, zoneProperties.ambientLightMode, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_AMBIENT_LIGHT_MODE, true);
+            }
+
+            if (zoneProperties.skyboxMode !== undefined)
+            {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone skybox mode!");
+                    return 0;
+                }
+                dataAfterFlags.setUint32(dataPositionAfterFlags, zoneProperties.skyboxMode, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_SKYBOX_MODE, true);
+            }
+
+            if (zoneProperties.hazeMode !== undefined)
+            {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone haze mode!");
+                    return 0;
+                }
+                dataAfterFlags.setUint32(dataPositionAfterFlags, zoneProperties.hazeMode, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_HAZE_MODE, true);
+            }
+
+            if (zoneProperties.bloomMode !== undefined)
+            {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone bloom mode!");
+                    return 0;
+                }
+                dataAfterFlags.setUint32(dataPositionAfterFlags, zoneProperties.bloomMode, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_BLOOM_MODE, true);
+            }
+
+            if (zoneProperties.avatarPriority !== undefined)
+            {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone avatar priority!");
+                    return 0;
+                }
+                dataAfterFlags.setUint32(dataPositionAfterFlags, zoneProperties.avatarPriority, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_AVATAR_PRIORITY, true);
+            }
+
+            if (zoneProperties.screenshare !== undefined)
+            {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone screenshare!");
+                    return 0;
+                }
+                dataAfterFlags.setUint32(dataPositionAfterFlags, zoneProperties.screenshare, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_SCREENSHARE, true);
+            }
+
+        }
+
         // shape properties
         if (properties.entityType === EntityType.Box ||
            properties.entityType === EntityType.Sphere ||
