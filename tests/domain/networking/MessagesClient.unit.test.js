@@ -9,8 +9,14 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountManagerMock from "../../../mocks/domain/networking/AccountManager.mock.js";
+AccountManagerMock.mock();
+
 import DomainServer from "../../../src/DomainServer";
 import MessagesClient from "../../../src/domain/networking/MessagesClient";
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 
 describe("MessagesClient - unit tests", () => {

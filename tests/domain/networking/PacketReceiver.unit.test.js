@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodeList from "../../../src/domain/networking/NodeList";
 import NodeType from "../../../src/domain/networking/NodeType";
@@ -18,6 +19,9 @@ import Packet from "../../../src/domain/networking/udt/Packet";
 import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Uuid from "../../../src/domain/shared/Uuid";
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 
 describe("PacketReceiver - unit tests", () => {
@@ -42,6 +46,7 @@ describe("PacketReceiver - unit tests", () => {
     sockAddr.setPort(7);
 
     const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AccountManager, contextID);  // Required by NodeList.
     ContextManager.set(contextID, AddressManager);  // Required by NodeList.
     ContextManager.set(contextID, NodeList, contextID);
 

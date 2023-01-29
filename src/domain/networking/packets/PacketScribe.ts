@@ -30,6 +30,7 @@ import NodeIgnoreRequest from "./NodeIgnoreRequest";
 import DomainConnectRequest from "./DomainConnectRequest";
 import EntityData from "./EntityData";
 import EntityQuery from "./EntityQuery";
+import DomainServerConnectionToken from "./DomainServerConnectionToken";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
 import DomainServerRemovedNode from "./DomainServerRemovedNode";
 import MessagesData from "./MessagesData";
@@ -37,6 +38,8 @@ import MessagesSubscribe from "../packets/MessagesSubscribe";
 import MessagesUnsubscribe from "../packets/MessagesUnsubscribe";
 import NegotiateAudioFormat from "./NegotiateAudioFormat";
 import SelectedAudioFormat from "./SelectedAudioFormat";
+import NodeKickRequest from "./NodeKickRequest";
+import NodeMuteRequest from "./NodeMuteRequest";
 import AvatarQuery from "./AvatarQuery";
 import RequestsDomainListData from "./RequestsDomainListData";
 import PerAvatarGainSet from "./PerAvatarGainSet";
@@ -92,6 +95,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.EntityData&period;read|EntityData&period;read}
  *  @property {function} EntityQuery.write -
  *      {@link PacketScribe.EntityQuery&period;write|EntityQuery&period;write}
+ *  @property {function} DomainServerConnectionToken.read -
+ *      {@link PacketScribe.DomainServerConnectionToken&period;read|DomainServerConnectionToken&period;read}
  *  @property {function} DomainDisconnectRequest.write -
  *      {@link PacketScribe.DomainDisconnectRequest&period;write|DomainDisconnectRequest&period;write}
  *  @property {function} DomainServerRemovedNode.read -
@@ -108,6 +113,10 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.NegotiateAudioFormat&period;write|NegotiateAudioFormat&period;write}
  *  @property {function} SelectedAudioFormat.read -
  *      {@link PacketScribe.SelectedAudioFormat&period;read|SelectedAudioFormat&period;read}
+ *  @property {function} NodeKickRequest.write -
+ *      {@link PacketScribe.NodeKickRequest&period;write|NodeKickRequest&period;write}
+ *  @property {function} NodeMuteRequest.write -
+ *      {@link PacketScribe.NodeMuteRequest&period;write|NodeMuteRequest&period;write}
  *  @property {function} AvatarQuery.write -
  *      {@link PacketScribe.AvatarQuery&period;write|AvatarQuery&period;write}
  *  @property {function} RequestsDomainListData.write -
@@ -147,6 +156,7 @@ const PacketScribe = {
     DomainConnectRequest,
     EntityData,
     EntityQuery,
+    DomainServerConnectionToken,
     DomainDisconnectRequest,
     DomainServerRemovedNode,
     MessagesData,
@@ -154,6 +164,8 @@ const PacketScribe = {
     MessagesUnsubscribe,
     NegotiateAudioFormat,
     SelectedAudioFormat,
+    NodeKickRequest,
+    NodeMuteRequest,
     AvatarQuery,
     RequestsDomainListData,
     PerAvatarGainSet,

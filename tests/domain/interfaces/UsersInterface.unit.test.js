@@ -9,17 +9,29 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-/* eslint-disable @typescript-eslint/no-magic-numbers */
+import AccountManagerMock from "../../../mocks/domain/networking/AccountManager.mock.js";
+AccountManagerMock.mock();
 
+import UsersInterface from "../../../src/domain/interfaces/UsersInterface";
 import Uuid from "../../../src/domain/shared/Uuid";
 import DomainServer from "../../../src/DomainServer";
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 
 describe("UsersInterface - unit tests", () => {
 
+    /* eslint-disable @typescript-eslint/no-magic-numbers */
+
     test("Can access the users interface", () => {
         const domainServer = new DomainServer();
-        expect(typeof domainServer.users).toBe("object");
+        expect(domainServer.users instanceof UsersInterface).toBe(true);
+    });
+
+    test("Can access the signals", () => {
+        const domainServer = new DomainServer();
+        expect(typeof domainServer.users.canKickChanged.connect).toBe("function");
     });
 
     test("Error logged if try to set avatar gain for invalid session ID or gain values", () => {
@@ -157,6 +169,43 @@ describe("UsersInterface - unit tests", () => {
         expect(domainServer.users.wantIgnored).toBe(true);
         domainServer.users.wantIgnored = false;
         expect(domainServer.users.wantIgnored).toBe(false);
+    });
+
+    test("Can get the canKick property", () => {
+        const domainServer = new DomainServer();
+        expect(domainServer.users.canKick).toBe(false);
+    });
+
+    test("Can call the mute method", () => {
+        let lastWarning = "";
+        const warn = jest.spyOn(console, "warn").mockImplementation((message) => {
+            lastWarning = message;  // eslint-disable-line
+        });
+        expect(warn).toHaveBeenCalledTimes(0);
+
+        const domainServer = new DomainServer();
+        domainServer.users.mute(new Uuid());
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(lastWarning).toContain("[networking] muteNodeBySessionID called with an invalid ID");
+
+        warn.mockRestore();
+    });
+
+
+    test("Can call the kick method", () => {
+        let lastWarning = "";
+        const warn = jest.spyOn(console, "warn").mockImplementation((message) => {
+            lastWarning = message;  // eslint-disable-line
+        });
+        expect(warn).toHaveBeenCalledTimes(0);
+
+        const domainServer = new DomainServer();
+        domainServer.users.kick(new Uuid(), domainServer.users.BAN_BY_USERNAME);
+        domainServer.users.kick(new Uuid());
+        expect(warn).toHaveBeenCalledTimes(2);
+        expect(lastWarning).toContain("[networking] kickNodeBySessionID called with an invalid ID");
+
+        warn.mockRestore();
     });
 
 });

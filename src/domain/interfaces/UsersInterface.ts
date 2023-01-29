@@ -11,6 +11,8 @@
 
 import NodeList from "../networking/NodeList";
 import ContextManager from "../shared/ContextManager";
+import ModerationFlags, { BanFlagsValue } from "../shared/ModerationFlags";
+import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Uuid from "../shared/Uuid";
 
 
@@ -20,6 +22,11 @@ import Uuid from "../shared/Uuid";
  *  @namespace UsersInterface
  *  @comment Don't document the constructor because it shouldn't be used in the SDK.
  *
+ *  @property {boolean} canKick - <code>true</code> if the domain server allows the user to kick (ban) users, otherwise
+ *      <code>false</code>.
+ *      <p><em>Read-only.</em></p>
+ *  @property {Signal<UsersInterface~canKickChanged>} canKickChanged - Triggered when the user's ability to kick (ban) users
+ *      changes.
  *  @property {boolean} wantIgnored=false - <code>true</code> to make the audio and avatar mixers to continue sending data from
  *      ignored users or users that have ignored the client, <code>false</code> to have them not to send such data.
  *      <p>Note: The audio mixer only continues to send audio from ignored or ignoring users if the client is an admin in the
@@ -29,12 +36,21 @@ class UsersInterface {
     // C++  class UsersScriptingInterface : public QObject, public Dependency
 
     #_nodeList: NodeList;
+    #_canKickChanged = new SignalEmitter();
 
 
     constructor(contextID: number) {
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
+        this.#_nodeList.canKickChanged.connect(() => {
+            this.#_canKickChanged.emit();
+        });
     }
 
+
+    get canKick(): boolean {
+        // C++  bool UsersScriptingInterface::getCanKick()
+        return this.#_nodeList.getThisNodeCanKick();
+    }
 
     get wantIgnored(): boolean {
         // C++  bool UsersScriptingInterface::getRequestsDomainListData()
@@ -49,7 +65,7 @@ class UsersInterface {
 
     /*@sdkdoc
      *  Sets a user's gain (volume) for the audio received from them. Typical range: <code>-60</code>dB &ndash;
-     *  <code>+20</code>db.
+     *  <code>+20</code>dB.
      *  @param {Uuid} id - The user's session ID.
      *  @param {number} gain - The gain to set, in dB.
      */
@@ -173,6 +189,39 @@ class UsersInterface {
         }
 
         return this.#_nodeList.isIgnoringNode(id);
+    }
+
+    /*@sdkdoc
+     *  Mutes another user's microphone for everyone. The mute is not permanent: the user can unmute themselves.
+     *  <p>This method only works if you're an administrator of the domain.</p>
+     *  @param {Uuid} sessionID - The session ID of the user to mute.
+     */
+    mute(sessionID: Uuid): void {
+        // C++  void UsersScriptingInterface::mute(const QUuid& nodeID);
+        this.#_nodeList.muteNodeBySessionID(sessionID);
+    }
+
+    /*@sdkdoc
+     *  Kicks and bans a user. This removes them from the server and prevents them from returning. By default, the ban is by
+     *  username (if available) and by machine fingerprint.
+     *  <p>This method only works if you're an administrator of the domain.</p>
+     *  @param {Uuid} sessionID - The session ID of the user to kick.
+     *  @param {ModerationFlags.BanFlagsValue} banFlags=3 - The methods of banning to use.
+     */
+    kick(sessionID: Uuid, banFlags: BanFlagsValue | undefined): void {
+        // C++  void UsersScriptingInterface::kick(const QUuid& nodeID,
+        //      unsigned int banFlags = ModerationFlags:: getDefaultBanFlags())
+        this.#_nodeList.kickNodeBySessionID(sessionID, banFlags ?? ModerationFlags.getDefaultBanFlags());
+    }
+
+
+    /*@sdkdoc
+     *  Triggered when the user's ability to kick (ban) users changes.
+     *  @callback UsersInterface~canKickChanged
+     */
+    get canKickChanged(): Signal {
+        // C++  void AccountManager::authRequired()
+        return this.#_canKickChanged.signal();
     }
 
 }

@@ -18,9 +18,25 @@ describe("NodePermissions - unit tests", () => {
 
     test("Can set and get permission values", () => {
         const nodePermissions = new NodePermissions();
-        expect(nodePermissions.permission).toBe(NodePermissions.DEFAULT_AGENT_PERMISSIONS);
+        expect(nodePermissions.permissions).toBe(NodePermissions.Permission.none);
         nodePermissions.permissions = 7;
         expect(nodePermissions.permissions).toBe(7);
+    });
+
+    test("Can get permission constants", () => {
+        expect(NodePermissions.Permission.none).toBe(0);
+        expect(NodePermissions.Permission.canKick).toBe(64);
+        expect(NodePermissions.Permission.canRezAvatarEntities).toBe(2048);
+    });
+
+    test("Can set and get permissions", () => {
+        const nodePermissions = new NodePermissions();
+        nodePermissions.permissions = NodePermissions.Permission.canAdjustLocks
+            | NodePermissions.Permission.canConnectPastMaxCapacity;
+        expect(nodePermissions.can(NodePermissions.Permission.canAdjustLocks)).toBe(true);
+        expect(nodePermissions.can(NodePermissions.Permission.canConnectPastMaxCapacity)).toBe(true);
+        expect(nodePermissions.can(NodePermissions.Permission.canConnectToDomain)).toBe(false);
+        expect(nodePermissions.can(NodePermissions.Permission.canRezAvatarEntities)).toBe(false);
     });
 
 });

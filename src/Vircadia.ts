@@ -52,6 +52,9 @@ export { default as EntityServer } from "./EntityServer";
 export { default as MessageMixer } from "./MessageMixer";
 export type { AssignmentClientState } from "./domain/AssignmentClient";
 
+export { default as ModerationFlags } from "./domain/shared/ModerationFlags";
+export type { BanFlagsValue } from "./domain/shared/ModerationFlags";
+
 export { default as SignalEmitter } from "./domain/shared/SignalEmitter";
 export type { Signal, Slot } from "./domain/shared/SignalEmitter";
 

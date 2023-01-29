@@ -10,12 +10,16 @@
 //
 
 import DomainServer from "../src/DomainServer";
+import { protocolVersionsSignature } from "../src/domain/networking/udt/PacketHeaders";
 import Uuid from "../src/domain/shared/Uuid";
 
-import TestConfig from "./test.config.js";
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 
 import "wrtc";  // WebRTC Node.js package.
-import { protocolVersionsSignature } from "../src/domain/networking/udt/PacketHeaders";
+
+import TestConfig from "./test.config.js";
 
 
 // Time needs to be allowed for the WebRTC RTCPeerConnection from one test to be closed before creating a new one in the

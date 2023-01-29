@@ -9,14 +9,28 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import ContextManager from "../shared/ContextManager";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Url from "../shared/Url";
 import Uuid from "../shared/Uuid";
+import PacketScribe from "./packets/PacketScribe";
+import AccountManager from "./AccountManager";
 import { LocalID } from "./NetworkPeer";
 import NodeList from "./NodeList";
-import SockAddr from "./SockAddr";
-import PacketScribe from "./packets/PacketScribe";
 import ReceivedMessage from "./ReceivedMessage";
+import SockAddr from "./SockAddr";
+
+
+enum ConnectionRefusedReason {
+    Unknown,
+    ProtocolMismatch,
+    LoginErrorMetaverse,
+    NotAuthorizedMetaverse,
+    TooManyUsers,
+    TimedOut,
+    LoginErrorDomain,
+    NotAuthorizedDomain
+}
 
 
 /*@devdoc
@@ -62,32 +76,32 @@ class DomainHandler {
     /*@devdoc
      *  The reasons that a client may be refused connection to a domain.
      *  @typedef {object} DomainHandler.ConnectionRefusedReasons
-     *  @property {number} Unknown - <code>0</code>:
+     *  @property {DomainHandler.ConnectionRefusedReason} Unknown - <code>0</code>:
      *      Some unknown reason.
-     *  @property {number} ProtocolMismatch - <code>1</code>:
+     *  @property {DomainHandler.ConnectionRefusedReason} ProtocolMismatch - <code>1</code>:
      *      The communications protocols of the domain and your client are not the same.
-     *  @property {number} LoginErrorMetaverse - <code>2</code>:
+     *  @property {DomainHandler.ConnectionRefusedReason} LoginErrorMetaverse - <code>2</code>:
      *      You could not be logged into the domain per your metaverse login.
-     *  @property {number} NotAuthorizedMetaverse - <code>3</code>:
+     *  @property {DomainHandler.ConnectionRefusedReason} NotAuthorizedMetaverse - <code>3</code>:
      *      You are not authorized to connect to the domain per your metaverse login.
-     *  @property {number} TooManyUsers - <code>4</code>:
+     *  @property {DomainHandler.ConnectionRefusedReason} TooManyUsers - <code>4</code>:
      *      The domain already has its maximum number of users.
-     *  @property {number} TimedOut - <code>5</code>:
+     *  @property {DomainHandler.ConnectionRefusedReason} TimedOut - <code>5</code>:
      *      Connecting to the domain timed out.
-     *  @property {number} LoginErrorDomain - <code>6</code>:
+     *  @property {DomainHandler.ConnectionRefusedReason} LoginErrorDomain - <code>6</code>:
      *      You could not be logged into the domain per your domain login.
-     *  @property {number} NotAuthorizedDomain - <code>7</code>:
+     *  @property {DomainHandler.ConnectionRefusedReason} NotAuthorizedDomain - <code>7</code>:
      *      You are not authorized to connect to the domain per your domain login.
      */
     static readonly ConnectionRefusedReason = new class {
-        readonly Unknown = 0;
-        readonly ProtocolMismatch = 1;
-        readonly LoginErrorMetaverse = 2;
-        readonly NotAuthorizedMetaverse = 3;
-        readonly TooManyUsers = 4;
-        readonly TimedOut = 5;
-        readonly LoginErrorDomain = 6;
-        readonly NotAuthorizedDomain = 7;
+        readonly Unknown: ConnectionRefusedReason = 0;
+        readonly ProtocolMismatch: ConnectionRefusedReason = 1;
+        readonly LoginErrorMetaverse: ConnectionRefusedReason = 2;
+        readonly NotAuthorizedMetaverse: ConnectionRefusedReason = 3;
+        readonly TooManyUsers: ConnectionRefusedReason = 4;
+        readonly TimedOut: ConnectionRefusedReason = 5;
+        readonly LoginErrorDomain: ConnectionRefusedReason = 6;
+        readonly NotAuthorizedDomain: ConnectionRefusedReason = 7;
     }();
 
     static readonly #SILENT_DOMAIN_TRAFFIC_DROP_MIN = 2;
@@ -98,7 +112,8 @@ class DomainHandler {
     #_sockAddr = new SockAddr();  // For WebRTC, the port is the critical part.
     #_isConnected = false;
     #_localID = 0;
-    #_uuid = new Uuid(Uuid.NULL);
+    #_uuid = new Uuid();
+    #_connectionToken = new Uuid();
 
     #_errorDomainURL = new Url();
     #_domainConnectionRefusals: Set<string> = new Set();
@@ -110,13 +125,19 @@ class DomainHandler {
     #_limitOfSilentDomainCheckInsReached = new SignalEmitter();
 
     #_pendingPath = "";
+    #_hasCheckedForAccessToken = false;
+    #_connectionDenialsSinceKeypairRegen = 0;
 
-    // Context objects.
+    // Context.
+    #_contextID;
     #_nodeList;
 
 
-    constructor(parent: NodeList) {
+    constructor(contextID: number, parent: NodeList) {
         // C++  DomainHandler(QObject* parent = 0);
+
+        this.#_contextID = contextID;
+
         this.#_nodeList = parent;
         this.#_sockAddr.setObjectName("DomainServer");
 
@@ -213,6 +234,24 @@ class DomainHandler {
     }
 
     /*@devdoc
+     *  Gets the token for the domain connection.
+     *  @returns {Uuid} The domain connection token.
+     */
+    getConnectionToken(): Uuid {
+        // C++  const QUuid& getConnectionToken() const
+        return this.#_connectionToken;
+    }
+
+    /*@devdoc
+     *  Sets the token for the domain connection.
+     *  @param {Uuid} connectionToken - The domain connection token.
+     */
+    setConnectionToken(connectionToken: Uuid): void {
+        // C++  void setConnectionToken(const QUuid& connectionToken)
+        this.#_connectionToken = connectionToken;
+    }
+
+    /*@devdoc
      *  Sets whether the client is connected to the domain.
      *  @param {boolean} isConnected - <code>true</code> if the client is connected to the domain, <code>false</code> if it
      *      isn't.
@@ -264,8 +303,9 @@ class DomainHandler {
             this.#sendDisconnectPacket();
         }
 
-        // clear member variables that hold the connection state to a domain
-        this.#_uuid = new Uuid(Uuid.NULL);
+        // Clear member variables that hold the connection state to a domain.
+        this.#_uuid = new Uuid();
+        this.#_connectionToken = new Uuid();
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -336,6 +376,7 @@ class DomainHandler {
 
         // WEBRTC TODO: Address further C++ code.
 
+        this.#_connectionDenialsSinceKeypairRegen = 0;
         this.#_checkInPacketsSinceLastReply = 0;
 
         // WEBRTC TODO: Address further C++ code.
@@ -357,7 +398,7 @@ class DomainHandler {
         this.#_checkInPacketsSinceLastReply = 0;
 
         const info = PacketScribe.DomainConnectionDenied.read(message.getMessage());
-        const sanitizedExtraInfo = info.extraInfo.toLowerCase().startsWith("http") ? "" : info.extraInfo;
+        const sanitizedExtraInfo = info.extraInfo.toLowerCase().startsWith("http") ? "" : info.extraInfo;  // Don't log URLs.
         console.warn("[networking] The domain-server denied a connection request: ", info.reasonMessage, "extraInfo:",
             sanitizedExtraInfo);
 
@@ -366,7 +407,34 @@ class DomainHandler {
             this.setRedirectErrorState(this.#_errorDomainURL, info.reasonMessage, info.reasonCode, info.extraInfo);
         }
 
-        // WEBRTC TODO: Address further C++ code.
+        // Some connection refusal reasons imply that a login is required. If so, suggest a new login.
+        if (this.#reasonSuggestsMetaverseLogin(info.reasonCode)) {
+            console.warn("[networking] Make sure you are logged in to the metaverse.");
+
+            const accountManager = ContextManager.get(this.#_contextID, AccountManager) as AccountManager;
+
+            if (!this.#_hasCheckedForAccessToken) {
+                accountManager.checkAndSignalForAccessToken();
+                this.#_hasCheckedForAccessToken = true;
+            }
+
+            // Regenerate the key pair after several failed attempts.
+            const CONNECTION_DENIALS_FOR_KEYPAIR_REGEN = 3;
+            this.#_connectionDenialsSinceKeypairRegen += 1;
+            if (this.#_connectionDenialsSinceKeypairRegen >= CONNECTION_DENIALS_FOR_KEYPAIR_REGEN) {
+                accountManager.generateNewUserKeypair();
+                this.#_connectionDenialsSinceKeypairRegen = 0;
+            }
+
+            // WEBRTC TODO: Address further C++ code - domain login.
+
+        } else if (this.#reasonSuggestsDomainLogin(info.reasonCode)) {
+            console.warn("[networking] Make sure you are logged in to the domain.");
+
+            // WEBRTC TODO: Address further C++ code.
+
+            console.error("Domain login not implemented.");
+        }
 
     };
 
@@ -514,9 +582,42 @@ class DomainHandler {
         this.#_sockAddr = new SockAddr();
         this.#_domainConnectionRefusals.clear();
 
-        // WEBRTC TODO: Address further C++ code.
+        this.#_hasCheckedForAccessToken = false;
+        this.#_pendingPath = "";
     }
 
+    #reasonSuggestsMetaverseLogin(reasonCode: ConnectionRefusedReason): boolean {  // eslint-disable-line class-methods-use-this
+        // C++  bool reasonSuggestsMetaverseLogin(ConnectionRefusedReason reasonCode)
+
+        switch (reasonCode) {
+            case ConnectionRefusedReason.LoginErrorMetaverse:
+            case ConnectionRefusedReason.NotAuthorizedMetaverse:
+                return true;
+
+            case ConnectionRefusedReason.Unknown:
+            case ConnectionRefusedReason.ProtocolMismatch:
+            case ConnectionRefusedReason.TooManyUsers:
+            case ConnectionRefusedReason.NotAuthorizedDomain:
+            default:
+                return false;
+        }
+    }
+
+    #reasonSuggestsDomainLogin(reasonCode: ConnectionRefusedReason): boolean {  // eslint-disable-line class-methods-use-this
+        // C++  bool reasonSuggestsDomainLogin(ConnectionRefusedReason reasonCode) {
+        switch (reasonCode) {
+            case ConnectionRefusedReason.LoginErrorDomain:
+            case ConnectionRefusedReason.NotAuthorizedDomain:
+                return true;
+
+            case ConnectionRefusedReason.Unknown:
+            case ConnectionRefusedReason.ProtocolMismatch:
+            case ConnectionRefusedReason.TooManyUsers:
+            case ConnectionRefusedReason.NotAuthorizedMetaverse:
+            default:
+                return false;
+        }
+    }
 }
 
 export default DomainHandler;

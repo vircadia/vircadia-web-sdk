@@ -13,7 +13,7 @@
  *  The <code>Url</code> class provides a Qt-style URL facility.
  *  <p>C++: <code>QUrl</code></p>
  *  @class Url
- *  @param {string} [url] - A string representation of a URL.
+ *  @param {string|Url} [url] - A string representation of a URL or another <code>Url</code>.
  */
 class Url {
     // C++  Qt's QUrl class.
@@ -22,11 +22,15 @@ class Url {
     #_url: URL | null;  // The JavaScript URL value if the raw value is a valid URL.
 
 
-    constructor(url?: string) {
-        this.#_raw = url ?? null;
-        if (url !== undefined) {
+    constructor(url?: Url | string) {
+        if (url instanceof Url) {
+            this.#_raw = !url.isEmpty() ? url.toString() : null;
+        } else {
+            this.#_raw = url ?? null;
+        }
+        if (this.#_raw !== null) {
             try {
-                this.#_url = new URL(url);
+                this.#_url = new URL(this.#_raw);
             } catch (e) {
                 this.#_url = null;
             }
@@ -96,12 +100,43 @@ class Url {
     }
 
     /*@devdoc
-     *  Gets the path (the part after the host and port, and before any query) of the URL.
+     *  Gets the path of the URL - the part after the host and port, and before any query.
      *  @returns {string} The path of the URL if valid, <code>""</code> if invalid.
      */
     path(): string {
         // C++  QString QUrl::path(QUrl::ComponentFormattingOptions options = FullyDecoded) const
         return this.#_url?.pathname ?? "";
+    }
+
+    /*@devdoc
+     *  Sets the path of the URL - the part after the host and port, and before any query - if the URL is valid.
+     *  @param {string} path - The path to set.
+     */
+    setPath(path: string): void {
+        // C++  void QUrl::setPath(const QString & path, QUrl:: ParsingMode mode = DecodedMode)
+        if (this.#_url) {
+            this.#_url.pathname = path;
+        }
+    }
+
+    /*@devdoc
+     *  Gets the query of the URL - the part after the path, starting with and including <code>"?"</code>.
+     *  @returns {string} The query of the URL if valid, <code>""</code> if invalid.
+     */
+    query(): string {
+        // C++  QString QUrl::query(QUrl::ComponentFormattingOptions options = PrettyDecoded) const
+        return this.#_url?.search ?? "";
+    }
+
+    /*@devdoc
+     *  Sets the query of the URL - the part after the path, starting with and including <code>"?"</code> - if the URL is valid.
+     *  @param {string} query - The query to set, including the leading <code>"?"</code>.
+     */
+    setQuery(query: string): void {
+        // C++  void QUrl::setQuery(const QString &query, QUrl::ParsingMode mode = TolerantMode)
+        if (this.#_url) {
+            this.#_url.search = query;
+        }
     }
 
     /*@devdoc

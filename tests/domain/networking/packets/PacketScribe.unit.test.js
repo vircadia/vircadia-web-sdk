@@ -53,6 +53,12 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.NodeIgnoreRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainConnectRequest).toBe("object");
         expect(typeof PacketScribe.DomainConnectRequest.write).toBe("function");
+        expect(typeof PacketScribe.EntityData).toBe("object");
+        expect(typeof PacketScribe.EntityData.read).toBe("function");
+        expect(typeof PacketScribe.EntityQuery).toBe("object");
+        expect(typeof PacketScribe.EntityQuery.write).toBe("function");
+        expect(typeof PacketScribe.DomainServerConnectionToken).toBe("object");
+        expect(typeof PacketScribe.DomainServerConnectionToken.read).toBe("function");
         expect(typeof PacketScribe.DomainDisconnectRequest).toBe("object");
         expect(typeof PacketScribe.DomainDisconnectRequest.write).toBe("function");
         expect(typeof PacketScribe.DomainServerRemovedNode).toBe("object");
@@ -68,6 +74,10 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.NegotiateAudioFormat.write).toBe("function");
         expect(typeof PacketScribe.SelectedAudioFormat).toBe("object");
         expect(typeof PacketScribe.SelectedAudioFormat.read).toBe("function");
+        expect(typeof PacketScribe.NodeKickRequest).toBe("object");
+        expect(typeof PacketScribe.NodeKickRequest.write).toBe("function");
+        expect(typeof PacketScribe.NodeMuteRequest).toBe("object");
+        expect(typeof PacketScribe.NodeMuteRequest.write).toBe("function");
         expect(typeof PacketScribe.AvatarQuery).toBe("object");
         expect(typeof PacketScribe.AvatarQuery.write).toBe("function");
         expect(typeof PacketScribe.RequestsDomainListData).toBe("object");

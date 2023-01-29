@@ -13,14 +13,14 @@ import assert from "../../shared/assert";
 
 
 /*@devdoc
- *  {@link PacketType(1)|Packet types}, <code>Unknown</code>, <code>StunResponse</code>, <code>...</code>, are represented as
- *  unsigned 8-bit numbers in the protocol packets.
+ *  {@link PacketType(1)|Packet types}, <code>Unknown</code>, <code>DomainConnectRequestPending</code>, <code>...</code>, are
+ *  represented as unsigned 8-bit numbers in the protocol packets.
  *  @typedef {number} PacketType
  */
 // Could just define `type PacketTypeValue = number` however using an object improves type safety.
 const enum PacketTypeValue {
     Unknown,                            // 0
-    StunResponse,
+    DomainConnectRequestPending,
     DomainList,
     Ping,
     PingReply,
@@ -139,7 +139,11 @@ const enum PacketTypeValue {
  *  @namespace PacketType
  *  @variation 1
  *  @property {PacketType} Unknown - <code>0</code>
- *  @property {PacketType} StunResponse - <code>1</code>
+ *  @property {PacketType} DomainConnectRequestPending - <code>1</code> - The user client may send this to the Domain Server
+ *      as a synonym for sending a <code>DomainConnectRequest</code> packet. This is provided as packet <code>1</code> for a
+ *      future version of the protocol so that protocol breaks can be better handled.<br />
+ *      The Domain Server responds with a DomainList or DomainConnectionDenied packet.<br />
+ *      {@link PacketScribe.DomainConnectRequestDetails}
  *  @property {PacketType} DomainList - <code>2</code> - The Domain Server sends this to the user client in response to a
  *      DomainConnectRequest or DomainListRequest packet, if the client is authorized to connect to the domain.<br />
  *      {@link PacketScribe.DomainListDetails}
@@ -205,7 +209,10 @@ const enum PacketTypeValue {
  *      {@link PacketScribe.SetAvatarTraitsDetails}
  *  @property {PacketType} InjectorGainSet - <code>26</code>
  *  @property {PacketType} AssignmentClientStatus - <code>27</code>
- *  @property {PacketType} NoisyMute - <code>28</code>
+ *  @property {PacketType} NoisyMute - <code>28</code> - The Avatar Mixer sends this to the user client, instructing the client
+ *      to mute its audio input. This may be due to the client's background audio being too loud or an admin muting the user in
+ *      the domain.<br />
+ *      This packet contains no content.
  *  @property {PacketType} AvatarIdentity - <code>29</code> - The user client sends this to the Avatar Mixer to update it with
  *      current user avatar identity information. The Avatar Mixer sends this to the user client to update it with identify
  *      information for avatars in the domain.<br />
@@ -237,7 +244,9 @@ const enum PacketTypeValue {
  *  @property {PacketType} EntityAdd - <code>43</code>
  *  @property {PacketType} EntityErase - <code>44</code>
  *  @property {PacketType} EntityEdit - <code>45</code>
- *  @property {PacketType} DomainServerConnectionToken - <code>46</code>
+ *  @property {PacketType} DomainServerConnectionToken - <code>46</code> - The Domain Server sends this to the client when the
+ *      client tries to log into the domain.<br />
+ *      {@link PacketScribe.DomainServerConnectionTokenDetails}
  *  @property {PacketType} DomainSettingsRequest - <code>47</code>
  *  @property {PacketType} DomainSettings - <code>48</code>
  *  @property {PacketType} AssetGet - <code>49</code>
@@ -277,8 +286,14 @@ const enum PacketTypeValue {
  *      use.<br />
  *      {@link PacketScribe.SelectedAudioFormatDetails}
  *  @property {PacketType} MoreEntityShapes - <code>66</code>
- *  @property {PacketType} NodeKickRequest - <code>67</code>
- *  @property {PacketType} NodeMuteRequest - <code>68</code>
+ *  @property {PacketType} NodeKickRequest - <code>67</code> - The user client sends this to the domain server to kick (ban)
+ *      another user from the domain.<br />
+ *      <em>Reliable.</em><br />
+ *      {@link PacketScribe.NodeKickRequestDetails}
+ *  @property {PacketType} NodeMuteRequest - <code>68</code> - The user client sends this to the audio mixer to mute another
+ *      user for everyone.<br />
+ *      <em>Reliable.</em><br />
+ *      {@link PacketScribe.NodeMuteRequestDetails}
  *  @property {PacketType} RadiusIgnoreRequest - <code>69</code>
  *  @property {PacketType} UsernameFromIDRequest - <code>70</code>
  *  @property {PacketType} UsernameFromIDReply - <code>71</code>
@@ -339,7 +354,7 @@ const PacketType = new class {
 
     // Property values are manually added because doing so provides additional type safety compared to adding at runtime.
     readonly Unknown = PacketTypeValue.Unknown;
-    readonly StunResponse = PacketTypeValue.StunResponse;
+    readonly DomainConnectRequestPending = PacketTypeValue.DomainConnectRequestPending;
     readonly DomainList = PacketTypeValue.DomainList;
     readonly Ping = PacketTypeValue.Ping;
     readonly PingReply = PacketTypeValue.PingReply;
@@ -461,7 +476,7 @@ const PacketType = new class {
 
     // Packets that don't include the local node ID of the sending node.
     readonly #_nonSourcedPackets = new Set([
-        PacketTypeValue.StunResponse,
+        PacketTypeValue.DomainConnectRequestPending,
         PacketTypeValue.CreateAssignment,
         PacketTypeValue.RequestAssignment,
         PacketTypeValue.DomainServerRequireDTLS,
@@ -602,6 +617,8 @@ const PacketType = new class {
         // C++  PacketVersion versionForPacketType(PacketType packetType)
         const DEFAULT_VERSION = 22;
         switch (packetType) {
+            case this.DomainConnectRequestPending:
+                return DEFAULT_VERSION;
             case this.DomainList:
                 return this.#_DomainListVersion.SocketTypes;
             case this.Ping:
@@ -636,12 +653,16 @@ const PacketType = new class {
                 return DEFAULT_VERSION;
             case this.SetAvatarTraits:
                 return DEFAULT_VERSION;
+            case this.NoisyMute:
+                return DEFAULT_VERSION;
             case this.AvatarIdentity:
                 return this.#_AvatarMixerPacketVersion.ARKitBlendshapes;
             case this.NodeIgnoreRequest:
                 return 18;  // eslint-disable-line @typescript-eslint/no-magic-numbers
             case this.DomainConnectRequest:
                 return this.#_DomainConnectRequestVersion.SocketTypes;
+            case this.AudioEnvironment:
+                return DEFAULT_VERSION;
             case this.EntityEdit:
             case this.EntityAdd:
             case this.EntityData:
@@ -650,7 +671,7 @@ const PacketType = new class {
                 return this.#_EntityQueryPacketVersion.ConicalFrustums;
             case this.EntityErase:
                 return DEFAULT_VERSION;
-            case this.AudioEnvironment:
+            case this.DomainServerConnectionToken:
                 return DEFAULT_VERSION;
             case this.DomainDisconnectRequest:
                 return DEFAULT_VERSION;
@@ -665,6 +686,10 @@ const PacketType = new class {
             case this.NegotiateAudioFormat:
                 return DEFAULT_VERSION;
             case this.SelectedAudioFormat:
+                return DEFAULT_VERSION;
+            case this.NodeKickRequest:
+                return DEFAULT_VERSION;
+            case this.NodeMuteRequest:
                 return DEFAULT_VERSION;
             case this.AvatarQuery:
                 return this.#_AvatarQueryVersion.ConicalFrustums;

@@ -12,12 +12,15 @@
 import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
 
-
 import AudioOutput from "../../../src/domain/audio/AudioOutput";
 import AudioClient from "../../../src/domain/audio-client/AudioClient";
+import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodeList from "../../../src/domain/networking/NodeList";
 import ContextManager from "../../../src/domain/shared/ContextManager";
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 
 describe("AudioClient - unit tests", () => {
@@ -26,12 +29,25 @@ describe("AudioClient - unit tests", () => {
 
     test("The AudioClient can be obtained from the ContextManager", () => {
         const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AccountManager, contextID);
         ContextManager.set(contextID, AddressManager);
         ContextManager.set(contextID, NodeList, contextID);
         ContextManager.set(contextID, AudioOutput);
         ContextManager.set(contextID, AudioClient, contextID);
         const audioClient = ContextManager.get(contextID, AudioClient);
         expect(audioClient instanceof AudioClient).toBe(true);
+    });
+
+    test("Can access the \"mutedByClient\" signal", () => {
+        const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AccountManager, contextID);
+        ContextManager.set(contextID, AddressManager);
+        ContextManager.set(contextID, NodeList, contextID);
+        ContextManager.set(contextID, AudioOutput);
+        ContextManager.set(contextID, AudioClient, contextID);
+        const audioClient = ContextManager.get(contextID, AudioClient);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        expect(typeof audioClient.mutedByMixer.connect).toBe("function");
     });
 
     log.mockReset();

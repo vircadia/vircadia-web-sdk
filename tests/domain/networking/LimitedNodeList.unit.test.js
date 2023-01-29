@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import Node from "../../../src/domain/networking/Node";
 import NodeList from "../../../src/domain/networking/NodeList";
@@ -20,6 +21,9 @@ import SockAddr from "../../../src/domain/networking/SockAddr";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Uuid from "../../../src/domain/shared/Uuid";
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 
 describe("LimitedNodeList - integration tests", () => {
 
@@ -27,6 +31,7 @@ describe("LimitedNodeList - integration tests", () => {
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
     const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AccountManager, contextID);  // Required by NodeList.
     ContextManager.set(contextID, AddressManager);  // Required by NodeList.
     ContextManager.set(contextID, NodeList, contextID);  // Required by PacketReceiver.
 
@@ -322,6 +327,20 @@ describe("LimitedNodeList - integration tests", () => {
         expect(LimitedNodeList.connectReasonToString(-1)).toBe("Invalid");
         expect(LimitedNodeList.connectReasonToString(27)).toBe("Invalid");
     });
+
+    test("Can set and get domain permissions", (done) => {
+        const limitedNodeList = new LimitedNodeList(contextID);
+        limitedNodeList.canKickChanged.connect(() => {
+            expect(limitedNodeList.getThisNodeCanKick()).toBe(true);
+            done();
+        });
+
+        expect(limitedNodeList.getThisNodeCanKick()).toBe(false);
+        const newPermissions = new NodePermissions();
+        newPermissions.permissions = NodePermissions.Permission.canKick;
+        limitedNodeList.setPermissions(newPermissions);
+    });
+
 
     // The following items are tested elsewhere:
     // - sendPacket() - Tested implicitly by NodeList integration test.

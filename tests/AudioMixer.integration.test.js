@@ -16,9 +16,12 @@ AudioWorkletsMock.mock();
 import DomainServer from "../src/DomainServer";
 import AudioMixer from "../src/AudioMixer";
 
-import TestConfig from "./test.config.js";
-
 import "wrtc";  // WebRTC Node.js package.
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
+import TestConfig from "./test.config.js";
 
 
 // Time needs to be allowed for the WebRTC RTCPeerConnection from one test to be closed before creating a new one in the
@@ -48,6 +51,11 @@ describe("AudioMixer - integration tests", () => {
     // Suppress console.log messages from being displayed.
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
     const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
+    const error = jest.spyOn(console, "error").mockImplementation((...message) => {
+        const errorMessage = message.join(" ");
+        // eslint-disable-next-line
+        expect(errorMessage).toBe("[networking] Public key upload to metaverse failed: https://metaverse.vircadia.com/live/api/v1/user/public_key Not authenticated");
+    });
 
 
     test("Check states change when connect to and disconnect from a domain", (done) => {
@@ -74,6 +82,7 @@ describe("AudioMixer - integration tests", () => {
     });
 
 
+    error.mockReset();
     warn.mockReset();
     log.mockReset();
 });

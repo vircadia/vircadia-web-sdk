@@ -103,7 +103,7 @@ const DomainConnectRequest = new class {
         }
         dataPosition += info.protocolVersionSig.byteLength;
 
-        data.setUint32(dataPosition, info.hardwareAddress.length, UDT.BIG_ENDIAN);
+        data.setUint32(dataPosition, info.hardwareAddress.length * 2, UDT.BIG_ENDIAN);
         dataPosition += 4;
         for (let i = 0; i < info.hardwareAddress.length; i++) {
             data.setUint16(dataPosition, info.hardwareAddress.charCodeAt(i), UDT.BIG_ENDIAN);
@@ -170,7 +170,7 @@ const DomainConnectRequest = new class {
             assert(info.username !== undefined && info.usernameSignature !== undefined,
                 "DomainConnectRequest.write() missing info for connected case!");
 
-            data.setUint32(dataPosition, info.username.length, UDT.BIG_ENDIAN);
+            data.setUint32(dataPosition, info.username.length * 2, UDT.BIG_ENDIAN);
             dataPosition += 4;
             for (let i = 0; i < info.username.length; i += 1) {
                 data.setUint16(dataPosition, info.username.charCodeAt(i), UDT.BIG_ENDIAN);
@@ -187,14 +187,14 @@ const DomainConnectRequest = new class {
 
             if (info.domainUsername !== undefined && info.domainTokens !== undefined) {
 
-                data.setUint32(dataPosition, info.domainUsername.length, UDT.BIG_ENDIAN);
+                data.setUint32(dataPosition, info.domainUsername.length * 2, UDT.BIG_ENDIAN);
                 dataPosition += 4;
                 for (let i = 0; i < info.domainUsername.length; i += 1) {
                     data.setUint16(dataPosition, info.domainUsername.charCodeAt(i), UDT.BIG_ENDIAN);
                     dataPosition += 2;
                 }
 
-                data.setUint32(dataPosition, info.domainTokens.length, UDT.BIG_ENDIAN);
+                data.setUint32(dataPosition, info.domainTokens.length * 2, UDT.BIG_ENDIAN);
                 dataPosition += 4;
                 for (let i = 0; i < info.domainTokens.length; i += 1) {
                     data.setUint16(dataPosition, info.domainTokens.charCodeAt(i), UDT.BIG_ENDIAN);

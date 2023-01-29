@@ -9,13 +9,17 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountManagerMock from "../mocks/domain/networking/AccountManager.mock.js";
+AccountManagerMock.mock();
 import AudioWorkletsMock from "../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
-
 
 import AvatarMixer from "../src/AvatarMixer";
 import Camera from "../src/Camera";
 import DomainServer from "../src/DomainServer";
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 
 describe("AvatarMixer - unit tests", () => {

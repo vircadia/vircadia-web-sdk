@@ -14,11 +14,12 @@
 import AssignmentClient from "./domain/AssignmentClient";
 import AudioOutput from "./domain/audio/AudioOutput";
 import AudioClient from "./domain/audio-client/AudioClient";
+import type { AudioPositionGetter, AudioOrientationGetter } from "./domain/audio-client/AudioClient";
 import NodeType from "./domain/networking/NodeType";
 import ContextManager from "./domain/shared/ContextManager";
 import Quat from "./domain/shared/Quat";
+import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
 import Vec3 from "./domain/shared/Vec3";
-import type { AudioPositionGetter, AudioOrientationGetter } from "./domain/audio-client/AudioClient";
 
 
 /*@sdkdoc
@@ -44,6 +45,11 @@ import type { AudioPositionGetter, AudioOrientationGetter } from "./domain/audio
  *      audio mixer changes. Set to <code>null</code> to remove the callback.
  *      <em>Write-only.</em>
  *
+ *  @property {string} audioWorkletRelativePath="" - The relative path to the SDK's audio worklet JavaScript files,
+ *      <code>vircadia-audio-input.js</code> and <code>vircadia-audio-output.js</code>.
+ *      <p>The URLs used to load these files are reported in the log. Depending on where these files are deployed, their URLs
+ *      may need to be adjusted. If used, must start with a <code>"."</code> and end with a <code>"/"</code>.</p>
+ *
  *  @property {MediaStream} audioOutput - The audio output stream to be played in the user client.
  *      <em>Read-only.</em>
  *      <p>This should be accessed after the user has interacted with the web page in some manner, otherwise a warning will be
@@ -55,17 +61,14 @@ import type { AudioPositionGetter, AudioOrientationGetter } from "./domain/audio
  *  @property {boolean} inputMuted=false - <code>true</code> to mute the <code>audioInput</code> so that it is not sent to the
  *      audio mixer, <code>false</code> to let it be sent.
  *      <p>When muted, processing of audio input is suspended. This halts hardware processing, reducing CPU/battery usage.</p>
+ *  @property {Signal<AudioMixer~mutedByMixer>} mutedByMixer - Triggered when the audio mixer has made the user client mute its
+ *      audio input &mdash; either because the background noise is too loud or an admin has muted the user.
  *  @property {AudioPositionGetter} positionGetter - The function the <code>AudioMixer</code> code should call in order to get
  *      the current position of the user client's audio.
  *      <em>Write-only.</em>
  *  @property {AudioOrientationGetter} orientationGetter - The function the <code>AudioMixer</code> code should call in order to
  *      get the current orientation of the user client's audio.
  *      <em>Write-only.</em>
- *
- *  @property {string} audioWorkletRelativePath="" - The relative path to the SDK's audio worklet JavaScript files,
- *      <code>vircadia-audio-input.js</code> and <code>vircadia-audio-output.js</code>.
- *      <p>The URLs used to load these files are reported in the log. Depending on where these files are deployed, their URLs
- *      may need to be adjusted. If used, must start with a <code>"."</code> and end with a <code>"/"</code>.</p>
  */
 class AudioMixer extends AssignmentClient {
     // C++  Application.cpp
@@ -108,6 +111,8 @@ class AudioMixer extends AssignmentClient {
 
     #_audioWorkletRelativePath = "";
 
+    #_mutedByMixer = new SignalEmitter();
+
 
     constructor(contextID: number) {
         super(contextID, NodeType.AudioMixer);
@@ -117,6 +122,10 @@ class AudioMixer extends AssignmentClient {
         ContextManager.set(contextID, AudioClient, contextID);
         this.#_audioClient = ContextManager.get(contextID, AudioClient) as AudioClient;
         this.#_audioOutput = ContextManager.get(contextID, AudioOutput) as AudioOutput;
+
+        this.#_audioClient.mutedByMixer.connect(() => {
+            this.#_mutedByMixer.emit();
+        });
     }
 
 
@@ -223,6 +232,17 @@ class AudioMixer extends AssignmentClient {
      */
     async pause(): Promise<void> {
         return this.#_audioOutput.pause();
+    }
+
+
+    /*@sdkdoc
+     *  Triggered when the audio mixer has made the client mute its audio input &mdash; either because the background noise is
+     *  too loud or an admin has muted the user.
+     *  @function AudioMixer~mutedByMixer
+     *  @returns {Signal}
+     */
+    get mutedByMixer(): Signal {
+        return this.#_mutedByMixer.signal();
     }
 
 }

@@ -9,13 +9,25 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import AccountManagerMock from "../../../mocks/domain/networking/AccountManager.mock.js";
+AccountManagerMock.mock();
+
+import Packet from "../../../src/domain/networking/udt/Packet";
+import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
+import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import DomainHandler from "../../../src/domain/networking/DomainHandler";
+import NLPacket from "../../../src/domain/networking/NLPacket";
 import NodeList from "../../../src/domain/networking/NodeList";
+import ReceivedMessage from "../../../src/domain/networking/ReceivedMessage";
+import SockAddr from "../../../src/domain/networking/SockAddr";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import SignalEmitter from "../../../src/domain/shared/SignalEmitter";
 import Url from "../../../src/domain/shared/Url";
 import Uuid from "../../../src/domain/shared/Uuid";
+
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 import TestConfig from "../../test.config.js";
 
@@ -29,6 +41,7 @@ describe("DomainHandler - integration tests", () => {
     const log = jest.spyOn(console, "log").mockImplementation(() => { /* no-op */ });
 
     const contextID = ContextManager.createContext();
+    ContextManager.set(contextID, AccountManager, contextID);  // Required by NodeList.
     ContextManager.set(contextID, AddressManager);  // Required by NodeList.
     ContextManager.set(contextID, NodeList, contextID);
     const domainHandler = ContextManager.get(contextID, NodeList).getDomainHandler();
@@ -145,6 +158,56 @@ describe("DomainHandler - integration tests", () => {
         expect(domainHandler.checkInPacketTimeout()).toBe(false);
         expect(domainHandler.checkInPacketTimeout()).toBe(false);
         expect(domainHandler.checkInPacketTimeout()).toBe(true);
+    });
+
+    test("Can set and get the connection token", () => {
+        expect(domainHandler.getConnectionToken().value()).toBe(Uuid.NULL);
+        const connectionToken = Uuid.createUuid();
+        domainHandler.setConnectionToken(connectionToken);
+        expect(domainHandler.getConnectionToken().value()).toBe(connectionToken.value());
+    });
+
+    test("Can process a DomainConnectionDenied message", (done) => {
+        // eslint-disable-next-line max-len
+        const MESSAGE_TEXT = "070000001013034600596f75206c61636b20746865207265717569726564206d6574617665727365207065726d697373696f6e7320746f20636f6e6e65637420746f207468697320646f6d61696e2e0000";
+        const arrayBuffer = new ArrayBuffer(MESSAGE_TEXT.length / 2);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0, length = arrayBuffer.byteLength; i < length; i++) {
+            uint8Array[i] = Number.parseInt(MESSAGE_TEXT.substr(i * 2, 2), 16);
+        }
+        const dataView = new DataView(arrayBuffer);
+        const sockAddr = new SockAddr();
+        sockAddr.setPort(7);
+        const packet = new Packet(dataView, dataView.byteLength, sockAddr);
+        const nlPacket = new NLPacket(packet);
+        expect(nlPacket.getType()).toBe(PacketType.DomainConnectionDenied);
+        const receivedMessage = new ReceivedMessage(nlPacket);
+
+        const warn = jest.spyOn(console, "warn").mockImplementation((message) => {
+            const EXPECTED_MESSAGES = [
+                "[networking] The domain-server denied a connection request: ",
+                "[networking] Make sure you are logged in to the metaverse."
+            ];
+            expect(EXPECTED_MESSAGES.indexOf(message)).toBeGreaterThan(-1);
+        });
+
+        let hasDomainConnectionRefusedBeenCalled = false;
+        domainHandler.domainConnectionRefused.connect((reasonMessage, reasonCode, extraInfo) => {
+            hasDomainConnectionRefusedBeenCalled = true;
+            expect(reasonMessage).toBe("You lack the required metaverse permissions to connect to this domain.");
+            expect(reasonCode).toBe(DomainHandler.ConnectionRefusedReason.NotAuthorizedMetaverse);
+            expect(extraInfo).toBe("");
+        });
+
+        const accountManager = ContextManager.get(contextID, AccountManager);
+        accountManager.authRequired.connect(() => {
+            expect(hasDomainConnectionRefusedBeenCalled).toBe(true);
+            expect(accountManager.generateNewUserKeypair).toHaveBeenCalledTimes(0);
+            warn.mockRestore();
+            done();
+        });
+
+        domainHandler.processDomainServerConnectionDeniedPacket(receivedMessage);
     });
 
     log.mockReset();
