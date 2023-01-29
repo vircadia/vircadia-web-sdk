@@ -35,6 +35,7 @@ import PropertyFlags from "../../shared/PropertyFlags";
 import { quat } from "../../shared/Quat";
 import Uuid from "../../shared/Uuid";
 import { vec3 } from "../../shared/Vec3";
+import { vec2 } from "../../shared/Vec2";
 import UDT from "../udt/UDT";
 
 import { ungzip } from "pako";
@@ -3746,7 +3747,7 @@ const EntityData = new class {
             if (webProperties.showKeyboardFocusHighlight !== undefined) {
                 const totalSize = 1;
                 if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
-                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone web entity keyboard focus highlight state!");
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for web entity keyboard focus highlight state!");
                     return 0;
                 }
                 dataAfterFlags.setUint8(dataPositionAfterFlags, webProperties.showKeyboardFocusHighlight ? 1 : 0);
@@ -3757,7 +3758,7 @@ const EntityData = new class {
             if (webProperties.useBackground !== undefined) {
                 const totalSize = 1;
                 if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
-                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for zone web entity background state!");
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for web entity background state!");
                     return 0;
                 }
                 dataAfterFlags.setUint8(dataPositionAfterFlags, webProperties.useBackground ? 1 : 0);
@@ -3823,6 +3824,101 @@ const EntityData = new class {
 
         }
 
+        // material properties
+        if (properties.entityType === EntityType.Material) {
+            const materialProperties = properties as MaterialEntityProperties;
+
+            if (materialProperties.materialURL !== undefined) {
+                const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, materialProperties.materialURL);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for material URL!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_MATERIAL_URL, true);
+                }
+            }
+
+            if (materialProperties.materialMappingMode !== undefined)
+            {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for material mapping mode!");
+                    return 0;
+                }
+                dataAfterFlags.setUint32(dataPositionAfterFlags, materialProperties.materialMappingMode, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_MATERIAL_MAPPING_MODE, true);
+            }
+
+            if (materialProperties.parentMaterialName !== undefined) {
+                const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, materialProperties.parentMaterialName);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for material parent name!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_PARENT_MATERIAL_NAME, true);
+                }
+            }
+
+            if (materialProperties.materialMappingPos !== undefined) {
+                const written = this.#_encodeVec2(dataPositionAfterFlags, dataAfterFlags, materialProperties.materialMappingPos);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for material mapping position!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_MATERIAL_MAPPING_POS, true);
+                }
+            }
+
+            if (materialProperties.materialMappingScale !== undefined) {
+                const written = this.#_encodeVec2(dataPositionAfterFlags, dataAfterFlags, materialProperties.materialMappingScale);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for material mapping scale!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_MATERIAL_MAPPING_SCALE, true);
+                }
+            }
+
+            if (materialProperties.materialMappingRot !== undefined) {
+                const totalSize = 4;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for material mapping rotation!");
+                    return 0;
+                }
+                dataAfterFlags.setFloat32(dataPositionAfterFlags, materialProperties.materialMappingRot, UDT.LITTLE_ENDIAN);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_MATERIAL_MAPPING_ROT, true);
+            }
+
+            if (materialProperties.materialData !== undefined) {
+                const written = this.#_encodeString(dataPositionAfterFlags, dataAfterFlags, materialProperties.materialData);
+                dataPositionAfterFlags += written;
+                if (written === 0) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for material data!");
+                    return 0;
+                } else {
+                    propertyFlags.setHasProperty(EntityPropertyFlags.PROP_MATERIAL_DATA, true);
+                }
+            }
+
+            if (materialProperties.materialRepeat !== undefined) {
+                const totalSize = 1;
+                if (dataAfterFlags.byteLength - dataPositionAfterFlags < totalSize) {
+                    console.debug("ERROR - encodeEntityEditPacket() called with buffer that is too small for material repeat state!");
+                    return 0;
+                }
+                dataAfterFlags.setUint8(dataPositionAfterFlags, materialProperties.materialRepeat ? 1 : 0);
+                dataPositionAfterFlags += totalSize;
+                propertyFlags.setHasProperty(EntityPropertyFlags.PROP_MATERIAL_REPEAT, true);
+            }
+
+        }
+
         // write property flags followed by the property data
 
         const propertyFlagsSize = propertyFlags.encode(new DataView(data.buffer, data.byteOffset + dataPosition));
@@ -3862,6 +3958,16 @@ const EntityData = new class {
         data.setFloat32(dataPosition, value.x, UDT.LITTLE_ENDIAN);
         data.setFloat32(dataPosition + 4, value.y, UDT.LITTLE_ENDIAN);
         data.setFloat32(dataPosition + 8, value.z, UDT.LITTLE_ENDIAN);
+        return totalSize;
+    }
+
+    #_encodeVec2(dataPosition: number, data: DataView, value: vec2): number {
+        const totalSize = 8;
+        if (data.byteLength - dataPosition < totalSize) {
+            return 0;
+        }
+        data.setFloat32(dataPosition, value.x, UDT.LITTLE_ENDIAN);
+        data.setFloat32(dataPosition + 4, value.y, UDT.LITTLE_ENDIAN);
         return totalSize;
     }
 
