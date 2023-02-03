@@ -15,7 +15,7 @@ import ReceivedMessage from "../networking/ReceivedMessage";
 import { MixedAudioDetails } from "../networking/packets/MixedAudio";
 import PacketScribe from "../networking/packets/PacketScribe";
 import { SilentAudioFrameDetails } from "../networking/packets/SilentAudioFrame";
-import PacketType from "../networking/udt/PacketHeaders";
+import PacketType, { PacketTypeValue } from "../networking/udt/PacketHeaders";
 import UDT from "../networking/udt/UDT";
 import assert from "../shared/assert";
 import ContextManager from "../shared/ContextManager";
@@ -40,6 +40,13 @@ class InboundAudioStream {
 
     #_numSamplesInMessage: number;
     #_lastSequenceNumber: number;
+    #_previousMessage: {
+        messageType: PacketTypeValue,
+        info: MixedAudioDetails | SilentAudioFrameDetails,
+        isMessageInSequence: boolean,
+        isMessageEarly: boolean,
+        numMessagesMissing: number
+    } | null;
 
     #_staticJitterBufferSize: number;  // Number of audio blocks.
     #_jitterBufferSamplesPerBlock;
@@ -58,6 +65,7 @@ class InboundAudioStream {
 
         this.#_numSamplesInMessage = numChannels * numFrames;
         this.#_lastSequenceNumber = -1;
+        this.#_previousMessage = null;
 
         this.#_staticJitterBufferSize = numStaticJitterBlocks === -1 ? Math.floor(numBlocks / 2) : numStaticJitterBlocks;
 
@@ -79,12 +87,15 @@ class InboundAudioStream {
     parseData(message: ReceivedMessage): number {
         // C++  int parseData(ReceivedMessage& message)
 
+        const messageType = message.getType();
         let info: MixedAudioDetails | SilentAudioFrameDetails | null = null;
-        if (message.getType() === PacketType.MixedAudio) {
+        if (messageType === PacketType.MixedAudio) {
             info = PacketScribe.MixedAudio.read(message.getMessage());
         } else {
             info = PacketScribe.SilentAudioFrame.read(message.getMessage());
         }
+
+        const messageLength = message.getMessage().byteLength;
 
 
         // The C++ SequenceNumberStats code is simplified here.
@@ -108,43 +119,86 @@ class InboundAudioStream {
         this.#_lastSequenceNumber = info.sequenceNumber;
 
 
-        // Insert silent samples for any missing.
-        if (isMessageEarly) {
-            this.#writeDroppableSilentSamples(numMessagesMissing * this.#_numSamplesInMessage);
+        // Ignore late messages.
+        if (!isMessageInSequence && !isMessageEarly) {
+
+            // WEBRTC TODO: Address further C++ code. Handle late packets.
+            // These aren't handled in the C++ either.
+            // In practice they seem not to occur; more common is packets being dropped.
+            // Could perhaps buffer a small number of packets here and insert late packets.
+
+            return messageLength;
         }
 
-        // Process message if it is in sequence or was early; ignore late messages.
-        if (isMessageInSequence || isMessageEarly) {
 
-            if (message.getType() === PacketType.SilentAudioFrame) {
-                // Possibly drop some of the samples in order to catch up to the desired jitter buffer size.
-                this.#writeDroppableSilentSamples((info as SilentAudioFrameDetails).numSilentSamples);
-            } else {
-                const selectedPCM = this.#_selectedCodecName === "pcm" || this.#_selectedCodecName === "";
-                const packetPCM = info.codecName === "pcm" || info.codecName === "";
-                if (info.codecName === this.#_selectedCodecName || packetPCM && selectedPCM) {
-                    this.#parseAudioData((info as MixedAudioDetails).audioBuffer);
+        // The C++ relies on the audio codec to ramp down the volume if a packet has been lost.
+        // We instead buffer the message and process the previous one.
 
-                    // WEBRTC TODO: Address further C++ code.
+        // Ramp up the volume of this message if it's early or the first message.
+        const previousMessage = this.#_previousMessage;
+        if ((isMessageEarly || previousMessage === null) && messageType === PacketType.MixedAudio) {
+            const audioBuffer = (info as MixedAudioDetails).audioBuffer;
+            for (let i = 0, length = audioBuffer.byteLength; i < length; i += 2) {
+                const scale = i / length;
+                audioBuffer.setInt16(i, audioBuffer.getInt16(i, UDT.LITTLE_ENDIAN) * scale, UDT.LITTLE_ENDIAN);
+            }
+        }
 
-                } else {
+        // Buffer the current message and retrieve the previous.
+        this.#_previousMessage = {
+            messageType,
+            info,
+            isMessageInSequence,
+            isMessageEarly,
+            numMessagesMissing
+        };
 
-                    // WEBRTC TODO: Address further C++ code.
-                    console.warn("Codec mismatch not handled.");
+        // Nothing to output if no previous message.
+        if (previousMessage === null) {
+            return messageLength;
+        }
 
-                }
+        // Ramp down the volume of previous message if the current message is early.
+        if (isMessageEarly && previousMessage.messageType === PacketType.MixedAudio) {
+            const audioBuffer = (previousMessage.info as MixedAudioDetails).audioBuffer;
+            for (let i = 0, length = audioBuffer.byteLength; i < length; i += 2) {
+                const scale = 1 - i / length;
+                audioBuffer.setInt16(i, audioBuffer.getInt16(i, UDT.LITTLE_ENDIAN) * scale, UDT.LITTLE_ENDIAN);
             }
 
         }
 
-        // WEBRTC TODO: Address further C++ code. Handle late packets.
-        // These aren't handled in the C++ either.
-        // In practice they seem not to occur; more common is packets being dropped.
-        // Could buffer a small number of packets here and insert late packets, before passing them to the jitter buffer.
 
+        // Insert silent samples for any missing.
+        if (previousMessage.isMessageEarly) {
+            this.#writeDroppableSilentSamples(previousMessage.numMessagesMissing * this.#_numSamplesInMessage);
+        }
+
+        // Process message.
+        info = previousMessage.info;
+        if (previousMessage.messageType === PacketType.SilentAudioFrame) {
+            // Possibly drop some of the samples in order to catch up to the desired jitter buffer size.
+            this.#writeDroppableSilentSamples((info as SilentAudioFrameDetails).numSilentSamples);
+        } else {
+            const selectedPCM = this.#_selectedCodecName === "pcm" || this.#_selectedCodecName === "";
+            const packetPCM = info.codecName === "pcm" || info.codecName === "";
+            if (info.codecName === this.#_selectedCodecName || packetPCM && selectedPCM) {
+                this.#parseAudioData((info as MixedAudioDetails).audioBuffer);
+
+                // WEBRTC TODO: Address further C++ code.
+
+            } else {
+
+                // WEBRTC TODO: Address further C++ code.
+                console.warn("Codec mismatch not handled.");
+
+            }
+        }
+
+        // Could buffer a small number of packets here and insert late packets, before passing them to the jitter buffer.
         // WEBRTC TODO: Address further C++ code. Jitter buffer sizing.
 
-        return message.getMessage().byteLength;
+        return messageLength;
     }
 
     /*@devdoc
@@ -181,6 +235,7 @@ class InboundAudioStream {
 
         // Web SDK specific.
         this.#_lastSequenceNumber = -1;
+        this.#_previousMessage = null;
     }
 
 
