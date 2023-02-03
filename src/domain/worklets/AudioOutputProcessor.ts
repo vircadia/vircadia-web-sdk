@@ -31,8 +31,8 @@ class AudioOutputProcessor extends AudioWorkletProcessor {
     // FIXME: All these fields should be private (#s) but Firefox isn't handling transpiled code with them (Sep 2021).
     _audioBuffer: Int16Array[] = [];
     // MAX_AUDIO_BUFFER_LENGTH = AudioClient.#RECEIVED_AUDIO_STREAM_CAPACITY_BLOCKS
-    readonly MAX_AUDIO_BUFFER_LENGTH = 180;  // The maximum number of audio blocks to buffer
-    readonly MIN_AUDIO_BUFFER_LENGTH = 90;  // The minimum number of audio blocks to have before starting to play them.
+    readonly MAX_AUDIO_BUFFER_LENGTH = 360;  // The maximum number of audio blocks to buffer
+    readonly MIN_AUDIO_BUFFER_LENGTH = 180;  // The minimum number of audio blocks to have before starting to play them.
     _isPlaying = false;  // Is playing audio blocks from the buffer.
     _haveLoggedOverflow = false;
 

@@ -72,7 +72,8 @@ class AudioClient {
 
     // C++  RECEIVED_AUDIO_STREAM_CAPACITY_FRAMES = 100.
     //      Multiplied by 240 / 128 because native client has 240 samples per block whereas audio worklet has 128.
-    static readonly #RECEIVED_AUDIO_STREAM_CAPACITY_BLOCKS = 180;  // = AudioOutputProcessor.MAX_AUDIO_BUFFER_LENGTH
+    static readonly #RECEIVED_AUDIO_STREAM_CAPACITY_BLOCKS = 360;  // = AudioOutputProcessor.MAX_AUDIO_BUFFER_LENGTH
+
 
 
     static #computeLoudness(pcmData: Int16Array | null): number {
