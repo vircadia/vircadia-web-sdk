@@ -206,7 +206,7 @@ class UsersInterface {
      *  username (if available) and by machine fingerprint.
      *  <p>This method only works if you're an administrator of the domain.</p>
      *  @param {Uuid} sessionID - The session ID of the user to kick.
-     *  @param {ModerationFlags.BanFlagsValue} banFlags=3 - The methods of banning to use.
+     *  @param {ModerationFlags.BanFlagsValue} [banFlags=3] - The methods of banning to use.
      */
     kick(sessionID: Uuid, banFlags: BanFlagsValue | undefined): void {
         // C++  void UsersScriptingInterface::kick(const QUuid& nodeID,
