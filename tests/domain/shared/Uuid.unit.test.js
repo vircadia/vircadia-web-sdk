@@ -12,7 +12,7 @@
 import Uuid from "../../../src/domain/shared/Uuid";
 
 import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;  // eslint-disable-lin
+globalThis.crypto = webcrypto;
 
 
 describe("Uuid - unit tests", () => {

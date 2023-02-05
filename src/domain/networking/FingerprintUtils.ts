@@ -20,9 +20,14 @@ import Uuid from "../shared/Uuid";
 const FingerprintUtils = new class {
     // C++  FingerprintUtils
 
-    // Dummy value for now.
-    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    readonly #_machineFingerprint = new Uuid(213897485297723222451865858523432009088n);
+    readonly #_machineFingerprint;
+
+
+    constructor() {
+        // JavaScript security prevents the creation of (doesn't provide the means to) unique machine IDs.
+        this.#_machineFingerprint = Uuid.createUuid();
+    }
+
 
     // WEBRTC TODO: Address further C++ code.
 
