@@ -9,6 +9,14 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+//  TODO: Node
+//  Using node-localstorage works in the unit test and builds into the SDK package but the package doesn't run in the browser.
+/*
+//  "@types/node-localstorage": "^1.3.0",
+//  "node-localstorage": "^2.2.1",
+import { LocalStorage } from "node-localstorage";
+*/
+
 import Uuid from "../shared/Uuid";
 
 
@@ -21,8 +29,13 @@ const FingerprintUtils = new class {
     // C++  FingerprintUtils
 
     readonly #_MACHINE_FINGERPRINT_KEY = "mfp";
+    // TODO: Node
+    /*
+    readonly #_NODE_LOCAL_STORAGE_DIR = ".store";
+    */
 
     readonly #_machineFingerprint;
+
 
     constructor() {
         if (typeof localStorage !== "undefined") {
@@ -38,9 +51,20 @@ const FingerprintUtils = new class {
             }
         } else {
             // Node.
-
-            // TODO.
-
+            // TODO: Node
+            /*
+            const localStorage = new LocalStorage(this.#_NODE_LOCAL_STORAGE_DIR);
+            //  const LocalStorage = eval("require")("node-localstorage").LocalStorage;
+            const machineFingerprint = localStorage.getItem(this.#_MACHINE_FINGERPRINT_KEY);
+            if (machineFingerprint === null) {
+                console.debug("$$$$... Create new fingerprint");
+                this.#_machineFingerprint = Uuid.createUuid();
+                localStorage.setItem(this.#_MACHINE_FINGERPRINT_KEY, this.#_machineFingerprint.stringify());
+            } else {
+                console.debug("$$$$... Use old fingerprint");
+                this.#_machineFingerprint = new Uuid(machineFingerprint);
+            }
+            */
             this.#_machineFingerprint = Uuid.createUuid();
         }
     }
