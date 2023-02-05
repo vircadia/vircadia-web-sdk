@@ -20,12 +20,29 @@ import Uuid from "../shared/Uuid";
 const FingerprintUtils = new class {
     // C++  FingerprintUtils
 
+    readonly #_MACHINE_FINGERPRINT_KEY = "mfp";
+
     readonly #_machineFingerprint;
 
-
     constructor() {
-        // JavaScript security prevents the creation of (doesn't provide the means to) unique machine IDs.
-        this.#_machineFingerprint = Uuid.createUuid();
+        if (typeof localStorage !== "undefined") {
+            // Browser.
+            // JavaScript security prevents the creation of (doesn't provide the means to) unique machine IDs.
+            // We store and retrieve a Uuid to local storage.
+            const machineFingerprint = localStorage.getItem(this.#_MACHINE_FINGERPRINT_KEY);
+            if (machineFingerprint === null) {
+                this.#_machineFingerprint = Uuid.createUuid();
+                localStorage.setItem(this.#_MACHINE_FINGERPRINT_KEY, this.#_machineFingerprint.stringify());
+            } else {
+                this.#_machineFingerprint = new Uuid(machineFingerprint);
+            }
+        } else {
+            // Node.
+
+            // TODO.
+
+            this.#_machineFingerprint = Uuid.createUuid();
+        }
     }
 
 
