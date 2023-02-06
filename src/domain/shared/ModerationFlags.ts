@@ -53,6 +53,7 @@ class ModerationFlags {
      *  @returns {ModerationFlags.BanFlagsValue} The default ban methods.
      */
     static getDefaultBanFlags(): number {
+        // C++  static constexpr unsigned int getDefaultBanFlags()
         return ModerationFlags.BanFlags.BAN_BY_USERNAME + ModerationFlags.BanFlags.BAN_BY_FINGERPRINT;
     }
 
