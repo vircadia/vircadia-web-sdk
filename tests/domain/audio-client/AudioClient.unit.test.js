@@ -12,15 +12,15 @@
 import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import AudioOutput from "../../../src/domain/audio/AudioOutput";
 import AudioClient from "../../../src/domain/audio-client/AudioClient";
 import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodeList from "../../../src/domain/networking/NodeList";
 import ContextManager from "../../../src/domain/shared/ContextManager";
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 
 describe("AudioClient - unit tests", () => {

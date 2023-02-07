@@ -12,11 +12,11 @@
 import AccountManagerMock from "../mocks/domain/networking/AccountManager.mock.js";
 AccountManagerMock.mock();
 
-import DomainServer from "../src/DomainServer";
-import MessageMixer from "../src/MessageMixer";
-
 import { webcrypto } from "crypto";
 globalThis.crypto = webcrypto;
+
+import DomainServer from "../src/DomainServer";
+import MessageMixer from "../src/MessageMixer";
 
 
 describe("MessageMixer - unit tests", () => {

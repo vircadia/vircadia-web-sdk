@@ -9,6 +9,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import Packet from "../../../src/domain/networking/udt/Packet";
 import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
 import AccountManager from "../../../src/domain/networking/AccountManager";
@@ -23,9 +26,6 @@ import ReceivedMessage from "../../../src/domain/networking/ReceivedMessage";
 import SockAddr from "../../../src/domain/networking/SockAddr";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Uuid from "../../../src/domain/shared/Uuid";
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 
 describe("NodeList - integration tests", () => {

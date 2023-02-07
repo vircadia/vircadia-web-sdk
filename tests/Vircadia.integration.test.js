@@ -12,6 +12,8 @@
 import AudioWorkletsMock from "../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer } from "../src/Vircadia";
 

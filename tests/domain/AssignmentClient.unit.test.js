@@ -12,12 +12,12 @@
 import AccountManagerMock from "../../mocks/domain/networking/AccountManager.mock.js";
 AccountManagerMock.mock();
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import DomainServer from "../../src/DomainServer";
 import AssignmentClient from "../../src/domain/AssignmentClient";
 import NodeType from "../../src/domain/networking/NodeType";
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 
 describe("AssignmentClient - unit tests", () => {

@@ -12,15 +12,15 @@
 import AccountManagerMock from "../../../mocks/domain/networking/AccountManager.mock.js";
 AccountManagerMock.mock();
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import AccountInterface from "../../../src/domain/interfaces/AccountInterface";
 import AccountManager from "../../../src/domain/networking/AccountManager";
 import NetworkingConstants from "../../../src/domain/networking/NetworkingConstants";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Url from "../../../src/domain/shared/Url";
 import DomainServer from "../../../src/DomainServer";
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 
 describe("AccountInterface - unit tests", () => {

@@ -9,14 +9,14 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import NodeList from "../../../src/domain/networking/NodeList";
 import OctreePacketProcessor from "../../../src/domain/octree/OctreePacketProcessor";
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 
 describe("OctreePacketProcessor - unit tests", () => {

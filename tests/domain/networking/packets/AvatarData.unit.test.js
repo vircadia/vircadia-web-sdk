@@ -9,6 +9,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import NLPacket from "../../../../src/domain/networking/NLPacket";
 import AvatarData from "../../../../src/domain/networking/packets/AvatarData";
 import PacketType from "../../../../src/domain/networking/udt/PacketHeaders";

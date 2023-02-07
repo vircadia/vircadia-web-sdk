@@ -9,6 +9,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import { TraitType } from "../../../../src/domain/avatars/AvatarTraits";
 import BulkAvatarTraits from "../../../../src/domain/networking/packets/BulkAvatarTraits";
 

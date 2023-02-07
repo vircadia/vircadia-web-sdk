@@ -12,6 +12,9 @@
 import AccountManagerMock from "../../../mocks/domain/networking/AccountManager.mock.js";
 AccountManagerMock.mock();
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import Packet from "../../../src/domain/networking/udt/Packet";
 import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
 import AccountManager from "../../../src/domain/networking/AccountManager";
@@ -25,9 +28,6 @@ import ContextManager from "../../../src/domain/shared/ContextManager";
 import SignalEmitter from "../../../src/domain/shared/SignalEmitter";
 import Url from "../../../src/domain/shared/Url";
 import Uuid from "../../../src/domain/shared/Uuid";
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 import TestConfig from "../../test.config.js";
 

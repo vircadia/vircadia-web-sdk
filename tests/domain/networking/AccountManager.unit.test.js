@@ -9,15 +9,15 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import AccountManager, { AccountManagerAuth } from "../../../src/domain/networking/AccountManager";
 import MetaverseAPI from "../../../src/domain/networking/MetaverseAPI";
 import NetworkingConstants from "../../../src/domain/networking/NetworkingConstants";
 import ContextManager from "../../../src/domain/shared/ContextManager";
 import Url from "../../../src/domain/shared/Url";
 import Uuid from "../../../src/domain/shared/Uuid";
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 
 describe("AccountManager - unit tests", () => {

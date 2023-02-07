@@ -14,11 +14,11 @@ AccountManagerMock.mock();
 import AudioWorkletsMock from "../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
 
-import DomainServer from "../src/DomainServer";
-import AudioMixer from "../src/AudioMixer";
-
 import { webcrypto } from "crypto";
 globalThis.crypto = webcrypto;
+
+import DomainServer from "../src/DomainServer";
+import AudioMixer from "../src/AudioMixer";
 
 
 describe("AudioMixer - unit tests", () => {

@@ -12,13 +12,13 @@
 import AccountManagerMock from "../mocks/domain/networking/AccountManager.mock.js";
 AccountManagerMock.mock();
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import Quat from "../src/domain/shared/Quat";
 import Vec3 from "../src/domain/shared/Vec3";
 import DomainServer from "../src/DomainServer";
 import Camera from "../src/Camera";
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 
 describe("Camera - unit tests", () => {

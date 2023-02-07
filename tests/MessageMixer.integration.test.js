@@ -9,13 +9,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import DomainServer from "../src/DomainServer";
 import MessageMixer from "../src/MessageMixer";
 
 import "wrtc";  // WebRTC Node.js package.
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 import TestConfig from "./test.config.js";
 

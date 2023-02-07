@@ -16,6 +16,9 @@ AccountManagerMock.mock();
 import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import DomainServer from "../../../src/DomainServer";
 import AvatarManager from "../../../src/domain/AvatarManager";
 import ScriptAvatar from "../../../src/domain/avatar-renderer/ScriptAvatar";
@@ -24,9 +27,6 @@ import ContextManager from "../../../src/domain/shared/ContextManager";
 import Quat from "../../../src/domain/shared/Quat";
 import Uuid from "../../../src/domain/shared/Uuid";
 import Vec3 from "../../../src/domain/shared/Vec3";
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 
 describe("ScriptAvatar - unit tests", () => {
