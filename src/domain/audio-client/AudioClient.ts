@@ -75,7 +75,6 @@ class AudioClient {
     static readonly #RECEIVED_AUDIO_STREAM_CAPACITY_BLOCKS = 360;  // = AudioOutputProcessor.MAX_AUDIO_BUFFER_LENGTH
 
 
-
     static #computeLoudness(pcmData: Int16Array | null): number {
         // C++  float computeLoudness(int16_t* samples, int numSamples)
 
