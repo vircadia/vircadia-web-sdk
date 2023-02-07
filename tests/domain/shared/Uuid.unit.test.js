@@ -9,10 +9,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import Uuid from "../../../src/domain/shared/Uuid";
-
 import { webcrypto } from "crypto";
 globalThis.crypto = webcrypto;
+
+import Uuid from "../../../src/domain/shared/Uuid";
 
 
 describe("Uuid - unit tests", () => {

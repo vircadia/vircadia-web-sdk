@@ -14,15 +14,15 @@
 import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import MyAvatar from "../../../src/domain/avatar/MyAvatar";
 import AccountManager from "../../../src/domain/networking/AccountManager";
 import AddressManager from "../../../src/domain/networking/AddressManager";
 import NodeList from "../../../src/domain/networking/NodeList";
 import AvatarConstants from "../../../src/domain/shared/AvatarConstants";
 import ContextManager from "../../../src/domain/shared/ContextManager";
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 
 describe("MyAvatar - unit tests", () => {

@@ -14,6 +14,9 @@ AccountManagerMock.mock();
 import AudioWorkletsMock from "../../../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import AudioConstants from "../../../src/domain/audio/AudioConstants";
 import AudioOutput from "../../../src/domain/audio/AudioOutput";
 import InboundAudioStream from "../../../src/domain/audio/InboundAudioStream";

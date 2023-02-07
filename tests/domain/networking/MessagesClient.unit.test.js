@@ -12,11 +12,11 @@
 import AccountManagerMock from "../../../mocks/domain/networking/AccountManager.mock.js";
 AccountManagerMock.mock();
 
-import DomainServer from "../../../src/DomainServer";
-import MessagesClient from "../../../src/domain/networking/MessagesClient";
-
 import { webcrypto } from "crypto";
 globalThis.crypto = webcrypto;
+
+import DomainServer from "../../../src/DomainServer";
+import MessagesClient from "../../../src/domain/networking/MessagesClient";
 
 
 describe("MessagesClient - unit tests", () => {

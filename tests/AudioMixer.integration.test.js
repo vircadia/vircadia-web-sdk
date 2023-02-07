@@ -12,14 +12,13 @@
 import AudioWorkletsMock from "../mocks/domain/audio/AudioWorklets.mock.js";
 AudioWorkletsMock.mock();
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
 
 import DomainServer from "../src/DomainServer";
 import AudioMixer from "../src/AudioMixer";
 
 import "wrtc";  // WebRTC Node.js package.
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 import TestConfig from "./test.config.js";
 

@@ -12,12 +12,12 @@
 import AccountManagerMock from "../mocks/domain/networking/AccountManager.mock.js";
 AccountManagerMock.mock();
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import Camera from "../src/Camera";
 import DomainServer from "../src/DomainServer";
 import EntityServer from "../src/EntityServer";
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 
 describe("EntityServer - unit tests", () => {

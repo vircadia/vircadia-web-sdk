@@ -12,13 +12,13 @@
 import AccountManagerMock from "../mocks/domain/networking/AccountManager.mock.js";
 AccountManagerMock.mock();
 
+import { webcrypto } from "crypto";
+globalThis.crypto = webcrypto;
+
 import DomainServer from "../src/DomainServer";
 import Uuid from "../src/domain/shared/Uuid";
 import AccountInterface from "../src/domain/interfaces/AccountInterface";
 import UsersInterface from "../src/domain/interfaces/UsersInterface";
-
-import { webcrypto } from "crypto";
-globalThis.crypto = webcrypto;
 
 
 describe("DomainServer - unit tests", () => {
