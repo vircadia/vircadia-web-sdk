@@ -17,7 +17,7 @@ import { protocolVersionsSignature } from "../src/domain/networking/udt/PacketHe
 import Uuid from "../src/domain/shared/Uuid";
 
 
-import "wrtc";  // WebRTC Node.js package.
+import "@koush/wrtc";  // WebRTC Node.js package.
 
 import TestConfig from "./test.config.js";
 
@@ -39,7 +39,7 @@ describe("DomainServer - integration tests", () => {
 
     // Add WebSocket and WebRTC to Node.js environment.
     global.WebSocket = require("ws");  // eslint-disable-line
-    global.RTCPeerConnection = require("wrtc").RTCPeerConnection;  // eslint-disable-line
+    global.RTCPeerConnection = require("@koush/wrtc").RTCPeerConnection;  // eslint-disable-line
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 

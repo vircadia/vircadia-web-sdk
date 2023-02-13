@@ -19,7 +19,7 @@ import AvatarMixer from "../src/AvatarMixer";
 import Camera from "../src/Camera";
 import DomainServer from "../src/DomainServer";
 
-import "wrtc";  // WebRTC Node.js package.
+import "@koush/wrtc";  // WebRTC Node.js package.
 
 import TestConfig from "./test.config.js";
 
@@ -41,7 +41,7 @@ describe("AvatarMixer - integration tests", () => {
 
     // Add WebSocket and WebRTC to Node.js environment.
     global.WebSocket = require("ws");  // eslint-disable-line
-    global.RTCPeerConnection = require("wrtc").RTCPeerConnection;  // eslint-disable-line
+    global.RTCPeerConnection = require("@koush/wrtc").RTCPeerConnection;  // eslint-disable-line
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
