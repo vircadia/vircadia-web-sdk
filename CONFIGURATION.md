@@ -92,7 +92,7 @@ This package provides `WebSocket` and WebRTC objects in the Node environment for
 Sample Jest test code:
 ```
 global.WebSocket = require("ws");
-global.RTCPeerConnection = require("wrtc").RTCPeerConnection;
+global.RTCPeerConnection = require("@koush/wrtc").RTCPeerConnection;
 ```
 
 **Note:** If the `ws` module isn't found in a new set-up then use `npm install --save-dev ws`.

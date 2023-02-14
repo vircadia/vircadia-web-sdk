@@ -15,7 +15,7 @@ import Url from "../../../../src/domain/shared/Url";
 
 import TestConfig from "../../../test.config.js";
 
-import "wrtc";  // WebRTC Node.js package.
+import "@koush/wrtc";  // WebRTC Node.js package.
 
 
 describe("Socket - integration tests", () => {
@@ -24,7 +24,7 @@ describe("Socket - integration tests", () => {
 
     // Add WebSocket and WebRTC to Node.js environment.
     global.WebSocket = require("ws");  // eslint-disable-line
-    global.RTCPeerConnection = require("wrtc").RTCPeerConnection;  // eslint-disable-line
+    global.RTCPeerConnection = require("@koush/wrtc").RTCPeerConnection;  // eslint-disable-line
 
 
     test("Can connect to the domain server", (done) => {

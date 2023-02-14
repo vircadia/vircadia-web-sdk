@@ -14,7 +14,7 @@ import NodeType from "../../../../src/domain/networking/NodeType";
 
 import TestConfig from "../../../test.config.js";
 
-import "wrtc";  // WebRTC Node.js package.
+import "@koush/wrtc";  // WebRTC Node.js package.
 
 
 describe("WebRTCSignalingChannel - integration tests", () => {
