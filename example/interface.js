@@ -12,6 +12,35 @@
 import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer, Vec3, Uuid }
     from "../dist/Vircadia.js";
 
+    (function() {
+        var timeouts = [];
+        var messageName = "zero-timeout-message";
+
+        // Like setTimeout, but only takes a function argument.  There's
+        // no time argument (always zero) and no arguments (you have to
+        // use a closure).
+        function setZeroTimeout(fn) {
+            timeouts.push(fn);
+            window.postMessage(messageName, "*");
+        }
+
+        function handleMessage(event) {
+            if (event.source == window && event.data == messageName) {
+                event.stopPropagation();
+                if (timeouts.length > 0) {
+                    var fn = timeouts.shift();
+                    fn();
+                }
+            }
+        }
+
+        window.addEventListener("message", handleMessage, true);
+
+        // Add the one thing we want added to the window object.
+        window.setZeroTimeout = setZeroTimeout;
+    })();
+
+
 (function () {
 
     const DEFAULT_URL = "ws://127.0.0.1:40102";
@@ -894,7 +923,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
     // Game Loop
     (function () {
         const MS_PER_S = 1000;
-        const TARGET_GAME_RATE = 10;  // FPS
+        const TARGET_GAME_RATE = 600;  // FPS
         const TARGET_INTERVAL = MS_PER_S / TARGET_GAME_RATE;  // ms
         const MIN_TIMEOUT = 5;  // ms
         let gameRate = 0;  // FPS
@@ -914,18 +943,32 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             // Update the avatar mixer with latest user client data and get latest data from avatar mixer.
             avatarMixerGameLoop();
             doppelganger.gameLoop();
+            audioMixer.update();
 
             // Update the entity server with latest user client data.
             entityServerGameLoop();
 
             const timeout = Math.max(TARGET_INTERVAL - (Date.now() - gameLoopStart), MIN_TIMEOUT);
-            gameLoopTimer = setTimeout(gameLoop, timeout);
+            gameLoopTimer = setZeroTimeout(gameLoop, timeout);
+        };
+
+        let runAudioLoop = false;
+        const audioLoop = () => {
+            audioMixer.update();
+            if (runAudioLoop) {
+                window.setZeroTimeout(audioLoop);
+            }
         };
 
         const connectButton = document.getElementById("domainConnectButton");
         connectButton.addEventListener("click", () => {
             if (gameLoopTimer === null) {
-                gameLoopTimer = setTimeout(gameLoop, 0);
+                gameLoopTimer = setZeroTimeout(gameLoop, 0);
+            }
+            if (!runAudioLoop)
+            {
+                runAudioLoop = true;
+                window.setZeroTimeout(audioLoop);
             }
         });
 
@@ -936,6 +979,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                 gameLoopTimer = null;
                 gameRateValue.value = "";
             }
+            runAudioLoop = false;
         });
 
     }());

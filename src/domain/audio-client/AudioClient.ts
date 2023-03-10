@@ -274,6 +274,9 @@ class AudioClient {
         return this.#_mutedByMixer.signal();
     }
 
+    processRingBuffer(): void {
+        this.#_audioInput.processRingBuffer();
+    }
 
     #start(): void {
         // C++  void AudioClient::start()
@@ -619,6 +622,8 @@ class AudioClient {
             }
 
             // WEBRTC TODO: Address further C++ code.
+
+            console.log("Audio Client read a frame");
 
             this.#handleAudioInput(pcmData);
         }

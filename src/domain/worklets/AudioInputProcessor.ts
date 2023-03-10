@@ -10,6 +10,7 @@
 //
 
 import AudioConstants from "../audio/AudioConstants";
+import { RingBuffer } from "../audio/ringbuf"
 
 // see: https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletGlobalScope
 declare const sampleRate: number;
@@ -58,9 +59,15 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     _processor: ((input: Array<Float32Array>) => void);
     _haveReportedUpSampleError = false;
 
+    _ringBufferStorage: any;
+    _ringBuffer: any;
+
 
     constructor(options?: AudioWorkletNodeOptions) {
         super(options);  // eslint-disable-line
+
+        this._ringBufferStorage = options?.processorOptions?.ringBufferStorage;
+        this._ringBuffer = new RingBuffer(this._ringBufferStorage, Int16Array);
 
         this._channelCount = options?.channelCount ? options.channelCount : 1;  // Default to mono.
         this._channelCount = Math.min(this._channelCount, 2);  // Mono or stereo output, only.
@@ -78,10 +85,8 @@ class AudioInputProcessor extends AudioWorkletProcessor {
             this._inputFraction = this._upsampleRatio;
         }
 
-        this._outputSize = this._channelCount === 1
-            ? AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL
-            : AudioConstants.NETWORK_FRAME_SAMPLES_STEREO;
-        this._outputSampleSize = this._outputSize / this._channelCount;
+        this._outputSampleSize = 120;
+        this._outputSize = this._channelCount * this._outputSampleSize;
         this._output = new Int16Array(this._outputSize);
         this._outputView = new DataView(this._output.buffer);
 
@@ -124,9 +129,16 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     }
 
     _resetOutput() {
-        this._output = new Int16Array(this._outputSize);
-        this._outputView = new DataView(this._output.buffer);
         this._outputIndex = 0;
+    }
+
+    _postOutput() {
+        const written = this._ringBuffer.push(this._output);
+        console.log("WRITTEN", written);
+        if (written < this._output.length) {
+            console.warn("Audio Input ring buffer is full.");
+        }
+        this._resetOutput();
     }
 
     _resetInput() {
@@ -152,8 +164,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
 
             this._outputIndex += 1;
             if (this._outputIndex === this._outputSampleSize) {
-                this.port.postMessage(this._output.buffer, [this._output.buffer]);
-                this._resetOutput();
+                this._postOutput();
             }
 
         }
@@ -207,8 +218,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
 
             // Post output if buffer full.
             if (this._outputIndex === this._outputSampleSize) {
-                this.port.postMessage(this._output.buffer, [this._output.buffer]);
-                this._resetOutput();
+                this._postOutput();
             }
 
             // Reset input each second to avoid accumulated errors.
@@ -251,8 +261,7 @@ class AudioInputProcessor extends AudioWorkletProcessor {
 
             // Post output if buffer full.
             if (this._outputIndex === this._outputSampleSize) {
-                this.port.postMessage(this._output.buffer, [this._output.buffer]);
-                this._resetOutput();
+                this._postOutput();
             }
 
             this._inputFraction += this._upsampleRatio;

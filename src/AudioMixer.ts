@@ -234,6 +234,15 @@ class AudioMixer extends AssignmentClient {
         return this.#_audioOutput.pause();
     }
 
+    /*@sdkdoc
+     *  Game loop update method that should be called multiple times per second to send recorded audio.
+     */
+    update(): void {
+        // C++  void Application::update(float deltaTime)
+
+        this.#_audioClient.processRingBuffer();
+
+    }
 
     /*@sdkdoc
      *  Triggered when the audio mixer has made the client mute its audio input &mdash; either because the background noise is
