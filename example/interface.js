@@ -924,7 +924,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
     // Game Loop
     (function () {
         const MS_PER_S = 1000;
-        const TARGET_GAME_RATE = 600;  // FPS
+        const TARGET_GAME_RATE = 10;  // FPS
         const TARGET_INTERVAL = MS_PER_S / TARGET_GAME_RATE;  // ms
         const MIN_TIMEOUT = 5;  // ms
         let gameRate = 0;  // FPS
@@ -944,7 +944,6 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             // Update the avatar mixer with latest user client data and get latest data from avatar mixer.
             avatarMixerGameLoop();
             doppelganger.gameLoop();
-            audioMixer.update();
 
             // Update the entity server with latest user client data.
             entityServerGameLoop();
