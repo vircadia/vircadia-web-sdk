@@ -51,7 +51,6 @@ class AudioInput {
     #_currentFrameSize = 0;
     #_ringBufferStorage: any = {};
     #_ringBuffer: any = {};
-    #_receivedData: Int16Array = new Int16Array();
     #_channelCount = 1;
 
     #_readyRead = new SignalEmitter();
@@ -268,25 +267,20 @@ class AudioInput {
 
         if (this.#_isStarted)
         {
-            while(!this.#_ringBuffer.empty()) {
-                const read = this.#_ringBuffer.pop(this.#_receivedData);
-                let index = 0;
-                while(index < read)
-                {
-                    const requiredForFrame = this.#_currentFrame.length - this.#_currentFrameSize;
-                    const data = this.#_receivedData.subarray(index, Math.min(index + requiredForFrame, read));
-                    this.#_currentFrame.set(data, this.#_currentFrameSize);
-                    this.#_currentFrameSize += data.length;
-                    if(this.#_currentFrameSize === this.#_currentFrame.length) {
-                        this.#_frameBuffer.push(this.#_currentFrame);
-                        this.#_currentFrame = this.#createFrame();
-                        this.#_currentFrameSize = 0;
-                        // WEBRTC TODO: Could perhaps throttle the #_readyRead.emit()s on the understanding that multiple packets will be
-                        // processed by the method connected to the signal.
-                        this.#_readyRead.emit();
-                        this.#_frameCallback();
-                    }
-                    index += data.length;
+            let available = this.#_ringBuffer.availableRead();
+            while(available !== 0) {
+                const requiredForFrame = this.#_currentFrame.length - this.#_currentFrameSize;
+                const read = this.#_ringBuffer.pop(this.#_currentFrame, Math.min(available, requiredForFrame), this.#_currentFrameSize);
+                available -= read;
+                this.#_currentFrameSize += read;
+                if(this.#_currentFrameSize === this.#_currentFrame.length) {
+                    this.#_frameBuffer.push(this.#_currentFrame);
+                    this.#_currentFrame = this.#createFrame();
+                    this.#_currentFrameSize = 0;
+                    // WEBRTC TODO: Could perhaps throttle the #_readyRead.emit()s on the understanding that multiple packets will be
+                    // processed by the method connected to the signal.
+                    this.#_readyRead.emit();
+                    this.#_frameCallback();
                 }
             }
         }
@@ -339,7 +333,6 @@ class AudioInput {
         this.#_ringBufferStorage = RingBuffer.getStorageForCapacity(
             ringBufferCapacity, Int16Array);
         this.#_ringBuffer = new RingBuffer(this.#_ringBufferStorage, Int16Array);
-        this.#_receivedData = new Int16Array(ringBufferCapacity);
 
         // Audio worklet.
         if (!this.#_audioContext.audioWorklet) {
