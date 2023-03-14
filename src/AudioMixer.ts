@@ -236,7 +236,6 @@ class AudioMixer extends AssignmentClient {
 
     /*@sdkdoc
      *  Event loop update method for audio processing. This should be called as often as possible to keep up with the audio worklets.
-     *  too loud or an admin has muted the user.
      *  @function AudioMixer.update
      */
     update(): void {
