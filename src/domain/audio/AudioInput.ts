@@ -205,7 +205,7 @@ class AudioInput {
         // C++  QIODevice::readAll()
         let frame: Int16Array | undefined = undefined;
         if (this.#_frameBuffer.length > 0) {
-            frame = this.#_frameBuffer.pop();
+            frame = this.#_frameBuffer.shift();
         }
         if (frame === undefined) {
             this.#_errorString = "Unexpected read of empty audio input buffer!";
