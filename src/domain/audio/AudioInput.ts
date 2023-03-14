@@ -55,6 +55,7 @@ class AudioInput {
     #_channelCount = 1;
 
     #_readyRead = new SignalEmitter();
+    #_frameCallback: () => void = () => {};
 
     #_audioWorkletRelativePath = "";
 
@@ -244,6 +245,19 @@ class AudioInput {
     }
 
     /*@devdoc
+     *  Set a callback that will be called each time a new network frames of audio input are available for reading.
+     *  @function AudioInput.setFrameCallback
+     *  @returns {Signal}
+     */
+    setFrameCallback(callback?: () => void) {
+        if (callback) {
+            this.#_frameCallback = callback;
+        } else {
+            this.#_frameCallback = () => {};
+        }
+    }
+
+    /*@devdoc
      *  Reads pending audio data from the {@link AudioInputProcessor},
      *  accumulates it into frames and triggers {@link
      *  AudioInput.readyRead} signal when ready to send.
@@ -256,7 +270,6 @@ class AudioInput {
         {
             while(!this.#_ringBuffer.empty()) {
                 const read = this.#_ringBuffer.pop(this.#_receivedData);
-                console.log("READ", read);
                 let index = 0;
                 while(index < read)
                 {
@@ -271,6 +284,7 @@ class AudioInput {
                         // WEBRTC TODO: Could perhaps throttle the #_readyRead.emit()s on the understanding that multiple packets will be
                         // processed by the method connected to the signal.
                         this.#_readyRead.emit();
+                        this.#_frameCallback();
                     }
                     index += data.length;
                 }

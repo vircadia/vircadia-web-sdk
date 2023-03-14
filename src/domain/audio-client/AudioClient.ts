@@ -274,7 +274,11 @@ class AudioClient {
         return this.#_mutedByMixer.signal();
     }
 
-    processRingBuffer(): void {
+    /*@devdoc
+     *  Event loop method that for audio processing.
+     *  @function AudioClient.update
+     */
+    update(): void {
         this.#_audioInput.processRingBuffer();
     }
 
@@ -321,7 +325,7 @@ class AudioClient {
         this.#_isStereoInput = false;
 
         if (this.#_audioInput.isStarted()) {
-            this.#_audioInput.readyRead.disconnect(this.#handleMicAudioInput);
+            this.#_audioInput.setFrameCallback(undefined);
             await this.#_audioInput.stop();
         }
 
@@ -353,7 +357,7 @@ class AudioClient {
             });
 
             if (isStarted) {
-                this.#_audioInput.readyRead.connect(this.#handleMicAudioInput);
+                this.#_audioInput.setFrameCallback(this.#handleMicAudioInput);
                 supportedFormat = true;
             } else {
                 console.error("[audioclient] Error starting audio input -", this.#_audioInput.errorString());
@@ -622,8 +626,6 @@ class AudioClient {
             }
 
             // WEBRTC TODO: Address further C++ code.
-
-            console.log("Audio Client read a frame");
 
             this.#handleAudioInput(pcmData);
         }

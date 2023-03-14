@@ -85,7 +85,14 @@ class AudioInputProcessor extends AudioWorkletProcessor {
             this._inputFraction = this._upsampleRatio;
         }
 
-        this._outputSampleSize = 120;
+        // This controls how much to buffer locally before transferring data to
+        // the ring buffer. The data transfer involves a few atomic operations
+        // and a copy loop implemented in plain javascript, so this value
+        // should be small enough for the copy to not take too much time, but
+        // large enough that the atomics aren't accessed too often.  128 is the
+        // default sample count that browsers expect the audio worklet to be
+        // able to handle in one go, so I went with that.
+        this._outputSampleSize = 128;
         this._outputSize = this._channelCount * this._outputSampleSize;
         this._output = new Int16Array(this._outputSize);
         this._outputView = new DataView(this._output.buffer);
@@ -134,7 +141,6 @@ class AudioInputProcessor extends AudioWorkletProcessor {
 
     _postOutput() {
         const written = this._ringBuffer.push(this._output);
-        console.log("WRITTEN", written);
         if (written < this._output.length) {
             console.warn("Audio Input ring buffer is full.");
         }

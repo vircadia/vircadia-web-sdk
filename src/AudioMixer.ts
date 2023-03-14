@@ -235,12 +235,14 @@ class AudioMixer extends AssignmentClient {
     }
 
     /*@sdkdoc
-     *  Game loop update method that should be called multiple times per second to send recorded audio.
+     *  Event loop update method for audio processing. This should be called as often as possible to keep up with the audio worklets.
+     *  too loud or an admin has muted the user.
+     *  @function AudioMixer.update
      */
     update(): void {
         // C++  void Application::update(float deltaTime)
 
-        this.#_audioClient.processRingBuffer();
+        this.#_audioClient.update();
 
     }
 
