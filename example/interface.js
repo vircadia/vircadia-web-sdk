@@ -12,33 +12,34 @@
 import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer, Vec3, Uuid }
     from "../dist/Vircadia.js";
 
-    (function() {
-        var timeouts = [];
-        var messageName = "zero-timeout-message";
+// https://dbaron.org/log/20100309-faster-timeouts
+(function() {
+    var timeouts = [];
+    var messageName = "zero-timeout-message";
 
-        // Like setTimeout, but only takes a function argument.  There's
-        // no time argument (always zero) and no arguments (you have to
-        // use a closure).
-        function setZeroTimeout(fn) {
-            timeouts.push(fn);
-            window.postMessage(messageName, "*");
-        }
+    // Like setTimeout, but only takes a function argument.  There's
+    // no time argument (always zero) and no arguments (you have to
+    // use a closure).
+    function setZeroTimeout(fn) {
+        timeouts.push(fn);
+        window.postMessage(messageName, "*");
+    }
 
-        function handleMessage(event) {
-            if (event.source == window && event.data == messageName) {
-                event.stopPropagation();
-                if (timeouts.length > 0) {
-                    var fn = timeouts.shift();
-                    fn();
-                }
+    function handleMessage(event) {
+        if (event.source == window && event.data == messageName) {
+            event.stopPropagation();
+            if (timeouts.length > 0) {
+                var fn = timeouts.shift();
+                fn();
             }
         }
+    }
 
-        window.addEventListener("message", handleMessage, true);
+    window.addEventListener("message", handleMessage, true);
 
-        // Add the one thing we want added to the window object.
-        window.setZeroTimeout = setZeroTimeout;
-    })();
+    // Add the one thing we want added to the window object.
+    window.setZeroTimeout = setZeroTimeout;
+})();
 
 
 (function () {
@@ -949,7 +950,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             entityServerGameLoop();
 
             const timeout = Math.max(TARGET_INTERVAL - (Date.now() - gameLoopStart), MIN_TIMEOUT);
-            gameLoopTimer = setZeroTimeout(gameLoop, timeout);
+            gameLoopTimer = setTimeout(gameLoop, timeout);
         };
 
         let runAudioLoop = false;
@@ -963,7 +964,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const connectButton = document.getElementById("domainConnectButton");
         connectButton.addEventListener("click", () => {
             if (gameLoopTimer === null) {
-                gameLoopTimer = setZeroTimeout(gameLoop, 0);
+                gameLoopTimer = setTimeout(gameLoop, 0);
             }
             if (!runAudioLoop)
             {
