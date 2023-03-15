@@ -10,7 +10,7 @@
 //
 
 import AudioConstants from "../audio/AudioConstants";
-import { RingBuffer } from "../audio/ringbuf"
+import { RingBuffer } from "../audio/RingBuffer";
 
 // see: https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletGlobalScope
 declare const sampleRate: number;
@@ -59,8 +59,8 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     _processor: ((input: Array<Float32Array>) => void);
     _haveReportedUpSampleError = false;
 
-    _ringBuffer: any;
     _ringBufferStorage: SharedArrayBuffer;
+    _ringBuffer: RingBuffer<Int16Array>;
 
 
     constructor(options?: AudioWorkletNodeOptions) {
