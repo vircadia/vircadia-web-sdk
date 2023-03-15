@@ -275,7 +275,7 @@ class AudioClient {
     }
 
     /*@devdoc
-     *  Event loop method that for audio processing.
+     *  Event loop method for audio processing.
      *  @function AudioClient.update
      */
     update(): void {

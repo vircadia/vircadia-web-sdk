@@ -13,9 +13,9 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
     from "../dist/Vircadia.js";
 
 // https://dbaron.org/log/20100309-faster-timeouts
-(function() {
-    var timeouts = [];
-    var messageName = "zero-timeout-message";
+(function () {
+    const timeouts = [];
+    const messageName = "zero-timeout-message";
 
     // Like setTimeout, but only takes a function argument.  There's
     // no time argument (always zero) and no arguments (you have to
@@ -26,10 +26,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
     }
 
     function handleMessage(event) {
-        if (event.source == window && event.data == messageName) {
+        if (event.source === window && event.data === messageName) {
             event.stopPropagation();
             if (timeouts.length > 0) {
-                var fn = timeouts.shift();
+                const fn = timeouts.shift();
                 fn();
             }
         }
@@ -39,7 +39,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
     // Add the one thing we want added to the window object.
     window.setZeroTimeout = setZeroTimeout;
-})();
+}());
 
 
 (function () {
@@ -965,8 +965,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             if (gameLoopTimer === null) {
                 gameLoopTimer = setTimeout(gameLoop, 0);
             }
-            if (!runAudioLoop)
-            {
+            if (!runAudioLoop) {
                 runAudioLoop = true;
                 window.setZeroTimeout(audioLoop);
             }

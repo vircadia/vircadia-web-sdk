@@ -59,14 +59,15 @@ class AudioInputProcessor extends AudioWorkletProcessor {
     _processor: ((input: Array<Float32Array>) => void);
     _haveReportedUpSampleError = false;
 
-    _ringBufferStorage: any;
     _ringBuffer: any;
+    _ringBufferStorage: SharedArrayBuffer;
 
 
     constructor(options?: AudioWorkletNodeOptions) {
         super(options);  // eslint-disable-line
 
-        this._ringBufferStorage = options?.processorOptions?.ringBufferStorage;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        this._ringBufferStorage = options?.processorOptions?.ringBufferStorage as SharedArrayBuffer;
         this._ringBuffer = new RingBuffer(this._ringBufferStorage, Int16Array);
 
         this._channelCount = options?.channelCount ? options.channelCount : 1;  // Default to mono.

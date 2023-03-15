@@ -13,7 +13,7 @@ import AudioWorklets from "./AudioWorklets";
 import AudioConstants from "../audio/AudioConstants";
 import assert from "../shared/assert";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
-import { RingBuffer } from "../audio/ringbuf"
+import { RingBuffer } from "../audio/ringbuf";
 
 
 /*@devdoc
@@ -49,12 +49,12 @@ class AudioInput {
     #_frameBuffer: Array<Int16Array> = [];
     #_currentFrame: Int16Array = new Int16Array();
     #_currentFrameSize = 0;
-    #_ringBufferStorage: any = {};
-    #_ringBuffer: any = {};
+    #_ringBufferStorage = {} as SharedArrayBuffer;
+    #_ringBuffer = {} as RingBuffer;
     #_channelCount = 1;
 
     #_readyRead = new SignalEmitter();
-    #_frameCallback: () => void = () => {};
+    #_frameCallback: (() => void) | undefined = undefined;
 
     #_audioWorkletRelativePath = "";
 
@@ -244,15 +244,15 @@ class AudioInput {
     }
 
     /*@devdoc
-     *  Set a callback that will be called each time a new network frames of audio input are available for reading.
+     *  Set a callback that will be called each time new network frames of audio input are available for reading.
      *  @function AudioInput.setFrameCallback
      *  @returns {Signal}
      */
-    setFrameCallback(callback?: () => void) {
+    setFrameCallback(callback?: () => void): void {
         if (callback) {
             this.#_frameCallback = callback;
         } else {
-            this.#_frameCallback = () => {};
+            this.#_frameCallback = undefined;
         }
     }
 
@@ -265,22 +265,25 @@ class AudioInput {
     processRingBuffer(): void {
         // C++  N/A
 
-        if (this.#_isStarted)
-        {
+        if (this.#_isStarted) {
             let available = this.#_ringBuffer.availableRead();
-            while(available !== 0) {
+            while (available !== 0) {
                 const requiredForFrame = this.#_currentFrame.length - this.#_currentFrameSize;
-                const read = this.#_ringBuffer.pop(this.#_currentFrame, Math.min(available, requiredForFrame), this.#_currentFrameSize);
+                const read = this.#_ringBuffer.pop(
+                    this.#_currentFrame,
+                    Math.min(available, requiredForFrame),
+                    this.#_currentFrameSize
+                );
                 available -= read;
                 this.#_currentFrameSize += read;
-                if(this.#_currentFrameSize === this.#_currentFrame.length) {
+                if (this.#_currentFrameSize === this.#_currentFrame.length) {
                     this.#_frameBuffer.push(this.#_currentFrame);
                     this.#_currentFrame = this.#createFrame();
                     this.#_currentFrameSize = 0;
-                    // WEBRTC TODO: Could perhaps throttle the #_readyRead.emit()s on the understanding that multiple packets will be
-                    // processed by the method connected to the signal.
+                    // WEBRTC TODO: Could perhaps throttle the #_readyRead.emit()s on the understanding that
+                    // multiple packets will be processed by the method connected to the signal.
                     this.#_readyRead.emit();
-                    this.#_frameCallback();
+                    this.#_frameCallback?.();
                 }
             }
         }
@@ -329,7 +332,7 @@ class AudioInput {
         this.#_currentFrame = this.#createFrame();
 
         const RING_BUFFER_LENGTH_IN_SECONDS = 0.1;
-        const ringBufferCapacity = this.#_channelCount * (AudioConstants.SAMPLE_RATE * RING_BUFFER_LENGTH_IN_SECONDS)
+        const ringBufferCapacity = this.#_channelCount * (AudioConstants.SAMPLE_RATE * RING_BUFFER_LENGTH_IN_SECONDS);
         this.#_ringBufferStorage = RingBuffer.getStorageForCapacity(
             ringBufferCapacity, Int16Array);
         this.#_ringBuffer = new RingBuffer(this.#_ringBufferStorage, Int16Array);
