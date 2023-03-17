@@ -68,6 +68,11 @@ class AudioInputProcessor extends AudioWorkletProcessor {
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         this._ringBufferStorage = options?.processorOptions?.ringBufferStorage as SharedArrayBuffer;
+
+        if (this._ringBufferStorage === undefined) {
+            throw new TypeError("AudioInputProcessor processorOptions.ringBufferStorage is undefined.");
+        }
+
         this._ringBuffer = new RingBuffer(this._ringBufferStorage, Int16Array);
 
         this._channelCount = options?.channelCount ? options.channelCount : 1;  // Default to mono.
