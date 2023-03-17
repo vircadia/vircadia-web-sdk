@@ -29,7 +29,8 @@ export class RingBuffer<T extends NodeJS.TypedArray> {
      * @return {SharedArrayBuffer} A SharedArrayBuffer of the right size.
      * @static
      */
-    static getStorageForCapacity(capacity: number, type: NodeJS.TypedArray): SharedArrayBuffer {
+    static getStorageForCapacity<T extends NodeJS.TypedArray>(capacity: number, type: TypedArrayConstructor<T>):
+    SharedArrayBuffer {
         if (!type.BYTES_PER_ELEMENT) {
             throw new TypeError("Pass in an ArrayBuffer subclass");
         }

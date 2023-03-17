@@ -13,7 +13,7 @@ import AudioWorklets from "./AudioWorklets";
 import AudioConstants from "../audio/AudioConstants";
 import assert from "../shared/assert";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
-import { RingBuffer } from "../audio/ringbuf";
+import { RingBuffer } from "../audio/RingBuffer";
 
 
 /*@devdoc
@@ -50,7 +50,7 @@ class AudioInput {
     #_currentFrame: Int16Array = new Int16Array();
     #_currentFrameSize = 0;
     #_ringBufferStorage = {} as SharedArrayBuffer;
-    #_ringBuffer = {} as RingBuffer;
+    #_ringBuffer = {} as RingBuffer<Int16Array>;
     #_channelCount = 1;
 
     #_readyRead = new SignalEmitter();
