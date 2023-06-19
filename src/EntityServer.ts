@@ -13,6 +13,7 @@ import { EntityHostType } from "./domain/entities/EntityHostType";
 import { EntityType } from "./domain/entities/EntityTypes";
 import { EntityProperties } from "./domain/networking/packets/EntityData";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
+import PacketType from "./domain/networking/udt/PacketHeaders";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType, { NodeTypeValue } from "./domain/networking/NodeType";
@@ -263,8 +264,12 @@ class EntityServer extends AssignmentClient {
                 console.error("[EntityServer] addEntity() called with invalid entity hostType!");
                 return new Uuid(Uuid.NULL);
             }
-            if (hostType !== EntityHostType.DOMAIN) {
-                console.error("[EntityServer] addEntity() called with unsupported entity hostType!");
+            if (hostType === EntityHostType.AVATAR) {
+                console.error("[EntityServer] addEntity() for avatar entities not implemented!");
+                return new Uuid(Uuid.NULL);
+            }
+            if (hostType === EntityHostType.LOCAL) {
+                console.error("[EntityServer] addEntity() for local entities not implemented!");
                 return new Uuid(Uuid.NULL);
             }
         }
@@ -308,14 +313,54 @@ class EntityServer extends AssignmentClient {
         }
     }
 
-    // @ts-ignore
-    #addEntityInternal(properties: EntityProperties, hostType: EntityHostType): Uuid {
+    #addEntityInternal(properties: EntityProperties, entityHostType: EntityHostType): Uuid {
         // C++  QUuid EntityScriptingInterface::addEntityInternal(const EntityItemProperties& properties,
         //          entity::HostType entityHostType)
 
+        // WEBRTC TODO: Address further C++ code - activity tracking.
+
+        // WEBRTC TODO: Address further C++ code - avatar entities and local entities.
+        if (entityHostType === EntityHostType.AVATAR) {
+            console.error("[EntityServer] addEntity() for avatar entities not implemented!");
+            return new Uuid(Uuid.NULL);
+        }
+        if (entityHostType === EntityHostType.LOCAL) {
+            console.error("[EntityServer] addEntity() for local entities not implemented!");
+            return new Uuid(Uuid.NULL);
+        }
+
+        // WEBRTC TODO: Address further C++ code - avatar entities.
+
+        const propertiesWithSimID = JSON.parse(JSON.stringify(properties)) as EntityProperties;
+
+        // WEBRTC TODO: Address further C++ code - avatar entities and local entities.
+        // propertiesWithSimID.entityHostType = entityHostType;
+
+        propertiesWithSimID.created = BigInt(Date.now());
+
+        const sessionID = this.#_nodeList.getSessionUUID();
+        propertiesWithSimID.lastEditedBy = sessionID;
+
+        // Don't use native client's "script semantics" for properties, use the server's.
+
+        // Don't track whether the dimensions have been initialized, this is the client's responsibility.
+
+        // WEBRTC TODO: Address synchronizing grab properties?
+
+        // The SDK doesn't maintain a local entity tree so just create an entity ID.
+        const id = Uuid.createUuid();
+
+        this.#queueEntityMessage(PacketType.EntityAdd, id, propertiesWithSimID);
+        return id;
+    }
+
+    // @ts-ignore
+    #queueEntityMessage(packetType: PacketType, entityID: Uuid, properties: EntityItemProperties): void {
+        // C++  void EntityScriptingInterface::queueEntityMessage(PacketType packetType, EntityItemID entityID,
+        //          const EntityItemProperties& properties)
+
         // TODO: Implement.
 
-        return Uuid.createUuid();
     }
 
 

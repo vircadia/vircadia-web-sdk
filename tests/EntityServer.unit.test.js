@@ -78,7 +78,10 @@ describe("EntityServer - unit tests", () => {
         // Unsupported host type.
         uuid = entityServer.addEntity({ entityType: EntityType.Shape }, EntityHostType.AVATAR);
         expect(uuid.isNull()).toBe(true);
-        expect(errorMessage).toBe("[EntityServer] addEntity() called with unsupported entity hostType!");
+        expect(errorMessage).toBe("[EntityServer] addEntity() for avatar entities not implemented!");
+        uuid = entityServer.addEntity({ entityType: EntityType.Shape }, EntityHostType.LOCAL);
+        expect(uuid.isNull()).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] addEntity() for local entities not implemented!");
 
         // Successful call in contrast.
         errorMessage = "";
