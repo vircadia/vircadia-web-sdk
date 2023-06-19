@@ -25,7 +25,7 @@ import ContextManager from "../../../src/domain/shared/ContextManager";
 import Uuid from "../../../src/domain/shared/Uuid";
 
 
-describe("LimitedNodeList - integration tests", () => {
+describe("LimitedNodeList - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
@@ -328,7 +328,7 @@ describe("LimitedNodeList - integration tests", () => {
         expect(LimitedNodeList.connectReasonToString(27)).toBe("Invalid");
     });
 
-    test("Can set and get domain permissions", (done) => {
+    test("Can set and get domain kick permissions", (done) => {
         const limitedNodeList = new LimitedNodeList(contextID);
         limitedNodeList.canKickChanged.connect(() => {
             expect(limitedNodeList.getThisNodeCanKick()).toBe(true);
@@ -338,6 +338,42 @@ describe("LimitedNodeList - integration tests", () => {
         expect(limitedNodeList.getThisNodeCanKick()).toBe(false);
         const newPermissions = new NodePermissions();
         newPermissions.permissions = NodePermissions.Permission.canKick;
+        limitedNodeList.setPermissions(newPermissions);
+    });
+
+    test("Can set and get domain editing permissions", (done) => {
+        const limitedNodeList = new LimitedNodeList(contextID);
+        let hasCanRezChanged = false;
+        let hasCanRezTempChanged = false;
+        limitedNodeList.canRezChanged.connect(() => {
+            hasCanRezChanged = true;
+            expect(limitedNodeList.getThisNodeCanRez()).toBe(true);
+        });
+        limitedNodeList.canRezTmpChanged.connect(() => {
+            hasCanRezTempChanged = true;
+            expect(limitedNodeList.getThisNodeCanRezTmp()).toBe(true);
+        });
+        limitedNodeList.canGetAndSetPrivateUserDataChanged.connect(() => {
+            expect(limitedNodeList.getThisNodeCanGetAndSetPrivateUserData()).toBe(true);
+            expect(hasCanRezChanged).toBe(true);
+            expect(hasCanRezTempChanged).toBe(true);
+            done();
+        });
+
+        expect(limitedNodeList.getThisNodeCanRez()).toBe(false);
+        expect(limitedNodeList.getThisNodeCanRezTmp()).toBe(false);
+        expect(limitedNodeList.getThisNodeCanGetAndSetPrivateUserData()).toBe(false);
+        let newPermissions = new NodePermissions();
+        newPermissions.permissions = NodePermissions.Permission.canRezPermanentEntities;
+        limitedNodeList.setPermissions(newPermissions);
+        newPermissions = new NodePermissions();
+        newPermissions.permissions = NodePermissions.Permission.canRezPermanentEntities
+            + NodePermissions.Permission.canRezTemporaryEntities;
+        limitedNodeList.setPermissions(newPermissions);
+        newPermissions = new NodePermissions();
+        newPermissions.permissions = NodePermissions.Permission.canRezPermanentEntities
+            + NodePermissions.Permission.canRezTemporaryEntities
+            + NodePermissions.Permission.canGetAndSetPrivateUserData;
         limitedNodeList.setPermissions(newPermissions);
     });
 

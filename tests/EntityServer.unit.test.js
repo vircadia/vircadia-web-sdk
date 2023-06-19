@@ -30,4 +30,21 @@ describe("EntityServer - unit tests", () => {
         expect(entityServer instanceof EntityServer).toBe(true);
     });
 
+    test("Can get user permissions", () => {
+
+        const domainServer = new DomainServer();
+        const camera = new Camera(domainServer.contextID);  // eslint-disable-line @typescript-eslint/no-unused-vars
+        const entityServer = new EntityServer(domainServer.contextID);
+
+        expect(typeof entityServer.canRez).toBe("boolean");
+        expect(typeof entityServer.canRezChanged.connect).toBe("function");
+        expect(typeof entityServer.canRezChanged.disconnect).toBe("function");
+        expect(typeof entityServer.canRezTemp).toBe("boolean");
+        expect(typeof entityServer.canRezTempChanged.connect).toBe("function");
+        expect(typeof entityServer.canRezTempChanged.disconnect).toBe("function");
+        expect(typeof entityServer.canGetAndSetPrivateUserData).toBe("boolean");
+        expect(typeof entityServer.canGetAndSetPrivateUserDataChanged.connect).toBe("function");
+        expect(typeof entityServer.canGetAndSetPrivateUserDataChanged.disconnect).toBe("function");
+    });
+
 });

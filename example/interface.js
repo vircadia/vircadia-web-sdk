@@ -639,6 +639,10 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const entityListBody = document.querySelector("#entityList > tbody");
         let entityIDsList = [];
 
+        const canRezStatus = document.getElementById("canRezStatus");
+        const canRezTempStatus = document.getElementById("canRezTempStatus");
+        const canUsePrivateStatus = document.getElementById("canUsePrivateStatus");
+
 
         // Status
 
@@ -646,16 +650,21 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         function onStateChanged(state) {
             statusText.value = EntityServer.stateToString(state);
-            if (state === EntityServer.UNAVAILABLE || state === EntityServer.DISCONNECTED) {
+            const isConnected = state === EntityServer.CONNECTED;
+            if (!isConnected) {
                 while (entityListBody.hasChildNodes()) {
                     entityListBody.removeChild(entityListBody.firstChild);
                 }
                 entityIDsList = [];
                 entitiesCount.value = 0;
             }
+
+            canRezStatus.disabled = !isConnected;
+            canRezTempStatus.disabled = !isConnected;
+            canUsePrivateStatus.disabled = !isConnected;
         }
-        onStateChanged(entityServer.state);
         entityServer.onStateChanged = onStateChanged;
+        onStateChanged(entityServer.state);
 
 
         // Entity List
@@ -713,6 +722,27 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             entitiesCount.value = entityIDsList.length;
         }
         entityServer.entityData.connect(onEntityData);
+
+
+        // Entity Editing
+
+        const onCanRezChanged = (canRez) => {
+            canRezStatus.value = canRez;
+        };
+        entityServer.canRezChanged.connect(onCanRezChanged);
+        onCanRezChanged(entityServer.canRez);
+
+        const onCanRezTempChanged = (canRezTemp) => {
+            canRezTempStatus.value = canRezTemp;
+        };
+        entityServer.canRezTempChanged.connect(onCanRezTempChanged);
+        onCanRezTempChanged(entityServer.canRezTemp);
+
+        const onCanGetAndSetPrivateUserDataChanged = (canGetAndSetPrivateUserData) => {
+            canUsePrivateStatus.value = canGetAndSetPrivateUserData;
+        };
+        entityServer.canGetAndSetPrivateUserDataChanged.connect(onCanGetAndSetPrivateUserDataChanged);
+        onCanGetAndSetPrivateUserDataChanged(entityServer.canGetAndSetPrivateUserData);
 
 
         // Game Loop

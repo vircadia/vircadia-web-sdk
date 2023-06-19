@@ -53,6 +53,17 @@ import AssignmentClient from "./domain/AssignmentClient";
  *      willing to handle.
  *  @property {Signal<EntityServer~entityData>} entityData - Triggered when new or changed entity data is received from the
  *      entity server.
+ *  @property {boolean} canRez - Whether the user has permissions to rez (create) persistent entities in the domain.
+ *  @property {Signal<EntityServer~canRezChanged>} canRezChanged - Triggered when whether the user's permissions to rez (create)
+ *      persistent entities changes in the domain.
+ *  @property {boolean} canRezTemp - Whether the user has permissions to rez (create) temporary entities in the domain.
+ *  @property {Signal<EntityServer~canRezTempChanged>} canRezTempChanged - Triggered when whether the user's permissions to rez
+ *      (create) temporary entities changes in the domain. Temporary entities are entities with a finite <code>lifetime</code>
+ *      property value set.
+ *  @property {boolean} canGetAndSetPrivateUserData - Whether the user has permissions to get and set entities'
+ *     <code>privateUserData</code> properties in the domain.
+ *  @property {Signal<EntityServer~canGetAndSetPrivateUserDataChanged>} canGetAndSetPrivateUserDataChanged - Triggered when the
+ *      user's permissions to get and set entities' <code>privateUserData</code> properties changes in the domain.
  */
 class EntityServer extends AssignmentClient {
 
@@ -102,6 +113,9 @@ class EntityServer extends AssignmentClient {
     #_queryExpiry = 0;
     #_physicsEnabled = true;
     #_entityData = new SignalEmitter();
+    #_canRezChanged = new SignalEmitter();
+    #_canRezTempChanged = new SignalEmitter();
+    #_canGetAndSetPrivateUserDataChanged = new SignalEmitter();
 
 
     constructor(contextID: number) {
@@ -117,6 +131,17 @@ class EntityServer extends AssignmentClient {
             this.#_entityData.emit(data);
         });
 
+        // C++  EntityScriptingInterface::EntityScriptingInterface(bool bidOnSimulationOwnership)
+        this.#_nodeList.canRezChanged.connect((canRez: boolean) => {
+            this.#_canRezChanged.emit(canRez);
+        });
+        this.#_nodeList.canRezTmpChanged.connect((canRezTmp: boolean) => {
+            this.#_canRezTempChanged.emit(canRezTmp);
+        });
+        this.#_nodeList.canGetAndSetPrivateUserDataChanged.connect((canGetAndSetPrivateUserData: boolean) => {
+            this.#_canGetAndSetPrivateUserDataChanged.emit(canGetAndSetPrivateUserData);
+        });
+
         // C++  Application::Application()
         this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
         this.#_nodeList.nodeKilled.connect(this.#nodeKilled);
@@ -129,6 +154,22 @@ class EntityServer extends AssignmentClient {
         return this.#_maxOctreePPS;
     }
 
+    get canRez(): boolean {
+        // C++  bool EntityScriptingInterface::canRez()
+        return this.#_nodeList.getThisNodeCanRez();
+    }
+
+    get canRezTemp(): boolean {  // Intentionally renamed from canRezTmp() in order to be more user-friendly.
+        // C++  bool EntityScriptingInterface::canRezTmp()
+        return this.#_nodeList.getThisNodeCanRezTmp();
+    }
+
+    get canGetAndSetPrivateUserData(): boolean {
+        // C++  bool EntityScriptingInterface::canGetAndSetPrivateUserData()
+        return this.#_nodeList.getThisNodeCanGetAndSetPrivateUserData();
+    }
+
+
     /*@sdkdoc
      *  Triggered when new or changed entity data is received from the entity server.
      *  @callback EntityServer~entityData
@@ -136,7 +177,43 @@ class EntityServer extends AssignmentClient {
      *      properties are provided for both new and changed entities.
      */
     get entityData(): Signal {
+        // C++  N/A
         return this.#_entityData.signal();
+    }
+
+    /*@sdkdoc
+     *  Triggered when the user's permissions to rez (create) persistent entities changes in the domain.
+     *  @callback EntityServer~canRezChanged
+     *  @param {boolean} canRez - <code>true</code> if the user has permissions to rez persistent entities in the domain,
+     *      <code>false</code> if the user doesn't.
+     */
+    get canRezChanged(): Signal {
+        // C++  void EntityScriptingInterface::canRezChanged(bool canRez)
+        return this.#_canRezChanged.signal();
+    }
+
+    /*@sdkdoc
+     *  Triggered when the user's permissions to rez (create) temporary entities changes in the domain. Temporary
+     *  entities are entities with a finite <code>lifetime</code> property value set.
+     *  @callback EntityServer~canRezTempChanged
+     *  @param {boolean} canRezTemp - <code>true</code> if the user has permissions to rez temporary entities in the domain,
+     *      <code>false</code> if the user doesn't.
+     */
+    get canRezTempChanged(): Signal {
+        // C++  void EntityScriptingInterface::canRezTmpChanged(bool canRez)
+        return this.#_canRezTempChanged.signal();
+    }
+
+    /*@sdkdoc
+     *  Triggered when the user's permissions to get and set entities' <code>privateUserData</code> properties changes in the
+     *  domain.
+     *  @callback EntityServer~canGetAndSetPrivateUserDataChanged
+     *  @param {boolean} canGetAndSetPrivateUserdata - <code>true</code> if the user has permissions to get and set entities'
+     *  <code>privateUserData</code> properties in the domain, <code>false</code> if the user doesn't.
+     */
+    get canGetAndSetPrivateUserDataChanged(): Signal {
+        // C++  void EntityScriptingInterface::canGetAndSetPrivateUserDataChanged(bool canGetAndSetPrivateUserData)
+        return this.#_canGetAndSetPrivateUserDataChanged.signal();
     }
 
 

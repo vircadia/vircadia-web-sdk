@@ -162,7 +162,10 @@ class LimitedNodeList {
     #_packetVersionMismatch = new SignalEmitter();
 
     #_permissions = new NodePermissions();
+    #_canRezChanged = new SignalEmitter();
+    #_canRezTmpChanged = new SignalEmitter();
     #_canKickChanged = new SignalEmitter();
+    #_canGetAndSetPrivateUserDataChanged = new SignalEmitter();
 
 
     constructor(contextID: number) {
@@ -727,6 +730,17 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        if (originalPermissions.can(NodePermissions.Permission.canRezPermanentEntities)
+            !== newPermissions.can(NodePermissions.Permission.canRezPermanentEntities)) {
+            this.#_canRezChanged.emit(this.#_permissions.can(NodePermissions.Permission.canRezPermanentEntities));
+        }
+        if (originalPermissions.can(NodePermissions.Permission.canRezTemporaryEntities)
+            !== newPermissions.can(NodePermissions.Permission.canRezTemporaryEntities)) {
+            this.#_canRezTmpChanged.emit(this.#_permissions.can(NodePermissions.Permission.canRezTemporaryEntities));
+        }
+
+        // WEBRTC TODO: Address further C++ code.
+
         if (originalPermissions.can(NodePermissions.Permission.canKick)
                 !== newPermissions.can(NodePermissions.Permission.canKick)) {
             this.#_canKickChanged.emit(this.#_permissions.can(NodePermissions.Permission.canKick));
@@ -734,16 +748,56 @@ class LimitedNodeList {
 
         // WEBRTC TODO: Address further C++ code.
 
+        if (originalPermissions.can(NodePermissions.Permission.canGetAndSetPrivateUserData)
+            !== newPermissions.can(NodePermissions.Permission.canGetAndSetPrivateUserData)) {
+            this.#_canGetAndSetPrivateUserDataChanged.emit(
+                this.#_permissions.can(NodePermissions.Permission.canGetAndSetPrivateUserData)
+            );
+        }
+
+        // WEBRTC TODO: Address further C++ code.
+
     }
 
     /*@devdoc
-     *  Gets whether the node has permissions on the domain to kick (ban) users.
-     *  @returns {boolean} <code>true</code> if the node has permissions on the domain to kick (ban) users, <code>false</code>
+     *  Gets whether the node has permissions to rez (create) persistent entities in the domain.
+     *  @returns {boolean} <code>true</code> if the node has permissions to rez persistent entities in the domain,
+     *      <code>false</code> if it doesn't.
+     */
+    getThisNodeCanRez(): boolean {
+        // C++  bool getThisNodeCanRez() const
+        return this.#_permissions.can(NodePermissions.Permission.canRezPermanentEntities);
+    }
+
+    /*@devdoc
+     *  Gets whether the node has permissions to rez (create) temporary entities in the domain. Temporary entities are entities
+     *  with a finite <code>lifetime</code> property value set.
+     *  @returns {boolean} <code>true</code> if the node has permissions on the domain to rez temporary entities,
+     *      <code>false</code> if it doesn't.
+     */
+    getThisNodeCanRezTmp(): boolean {
+        // C++  bool getThisNodeCanRezTmp() const
+        return this.#_permissions.can(NodePermissions.Permission.canRezTemporaryEntities);
+    }
+
+    /*@devdoc
+     *  Gets whether the node has permissions to kick (ban) users in the domain.
+     *  @returns {boolean} <code>true</code> if the node has permissions to kick (ban) users in the domain, <code>false</code>
      *      if it doesn't.
      */
     getThisNodeCanKick(): boolean {
         // C++  bool getThisNodeCanKick() const
         return this.#_permissions.can(NodePermissions.Permission.canKick);
+    }
+
+    /*@devdoc
+     *  Gets whether the node has permissions to get and set entities' <code>privateUserData</code> properties in the domain.
+     *  @returns {boolean} <code>true</code> if the node has permissions to get and set entities' <code>privateUserData</code>
+     *      properties in the domain, <code>false</code> if it doesn't.
+     */
+    getThisNodeCanGetAndSetPrivateUserData(): boolean {
+        // C++  bool getThisNodeCanGetAndSetPrivateUserData() const
+        return this.#_permissions.can(NodePermissions.Permission.canGetAndSetPrivateUserData);
     }
 
 
@@ -817,7 +871,32 @@ class LimitedNodeList {
     }
 
     /*@devdoc
-     *  Triggered when the node's kick permissions on the domain changes.
+     *  Triggered when the node's rez persistent entities permission changes in the domain.
+     *  @function LimitedNodeList.canRezChanged
+     *  @param {boolean} canRez - <code>true</code> if the node has permission to rez persistent entities on the domain,
+     *      <code>false</code> if it doesn't.
+     *  @returns {Signal}
+     */
+    get canRezChanged(): Signal {
+        // C++  void canRezChanged(bool canRez)
+        return this.#_canRezChanged.signal();
+    }
+
+    /*@devdoc
+     *  Triggered when the node's rez temporary entities permission changes in the domain. Temporary entities are entities with
+     *  a finite <code>lifetime</code> property value set.
+     *  @function LimitedNodeList.canRezTmpChanged
+     *  @param {boolean} canRezTmp - <code>true</code> if the node has permission to rez temporary entities on the domain,
+     *      <code>false</code> if it doesn't.
+     *  @returns {Signal}
+     */
+    get canRezTmpChanged(): Signal {
+        // C++  void canRezTmpChanged(bool canRezTmp)
+        return this.#_canRezTmpChanged.signal();
+    }
+
+    /*@devdoc
+     *  Triggered when the node's kick permissions changes in the domain.
      *  @function LimitedNodeList.canKickChanged
      *  @param {boolean} canKick - <code>true</code> if the node has permissions on the domain to kick (ban) users,
      *      <code>false</code> if it doesn't.
@@ -826,6 +905,19 @@ class LimitedNodeList {
     get canKickChanged(): Signal {
         // C++  void canKickChanged(bool canKick)
         return this.#_canKickChanged.signal();
+    }
+
+    /*@devdoc
+     *  Triggered when the node's permission to get and set entities' <code>privateUserData</code> properties changes in the
+     *  domain.
+     *  @function LimitedNodeList.canGetAndSetPrivateUserDataChanged
+     *  @param {boolean} canGetAndSetPrivateUserData - <code>true</code> if the node has permission to get and set entities'
+     *      <code>privateUserData</code> properties, <code>false</code> if it doesn't.
+     *  @returns {Signal}
+     */
+    get canGetAndSetPrivateUserDataChanged(): Signal {
+        // C++  void canGetAndSetPrivateUserDataChanged(bool canGetAndSetPrivateUserData)
+        return this.#_canGetAndSetPrivateUserDataChanged.signal();
     }
 
 

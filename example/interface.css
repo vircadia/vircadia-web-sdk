@@ -62,6 +62,10 @@ input {
         border: dotted 1px #d0d0d0;
     }
 
+    input:disabled {
+        color: #808080;
+    }
+
 button {
     width: 88px;
 }
