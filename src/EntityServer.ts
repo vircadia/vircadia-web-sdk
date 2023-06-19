@@ -9,6 +9,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { EntityHostType } from "./domain/entities/EntityHostType";
+import { EntityType } from "./domain/entities/EntityTypes";
+import { EntityProperties } from "./domain/networking/packets/EntityData";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
@@ -19,6 +22,7 @@ import OctreeQuery from "./domain/octree/OctreeQuery";
 import Camera from "./domain/shared/Camera";
 import ContextManager from "./domain/shared/ContextManager";
 import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
+import Uuid from "./domain/shared/Uuid";
 import AssignmentClient from "./domain/AssignmentClient";
 
 
@@ -233,6 +237,47 @@ class EntityServer extends AssignmentClient {
         }
     }
 
+    /*@sdkdoc
+     *  Adds a new entity to the entity server.
+     *  @param {EntityProperties} properties - The properties of the entity to add.
+     *  @param {EntityHostType} [hostType=EntityHostType.DOMAIN] - Where to host the entity.
+     *  @returns {Uuid} The ID of the new entity if added, or {@link Uuid(1)|Uuid.NULL} if no entity added.
+     */
+    addEntity(properties: EntityProperties, hostType?: EntityHostType): Uuid {
+        // C++  QUuid EntityScriptingInterface::addEntity(const EntityItemProperties& properties,
+        //          const QString& entityHostTypeString)
+
+        if (typeof properties !== "object") {
+            console.error("[EntityServer] addEntity() called with invalid entity properties!");
+            return new Uuid(Uuid.NULL);
+        }
+
+        if (typeof properties.entityType !== "number" || properties.entityType <= EntityType.Unknown
+                || properties.entityType >= EntityType.NUM_TYPES) {
+            console.error("[EntityServer] addEntity() called with invalid entity type!");
+            return new Uuid(Uuid.NULL);
+        }
+
+        if (typeof hostType !== "undefined") {
+            if (typeof hostType !== "number" || hostType < EntityHostType.DOMAIN || hostType > EntityHostType.LOCAL) {
+                console.error("[EntityServer] addEntity() called with invalid entity hostType!");
+                return new Uuid(Uuid.NULL);
+            }
+            if (hostType !== EntityHostType.DOMAIN) {
+                console.error("[EntityServer] addEntity() called with unsupported entity hostType!");
+                return new Uuid(Uuid.NULL);
+            }
+        }
+
+        if ([EntityType.Line, EntityType.PolyLine, EntityType.PolyVox, EntityType.Grid, EntityType.Gizmo]
+            .includes(properties.entityType)) {
+            console.error("[EntityServer] addEntity() called with unsupported entity type!", properties.entityType);
+            return new Uuid(Uuid.NULL);
+        }
+
+        return this.#addEntityInternal(properties, hostType ?? EntityHostType.DOMAIN);
+    }
+
 
     // Sends an EntityQuery packet to the entity server.
     #queryOctree(serverType: NodeTypeValue): void {
@@ -261,6 +306,16 @@ class EntityServer extends AssignmentClient {
             const packet = PacketScribe.EntityQuery.write(entityQueryData);
             this.#_nodeList.sendUnreliablePacket(packet, node);
         }
+    }
+
+    // @ts-ignore
+    #addEntityInternal(properties: EntityProperties, hostType: EntityHostType): Uuid {
+        // C++  QUuid EntityScriptingInterface::addEntityInternal(const EntityItemProperties& properties,
+        //          entity::HostType entityHostType)
+
+        // TODO: Implement.
+
+        return Uuid.createUuid();
     }
 
 

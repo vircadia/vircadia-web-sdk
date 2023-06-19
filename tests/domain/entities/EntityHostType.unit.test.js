@@ -15,8 +15,8 @@ describe("EntityHostType - unit tests", () => {
 
     test("Can get entity host types", () => {
         expect(EntityHostType.DOMAIN).toBe(0);
-        expect(EntityHostType.LOCAL).toBe(1);
-        expect(EntityHostType.AVATAR).toBe(2);
+        expect(EntityHostType.AVATAR).toBe(1);
+        expect(EntityHostType.LOCAL).toBe(2);
     });
 
 });

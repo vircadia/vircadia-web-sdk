@@ -9,7 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer, Vec3, Uuid }
+import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer, EntityType, Uuid, Vec3 }
     from "../dist/Vircadia.js";
 
 (function () {
@@ -639,6 +639,8 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
         const entityListBody = document.querySelector("#entityList > tbody");
         let entityIDsList = [];
 
+        const addEntityButton = document.getElementById("addEntityButton");
+        const addedEntityID = document.getElementById("addedEntityID");
         const canRezStatus = document.getElementById("canRezStatus");
         const canRezTempStatus = document.getElementById("canRezTempStatus");
         const canUsePrivateStatus = document.getElementById("canUsePrivateStatus");
@@ -726,8 +728,16 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
 
         // Entity Editing
 
+        addEntityButton.addEventListener("click", () => {
+            const entityID = entityServer.addEntity({
+                entityType: EntityType.Shape
+            });
+            addedEntityID.value = entityID.stringify();
+        });
+
         const onCanRezChanged = (canRez) => {
             canRezStatus.value = canRez;
+            addEntityButton.disabled = !entityServer.canRez;
         };
         entityServer.canRezChanged.connect(onCanRezChanged);
         onCanRezChanged(entityServer.canRez);

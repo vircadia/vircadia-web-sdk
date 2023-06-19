@@ -52,8 +52,14 @@ export { default as EntityServer } from "./EntityServer";
 export { default as MessageMixer } from "./MessageMixer";
 export type { AssignmentClientState } from "./domain/AssignmentClient";
 
+export { EntityHostType } from "./domain/entities/EntityHostType";
+export { EntityType } from "./domain/entities/EntityTypes";
+
 export { default as ModerationFlags } from "./domain/shared/ModerationFlags";
 export type { BanFlagsValue } from "./domain/shared/ModerationFlags";
+
+export { default as Quat } from "./domain/shared/Quat";
+export type { quat } from "./domain/shared/Quat";
 
 export { default as SignalEmitter } from "./domain/shared/SignalEmitter";
 export type { Signal, Slot } from "./domain/shared/SignalEmitter";
@@ -62,6 +68,3 @@ export { default as Uuid } from "./domain/shared/Uuid";
 
 export { default as Vec3 } from "./domain/shared/Vec3";
 export type { vec3 } from "./domain/shared/Vec3";
-
-export { default as Quat } from "./domain/shared/Quat";
-export type { quat } from "./domain/shared/Quat";

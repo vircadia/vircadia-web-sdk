@@ -16,7 +16,7 @@ describe("EntityTypes - unit tests", () => {
     test("Can get entity types", () => {
         expect(EntityType.Unknown).toBe(0);
         expect(EntityType.Box).toBe(1);
-        expect(EntityType.NUM_TYPES).toBe(17);
+        expect(EntityType.NUM_TYPES).toBe(17);  // eslint-disable-line @typescript-eslint/no-magic-numbers
     });
 
 });

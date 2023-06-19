@@ -14,19 +14,19 @@
  *  @namespace EntityHostType
  *  @property {number} DOMAIN - <code>0</code> - Domain entities are stored on the domain, are visible to everyone, and are sent
  *      to everyone by the entity server.
- *  @property {number} LOCAL - <code>1</code> - Avatar entities are stored on an Interface client, are visible to everyone, and
- *      are sent to everyone by the avatar mixer. They follow the client to each domain visited, displaying at the same domain
- *      coordinates unless parented to the client's avatar.
- *  @property {number} AVATAR - <code>2</code> - Local entities are ephemeral — they aren't stored anywhere — and are visible
+ *  @property {number} AVATAR - <code>1</code> - Local entities are ephemeral — they aren't stored anywhere — and are visible
  *      only to the client. They follow the client to each domain visited, displaying at the same domain coordinates unless
  *      parented to the client's avatar. Additionally, local entities are always collisionless.
+ *  @property {number} LOCAL - <code>2</code> - Avatar entities are stored on an Interface client, are visible to everyone, and
+ *      are sent to everyone by the avatar mixer. They follow the client to each domain visited, displaying at the same domain
+ *      coordinates unless parented to the client's avatar.
  */
 enum EntityHostType {
     // C++  namespace entity { enum class HostType }
 
     DOMAIN = 0,
-    LOCAL,
-    AVATAR
+    AVATAR,
+    LOCAL
 }
 
 export { EntityHostType };
