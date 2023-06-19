@@ -10,7 +10,7 @@
 //
 
 /*@sdkdoc
- *  The <code>EntityType</code> namespace provides types for entities.
+ *  The <code>EntityType</code> namespace enumerates entity types.
  *  @namespace EntityType
  *  @property {number} Unknown - <code>0</code> - Default entity type.
  *  @property {number} Box - <code>1</code> - A rectangular prism. This is a synonym of <code>Shape</code> for the case where
