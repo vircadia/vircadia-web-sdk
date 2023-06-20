@@ -1,5 +1,5 @@
 //
-//  EntityHostType.ts
+//  EntityItem.ts
 //
 //  Created by David Rowe on 19 Jun 2023.
 //  Copyright 2023 Vircadia contributors.
@@ -10,8 +10,9 @@
 //
 
 /*@sdkdoc
- *  The <code>EntityHostType</code> namespace enumerates how an entity is hosted and sent to others for display.
- *  @namespace EntityHostType
+ *  The <code>HostType</code> namespace enumerates how an entity is hosted and sent to others for display.
+ *  <p>C++: <code>HostType</code></p>
+ *  @namespace HostType
  *  @property {number} DOMAIN - <code>0</code> - Domain entities are stored on the domain, are visible to everyone, and are sent
  *      to everyone by the entity server.
  *  @property {number} AVATAR - <code>1</code> - Local entities are ephemeral — they aren't stored anywhere — and are visible
@@ -21,12 +22,12 @@
  *      are sent to everyone by the avatar mixer. They follow the client to each domain visited, displaying at the same domain
  *      coordinates unless parented to the client's avatar.
  */
-enum EntityHostType {
-    // C++  namespace entity { enum class HostType }
+enum HostType {
+    // C++  enum class HostType
 
     DOMAIN = 0,
     AVATAR,
     LOCAL
 }
 
-export { EntityHostType };
+export { HostType };

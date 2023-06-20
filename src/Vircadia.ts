@@ -52,7 +52,7 @@ export { default as EntityServer } from "./EntityServer";
 export { default as MessageMixer } from "./MessageMixer";
 export type { AssignmentClientState } from "./domain/AssignmentClient";
 
-export { EntityHostType } from "./domain/entities/EntityHostType";
+export { HostType } from "./domain/entities/EntityItem";
 export { EntityType } from "./domain/entities/EntityTypes";
 
 export { default as ModerationFlags } from "./domain/shared/ModerationFlags";

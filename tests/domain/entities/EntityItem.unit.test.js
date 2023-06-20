@@ -1,5 +1,5 @@
 //
-//  EntityHostType.unit.test.js
+//  EntityItem.unit.test.js
 //
 //  Created by David Rowe on 19 Jun 2023.
 //  Copyright 2023 Vircadia contributors.
@@ -9,14 +9,14 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { EntityHostType } from "../../../src/domain/entities/EntityHostType";
+import { HostType } from "../../../src/domain/entities/EntityItem";
 
-describe("EntityHostType - unit tests", () => {
+describe("EntityItem - unit tests", () => {
 
     test("Can get entity host types", () => {
-        expect(EntityHostType.DOMAIN).toBe(0);
-        expect(EntityHostType.AVATAR).toBe(1);
-        expect(EntityHostType.LOCAL).toBe(2);
+        expect(HostType.DOMAIN).toBe(0);
+        expect(HostType.AVATAR).toBe(1);
+        expect(HostType.LOCAL).toBe(2);
     });
 
 });

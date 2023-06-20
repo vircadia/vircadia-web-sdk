@@ -15,7 +15,7 @@ AccountManagerMock.mock();
 import { webcrypto } from "crypto";
 globalThis.crypto = webcrypto;
 
-import { EntityHostType } from "../src/domain/entities/EntityHostType";
+import { HostType } from "../src/domain/entities/EntityItem";
 import { EntityType } from "../src/domain/entities/EntityTypes";
 import Camera from "../src/Camera";
 import DomainServer from "../src/DomainServer";
@@ -76,16 +76,16 @@ describe("EntityServer - unit tests", () => {
         expect(errorMessage).toBe("[EntityServer] addEntity() called with invalid entity hostType!");
 
         // Unsupported host type.
-        uuid = entityServer.addEntity({ entityType: EntityType.Shape }, EntityHostType.AVATAR);
+        uuid = entityServer.addEntity({ entityType: EntityType.Shape }, HostType.AVATAR);
         expect(uuid.isNull()).toBe(true);
         expect(errorMessage).toBe("[EntityServer] addEntity() for avatar entities not implemented!");
-        uuid = entityServer.addEntity({ entityType: EntityType.Shape }, EntityHostType.LOCAL);
+        uuid = entityServer.addEntity({ entityType: EntityType.Shape }, HostType.LOCAL);
         expect(uuid.isNull()).toBe(true);
         expect(errorMessage).toBe("[EntityServer] addEntity() for local entities not implemented!");
 
         // Successful call in contrast.
         errorMessage = "";
-        uuid = entityServer.addEntity({ entityType: EntityType.Shape }, EntityHostType.DOMAIN);
+        uuid = entityServer.addEntity({ entityType: EntityType.Shape }, HostType.DOMAIN);
         expect(uuid.isNull()).toBe(false);
         expect(errorMessage).toBe("");
 

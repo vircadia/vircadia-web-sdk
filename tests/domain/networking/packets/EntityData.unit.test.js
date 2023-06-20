@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { HostType } from "../../../../src/domain/entities/EntityItem"; }
 import EntityData from "../../../../src/domain/networking/packets/EntityData";
 import AvatarPriorityMode from "../../../../src/domain/shared/AvatarPriorityMode";
 import ComponentMode from "../../../../src/domain/shared/ComponentMode";
@@ -66,6 +67,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].created).toBe(1655451515775649n);
         expect(info[0].lastEditedBy instanceof Uuid).toBe(true);
         expect(info[0].lastEditedBy.stringify()).toBe("e0a1aa03-b104-4476-a927-28a804e9d44a");
+        expect(info[0].entityHostType).toBe(HostType.DOMAIN);
         expect(info[0].queryAACube.corner.x).toBeCloseTo(0.6662073, 3);
         expect(info[0].queryAACube.corner.y).toBeCloseTo(-12.5329, 3);
         expect(info[0].queryAACube.corner.z).toBeCloseTo(2.7988767, 3);
@@ -214,6 +216,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].registrationPoint).toBeUndefined();
         expect(info[0].created).toBeUndefined();
         expect(info[0].lastEditedBy).toBeUndefined();
+        expect(info[0].entityHostType).toBe(HostType.DOMAIN);
         expect(info[0].queryAACube).toBeUndefined();
         expect(info[0].canCastShadow).toBeUndefined();
         expect(info[0].renderLayer).toBeUndefined();
@@ -339,6 +342,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].created).toBe(1655893407496516n);
         expect(info[1].lastEditedBy instanceof Uuid).toBe(true);
         expect(info[1].lastEditedBy.stringify()).toBe("49c19ac5-e413-4579-80e8-a0899444cb01");
+        expect(info[1].entityHostType).toBe(HostType.DOMAIN);
         expect(info[1].queryAACube.corner.x).toBeCloseTo(-1.548620, 3);
         expect(info[1].queryAACube.corner.y).toBeCloseTo(-2.31339, 3);
         expect(info[1].queryAACube.corner.z).toBeCloseTo(-0.900225, 3);
@@ -497,6 +501,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].created).toBe(1657627173666914n);
         expect(info[0].lastEditedBy instanceof Uuid).toBe(true);
         expect(info[0].lastEditedBy.stringify()).toBe("1026cbdd-6414-4861-bf88-99a21bed3fd2");
+        expect(info[0].entityHostType).toBe(HostType.DOMAIN);
         expect(info[0].queryAACube.corner.x).toBeCloseTo(-0.68387, 4);
         expect(info[0].queryAACube.corner.y).toBeCloseTo(-1.85178, 4);
         expect(info[0].queryAACube.corner.z).toBeCloseTo(0.52001, 4);
@@ -641,6 +646,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].created).toBe(1657627191786141n);
         expect(info[1].lastEditedBy instanceof Uuid).toBe(true);
         expect(info[1].lastEditedBy.stringify()).toBe("1026cbdd-6414-4861-bf88-99a21bed3fd2");
+        expect(info[1].entityHostType).toBe(HostType.DOMAIN);
         expect(info[1].queryAACube.corner.x).toBeCloseTo(-1.18520, 4);
         expect(info[1].queryAACube.corner.y).toBeCloseTo(-1.83080, 4);
         expect(info[1].queryAACube.corner.z).toBeCloseTo(0.49136, 4);

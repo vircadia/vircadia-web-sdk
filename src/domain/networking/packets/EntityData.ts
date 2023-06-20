@@ -9,6 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import { HostType } from "../../entities/EntityItem";
 import { EntityPropertyFlags } from "../../entities/EntityPropertyFlags";
 import { EntityType } from "../../entities/EntityTypes";
 import GizmoEntityItem, { GizmoEntityProperties, GizmoEntitySubclassData } from "../../entities/GizmoEntityItem";
@@ -63,6 +64,7 @@ type CommonEntityProperties = {
     registrationPoint: vec3 | undefined;
     created: bigint | undefined;
     lastEditedBy: Uuid | undefined;
+    entityHostType: HostType | undefined;  // Not sent over the wire.
     queryAACube: AACube | undefined;
     canCastShadow: boolean | undefined;
     renderLayer: number | undefined;
@@ -217,6 +219,8 @@ const EntityData = new class {
      *      since Unix
      *  @property {Uuid|undefined} lastEditedBy - The session ID of the avatar or agent that most recently created or edited
      *      the entity.
+     *  @property {HostType|undefined} entityHostType - How the entity is hosted and sent to others for display. The value can
+     *      only be set at entity creation by {@link EntityServer#addEntity|EntityServer.addEntity}. <em>Read-only.</em>
      *  @property {AACube|undefined} queryAACube - The axis-aligned cube that determines where the entity lives in the entity
      *      server's octree. The cube may be considerably larger than the entity in some situations, e.g., when the entity is
      *      grabbed by an avatar: the position of the entity is determined through avatar mixer updates and so the AA cube is
@@ -712,6 +716,8 @@ const EntityData = new class {
                     dataPosition += 16;
                 }
             }
+
+            const entityHostType = HostType.DOMAIN;  // Not sent over the wire.
 
             let queryAACube: AACube | undefined = undefined;
             if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_QUERY_AA_CUBE)) {
@@ -1297,6 +1303,7 @@ const EntityData = new class {
                     registrationPoint,
                     created,
                     lastEditedBy,
+                    entityHostType,
                     queryAACube,
                     canCastShadow,
                     renderLayer,

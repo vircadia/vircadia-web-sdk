@@ -9,7 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { EntityHostType } from "./domain/entities/EntityHostType";
+import { HostType } from "./domain/entities/EntityItem";
 import { EntityType } from "./domain/entities/EntityTypes";
 import { EntityProperties } from "./domain/networking/packets/EntityData";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
@@ -241,10 +241,10 @@ class EntityServer extends AssignmentClient {
     /*@sdkdoc
      *  Adds a new entity to the entity server.
      *  @param {EntityProperties} properties - The properties of the entity to add.
-     *  @param {EntityHostType} [hostType=EntityHostType.DOMAIN] - Where to host the entity.
+     *  @param {HostType} [hostType=HostType.DOMAIN] - Where to host the entity.
      *  @returns {Uuid} The ID of the new entity if added, or {@link Uuid(1)|Uuid.NULL} if no entity added.
      */
-    addEntity(properties: EntityProperties, hostType?: EntityHostType): Uuid {
+    addEntity(properties: EntityProperties, hostType?: HostType): Uuid {
         // C++  QUuid EntityScriptingInterface::addEntity(const EntityItemProperties& properties,
         //          const QString& entityHostTypeString)
 
@@ -260,15 +260,15 @@ class EntityServer extends AssignmentClient {
         }
 
         if (typeof hostType !== "undefined") {
-            if (typeof hostType !== "number" || hostType < EntityHostType.DOMAIN || hostType > EntityHostType.LOCAL) {
+            if (typeof hostType !== "number" || hostType < HostType.DOMAIN || hostType > HostType.LOCAL) {
                 console.error("[EntityServer] addEntity() called with invalid entity hostType!");
                 return new Uuid(Uuid.NULL);
             }
-            if (hostType === EntityHostType.AVATAR) {
+            if (hostType === HostType.AVATAR) {
                 console.error("[EntityServer] addEntity() for avatar entities not implemented!");
                 return new Uuid(Uuid.NULL);
             }
-            if (hostType === EntityHostType.LOCAL) {
+            if (hostType === HostType.LOCAL) {
                 console.error("[EntityServer] addEntity() for local entities not implemented!");
                 return new Uuid(Uuid.NULL);
             }
@@ -280,7 +280,7 @@ class EntityServer extends AssignmentClient {
             return new Uuid(Uuid.NULL);
         }
 
-        return this.#addEntityInternal(properties, hostType ?? EntityHostType.DOMAIN);
+        return this.#addEntityInternal(properties, hostType ?? HostType.DOMAIN);
     }
 
 
@@ -313,18 +313,18 @@ class EntityServer extends AssignmentClient {
         }
     }
 
-    #addEntityInternal(properties: EntityProperties, entityHostType: EntityHostType): Uuid {
+    #addEntityInternal(properties: EntityProperties, entityHostType: HostType): Uuid {
         // C++  QUuid EntityScriptingInterface::addEntityInternal(const EntityItemProperties& properties,
         //          entity::HostType entityHostType)
 
         // WEBRTC TODO: Address further C++ code - activity tracking.
 
         // WEBRTC TODO: Address further C++ code - avatar entities and local entities.
-        if (entityHostType === EntityHostType.AVATAR) {
+        if (entityHostType === HostType.AVATAR) {
             console.error("[EntityServer] addEntity() for avatar entities not implemented!");
             return new Uuid(Uuid.NULL);
         }
-        if (entityHostType === EntityHostType.LOCAL) {
+        if (entityHostType === HostType.LOCAL) {
             console.error("[EntityServer] addEntity() for local entities not implemented!");
             return new Uuid(Uuid.NULL);
         }
@@ -332,9 +332,9 @@ class EntityServer extends AssignmentClient {
         // WEBRTC TODO: Address further C++ code - avatar entities.
 
         const propertiesWithSimID = JSON.parse(JSON.stringify(properties)) as EntityProperties;
+        propertiesWithSimID.entityHostType = entityHostType;
 
         // WEBRTC TODO: Address further C++ code - avatar entities and local entities.
-        // propertiesWithSimID.entityHostType = entityHostType;
 
         propertiesWithSimID.created = BigInt(Date.now());
 
