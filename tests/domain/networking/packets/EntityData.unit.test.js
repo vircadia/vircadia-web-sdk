@@ -119,7 +119,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].acceleration.y).toBeCloseTo(0, 2);
         expect(info[0].acceleration.z).toBeCloseTo(0, 2);
         expect(info[0].damping).toBeCloseTo(0, 2);
-        expect(info[0].angularDampling).toBeCloseTo(0, 2);
+        expect(info[0].angularDamping).toBeCloseTo(0, 2);
         expect(info[0].restitution).toBeCloseTo(0.5, 3);
         expect(info[0].friction).toBeCloseTo(0.5, 3);
         expect(info[0].lifetime).toBeCloseTo(-1, 2);
@@ -247,7 +247,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].acceleration.y).toBeCloseTo(0, 2);
         expect(info[0].acceleration.z).toBeCloseTo(0, 2);
         expect(info[0].damping).toBeUndefined();
-        expect(info[0].angularDampling).toBeUndefined();
+        expect(info[0].angularDamping).toBeUndefined();
         expect(info[0].restitution).toBeCloseTo(0.5, 3);
         expect(info[0].friction).toBeCloseTo(0.5, 3);
         expect(info[0].lifetime).toBeCloseTo(-1, 2);
@@ -394,7 +394,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].acceleration.y).toBeCloseTo(0, 2);
         expect(info[1].acceleration.z).toBeCloseTo(0, 2);
         expect(info[1].damping).toBeCloseTo(0, 2);
-        expect(info[1].angularDampling).toBeCloseTo(0, 2);
+        expect(info[1].angularDamping).toBeCloseTo(0, 2);
         expect(info[1].restitution).toBeCloseTo(0.5, 3);
         expect(info[1].friction).toBeCloseTo(0.5, 3);
         expect(info[1].lifetime).toBeCloseTo(-1, 2);
@@ -551,7 +551,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].acceleration.y).toBeCloseTo(0, 2);
         expect(info[0].acceleration.z).toBeCloseTo(0, 2);
         expect(info[0].damping).toBe(0);
-        expect(info[0].angularDampling).toBe(0);
+        expect(info[0].angularDamping).toBe(0);
         expect(info[0].restitution).toBeCloseTo(0.5, 3);
         expect(info[0].friction).toBeCloseTo(0.5, 3);
         expect(info[0].lifetime).toBeCloseTo(-1, 2);
@@ -698,7 +698,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].acceleration.y).toBeCloseTo(0, 2);
         expect(info[1].acceleration.z).toBeCloseTo(0, 2);
         expect(info[1].damping).toBeCloseTo(0, 2);
-        expect(info[1].angularDampling).toBeCloseTo(0, 2);
+        expect(info[1].angularDamping).toBeCloseTo(0, 2);
         expect(info[1].restitution).toBeCloseTo(0.5, 3);
         expect(info[1].friction).toBeCloseTo(0.5, 3);
         expect(info[1].lifetime).toBeCloseTo(-1, 2);

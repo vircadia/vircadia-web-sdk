@@ -91,7 +91,7 @@ type CommonEntityProperties = {
     gravity: vec3 | undefined;
     acceleration: vec3 | undefined;
     damping: number | undefined;
-    angularDampling: number | undefined;
+    angularDamping: number | undefined;
     restitution: number | undefined;
     friction: number | undefined;
     lifetime: number | undefined;
@@ -278,7 +278,7 @@ const EntityData = new class {
      *      <code>0.0</code> – <code>1.0</code>. A higher damping value slows down the entity more quickly. The default value is
      *      for an exponential decay timescale of <code>2.0s</code>, where it takes <code>2.0s</code> for the movement to slow
      *      to <code>1/e = 0.368</code> of its initial value.
-     *  @property {number|undefined} angularDampling - How much the angular velocity of an entity slows down over time, range
+     *  @property {number|undefined} angularDamping - How much the angular velocity of an entity slows down over time, range
      *      <code>0.0 – 1.0</code>. A higher damping value slows down the entity more quickly. The default value is for an
      *      exponential decay timescale of <code>2.0s</code>, where it takes <code>2.0s</code> for the movement to slow to
      *      <code>1/e = 0.368</code> of its initial value.
@@ -935,9 +935,9 @@ const EntityData = new class {
                 dataPosition += 4;
             }
 
-            let angularDampling: number | undefined = undefined;
+            let angularDamping: number | undefined = undefined;
             if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_DAMPING)) {
-                angularDampling = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+                angularDamping = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
@@ -1330,7 +1330,7 @@ const EntityData = new class {
                     gravity,
                     acceleration,
                     damping,
-                    angularDampling,
+                    angularDamping,
                     restitution,
                     friction,
                     lifetime,
