@@ -10,7 +10,7 @@
 //
 
 import { HostType } from "../../entities/EntityItem";
-import { EntityPropertyFlags } from "../../entities/EntityPropertyFlags";
+import { EntityPropertyList } from "../../entities/EntityPropertyFlags";
 import { EntityType } from "../../entities/EntityTypes";
 import GizmoEntityItem, { GizmoEntityProperties, GizmoEntitySubclassData } from "../../entities/GizmoEntityItem";
 import GridEntityItem, { GridEntityProperties, GridEntitySubclassData } from "../../entities/GridEntityItem";
@@ -557,7 +557,7 @@ const EntityData = new class {
             dataPosition += propertyFlags.decode(encodedFlags, encodedFlags.byteLength);
 
             let simOwnerData: ArrayBuffer | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SIMULATION_OWNER)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SIMULATION_OWNER)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -574,7 +574,7 @@ const EntityData = new class {
             }
 
             let parentID: Uuid | null | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PARENT_ID)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PARENT_ID)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -587,19 +587,19 @@ const EntityData = new class {
             }
 
             let parentJointIndex: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PARENT_JOINT_INDEX)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)) {
                 parentJointIndex = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
             }
 
             let visible: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VISIBLE)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_VISIBLE)) {
                 visible = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let name: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_NAME)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_NAME)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
                 if (length > 0) {
@@ -611,13 +611,13 @@ const EntityData = new class {
             }
 
             let locked: boolean | undefined = false;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LOCKED)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_LOCKED)) {
                 locked = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let userData: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USER_DATA)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_USER_DATA)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
                 if (length > 0) {
@@ -629,7 +629,7 @@ const EntityData = new class {
             }
 
             let privateUserData: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PRIVATE_USER_DATA)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PRIVATE_USER_DATA)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
                 if (length > 0) {
@@ -641,7 +641,7 @@ const EntityData = new class {
             }
 
             let href: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HREF)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HREF)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
                 if (length > 0) {
@@ -653,7 +653,7 @@ const EntityData = new class {
             }
 
             let description: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DESCRIPTION)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_DESCRIPTION)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
                 if (length > 0) {
@@ -665,7 +665,7 @@ const EntityData = new class {
             }
 
             let position: vec3 | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_POSITION)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_POSITION)) {
                 position = {
                     x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                     y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -675,7 +675,7 @@ const EntityData = new class {
             }
 
             let dimensions: vec3 | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DIMENSIONS)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_DIMENSIONS)) {
                 dimensions = {
                     x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                     y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -685,13 +685,13 @@ const EntityData = new class {
             }
 
             let rotation: quat | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ROTATION)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ROTATION)) {
                 rotation = GLMHelpers.unpackOrientationQuatFromBytes(data, dataPosition);
                 dataPosition += 8;
             }
 
             let registrationPoint: vec3 | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_REGISTRATION_POINT)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_REGISTRATION_POINT)) {
                 registrationPoint = {
                     x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                     y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -701,13 +701,13 @@ const EntityData = new class {
             }
 
             let created: bigint | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CREATED)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_CREATED)) {
                 created = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 8;
             }
 
             let lastEditedBy: Uuid | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LAST_EDITED_BY)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY)) {
                 const lastEditedLength = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -720,7 +720,7 @@ const EntityData = new class {
             const entityHostType = HostType.DOMAIN;  // Not sent over the wire.
 
             let queryAACube: AACube | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_QUERY_AA_CUBE)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_QUERY_AA_CUBE)) {
                 const corner = {
                     x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                     y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -735,31 +735,31 @@ const EntityData = new class {
             }
 
             let canCastShadow: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CAN_CAST_SHADOW)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_CAN_CAST_SHADOW)) {
                 canCastShadow = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let renderLayer: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RENDER_LAYER)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_RENDER_LAYER)) {
                 renderLayer = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let primitiveMode: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PRIMITIVE_MODE)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PRIMITIVE_MODE)) {
                 primitiveMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let ignorePickIntersection: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_IGNORE_PICK_INTERSECTION)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_IGNORE_PICK_INTERSECTION)) {
                 ignorePickIntersection = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let renderWithZones: Uuid[] | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RENDER_WITH_ZONES)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_RENDER_WITH_ZONES)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -775,49 +775,49 @@ const EntityData = new class {
             }
 
             let billboardMode: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BILLBOARD_MODE)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_BILLBOARD_MODE)) {
                 billboardMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let grabbable: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_GRABBABLE)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_GRABBABLE)) {
                 grabbable = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let grabKinematic: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_KINEMATIC)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_KINEMATIC)) {
                 grabKinematic = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let grabFollowsController: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_FOLLOWS_CONTROLLER)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_FOLLOWS_CONTROLLER)) {
                 grabFollowsController = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let triggerable: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_TRIGGERABLE)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_TRIGGERABLE)) {
                 triggerable = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let grabEquippable: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_EQUIPPABLE)) {
                 grabEquippable = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let delegateToParent: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_DELEGATE_TO_PARENT)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_DELEGATE_TO_PARENT)) {
                 delegateToParent = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let equippableLeftPositionOffset: vec3 | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET)) {
                 equippableLeftPositionOffset = {
                     x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                     y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -827,14 +827,14 @@ const EntityData = new class {
             }
 
             let equippableLeftRotationOffset: quat | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET)) {
                 equippableLeftRotationOffset
                         = GLMHelpers.unpackOrientationQuatFromBytes(data, dataPosition);
                 dataPosition += 8;
             }
 
             let equippableRightPositionOffset: vec3 | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET)) {
                 equippableRightPositionOffset = {
                     x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                     y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -844,14 +844,14 @@ const EntityData = new class {
             }
 
             let equippableRightRotationOffset: quat | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET)) {
                 equippableRightRotationOffset
                         = GLMHelpers.unpackOrientationQuatFromBytes(data, dataPosition);
                 dataPosition += 8;
             }
 
             let equippableIndicatorURL: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_URL)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_EQUIPPABLE_INDICATOR_URL)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -864,7 +864,7 @@ const EntityData = new class {
             }
 
             let equippableIndicatorScale: vec3 | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE)) {
                 equippableIndicatorScale = {
                     x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                     y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -874,7 +874,7 @@ const EntityData = new class {
             }
 
             let equippableIndicatorOffset: vec3 | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET)) {
                 equippableIndicatorOffset = {
                     x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                     y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -884,13 +884,13 @@ const EntityData = new class {
             }
 
             let density: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DENSITY)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_DENSITY)) {
                 density = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let velocity: vec3 | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VELOCITY)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_VELOCITY)) {
                 velocity = {
                     x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                     y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -900,7 +900,7 @@ const EntityData = new class {
             }
 
             let angularVelocity: vec3 | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_VELOCITY)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANGULAR_VELOCITY)) {
                 angularVelocity = {
                     x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                     y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -910,7 +910,7 @@ const EntityData = new class {
             }
 
             let gravity: vec3 | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRAVITY)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAVITY)) {
                 gravity = {
                     x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                     y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -920,7 +920,7 @@ const EntityData = new class {
             }
 
             let acceleration: vec3 | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACCELERATION)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ACCELERATION)) {
                 acceleration = {
                     x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                     y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -930,55 +930,55 @@ const EntityData = new class {
             }
 
             let damping: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DAMPING)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_DAMPING)) {
                 damping = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let angularDamping: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANGULAR_DAMPING)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANGULAR_DAMPING)) {
                 angularDamping = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let restitution: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RESTITUTION)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_RESTITUTION)) {
                 restitution = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let friction: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_FRICTION)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_FRICTION)) {
                 friction = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let lifetime: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIFETIME)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_LIFETIME)) {
                 lifetime = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let collisionless: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISIONLESS)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLLISIONLESS)) {
                 collisionless = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let collisionMask: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_MASK)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLLISION_MASK)) {
                 collisionMask = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
             }
 
             let dynamic: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DYNAMIC)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_DYNAMIC)) {
                 dynamic = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let collisionSoundURL: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLLISION_SOUND_URL)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLLISION_SOUND_URL)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -991,7 +991,7 @@ const EntityData = new class {
             }
 
             let actionData: ArrayBuffer | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACTION_DATA)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ACTION_DATA)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -1007,37 +1007,37 @@ const EntityData = new class {
             }
 
             let cloneable: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONEABLE)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_CLONEABLE)) {
                 cloneable = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let cloneLifetime: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_LIFETIME)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_CLONE_LIFETIME)) {
                 cloneLifetime = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let cloneLimit: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_LIMIT)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_CLONE_LIMIT)) {
                 cloneLimit = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let cloneDynamic: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_DYNAMIC)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_CLONE_DYNAMIC)) {
                 cloneDynamic = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let cloneAvatarIdentity: boolean | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_AVATAR_ENTITY)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_CLONE_AVATAR_ENTITY)) {
                 cloneAvatarIdentity = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
             let cloneOriginID: Uuid | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CLONE_ORIGIN_ID)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_CLONE_ORIGIN_ID)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -1048,7 +1048,7 @@ const EntityData = new class {
             }
 
             let script: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SCRIPT)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -1061,13 +1061,13 @@ const EntityData = new class {
             }
 
             let scriptTimestamp: bigint | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT_TIMESTAMP)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SCRIPT_TIMESTAMP)) {
                 scriptTimestamp = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 8;
             }
 
             let serverScripts: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SERVER_SCRIPTS)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SERVER_SCRIPTS)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -1080,7 +1080,7 @@ const EntityData = new class {
             }
 
             let itemName: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_NAME)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ITEM_NAME)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -1093,7 +1093,7 @@ const EntityData = new class {
             }
 
             let itemDescription: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_DESCRIPTION)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ITEM_DESCRIPTION)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -1106,7 +1106,7 @@ const EntityData = new class {
             }
 
             let itemCategories: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_CATEGORIES)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ITEM_CATEGORIES)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -1119,7 +1119,7 @@ const EntityData = new class {
             }
 
             let itemArtist: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_ARTIST)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ITEM_ARTIST)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -1132,7 +1132,7 @@ const EntityData = new class {
             }
 
             let itemLicense: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ITEM_LICENSE)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ITEM_LICENSE)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -1145,13 +1145,13 @@ const EntityData = new class {
             }
 
             let limitedRun: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIMITED_RUN)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_LIMITED_RUN)) {
                 limitedRun = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let marketplaceID: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MARKETPLACE_ID)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MARKETPLACE_ID)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -1164,19 +1164,19 @@ const EntityData = new class {
             }
 
             let editionNumber: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EDITION_NUMBER)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_EDITION_NUMBER)) {
                 editionNumber = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let entityInstanceNumber: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ENTITY_INSTANCE_NUMBER)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ENTITY_INSTANCE_NUMBER)) {
                 entityInstanceNumber = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }
 
             let certificateID: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_ID)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_CERTIFICATE_ID)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -1189,7 +1189,7 @@ const EntityData = new class {
             }
 
             let certificateType: string | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CERTIFICATE_TYPE)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_CERTIFICATE_TYPE)) {
                 const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 2;
 
@@ -1202,7 +1202,7 @@ const EntityData = new class {
             }
 
             let staticCertificateVersion: number | undefined = undefined;
-            if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_STATIC_CERTIFICATE_VERSION)) {
+            if (propertyFlags.getHasProperty(EntityPropertyList.PROP_STATIC_CERTIFICATE_VERSION)) {
                 staticCertificateVersion = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
                 dataPosition += 4;
             }

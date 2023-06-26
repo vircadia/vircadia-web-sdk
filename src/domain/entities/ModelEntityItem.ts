@@ -17,7 +17,7 @@ import PropertyFlags from "../shared/PropertyFlags";
 import type { quat } from "../shared/Quat";
 import ShapeType from "../shared/ShapeType";
 import type { vec3 } from "../shared/Vec3";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type AnimationProperties = {
@@ -154,13 +154,13 @@ class ModelEntityItem {
         const textDecoder = new TextDecoder();
 
         let shapeType: ShapeType | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SHAPE_TYPE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SHAPE_TYPE)) {
             shapeType = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let compoundShapeURL: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COMPOUND_SHAPE_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COMPOUND_SHAPE_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -174,7 +174,7 @@ class ModelEntityItem {
         }
 
         let color: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLOR)) {
             color = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -184,7 +184,7 @@ class ModelEntityItem {
         }
 
         let textures: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXTURES)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_TEXTURES)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -198,7 +198,7 @@ class ModelEntityItem {
         }
 
         let modelURL: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MODEL_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -212,7 +212,7 @@ class ModelEntityItem {
         }
 
         let modelScale: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MODEL_SCALE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MODEL_SCALE)) {
             modelScale = {
                 x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                 y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -222,7 +222,7 @@ class ModelEntityItem {
         }
 
         let jointRotationsSet: boolean[] | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_ROTATIONS_SET)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_JOINT_ROTATIONS_SET)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -243,7 +243,7 @@ class ModelEntityItem {
         }
 
         let jointRotations: quat[] | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_ROTATIONS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_JOINT_ROTATIONS)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -261,7 +261,7 @@ class ModelEntityItem {
         }
 
         let jointTranslationsSet: boolean[] | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_TRANSLATIONS_SET)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_JOINT_TRANSLATIONS_SET)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -282,7 +282,7 @@ class ModelEntityItem {
         }
 
         let jointTranslations: vec3[] | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_JOINT_TRANSLATIONS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_JOINT_TRANSLATIONS)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -303,19 +303,19 @@ class ModelEntityItem {
         }
 
         let relayParentJoints: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RELAY_PARENT_JOINTS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_RELAY_PARENT_JOINTS)) {
             relayParentJoints = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let groupCulled: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GROUP_CULLED)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GROUP_CULLED)) {
             groupCulled = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let blendShapeCoefficients: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BLENDSHAPE_COEFFICIENTS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_BLENDSHAPE_COEFFICIENTS)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -329,13 +329,13 @@ class ModelEntityItem {
         }
 
         let useOriginalPivot: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USE_ORIGINAL_PIVOT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_USE_ORIGINAL_PIVOT)) {
             useOriginalPivot = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let animationURL: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -349,49 +349,49 @@ class ModelEntityItem {
         }
 
         let animationAllowTranslation: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_ALLOW_TRANSLATION)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_ALLOW_TRANSLATION)) {
             animationAllowTranslation = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let animationFPS: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FPS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_FPS)) {
             animationFPS = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let animationFrameIndex: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FRAME_INDEX)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_FRAME_INDEX)) {
             animationFrameIndex = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let animationPlaying: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_PLAYING)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_PLAYING)) {
             animationPlaying = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let animationLoop: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_LOOP)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_LOOP)) {
             animationLoop = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let animationFirstFrame: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_FIRST_FRAME)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_FIRST_FRAME)) {
             animationFirstFrame = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let animationLastFrame: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_LAST_FRAME)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_LAST_FRAME)) {
             animationLastFrame = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let animationHold: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ANIMATION_HOLD)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_HOLD)) {
             animationHold = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }

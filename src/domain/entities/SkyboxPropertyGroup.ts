@@ -12,7 +12,7 @@
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type SkyboxProperties = {
@@ -70,7 +70,7 @@ class SkyboxPropertyGroup {
         const textDecoder = new TextDecoder();
 
         let color: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SKYBOX_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SKYBOX_COLOR)) {
             color = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -80,7 +80,7 @@ class SkyboxPropertyGroup {
         }
 
         let url: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SKYBOX_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SKYBOX_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {

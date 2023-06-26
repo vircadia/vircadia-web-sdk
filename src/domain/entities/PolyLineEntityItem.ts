@@ -12,7 +12,7 @@
 import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 // WEBRTC TODO: Replace Record<string, never> with PolyLineEntityItem's special properties.
@@ -39,12 +39,12 @@ class PolyLineEntityItem {
 
         let dataPosition = position;
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLOR)) {
             // WEBRTC TODO: Read color property.
             dataPosition += 3;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXTURES)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_TEXTURES)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -54,7 +54,7 @@ class PolyLineEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LINE_POINTS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_LINE_POINTS)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -64,7 +64,7 @@ class PolyLineEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_STROKE_WIDTHS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_STROKE_WIDTHS)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -74,7 +74,7 @@ class PolyLineEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_STROKE_NORMALS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_STROKE_NORMALS)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -84,7 +84,7 @@ class PolyLineEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_STROKE_COLORS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_STROKE_COLORS)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -94,17 +94,17 @@ class PolyLineEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_IS_UV_MODE_STRETCH)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_IS_UV_MODE_STRETCH)) {
             // WEBRTC TODO: Read isUVModeStretch property.
             dataPosition += 1;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LINE_GLOW)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_LINE_GLOW)) {
             // WEBRTC TODO: Read lineGlow property.
             dataPosition += 1;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LINE_FACE_CAMERA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_LINE_FACE_CAMERA)) {
             // WEBRTC TODO: Read lineFaceCamera property.
             dataPosition += 1;
         }

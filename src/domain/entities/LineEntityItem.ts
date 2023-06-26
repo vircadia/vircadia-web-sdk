@@ -12,7 +12,7 @@
 import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 // WEBRTC TODO: Replace Record<string, never> with LineEntityItem's special properties.
 type LineEntitySubclassProperties = Record<string, never>;
@@ -38,12 +38,12 @@ class LineEntityItem {
 
         let dataPosition = position;
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLOR)) {
             // WEBRTC TODO: Read color property.
             dataPosition += 3;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LINE_POINTS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_LINE_POINTS)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 

@@ -11,7 +11,7 @@
 
 import UDT from "../networking/udt/UDT";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type AmbientLightProperties = {
@@ -73,13 +73,13 @@ class AmbientLightPropertyGroup {
         const textDecoder = new TextDecoder();
 
         let intensity: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_AMBIENT_LIGHT_INTENSITY)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_AMBIENT_LIGHT_INTENSITY)) {
             intensity = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let url: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_AMBIENT_LIGHT_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_AMBIENT_LIGHT_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {

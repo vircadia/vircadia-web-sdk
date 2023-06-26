@@ -13,7 +13,7 @@ import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 import PulsePropertyGroup from "./PulsePropertyGroup";
 
 /*@sdkdoc
@@ -152,7 +152,7 @@ class TextEntityItem {
         dataPosition += pulseProperties.bytesRead;
 
         let text: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_TEXT)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -164,13 +164,13 @@ class TextEntityItem {
         }
 
         let lineHeight: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LINE_HEIGHT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_LINE_HEIGHT)) {
             lineHeight = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let textColor: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXT_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_TEXT_COLOR)) {
             textColor = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -180,13 +180,13 @@ class TextEntityItem {
         }
 
         let textAlpha: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXT_ALPHA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_TEXT_ALPHA)) {
             textAlpha = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let backgroundColor: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BACKGROUND_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_BACKGROUND_COLOR)) {
             backgroundColor = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -196,43 +196,43 @@ class TextEntityItem {
         }
 
         let backgroundAlpha: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BACKGROUND_ALPHA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_BACKGROUND_ALPHA)) {
             backgroundAlpha = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let leftMargin: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LEFT_MARGIN)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_LEFT_MARGIN)) {
             leftMargin = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let rightMargin: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RIGHT_MARGIN)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_RIGHT_MARGIN)) {
             rightMargin = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let topMargin: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TOP_MARGIN)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_TOP_MARGIN)) {
             topMargin = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let bottomMargin: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BOTTOM_MARGIN)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_BOTTOM_MARGIN)) {
             bottomMargin = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let unlit: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_UNLIT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_UNLIT)) {
             unlit = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let font: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_FONT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_FONT)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -244,7 +244,7 @@ class TextEntityItem {
         }
 
         let textEffect: TextEffect | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXT_EFFECT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_TEXT_EFFECT)) {
             const value = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             switch (value) {
                 case 0:
@@ -267,7 +267,7 @@ class TextEntityItem {
         }
 
         let textEffectColor: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXT_EFFECT_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_TEXT_EFFECT_COLOR)) {
             textEffectColor = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -277,13 +277,13 @@ class TextEntityItem {
         }
 
         let textEffectThickness: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXT_EFFECT_THICKNESS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_TEXT_EFFECT_THICKNESS)) {
             textEffectThickness = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let textAlignment: TextAlignment | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXT_ALIGNMENT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_TEXT_ALIGNMENT)) {
             const value = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             switch (value) {
                 case 0:

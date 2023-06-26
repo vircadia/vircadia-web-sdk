@@ -13,7 +13,7 @@ import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
 import type { vec3 } from "../shared/Vec3";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type KeyLightProperties = {
@@ -83,7 +83,7 @@ class KeyLightPropertyGroup {
         let dataPosition = position;
 
         let color: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_KEYLIGHT_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_KEYLIGHT_COLOR)) {
             color = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -93,13 +93,13 @@ class KeyLightPropertyGroup {
         }
 
         let intensity: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_KEYLIGHT_INTENSITY)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_KEYLIGHT_INTENSITY)) {
             intensity = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let direction: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_KEYLIGHT_DIRECTION)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_KEYLIGHT_DIRECTION)) {
             direction = {
                 x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                 y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -109,19 +109,19 @@ class KeyLightPropertyGroup {
         }
 
         let castShadows: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_KEYLIGHT_CAST_SHADOW)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_KEYLIGHT_CAST_SHADOW)) {
             castShadows = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let shadowBias: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_KEYLIGHT_SHADOW_BIAS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_KEYLIGHT_SHADOW_BIAS)) {
             shadowBias = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let shadowMaxDistance: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_KEYLIGHT_SHADOW_MAX_DISTANCE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_KEYLIGHT_SHADOW_MAX_DISTANCE)) {
             shadowMaxDistance = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }

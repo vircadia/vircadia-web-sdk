@@ -10,7 +10,7 @@
 //
 
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 // WEBRTC TODO: Replace Record<string, never> with PulsePropertyGroupProperties.
@@ -34,27 +34,27 @@ class PulsePropertyGroup {
 
         let dataPosition = position;
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PULSE_MIN)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PULSE_MIN)) {
             // WEBRTC TODO: Read pulseMin property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PULSE_MAX)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PULSE_MAX)) {
             // WEBRTC TODO: Read pulseMax property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PULSE_PERIOD)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PULSE_PERIOD)) {
             // WEBRTC TODO: Read pulsePeriod property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PULSE_COLOR_MODE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PULSE_COLOR_MODE)) {
             // WEBRTC TODO: Read pulseColorMode property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PULSE_ALPHA_MODE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PULSE_ALPHA_MODE)) {
             // WEBRTC TODO: Read pulseAlphaMode property.
             dataPosition += 4;
         }

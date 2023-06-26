@@ -13,7 +13,7 @@ import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 import PulsePropertyGroup from "./PulsePropertyGroup";
 
 
@@ -122,7 +122,7 @@ class WebEntityItem {
         const textDecoder = new TextDecoder();
 
         let color: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLOR)) {
             color = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -132,7 +132,7 @@ class WebEntityItem {
         }
 
         let alpha: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ALPHA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ALPHA)) {
             alpha = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
@@ -142,7 +142,7 @@ class WebEntityItem {
         dataPosition += pulseProperties.bytesRead;
 
         let sourceURL: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SOURCE_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SOURCE_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -154,13 +154,13 @@ class WebEntityItem {
         }
 
         let dpi: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_DPI)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_DPI)) {
             dpi = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
         }
 
         let scriptURL: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCRIPT_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SCRIPT_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -172,31 +172,31 @@ class WebEntityItem {
         }
 
         let maxFPS: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MAX_FPS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MAX_FPS)) {
             maxFPS = data.getUint8(dataPosition);
             dataPosition += 1;
         }
 
         let inputMode: WebInputMode | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_INPUT_MODE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_INPUT_MODE)) {
             inputMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let showKeyboardFocusHighlight: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SHOW_KEYBOARD_FOCUS_HIGHLIGHT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SHOW_KEYBOARD_FOCUS_HIGHLIGHT)) {
             showKeyboardFocusHighlight = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let useBackground: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_WEB_USE_BACKGROUND)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_WEB_USE_BACKGROUND)) {
             useBackground = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let userAgent: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_USER_AGENT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_USER_AGENT)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {

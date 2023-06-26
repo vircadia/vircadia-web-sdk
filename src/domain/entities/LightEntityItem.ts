@@ -13,7 +13,7 @@ import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type LightEntitySubclassProperties = {
@@ -85,7 +85,7 @@ class LightEntityItem {
         let dataPosition = position;
 
         let color: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLOR)) {
             color = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -95,31 +95,31 @@ class LightEntityItem {
         }
 
         let isSpotlight: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_IS_SPOTLIGHT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_IS_SPOTLIGHT)) {
             isSpotlight = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let intensity: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_INTENSITY)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_INTENSITY)) {
             intensity = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let exponent: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EXPONENT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_EXPONENT)) {
             exponent = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let cutoff: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_CUTOFF)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_CUTOFF)) {
             cutoff = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let falloffRadius: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_FALLOFF_RADIUS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_FALLOFF_RADIUS)) {
             falloffRadius = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }

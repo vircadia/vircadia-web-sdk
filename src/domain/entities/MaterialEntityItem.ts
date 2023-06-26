@@ -13,7 +13,7 @@ import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import PropertyFlags from "../shared/PropertyFlags";
 import { vec2 } from "../shared/Vec2";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 /*@sdkdoc
@@ -293,7 +293,7 @@ class MaterialEntityItem {
         const textDecoder = new TextDecoder();
 
         let materialURL: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MATERIAL_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MATERIAL_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -305,19 +305,19 @@ class MaterialEntityItem {
         }
 
         let materialMappingMode: MaterialMappingMode | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MATERIAL_MAPPING_MODE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MATERIAL_MAPPING_MODE)) {
             materialMappingMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let priority: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MATERIAL_PRIORITY)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MATERIAL_PRIORITY)) {
             priority = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
         }
 
         let parentMaterialName: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PARENT_MATERIAL_NAME)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PARENT_MATERIAL_NAME)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -329,7 +329,7 @@ class MaterialEntityItem {
         }
 
         let materialMappingPos: vec2 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MATERIAL_MAPPING_POS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MATERIAL_MAPPING_POS)) {
             materialMappingPos = {
                 x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                 y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN)
@@ -338,7 +338,7 @@ class MaterialEntityItem {
         }
 
         let materialMappingScale: vec2 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MATERIAL_MAPPING_SCALE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MATERIAL_MAPPING_SCALE)) {
             materialMappingScale = {
                 x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                 y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN)
@@ -347,13 +347,13 @@ class MaterialEntityItem {
         }
 
         let materialMappingRot: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MATERIAL_MAPPING_ROT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MATERIAL_MAPPING_ROT)) {
             materialMappingRot = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let materialData: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MATERIAL_DATA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MATERIAL_DATA)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -365,7 +365,7 @@ class MaterialEntityItem {
         }
 
         let materialRepeat: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MATERIAL_REPEAT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MATERIAL_REPEAT)) {
             materialRepeat = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }

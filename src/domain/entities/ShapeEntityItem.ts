@@ -13,7 +13,7 @@ import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 import PulsePropertyGroup from "./PulsePropertyGroup";
 
 
@@ -125,7 +125,7 @@ class ShapeEntityItem {
         let dataPosition = position;
 
         let color: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLOR)) {
             color = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -135,7 +135,7 @@ class ShapeEntityItem {
         }
 
         let alpha: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ALPHA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ALPHA)) {
             alpha = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
@@ -147,7 +147,7 @@ class ShapeEntityItem {
         const textDecoder = new TextDecoder();
 
         let shape: Shape | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SHAPE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SHAPE)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 

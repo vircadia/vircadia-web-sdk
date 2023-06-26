@@ -11,7 +11,7 @@
 
 import { CommonEntityProperties } from "../networking/packets/EntityData";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 import RingGizmoPropertyGroup from "./RingGizmoPropertyGroup";
 
 
@@ -39,7 +39,7 @@ class GizmoEntityItem {
 
         let dataPosition = position;
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GIZMO_TYPE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GIZMO_TYPE)) {
             // WEBRTC TODO: Read gizmoType property.
             dataPosition += 4;
         }

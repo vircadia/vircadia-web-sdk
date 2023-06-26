@@ -17,7 +17,7 @@ import PropertyFlags from "../shared/PropertyFlags";
 import { quat } from "../shared/Quat";
 import ShapeType from "../shared/ShapeType";
 import { vec3 } from "../shared/Vec3";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 import PulsePropertyGroup from "./PulsePropertyGroup";
 
 
@@ -215,13 +215,13 @@ class ParticleEffectEntityItem {
         const textDecoder = new TextDecoder();
 
         let shapeType: ShapeType | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SHAPE_TYPE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SHAPE_TYPE)) {
             shapeType = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let compoundShapeURL: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COMPOUND_SHAPE_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COMPOUND_SHAPE_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -233,7 +233,7 @@ class ParticleEffectEntityItem {
         }
 
         let color: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLOR)) {
             color = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -243,7 +243,7 @@ class ParticleEffectEntityItem {
         }
 
         let alpha: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ALPHA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ALPHA)) {
             alpha = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
@@ -253,7 +253,7 @@ class ParticleEffectEntityItem {
         dataPosition += pulseProperties.bytesRead;
 
         let textures: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_TEXTURES)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_TEXTURES)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -265,49 +265,49 @@ class ParticleEffectEntityItem {
         }
 
         let maxParticles: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MAX_PARTICLES)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MAX_PARTICLES)) {
             maxParticles = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let lifespan: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_LIFESPAN)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_LIFESPAN)) {
             lifespan = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let isEmitting: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EMITTING_PARTICLES)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_EMITTING_PARTICLES)) {
             isEmitting = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let emitRate: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EMIT_RATE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_EMIT_RATE)) {
             emitRate = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let emitSpeed: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EMIT_SPEED)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_EMIT_SPEED)) {
             emitSpeed = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let speedSpread: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SPEED_SPREAD)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SPEED_SPREAD)) {
             speedSpread = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let emitOrientation: quat | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EMIT_ORIENTATION)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_EMIT_ORIENTATION)) {
             emitOrientation = GLMHelpers.unpackOrientationQuatFromBytes(data, dataPosition);
             dataPosition += 8;
         }
 
         let emitDimensions: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EMIT_DIMENSIONS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_EMIT_DIMENSIONS)) {
             emitDimensions = {
                 x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                 y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -317,37 +317,37 @@ class ParticleEffectEntityItem {
         }
 
         let emitRadiusStart: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EMIT_RADIUS_START)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_EMIT_RADIUS_START)) {
             emitRadiusStart = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let polarStart: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_POLAR_START)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_POLAR_START)) {
             polarStart = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let polarFinish: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_POLAR_FINISH)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_POLAR_FINISH)) {
             polarFinish = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let azimuthStart: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_AZIMUTH_START)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_AZIMUTH_START)) {
             azimuthStart = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let azimuthFinish: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_AZIMUTH_FINISH)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_AZIMUTH_FINISH)) {
             azimuthFinish = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let emitAcceleration: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EMIT_ACCELERATION)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_EMIT_ACCELERATION)) {
             emitAcceleration = {
                 x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                 y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -357,7 +357,7 @@ class ParticleEffectEntityItem {
         }
 
         let accelerationSpread: vec3 | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ACCELERATION_SPREAD)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ACCELERATION_SPREAD)) {
             accelerationSpread = {
                 x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                 y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -367,31 +367,31 @@ class ParticleEffectEntityItem {
         }
 
         let particleRadius: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PARTICLE_RADIUS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PARTICLE_RADIUS)) {
             particleRadius = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let radiusSpread: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RADIUS_SPREAD)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_RADIUS_SPREAD)) {
             radiusSpread = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let radiusStart: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RADIUS_START)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_RADIUS_START)) {
             radiusStart = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let radiusFinish: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_RADIUS_FINISH)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_RADIUS_FINISH)) {
             radiusFinish = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let colorSpread: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR_SPREAD)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLOR_SPREAD)) {
             colorSpread = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -401,7 +401,7 @@ class ParticleEffectEntityItem {
         }
 
         let colorStart: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR_START)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLOR_START)) {
             colorStart = {
                 red: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                 green: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -411,7 +411,7 @@ class ParticleEffectEntityItem {
         }
 
         let colorFinish: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR_FINISH)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLOR_FINISH)) {
             colorFinish = {
                 red: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
                 green: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
@@ -421,55 +421,55 @@ class ParticleEffectEntityItem {
         }
 
         let alphaSpread: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ALPHA_SPREAD)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ALPHA_SPREAD)) {
             alphaSpread = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let alphaStart: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ALPHA_START)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ALPHA_START)) {
             alphaStart = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let alphaFinish: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ALPHA_FINISH)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ALPHA_FINISH)) {
             alphaFinish = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let emitterShouldTrail: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EMITTER_SHOULD_TRAIL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_EMITTER_SHOULD_TRAIL)) {
             emitterShouldTrail = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let particleSpin: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PARTICLE_SPIN)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PARTICLE_SPIN)) {
             particleSpin = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let spinSpread: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SPIN_SPREAD)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SPIN_SPREAD)) {
             spinSpread = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let spinStart: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SPIN_START)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SPIN_START)) {
             spinStart = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let spinFinish: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SPIN_FINISH)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SPIN_FINISH)) {
             spinFinish = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let rotateWithEntity: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_PARTICLE_ROTATE_WITH_ENTITY)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_PARTICLE_ROTATE_WITH_ENTITY)) {
             rotateWithEntity = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }

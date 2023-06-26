@@ -14,7 +14,7 @@ import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
 import { rect } from "../shared/Rect";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 import PulsePropertyGroup from "./PulsePropertyGroup";
 
 
@@ -95,7 +95,7 @@ class ImageEntityItem {
         const textDecoder = new TextDecoder();
 
         let color: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLOR)) {
             color = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -105,7 +105,7 @@ class ImageEntityItem {
         }
 
         let alpha: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ALPHA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ALPHA)) {
             alpha = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
@@ -115,7 +115,7 @@ class ImageEntityItem {
         dataPosition += pulseProperties.bytesRead;
 
         let imageURL: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_IMAGE_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_IMAGE_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -127,19 +127,19 @@ class ImageEntityItem {
         }
 
         let emissive: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_EMISSIVE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_EMISSIVE)) {
             emissive = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let keepAspectRatio: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_KEEP_ASPECT_RATIO)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_KEEP_ASPECT_RATIO)) {
             keepAspectRatio = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let subImage: rect | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SUB_IMAGE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SUB_IMAGE)) {
             subImage = {
                 x: data.getUint32(dataPosition, UDT.LITTLE_ENDIAN),
                 y: data.getUint32(dataPosition + 4, UDT.LITTLE_ENDIAN),

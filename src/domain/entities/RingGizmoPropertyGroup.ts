@@ -10,7 +10,7 @@
 //
 
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 // WEBRTC TODO: Replace Record<string, never> with RingGizmoPropertyGroupProperties.
@@ -34,92 +34,92 @@ class RingGizmoPropertyGroup {
 
         let dataPosition = position;
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_START_ANGLE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_START_ANGLE)) {
             // WEBRTC TODO: Read startAngle property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_END_ANGLE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_END_ANGLE)) {
             // WEBRTC TODO: Read endAngle property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_INNER_RADIUS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_INNER_RADIUS)) {
             // WEBRTC TODO: Read innerRadius property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_INNER_START_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_INNER_START_COLOR)) {
             // WEBRTC TODO: Read innerStartColor property.
             dataPosition += 3;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_INNER_END_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_INNER_END_COLOR)) {
             // WEBRTC TODO: Read innerEndColor property.
             dataPosition += 3;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_OUTER_START_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_OUTER_START_COLOR)) {
             // WEBRTC TODO: Read outerStartColor property.
             dataPosition += 3;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_OUTER_END_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_OUTER_END_COLOR)) {
             // WEBRTC TODO: Read outerEndColor property.
             dataPosition += 3;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_INNER_START_ALPHA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_INNER_START_ALPHA)) {
             // WEBRTC TODO: Read innerStartAlpha property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_INNER_END_ALPHA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_INNER_END_ALPHA)) {
             // WEBRTC TODO: Read innerEndAlpha property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_OUTER_START_ALPHA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_OUTER_START_ALPHA)) {
             // WEBRTC TODO: Read outerStartAlpha property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_OUTER_END_ALPHA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_OUTER_END_ALPHA)) {
             // WEBRTC TODO: Read outerEndAlpha property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAS_TICK_MARKS)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAS_TICK_MARKS)) {
             // WEBRTC TODO: Read hasTickMarks property.
             dataPosition += 1;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MAJOR_TICK_MARKS_ANGLE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MAJOR_TICK_MARKS_ANGLE)) {
             // WEBRTC TODO: Read majorTickMarksAngle property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MINOR_TICK_MARKS_ANGLE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MINOR_TICK_MARKS_ANGLE)) {
             // WEBRTC TODO: Read minorTickMarksAngle property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MAJOR_TICK_MARKS_LENGTH)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MAJOR_TICK_MARKS_LENGTH)) {
             // WEBRTC TODO: Read majorTickMarksLength property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MINOR_TICK_MARKS_LENGTH)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MINOR_TICK_MARKS_LENGTH)) {
             // WEBRTC TODO: Read minorTickMarksLength property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MAJOR_TICK_MARKS_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MAJOR_TICK_MARKS_COLOR)) {
             // WEBRTC TODO: Read majorTickMarksColor property.
             dataPosition += 3;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MINOR_TICK_MARKS_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MINOR_TICK_MARKS_COLOR)) {
             // WEBRTC TODO: Read minorTickMarksColor property.
             dataPosition += 3;
         }

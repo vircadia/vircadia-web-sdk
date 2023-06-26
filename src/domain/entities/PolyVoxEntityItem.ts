@@ -12,7 +12,7 @@
 import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 // WEBRTC TODO: Replace Record<string, never> with PolyVoxEntityItem's special properties.
@@ -39,12 +39,12 @@ class PolyVoxEntityItem {
 
         let dataPosition = position;
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VOXEL_VOLUME_SIZE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_VOXEL_VOLUME_SIZE)) {
             // WEBRTC TODO: Read voxelVolumeSize property.
             dataPosition += 12;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VOXEL_DATA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_VOXEL_DATA)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -56,12 +56,12 @@ class PolyVoxEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_VOXEL_SURFACE_STYLE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_VOXEL_SURFACE_STYLE)) {
             // WEBRTC TODO: Read voxelSurfaceStyle property.
             dataPosition += 2;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_X_TEXTURE_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_X_TEXTURE_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -71,7 +71,7 @@ class PolyVoxEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_Y_TEXTURE_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_Y_TEXTURE_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -81,7 +81,7 @@ class PolyVoxEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_Z_TEXTURE_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_Z_TEXTURE_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -91,7 +91,7 @@ class PolyVoxEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_X_N_NEIGHBOR_ID)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_X_N_NEIGHBOR_ID)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -101,7 +101,7 @@ class PolyVoxEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_Y_N_NEIGHBOR_ID)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_Y_N_NEIGHBOR_ID)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -111,7 +111,7 @@ class PolyVoxEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_Z_N_NEIGHBOR_ID)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_Z_N_NEIGHBOR_ID)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -121,7 +121,7 @@ class PolyVoxEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_X_P_NEIGHBOR_ID)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_X_P_NEIGHBOR_ID)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -131,7 +131,7 @@ class PolyVoxEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_Y_P_NEIGHBOR_ID)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_Y_P_NEIGHBOR_ID)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 
@@ -141,7 +141,7 @@ class PolyVoxEntityItem {
             }
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_Z_P_NEIGHBOR_ID)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_Z_P_NEIGHBOR_ID)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
 

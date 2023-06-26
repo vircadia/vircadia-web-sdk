@@ -11,7 +11,7 @@
 
 import { CommonEntityProperties } from "../networking/packets/EntityData";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 import PulsePropertyGroup from "./PulsePropertyGroup";
 
 
@@ -39,12 +39,12 @@ class GridEntityItem {
 
         let dataPosition = position;
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COLOR)) {
             // WEBRTC TODO: Read color property.
             dataPosition += 3;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_ALPHA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ALPHA)) {
             // WEBRTC TODO: Read alpha property.
             dataPosition += 4;
         }
@@ -53,17 +53,17 @@ class GridEntityItem {
         // Ignore deprecated pulse property.
         dataPosition += pulseProperties.bytesRead;
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GRID_FOLLOW_CAMERA)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRID_FOLLOW_CAMERA)) {
             // WEBRTC TODO: Read gridFollowCamera property.
             dataPosition += 1;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MAJOR_GRID_EVERY)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MAJOR_GRID_EVERY)) {
             // WEBRTC TODO: Read majorGridEvery property.
             dataPosition += 4;
         }
 
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_MINOR_GRID_EVERY)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_MINOR_GRID_EVERY)) {
             // WEBRTC TODO: Read minorGridEvery property.
             dataPosition += 4;
         }

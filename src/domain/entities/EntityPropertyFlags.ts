@@ -10,228 +10,211 @@
 //
 
 /*@devdoc
- *  The <code>EntityPropertyFlags</code> namespace provides the positions of the flags in {@link PropertyFlags}.
- *  <table>
- *      <thead>
- *          <tr><th>Name</th><th>Value</th><th>Description</th></tr>
- *      </thead>
- *      <tbody>
- *          <tr><td>PROP_PAGED_PROPERTY</td><td>0</td><td>Paged property flag.</td></tr>
- *          <tr><td>PROP_CUSTOM_PROPERTIES_INCLUDED</td><td>1</td><td>Custom properties included flag.</td></tr>
- *          <tr><td>PROP_SIMULATION_OWNER</td><td>2</td><td>Simulation owner flag.</td></tr>
- *          <tr><td>PROP_PARENT_ID</td><td>3</td><td>Parent id flag.</td></tr>
- *          <tr><td>PROP_PARENT_JOINT_INDEX</td><td>4</td><td>Parent joint index flag.</td></tr>
- *          <tr><td>PROP_VISIBLE</td><td>5</td><td>Visible flag.</td></tr>
- *          <tr><td>PROP_NAME</td><td>6</td><td>Name flag.</td></tr>
- *          <tr><td>PROP_LOCKED</td><td>7</td><td>Locked flag.</td></tr>
- *          <tr><td>PROP_USER_DATA</td><td>8</td><td>User data flag.</td></tr>
- *          <tr><td>PROP_PRIVATE_USER_DATA</td><td>9</td><td>Private user data flag.</td></tr>
- *          <tr><td>PROP_HREF</td><td>10</td><td>Href flag.</td></tr>
- *          <tr><td>PROP_DESCRIPTION</td><td>11</td><td>Description flag.</td></tr>
- *          <tr><td>PROP_POSITION</td><td>12</td><td>Position flag.</td></tr>
- *          <tr><td>PROP_DIMENSIONS</td><td>13</td><td>Dimensions flag.</td></tr>
- *          <tr><td>PROP_ROTATION</td><td>14</td><td>Rotation flag.</td></tr>
- *          <tr><td>PROP_REGISTRATION_POINT</td><td>15</td><td>Registration point flag.</td></tr>
- *          <tr><td>PROP_CREATED</td><td>16</td><td>Created flag.</td></tr>
- *          <tr><td>PROP_LAST_EDITED_BY</td><td>17</td><td>Last edited by flag.</td></tr>
- *          <tr><td>PROP_ENTITY_HOST_TYPE</td><td>18</td><td>Entity host type flag.</td></tr>
- *          <tr><td>PROP_OWNING_AVATAR_ID</td><td>19</td><td>Owning avatar id flag.</td></tr>
- *          <tr><td>PROP_QUERY_AA_CUBE</td><td>20</td><td>Query aa cube flag.</td></tr>
- *          <tr><td>PROP_CAN_CAST_SHADOW</td><td>21</td><td>Can cast shadow flag.</td></tr>
- *          <tr><td>PROP_VISIBLE_IN_SECONDARY_CAMERA</td><td>22</td><td>Visible in secondary camera flag.</td></tr>
- *          <tr><td>PROP_RENDER_LAYER</td><td>23</td><td>Render layer flag.</td></tr>
- *          <tr><td>PROP_PRIMITIVE_MODE</td><td>24</td><td>Primitive mode flag.</td></tr>
- *          <tr><td>PROP_IGNORE_PICK_INTERSECTION</td><td>25</td><td>Ignore pick intersection flag.</td></tr>
- *          <tr><td>PROP_RENDER_WITH_ZONES</td><td>26</td><td>Render with zones flag.</td></tr>
- *          <tr><td>PROP_BILLBOARD_MODE</td><td>27</td><td>Billboard mode flag.</td></tr>
- *          <tr><td>PROP_GRAB_GRABBABLE</td><td>28</td><td>Grab grabbable flag.</td></tr>
- *          <tr><td>PROP_GRAB_KINEMATIC</td><td>29</td><td>Grab kinematic flag.</td></tr>
- *          <tr><td>PROP_GRAB_FOLLOWS_CONTROLLER</td><td>30</td><td>Grab follows controller flag.</td></tr>
- *          <tr><td>PROP_GRAB_TRIGGERABLE</td><td>31</td><td>Grab triggerable flag.</td></tr>
- *          <tr><td>PROP_GRAB_EQUIPPABLE</td><td>32</td><td>Grab equippable flag.</td></tr>
- *          <tr><td>PROP_GRAB_DELEGATE_TO_PARENT</td><td>33</td><td>Grab delegate to parent flag.</td></tr>
- *          <tr><td>PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET</td><td>34</td><td>Grab left equippable position offset flag.</td>
- *          </tr>
- *          <tr><td>PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET</td><td>35</td><td>Grab left equippable rotation offset flag.</td>
- *          </tr>
- *          <tr><td>PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET</td><td>36</td><td>Grab right equippable position offset flag.
- *          </td></tr>
- *          <tr><td>PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET</td><td>37</td><td>Grab right equippable rotation offset flag.
- *          </td></tr>
- *          <tr><td>PROP_GRAB_EQUIPPABLE_INDICATOR_URL</td><td>38</td><td>Grab equippable indicator url flag.</td></tr>
- *          <tr><td>PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE</td><td>39</td><td>Grab equippable indicator scale flag.</td></tr>
- *          <tr><td>PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET</td><td>40</td><td>Grab equippable indicator offset flag.</td></tr>
- *          <tr><td>PROP_DENSITY</td><td>41</td><td>Density flag.</td></tr>
- *          <tr><td>PROP_VELOCITY</td><td>42</td><td>Velocity flag.</td></tr>
- *          <tr><td>PROP_ANGULAR_VELOCITY</td><td>43</td><td>Angular velocity flag.</td></tr>
- *          <tr><td>PROP_GRAVITY</td><td>44</td><td>Gravity flag.</td></tr>
- *          <tr><td>PROP_ACCELERATION</td><td>45</td><td>Acceleration flag.</td></tr>
- *          <tr><td>PROP_DAMPING</td><td>46</td><td>Damping flag.</td></tr>
- *          <tr><td>PROP_ANGULAR_DAMPING</td><td>47</td><td>Angular damping flag.</td></tr>
- *          <tr><td>PROP_RESTITUTION</td><td>48</td><td>Restitution flag.</td></tr>
- *          <tr><td>PROP_FRICTION</td><td>49</td><td>Friction flag.</td></tr>
- *          <tr><td>PROP_LIFETIME</td><td>50</td><td>Lifetime flag.</td></tr>
- *          <tr><td>PROP_COLLISIONLESS</td><td>51</td><td>Collisionless flag.</td></tr>
- *          <tr><td>PROP_COLLISION_MASK</td><td>52</td><td>Collision mask flag.</td></tr>
- *          <tr><td>PROP_DYNAMIC</td><td>53</td><td>Dynamic flag.</td></tr>
- *          <tr><td>PROP_COLLISION_SOUND_URL</td><td>54</td><td>Collision sound url flag.</td></tr>
- *          <tr><td>PROP_ACTION_DATA</td><td>55</td><td>Action data flag.</td></tr>
- *          <tr><td>PROP_CLONEABLE</td><td>56</td><td>Cloneable flag.</td></tr>
- *          <tr><td>PROP_CLONE_LIFETIME</td><td>57</td><td>Clone lifetime flag.</td></tr>
- *          <tr><td>PROP_CLONE_LIMIT</td><td>58</td><td>Clone limit flag.</td></tr>
- *          <tr><td>PROP_CLONE_DYNAMIC</td><td>59</td><td>Clone dynamic flag.</td></tr>
- *          <tr><td>PROP_CLONE_AVATAR_ENTITY</td><td>60</td><td>Clone avatar entity flag.</td></tr>
- *          <tr><td>PROP_CLONE_ORIGIN_ID</td><td>61</td><td>Clone origin id flag.</td></tr>
- *          <tr><td>PROP_SCRIPT</td><td>62</td><td>Script flag.</td></tr>
- *          <tr><td>PROP_SCRIPT_TIMESTAMP</td><td>63</td><td>Script timestamp flag.</td></tr>
- *          <tr><td>PROP_SERVER_SCRIPTS</td><td>64</td><td>Server scripts flag.</td></tr>
- *          <tr><td>PROP_ITEM_NAME</td><td>65</td><td>Item name flag.</td></tr>
- *          <tr><td>PROP_ITEM_DESCRIPTION</td><td>66</td><td>Item description flag.</td></tr>
- *          <tr><td>PROP_ITEM_CATEGORIES</td><td>67</td><td>Item categories flag.</td></tr>
- *          <tr><td>PROP_ITEM_ARTIST</td><td>68</td><td>Item artist flag.</td></tr>
- *          <tr><td>PROP_ITEM_LICENSE</td><td>69</td><td>Item license flag.</td></tr>
- *          <tr><td>PROP_LIMITED_RUN</td><td>70</td><td>Limited run flag.</td></tr>
- *          <tr><td>PROP_MARKETPLACE_ID</td><td>71</td><td>Marketplace id flag.</td></tr>
- *          <tr><td>PROP_EDITION_NUMBER</td><td>72</td><td>Edition number flag.</td></tr>
- *          <tr><td>PROP_ENTITY_INSTANCE_NUMBER</td><td>73</td><td>Entity instance number flag.</td></tr>
- *          <tr><td>PROP_CERTIFICATE_ID</td><td>74</td><td>Certificate id flag.</td></tr>
- *          <tr><td>PROP_CERTIFICATE_TYPE</td><td>75</td><td>Certificate type flag.</td></tr>
- *          <tr><td>PROP_STATIC_CERTIFICATE_VERSION</td><td>76</td><td>Static certificate version flag.</td></tr>
- *          <tr><td>PROP_LOCAL_POSITION</td><td>77</td><td>Local position flag.</td></tr>
- *          <tr><td>PROP_LOCAL_ROTATION</td><td>78</td><td>Local rotation flag.</td></tr>
- *          <tr><td>PROP_LOCAL_VELOCITY</td><td>79</td><td>Local velocity flag.</td></tr>
- *          <tr><td>PROP_LOCAL_ANGULAR_VELOCITY</td><td>80</td><td>Local angular velocity flag.</td></tr>
- *          <tr><td>PROP_LOCAL_DIMENSIONS</td><td>81</td><td>Local dimensions flag.</td></tr>
- *          <tr><td>PROP_SHAPE_TYPE</td><td>82</td><td>Shape type flag.</td></tr>
- *          <tr><td>PROP_COMPOUND_SHAPE_URL</td><td>83</td><td>Compound shape url flag.</td></tr>
- *          <tr><td>PROP_COLOR</td><td>84</td><td>Color flag.</td></tr>
- *          <tr><td>PROP_ALPHA</td><td>85</td><td>Alpha flag.</td></tr>
- *          <tr><td>PROP_PULSE_MIN</td><td>86</td><td>Pulse min flag.</td></tr>
- *          <tr><td>PROP_PULSE_MAX</td><td>87</td><td>Pulse max flag.</td></tr>
- *          <tr><td>PROP_PULSE_PERIOD</td><td>88</td><td>Pulse period flag.</td></tr>
- *          <tr><td>PROP_PULSE_COLOR_MODE</td><td>89</td><td>Pulse color mode flag.</td></tr>
- *          <tr><td>PROP_PULSE_ALPHA_MODE</td><td>90</td><td>Pulse alpha mode flag.</td></tr>
- *          <tr><td>PROP_TEXTURES</td><td>91</td><td>Textures flag.</td></tr>
- *          <tr><td>PROP_DERIVED_0</td><td>92</td><td>Derived 0 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_1</td><td>93</td><td>Derived 1 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_2</td><td>94</td><td>Derived 2 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_3</td><td>95</td><td>Derived 3 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_4</td><td>96</td><td>Derived 4 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_5</td><td>97</td><td>Derived 5 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_6</td><td>98</td><td>Derived 6 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_7</td><td>99</td><td>Derived 7 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_8</td><td>100</td><td>Derived 8 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_9</td><td>101</td><td>Derived 9 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_10</td><td>102</td><td>Derived 10 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_11</td><td>103</td><td>Derived 11 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_12</td><td>104</td><td>Derived 12 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_13</td><td>105</td><td>Derived 13 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_14</td><td>106</td><td>Derived 14 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_15</td><td>107</td><td>Derived 15 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_16</td><td>108</td><td>Derived 16 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_17</td><td>109</td><td>Derived 17 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_18</td><td>110</td><td>Derived 18 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_19</td><td>111</td><td>Derived 19 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_20</td><td>112</td><td>Derived 20 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_21</td><td>113</td><td>Derived 21 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_22</td><td>114</td><td>Derived 22 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_23</td><td>115</td><td>Derived 23 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_24</td><td>116</td><td>Derived 24 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_25</td><td>117</td><td>Derived 25 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_26</td><td>118</td><td>Derived 26 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_27</td><td>119</td><td>Derived 27 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_28</td><td>120</td><td>Derived 28 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_29</td><td>121</td><td>Derived 29 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_30</td><td>122</td><td>Derived 30 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_31</td><td>123</td><td>Derived 31 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_32</td><td>124</td><td>Derived 32 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_33</td><td>125</td><td>Derived 33 flag.</td></tr>
- *          <tr><td>PROP_DERIVED_34</td><td>126</td><td>Derived 34 flag.</td></tr>
- *          <tr><td>PROP_AFTER_LAST_ITEM</td><td>127</td><td>After last item flag.</td></tr>
- *          <tr><td>PROP_MAX_PARTICLES</td><td>{@link EntityPropertyFlags|PROP_DERIVED_0}</td><td>Max particles flag. First
- *          ParticleEffect entity-specific property.</td></tr>
- *          <tr><td>PROP_LIFESPAN</td><td>{@link EntityPropertyFlags|PROP_DERIVED_1}</td><td>Lifespan flag.</td></tr>
- *          <tr><td>PROP_EMITTING_PARTICLES</td><td>{@link EntityPropertyFlags|PROP_DERIVED_2}</td><td>Emitting_particles flag.
- *          </td></tr>
- *          <tr><td>PROP_EMIT_RATE</td><td>{@link EntityPropertyFlags|PROP_DERIVED_3}</td><td>Emit rate flag.</td></tr>
- *          <tr><td>PROP_EMIT_SPEED</td><td>{@link EntityPropertyFlags|PROP_DERIVED_4}</td><td>Emit speed flag.</td></tr>
- *          <tr><td>PROP_SPEED_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_5}</td><td>Speed spread flag.</td></tr>
- *          <tr><td>PROP_EMIT_ORIENTATION</td><td>{@link EntityPropertyFlags|PROP_DERIVED_6}</td><td>Emit orientation flag.
- *          </td></tr>
- *          <tr><td>PROP_EMIT_DIMENSIONS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_7}</td><td>Emit dimensions flag.</td>
- *          </tr>
- *          <tr><td>PROP_ACCELERATION_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_8}</td><td>Acceleration spread
- *          flag.</td></tr>
- *          <tr><td>PROP_POLAR_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_9}</td><td>Polar start flag.</td></tr>
- *          <tr><td>PROP_POLAR_FINISH</td><td>{@link EntityPropertyFlags|PROP_DERIVED_10}</td><td>Polar finish flag.</td></tr>
- *          <tr><td>PROP_AZIMUTH_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_11}</td><td>Azimuth start flag.</td></tr>
- *          <tr><td>PROP_AZIMUTH_FINISH</td><td>{@link EntityPropertyFlags|PROP_DERIVED_12}</td><td>Azimuth finish flag.</td>
- *          </tr>
- *          <tr><td>PROP_EMIT_RADIUS_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_13}</td><td>Emit radius start flag.
- *          </td></tr>
- *          <tr><td>PROP_EMIT_ACCELERATION</td><td>{@link EntityPropertyFlags|PROP_DERIVED_14}</td><td>Emit acceleration flag.
- *          </td></tr>
- *          <tr><td>PROP_PARTICLE_RADIUS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_15}</td><td>Particle radius flag.</td>
- *          </tr>
- *          <tr><td>PROP_RADIUS_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_16}</td><td>Radius spread flag.</td></tr>
- *          <tr><td>PROP_RADIUS_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_17}</td><td>Radius start flag.</td></tr>
- *          <tr><td>PROP_RADIUS_FINISH</td><td>{@link EntityPropertyFlags|PROP_DERIVED_18}</td><td>Radius finish flag.</td></tr>
- *          <tr><td>PROP_COLOR_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_19}</td><td>Color spread flag.</td></tr>
- *          <tr><td>PROP_COLOR_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_20}</td><td>Color start flag.</td></tr>
- *          <tr><td>PROP_COLOR_FINISH</td><td>{@link EntityPropertyFlags|PROP_DERIVED_21}</td><td>Color finish flag.</td></tr>
- *          <tr><td>PROP_ALPHA_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_22}</td><td>Alpha spread flag.</td></tr>
- *          <tr><td>PROP_ALPHA_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_23}</td><td>Alpha start flag.</td></tr>
- *          <tr><td>PROP_ALPHA_FINISH</td><td>{@link EntityPropertyFlags|PROP_DERIVED_24}</td><td>Alpha finish flag.</td></tr>
- *          <tr><td>PROP_EMITTER_SHOULD_TRAIL</td><td>{@link EntityPropertyFlags|PROP_DERIVED_25}</td><td>Emitter should trail
- *          flag.</td></tr>
- *          <tr><td>PROP_PARTICLE_SPIN</td><td>{@link EntityPropertyFlags|PROP_DERIVED_26}</td><td>Particle spin flag.</td></tr>
- *          <tr><td>PROP_SPIN_START</td><td>{@link EntityPropertyFlags|PROP_DERIVED_27}</td><td>Spin start flag.</td></tr>
- *          <tr><td>PROP_SPIN_FINISH</td><td>{@link EntityPropertyFlags|PROP_DERIVED_28}</td><td>Spin finish flag.</td></tr>
- *          <tr><td>PROP_SPIN_SPREAD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_29}</td><td>Spin spread flag.</td></tr>
- *          <tr><td>PROP_PARTICLE_ROTATE_WITH_ENTITY</td><td>{@link EntityPropertyFlags|PROP_DERIVED_30}</td><td>Particle rotate
- *          with entity flag.</td></tr>
- *          <tr><td>PROP_MODEL_URL</td><td>{@link EntityPropertyFlags|PROP_DERIVED_0}</td><td>Model url flag. First Model
- *          entity-specific property.<br />
- *          {@link ModelEntityItem|ModelEntity}</td></tr>
- *          <tr><td>PROP_MODEL_SCALE</td><td>{@link EntityPropertyFlags|PROP_DERIVED_1}</td><td>Model scale flag.</td></tr>
- *          <tr><td>PROP_JOINT_ROTATIONS_SET</td><td>{@link EntityPropertyFlags|PROP_DERIVED_2}</td><td>Joint rotations set
- *          flag.</td></tr>
- *          <tr><td>PROP_JOINT_ROTATIONS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_3}</td><td>Joint rotations flag.</td>
- *          </tr>
- *          <tr><td>PROP_JOINT_TRANSLATIONS_SET</td><td>{@link EntityPropertyFlags|PROP_DERIVED_4}</td><td>Joint translations
- *          set flag.</td></tr>
- *          <tr><td>PROP_JOINT_TRANSLATIONS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_5}</td><td>Joint translations flag.
- *          </td></tr>
- *          <tr><td>PROP_RELAY_PARENT_JOINTS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_6}</td><td>Relay parent joints
- *          flag.</td></tr>
- *          <tr><td>PROP_GROUP_CULLED</td><td>{@link EntityPropertyFlags|PROP_DERIVED_7}</td><td>Group culled flag.</td></tr>
- *          <tr><td>PROP_BLENDSHAPE_COEFFICIENTS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_8}</td><td>Blendshape
- *          coefficients flag.</td></tr>
- *          <tr><td>PROP_USE_ORIGINAL_PIVOT</td><td>{@link EntityPropertyFlags|PROP_DERIVED_9}</td><td>Use original pivot flag.
- *          </td></tr>
- *          <tr><td>PROP_ANIMATION_URL</td><td>{@link EntityPropertyFlags|PROP_DERIVED_10}</td><td>Animation url flag.</td></tr>
- *          <tr><td>PROP_ANIMATION_ALLOW_TRANSLATION</td><td>{@link EntityPropertyFlags|PROP_DERIVED_11}</td><td>Animation allow
- *          translation flag.</td></tr>
- *          <tr><td>PROP_ANIMATION_FPS</td><td>{@link EntityPropertyFlags|PROP_DERIVED_12}</td><td>Animation fps flag.</td></tr>
- *          <tr><td>PROP_ANIMATION_FRAME_INDEX</td><td>{@link EntityPropertyFlags|PROP_DERIVED_13}</td><td>Animation frame index
- *          flag.</td></tr>
- *          <tr><td>PROP_ANIMATION_PLAYING</td><td>{@link EntityPropertyFlags|PROP_DERIVED_14}</td><td>Animation playing flag.
- *          </td></tr>
- *          <tr><td>PROP_ANIMATION_LOOP</td><td>{@link EntityPropertyFlags|PROP_DERIVED_15}</td><td>Animation loop flag.</td>
- *          </tr>
- *          <tr><td>PROP_ANIMATION_FIRST_FRAME</td><td>{@link EntityPropertyFlags|PROP_DERIVED_16}</td><td>Animation first frame
- *          flag.</td></tr>
- *          <tr><td>PROP_ANIMATION_LAST_FRAME</td><td>{@link EntityPropertyFlags|PROP_DERIVED_17}</td><td>Animation last frame
- *          flag.</td></tr>
- *          <tr><td>PROP_ANIMATION_HOLD</td><td>{@link EntityPropertyFlags|PROP_DERIVED_18}</td><td>Animation hold flag.</td>
- *          <tr><td>PROP_SHAPE</td><td>{@link EntityPropertyFlags|PROP_DERIVED_0}</td><td>Shape flag.</td>
- *          </tr>
- *      </tbody>
- *  </table>
- *  @typedef {number} EntityPropertyFlags
+ *  The <code>EntityPropertyList</code> namespace provides the positions of the flags in {@link PropertyFlags}.
+ *  @namespace EntityPropertyList
+ *  @property {number} PROP_PAGED_PROPERTY - <code>0</code> - Paged property flag.
+ *  @property {number} PROP_CUSTOM_PROPERTIES_INCLUDED - <code>1</code> - Custom properties included flag.
+ *  @property {number} PROP_SIMULATION_OWNER - <code>2</code> - Simulation owner flag.
+ *  @property {number} PROP_PARENT_ID - <code>3</code> - Parent id flag.
+ *  @property {number} PROP_PARENT_JOINT_INDEX - <code>4</code> - Parent joint index flag.
+ *  @property {number} PROP_VISIBLE - <code>5</code> - Visible flag.
+ *  @property {number} PROP_NAME - <code>6</code> - Name flag.
+ *  @property {number} PROP_LOCKED - <code>7</code> - Locked flag.
+ *  @property {number} PROP_USER_DATA - <code>8</code> - User data flag.
+ *  @property {number} PROP_PRIVATE_USER_DATA - <code>9</code> - Private user data flag.
+ *  @property {number} PROP_HREF - <code>10</code> - Href flag.
+ *  @property {number} PROP_DESCRIPTION - <code>11</code> - Description flag.
+ *  @property {number} PROP_POSITION - <code>12</code> - Position flag.
+ *  @property {number} PROP_DIMENSIONS - <code>13</code> - Dimensions flag.
+ *  @property {number} PROP_ROTATION - <code>14</code> - Rotation flag.
+ *  @property {number} PROP_REGISTRATION_POINT - <code>15</code> - Registration point flag.
+ *  @property {number} PROP_CREATED - <code>16</code> - Created flag.
+ *  @property {number} PROP_LAST_EDITED_BY - <code>17</code> - Last edited by flag.
+ *  @property {number} PROP_ENTITY_HOST_TYPE - <code>18</code> - Entity host type flag.
+ *  @property {number} PROP_OWNING_AVATAR_ID - <code>19</code> - Owning avatar id flag.
+ *  @property {number} PROP_QUERY_AA_CUBE - <code>20</code> - Query aa cube flag.
+ *  @property {number} PROP_CAN_CAST_SHADOW - <code>21</code> - Can cast shadow flag.
+ *  @property {number} PROP_VISIBLE_IN_SECONDARY_CAMERA - <code>22</code> - Visible in secondary camera flag.
+ *  @property {number} PROP_RENDER_LAYER - <code>23</code> - Render layer flag.
+ *  @property {number} PROP_PRIMITIVE_MODE - <code>24</code> - Primitive mode flag.
+ *  @property {number} PROP_IGNORE_PICK_INTERSECTION - <code>25</code> - Ignore pick intersection flag.
+ *  @property {number} PROP_RENDER_WITH_ZONES - <code>26</code> - Render with zones flag.
+ *  @property {number} PROP_BILLBOARD_MODE - <code>27</code> - Billboard mode flag.
+ *  @property {number} PROP_GRAB_GRABBABLE - <code>28</code> - Grab grabbable flag.
+ *  @property {number} PROP_GRAB_KINEMATIC - <code>29</code> - Grab kinematic flag.
+ *  @property {number} PROP_GRAB_FOLLOWS_CONTROLLER - <code>30</code> - Grab follows controller flag.
+ *  @property {number} PROP_GRAB_TRIGGERABLE - <code>31</code> - Grab triggerable flag.
+ *  @property {number} PROP_GRAB_EQUIPPABLE - <code>32</code> - Grab equippable flag.
+ *  @property {number} PROP_GRAB_DELEGATE_TO_PARENT - <code>33</code> - Grab delegate to parent flag.
+ *  @property {number} PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET - <code>34</code> - Grab left equippable position offset flag.
+ *  @property {number} PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET - <code>35</code> - Grab left equippable rotation offset flag.
+ *  @property {number} PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET - <code>36</code> - Grab right equippable position offset
+ *      flag.
+ *  @property {number} PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET - <code>37</code> - Grab right equippable rotation offset
+ *      flag.
+ *  @property {number} PROP_GRAB_EQUIPPABLE_INDICATOR_URL - <code>38</code> - Grab equippable indicator url flag.
+ *  @property {number} PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE - <code>39</code> - Grab equippable indicator scale flag.
+ *  @property {number} PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET - <code>40</code> - Grab equippable indicator offset flag.
+ *  @property {number} PROP_DENSITY - <code>41</code> - Density flag.
+ *  @property {number} PROP_VELOCITY - <code>42</code> - Velocity flag.
+ *  @property {number} PROP_ANGULAR_VELOCITY - <code>43</code> - Angular velocity flag.
+ *  @property {number} PROP_GRAVITY - <code>44</code> - Gravity flag.
+ *  @property {number} PROP_ACCELERATION - <code>45</code> - Acceleration flag.
+ *  @property {number} PROP_DAMPING - <code>46</code> - Damping flag.
+ *  @property {number} PROP_ANGULAR_DAMPING - <code>47</code> - Angular damping flag.
+ *  @property {number} PROP_RESTITUTION - <code>48</code> - Restitution flag.
+ *  @property {number} PROP_FRICTION - <code>49</code> - Friction flag.
+ *  @property {number} PROP_LIFETIME - <code>50</code> - Lifetime flag.
+ *  @property {number} PROP_COLLISIONLESS - <code>51</code> - Collisionless flag.
+ *  @property {number} PROP_COLLISION_MASK - <code>52</code> - Collision mask flag.
+ *  @property {number} PROP_DYNAMIC - <code>53</code> - Dynamic flag.
+ *  @property {number} PROP_COLLISION_SOUND_URL - <code>54</code> - Collision sound url flag.
+ *  @property {number} PROP_ACTION_DATA - <code>55</code> - Action data flag.
+ *  @property {number} PROP_CLONEABLE - <code>56</code> - Cloneable flag.
+ *  @property {number} PROP_CLONE_LIFETIME - <code>57</code> - Clone lifetime flag.
+ *  @property {number} PROP_CLONE_LIMIT - <code>58</code> - Clone limit flag.
+ *  @property {number} PROP_CLONE_DYNAMIC - <code>59</code> - Clone dynamic flag.
+ *  @property {number} PROP_CLONE_AVATAR_ENTITY - <code>60</code> - Clone avatar entity flag.
+ *  @property {number} PROP_CLONE_ORIGIN_ID - <code>61</code> - Clone origin id flag.
+ *  @property {number} PROP_SCRIPT - <code>62</code> - Script flag.
+ *  @property {number} PROP_SCRIPT_TIMESTAMP - <code>63</code> - Script timestamp flag.
+ *  @property {number} PROP_SERVER_SCRIPTS - <code>64</code> - Server scripts flag.
+ *  @property {number} PROP_ITEM_NAME - <code>65</code> - Item name flag.
+ *  @property {number} PROP_ITEM_DESCRIPTION - <code>66</code> - Item description flag.
+ *  @property {number} PROP_ITEM_CATEGORIES - <code>67</code> - Item categories flag.
+ *  @property {number} PROP_ITEM_ARTIST - <code>68</code> - Item artist flag.
+ *  @property {number} PROP_ITEM_LICENSE - <code>69</code> - Item license flag.
+ *  @property {number} PROP_LIMITED_RUN - <code>70</code> - Limited run flag.
+ *  @property {number} PROP_MARKETPLACE_ID - <code>71</code> - Marketplace id flag.
+ *  @property {number} PROP_EDITION_NUMBER - <code>72</code> - Edition number flag.
+ *  @property {number} PROP_ENTITY_INSTANCE_NUMBER - <code>73</code> - Entity instance number flag.
+ *  @property {number} PROP_CERTIFICATE_ID - <code>74</code> - Certificate id flag.
+ *  @property {number} PROP_CERTIFICATE_TYPE - <code>75</code> - Certificate type flag.
+ *  @property {number} PROP_STATIC_CERTIFICATE_VERSION - <code>76</code> - Static certificate version flag.
+ *  @property {number} PROP_LOCAL_POSITION - <code>77</code> - Local position flag.
+ *  @property {number} PROP_LOCAL_ROTATION - <code>78</code> - Local rotation flag.
+ *  @property {number} PROP_LOCAL_VELOCITY - <code>79</code> - Local velocity flag.
+ *  @property {number} PROP_LOCAL_ANGULAR_VELOCITY - <code>80</code> - Local angular velocity flag.
+ *  @property {number} PROP_LOCAL_DIMENSIONS - <code>81</code> - Local dimensions flag.
+ *  @property {number} PROP_SHAPE_TYPE - <code>82</code> - Shape type flag.
+ *  @property {number} PROP_COMPOUND_SHAPE_URL - <code>83</code> - Compound shape url flag.
+ *  @property {number} PROP_COLOR - <code>84</code> - Color flag.
+ *  @property {number} PROP_ALPHA - <code>85</code> - Alpha flag.
+ *  @property {number} PROP_PULSE_MIN - <code>86</code> - Pulse min flag.
+ *  @property {number} PROP_PULSE_MAX - <code>87</code> - Pulse max flag.
+ *  @property {number} PROP_PULSE_PERIOD - <code>88</code> - Pulse period flag.
+ *  @property {number} PROP_PULSE_COLOR_MODE - <code>89</code> - Pulse color mode flag.
+ *  @property {number} PROP_PULSE_ALPHA_MODE - <code>90</code> - Pulse alpha mode flag.
+ *  @property {number} PROP_TEXTURES - <code>91</code> - Textures flag.
+ *  @property {number} PROP_DERIVED_0 - <code>92</code> - Derived 0 flag.
+ *  @property {number} PROP_DERIVED_1 - <code>93</code> - Derived 1 flag.
+ *  @property {number} PROP_DERIVED_2 - <code>94</code> - Derived 2 flag.
+ *  @property {number} PROP_DERIVED_3 - <code>95</code> - Derived 3 flag.
+ *  @property {number} PROP_DERIVED_4 - <code>96</code> - Derived 4 flag.
+ *  @property {number} PROP_DERIVED_5 - <code>97</code> - Derived 5 flag.
+ *  @property {number} PROP_DERIVED_6 - <code>98</code> - Derived 6 flag.
+ *  @property {number} PROP_DERIVED_7 - <code>99</code> - Derived 7 flag.
+ *  @property {number} PROP_DERIVED_8 - <code>100</code> - Derived 8 flag.
+ *  @property {number} PROP_DERIVED_9 - <code>101</code> - Derived 9 flag.
+ *  @property {number} PROP_DERIVED_10 - <code>102</code> - Derived 10 flag.
+ *  @property {number} PROP_DERIVED_11 - <code>103</code> - Derived 11 flag.
+ *  @property {number} PROP_DERIVED_12 - <code>104</code> - Derived 12 flag.
+ *  @property {number} PROP_DERIVED_13 - <code>105</code> - Derived 13 flag.
+ *  @property {number} PROP_DERIVED_14 - <code>106</code> - Derived 14 flag.
+ *  @property {number} PROP_DERIVED_15 - <code>107</code> - Derived 15 flag.
+ *  @property {number} PROP_DERIVED_16 - <code>108</code> - Derived 16 flag.
+ *  @property {number} PROP_DERIVED_17 - <code>109</code> - Derived 17 flag.
+ *  @property {number} PROP_DERIVED_18 - <code>110</code> - Derived 18 flag.
+ *  @property {number} PROP_DERIVED_19 - <code>111</code> - Derived 19 flag.
+ *  @property {number} PROP_DERIVED_20 - <code>112</code> - Derived 20 flag.
+ *  @property {number} PROP_DERIVED_21 - <code>113</code> - Derived 21 flag.
+ *  @property {number} PROP_DERIVED_22 - <code>114</code> - Derived 22 flag.
+ *  @property {number} PROP_DERIVED_23 - <code>115</code> - Derived 23 flag.
+ *  @property {number} PROP_DERIVED_24 - <code>116</code> - Derived 24 flag.
+ *  @property {number} PROP_DERIVED_25 - <code>117</code> - Derived 25 flag.
+ *  @property {number} PROP_DERIVED_26 - <code>118</code> - Derived 26 flag.
+ *  @property {number} PROP_DERIVED_27 - <code>119</code> - Derived 27 flag.
+ *  @property {number} PROP_DERIVED_28 - <code>120</code> - Derived 28 flag.
+ *  @property {number} PROP_DERIVED_29 - <code>121</code> - Derived 29 flag.
+ *  @property {number} PROP_DERIVED_30 - <code>122</code> - Derived 30 flag.
+ *  @property {number} PROP_DERIVED_31 - <code>123</code> - Derived 31 flag.
+ *  @property {number} PROP_DERIVED_32 - <code>124</code> - Derived 32 flag.
+ *  @property {number} PROP_DERIVED_33 - <code>125</code> - Derived 33 flag.
+ *  @property {number} PROP_DERIVED_34 - <code>126</code> - Derived 34 flag.
+ *  @property {number} PROP_AFTER_LAST_ITEM - <code>127</code> - After last item flag.
+ *  @property {number} PROP_MAX_PARTICLES - <code>{@link EntityPropertyList|PROP_DERIVED_0}</code> - Max particles flag. First
+ *      ParticleEffect entity-specific property.
+ *  @property {number} PROP_LIFESPAN - <code>{@link EntityPropertyList|PROP_DERIVED_1}</code> - Lifespan flag.
+ *  @property {number} PROP_EMITTING_PARTICLES - <code>{@link EntityPropertyList|PROP_DERIVED_2}</code> - Emitting_particles
+ *      flag.
+ *  @property {number} PROP_EMIT_RATE - <code>{@link EntityPropertyList|PROP_DERIVED_3}</code> - Emit rate flag.
+ *  @property {number} PROP_EMIT_SPEED - <code>{@link EntityPropertyList|PROP_DERIVED_4}</code> - Emit speed flag.
+ *  @property {number} PROP_SPEED_SPREAD - <code>{@link EntityPropertyList|PROP_DERIVED_5}</code> - Speed spread flag.
+ *  @property {number} PROP_EMIT_ORIENTATION - <code>{@link EntityPropertyList|PROP_DERIVED_6}</code> - Emit orientation flag.
+ *  @property {number} PROP_EMIT_DIMENSIONS - <code>{@link EntityPropertyList|PROP_DERIVED_7}</code> - Emit dimensions flag.
+ *  @property {number} PROP_ACCELERATION_SPREAD - <code>{@link EntityPropertyList|PROP_DERIVED_8}</code> - Acceleration spread
+ *      flag.
+ *  @property {number} PROP_POLAR_START - <code>{@link EntityPropertyList|PROP_DERIVED_9}</code> - Polar start flag.
+ *  @property {number} PROP_POLAR_FINISH - <code>{@link EntityPropertyList|PROP_DERIVED_10}</code> - Polar finish flag.
+ *  @property {number} PROP_AZIMUTH_START - <code>{@link EntityPropertyList|PROP_DERIVED_11}</code> - Azimuth start flag.
+ *  @property {number} PROP_AZIMUTH_FINISH - <code>{@link EntityPropertyList|PROP_DERIVED_12}</code> - Azimuth finish flag.
+ *  @property {number} PROP_EMIT_RADIUS_START - <code>{@link EntityPropertyList|PROP_DERIVED_13}</code> - Emit radius start
+ *      flag.
+ *  @property {number} PROP_EMIT_ACCELERATION - <code>{@link EntityPropertyList|PROP_DERIVED_14}</code> - Emit acceleration
+ *      flag.
+ *  @property {number} PROP_PARTICLE_RADIUS - <code>{@link EntityPropertyList|PROP_DERIVED_15}</code> - Particle radius flag.
+ *  @property {number} PROP_RADIUS_SPREAD - <code>{@link EntityPropertyList|PROP_DERIVED_16}</code> - Radius spread flag.
+ *  @property {number} PROP_RADIUS_START - <code>{@link EntityPropertyList|PROP_DERIVED_17}</code> - Radius start flag.
+ *  @property {number} PROP_RADIUS_FINISH - <code>{@link EntityPropertyList|PROP_DERIVED_18}</code> - Radius finish flag.
+ *  @property {number} PROP_COLOR_SPREAD - <code>{@link EntityPropertyList|PROP_DERIVED_19}</code> - Color spread flag.
+ *  @property {number} PROP_COLOR_START - <code>{@link EntityPropertyList|PROP_DERIVED_20}</code> - Color start flag.
+ *  @property {number} PROP_COLOR_FINISH - <code>{@link EntityPropertyList|PROP_DERIVED_21}</code> - Color finish flag.
+ *  @property {number} PROP_ALPHA_SPREAD - <code>{@link EntityPropertyList|PROP_DERIVED_22}</code> - Alpha spread flag.
+ *  @property {number} PROP_ALPHA_START - <code>{@link EntityPropertyList|PROP_DERIVED_23}</code> - Alpha start flag.
+ *  @property {number} PROP_ALPHA_FINISH - <code>{@link EntityPropertyList|PROP_DERIVED_24}</code> - Alpha finish flag.
+ *  @property {number} PROP_EMITTER_SHOULD_TRAIL - <code>{@link EntityPropertyList|PROP_DERIVED_25}</code> - Emitter should
+ *      trail flag.
+ *  @property {number} PROP_PARTICLE_SPIN - <code>{@link EntityPropertyList|PROP_DERIVED_26}</code> - Particle spin flag.
+ *  @property {number} PROP_SPIN_START - <code>{@link EntityPropertyList|PROP_DERIVED_27}</code> - Spin start flag.
+ *  @property {number} PROP_SPIN_FINISH - <code>{@link EntityPropertyList|PROP_DERIVED_28}</code> - Spin finish flag.
+ *  @property {number} PROP_SPIN_SPREAD - <code>{@link EntityPropertyList|PROP_DERIVED_29}</code> - Spin spread flag.
+ *  @property {number} PROP_PARTICLE_ROTATE_WITH_ENTITY - <code>{@link EntityPropertyList|PROP_DERIVED_30}</code> - Particle
+ *      rotate with entity flag.
+ *  @property {number} PROP_MODEL_URL - <code>{@link EntityPropertyList|PROP_DERIVED_0}</code> - Model url flag. First
+ *      {@link ModelEntityItem|ModelEntity}-specific property.
+ *  @property {number} PROP_MODEL_SCALE - <code>{@link EntityPropertyList|PROP_DERIVED_1}</code> - Model scale flag.
+ *  @property {number} PROP_JOINT_ROTATIONS_SET - <code>{@link EntityPropertyList|PROP_DERIVED_2}</code> - Joint rotations set
+ *      flag.
+ *  @property {number} PROP_JOINT_ROTATIONS - <code>{@link EntityPropertyList|PROP_DERIVED_3}</code> - Joint rotations flag.
+ *  @property {number} PROP_JOINT_TRANSLATIONS_SET - <code>{@link EntityPropertyList|PROP_DERIVED_4}</code> - Joint translations
+ *      set flag.
+ *  @property {number} PROP_JOINT_TRANSLATIONS - <code>{@link EntityPropertyList|PROP_DERIVED_5}</code> - Joint translations
+ *      flag.
+ *  @property {number} PROP_RELAY_PARENT_JOINTS - <code>{@link EntityPropertyList|PROP_DERIVED_6}</code> - Relay parent joints
+ *      flag.
+ *  @property {number} PROP_GROUP_CULLED - <code>{@link EntityPropertyList|PROP_DERIVED_7}</code> - Group culled flag.
+ *  @property {number} PROP_BLENDSHAPE_COEFFICIENTS - <code>{@link EntityPropertyList|PROP_DERIVED_8}</code> - Blendshape
+ *      coefficients flag.
+ *  @property {number} PROP_USE_ORIGINAL_PIVOT - <code>{@link EntityPropertyList|PROP_DERIVED_9}</code> - Use original pivot
+ *      flag.
+ *  @property {number} PROP_ANIMATION_URL - <code>{@link EntityPropertyList|PROP_DERIVED_10}</code> - Animation url flag.
+ *  @property {number} PROP_ANIMATION_ALLOW_TRANSLATION - <code>{@link EntityPropertyList|PROP_DERIVED_11}</code> - Animation
+ *      allow translation flag.
+ *  @property {number} PROP_ANIMATION_FPS - <code>{@link EntityPropertyList|PROP_DERIVED_12}</code> - Animation fps flag.
+ *  @property {number} PROP_ANIMATION_FRAME_INDEX - <code>{@link EntityPropertyList|PROP_DERIVED_13}</code> - Animation frame
+ *      index flag.
+ *  @property {number} PROP_ANIMATION_PLAYING - <code>{@link EntityPropertyList|PROP_DERIVED_14}</code> - Animation playing
+ *      flag.
+ *  @property {number} PROP_ANIMATION_LOOP - <code>{@link EntityPropertyList|PROP_DERIVED_15}</code> - Animation loop flag.
+ *  @property {number} PROP_ANIMATION_FIRST_FRAME - <code>{@link EntityPropertyList|PROP_DERIVED_16}</code> - Animation first
+ *      frame flag.
+ *  @property {number} PROP_ANIMATION_LAST_FRAME - <code>{@link EntityPropertyList|PROP_DERIVED_17}</code> - Animation last
+ *      frame flag.
+ *  @property {number} PROP_ANIMATION_HOLD - <code>{@link EntityPropertyList|PROP_DERIVED_18}</code> - Animation hold flag.
+ *  @property {number} PROP_SHAPE - <code>{@link EntityPropertyList|PROP_DERIVED_0}</code> - Shape flag.
  */
-enum EntityPropertyFlags {
-    // C++  EntityPropertyFlags.h
+enum EntityPropertyList {
+    // C++  EntityPropertyList
 
     PROP_PAGED_PROPERTY,
     PROP_CUSTOM_PROPERTIES_INCLUDED,
@@ -592,4 +575,4 @@ enum EntityPropertyFlags {
     PROP_MINOR_TICK_MARKS_COLOR = PROP_DERIVED_18
 }
 
-export { EntityPropertyFlags };
+export { EntityPropertyList };

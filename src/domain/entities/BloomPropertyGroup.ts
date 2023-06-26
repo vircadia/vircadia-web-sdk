@@ -11,7 +11,7 @@
 
 import UDT from "../networking/udt/UDT";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type BloomProperties = {
@@ -69,19 +69,19 @@ class BloomPropertyGroup {
         let dataPosition = position;
 
         let intensity: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BLOOM_INTENSITY)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_BLOOM_INTENSITY)) {
             intensity = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let threshold: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BLOOM_THRESHOLD)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_BLOOM_THRESHOLD)) {
             threshold = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let size: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BLOOM_SIZE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_BLOOM_SIZE)) {
             size = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }

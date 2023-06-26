@@ -12,7 +12,7 @@
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type HazeProperties = {
@@ -100,13 +100,13 @@ class HazePropertyGroup {
         let dataPosition = position;
 
         let range: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_RANGE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_RANGE)) {
             range = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let color: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_COLOR)) {
             color = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -116,7 +116,7 @@ class HazePropertyGroup {
         }
 
         let glareColor: color | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_GLARE_COLOR)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_GLARE_COLOR)) {
             glareColor = {
                 red: data.getUint8(dataPosition),
                 green: data.getUint8(dataPosition + 1),
@@ -126,57 +126,57 @@ class HazePropertyGroup {
         }
 
         let enableGlare: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_ENABLE_GLARE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_ENABLE_GLARE)) {
             enableGlare = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let glareAngle: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_GLARE_ANGLE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_GLARE_ANGLE)) {
             glareAngle = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let altitudeEffect: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_ALTITUDE_EFFECT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_ALTITUDE_EFFECT)) {
             altitudeEffect = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let ceiling: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_CEILING)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_CEILING)) {
             ceiling = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let base: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_BASE_REF)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_BASE_REF)) {
             base = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let backgroundBlend: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_BACKGROUND_BLEND)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_BACKGROUND_BLEND)) {
             backgroundBlend = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             // WEBRTC TODO: Read hazeBackgroundBlend property.
             dataPosition += 4;
         }
 
         let attenuateKeyLight: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_ATTENUATE_KEYLIGHT)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_ATTENUATE_KEYLIGHT)) {
             attenuateKeyLight = Boolean(data.getUint8(dataPosition));
             // WEBRTC TODO: Read hazeAttenuateKeylight property.
             dataPosition += 1;
         }
 
         let keyLightRange: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_KEYLIGHT_RANGE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_KEYLIGHT_RANGE)) {
             keyLightRange = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let keyLightAltitude: number | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_KEYLIGHT_ALTITUDE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_KEYLIGHT_ALTITUDE)) {
             keyLightAltitude = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }

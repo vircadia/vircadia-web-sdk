@@ -17,7 +17,7 @@ import PropertyFlags from "../shared/PropertyFlags";
 import ShapeType from "../shared/ShapeType";
 import AmbientLightPropertyGroup, { AmbientLightProperties } from "./AmbientLightPropertyGroup";
 import BloomPropertyGroup, { BloomProperties } from "./BloomPropertyGroup";
-import { EntityPropertyFlags } from "./EntityPropertyFlags";
+import { EntityPropertyList } from "./EntityPropertyFlags";
 import HazePropertyGroup, { HazeProperties } from "./HazePropertyGroup";
 import KeyLightPropertyGroup, { KeyLightProperties } from "./KeyLightPropertyGroup";
 import SkyboxPropertyGroup, { SkyboxProperties } from "./SkyboxPropertyGroup";
@@ -128,13 +128,13 @@ class ZoneEntityItem {
         const textDecoder = new TextDecoder();
 
         let shapeType: ShapeType | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SHAPE_TYPE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SHAPE_TYPE)) {
             shapeType = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let compoundShapeURL: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COMPOUND_SHAPE_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_COMPOUND_SHAPE_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -162,19 +162,19 @@ class ZoneEntityItem {
         dataPosition += bloomProperties.bytesRead;
 
         let flyingAllowed: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_FLYING_ALLOWED)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_FLYING_ALLOWED)) {
             flyingAllowed = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let ghostingAllowed: boolean | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_GHOSTING_ALLOWED)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GHOSTING_ALLOWED)) {
             ghostingAllowed = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
         let filterURL: string | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_FILTER_URL)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_FILTER_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
@@ -186,43 +186,43 @@ class ZoneEntityItem {
         }
 
         let keyLightMode: ComponentMode | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_KEY_LIGHT_MODE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_KEY_LIGHT_MODE)) {
             keyLightMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let ambientLightMode: ComponentMode | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_AMBIENT_LIGHT_MODE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_AMBIENT_LIGHT_MODE)) {
             ambientLightMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let skyboxMode: ComponentMode | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SKYBOX_MODE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SKYBOX_MODE)) {
             skyboxMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let hazeMode: ComponentMode | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_HAZE_MODE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_MODE)) {
             hazeMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let bloomMode: ComponentMode | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_BLOOM_MODE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_BLOOM_MODE)) {
             bloomMode = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let avatarPriority: AvatarPriorityMode | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_AVATAR_PRIORITY)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_AVATAR_PRIORITY)) {
             avatarPriority = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
         let screenshare: ComponentMode | undefined = undefined;
-        if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_SCREENSHARE)) {
+        if (propertyFlags.getHasProperty(EntityPropertyList.PROP_SCREENSHARE)) {
             screenshare = data.getUint32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
