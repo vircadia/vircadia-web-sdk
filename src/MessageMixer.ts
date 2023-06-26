@@ -138,7 +138,6 @@ class MessageMixer extends AssignmentClient {
             return;
         }
 
-
         this.#_messagesClient.sendMessage(channel, message, localOnly);
     }
 

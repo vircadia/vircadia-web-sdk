@@ -83,7 +83,7 @@ describe("EntityServer - unit tests", () => {
         expect(uuid.isNull()).toBe(true);
         expect(errorMessage).toBe("[EntityServer] addEntity() for local entities not implemented!");
 
-        // Successful call in contrast.
+        // Successful call.
         errorMessage = "";
         uuid = entityServer.addEntity({ entityType: EntityType.Shape }, HostType.DOMAIN);
         expect(uuid.isNull()).toBe(false);

@@ -47,7 +47,7 @@ const EntityQuery = new class {
     /*@devdoc
      *  Writes an {@link PacketType(1)|EntityQuery} packet, ready for sending.
      *  @function PacketScribe.EntityQuery&period;write
-     *  @param {PacketScribe.EntityQueryDetails} info - The information needed for writing the packet list.
+     *  @param {PacketScribe.EntityQueryDetails} info - The information needed for writing the packet.
      *  @return {NLPacket} The packet, ready for sending.
      */
     write(info: EntityQueryDetails): NLPacket {  /* eslint-disable-line class-methods-use-this */

@@ -9,7 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { HostType } from "../../../../src/domain/entities/EntityItem"; }
+import { HostType } from "../../../../src/domain/entities/EntityItem";
 import EntityData from "../../../../src/domain/networking/packets/EntityData";
 import AvatarPriorityMode from "../../../../src/domain/shared/AvatarPriorityMode";
 import ComponentMode from "../../../../src/domain/shared/ComponentMode";

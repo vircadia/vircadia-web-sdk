@@ -250,37 +250,60 @@ class EntityServer extends AssignmentClient {
 
         if (typeof properties !== "object") {
             console.error("[EntityServer] addEntity() called with invalid entity properties!");
-            return new Uuid(Uuid.NULL);
+            return new Uuid();
         }
 
         if (typeof properties.entityType !== "number" || properties.entityType <= EntityType.Unknown
                 || properties.entityType >= EntityType.NUM_TYPES) {
             console.error("[EntityServer] addEntity() called with invalid entity type!");
-            return new Uuid(Uuid.NULL);
+            return new Uuid();
         }
 
         if (typeof hostType !== "undefined") {
             if (typeof hostType !== "number" || hostType < HostType.DOMAIN || hostType > HostType.LOCAL) {
                 console.error("[EntityServer] addEntity() called with invalid entity hostType!");
-                return new Uuid(Uuid.NULL);
+                return new Uuid();
             }
             if (hostType === HostType.AVATAR) {
                 console.error("[EntityServer] addEntity() for avatar entities not implemented!");
-                return new Uuid(Uuid.NULL);
+                return new Uuid();
             }
             if (hostType === HostType.LOCAL) {
                 console.error("[EntityServer] addEntity() for local entities not implemented!");
-                return new Uuid(Uuid.NULL);
+                return new Uuid();
             }
         }
 
         if ([EntityType.Line, EntityType.PolyLine, EntityType.PolyVox, EntityType.Grid, EntityType.Gizmo]
             .includes(properties.entityType)) {
             console.error("[EntityServer] addEntity() called with unsupported entity type!", properties.entityType);
-            return new Uuid(Uuid.NULL);
+            return new Uuid();
         }
 
         return this.#addEntityInternal(properties, hostType ?? HostType.DOMAIN);
+    }
+
+    /*@sdkdoc
+     *  Edits an entity, changing one or more of its property values.
+     *  @param {Uuid} entityID - The ID of the entity to edit.
+     *  @param {Entities.EntityProperties} properties - The new property values.
+     *  @returns {Uuid} The ID of the entity if an edit request was successfully sent to the server, or
+     *      {@link Uuid(1)|Uuid.NULL} if no entity edit request was sent.
+     */
+    editEntity(entityID: Uuid, properties: EntityProperties): Uuid {
+        // C++  QUuid EntityScriptingInterface::editEntity(const QUuid& entityID, const EntityItemProperties& properties)
+
+        if (!(entityID instanceof Uuid)) {
+            console.error("[EntityServer] editEntity() called with invalid entity ID!");
+            return new Uuid();
+        }
+
+        if (typeof properties !== "object") {
+            console.error("[EntityServer] editEntity() called with invalid entity properties!");
+            return new Uuid();
+        }
+
+        return this.#editEntityInternal(entityID, properties);
     }
 
 
