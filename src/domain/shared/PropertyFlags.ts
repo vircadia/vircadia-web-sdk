@@ -26,6 +26,17 @@ class PropertyFlags {
     #_maxFlag = Number.MIN_SAFE_INTEGER;
     #_minFlag = Number.MAX_SAFE_INTEGER;
     #_trailingFlipped = false;
+    #_encodedLength = 0;
+
+    /*@devdoc
+     *  Gets whether the property flags are empty.
+     *  @returns {boolean} <code>true</code> if no property flags are set, <code>false</code> if one or more are set.
+     */
+    isEmpty(): boolean {
+        // C++  bool isEmpty()
+        return this.#_maxFlag === Number.MIN_SAFE_INTEGER && this.#_minFlag === Number.MAX_SAFE_INTEGER
+            && this.#_trailingFlipped === false && this.#_encodedLength === 0;
+    }
 
     /*@devdoc
      *  Gets whether the property flag is present in the flags sent by the server.
@@ -33,7 +44,7 @@ class PropertyFlags {
      *  @returns {boolean} <code>true</code> if the property flag is present, <code>false</code> if it isn't.
      */
     getHasProperty(flag: number): boolean {
-        // C++ bool getHasProperty(Enum flag)
+        // C++  bool getHasProperty(Enum flag)
 
         const bytePos = Math.floor(flag / this.#BITS_IN_BYTE);
 
@@ -55,7 +66,7 @@ class PropertyFlags {
      *  @param {boolean} value - The value to set the flag to.
      */
     setHasProperty(flag: number, value: boolean): void {
-        // C++ void setHasProperty(Enum flag, bool value = true)
+        // C++  void setHasProperty(Enum flag, bool value = true)
 
         const bytePos = Math.floor(flag / this.#BITS_IN_BYTE);
 
@@ -100,7 +111,7 @@ class PropertyFlags {
      *  @returns {number} The number of bytes processed.
      */
     decode(data: DataView, size: number): number {
-        // C++ size_t decode(const uint8_t* data, size_t length)
+        // C++  size_t decode(const uint8_t* data, size_t length)
 
         /* Process each bit of each  byte until the stop condition is reached.
         * Starts from the leftmost bit.
@@ -168,19 +179,17 @@ class PropertyFlags {
             }
         }
 
-        // WEBRTC TODO: Address further C++ code.
-
+        this.#_encodedLength = bytesConsumed;
         return bytesConsumed;
     }
 
     #clear(): void {
-        // C++ void clear()
+        // C++  void clear()
         this.#_flags = new Uint8Array(0);
         this.#_maxFlag = Number.MIN_SAFE_INTEGER;
         this.#_minFlag = Number.MAX_SAFE_INTEGER;
         this.#_trailingFlipped = false;
-
-        // WEBRTC TODO: Address further C++ code.
+        this.#_encodedLength = 0;
     }
 }
 

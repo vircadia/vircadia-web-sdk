@@ -16,12 +16,18 @@ describe("EntityData - unit tests", () => {
 
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
+    test("Can create an empty property flags", () => {
+        const propertyFlags = new PropertyFlags();
+        expect(propertyFlags.isEmpty()).toBe(true);
+    });
+
     test("Can set and get property flags", () => {
         const propertyFlags = new PropertyFlags();
 
         // Set 1st bit.
         propertyFlags.setHasProperty(0, true);
         expect(propertyFlags.getHasProperty(0)).toBe(true);
+        expect(propertyFlags.isEmpty()).toBe(false);
 
         // Clear 1st bit.
         propertyFlags.setHasProperty(0, false);
@@ -53,8 +59,8 @@ describe("EntityData - unit tests", () => {
         const propertyFlags = new PropertyFlags();
 
         const bytesConsumed = propertyFlags.decode(data, 32, 0);
-
         expect(bytesConsumed).toBe(16);
+        expect(propertyFlags.isEmpty()).toBe(false);
 
         expect(propertyFlags.getHasProperty(0)).toBe(false);
         expect(propertyFlags.getHasProperty(1)).toBe(false);
