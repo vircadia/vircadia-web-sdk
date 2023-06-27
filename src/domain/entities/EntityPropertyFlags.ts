@@ -9,6 +9,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import PropertyFlags from "../shared/PropertyFlags";
+
 /*@devdoc
  *  The <code>EntityPropertyList</code> namespace provides the positions of the flags in {@link PropertyFlags}.
  *  @namespace EntityPropertyList
@@ -575,4 +577,16 @@ enum EntityPropertyList {
     PROP_MINOR_TICK_MARKS_COLOR = PROP_DERIVED_18
 }
 
-export { EntityPropertyList };
+/*@devdoc
+ *  The <code>EntityPropertyFlags</code> provides facilities to decode, set and get entity property flags per the
+ *  {@link EntityPropertyList} values.
+ *
+ *  <p>C++ <code>typedef PropertyFlags<EntityPropertyList> EntityPropertyFlags</code></p>
+ *  @class EntityPropertyFlags
+ *  @extends PropertyFlags
+ */
+class EntityPropertyFlags extends PropertyFlags {
+    // C++  typedef PropertyFlags<EntityPropertyList> EntityPropertyFlags
+}
+
+export { EntityPropertyList, EntityPropertyFlags };
