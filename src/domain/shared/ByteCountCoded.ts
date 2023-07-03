@@ -11,11 +11,12 @@
 
 
 /*@devdoc
- *  The <code>ByteCountCoded</code> class provides facilities to decode data.
+ *  The <code>ByteCountCoded</code> class provides facilities to encode and decode byte count coded integer data.
+ *  Up to 64-bit integer values are supported.
  *  <p>C++: <code>template&lt;typename T&gt; class ByteCountCoded</code></p>
  *  @class ByteCountCoded
  *
- *  @property {number} data - The decoded byte count encoded data.
+ *  @property {number} data - The integer value to encode or the decoded integer value.
  */
 // WEBRTC TODO: Make the class generic.
 class ByteCountCoded {
@@ -24,17 +25,21 @@ class ByteCountCoded {
     // WEBRTC TODO: Move to NumericalConstants.ts
     readonly #BITS_IN_BYTE = 8;
 
-    #_data = 0;
+    #_data = 0n;  // BigInt required for 64-bit values.
 
-    get data(): number {
+    get data(): bigint {
         return this.#_data;
     }
 
+    set data(data: bigint) {
+        this.#_data = data;
+    }
+
     /*@devdoc
-     *  Decode the encoded data.
+     *  Decodes the encoded data.
      *  @param {DataView} encodedBuffer - The data to decode.
      *  @param {number} encodedSize - The maximum size of the data to decode.
-     *  @returns {number} The number of bytes processed.
+     *  @returns {number} The number of bytes processed. The decoded value is provided in the <code>data</code> property.
      */
     decode(encodedBuffer: DataView, encodedSize: number): number {
         // C++ template<typename T> inline size_t ByteCountCoded<T>::decode(const char* encodedBuffer, int encodedSize)
@@ -58,7 +63,7 @@ class ByteCountCoded {
         * b. 0011 0000 -> The decoded value is 6.
         */
 
-        this.#_data = 0;
+        this.#_data = 0n;
 
         let bytesConsumed = 0;
         const bitCount = this.#BITS_IN_BYTE * encodedSize;
@@ -103,7 +108,7 @@ class ByteCountCoded {
                     }
 
                     if (bitIsSet) {
-                        this.#_data += bitValue;
+                        this.#_data += BigInt(bitValue);
                     }
                     bitValue *= 2;
                 }
@@ -118,7 +123,71 @@ class ByteCountCoded {
         return bytesConsumed;
     }
 
+    /**
+     *  Encodes the numeric value set in the <code>data</code> property into the buffer.
+     *  @param data - The buffer to write the encoded value into.
+     *  @returns The number of bytes written.
+     */
+    encode(data: DataView): number {
+        // C++  template<typename T> inline QByteArray ByteCountCoded<T>::encode() const
+
+        const totalBits = 64;  // Up to 64-bit integers.
+        let valueBits = totalBits;
+        let firstValueFound = false;
+        let temp = this.#_data;
+        let lastBitMask = 1n << BigInt(totalBits - 1);
+
+        // determine the number of bits that the value takes
+        for (let bitAt = 0; bitAt < totalBits; bitAt++) {
+            let bitValue = (temp & lastBitMask) === lastBitMask;
+            if (!firstValueFound) {
+                if (!bitValue) {
+                    valueBits--;
+                } else {
+                    firstValueFound = true;
+                }
+            }
+            temp = temp << 1n;
+        }
+    
+        // Calculate the number of total bytes, including our header.
+        // BITS_IN_BYTE-1 because we need to code the number of bytes in the header
+        // + 1 because we always take at least 1 byte, even if number of bits is less than a bytes worth
+        const BITS_IN_BYTE = 8;
+        let numberOfBytes = Math.trunc(valueBits / (BITS_IN_BYTE - 1)) + 1; 
+
+        // Fill data with initial 0s.
+        for (let i = 0; i < numberOfBytes; i++) {
+            data.setUint8(i, 0);
+        }
+
+        // Next, pack the number of header bits in, the first N-1 to be set to 1, the last to be set to 0.
+        for(let i = 0; i < numberOfBytes; i++) {
+            let outputIndex = i;
+            let bitValue = (i < (numberOfBytes - 1)  ? 1 : 0);
+            let original = data.getUint8(outputIndex / BITS_IN_BYTE);
+            let shiftBy = BITS_IN_BYTE - ((outputIndex % BITS_IN_BYTE) + 1);
+            let thisBit = bitValue << shiftBy;
+            data.setUint8(i / BITS_IN_BYTE, original | thisBit);
+        }
+
+        // finally pack the actual bits from the bit array.
+        temp = this.#_data;
+        for(let i = numberOfBytes; i < (numberOfBytes + valueBits); i++) {
+            let outputIndex = i;
+            let bitValue = temp & 1n;
+            let original = data.getUint8(outputIndex / BITS_IN_BYTE);
+            let shiftBy = Math.trunc(BITS_IN_BYTE - ((outputIndex % BITS_IN_BYTE) + 1));
+            let thisBit = bitValue << BigInt(shiftBy);
+            data.setUint8(i / BITS_IN_BYTE, original | Number(thisBit));
+            temp = temp >> 1n;
+        }
+
+        return numberOfBytes;
+    }
+
     // WEBRTC TODO: Address further C++ code.
+
 }
 
 export default ByteCountCoded;

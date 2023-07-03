@@ -536,7 +536,7 @@ const EntityData = new class {
 
             let encodedData = new DataView(data.buffer, data.byteOffset + dataPosition);
             dataPosition += codec.decode(encodedData, encodedData.byteLength);
-            const entityType = codec.data;
+            const entityType = Number(codec.data);
 
             const createdFromBuffer = data.getBigUint64(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 8;
@@ -546,11 +546,11 @@ const EntityData = new class {
 
             encodedData = new DataView(data.buffer, data.byteOffset + dataPosition);
             dataPosition += codec.decode(encodedData, encodedData.byteLength);
-            const updateDelta = codec.data;
+            const updateDelta = Number(codec.data);
 
             encodedData = new DataView(data.buffer, data.byteOffset + dataPosition);
             dataPosition += codec.decode(encodedData, encodedData.byteLength);
-            const simulatedDelta = codec.data;
+            const simulatedDelta = Number(codec.data);
 
             const propertyFlags = new PropertyFlags();
             const encodedFlags = new DataView(data.buffer, data.byteOffset + dataPosition);
