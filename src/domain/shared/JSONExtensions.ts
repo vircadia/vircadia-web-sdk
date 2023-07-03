@@ -9,6 +9,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import Uuid from "./Uuid";
+
+
 /*@devdoc
  *  The <code>JSONExtensions</code> namespace provides "replacer" and "reviver" methods for use when stringifying and parsing
     JSON with <code>bigint</code> values.
@@ -23,14 +26,17 @@
  *  @function JSONExtensions.bigintReplacer
  *  @param {string} key - The key of the property being processed.
  *  @param {unknown} value - The value of the property being processed.
- *  @returns {string|unknown} A numeric string ending with <code>"n"</code> if the value is a <code>bigint</code>, otherwise the
- *      unaltered <code>value</code> passed in.
+ *  @returns {string|unknown} A numeric string ending with <code>"n"</code> if the value is a <code>bigint</code> or
+ *      {@link Uuid}, otherwise the unaltered <code>value</code> passed in.
  */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 export function bigintReplacer(key: string, value: unknown): unknown {
     if (typeof value === "bigint") {
         return value.toString() + "n";
+    }
+    if (value instanceof Uuid) {
+        return value.value().toString() + "n";
     }
     return value;
 }

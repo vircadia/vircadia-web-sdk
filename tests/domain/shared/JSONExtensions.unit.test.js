@@ -17,6 +17,7 @@
 */
 
 import { bigintReplacer, bigintReviver } from "../../../src/domain/shared/JSONExtensions";
+import Uuid from "../../../src/domain/shared/Uuid";
 
 
 describe("JSON extensions - unit tests", () => {
@@ -31,10 +32,21 @@ describe("JSON extensions - unit tests", () => {
         expect(jsonString).toBe("{\"value\":\"170141183460469231731687303715884105731n\",\"other\":123}");
     });
 
+    test("Can stringify objects with Uuid values", () => {
+        const value = new Uuid(2n ** 127n + 3n);  // Most-significant and 2 least-significant bits.
+        const object = {
+            value,
+            other: 123
+        };
+        const jsonString = JSON.stringify(object, bigintReplacer);
+        expect(jsonString).toBe("{\"value\":\"170141183460469231731687303715884105731n\",\"other\":123}");
+    });
+
     test("Can parse objects with bigint values", () => {
         const jsonString = "{\"value\":\"170141183460469231731687303715884105731n\",\"other\":123}";
         const object = JSON.parse(jsonString, bigintReviver);
         expect(object.value).toBe(2n ** 127n + 3n);
         expect(object.other).toBe(123);
     });
+
 });
