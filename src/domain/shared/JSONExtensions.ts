@@ -53,8 +53,7 @@ export function bigintReplacer(key: string, value: unknown): unknown {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 export function bigintReviver(key: string, value: unknown): unknown {
-    if (typeof value === "string" && value.endsWith("n")) {  // $$$$$$: Match
-        console.debug("$$$$... return", BigInt(value.slice(0, -1)));
+    if (typeof value === "string" && value.endsWith("n")) {
         return BigInt(value.slice(0, -1));
     }
     return value;

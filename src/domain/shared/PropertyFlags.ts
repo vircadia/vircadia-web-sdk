@@ -221,9 +221,9 @@ class PropertyFlags {
      */
     debugDumpBits(): void {
         // C++  void PropertyFlags<Enum>::debugDumpBits()
-        console.debug("#_minFlag=", this.#_minFlag);
-        console.debug("#_maxFlag=", this.#_maxFlag);
-        console.debug("#_trailingFlipped=", this.#_trailingFlipped);
+        //console.debug("#_minFlag=", this.#_minFlag);
+        //console.debug("#_maxFlag=", this.#_maxFlag);
+        //console.debug("#_trailingFlipped=", this.#_trailingFlipped);
         let bits = "";
         for (let i = 0; i < this.#_flags.length; i++) {
             bits += this.#_flags[i] ? "1" : "0";

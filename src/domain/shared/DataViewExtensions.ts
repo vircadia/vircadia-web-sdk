@@ -12,7 +12,7 @@
 /*@devdoc
  *  The <code>DataView</code> namespace comprises methods added to the prototype of JavaScript's
  *  {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView|DataView} object, for
- *  handling reading and writing large <code>bigint</vcde> values. These methods are added only if they aren't already present
+ *  handling reading and writing large <code>bigint</code> values. These methods are added only if they aren't already present
  *  in the browser's <code>DataView</code> implementation.
  *  <p>C++: N/A</p>
  *  @namespace DataView
