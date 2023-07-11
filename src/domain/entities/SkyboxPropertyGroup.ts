@@ -11,8 +11,7 @@
 
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
-import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type SkyboxProperties = {
@@ -58,7 +57,7 @@ class SkyboxPropertyGroup {
      *  @param {PropertyFlags} propertyFlags - The property flags.
      *  @returns {SkyboxPropertyGroupSubclassData} The Zone entity's skybox properties and the number of bytes read.
      */
-    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): SkyboxPropertyGroupSubclassData { // eslint-disable-line class-methods-use-this, max-len
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: EntityPropertyFlags): SkyboxPropertyGroupSubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int SkyboxPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

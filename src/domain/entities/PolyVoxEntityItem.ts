@@ -11,8 +11,7 @@
 
 import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
-import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 // WEBRTC TODO: Replace Record<string, never> with PolyVoxEntityItem's special properties.
@@ -30,7 +29,7 @@ type PolyVoxEntitySubclassData = {
 class PolyVoxEntityItem {
     // C++  class PolyVoxEntityItem : public EntityItem
 
-    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): PolyVoxEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: EntityPropertyFlags): PolyVoxEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int PolyVoxEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

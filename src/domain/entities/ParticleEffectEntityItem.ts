@@ -13,11 +13,10 @@ import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import GLMHelpers from "../shared/GLMHelpers";
-import PropertyFlags from "../shared/PropertyFlags";
 import { quat } from "../shared/Quat";
 import ShapeType from "../shared/ShapeType";
 import { vec3 } from "../shared/Vec3";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 import PulsePropertyGroup from "./PulsePropertyGroup";
 
 
@@ -203,7 +202,7 @@ class ParticleEffectEntityItem {
      *  @param {PropertyFlags} propertyFlags - The property flags.
      *  @returns {ParticleEffectEntitySubclassData} The ParticleEffect entity properties and the number of bytes read.
      */
-    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): ParticleEffectEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: EntityPropertyFlags): ParticleEffectEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int ParticleEffectEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

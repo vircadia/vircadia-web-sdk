@@ -12,8 +12,7 @@
 import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import { color } from "../shared/Color";
-import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 import PulsePropertyGroup from "./PulsePropertyGroup";
 
 /*@sdkdoc
@@ -136,7 +135,7 @@ class TextEntityItem {
      *  @param {PropertyFlags} propertyFlags - The property flags.
      *  @returns {TextEntitySubclassData} The Text entity properties and the number of bytes read.
      */
-    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): TextEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: EntityPropertyFlags): TextEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int TextEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

@@ -11,8 +11,7 @@
 
 import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
-import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 
 // WEBRTC TODO: Replace Record<string, never> with LineEntityItem's special properties.
 type LineEntitySubclassProperties = Record<string, never>;
@@ -29,7 +28,7 @@ type LineEntitySubclassData = {
 class LineEntityItem {
     // C++  class LineEntityItem : public EntityItem
 
-    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): LineEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: EntityPropertyFlags): LineEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int LineEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

@@ -9,10 +9,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import EntityPropertyFlags from "../../../src/domain/entities/EntityPropertyFlags";
 import ZoneEntityItem from "../../../src/domain/entities/ZoneEntityItem";
 import AvatarPriorityMode from "../../../src/domain/shared/AvatarPriorityMode";
 import ComponentMode from "../../../src/domain/shared/ComponentMode";
-import PropertyFlags from "../../../src/domain/shared/PropertyFlags";
 import ShapeType from "../../../src/domain/shared/ShapeType";
 
 
@@ -27,7 +27,7 @@ describe("ZoneEntityItem - unit tests", () => {
         }));
 
         const encodedFlags = new DataView(bufferArray.buffer);
-        const propertyFlags = new PropertyFlags();
+        const propertyFlags = new EntityPropertyFlags();
         propertyFlags.decode(encodedFlags, encodedFlags.byteLength);
 
         // eslint-disable-next-line max-len

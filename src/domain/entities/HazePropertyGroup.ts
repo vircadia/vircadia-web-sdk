@@ -11,8 +11,7 @@
 
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
-import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type HazeProperties = {
@@ -90,7 +89,7 @@ class HazePropertyGroup {
      *  @returns {HazePropertyGroupSubclassData} The Zone entity's haze properties and the number of bytes read.
      */
     static readEntitySubclassDataFromBuffer(data: DataView, position: number,
-        propertyFlags: PropertyFlags): HazePropertyGroupSubclassData {
+        propertyFlags: EntityPropertyFlags): HazePropertyGroupSubclassData {
         // C++  int HazePropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

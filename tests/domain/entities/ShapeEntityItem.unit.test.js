@@ -9,8 +9,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import EntityPropertyFlags from "../../../src/domain/entities/EntityPropertyFlags";
 import ShapeEntityItem from "../../../src/domain/entities/ShapeEntityItem";
-import PropertyFlags from "../../../src/domain/shared/PropertyFlags";
 
 
 describe("ShapeEntityItem - unit tests", () => {
@@ -24,7 +24,7 @@ describe("ShapeEntityItem - unit tests", () => {
         }));
 
         const encodedFlags = new DataView(bufferArray.buffer);
-        const propertyFlags = new PropertyFlags();
+        const propertyFlags = new EntityPropertyFlags();
         propertyFlags.decode(encodedFlags, encodedFlags.byteLength);
 
         const bufferHex = "00b4ef0000803f000000000000803f0000803f00000000000000000800547269616e676c65";

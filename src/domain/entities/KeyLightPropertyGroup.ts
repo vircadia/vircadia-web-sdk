@@ -11,9 +11,8 @@
 
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
-import PropertyFlags from "../shared/PropertyFlags";
 import type { vec3 } from "../shared/Vec3";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type KeyLightProperties = {
@@ -73,7 +72,7 @@ class KeyLightPropertyGroup {
      *  @returns {KeyLightPropertyGroupSubclassData} The Zone entity's key light properties and the number of bytes read.
      */
     static readEntitySubclassDataFromBuffer(data: DataView, position: number,
-        propertyFlags: PropertyFlags): KeyLightPropertyGroupSubclassData {
+        propertyFlags: EntityPropertyFlags): KeyLightPropertyGroupSubclassData {
         // C++  int KeyLightPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

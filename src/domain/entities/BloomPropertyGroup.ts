@@ -10,8 +10,7 @@
 //
 
 import UDT from "../networking/udt/UDT";
-import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type BloomProperties = {
@@ -59,7 +58,7 @@ class BloomPropertyGroup {
      *  @returns {BloomPropertyGroupSubclassData} The Zone entity's bloom properties and the number of bytes read.
      */
     static readEntitySubclassDataFromBuffer(data: DataView, position: number,
-        propertyFlags: PropertyFlags): BloomPropertyGroupSubclassData { // eslint-disable-line class-methods-use-this, max-len
+        propertyFlags: EntityPropertyFlags): BloomPropertyGroupSubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int BloomPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

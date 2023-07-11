@@ -12,8 +12,7 @@
 import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
-import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type LightEntitySubclassProperties = {
@@ -75,7 +74,7 @@ class LightEntityItem {
      *  @returns {LightEntitySubclassData} The Light entity properties and the number of bytes read.
      */
     static readEntitySubclassDataFromBuffer(data: DataView, position: number,
-        propertyFlags: PropertyFlags): LightEntitySubclassData {
+        propertyFlags: EntityPropertyFlags): LightEntitySubclassData {
         // C++  int LightEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

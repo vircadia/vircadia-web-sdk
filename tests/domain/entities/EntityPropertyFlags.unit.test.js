@@ -9,7 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import { EntityPropertyFlags, EntityPropertyList } from "../../../src/domain/entities/EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "../../../src/domain/entities/EntityPropertyFlags";
 
 describe("EntityPropertyFlags - unit test", () => {
     /* eslint-disable @typescript-eslint/no-magic-numbers */

@@ -9,8 +9,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import EntityPropertyFlags from "../../../src/domain/entities/EntityPropertyFlags";
 import MaterialEntityItem from "../../../src/domain/entities/MaterialEntityItem";
-import PropertyFlags from "../../../src/domain/shared/PropertyFlags";
 
 
 describe("MaterialEntityItem - unit tests", () => {
@@ -24,7 +24,7 @@ describe("MaterialEntityItem - unit tests", () => {
         }));
 
         const encodedFlags = new DataView(bufferArray.buffer);
-        const propertyFlags = new PropertyFlags();
+        const propertyFlags = new EntityPropertyFlags();
         propertyFlags.decode(encodedFlags, encodedFlags.byteLength);
 
         // eslint-disable-next-line max-len

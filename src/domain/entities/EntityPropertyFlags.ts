@@ -593,4 +593,5 @@ class EntityPropertyFlags extends PropertyFlags {
     // C++  typedef PropertyFlags<EntityPropertyList> EntityPropertyFlags
 }
 
-export { EntityPropertyList, EntityPropertyFlags };
+export default EntityPropertyFlags;
+export { EntityPropertyList };

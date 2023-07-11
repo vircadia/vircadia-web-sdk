@@ -13,11 +13,10 @@ import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import type { color } from "../shared/Color";
 import GLMHelpers from "../shared/GLMHelpers";
-import PropertyFlags from "../shared/PropertyFlags";
 import type { quat } from "../shared/Quat";
 import ShapeType from "../shared/ShapeType";
 import type { vec3 } from "../shared/Vec3";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type AnimationProperties = {
@@ -142,7 +141,7 @@ class ModelEntityItem {
      *  @returns {ModelEntitySubclassData} The Model entity properties and the number of bytes read.
      */
     // eslint-disable-next-line max-len
-    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): ModelEntitySubclassData { // eslint-disable-line class-methods-use-this
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: EntityPropertyFlags): ModelEntitySubclassData { // eslint-disable-line class-methods-use-this
         // C++  int ModelEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

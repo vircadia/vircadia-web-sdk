@@ -9,8 +9,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+import EntityPropertyFlags from "../../../src/domain/entities/EntityPropertyFlags";
 import ParticleEffectEntityItem from "../../../src/domain/entities/ParticleEffectEntityItem";
-import PropertyFlags from "../../../src/domain/shared/PropertyFlags";
 import ShapeType from "../../../src/domain/shared/ShapeType";
 
 
@@ -25,7 +25,7 @@ describe("ParticleEffectEntityItem - unit tests", () => {
         }));
 
         const encodedFlags = new DataView(bufferArray.buffer);
-        const propertyFlags = new PropertyFlags();
+        const propertyFlags = new EntityPropertyFlags();
         propertyFlags.decode(encodedFlags, encodedFlags.byteLength);
 
         // eslint-disable-next-line max-len
@@ -90,7 +90,7 @@ describe("ParticleEffectEntityItem - unit tests", () => {
         }));
 
         const encodedFlags = new DataView(bufferArray.buffer);
-        const propertyFlags = new PropertyFlags();
+        const propertyFlags = new EntityPropertyFlags();
         propertyFlags.decode(encodedFlags, encodedFlags.byteLength);
 
         // eslint-disable-next-line max-len

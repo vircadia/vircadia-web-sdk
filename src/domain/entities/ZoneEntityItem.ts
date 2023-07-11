@@ -13,11 +13,10 @@ import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
 import AvatarPriorityMode from "../shared/AvatarPriorityMode";
 import ComponentMode from "../shared/ComponentMode";
-import PropertyFlags from "../shared/PropertyFlags";
 import ShapeType from "../shared/ShapeType";
 import AmbientLightPropertyGroup, { AmbientLightProperties } from "./AmbientLightPropertyGroup";
 import BloomPropertyGroup, { BloomProperties } from "./BloomPropertyGroup";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 import HazePropertyGroup, { HazeProperties } from "./HazePropertyGroup";
 import KeyLightPropertyGroup, { KeyLightProperties } from "./KeyLightPropertyGroup";
 import SkyboxPropertyGroup, { SkyboxProperties } from "./SkyboxPropertyGroup";
@@ -116,7 +115,7 @@ class ZoneEntityItem {
      *  @param {PropertyFlags} propertyFlags - The property flags.
      *  @returns {ZoneEntitySubclassData} The Zone entity properties and the number of bytes read.
      */
-    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): ZoneEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: EntityPropertyFlags): ZoneEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int ZoneEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

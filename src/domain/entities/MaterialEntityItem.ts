@@ -11,9 +11,8 @@
 
 import { CommonEntityProperties } from "../networking/packets/EntityData";
 import UDT from "../networking/udt/UDT";
-import PropertyFlags from "../shared/PropertyFlags";
 import { vec2 } from "../shared/Vec2";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 /*@sdkdoc
@@ -281,7 +280,7 @@ class MaterialEntityItem {
      *  @param {PropertyFlags} propertyFlags - The property flags.
      *  @returns {MaterialEntitySubclassData} The Material entity properties and the number of bytes read.
      */
-    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: PropertyFlags): MaterialEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
+    static readEntitySubclassDataFromBuffer(data: DataView, position: number, propertyFlags: EntityPropertyFlags): MaterialEntitySubclassData { // eslint-disable-line class-methods-use-this, max-len
         // C++  int MaterialEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)

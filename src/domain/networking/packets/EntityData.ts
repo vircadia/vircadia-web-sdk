@@ -10,7 +10,7 @@
 //
 
 import { HostType } from "../../entities/EntityItem";
-import { EntityPropertyList } from "../../entities/EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "../../entities/EntityPropertyFlags";
 import { EntityType } from "../../entities/EntityTypes";
 import GizmoEntityItem, { GizmoEntityProperties, GizmoEntitySubclassData } from "../../entities/GizmoEntityItem";
 import GridEntityItem, { GridEntityProperties, GridEntitySubclassData } from "../../entities/GridEntityItem";
@@ -32,7 +32,6 @@ import assert from "../../shared/assert";
 import ByteCountCoded from "../../shared/ByteCountCoded";
 import "../../shared/DataViewExtensions";
 import GLMHelpers from "../../shared/GLMHelpers";
-import PropertyFlags from "../../shared/PropertyFlags";
 import { quat } from "../../shared/Quat";
 import Uuid from "../../shared/Uuid";
 import { vec3 } from "../../shared/Vec3";
@@ -552,7 +551,7 @@ const EntityData = new class {
             dataPosition += codec.decode(encodedData, encodedData.byteLength);
             const simulatedDelta = Number(codec.data);
 
-            const propertyFlags = new PropertyFlags();
+            const propertyFlags = new EntityPropertyFlags();
             const encodedFlags = new DataView(data.buffer, data.byteOffset + dataPosition);
             dataPosition += propertyFlags.decode(encodedFlags, encodedFlags.byteLength);
 

@@ -10,8 +10,7 @@
 //
 
 import UDT from "../networking/udt/UDT";
-import PropertyFlags from "../shared/PropertyFlags";
-import { EntityPropertyList } from "./EntityPropertyFlags";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type AmbientLightProperties = {
@@ -61,7 +60,7 @@ class AmbientLightPropertyGroup {
      *      read.
      */
     static readEntitySubclassDataFromBuffer(data: DataView, position: number,
-        propertyFlags: PropertyFlags): AmbientLightPropertyGroupSubclassData {
+        propertyFlags: EntityPropertyFlags): AmbientLightPropertyGroupSubclassData {
         // C++  int AmbientLightPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
         //      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
         //      bool& somethingChanged)
