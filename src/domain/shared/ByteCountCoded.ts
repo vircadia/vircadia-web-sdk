@@ -16,7 +16,7 @@
  *  <p>C++: <code>template&lt;typename T&gt; class ByteCountCoded</code></p>
  *  @class ByteCountCoded
  *
- *  @property {number} data - The integer value to encode or the decoded integer value.
+ *  @property {bigint} data - The integer value to encode or the decoded integer value.
  */
 // WEBRTC TODO: Make the class generic.
 class ByteCountCoded {
@@ -135,26 +135,26 @@ class ByteCountCoded {
         let valueBits = totalBits;
         let firstValueFound = false;
         let temp = this.#_data;
-        let lastBitMask = 1n << BigInt(totalBits - 1);
+        const lastBitMask = 1n << BigInt(totalBits - 1);
 
         // determine the number of bits that the value takes
         for (let bitAt = 0; bitAt < totalBits; bitAt++) {
-            let bitValue = (temp & lastBitMask) === lastBitMask;
+            const bitValue = (temp & lastBitMask) === lastBitMask;
             if (!firstValueFound) {
                 if (!bitValue) {
-                    valueBits--;
+                    valueBits -= 1;
                 } else {
                     firstValueFound = true;
                 }
             }
             temp = temp << 1n;
         }
-    
+
         // Calculate the number of total bytes, including our header.
         // BITS_IN_BYTE-1 because we need to code the number of bytes in the header
         // + 1 because we always take at least 1 byte, even if number of bits is less than a bytes worth
         const BITS_IN_BYTE = 8;
-        let numberOfBytes = Math.trunc(valueBits / (BITS_IN_BYTE - 1)) + 1; 
+        const numberOfBytes = Math.trunc(valueBits / (BITS_IN_BYTE - 1)) + 1; 
 
         // Fill data with initial 0s.
         for (let i = 0; i < numberOfBytes; i++) {
@@ -162,23 +162,23 @@ class ByteCountCoded {
         }
 
         // Next, pack the number of header bits in, the first N-1 to be set to 1, the last to be set to 0.
-        for(let i = 0; i < numberOfBytes; i++) {
-            let outputIndex = i;
-            let bitValue = (i < (numberOfBytes - 1)  ? 1 : 0);
-            let original = data.getUint8(outputIndex / BITS_IN_BYTE);
-            let shiftBy = BITS_IN_BYTE - ((outputIndex % BITS_IN_BYTE) + 1);
-            let thisBit = bitValue << shiftBy;
+        for (let i = 0; i < numberOfBytes; i++) {
+            const outputIndex = i;
+            const bitValue = i < numberOfBytes - 1 ? 1 : 0;
+            const original = data.getUint8(outputIndex / BITS_IN_BYTE);
+            const shiftBy = BITS_IN_BYTE - (outputIndex % BITS_IN_BYTE + 1);
+            const thisBit = bitValue << shiftBy;
             data.setUint8(i / BITS_IN_BYTE, original | thisBit);
         }
 
         // finally pack the actual bits from the bit array.
         temp = this.#_data;
-        for(let i = numberOfBytes; i < (numberOfBytes + valueBits); i++) {
-            let outputIndex = i;
-            let bitValue = temp & 1n;
-            let original = data.getUint8(outputIndex / BITS_IN_BYTE);
-            let shiftBy = Math.trunc(BITS_IN_BYTE - ((outputIndex % BITS_IN_BYTE) + 1));
-            let thisBit = bitValue << BigInt(shiftBy);
+        for (let i = numberOfBytes; i < numberOfBytes + valueBits; i++) {
+            const outputIndex = i;
+            const bitValue = temp & 1n;
+            const original = data.getUint8(outputIndex / BITS_IN_BYTE);
+            const shiftBy = Math.trunc(BITS_IN_BYTE - (outputIndex % BITS_IN_BYTE + 1));
+            const thisBit = bitValue << BigInt(shiftBy);
             data.setUint8(i / BITS_IN_BYTE, original | Number(thisBit));
             temp = temp >> 1n;
         }
