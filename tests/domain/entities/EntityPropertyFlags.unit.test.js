@@ -14,9 +14,10 @@ import { EntityPropertyFlags, EntityPropertyList } from "../../../src/domain/ent
 describe("EntityPropertyFlags - unit test", () => {
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-    test("Can access EntityPRopertyList values", () => {
+    test("Can access EntityPropertyList values", () => {
         expect(EntityPropertyList.PROP_PAGED_PROPERTY).toBe(0);
         expect(EntityPropertyList.PROP_DERIVED_34).toBe(126);
+        expect(EntityPropertyList.PROP_LAST_ITEM).toBe(126);
         expect(EntityPropertyList.PROP_AFTER_LAST_ITEM).toBe(127);
         expect(EntityPropertyList.PROP_MAX_PARTICLES).toBe(92);
         expect(EntityPropertyList.PROP_MINOR_TICK_MARKS_COLOR).toBe(110);

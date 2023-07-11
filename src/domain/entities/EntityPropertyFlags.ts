@@ -217,6 +217,7 @@ import PropertyFlags from "../shared/PropertyFlags";
  */
 enum EntityPropertyList {
     // C++  EntityPropertyList
+    //      EntityPropertyList PROP_LAST_ITEM = (EntityPropertyList)(PROP_AFTER_LAST_ITEM - 1);
 
     PROP_PAGED_PROPERTY,
     PROP_CUSTOM_PROPERTIES_INCLUDED,
@@ -574,7 +575,10 @@ enum EntityPropertyList {
     PROP_MAJOR_TICK_MARKS_LENGTH = PROP_DERIVED_15,
     PROP_MINOR_TICK_MARKS_LENGTH = PROP_DERIVED_16,
     PROP_MAJOR_TICK_MARKS_COLOR = PROP_DERIVED_17,
-    PROP_MINOR_TICK_MARKS_COLOR = PROP_DERIVED_18
+    PROP_MINOR_TICK_MARKS_COLOR = PROP_DERIVED_18,
+
+    // Last item
+    PROP_LAST_ITEM = PROP_AFTER_LAST_ITEM - 1
 }
 
 /*@devdoc

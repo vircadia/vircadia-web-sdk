@@ -14,19 +14,26 @@
  *  The <code>PropertyFlags</code> class provides facilities to decode, set and get property flags.
  *  <p>C++: <code>template&lt;typename Enum&gt; class PropertyFlags </code></p>
  *  @class PropertyFlags
+ *  @property {number} length - The number of flags.
  */
 // WEBRTC TODO: Make the class generic.
 class PropertyFlags {
     // C++ template<typename Enum>class PropertyFlags
 
-    // WEBRTC TODO: Move to NumericalConstants.ts
-    readonly #BITS_IN_BYTE = 8;
-
-    #_flags = new Uint8Array(0);
+    #_flags: boolean[] = [];
     #_maxFlag = Number.MIN_SAFE_INTEGER;
     #_minFlag = Number.MAX_SAFE_INTEGER;
     #_trailingFlipped = false;
     #_encodedLength = 0;
+
+    constructor(otherPropertyFlags?: PropertyFlags) {
+        if (otherPropertyFlags) {
+            for (let i = 0, length = otherPropertyFlags.length(); i < length; i += 1) {
+                this.setHasProperty(i, otherPropertyFlags.getHasProperty(i));
+            }
+        }
+    }
+
 
     /*@devdoc
      *  Gets whether the property flags are empty.
@@ -39,6 +46,25 @@ class PropertyFlags {
     }
 
     /*@devdoc
+     *  Gets the number of flags.
+     *  @returns {number} The number of flags.
+     */
+    length(): number {
+        // C++  int QByteArray::length() const
+        return this.#_flags.length;
+    }
+
+    /*@devdoc
+     *  Gets the number of bytes used in the encoding, after calling {@link encode} or {@link decode}.
+     *  @returns {number} The number of bytes used in the encoding, or <code>0</code> if {@link encode} or {@link decode}
+     *      haven't been called.
+     */
+    getEncodedLength(): number {
+        // C++  int getEncodedLength() const
+        return this.#_encodedLength;
+    }
+
+    /*@devdoc
      *  Gets whether the property flag is present in the flags sent by the server.
      *  @param {number} flag - The bit position of the flag.
      *  @returns {boolean} <code>true</code> if the property flag is present, <code>false</code> if it isn't.
@@ -46,18 +72,12 @@ class PropertyFlags {
     getHasProperty(flag: number): boolean {
         // C++  bool getHasProperty(Enum flag)
 
-        const bytePos = Math.floor(flag / this.#BITS_IN_BYTE);
-
-        if (bytePos > this.#_maxFlag) {
+        if (flag > this.#_maxFlag) {
             // Usually false.
             return this.#_trailingFlipped;
         }
 
-        const bitPos = flag - bytePos * this.#BITS_IN_BYTE;
-        const mask = 1 << bitPos;
-        const tmp = this.#_flags[bytePos] ?? 0;
-
-        return (tmp & mask) > 0;
+        return this.#_flags[flag] ?? false;
     }
 
     /*@devdoc
@@ -68,92 +88,62 @@ class PropertyFlags {
     setHasProperty(flag: number, value: boolean): void {
         // C++  void setHasProperty(Enum flag, bool value = true)
 
-        const bytePos = Math.floor(flag / this.#BITS_IN_BYTE);
-
-        if (bytePos < this.#_minFlag) {
+        if (flag < this.#_minFlag) {
             if (value) {
-                this.#_minFlag = bytePos;
+                this.#_minFlag = flag;
             }
         }
-
-        if (bytePos > this.#_maxFlag) {
+        if (flag > this.#_maxFlag) {
             if (value) {
-                this.#_maxFlag = bytePos;
-                const newFlags = new Uint8Array(this.#_flags.length + bytePos + 1);
-                newFlags.set(this.#_flags);
-                this.#_flags = newFlags;
+                this.#_maxFlag = flag;
+                this.#resize(this.#_maxFlag + 1);
             } else {
-                // Bail early, we're setting a flag outside of our current _maxFlag to false, which is already the default.
+                // We're setting a flag outside of our current _maxFlag to false, which is already the default.
                 return;
             }
         }
+        this.#_flags[flag] = value;
 
-        // flag represents the position of the bit to set.
-        // We subtract bytePos * 8 bits from flag because we store the bit representation of flags as an array of bytes, and we
-        // want to update a single bit within a byte.
-        const bitPosInByte = flag - bytePos * this.#BITS_IN_BYTE;
-        const byteMask = 1 << bitPosInByte;
-        let byteValue = this.#_flags[bytePos] ?? 0;
-
-        if (value) {
-            byteValue |= byteMask;
-        } else {
-            byteValue &= ~byteMask;
+        if (flag === this.#_maxFlag && !value) {
+            this.#shrinkIfNeeded();
         }
-
-        this.#_flags.set([byteValue], bytePos);
     }
 
     /*@devdoc
-     *  Decode the encoded property flags.
+     *  Decodes property flags from input data.
      *  @param {DataView} data - The data to decode.
      *  @param {number} size - The maximum size of the data to decode.
      *  @returns {number} The number of bytes processed.
      */
     decode(data: DataView, size: number): number {
-        // C++  size_t decode(const uint8_t* data, size_t length)
+        // C++  size_t PropertyFlags<Enum>::decode(const uint8_t* data, size_t size)
 
-        /* Process each bit of each  byte until the stop condition is reached.
-        * Starts from the leftmost bit.
-        * Advance through the lead bits (contiguous 1s starting from the left) until the first non lead bit is found (first 0
-        * encountered).
-        * Compute the position of the last bit.
-        * Continue iterating through the next bits and set the flag property corresponding to the current value of the variable
-        * flag when a bit is set.
-        * Stop when the lead bits AND the last bit have been processed (at the position denoted by lastValueBit).
-        *
-        * The number of lead bits represents the number of bytes to decode.
-        */
         this.#clear();
 
         let bytesConsumed = 0;
-        const bitCount = this.#BITS_IN_BYTE * size;
-        // There is at least 1 byte (after the leadBits).
-        let encodedByteCount = 1;
-        // There is always at least 1 lead bit.
-        let leadBits = 1;
+        const BITS_IN_BYTE = 8;
+        const bitCount = BITS_IN_BYTE * size;
+
+        let encodedByteCount = 1;  // There is at least 1 byte (after the leadBits).
+        let leadBits = 1;  // There is always at least 1 lead bit.
         let inLeadBits = true;
         let bitAt = 0;
-        let expectedBitCount = 0;
+        let expectedBitCount = 0;  // Unknown at this stage.
         let lastValueBit = 0;
-
         for (let byte = 0; byte < size; byte++) {
             const originalByte = data.getUint8(byte);
             bytesConsumed += 1;
-            // Left Most Bit set.
-            let maskBit = 128;
-            for (let bit = 0; bit < this.#BITS_IN_BYTE; bit++) {
-                const bitIsSet: boolean = (originalByte & maskBit) !== 0;
-
+            let maskBit = 0x80;  // Left-most bit set.
+            for (let bit = 0; bit < BITS_IN_BYTE; bit++) {
+                const bitIsSet = originalByte & maskBit;
                 // Processing of the lead bits.
                 if (inLeadBits) {
                     if (bitIsSet) {
                         encodedByteCount += 1;
                         leadBits += 1;
                     } else {
-                        // Once we hit our first 0, we know we're out of the lead bits.
-                        inLeadBits = false;
-                        expectedBitCount = encodedByteCount * this.#BITS_IN_BYTE - leadBits;
+                        inLeadBits = false;  // Once we hit our first 0, we know we're out of the lead bits.
+                        expectedBitCount = encodedByteCount * BITS_IN_BYTE - leadBits;
                         lastValueBit = expectedBitCount + bitAt;
 
                         // Check to see if the remainder of our buffer is sufficient.
@@ -167,29 +157,116 @@ class PropertyFlags {
                     }
 
                     if (bitIsSet) {
-                        const flag = bitAt - leadBits;
-                        this.setHasProperty(flag, true);
+                        this.setHasProperty(bitAt - leadBits, true);
                     }
                 }
                 bitAt += 1;
-                maskBit = maskBit >> 1;
+                maskBit >>= 1;
             }
             if (!inLeadBits && bitAt > lastValueBit) {
                 break;
             }
         }
-
         this.#_encodedLength = bytesConsumed;
         return bytesConsumed;
     }
 
+    /*@devdoc
+     *  Encodes the property flags into a buffer.
+     *  @param {DataView} output - The section of buffer to write to.
+     *  @returns {number} The number of bytes processed.
+     */
+    encode(output: DataView): number {
+        // C++  QByteArray PropertyFlags<Enum>::encode()
+
+        if (this.#_maxFlag < this.#_minFlag) {
+            output.setUint8(0, 0);
+            return 1;  // No flags... nothing to encode.
+        }
+
+        const BITS_PER_BYTE = 8;
+        const lengthInBytes = Math.floor(this.#_maxFlag / (BITS_PER_BYTE - 1) + 1);
+
+        for (let i = 0; i < lengthInBytes; i++) {
+            output.setUint8(i, 0);
+        }
+
+        // Pack the number of header bits in, the first N-1 to be set to 1, the last to be set to 0.
+        for (let i = 0; i < lengthInBytes; i++) {
+            const outputIndex = i;
+            const bitValue = i < lengthInBytes - 1 ? 1 : 0;
+            const original = output.getUint8(outputIndex / BITS_PER_BYTE);
+            const shiftBy = BITS_PER_BYTE - (outputIndex % BITS_PER_BYTE + 1);
+            const thisBit = bitValue << shiftBy;
+            output.setUint8(i / BITS_PER_BYTE, original | thisBit);
+        }
+
+        // Pack the actual bits from the bit array.
+        for (let i = lengthInBytes; i < lengthInBytes + this.#_maxFlag + 1; i++) {
+            const flagIndex = i - lengthInBytes;
+            const outputIndex = i;
+            const bitValue = this.#_flags[flagIndex] ? 1 : 0;
+            const original = output.getUint8(outputIndex / BITS_PER_BYTE);
+            const shiftBy = BITS_PER_BYTE - (outputIndex % BITS_PER_BYTE + 1);
+            const thisBit = bitValue << shiftBy;
+            output.setUint8(i / BITS_PER_BYTE, original | thisBit);
+        }
+
+        this.#_encodedLength = lengthInBytes;
+        return lengthInBytes;
+    }
+
+    /*@devdoc
+     *  Outputs debug information about the property flags to the console.
+     */
+    debugDumpBits(): void {
+        // C++  void PropertyFlags<Enum>::debugDumpBits()
+        console.debug("#_minFlag=", this.#_minFlag);
+        console.debug("#_maxFlag=", this.#_maxFlag);
+        console.debug("#_trailingFlipped=", this.#_trailingFlipped);
+        let bits = "";
+        for (let i = 0; i < this.#_flags.length; i++) {
+            bits += this.#_flags[i] ? "1" : "0";
+        }
+        console.debug("bits:", bits);
+    }
+
     #clear(): void {
         // C++  void clear()
-        this.#_flags = new Uint8Array(0);
+        this.#_flags = [];
         this.#_maxFlag = Number.MIN_SAFE_INTEGER;
         this.#_minFlag = Number.MAX_SAFE_INTEGER;
         this.#_trailingFlipped = false;
         this.#_encodedLength = 0;
+    }
+
+    #resize(size: number): void {
+        // C++  void QBitArray::resize(qsizetype size)
+        if (size < this.#_flags.length) {
+            for (let i = this.#_flags.length; i > size; i--) {
+                this.#_flags.pop();
+            }
+        } else if (size > this.#_flags.length) {
+            for (let i = this.#_flags.length; i < size; i++) {
+                this.#_flags[i] = false;
+            }
+        }
+        const BITS_PER_BYTE = 8;
+        this.#_encodedLength = Math.ceil(this.#_flags.length / BITS_PER_BYTE);
+    }
+
+    #shrinkIfNeeded(): void {
+        // C++  template<typename Enum> inline void PropertyFlags<Enum>::shrinkIfNeeded()
+        const maxFlagWas = this.#_maxFlag;
+        while (this.#_maxFlag >= 0) {
+            if (this.#_flags[this.#_maxFlag]) {
+                break;
+            }
+            this.#_maxFlag -= 1;
+        }
+        if (maxFlagWas !== this.#_maxFlag) {
+            this.#resize(this.#_maxFlag + 1);
+        }
     }
 }
 

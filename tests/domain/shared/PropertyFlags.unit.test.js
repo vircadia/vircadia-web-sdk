@@ -10,6 +10,7 @@
 //
 
 import PropertyFlags from "../../../src/domain/shared/PropertyFlags";
+import { buffer2hex } from "../../testUtils";
 
 
 describe("EntityData - unit tests", () => {
@@ -61,6 +62,7 @@ describe("EntityData - unit tests", () => {
         const bytesConsumed = propertyFlags.decode(data, 32, 0);
         expect(bytesConsumed).toBe(16);
         expect(propertyFlags.isEmpty()).toBe(false);
+        expect(propertyFlags.getEncodedLength()).toBe(16);
 
         expect(propertyFlags.getHasProperty(0)).toBe(false);
         expect(propertyFlags.getHasProperty(1)).toBe(false);
@@ -174,5 +176,168 @@ describe("EntityData - unit tests", () => {
         expect(propertyFlags.getHasProperty(109)).toBe(true);
         expect(propertyFlags.getHasProperty(110)).toBe(true);
         expect(propertyFlags.getHasProperty(111)).toBe(false);
+
+        expect(propertyFlags.length()).toBe(111);
+    });
+
+    test("Can encode property flags", () => {
+        const bufferHex = "fffe3fffcdfffffffffffff8381ffffe";
+
+        const propertyFlags = new PropertyFlags();
+        propertyFlags.setHasProperty(2, true);
+        propertyFlags.setHasProperty(3, true);
+        propertyFlags.setHasProperty(4, true);
+        propertyFlags.setHasProperty(5, true);
+        propertyFlags.setHasProperty(6, true);
+        propertyFlags.setHasProperty(7, true);
+        propertyFlags.setHasProperty(8, true);
+        propertyFlags.setHasProperty(9, true);
+        propertyFlags.setHasProperty(10, true);
+        propertyFlags.setHasProperty(11, true);
+        propertyFlags.setHasProperty(12, true);
+        propertyFlags.setHasProperty(13, true);
+        propertyFlags.setHasProperty(14, true);
+        propertyFlags.setHasProperty(15, true);
+        propertyFlags.setHasProperty(16, true);
+        propertyFlags.setHasProperty(17, true);
+        propertyFlags.setHasProperty(20, true);
+        propertyFlags.setHasProperty(21, true);
+        propertyFlags.setHasProperty(23, true);
+        propertyFlags.setHasProperty(24, true);
+        propertyFlags.setHasProperty(25, true);
+        propertyFlags.setHasProperty(26, true);
+        propertyFlags.setHasProperty(27, true);
+        propertyFlags.setHasProperty(28, true);
+        propertyFlags.setHasProperty(29, true);
+        propertyFlags.setHasProperty(30, true);
+        propertyFlags.setHasProperty(31, true);
+        propertyFlags.setHasProperty(32, true);
+        propertyFlags.setHasProperty(33, true);
+        propertyFlags.setHasProperty(34, true);
+        propertyFlags.setHasProperty(35, true);
+        propertyFlags.setHasProperty(36, true);
+        propertyFlags.setHasProperty(37, true);
+        propertyFlags.setHasProperty(38, true);
+        propertyFlags.setHasProperty(39, true);
+        propertyFlags.setHasProperty(40, true);
+        propertyFlags.setHasProperty(41, true);
+        propertyFlags.setHasProperty(42, true);
+        propertyFlags.setHasProperty(43, true);
+        propertyFlags.setHasProperty(44, true);
+        propertyFlags.setHasProperty(45, true);
+        propertyFlags.setHasProperty(46, true);
+        propertyFlags.setHasProperty(47, true);
+        propertyFlags.setHasProperty(48, true);
+        propertyFlags.setHasProperty(49, true);
+        propertyFlags.setHasProperty(50, true);
+        propertyFlags.setHasProperty(51, true);
+        propertyFlags.setHasProperty(52, true);
+        propertyFlags.setHasProperty(53, true);
+        propertyFlags.setHasProperty(54, true);
+        propertyFlags.setHasProperty(55, true);
+        propertyFlags.setHasProperty(56, true);
+        propertyFlags.setHasProperty(57, true);
+        propertyFlags.setHasProperty(58, true);
+        propertyFlags.setHasProperty(59, true);
+        propertyFlags.setHasProperty(60, true);
+        propertyFlags.setHasProperty(61, true);
+        propertyFlags.setHasProperty(62, true);
+        propertyFlags.setHasProperty(63, true);
+        propertyFlags.setHasProperty(64, true);
+        propertyFlags.setHasProperty(65, true);
+        propertyFlags.setHasProperty(66, true);
+        propertyFlags.setHasProperty(67, true);
+        propertyFlags.setHasProperty(68, true);
+        propertyFlags.setHasProperty(69, true);
+        propertyFlags.setHasProperty(70, true);
+        propertyFlags.setHasProperty(71, true);
+        propertyFlags.setHasProperty(72, true);
+        propertyFlags.setHasProperty(73, true);
+        propertyFlags.setHasProperty(74, true);
+        propertyFlags.setHasProperty(75, true);
+        propertyFlags.setHasProperty(76, true);
+        propertyFlags.setHasProperty(82, true);
+        propertyFlags.setHasProperty(83, true);
+        propertyFlags.setHasProperty(84, true);
+        propertyFlags.setHasProperty(91, true);
+        propertyFlags.setHasProperty(92, true);
+        propertyFlags.setHasProperty(93, true);
+        propertyFlags.setHasProperty(94, true);
+        propertyFlags.setHasProperty(95, true);
+        propertyFlags.setHasProperty(96, true);
+        propertyFlags.setHasProperty(97, true);
+        propertyFlags.setHasProperty(98, true);
+        propertyFlags.setHasProperty(99, true);
+        propertyFlags.setHasProperty(100, true);
+        propertyFlags.setHasProperty(101, true);
+        propertyFlags.setHasProperty(102, true);
+        propertyFlags.setHasProperty(103, true);
+        propertyFlags.setHasProperty(104, true);
+        propertyFlags.setHasProperty(105, true);
+        propertyFlags.setHasProperty(106, true);
+        propertyFlags.setHasProperty(107, true);
+        propertyFlags.setHasProperty(108, true);
+        propertyFlags.setHasProperty(109, true);
+        propertyFlags.setHasProperty(110, true);
+
+        expect(propertyFlags.length()).toBe(111);
+
+        const bufferArray = new Uint8Array(16);
+        const data = new DataView(bufferArray.buffer);
+
+        const bytesWritten = propertyFlags.encode(data, 0);
+        expect(bytesWritten).toBe(16);
+        expect(propertyFlags.getEncodedLength()).toBe(16);
+
+        const bytes = buffer2hex(bufferArray);
+        expect(bytes).toBe(bufferHex);
+    });
+
+    test("Can construct from another PropertyFlags object", () => {
+        const bufferHex = "fffe3fffcdfffffffffffff8381ffffe";
+        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        const data = new DataView(bufferArray.buffer);
+        const propertyFlags = new PropertyFlags();
+
+        const bytesConsumed = propertyFlags.decode(data, 16, 0);
+        expect(bytesConsumed).toBe(16);
+        expect(propertyFlags.length()).toBe(111);
+        const propertyFlagsCopy = new PropertyFlags(propertyFlags);
+        expect(propertyFlagsCopy.length()).toBe(111);
+
+        const originalArray = new Uint8Array(16);
+        const originalData = new DataView(originalArray.buffer);
+        propertyFlags.encode(originalData, 0);
+        const originalBytes = buffer2hex(bufferArray);
+        expect(originalBytes).toBe(bufferHex);
+
+        const copyArray = new Uint8Array(16);
+        const copyData = new DataView(copyArray.buffer);
+        propertyFlags.encode(copyData, 0);
+        const copyBytes = buffer2hex(bufferArray);
+        expect(copyBytes).toBe(bufferHex);
+
+    });
+
+    test("Can output debug information", () => {
+        let debugMessage = "";
+        const debug = jest.spyOn(console, "debug").mockImplementation((...message) => {
+            debugMessage = message.join(" ");
+        });
+
+        const propertyFlags = new PropertyFlags();
+        propertyFlags.setHasProperty(0, true);
+        propertyFlags.setHasProperty(1, true);
+        propertyFlags.setHasProperty(8, true);
+        expect(propertyFlags.getHasProperty(0)).toBe(true);
+        expect(propertyFlags.getHasProperty(1)).toBe(true);
+        expect(propertyFlags.getHasProperty(8)).toBe(true);
+        propertyFlags.debugDumpBits();
+
+        expect(debugMessage).toBe("bits: 110000001");
+
+        debug.mockReset();
     });
 });
