@@ -10,12 +10,22 @@
 //
 
 import { EntityProperties } from "../networking/packets/EntityData";
-import { EntityPropertyFlags, EntityPropertyList } from "./EntityPropertyFlags";
+import UDT from "../networking/udt/UDT";
+import MessageData from "../networking/MessageData";
+import { AppendState } from "../octree/OctreeElement";
+import OctreePacketData, { OctreePacketContext } from "../octree/OctreePacketData";
+import assert from "../shared/assert";
+import ByteCountCoded from "../shared/ByteCountCoded";
+import Uuid from "../shared/Uuid";
+import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
+import { EntityType } from "./EntityTypes";
+import { ShapeEntityProperties } from "./ShapeEntityItem";
 
 
 /*@devdoc
  *  The <code>EntityItemProperties</code> class provides methods for working with entity item properties.
  *  <p>C++: <code>EntityItemProperties</code></p>
+ *  @class EntityItemProperties
  */
 class EntityItemProperties {
     // C++: class EntityItemProperties
@@ -282,6 +292,128 @@ class EntityItemProperties {
             // WEBRTC TODO: Handle group properties.
         }
         return changedProperties;
+    }
+
+    /*@devdoc
+        Writes as many entity properties as can fit in the buffer.
+        @param {Uuid} id - The entity ID.
+        @param {EntityProperties} properties - A set of entity properties and values.
+        @param {MessageData} buffer - The buffer to write the entity properties to.
+        @param {EntityPropertyFlags} requestedProperties - The properties that are requested to be written.
+        @param {EntityPropertyFlags} didntFitProperties - The properties that couldn't be written to the buffer this call.
+        @returns {AppendState} Whether all, some, or none of the requested properties were written. Any properties that weren't
+            written are returned in the <code>didntFitProperties</code> parameter.
+     */
+    static encodeEntityEditPacket(/* command: PacketTypeValue, */ id: Uuid, properties: EntityProperties,
+        buffer: MessageData, requestedProperties: EntityPropertyFlags, didntFitProperties: EntityPropertyFlags): AppendState {
+        // C++  OctreeElement::AppendState encodeEntityEditPacket(PacketType command, EntityItemID id,
+        //          const EntityItemProperties& properties, QByteArray& buffer, EntityPropertyFlags requestedProperties,
+        //          EntityPropertyFlags & didntFitProperties)
+        // The command parameter isn't used in the C++, either.
+
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+        assert(didntFitProperties.isEmpty());
+
+        const data = buffer.data;
+        let dataPosition = buffer.dataPosition;
+
+        const codec = new ByteCountCoded();
+
+        let appendState = AppendState.COMPLETED;
+
+        // Simplification: The server doesn't actually use octcode data (see EntityItemProperties::decodeEntityEditPacket()) and
+        // we're not compressing data so we can write an empty octcode value.
+        data.setUint8(dataPosition, 0);
+        dataPosition += 1;
+
+        const propertyFlags = new EntityPropertyFlags();
+        propertyFlags.setHasProperty(EntityPropertyList.PROP_LAST_ITEM, true);
+        didntFitProperties.copy(requestedProperties);
+
+        data.setBigUint64(dataPosition, properties.lastEdited, UDT.LITTLE_ENDIAN);
+        dataPosition += 8;
+
+        data.setBigUint128(dataPosition, id.value(), UDT.BIG_ENDIAN);
+        dataPosition += 16;
+
+        codec.data = BigInt(properties.entityType);
+        const bytesWritten = codec.encode(new DataView(data.buffer, data.byteOffset + dataPosition));
+        dataPosition += bytesWritten;
+
+        dataPosition += 1;  // 0x00 for endcodedUpdateDelta.
+
+        const propertyFlagsOffset = dataPosition;
+        const oldPropertyFlagsLength
+            = propertyFlags.encode(new DataView(data.buffer, data.byteOffset + propertyFlagsOffset));
+        dataPosition += oldPropertyFlagsLength;
+        let propertyCount = 0;
+
+
+        // Simplification: The header values will always fit because this method is always called for a new packet.
+
+        propertyFlags.setHasProperty(EntityPropertyList.PROP_LAST_ITEM, false);
+
+        const entityType = properties.entityType;
+
+        const packetContext: OctreePacketContext = {
+            propertiesToWrite: didntFitProperties,
+            propertiesWritten: propertyFlags,
+            propertyCount,
+            appendState
+        };
+
+
+        // WEBRTC TODO: Address further C++ code - other entity properties.
+
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY)) {
+            assert(properties.lastEditedBy !== undefined);
+            dataPosition += OctreePacketData.appendUUIDValue(data, dataPosition, properties.lastEditedBy, packetContext);
+        }
+
+        // WEBRTC TODO: Address further C++ code - other entity properties.
+
+        if (entityType === EntityType.Box || entityType === EntityType.Sphere || entityType === EntityType.Shape) {
+            const entityProperties = properties as ShapeEntityProperties;
+
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLOR)) {
+                assert(entityProperties.color !== undefined);
+                dataPosition += OctreePacketData.appendColorValue(data, dataPosition, entityProperties.color, packetContext);
+            }
+
+            // WEBRTC TODO: Address further C++ code - other entity properties.
+
+        }
+
+        // WEBRTC TODO: Address further C++ code - other entity properties.
+
+
+        propertyCount = packetContext.propertyCount;
+        appendState = packetContext.appendState;
+
+        if (propertyCount > 0) {
+            const newPropertyFlagsLength
+                = propertyFlags.encode(new DataView(data.buffer, data.byteOffset + propertyFlagsOffset));
+
+            // If the size of the PropertyFlags has shrunk then move property data.
+            if (newPropertyFlagsLength < oldPropertyFlagsLength) {
+                const numPropertyBytes = dataPosition - (propertyFlagsOffset + oldPropertyFlagsLength);
+                for (let i = 0; i < numPropertyBytes; i++) {
+                    data.setUint8(propertyFlagsOffset + newPropertyFlagsLength + i,
+                        data.getUint8(propertyFlagsOffset + oldPropertyFlagsLength + i));
+                }
+                dataPosition = propertyFlagsOffset + newPropertyFlagsLength + numPropertyBytes;
+            } else {
+                assert(newPropertyFlagsLength === oldPropertyFlagsLength);  // Should not have grown.
+            }
+        } else {
+            dataPosition = buffer.dataPosition;
+            appendState = AppendState.NONE;
+        }
+
+        buffer.dataPosition = dataPosition;
+
+        return appendState;
     }
 
 }
