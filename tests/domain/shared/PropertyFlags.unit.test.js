@@ -29,18 +29,25 @@ describe("EntityData - unit tests", () => {
         propertyFlags.setHasProperty(0, true);
         expect(propertyFlags.getHasProperty(0)).toBe(true);
         expect(propertyFlags.isEmpty()).toBe(false);
+        expect(propertyFlags.length()).toBe(1);
 
         // Clear 1st bit.
         propertyFlags.setHasProperty(0, false);
         expect(propertyFlags.getHasProperty(0)).toBe(false);
+        expect(propertyFlags.isEmpty()).toBe(true);
+        expect(propertyFlags.length()).toBe(0);
 
         // Set 2nd bit.
         propertyFlags.setHasProperty(1, true);
         expect(propertyFlags.getHasProperty(1)).toBe(true);
+        expect(propertyFlags.isEmpty()).toBe(false);
+        expect(propertyFlags.length()).toBe(2);
 
         // Clear 2nd bit.
         propertyFlags.setHasProperty(1, false);
         expect(propertyFlags.getHasProperty(1)).toBe(false);
+        expect(propertyFlags.isEmpty()).toBe(true);
+        expect(propertyFlags.length()).toBe(0);
 
         // Set 1st, 2nd and 9th bits.
         propertyFlags.setHasProperty(0, true);
@@ -49,6 +56,8 @@ describe("EntityData - unit tests", () => {
         expect(propertyFlags.getHasProperty(0)).toBe(true);
         expect(propertyFlags.getHasProperty(1)).toBe(true);
         expect(propertyFlags.getHasProperty(8)).toBe(true);
+        expect(propertyFlags.isEmpty()).toBe(false);
+        expect(propertyFlags.length()).toBe(9);
     });
 
     test("Can decode property flags", () => {
@@ -318,7 +327,34 @@ describe("EntityData - unit tests", () => {
         propertyFlags.encode(copyData, 0);
         const copyBytes = buffer2hex(bufferArray);
         expect(copyBytes).toBe(bufferHex);
+    });
 
+    test("Can copy from another PropertyFlags object", () => {
+        const bufferHex = "fffe3fffcdfffffffffffff8381ffffe";
+        const bufferArray = new Uint8Array(bufferHex.match(/[\da-f]{2}/giu).map(function (hex) {
+            return parseInt(hex, 16);
+        }));
+        const data = new DataView(bufferArray.buffer);
+        const propertyFlags = new PropertyFlags();
+
+        const bytesConsumed = propertyFlags.decode(data, 16, 0);
+        expect(bytesConsumed).toBe(16);
+        expect(propertyFlags.length()).toBe(111);
+        const propertyFlagsCopy = new PropertyFlags();
+        propertyFlagsCopy.copy(propertyFlags);
+        expect(propertyFlagsCopy.length()).toBe(111);
+
+        const originalArray = new Uint8Array(16);
+        const originalData = new DataView(originalArray.buffer);
+        propertyFlags.encode(originalData, 0);
+        const originalBytes = buffer2hex(bufferArray);
+        expect(originalBytes).toBe(bufferHex);
+
+        const copyArray = new Uint8Array(16);
+        const copyData = new DataView(copyArray.buffer);
+        propertyFlags.encode(copyData, 0);
+        const copyBytes = buffer2hex(bufferArray);
+        expect(copyBytes).toBe(bufferHex);
     });
 
     test("Can output debug information", () => {
@@ -334,10 +370,14 @@ describe("EntityData - unit tests", () => {
         expect(propertyFlags.getHasProperty(0)).toBe(true);
         expect(propertyFlags.getHasProperty(1)).toBe(true);
         expect(propertyFlags.getHasProperty(8)).toBe(true);
-        propertyFlags.debugDumpBits();
 
+        propertyFlags.debugDumpBits();
         expect(debugMessage).toBe("bits: 110000001");
+
+        propertyFlags.debugDumpBits("Test");
+        expect(debugMessage).toBe("Test bits: 110000001");
 
         debug.mockReset();
     });
+
 });

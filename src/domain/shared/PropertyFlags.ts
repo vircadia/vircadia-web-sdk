@@ -36,13 +36,24 @@ class PropertyFlags {
 
 
     /*@devdoc
+     *  Copies the flags from another instance.
+     *  @param {PropertyFlags} other - The other instance to copy the flags from.
+     */
+    copy(other: PropertyFlags): void {
+        // C++  operator = (const PropertyFlags& other)
+        this.#clear();
+        for (let i = 0, length = other.length(); i < length; i++) {
+            this.setHasProperty(i, other.getHasProperty(i));
+        }
+    }
+
+    /*@devdoc
      *  Gets whether the property flags are empty.
      *  @returns {boolean} <code>true</code> if no property flags are set, <code>false</code> if one or more are set.
      */
     isEmpty(): boolean {
         // C++  bool isEmpty()
-        return this.#_maxFlag === Number.MIN_SAFE_INTEGER && this.#_minFlag === Number.MAX_SAFE_INTEGER
-            && this.#_trailingFlipped === false && this.#_encodedLength === 0;
+        return this.#_trailingFlipped === false && this.#_encodedLength === 0;
     }
 
     /*@devdoc
@@ -218,17 +229,20 @@ class PropertyFlags {
 
     /*@devdoc
      *  Outputs debug information about the property flags to the console.
+     *  @param {string} [prefix] - A string to prefix the debug output with.
      */
-    debugDumpBits(): void {
+    debugDumpBits(prefix?: string): void {
         // C++  void PropertyFlags<Enum>::debugDumpBits()
-        //console.debug("#_minFlag=", this.#_minFlag);
-        //console.debug("#_maxFlag=", this.#_maxFlag);
-        //console.debug("#_trailingFlipped=", this.#_trailingFlipped);
+        // console.debug("#_minFlag =", this.#_minFlag);
+        // console.debug("#_maxFlag =", this.#_maxFlag);
+        // console.debug("#_trailingFlipped =", this.#_trailingFlipped);
+        // console.debug("#_encodedLength =", this.#_encodedLength);
+        // console.debug("#_flags.length =", this.#_flags.length);
         let bits = "";
         for (let i = 0; i < this.#_flags.length; i++) {
             bits += this.#_flags[i] ? "1" : "0";
         }
-        console.debug("bits:", bits);
+        console.debug(`${prefix ? prefix + " " : ""}bits:`, bits);
     }
 
     #clear(): void {

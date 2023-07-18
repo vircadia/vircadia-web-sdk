@@ -32,7 +32,7 @@ describe("EntityPropertyFlags - unit test", () => {
         expect(entityPropertyFlags.isEmpty()).toBe(false);
         entityPropertyFlags.setHasProperty(EntityPropertyList.PROP_POSITION, false);
         expect(entityPropertyFlags.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(false);
-        expect(entityPropertyFlags.isEmpty()).toBe(false);  // Length isn't reset.
+        expect(entityPropertyFlags.isEmpty()).toBe(true);
     });
 
 });
