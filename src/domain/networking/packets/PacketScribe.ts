@@ -30,6 +30,7 @@ import NodeIgnoreRequest from "./NodeIgnoreRequest";
 import DomainConnectRequest from "./DomainConnectRequest";
 import EntityData from "./EntityData";
 import EntityQuery from "./EntityQuery";
+import EntityEdit from "./EntityEdit";
 import DomainServerConnectionToken from "./DomainServerConnectionToken";
 import DomainDisconnectRequest from "./DomainDisconnectRequest";
 import DomainServerRemovedNode from "./DomainServerRemovedNode";
@@ -95,6 +96,8 @@ import BulkAvatarTraitsAck from "./BulkAvatarTraitsAck";
  *      {@link PacketScribe.EntityData&period;read|EntityData&period;read}
  *  @property {function} EntityQuery.write -
  *      {@link PacketScribe.EntityQuery&period;write|EntityQuery&period;write}
+ *  @property {function} EntityEdit.write -
+ *      {@link PacketScribe.EntityEdit&period;write|EntityEdit&period;write}
  *  @property {function} DomainServerConnectionToken.read -
  *      {@link PacketScribe.DomainServerConnectionToken&period;read|DomainServerConnectionToken&period;read}
  *  @property {function} DomainDisconnectRequest.write -
@@ -156,6 +159,7 @@ const PacketScribe = {
     DomainConnectRequest,
     EntityData,
     EntityQuery,
+    EntityEdit,
     DomainServerConnectionToken,
     DomainDisconnectRequest,
     DomainServerRemovedNode,

@@ -60,6 +60,8 @@ describe("Packets - unit tests", () => {
         expect(typeof PacketScribe.EntityData.read).toBe("function");
         expect(typeof PacketScribe.EntityQuery).toBe("object");
         expect(typeof PacketScribe.EntityQuery.write).toBe("function");
+        expect(typeof PacketScribe.EntityEdit).toBe("object");
+        expect(typeof PacketScribe.EntityEdit.write).toBe("function");
         expect(typeof PacketScribe.DomainServerConnectionToken).toBe("object");
         expect(typeof PacketScribe.DomainServerConnectionToken.read).toBe("function");
         expect(typeof PacketScribe.DomainDisconnectRequest).toBe("object");
