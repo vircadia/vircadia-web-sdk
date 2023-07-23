@@ -364,11 +364,20 @@ class EntityItemProperties {
         };
 
 
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+        // WEBRTC TODO: Address further C++ code - other entity properties.
+
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_PARENT_ID)) {
+            dataPosition += OctreePacketData.appendUUIDValue(data, dataPosition, EntityPropertyList.PROP_PARENT_ID,
+                properties.parentID ?? new Uuid(), packetContext);
+        }
+
         // WEBRTC TODO: Address further C++ code - other entity properties.
 
         if (requestedProperties.getHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY)) {
-            assert(properties.lastEditedBy !== undefined);
-            dataPosition += OctreePacketData.appendUUIDValue(data, dataPosition, properties.lastEditedBy, packetContext);
+            dataPosition += OctreePacketData.appendUUIDValue(data, dataPosition, EntityPropertyList.PROP_LAST_EDITED_BY,
+                properties.lastEditedBy!, packetContext);
         }
 
         // WEBRTC TODO: Address further C++ code - other entity properties.
@@ -377,8 +386,8 @@ class EntityItemProperties {
             const entityProperties = properties as ShapeEntityProperties;
 
             if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLOR)) {
-                assert(entityProperties.color !== undefined);
-                dataPosition += OctreePacketData.appendColorValue(data, dataPosition, entityProperties.color, packetContext);
+                dataPosition += OctreePacketData.appendColorValue(data, dataPosition, EntityPropertyList.PROP_COLOR,
+                    entityProperties.color!, packetContext);
             }
 
             // WEBRTC TODO: Address further C++ code - other entity properties.
@@ -386,6 +395,8 @@ class EntityItemProperties {
         }
 
         // WEBRTC TODO: Address further C++ code - other entity properties.
+
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
 
 
         propertyCount = packetContext.propertyCount;

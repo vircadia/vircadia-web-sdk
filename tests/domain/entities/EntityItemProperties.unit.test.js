@@ -122,7 +122,7 @@ describe("EntityItemsProperties - unit test", () => {
         const didntFitProperties = new EntityPropertyFlags();
         const entityID = new Uuid("b71d5380-2fcc-4833-93a7-9a4967017587");
 
-        const BUFFER_SIZE = 48;
+        const BUFFER_SIZE = 48;  // 2 available bytes after property flags.
         const messageData = new MessageData();
         messageData.buffer = new Uint8Array(BUFFER_SIZE);
         messageData.dataPosition = 0;

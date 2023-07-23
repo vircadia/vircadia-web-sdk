@@ -9,7 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import EntityPropertyFlags, { EntityPropertyList } from "../entities/EntityPropertyFlags";
+import EntityPropertyFlags from "../entities/EntityPropertyFlags";
 import UDT from "../networking/udt/UDT";
 import { color } from "../shared/Color";
 import Uuid from "../shared/Uuid";
@@ -45,19 +45,21 @@ class OctreePacketData {
      *  Appends a {@link color} value to a packet and updates the packet context.
      *  @param {DataView} data - The packet data.
      *  @param {number} dataPosition - The position to write the value at.
+     *  @param {number} flag - The property flag for the value being written.
      *  @param {color} value - The value to write.
      *  @param {OctreePacketContext} packetContext - The context of the packet being written.
      *  @returns {number} The number of bytes written. <code>0</code> if the value wouldn't fit.
      */
-    static appendColorValue(data: DataView, dataPosition: number, value: color, packetContext: OctreePacketContext): number {
+    static appendColorValue(data: DataView, dataPosition: number, flag: number, value: color,
+        packetContext: OctreePacketContext): number {
         // C++  bool appendValue(const glm::u8vec3& value);
         const NUM_BYTES = 3;
         if (dataPosition + NUM_BYTES <= data.byteLength) {
             data.setUint8(dataPosition, value.red);
             data.setUint8(dataPosition + 1, value.green);
             data.setUint8(dataPosition + 2, value.blue);
-            packetContext.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_COLOR, false);
-            packetContext.propertiesWritten.setHasProperty(EntityPropertyList.PROP_COLOR, true);
+            packetContext.propertiesToWrite.setHasProperty(flag, false);
+            packetContext.propertiesWritten.setHasProperty(flag, true);
             packetContext.propertyCount += 1;
             return NUM_BYTES;
         }
@@ -69,18 +71,20 @@ class OctreePacketData {
      *  Appends a {@link Uuid} value to a packet and updates the packet context.
      *  @param {DataView} data - The packet data.
      *  @param {number} dataPosition - The position to write the value at.
+     *  @param {number} flag - The property flag for the value being written.
      *  @param {Uuid} value - The value to write.
      *  @param {OctreePacketContext} packetContext - The context of the packet being written.
      *  @returns {number} The number of bytes written. <code>0</code> if the value wouldn't fit.
      */
-    static appendUUIDValue(data: DataView, dataPosition: number, value: Uuid, packetContext: OctreePacketContext): number {
+    static appendUUIDValue(data: DataView, dataPosition: number, flag: number, value: Uuid,
+        packetContext: OctreePacketContext): number {
         // C++  bool OctreePacketData::appendValue(const QUuid& uuid)
         if (value.isNull()) {
             const NUM_BYTES = 2;
             if (dataPosition + NUM_BYTES <= data.byteLength) {
                 data.setUint16(dataPosition, 0, UDT.LITTLE_ENDIAN);
-                packetContext.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY, false);
-                packetContext.propertiesWritten.setHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY, true);
+                packetContext.propertiesToWrite.setHasProperty(flag, false);
+                packetContext.propertiesWritten.setHasProperty(flag, true);
                 packetContext.propertyCount += 1;
                 return NUM_BYTES;
             }
@@ -90,8 +94,8 @@ class OctreePacketData {
             if (dataPosition + NUM_LENGTH_BYTES + NUM_VALUE_BYTES <= data.byteLength) {
                 data.setUint16(dataPosition, NUM_VALUE_BYTES, UDT.LITTLE_ENDIAN);
                 data.setBigUint128(dataPosition + NUM_LENGTH_BYTES, value.value(), UDT.BIG_ENDIAN);
-                packetContext.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY, false);
-                packetContext.propertiesWritten.setHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY, true);
+                packetContext.propertiesToWrite.setHasProperty(flag, false);
+                packetContext.propertiesWritten.setHasProperty(flag, true);
                 packetContext.propertyCount += 1;
                 return NUM_LENGTH_BYTES + NUM_VALUE_BYTES;
             }

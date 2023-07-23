@@ -32,7 +32,7 @@ describe("OctreePacketData - unit tests", () => {
             appendState: AppendState.COMPLETED
         };
         context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_COLOR, true);
-        let bytesWritten = OctreePacketData.appendColorValue(data, 2, value, context);
+        let bytesWritten = OctreePacketData.appendColorValue(data, 2, EntityPropertyList.PROP_COLOR, value, context);
         expect(bytesWritten).toBe(3);
         expect(buffer2hex(data.buffer)).toEqual("00006496c80000000000");
         expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_COLOR)).toBe(false);
@@ -50,7 +50,7 @@ describe("OctreePacketData - unit tests", () => {
             appendState: AppendState.COMPLETED
         };
         context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_COLOR, true);
-        bytesWritten = OctreePacketData.appendColorValue(data, 8, value, context);
+        bytesWritten = OctreePacketData.appendColorValue(data, 8, EntityPropertyList.PROP_COLOR, value, context);
         expect(bytesWritten).toBe(0);
         expect(buffer2hex(data.buffer)).toEqual("00000000000000000000");
         expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_COLOR)).toBe(true);
@@ -70,7 +70,7 @@ describe("OctreePacketData - unit tests", () => {
             appendState: AppendState.COMPLETED
         };
         context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY, true);
-        let bytesWritten = OctreePacketData.appendUUIDValue(data, 2, value, context);
+        let bytesWritten = OctreePacketData.appendUUIDValue(data, 2, EntityPropertyList.PROP_LAST_EDITED_BY, value, context);
         expect(bytesWritten).toBe(2);
         expect(buffer2hex(data.buffer)).toEqual("000000000000000000000000000000000000000000000000");
         expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY)).toBe(false);
@@ -88,7 +88,7 @@ describe("OctreePacketData - unit tests", () => {
             appendState: AppendState.COMPLETED
         };
         context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY, true);
-        bytesWritten = OctreePacketData.appendUUIDValue(data, 2, value, context);
+        bytesWritten = OctreePacketData.appendUUIDValue(data, 2, EntityPropertyList.PROP_LAST_EDITED_BY, value, context);
         expect(bytesWritten).toBe(18);
         expect(buffer2hex(data.buffer)).toEqual("00001000a3eda01ec4de456dbf07858a26c5a64800000000");
         expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY)).toBe(false);
@@ -106,7 +106,7 @@ describe("OctreePacketData - unit tests", () => {
             appendState: AppendState.COMPLETED
         };
         context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY, true);
-        bytesWritten = OctreePacketData.appendUUIDValue(data, 2, value, context);
+        bytesWritten = OctreePacketData.appendUUIDValue(data, 2, EntityPropertyList.PROP_LAST_EDITED_BY, value, context);
         expect(bytesWritten).toBe(0);
         expect(buffer2hex(data.buffer)).toEqual("00000000000000000000");
         expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY)).toBe(true);
