@@ -17,6 +17,7 @@ globalThis.crypto = webcrypto;
 
 import { HostType } from "../src/domain/entities/EntityItem";
 import { EntityType } from "../src/domain/entities/EntityTypes";
+import Uuid from "../src/domain/shared/Uuid";
 import Camera from "../src/Camera";
 import DomainServer from "../src/DomainServer";
 import EntityServer from "../src/EntityServer";
@@ -61,34 +62,97 @@ describe("EntityServer - unit tests", () => {
 
         // No parameters.
         let uuid = entityServer.addEntity();
-        expect(uuid.isNull()).toBe(true);
         expect(errorMessage).toBe("[EntityServer] addEntity() called with invalid entity properties!");
+        expect(uuid.isNull()).toBe(true);
 
         // Missing entity type.
         uuid = entityServer.addEntity({ name: "something" });
-        expect(uuid.isNull()).toBe(true);
         expect(errorMessage).toBe("[EntityServer] addEntity() called with invalid entity type!");
+        expect(uuid.isNull()).toBe(true);
 
         // Invalid host type.
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         uuid = entityServer.addEntity({ entityType: EntityType.Shape }, 7);
-        expect(uuid.isNull()).toBe(true);
         expect(errorMessage).toBe("[EntityServer] addEntity() called with invalid entity hostType!");
+        expect(uuid.isNull()).toBe(true);
 
         // Unsupported host type.
         uuid = entityServer.addEntity({ entityType: EntityType.Shape }, HostType.AVATAR);
-        expect(uuid.isNull()).toBe(true);
         expect(errorMessage).toBe("[EntityServer] addEntity() for avatar entities not implemented!");
-        uuid = entityServer.addEntity({ entityType: EntityType.Shape }, HostType.LOCAL);
         expect(uuid.isNull()).toBe(true);
+        uuid = entityServer.addEntity({ entityType: EntityType.Shape }, HostType.LOCAL);
         expect(errorMessage).toBe("[EntityServer] addEntity() for local entities not implemented!");
+        expect(uuid.isNull()).toBe(true);
 
         // Successful call.
         errorMessage = "";
         uuid = entityServer.addEntity({ entityType: EntityType.Shape }, HostType.DOMAIN);
-        expect(uuid.isNull()).toBe(false);
         expect(errorMessage).toBe("");
+        expect(uuid.isNull()).toBe(false);
 
+        error.mockRestore();
+    });
+
+    test("Calling editEntity() with invalid parameters generates errors", () => {
+        const domainServer = new DomainServer();
+        const camera = new Camera(domainServer.contextID);  // eslint-disable-line @typescript-eslint/no-unused-vars
+        const entityServer = new EntityServer(domainServer.contextID);
+
+        let warnMessage = "";
+        const warn = jest.spyOn(console, "warn").mockImplementation((...message) => {
+            warnMessage = message.join(" ");
+        });
+        let errorMessage = "";
+        const error = jest.spyOn(console, "error").mockImplementation((...message) => {
+            errorMessage = message.join(" ");
+        });
+
+        // No parameters.
+        let uuid = entityServer.editEntity();
+        expect(warnMessage).toBe("");
+        expect(errorMessage).toBe("[EntityServer] editEntity() called with invalid entity ID!");
+        expect(uuid.isNull()).toBe(true);
+
+        // Invalid ID.
+        uuid = entityServer.editEntity("string");
+        expect(warnMessage).toBe("");
+        expect(errorMessage).toBe("[EntityServer] editEntity() called with invalid entity ID!");
+        expect(uuid.isNull()).toBe(true);
+
+        // Invalid properties.
+        uuid = entityServer.editEntity(Uuid.createUuid(), "string");
+        expect(warnMessage).toBe("");
+        expect(errorMessage).toBe("[EntityServer] editEntity() called with invalid entity properties!");
+        expect(uuid.isNull()).toBe(true);
+
+        // Required properties missing.
+        uuid = entityServer.editEntity(Uuid.createUuid(), {
+            color: { red: 255, green: 255, blue: 255 }
+        });
+        expect(warnMessage).toBe("");
+        expect(errorMessage).toBe("[EntityServer] editEntity() called with invalid entity type value!");
+        expect(uuid.isNull()).toBe(true);
+        uuid = entityServer.editEntity(Uuid.createUuid(), {
+            entityType: EntityType.Box,
+            color: { red: 255, green: 255, blue: 255 }
+        });
+        expect(warnMessage).toBe("");
+        expect(errorMessage).toBe("[EntityServer] editEntity() called with invalid lastEdited value!");
+        expect(uuid.isNull()).toBe(true);
+
+        // Valid properties.
+        errorMessage = "";
+        const MS_TO_TICKS = 10000n;
+        uuid = entityServer.editEntity(Uuid.createUuid(), {
+            entityType: EntityType.Box,
+            lastEdited: BigInt(Date.now()) * MS_TO_TICKS,
+            color: { red: 255, green: 255, blue: 255 }
+        });
+        expect(warnMessage).toBe("[EntityServer] Could not send edit message because not connected.");
+        expect(errorMessage).toBe("");
+        expect(uuid.isNull()).toBe(true);
+
+        warn.mockRestore();
         error.mockRestore();
     });
 

@@ -13,10 +13,11 @@ import { HostType } from "./domain/entities/EntityItem";
 import { EntityType } from "./domain/entities/EntityTypes";
 import { EntityProperties } from "./domain/networking/packets/EntityData";
 import PacketScribe from "./domain/networking/packets/PacketScribe";
-import PacketType from "./domain/networking/udt/PacketHeaders";
+import PacketType, { PacketTypeValue } from "./domain/networking/udt/PacketHeaders";
 import Node from "./domain/networking/Node";
 import NodeList from "./domain/networking/NodeList";
 import NodeType, { NodeTypeValue } from "./domain/networking/NodeType";
+import EntityEditPacketSender from "./domain/entities/EntityEditPacketSender";
 import OctreeConstants from "./domain/octree/OctreeConstants";
 import OctreePacketProcessor from "./domain/octree/OctreePacketProcessor";
 import OctreeQuery from "./domain/octree/OctreeQuery";
@@ -25,6 +26,7 @@ import ContextManager from "./domain/shared/ContextManager";
 import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
 import Uuid from "./domain/shared/Uuid";
 import AssignmentClient from "./domain/AssignmentClient";
+import { bigintReplacer, bigintReviver } from "./domain/shared/JSONExtensions";
 
 
 /*@sdkdoc
@@ -115,6 +117,7 @@ class EntityServer extends AssignmentClient {
     #_octreeQuery = new OctreeQuery(true);
     #_octreeProcessor;
     #_maxOctreePPS = OctreeConstants.DEFAULT_MAX_OCTREE_PPS;
+    #_entityEditPacketSender;
     #_queryExpiry = 0;
     #_physicsEnabled = true;
     #_entityData = new SignalEmitter();
@@ -135,6 +138,9 @@ class EntityServer extends AssignmentClient {
         this.#_octreeProcessor.entityData.connect((data) => {
             this.#_entityData.emit(data);
         });
+
+        ContextManager.set(contextID, EntityEditPacketSender, contextID);
+        this.#_entityEditPacketSender = ContextManager.get(contextID, EntityEditPacketSender) as EntityEditPacketSender;
 
         // C++  EntityScriptingInterface::EntityScriptingInterface(bool bidOnSimulationOwnership)
         this.#_nodeList.canRezChanged.connect((canRez: boolean) => {
@@ -242,7 +248,9 @@ class EntityServer extends AssignmentClient {
      *  Adds a new entity to the entity server.
      *  @param {EntityProperties} properties - The properties of the entity to add.
      *  @param {HostType} [hostType=HostType.DOMAIN] - Where to host the entity.
-     *  @returns {Uuid} The ID of the new entity if added, or {@link Uuid(1)|Uuid.NULL} if no entity added.
+     *      <p>Note: Currently only <code>HostType.DOMAIN</code> is supported.</p>
+     *  @returns {Uuid} The ID of the new entity if an add request was successfully sent to the server, or
+     *      {@link Uuid(1)|Uuid.NULL} if no entity add request was made (invalid data or not connected).
      */
     addEntity(properties: EntityProperties, hostType?: HostType): Uuid {
         // C++  QUuid EntityScriptingInterface::addEntity(const EntityItemProperties& properties,
@@ -288,7 +296,7 @@ class EntityServer extends AssignmentClient {
      *  @param {Uuid} entityID - The ID of the entity to edit.
      *  @param {Entities.EntityProperties} properties - The new property values.
      *  @returns {Uuid} The ID of the entity if an edit request was successfully sent to the server, or
-     *      {@link Uuid(1)|Uuid.NULL} if no entity edit request was sent.
+     *      {@link Uuid(1)|Uuid.NULL} if no entity edit request was sent (invalid data or not connected).
      */
     editEntity(entityID: Uuid, properties: EntityProperties): Uuid {
         // C++  QUuid EntityScriptingInterface::editEntity(const QUuid& entityID, const EntityItemProperties& properties)
@@ -300,6 +308,24 @@ class EntityServer extends AssignmentClient {
 
         if (typeof properties !== "object") {
             console.error("[EntityServer] editEntity() called with invalid entity properties!");
+            return new Uuid();
+        }
+
+        // Required properties.
+        // Required by EntityItemProperties.encodeEntityEditPacket() ...
+        if (typeof properties.entityType !== "number" || properties.entityType <= EntityType.Unknown
+            || properties.entityType >= EntityType.NUM_TYPES) {
+            console.error("[EntityServer] editEntity() called with invalid entity type value!");
+            return new Uuid();
+        }
+        if (typeof properties.lastEdited !== "bigint") {
+            console.error("[EntityServer] editEntity() called with invalid lastEdited value!");
+            return new Uuid();
+        }
+
+        // WEBRTC TODO: Queue edit requests if not connected.
+        if (this.state !== EntityServer.CONNECTED) {
+            console.warn("[EntityServer] Could not send edit message because not connected.");
             return new Uuid();
         }
 
@@ -354,7 +380,7 @@ class EntityServer extends AssignmentClient {
 
         // WEBRTC TODO: Address further C++ code - avatar entities.
 
-        const propertiesWithSimID = JSON.parse(JSON.stringify(properties)) as EntityProperties;
+        const propertiesWithSimID = JSON.parse(JSON.stringify(properties, bigintReplacer), bigintReviver) as EntityProperties;
         propertiesWithSimID.entityHostType = entityHostType;
 
         // WEBRTC TODO: Address further C++ code - avatar entities and local entities.
@@ -377,13 +403,31 @@ class EntityServer extends AssignmentClient {
         return id;
     }
 
-    // @ts-ignore
-    #queueEntityMessage(packetType: PacketType, entityID: Uuid, properties: EntityItemProperties): void {
+    #editEntityInternal(entityID: Uuid, properties: EntityProperties): Uuid {
+        // C++  QUuid EntityScriptingInterface::editEntity(const QUuid& entityID, const EntityItemProperties& properties)
+
+        // WEBRTC TODO: Address further C++ code - activity tracking.
+
+        const sessionID = this.#_nodeList.getSessionUUID();
+        const propertiesWithSessionID
+            = JSON.parse(JSON.stringify(properties, bigintReplacer), bigintReviver) as EntityProperties;
+        properties.lastEditedBy = sessionID;
+
+        // The SDK doesn't maintain a local entity tree so skip entity tree-related code.
+
+        // The SDK doesn't support local positions and such script-side semantics.
+
+        // WEBRTC TODO: Address synchronizing grab properties?
+
+        this.#queueEntityMessage(PacketType.EntityEdit, entityID, propertiesWithSessionID);
+        return entityID;
+    }
+
+    #queueEntityMessage(packetType: PacketTypeValue, entityID: Uuid, properties: EntityProperties): void {
         // C++  void EntityScriptingInterface::queueEntityMessage(PacketType packetType, EntityItemID entityID,
         //          const EntityItemProperties& properties)
 
-        // TODO: Implement.
-
+        this.#_entityEditPacketSender.queueEditEntityMessage(packetType, entityID, properties);
     }
 
 

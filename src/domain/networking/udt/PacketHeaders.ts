@@ -243,7 +243,9 @@ const enum PacketTypeValue {
  *      {@link PacketScribe.EntityQueryDetails}
  *  @property {PacketType} EntityAdd - <code>43</code>
  *  @property {PacketType} EntityErase - <code>44</code>
- *  @property {PacketType} EntityEdit - <code>45</code>
+ *  @property {PacketType} EntityEdit - <code>45</code> - The user client sends this to the Entity Server to edit an existing
+ *      entity.
+ *      {@link PacketScribe.EntityEditDetails}
  *  @property {PacketType} DomainServerConnectionToken - <code>46</code> - The Domain Server sends this to the client when the
  *      client tries to log into the domain.<br />
  *      {@link PacketScribe.DomainServerConnectionTokenDetails}

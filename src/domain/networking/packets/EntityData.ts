@@ -183,7 +183,7 @@ const EntityData = new class {
      *  <p>A property value may be undefined if it couldn't fit in the data packet sent by the server.</p>
      *  @typedef {object} EntityProperties
      *
-     *  @property {Uuid} entityItemID - The ID of the entity.
+     *  @property {Uuid} entityItemID - The ID of the entity. <em>Read-only.</em>
      *  @property {EntityType} entityType - The entity's type. It cannot be changed after an entity is created.
      *  @property {bigint} createdFromBuffer - Timestamp for when the entity was created. Expressed in number of microseconds
      *      since Unix epoch.
@@ -1375,7 +1375,7 @@ const EntityData = new class {
     }
 
     // Implemented recursively in the C++ code, numberOfThreeBitSectionsInCode is here implemented iteratively.
-    #numberOfThreeBitSectionsInCode(data: DataView, dataPosition: number, maxBytes: number): number {
+    #numberOfThreeBitSectionsInCode(data: DataView, dataPosition: number, maxBytes = this.#_UNKNOWN_OCTCODE_LENGTH): number {
         // C++  int OctalCode::numberOfThreeBitSectionsInCode(const unsigned char* octalCode, int maxBytes)
 
         if (maxBytes === this.#_OVERFLOWED_OCTCODE_BUFFER) {

@@ -60,7 +60,7 @@ class OctreeEditPacketSender {
 
         // WEBRTC TODO: Address further C++ code - queue edits if not connected to entity server. Perhaps reuse SendQueue?
         const entityServer = this.#_nodeList.soloNodeOfType(NodeType.EntityServer);
-        if (entityServer) {
+        if (entityServer && entityServer.getActiveSocket()) {
             if (editMessage instanceof NLPacket) {
                 this.#_nodeList.sendPacket(editMessage, entityServer);
             } else {
