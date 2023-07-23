@@ -134,4 +134,32 @@ describe("EntityEditPacketSender - unit tests", () => {
         });
     });
 
+    test("Error is logged when entity property value is invalid", () => {
+        let errorMessage = "";
+        const error = jest.spyOn(console, "error").mockImplementation((...message) => {
+            errorMessage = message.join(" ");
+        });
+        const warn = jest.spyOn(console, "warn").mockImplementation(() => { /* no-op */ });
+
+        const contextID = ContextManager.createContext();
+        ContextManager.set(contextID, AccountManager, contextID);
+        ContextManager.set(contextID, AddressManager);
+        ContextManager.set(contextID, NodeList, contextID);
+        ContextManager.set(contextID, EntityEditPacketSender, contextID);
+        const entityEditPacketSender = ContextManager.get(contextID, EntityEditPacketSender);
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        entityEditPacketSender.queueEditEntityMessage(PacketType.EntityEdit, Uuid.createUuid(), {
+            entityType: EntityType.Box,
+            lastEdited: 0n,
+            parentID: new Uuid(Uuid.AVATAR_SELF_ID),
+            color: { red: 255, green: 255, blue: "" }
+        });
+
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid color value to packet!");
+
+        error.mockRestore();
+        warn.mockRestore();
+    });
+
 });

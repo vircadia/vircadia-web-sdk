@@ -323,6 +323,8 @@ class EntityServer extends AssignmentClient {
             return new Uuid();
         }
 
+        // Invalid properties are checked by when they are written to the packet.
+
         // WEBRTC TODO: Queue edit requests if not connected.
         if (this.state !== EntityServer.CONNECTED) {
             console.warn("[EntityServer] Could not send edit message because not connected.");

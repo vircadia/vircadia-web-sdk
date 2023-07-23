@@ -53,6 +53,12 @@ class OctreePacketData {
     static appendColorValue(data: DataView, dataPosition: number, flag: number, value: color,
         packetContext: OctreePacketContext): number {
         // C++  bool appendValue(const glm::u8vec3& value);
+        const valid = typeof value.red === "number" && typeof value.green === "number" && typeof value.blue === "number";
+        if (!valid) {
+            console.error("[EntityServer] Cannot write invalid color value to packet!");
+            return 0;
+        }
+
         const NUM_BYTES = 3;
         if (dataPosition + NUM_BYTES <= data.byteLength) {
             data.setUint8(dataPosition, value.red);
@@ -79,6 +85,12 @@ class OctreePacketData {
     static appendUUIDValue(data: DataView, dataPosition: number, flag: number, value: Uuid,
         packetContext: OctreePacketContext): number {
         // C++  bool OctreePacketData::appendValue(const QUuid& uuid)
+        const valid = value instanceof Uuid;
+        if (!valid) {
+            console.error("[EntityServer] Cannot write invalid UUID value to packet!");
+            return 0;
+        }
+
         if (value.isNull()) {
             const NUM_BYTES = 2;
             if (dataPosition + NUM_BYTES <= data.byteLength) {

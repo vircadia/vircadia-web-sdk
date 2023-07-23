@@ -21,7 +21,35 @@ import { buffer2hex } from "../../testUtils";
 describe("OctreePacketData - unit tests", () => {
     /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-    test("Can write a color value to a packet", () => {
+    test("Error if try to write an invalid color value", () => {
+        let errorMessage = "";
+        const error = jest.spyOn(console, "error").mockImplementation((...message) => {
+            errorMessage = message.join(" ");
+        });
+
+        const data = new DataView(new ArrayBuffer(10));
+        const context = {
+            propertiesToWrite: new EntityPropertyFlags(),
+            propertiesWritten: new EntityPropertyFlags(),
+            propertyCount: 0,
+            appendState: AppendState.COMPLETED
+        };
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_COLOR, true);
+
+        let value = "aabbcc";
+        let bytesWritten = OctreePacketData.appendColorValue(data, 2, EntityPropertyList.PROP_COLOR, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid color value to packet!");
+
+        value = { red: 100, green: 150, blue: "" };
+        bytesWritten = OctreePacketData.appendColorValue(data, 2, EntityPropertyList.PROP_COLOR, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid color value to packet!");
+
+        error.mockRestore();
+    });
+
+    test("Can write a color value", () => {
         // Successful write.
         let data = new DataView(new ArrayBuffer(10));
         let value = { red: 100, green: 150, blue: 200 };
@@ -57,6 +85,29 @@ describe("OctreePacketData - unit tests", () => {
         expect(context.propertiesWritten.getHasProperty(EntityPropertyList.PROP_COLOR)).toBe(false);
         expect(context.propertyCount).toBe(0);
         expect(context.appendState).toBe(AppendState.PARTIAL);
+    });
+
+    test("Error if try to write an invalid UUID value", () => {
+        let errorMessage = "";
+        const error = jest.spyOn(console, "error").mockImplementation((...message) => {
+            errorMessage = message.join(" ");
+        });
+
+        const data = new DataView(new ArrayBuffer(10));
+        const context = {
+            propertiesToWrite: new EntityPropertyFlags(),
+            propertiesWritten: new EntityPropertyFlags(),
+            propertyCount: 0,
+            appendState: AppendState.COMPLETED
+        };
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY, true);
+
+        const value = "aabbcc";
+        const bytesWritten = OctreePacketData.appendColorValue(data, 2, EntityPropertyList.PROP_LAST_EDITED_BY, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid color value to packet!");
+
+        error.mockRestore();
     });
 
     test("Can write a UUID value", () => {

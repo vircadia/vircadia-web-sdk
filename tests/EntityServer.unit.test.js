@@ -152,6 +152,9 @@ describe("EntityServer - unit tests", () => {
         expect(errorMessage).toBe("");
         expect(uuid.isNull()).toBe(true);
 
+        // Invalid property values.
+        // Tested in EntityEditPacketSender.unit.test.js.
+
         warn.mockRestore();
         error.mockRestore();
     });
