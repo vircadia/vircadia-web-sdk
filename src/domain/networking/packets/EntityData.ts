@@ -1414,7 +1414,6 @@ const EntityData = new class {
         return 1 + Math.ceil(threeBitCodes * 3 / 8.0);
     }
 
-
 }();
 
 export default EntityData;

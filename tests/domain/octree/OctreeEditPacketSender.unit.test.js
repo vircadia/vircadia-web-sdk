@@ -18,6 +18,7 @@ import ContextManager from "../../../src/domain/shared/ContextManager";
 import PacketType from "../../../src/domain/networking/udt/PacketHeaders";
 import NLPacket from "../../../src/domain/networking/NLPacket";
 import NodeList from "../../../src/domain/networking/NodeList";
+import SockAddr from "../../../src/domain/networking/SockAddr";
 import OctreeEditPacketSender from "../../../src/domain/octree/OctreeEditPacketSender";
 
 
@@ -82,7 +83,11 @@ describe("OctreeEditPacketSender - unit tests", () => {
 
         const mockSoloNodeOfType = jest.spyOn(ContextManager.get(contextID, NodeList), "soloNodeOfType")
             .mockImplementation(() => {
-                return {};  // Entity server node.
+                return {
+                    getActiveSocket: () => {
+                        return new SockAddr();
+                    }
+                };  // Entity server node.
             });
         const mockSendPacket = jest.spyOn(ContextManager.get(contextID, NodeList), "sendPacket")
             .mockImplementation((editMessage) => {

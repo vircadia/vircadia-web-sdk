@@ -153,6 +153,9 @@ class EntityServer extends AssignmentClient {
             this.#_canGetAndSetPrivateUserDataChanged.emit(canGetAndSetPrivateUserData);
         });
 
+        // C++  OctreeScriptingInterface::OctreeScriptingInterface(OctreeEditPacketSender* packetSender = nullptr)
+        // Nothing to do here.
+
         // C++  Application::Application()
         this.#_nodeList.nodeActivated.connect(this.#nodeActivated);
         this.#_nodeList.nodeKilled.connect(this.#nodeKilled);

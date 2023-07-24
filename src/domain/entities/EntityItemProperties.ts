@@ -324,6 +324,7 @@ class EntityItemProperties {
 
         // Simplification: The server doesn't actually use octcode data (see EntityItemProperties::decodeEntityEditPacket()) and
         // we're not compressing data so we can write an empty octcode value.
+        // WEBRTC TODO: Support compressing data?
         data.setUint8(dataPosition, 0);
         dataPosition += 1;
 
