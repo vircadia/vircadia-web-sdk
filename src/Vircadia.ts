@@ -41,7 +41,7 @@ export default Vircadia;
 export { Vircadia };
 
 export { default as DomainServer } from "./DomainServer";
-export type { ConnectionState } from "./DomainServer";
+export { ConnectionState } from "./DomainServer";
 
 export { default as Camera } from "./Camera";
 
@@ -50,7 +50,7 @@ export type { AudioPositionGetter, AudioOrientationGetter } from "./domain/audio
 export { default as AvatarMixer, MyAvatarInterface, AvatarListInterface } from "./AvatarMixer";
 export { default as EntityServer } from "./EntityServer";
 export { default as MessageMixer } from "./MessageMixer";
-export type { AssignmentClientState } from "./domain/AssignmentClient";
+export { AssignmentClientState } from "./domain/AssignmentClient";
 
 export { default as ModerationFlags } from "./domain/shared/ModerationFlags";
 export type { BanFlagsValue } from "./domain/shared/ModerationFlags";

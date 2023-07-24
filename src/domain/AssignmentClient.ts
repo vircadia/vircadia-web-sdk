@@ -171,4 +171,4 @@ class AssignmentClient {
 }
 
 export default AssignmentClient;
-export type { AssignmentClientState };
+export { AssignmentClientState };
