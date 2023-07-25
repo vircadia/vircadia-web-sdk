@@ -30,6 +30,15 @@ describe("GLMHelpers - unit tests", () => {
         expect(quat.w).toBeCloseTo(1, 2);
     });
 
+    test("Can write a quaternion into 8 bytes of packet data", () => {
+        const buffer = new ArrayBuffer(16);
+        const data = new DataView(buffer);
+        const quat = { x: -0.00913472, y: 0.104486, z: 0.0052514, w: 0.994471 };
+        GLMHelpers.packOrientationQuatToBytes(data, 2, quat);
+        const bytes = buffer2hex(buffer);
+        expect(bytes).toBe("0000d47e5f8dab8049ff000000000000");
+    });
+
     test("Can read a quaternion from 6 bytes of packet data", () => {
 
         // 30 deg yaw.

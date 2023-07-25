@@ -11,7 +11,7 @@
 
 import UDT from "../networking/udt/UDT";
 import assert from "./assert";
-import { quat } from "./Quat";
+import Quat, { quat } from "./Quat";
 import { vec3 } from "./Vec3";
 
 
@@ -34,6 +34,24 @@ const GLMHelpers = new class {
     readonly #_INT16_MAX = 32767.0;
     readonly #_INT16_MIN = -32768.0;
 
+
+    /*@devdoc
+     *  Writes a quaternion value to a packet, packing it into 8 bytes.
+     *  @function GLMHelpers.packOrientationQuatToBytes
+     *  @param {DataView} data - The packet data to write.
+     *  @param {number} dataPosition - The data position to write the value at.
+     *  @param {quat} quatInput - The quaternion value to write.
+     */
+    // eslint-disable-next-line class-methods-use-this
+    packOrientationQuatToBytes(data: DataView, dataPosition: number, quatInput: quat): void {
+        // C++  int packOrientationQuatToBytes(unsigned char* buffer, const glm::quat& quatInput)
+        const quatNormalized = Quat.normalize(quatInput);
+        const QUAT_PART_CONVERSION_RATIO = this.#_UINT16_MAX / 2.0;
+        data.setUint16(dataPosition, Math.floor((quatNormalized.x + 1.0) * QUAT_PART_CONVERSION_RATIO), UDT.LITTLE_ENDIAN);
+        data.setUint16(dataPosition + 2, Math.floor((quatNormalized.y + 1.0) * QUAT_PART_CONVERSION_RATIO), UDT.LITTLE_ENDIAN);
+        data.setUint16(dataPosition + 4, Math.floor((quatNormalized.z + 1.0) * QUAT_PART_CONVERSION_RATIO), UDT.LITTLE_ENDIAN);
+        data.setUint16(dataPosition + 6, Math.floor((quatNormalized.w + 1.0) * QUAT_PART_CONVERSION_RATIO), UDT.LITTLE_ENDIAN);
+    }
 
     /*@devdoc
      *  Reads a quaternion value from a packet, unpacking it from 8 bytes.
