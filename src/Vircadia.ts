@@ -41,7 +41,7 @@ export default Vircadia;
 export { Vircadia };
 
 export { default as DomainServer } from "./DomainServer";
-export type { ConnectionState } from "./DomainServer";
+export { ConnectionState } from "./DomainServer";
 
 export { default as Camera } from "./Camera";
 
@@ -50,7 +50,7 @@ export type { AudioPositionGetter, AudioOrientationGetter } from "./domain/audio
 export { default as AvatarMixer, MyAvatarInterface, AvatarListInterface } from "./AvatarMixer";
 export { default as EntityServer } from "./EntityServer";
 export { default as MessageMixer } from "./MessageMixer";
-export type { AssignmentClientState } from "./domain/AssignmentClient";
+export { AssignmentClientState } from "./domain/AssignmentClient";
 
 export { default as ModerationFlags } from "./domain/shared/ModerationFlags";
 export type { BanFlagsValue } from "./domain/shared/ModerationFlags";
@@ -65,3 +65,19 @@ export type { vec3 } from "./domain/shared/Vec3";
 
 export { default as Quat } from "./domain/shared/Quat";
 export type { quat } from "./domain/shared/Quat";
+
+export { default as ScriptAvatar } from "./domain/avatar-renderer/ScriptAvatar";
+export type { SkeletonJoint } from "./domain/avatars/AvatarTraits";
+
+export type { AmbientLightProperties } from "./domain/entities/AmbientLightPropertyGroup";
+export type { BloomProperties } from "./domain/entities/BloomPropertyGroup";
+export type { HazeProperties } from "./domain/entities/HazePropertyGroup";
+export type { ImageEntityProperties } from "./domain/entities/ImageEntityItem";
+export type { LightEntityProperties } from "./domain/entities/LightEntityItem";
+export type { MaterialEntityProperties } from "./domain/entities/MaterialEntityItem";
+export type { ModelEntityProperties } from "./domain/entities/ModelEntityItem";
+export type { ShapeEntityProperties } from "./domain/entities/ShapeEntityItem";
+export type { WebEntityProperties, WebInputMode } from "./domain/entities/WebEntityItem";
+export type { ZoneEntityProperties } from "./domain/entities/ZoneEntityItem";
+
+export type { EntityProperties } from "./domain/networking/packets/EntityData";

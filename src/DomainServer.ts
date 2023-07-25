@@ -479,4 +479,4 @@ class DomainServer {
 }
 
 export default DomainServer;
-export type { ConnectionState };
+export { ConnectionState };
