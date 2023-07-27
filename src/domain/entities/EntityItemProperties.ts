@@ -367,18 +367,261 @@ class EntityItemProperties {
 
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-        // WEBRTC TODO: Address further C++ code - other entity properties.
-
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SIMULATION_OWNER)) {
+            dataPosition += OctreePacketData.appendArrayBufferValue(data, dataPosition,
+                EntityPropertyList.PROP_SIMULATION_OWNER,
+                properties.simOwnerData!, packetContext);
+        }
         if (requestedProperties.getHasProperty(EntityPropertyList.PROP_PARENT_ID)) {
-            dataPosition += OctreePacketData.appendUUIDValue(data, dataPosition, EntityPropertyList.PROP_PARENT_ID,
+            dataPosition += OctreePacketData.appendUuidValue(data, dataPosition, EntityPropertyList.PROP_PARENT_ID,
                 properties.parentID ?? new Uuid(), packetContext);
         }
-
-        // WEBRTC TODO: Address further C++ code - other entity properties.
-
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)) {
+            dataPosition += OctreePacketData.appendUint16Value(data, dataPosition, EntityPropertyList.PROP_PARENT_JOINT_INDEX,
+                properties.parentJointIndex!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_VISIBLE)) {
+            dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_VISIBLE,
+                properties.visible!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_NAME)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_NAME,
+                properties.name!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_LOCKED)) {
+            dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_LOCKED,
+                properties.locked!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_USER_DATA)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_USER_DATA,
+                properties.userData!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_PRIVATE_USER_DATA)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_PRIVATE_USER_DATA,
+                properties.privateUserData!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HREF)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_HREF,
+                properties.href!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_DESCRIPTION)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_DESCRIPTION,
+                properties.description!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_POSITION)) {
+            dataPosition += OctreePacketData.appendVec3Value(data, dataPosition, EntityPropertyList.PROP_POSITION,
+                properties.position!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_DIMENSIONS)) {
+            dataPosition += OctreePacketData.appendVec3Value(data, dataPosition, EntityPropertyList.PROP_DIMENSIONS,
+                properties.dimensions!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ROTATION)) {
+            dataPosition += OctreePacketData.appendQuatValue(data, dataPosition, EntityPropertyList.PROP_ROTATION,
+                properties.rotation!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_REGISTRATION_POINT)) {
+            dataPosition += OctreePacketData.appendVec3Value(data, dataPosition, EntityPropertyList.PROP_REGISTRATION_POINT,
+                properties.registrationPoint!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_CREATED)) {
+            dataPosition += OctreePacketData.appendUint64Value(data, dataPosition, EntityPropertyList.PROP_CREATED,
+                properties.created!, UDT.LITTLE_ENDIAN, packetContext);
+        }
         if (requestedProperties.getHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY)) {
-            dataPosition += OctreePacketData.appendUUIDValue(data, dataPosition, EntityPropertyList.PROP_LAST_EDITED_BY,
+            dataPosition += OctreePacketData.appendUuidValue(data, dataPosition, EntityPropertyList.PROP_LAST_EDITED_BY,
                 properties.lastEditedBy!, packetContext);
+        }
+        // PROP_ENTITY_HOST_TYPE - not sent over the wire.
+        // PROP_OWNING_AVATAR_ID - not sent over the wire.
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_QUERY_AA_CUBE)) {
+            dataPosition += OctreePacketData.appendAACubeValue(data, dataPosition, EntityPropertyList.PROP_QUERY_AA_CUBE,
+                properties.queryAACube!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_CAN_CAST_SHADOW)) {
+            dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_CAN_CAST_SHADOW,
+                properties.canCastShadow!, packetContext);
+
+        }
+        // PROP_VISIBLE_IN_SECONDARY_CAMERA - not sent over the wire.
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_RENDER_LAYER)) {
+            dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_RENDER_LAYER,
+                properties.renderLayer!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_PRIMITIVE_MODE)) {
+            dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_PRIMITIVE_MODE,
+                properties.primitiveMode!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_IGNORE_PICK_INTERSECTION)) {
+            dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition,
+                EntityPropertyList.PROP_IGNORE_PICK_INTERSECTION, properties.ignorePickIntersection!, packetContext);
+
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_RENDER_WITH_ZONES)) {
+            dataPosition += OctreePacketData.appendUuidArray(data, dataPosition, EntityPropertyList.PROP_RENDER_WITH_ZONES,
+                properties.renderWithZones!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_BILLBOARD_MODE)) {
+            dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_BILLBOARD_MODE,
+                properties.billboardMode!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        // WEBRTC TODO: Add grab properties.
+        //_staticGrab.setProperties(properties);
+        //_staticGrab.appendToEditPacket(packetData, requestedProperties, propertyFlags,
+        //    propertiesDidntFit, propertyCount, appendState);
+
+        // Physics
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_DENSITY)) {
+            dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_DENSITY,
+                properties.density!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_VELOCITY)) {
+            dataPosition += OctreePacketData.appendVec3Value(data, dataPosition, EntityPropertyList.PROP_VELOCITY,
+                properties.velocity!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ANGULAR_VELOCITY)) {
+            dataPosition += OctreePacketData.appendVec3Value(data, dataPosition, EntityPropertyList.PROP_ANGULAR_VELOCITY,
+                properties.angularVelocity!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAVITY)) {
+            dataPosition += OctreePacketData.appendVec3Value(data, dataPosition, EntityPropertyList.PROP_GRAVITY,
+                properties.gravity!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ACCELERATION)) {
+            dataPosition += OctreePacketData.appendVec3Value(data, dataPosition, EntityPropertyList.PROP_ACCELERATION,
+                properties.acceleration!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_DAMPING)) {
+            dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_DAMPING,
+                properties.damping!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ANGULAR_DAMPING)) {
+            dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_ANGULAR_DAMPING,
+                properties.angularDamping!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_RESTITUTION)) {
+            dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_RESTITUTION,
+                properties.restitution!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_FRICTION)) {
+            dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_FRICTION,
+                properties.friction!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_LIFETIME)) {
+            dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_LIFETIME,
+                properties.lifetime!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLLISIONLESS)) {
+            dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_COLLISIONLESS,
+                properties.collisionless!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLLISION_MASK)) {
+            dataPosition += OctreePacketData.appendUint16Value(data, dataPosition, EntityPropertyList.PROP_COLLISION_MASK,
+                properties.collisionMask!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_DYNAMIC)) {
+            dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_DYNAMIC,
+                properties.dynamic!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLLISION_SOUND_URL)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_COLLISION_SOUND_URL,
+                properties.collisionSoundURL!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ACTION_DATA)) {
+            dataPosition += OctreePacketData.appendArrayBufferValue(data, dataPosition, EntityPropertyList.PROP_ACTION_DATA,
+                properties.actionData!, packetContext);
+        }
+
+        // Cloning
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_CLONEABLE)) {
+            dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_CLONEABLE,
+                properties.cloneable!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_CLONE_LIFETIME)) {
+            dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_CLONE_LIFETIME,
+                properties.cloneLifetime!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_CLONE_LIMIT)) {
+            dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_CLONE_LIMIT,
+                properties.cloneLimit!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_CLONE_DYNAMIC)) {
+            dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_CLONE_DYNAMIC,
+                properties.cloneDynamic!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_CLONE_AVATAR_ENTITY)) {
+            dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_CLONE_AVATAR_ENTITY,
+                properties.cloneAvatarEntity!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_CLONE_ORIGIN_ID)) {
+            dataPosition += OctreePacketData.appendUuidValue(data, dataPosition, EntityPropertyList.PROP_CLONE_ORIGIN_ID,
+                properties.cloneOriginID!, packetContext);
+        }
+
+        // Scripts
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SCRIPT)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_SCRIPT,
+                properties.script!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SCRIPT_TIMESTAMP)) {
+            dataPosition += OctreePacketData.appendUint64Value(data, dataPosition, EntityPropertyList.PROP_SCRIPT_TIMESTAMP,
+                properties.scriptTimestamp!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SERVER_SCRIPTS)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_SERVER_SCRIPTS,
+                properties.serverScripts!, packetContext);
+        }
+
+        // Certifiable Properties
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ITEM_NAME)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_ITEM_NAME,
+                properties.itemName!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ITEM_DESCRIPTION)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_ITEM_DESCRIPTION,
+                properties.itemDescription!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ITEM_CATEGORIES)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_ITEM_CATEGORIES,
+                properties.itemCategories!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ITEM_ARTIST)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_ITEM_ARTIST,
+                properties.itemArtist!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ITEM_LICENSE)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_ITEM_LICENSE,
+                properties.itemLicense!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_LIMITED_RUN)) {
+            dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_LIMITED_RUN,
+                properties.limitedRun!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MARKETPLACE_ID)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_MARKETPLACE_ID,
+                properties.marketplaceID!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_EDITION_NUMBER)) {
+            dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_EDITION_NUMBER,
+                properties.editionNumber!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ENTITY_INSTANCE_NUMBER)) {
+            dataPosition += OctreePacketData.appendUint32Value(data, dataPosition,
+                EntityPropertyList.PROP_ENTITY_INSTANCE_NUMBER,
+                properties.entityInstanceNumber!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_CERTIFICATE_ID)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_CERTIFICATE_ID,
+                properties.certificateID!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_CERTIFICATE_TYPE)) {
+            dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_CERTIFICATE_TYPE,
+                properties.certificateType!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_STATIC_CERTIFICATE_VERSION)) {
+            dataPosition += OctreePacketData.appendUint32Value(data, dataPosition,
+                EntityPropertyList.PROP_STATIC_CERTIFICATE_VERSION,
+                properties.staticCertificateVersion!, UDT.LITTLE_ENDIAN, packetContext);
         }
 
         // WEBRTC TODO: Address further C++ code - other entity properties.
