@@ -132,7 +132,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].cloneLifetime).toBeCloseTo(300, 2);
         expect(info[0].cloneLimit).toBeCloseTo(0, 2);
         expect(info[0].cloneDynamic).toBe(false);
-        expect(info[0].cloneAvatarIdentity).toBe(false);
+        expect(info[0].cloneAvatarEntity).toBe(false);
         expect(info[0].cloneOriginID).toBeUndefined();
         expect(info[0].script).toBeUndefined();
         expect(info[0].scriptTimestamp).toBe(0n);
@@ -260,7 +260,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].cloneLifetime).toBeCloseTo(300, 2);
         expect(info[0].cloneLimit).toBeCloseTo(0, 2);
         expect(info[0].cloneDynamic).toBe(false);
-        expect(info[0].cloneAvatarIdentity).toBe(false);
+        expect(info[0].cloneAvatarEntity).toBe(false);
         expect(info[0].cloneOriginID).toBeUndefined();
         expect(info[0].script).toBeUndefined();
         expect(info[0].scriptTimestamp).toBe(0n);
@@ -407,7 +407,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].cloneLifetime).toBeCloseTo(300, 2);
         expect(info[1].cloneLimit).toBeCloseTo(0, 2);
         expect(info[1].cloneDynamic).toBe(false);
-        expect(info[1].cloneAvatarIdentity).toBe(false);
+        expect(info[1].cloneAvatarEntity).toBe(false);
         expect(info[1].cloneOriginID).toBeUndefined();
         expect(info[1].script).toBeUndefined();
         expect(info[1].scriptTimestamp).toBe(0n);
@@ -564,7 +564,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].cloneLifetime).toBeCloseTo(300, 2);
         expect(info[0].cloneLimit).toBeCloseTo(0, 2);
         expect(info[0].cloneDynamic).toBe(false);
-        expect(info[0].cloneAvatarIdentity).toBe(false);
+        expect(info[0].cloneAvatarEntity).toBe(false);
         expect(info[0].cloneOriginID).toBeUndefined();
         expect(info[0].script).toBeUndefined();
         expect(info[0].scriptTimestamp).toBe(0n);
@@ -711,7 +711,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].cloneLifetime).toBeCloseTo(300, 2);
         expect(info[1].cloneLimit).toBeCloseTo(0, 2);
         expect(info[1].cloneDynamic).toBe(false);
-        expect(info[1].cloneAvatarIdentity).toBe(false);
+        expect(info[1].cloneAvatarEntity).toBe(false);
         expect(info[1].cloneOriginID).toBeUndefined();
         expect(info[1].script).toBeUndefined();
         expect(info[1].scriptTimestamp).toBe(0n);

@@ -103,7 +103,7 @@ type CommonEntityProperties = {
     cloneLifetime: number | undefined;
     cloneLimit: number | undefined;
     cloneDynamic: boolean | undefined;
-    cloneAvatarIdentity: boolean | undefined;
+    cloneAvatarEntity: boolean | undefined;
     cloneOriginID: Uuid | undefined;
     script: string | undefined;
     scriptTimestamp: bigint | undefined;
@@ -306,7 +306,7 @@ const EntityData = new class {
      *      any given time.
      *  @property {boolean|undefined} cloneDynamic - <code>true</code> if clones created from this entity will have their
      *      dynamic property set to true, <code>false</code> if they won't.
-     *  @property {boolean|undefined} cloneAvatarIdentity - <code>true</code> if clones created from this entity will be
+     *  @property {boolean|undefined} cloneAvatarEntity - <code>true</code> if clones created from this entity will be
      *      created as avatar entities, <code>false</code> if they won't be.
      *  @property {Uuid|undefined} cloneOriginID - The ID of the entity that this entity was cloned from.
      *  @property {string|undefined} script - The URL of the client entity script, if any, that is attached to the entity.
@@ -1029,9 +1029,9 @@ const EntityData = new class {
                 dataPosition += 1;
             }
 
-            let cloneAvatarIdentity: boolean | undefined = undefined;
+            let cloneAvatarEntity: boolean | undefined = undefined;
             if (propertyFlags.getHasProperty(EntityPropertyList.PROP_CLONE_AVATAR_ENTITY)) {
-                cloneAvatarIdentity = Boolean(data.getUint8(dataPosition));
+                cloneAvatarEntity = Boolean(data.getUint8(dataPosition));
                 dataPosition += 1;
             }
 
@@ -1342,7 +1342,7 @@ const EntityData = new class {
                     cloneLifetime,
                     cloneLimit,
                     cloneDynamic,
-                    cloneAvatarIdentity,
+                    cloneAvatarEntity,
                     cloneOriginID,
                     script,
                     scriptTimestamp,
