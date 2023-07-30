@@ -16,6 +16,8 @@ import { color } from "../shared/Color";
 import GLMHelpers from "../shared/GLMHelpers";
 import { quat } from "../shared/Quat";
 import Uuid from "../shared/Uuid";
+import { rect } from "../shared/Rect";
+import { vec2 } from "../shared/Vec2";
 import { vec3 } from "../shared/Vec3";
 import { AppendState } from "./OctreeElement";
 
@@ -247,6 +249,40 @@ class OctreePacketData {
     }
 
     /*@devdoc
+     *  Appends a {@link rect} value to a packet and updates the packet context.
+     *  @param {DataView} data - The packet data.
+     *  @param {number} dataPosition - The position to write the value at.
+     *  @param {number} flag - The property flag for the value being written.
+     *  @param {rect} value - The value to write.
+     *  @param {OctreePacketContext} packetContext - The context of the packet being written.
+     *  @returns {number} The number of bytes written. <code>0</code> if the value wouldn't fit.
+     */
+    static appendRectValue(data: DataView, dataPosition: number, flag: number, value: rect,
+        packetContext: OctreePacketContext): number {
+        // C++  bool appendPosition(const QRect& value)
+        const valid = typeof value.x === "number" && typeof value.y === "number" && typeof value.width === "number"
+            && typeof value.height === "number";
+        if (!valid) {
+            console.error("[EntityServer] Cannot write invalid rect value to packet!");
+            return 0;
+        }
+
+        const NUM_BYTES = 16;  // 4 floats.
+        if (dataPosition + NUM_BYTES <= data.byteLength) {
+            data.setUint32(dataPosition, value.x, UDT.LITTLE_ENDIAN);
+            data.setUint32(dataPosition + 4, value.y, UDT.LITTLE_ENDIAN);
+            data.setUint32(dataPosition + 8, value.width, UDT.LITTLE_ENDIAN);
+            data.setUint32(dataPosition + 12, value.height, UDT.LITTLE_ENDIAN);
+            packetContext.propertiesToWrite.setHasProperty(flag, false);
+            packetContext.propertiesWritten.setHasProperty(flag, true);
+            packetContext.propertyCount += 1;
+            return NUM_BYTES;
+        }
+        packetContext.appendState = AppendState.PARTIAL;
+        return 0;
+    }
+
+    /*@devdoc
      *  Appends a string value to a packet and updates the packet context.
      *  @param {DataView} data - The packet data.
      *  @param {number} dataPosition - The position to write the value at.
@@ -273,6 +309,36 @@ class OctreePacketData {
             for (let i = 0; i < utf8.length; i += 1) {
                 data.setUint8(startIndex + i, utf8.at(i) ?? 0);
             }
+            packetContext.propertiesToWrite.setHasProperty(flag, false);
+            packetContext.propertiesWritten.setHasProperty(flag, true);
+            packetContext.propertyCount += 1;
+            return NUM_BYTES;
+        }
+        packetContext.appendState = AppendState.PARTIAL;
+        return 0;
+    }
+
+    /*@devdoc
+     *  Appends a uint8 value to a packet and updates the packet context.
+     *  @param {DataView} data - The packet data.
+     *  @param {number} dataPosition - The position to write the value at.
+     *  @param {number} flag - The property flag for the value being written.
+     *  @param {number} value - The value to write.
+     *  @param {OctreePacketContext} packetContext - The context of the packet being written.
+     *  @returns {number} The number of bytes written. <code>0</code> if the value wouldn't fit.
+     */
+    static appendUint8Value(data: DataView, dataPosition: number, flag: number, value: number,
+        packetContext: OctreePacketContext): number {
+        // C++  bool appendValue(uint8_t value)
+        const valid = typeof value === "number" && 0 <= value && value <= 0xff;
+        if (!valid) {
+            console.error("[EntityServer] Cannot write invalid uint8 value to packet!");
+            return 0;
+        }
+
+        const NUM_BYTES = 1;
+        if (dataPosition + NUM_BYTES <= data.byteLength) {
+            data.setUint8(dataPosition, value);
             packetContext.propertiesToWrite.setHasProperty(flag, false);
             packetContext.propertiesWritten.setHasProperty(flag, true);
             packetContext.propertyCount += 1;
@@ -453,6 +519,37 @@ class OctreePacketData {
                 packetContext.propertyCount += 1;
                 return NUM_LENGTH_BYTES + NUM_VALUE_BYTES;
             }
+        }
+        packetContext.appendState = AppendState.PARTIAL;
+        return 0;
+    }
+
+    /*@devdoc
+     *  Appends a {@link vec2} value to a packet and updates the packet context.
+     *  @param {DataView} data - The packet data.
+     *  @param {number} dataPosition - The position to write the value at.
+     *  @param {number} flag - The property flag for the value being written.
+     *  @param {vec2} value - The value to write.
+     *  @param {OctreePacketContext} packetContext - The context of the packet being written.
+     *  @returns {number} The number of bytes written. <code>0</code> if the value wouldn't fit.
+     */
+    static appendVec2Value(data: DataView, dataPosition: number, flag: number, value: vec2,
+        packetContext: OctreePacketContext): number {
+        // C++  bool appendPosition(const glm::vec2& value)
+        const valid = typeof value.x === "number" && typeof value.y === "number";
+        if (!valid) {
+            console.error("[EntityServer] Cannot write invalid vec2 value to packet!");
+            return 0;
+        }
+
+        const NUM_BYTES = 8;  // 2 floats.
+        if (dataPosition + NUM_BYTES <= data.byteLength) {
+            data.setFloat32(dataPosition, value.x, UDT.LITTLE_ENDIAN);
+            data.setFloat32(dataPosition + 4, value.y, UDT.LITTLE_ENDIAN);
+            packetContext.propertiesToWrite.setHasProperty(flag, false);
+            packetContext.propertiesWritten.setHasProperty(flag, true);
+            packetContext.propertyCount += 1;
+            return NUM_BYTES;
         }
         packetContext.appendState = AppendState.PARTIAL;
         return 0;

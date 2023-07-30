@@ -254,25 +254,6 @@ describe("OctreePacketData - unit tests", () => {
         tearDown();
     });
 
-    test("Error if try to write an invalid quat value", () => {
-        setUp(10);
-        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_ROTATION, true);
-
-        value = { x: 1, y: 2, z: 3 };
-        bytesWritten = OctreePacketData.appendQuatValue(data, 2, EntityPropertyList.PROP_ROTATION, value, context);
-        expect(bytesWritten).toBe(0);
-        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_ROTATION)).toBe(true);
-        expect(errorMessage).toBe("[EntityServer] Cannot write invalid quat value to packet!");
-
-        value = { x: 1, y: 2, z: 3, w: "" };
-        bytesWritten = OctreePacketData.appendQuatValue(data, 2, EntityPropertyList.PROP_ROTATION, value, context);
-        expect(bytesWritten).toBe(0);
-        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_ROTATION)).toBe(true);
-        expect(errorMessage).toBe("[EntityServer] Cannot write invalid quat value to packet!");
-
-        tearDown();
-    });
-
     test("Error if try to write an invalid float32 value", () => {
         setUp(12);
         context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_DENSITY, true);
@@ -360,6 +341,25 @@ describe("OctreePacketData - unit tests", () => {
         tearDown();
     });
 
+    test("Error if try to write an invalid quat value", () => {
+        setUp(10);
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_ROTATION, true);
+
+        value = { x: 1, y: 2, z: 3 };
+        bytesWritten = OctreePacketData.appendQuatValue(data, 2, EntityPropertyList.PROP_ROTATION, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_ROTATION)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid quat value to packet!");
+
+        value = { x: 1, y: 2, z: 3, w: "" };
+        bytesWritten = OctreePacketData.appendQuatValue(data, 2, EntityPropertyList.PROP_ROTATION, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_ROTATION)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid quat value to packet!");
+
+        tearDown();
+    });
+
     test("Can write a quat value", () => {
         // Successful write.
         setUp(16);
@@ -386,6 +386,51 @@ describe("OctreePacketData - unit tests", () => {
         expect(context.appendState).toBe(AppendState.PARTIAL);
         tearDown();
 
+    });
+
+    test("Error if try to write an invalid rect value", () => {
+        setUp(20);
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_POSITION, true);
+
+        value = "aabbcc";
+        bytesWritten = OctreePacketData.appendRectValue(data, 2, EntityPropertyList.PROP_POSITION, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid rect value to packet!");
+
+        value = { x: 4, y: 10, width: 120, height: "" };
+        bytesWritten = OctreePacketData.appendRectValue(data, 2, EntityPropertyList.PROP_POSITION, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid rect value to packet!");
+
+        tearDown();
+    });
+
+    test("Can write a rect value", () => {
+        // Successful write.
+        setUp(20);
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_POSITION, true);
+        value = { x: 4, y: 10, width: 120, height: 100 };
+        bytesWritten = OctreePacketData.appendRectValue(data, 2, EntityPropertyList.PROP_POSITION, value, context);
+        expect(bytesWritten).toBe(16);
+        expect(buffer2hex(data.buffer)).toEqual("0000040000000a00000078000000640000000000");
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(false);
+        expect(context.propertiesWritten.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
+        expect(context.propertyCount).toBe(1);
+        expect(context.appendState).toBe(AppendState.COMPLETED);
+
+        // Unsuccessful write if insufficient space.
+        setUp(20);
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_POSITION, true);
+        value = { x: 4, y: 10, width: 120, height: 100 };
+        bytesWritten = OctreePacketData.appendRectValue(data, 8, EntityPropertyList.PROP_POSITION, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(buffer2hex(data.buffer)).toEqual("0000000000000000000000000000000000000000");
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
+        expect(context.propertiesWritten.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(false);
+        expect(context.propertyCount).toBe(0);
+        expect(context.appendState).toBe(AppendState.PARTIAL);
+        tearDown();
     });
 
     test("Error if try to write an invalid string value", () => {
@@ -437,6 +482,86 @@ describe("OctreePacketData - unit tests", () => {
         expect(context.propertiesWritten.getHasProperty(EntityPropertyList.PROP_NAME)).toBe(false);
         expect(context.propertyCount).toBe(0);
         expect(context.appendState).toBe(AppendState.PARTIAL);
+        tearDown();
+    });
+
+    test("Error if try to write an invalid Uint8 value", () => {
+        setUp(10);
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX, true);
+
+        value = "aabbcc";
+        errorMessage = "";
+        bytesWritten = OctreePacketData.appendUint8Value(data, 2, EntityPropertyList.PROP_PARENT_JOINT_INDEX, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid uint8 value to packet!");
+
+        value = -1;
+        errorMessage = "";
+        bytesWritten = OctreePacketData.appendUint8Value(data, 2, EntityPropertyList.PROP_PARENT_JOINT_INDEX, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid uint8 value to packet!");
+
+        value = 0x10000;
+        errorMessage = "";
+        bytesWritten = OctreePacketData.appendUint8Value(data, 2, EntityPropertyList.PROP_PARENT_JOINT_INDEX, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid uint8 value to packet!");
+
+        tearDown();
+    });
+
+    test("Can write a uint8 value", () => {
+        // Successful write of min value.
+        setUp(10);
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX, true);
+        value = 0;
+        bytesWritten = OctreePacketData.appendUint8Value(data, 2, EntityPropertyList.PROP_PARENT_JOINT_INDEX, value, context);
+        expect(bytesWritten).toBe(1);
+        expect(buffer2hex(data.buffer)).toEqual("00000000000000000000");
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)).toBe(false);
+        expect(context.propertiesWritten.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)).toBe(true);
+        expect(context.propertyCount).toBe(1);
+        expect(context.appendState).toBe(AppendState.COMPLETED);
+
+        // Successful write of intermediate value.
+        setUp(10);
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX, true);
+        value = 0x12;
+        bytesWritten = OctreePacketData.appendUint8Value(data, 2, EntityPropertyList.PROP_PARENT_JOINT_INDEX, value, context);
+        expect(bytesWritten).toBe(1);
+        expect(buffer2hex(data.buffer)).toEqual("00001200000000000000");
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)).toBe(false);
+        expect(context.propertiesWritten.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)).toBe(true);
+        expect(context.propertyCount).toBe(1);
+        expect(context.appendState).toBe(AppendState.COMPLETED);
+
+        // Successful write of max value.
+        setUp(10);
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX, true);
+        value = 0xff;
+        bytesWritten = OctreePacketData.appendUint8Value(data, 2, EntityPropertyList.PROP_PARENT_JOINT_INDEX, value, context);
+        expect(bytesWritten).toBe(1);
+        expect(buffer2hex(data.buffer)).toEqual("0000ff00000000000000");
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)).toBe(false);
+        expect(context.propertiesWritten.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)).toBe(true);
+        expect(context.propertyCount).toBe(1);
+        expect(context.appendState).toBe(AppendState.COMPLETED);
+
+        // Unsuccessful write if insufficient space.
+        setUp(10);
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX, true);
+        value = 0;
+        bytesWritten = OctreePacketData.appendUint8Value(data, 10, EntityPropertyList.PROP_PARENT_JOINT_INDEX, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(buffer2hex(data.buffer)).toEqual("00000000000000000000");
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)).toBe(true);
+        expect(context.propertiesWritten.getHasProperty(EntityPropertyList.PROP_PARENT_JOINT_INDEX)).toBe(false);
+        expect(context.propertyCount).toBe(0);
+        expect(context.appendState).toBe(AppendState.PARTIAL);
+
         tearDown();
     });
 
@@ -601,7 +726,7 @@ describe("OctreePacketData - unit tests", () => {
         // Unsuccessful write if insufficient space.
         setUp(12);
         context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_RENDER_LAYER, true);
-        value = 0;
+        value = 1;
         bytesWritten = OctreePacketData.appendUint32Value(data, 9, EntityPropertyList.PROP_RENDER_LAYER, value,
             UDT.LITTLE_ENDIAN, context);
         expect(bytesWritten).toBe(0);
@@ -822,8 +947,53 @@ describe("OctreePacketData - unit tests", () => {
         tearDown();
     });
 
+    test("Error if try to write an invalid vec2 value", () => {
+        setUp(12);
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_POSITION, true);
+
+        value = "aabbcc";
+        bytesWritten = OctreePacketData.appendVec2Value(data, 2, EntityPropertyList.PROP_POSITION, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid vec2 value to packet!");
+
+        value = { x: -4, y: "" };
+        bytesWritten = OctreePacketData.appendVec2Value(data, 2, EntityPropertyList.PROP_POSITION, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid vec2 value to packet!");
+
+        tearDown();
+    });
+
+    test("Can write a vec2 value", () => {
+        // Successful write.
+        setUp(12);
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_POSITION, true);
+        value = { x: -10.5, y: 1.2 };
+        bytesWritten = OctreePacketData.appendVec2Value(data, 2, EntityPropertyList.PROP_POSITION, value, context);
+        expect(bytesWritten).toBe(8);
+        expect(buffer2hex(data.buffer)).toEqual("0000000028c19a99993f0000");
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(false);
+        expect(context.propertiesWritten.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
+        expect(context.propertyCount).toBe(1);
+        expect(context.appendState).toBe(AppendState.COMPLETED);
+
+        // Unsuccessful write if insufficient space.
+        setUp(12);
+        context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_POSITION, true);
+        value = { x: -10.5, y: 1.2 };
+        bytesWritten = OctreePacketData.appendVec2Value(data, 8, EntityPropertyList.PROP_POSITION, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(buffer2hex(data.buffer)).toEqual("000000000000000000000000");
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
+        expect(context.propertiesWritten.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(false);
+        expect(context.propertyCount).toBe(0);
+        expect(context.appendState).toBe(AppendState.PARTIAL);
+        tearDown();
+    });
+
     test("Error if try to write an invalid vec3 value", () => {
-        setUp(10);
+        setUp(16);
         context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_POSITION, true);
 
         value = "aabbcc";

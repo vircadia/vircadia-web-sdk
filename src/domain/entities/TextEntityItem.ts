@@ -329,4 +329,5 @@ class TextEntityItem {
 }
 
 export default TextEntityItem;
+export { TextAlignment, TextEffect };
 export type { TextEntitySubclassData, TextEntityProperties };

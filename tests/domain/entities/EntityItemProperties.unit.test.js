@@ -110,8 +110,7 @@ describe("EntityItemsProperties - unit test", () => {
         expect(messageData.dataPosition).toBe(EXPECTED_MESSAGE.length / 2);
     });
 
-    test("If no entity properties can fit in the packet then the return value reflects this", () => {
-
+    test("If no entity properties can fit in the packet then the encode return value reflects this", () => {
         const properties = {
             lastEdited: 1688896885851574n,  // Date.now() as count of 100ns ticks since the Unix epoch + 44 clock skew.
             lastEditedBy: new Uuid("a82f40b6-ee89-46cc-b504-02b88d72a546"),

@@ -10,7 +10,7 @@
 //
 
 import EntityPropertyFlags from "../../../src/domain/entities/EntityPropertyFlags";
-import TextEntityItem from "../../../src/domain/entities/TextEntityItem";
+import TextEntityItem, { TextAlignment, TextEffect } from "../../../src/domain/entities/TextEntityItem";
 
 
 describe("TextEntityItem - unit tests", () => {
@@ -59,6 +59,19 @@ describe("TextEntityItem - unit tests", () => {
         expect(textEntity.properties.textColor.blue).toBe(184);
         expect(textEntity.properties.textEffectThickness).toBeCloseTo(0.200, 2);
         expect(textEntity.properties.textAlignment).toBe("left");
+    });
+
+    test("Can get the index of a TextAlignment value", () => {
+        expect(Object.values(TextAlignment).indexOf("left")).toBe(0);
+        expect(Object.values(TextAlignment).indexOf("center")).toBe(1);
+        expect(Object.values(TextAlignment).indexOf("right")).toBe(2);
+    });
+
+    test("Can get the index of a TextEffect value", () => {
+        expect(Object.values(TextEffect).indexOf("none")).toBe(0);
+        expect(Object.values(TextEffect).indexOf("outline")).toBe(1);
+        expect(Object.values(TextEffect).indexOf("outline fill")).toBe(2);
+        expect(Object.values(TextEffect).indexOf("shadow")).toBe(3);
     });
 
 });

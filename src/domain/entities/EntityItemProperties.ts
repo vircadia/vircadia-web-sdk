@@ -19,7 +19,13 @@ import ByteCountCoded from "../shared/ByteCountCoded";
 import Uuid from "../shared/Uuid";
 import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 import { EntityType } from "./EntityTypes";
+import { ImageEntityProperties } from "./ImageEntityItem";
+import { LightEntityProperties } from "./LightEntityItem";
+import { MaterialEntityProperties } from "./MaterialEntityItem";
+import { ParticleEffectEntityProperties } from "./ParticleEffectEntityItem";
 import { ShapeEntityProperties } from "./ShapeEntityItem";
+import { TextEntityProperties, TextAlignment, TextEffect } from "./TextEntityItem";
+import { WebEntityProperties } from "./WebEntityItem";
 
 
 /*@devdoc
@@ -117,7 +123,6 @@ class EntityItemProperties {
         ["compoundShapeURL", EntityPropertyList.PROP_COMPOUND_SHAPE_URL],
         ["color", EntityPropertyList.PROP_COLOR],
         ["alpha", EntityPropertyList.PROP_ALPHA],
-        //changedProperties += _pulse.getChangedProperties();
         // ...PulsePropertyGroup.PROPERTY_MAP,  // Pulse properties are deprecated and aren't implemented in the Web SDK.
         ["textures", EntityPropertyList.PROP_TEXTURES],
 
@@ -624,18 +629,433 @@ class EntityItemProperties {
                 properties.staticCertificateVersion!, UDT.LITTLE_ENDIAN, packetContext);
         }
 
-        // WEBRTC TODO: Address further C++ code - other entity properties.
 
-        if (entityType === EntityType.Box || entityType === EntityType.Sphere || entityType === EntityType.Shape) {
-            const entityProperties = properties as ShapeEntityProperties;
-
+        if (entityType === EntityType.ParticleEffect) {
+            const entityProperties = properties as ParticleEffectEntityProperties;
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SHAPE_TYPE)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_SHAPE_TYPE,
+                    entityProperties.shapeType!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COMPOUND_SHAPE_URL)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition,
+                    EntityPropertyList.PROP_COMPOUND_SHAPE_URL,
+                    entityProperties.compoundShapeURL!, packetContext);
+            }
             if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLOR)) {
                 dataPosition += OctreePacketData.appendColorValue(data, dataPosition, EntityPropertyList.PROP_COLOR,
                     entityProperties.color!, packetContext);
             }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ALPHA)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_ALPHA,
+                    entityProperties.alpha!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            // ... Ignore deprecated pulse properties.
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_TEXTURES)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_TEXTURES,
+                    entityProperties.textures!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MAX_PARTICLES)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_MAX_PARTICLES,
+                    entityProperties.maxParticles!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_LIFESPAN)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_LIFESPAN,
+                    entityProperties.lifespan!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_EMITTING_PARTICLES)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition,
+                    EntityPropertyList.PROP_EMITTING_PARTICLES,
+                    entityProperties.isEmitting!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_EMIT_RATE)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_EMIT_RATE,
+                    entityProperties.emitRate!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_EMIT_SPEED)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_EMIT_SPEED,
+                    entityProperties.emitSpeed!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SPEED_SPREAD)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_SPEED_SPREAD,
+                    entityProperties.speedSpread!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_EMIT_ORIENTATION)) {
+                dataPosition += OctreePacketData.appendQuatValue(data, dataPosition,
+                    EntityPropertyList.PROP_EMIT_ORIENTATION,
+                    entityProperties.emitOrientation!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_EMIT_DIMENSIONS)) {
+                dataPosition += OctreePacketData.appendVec3Value(data, dataPosition,
+                    EntityPropertyList.PROP_EMIT_DIMENSIONS,
+                    entityProperties.emitDimensions!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_EMIT_RADIUS_START)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_EMIT_RADIUS_START,
+                    entityProperties.emitRadiusStart!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_POLAR_START)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_POLAR_START,
+                    entityProperties.polarStart!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_POLAR_FINISH)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_POLAR_FINISH,
+                    entityProperties.polarFinish!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_AZIMUTH_START)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_AZIMUTH_START,
+                    entityProperties.azimuthStart!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_AZIMUTH_FINISH)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_AZIMUTH_FINISH,
+                    entityProperties.azimuthFinish!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_EMIT_ACCELERATION)) {
+                dataPosition += OctreePacketData.appendVec3Value(data, dataPosition,
+                    EntityPropertyList.PROP_EMIT_ACCELERATION,
+                    entityProperties.emitAcceleration!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ACCELERATION_SPREAD)) {
+                dataPosition += OctreePacketData.appendVec3Value(data, dataPosition,
+                    EntityPropertyList.PROP_ACCELERATION_SPREAD,
+                    entityProperties.accelerationSpread!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_PARTICLE_RADIUS)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_PARTICLE_RADIUS,
+                    entityProperties.particleRadius!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_RADIUS_SPREAD)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_RADIUS_SPREAD,
+                    entityProperties.radiusSpread!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_RADIUS_START)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_RADIUS_START,
+                    entityProperties.radiusStart!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_RADIUS_FINISH)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_RADIUS_FINISH,
+                    entityProperties.radiusFinish!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLOR_SPREAD)) {
+                dataPosition += OctreePacketData.appendColorValue(data, dataPosition, EntityPropertyList.PROP_COLOR_SPREAD,
+                    entityProperties.colorSpread!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLOR_START)) {
+                dataPosition += OctreePacketData.appendVec3Value(data, dataPosition, EntityPropertyList.PROP_COLOR_START,
+                    {
+                        x: entityProperties.colorStart!.red,
+                        y: entityProperties.colorStart!.green,
+                        z: entityProperties.colorStart!.blue
+                    }, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLOR_FINISH)) {
+                dataPosition += OctreePacketData.appendVec3Value(data, dataPosition, EntityPropertyList.PROP_COLOR_FINISH,
+                    {
+                        x: entityProperties.colorFinish!.red,
+                        y: entityProperties.colorFinish!.green,
+                        z: entityProperties.colorFinish!.blue
+                    }, packetContext);
+            }
 
-            // WEBRTC TODO: Address further C++ code - other entity properties.
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ALPHA_SPREAD)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_ALPHA_SPREAD,
+                    entityProperties.alphaSpread!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ALPHA_START)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_ALPHA_START,
+                    entityProperties.alphaStart!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ALPHA_FINISH)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_ALPHA_FINISH,
+                    entityProperties.alphaFinish!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_EMITTER_SHOULD_TRAIL)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition,
+                    EntityPropertyList.PROP_EMITTER_SHOULD_TRAIL,
+                    entityProperties.emitterShouldTrail!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_PARTICLE_SPIN)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_PARTICLE_SPIN,
+                    entityProperties.particleSpin!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SPIN_SPREAD)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_SPIN_SPREAD,
+                    entityProperties.spinSpread!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SPIN_START)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_SPIN_START,
+                    entityProperties.spinStart!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SPIN_FINISH)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_SPIN_FINISH,
+                    entityProperties.spinFinish!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_PARTICLE_ROTATE_WITH_ENTITY)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition,
+                    EntityPropertyList.PROP_PARTICLE_ROTATE_WITH_ENTITY,
+                    entityProperties.rotateWithEntity!, packetContext);
+            }
+        }
 
+        // WEBRTC TODO: Address further C++ code - other entity properties.
+
+        if (entityType === EntityType.Light) {
+            const entityProperties = properties as LightEntityProperties;
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLOR)) {
+                dataPosition += OctreePacketData.appendColorValue(data, dataPosition, EntityPropertyList.PROP_COLOR,
+                    entityProperties.color!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_IS_SPOTLIGHT)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_IS_SPOTLIGHT,
+                    entityProperties.isSpotlight!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_INTENSITY)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_INTENSITY,
+                    entityProperties.intensity!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_EXPONENT)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_EXPONENT,
+                    entityProperties.exponent!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_CUTOFF)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_CUTOFF,
+                    entityProperties.cutoff!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_FALLOFF_RADIUS)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_FALLOFF_RADIUS,
+                    entityProperties.falloffRadius!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+        }
+
+        if (entityType === EntityType.Text) {
+            const entityProperties = properties as TextEntityProperties;
+            // ... Ignore deprecated pulse properties.
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_TEXT)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_TEXT,
+                    entityProperties.text!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_LINE_HEIGHT)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_LINE_HEIGHT,
+                    entityProperties.lineHeight!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_TEXT_COLOR)) {
+                dataPosition += OctreePacketData.appendColorValue(data, dataPosition, EntityPropertyList.PROP_TEXT_COLOR,
+                    entityProperties.textColor!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_TEXT_ALPHA)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_TEXT_ALPHA,
+                    entityProperties.textAlpha!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_BACKGROUND_COLOR)) {
+                dataPosition += OctreePacketData.appendColorValue(data, dataPosition, EntityPropertyList.PROP_BACKGROUND_COLOR,
+                    entityProperties.backgroundColor!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_BACKGROUND_ALPHA)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_BACKGROUND_ALPHA,
+                    entityProperties.backgroundAlpha!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_LEFT_MARGIN)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_LEFT_MARGIN,
+                    entityProperties.leftMargin!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_RIGHT_MARGIN)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_RIGHT_MARGIN,
+                    entityProperties.rightMargin!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_TOP_MARGIN)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_TOP_MARGIN,
+                    entityProperties.topMargin!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_BOTTOM_MARGIN)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_BOTTOM_MARGIN,
+                    entityProperties.bottomMargin!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_UNLIT)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_UNLIT,
+                    entityProperties.unlit!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_FONT)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_FONT,
+                    entityProperties.font!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_TEXT_EFFECT)) {
+                const textEffectValue = Object.values(TextEffect).indexOf(entityProperties.textEffect!);
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_TEXT_EFFECT,
+                    textEffectValue, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_TEXT_EFFECT_COLOR)) {
+                dataPosition += OctreePacketData.appendColorValue(data, dataPosition, EntityPropertyList.PROP_TEXT_EFFECT_COLOR,
+                    entityProperties.textEffectColor!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_TEXT_EFFECT_THICKNESS)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_TEXT_EFFECT_THICKNESS,
+                    entityProperties.textEffectThickness!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_TEXT_ALIGNMENT)) {
+                const textAlignmentValue = Object.values(TextAlignment).indexOf(entityProperties.textAlignment!);
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_TEXT_ALIGNMENT,
+                    textAlignmentValue, UDT.LITTLE_ENDIAN, packetContext);
+            }
+        }
+
+        // WEBRTC TODO: Address further C++ code - other entity properties.
+
+        if (entityType === EntityType.Web) {
+            const entityProperties = properties as WebEntityProperties;
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLOR)) {
+                dataPosition += OctreePacketData.appendColorValue(data, dataPosition, EntityPropertyList.PROP_COLOR,
+                    entityProperties.color!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ALPHA)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_ALPHA,
+                    entityProperties.alpha!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            // ... Ignore deprecated pulse properties.
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SOURCE_URL)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_SOURCE_URL,
+                    entityProperties.sourceURL!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_DPI)) {
+                dataPosition += OctreePacketData.appendUint16Value(data, dataPosition, EntityPropertyList.PROP_DPI,
+                    entityProperties.dpi!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SCRIPT_URL)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_SCRIPT_URL,
+                    entityProperties.scriptURL!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MAX_FPS)) {
+                dataPosition += OctreePacketData.appendUint8Value(data, dataPosition, EntityPropertyList.PROP_MAX_FPS,
+                    entityProperties.maxFPS!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_INPUT_MODE)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_INPUT_MODE,
+                    entityProperties.inputMode!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SHOW_KEYBOARD_FOCUS_HIGHLIGHT)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition,
+                    EntityPropertyList.PROP_SHOW_KEYBOARD_FOCUS_HIGHLIGHT,
+                    entityProperties.showKeyboardFocusHighlight!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_WEB_USE_BACKGROUND)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition,
+                    EntityPropertyList.PROP_WEB_USE_BACKGROUND,
+                    entityProperties.useBackground!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_USER_AGENT)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_USER_AGENT,
+                    entityProperties.userAgent!, packetContext);
+            }
+        }
+
+        // WEBRTC TODO: Address further C++ code - other entity properties.
+
+        if (entityType === EntityType.Box || entityType === EntityType.Sphere || entityType === EntityType.Shape) {
+            const entityProperties = properties as ShapeEntityProperties;
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLOR)) {
+                dataPosition += OctreePacketData.appendColorValue(data, dataPosition, EntityPropertyList.PROP_COLOR,
+                    entityProperties.color!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ALPHA)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_ALPHA,
+                    entityProperties.alpha!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            // ... Ignore deprecated pulse properties.
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SHAPE)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_SHAPE,
+                    entityProperties.shape!, packetContext);
+            }
+        }
+
+        // WEBRTC TODO: Address further C++ code - other entity properties.
+
+        if (entityType === EntityType.Material) {
+            const entityProperties = properties as MaterialEntityProperties;
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MATERIAL_URL)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_MATERIAL_URL,
+                    entityProperties.materialURL!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MATERIAL_MAPPING_MODE)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition,
+                    EntityPropertyList.PROP_MATERIAL_MAPPING_MODE,
+                    entityProperties.materialMappingMode!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MATERIAL_PRIORITY)) {
+                dataPosition += OctreePacketData.appendUint16Value(data, dataPosition,
+                    EntityPropertyList.PROP_MATERIAL_PRIORITY,
+                    entityProperties.priority!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_PARENT_MATERIAL_NAME)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition,
+                    EntityPropertyList.PROP_PARENT_MATERIAL_NAME,
+                    entityProperties.parentMaterialName!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MATERIAL_MAPPING_POS)) {
+                dataPosition += OctreePacketData.appendVec2Value(data, dataPosition,
+                    EntityPropertyList.PROP_MATERIAL_MAPPING_POS,
+                    entityProperties.materialMappingPos!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MATERIAL_MAPPING_SCALE)) {
+                dataPosition += OctreePacketData.appendVec2Value(data, dataPosition,
+                    EntityPropertyList.PROP_MATERIAL_MAPPING_SCALE,
+                    entityProperties.materialMappingScale!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MATERIAL_MAPPING_ROT)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition,
+                    EntityPropertyList.PROP_MATERIAL_MAPPING_ROT,
+                    entityProperties.materialMappingRot!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MATERIAL_DATA)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_MATERIAL_DATA,
+                    entityProperties.materialData!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MATERIAL_REPEAT)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_MATERIAL_REPEAT,
+                    entityProperties.materialRepeat!, packetContext);
+            }
+        }
+
+        if (entityType === EntityType.Image) {
+            const entityProperties = properties as ImageEntityProperties;
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLOR)) {
+                dataPosition += OctreePacketData.appendColorValue(data, dataPosition, EntityPropertyList.PROP_COLOR,
+                    entityProperties.color!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_ALPHA)) {
+                dataPosition += OctreePacketData.appendFloat32Value(data, dataPosition, EntityPropertyList.PROP_ALPHA,
+                    entityProperties.alpha!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            // ... Ignore deprecated pulse properties.
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_IMAGE_URL)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_IMAGE_URL,
+                    entityProperties.imageURL!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_EMISSIVE)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_EMISSIVE,
+                    entityProperties.emissive!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_KEEP_ASPECT_RATIO)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition,
+                    EntityPropertyList.PROP_KEEP_ASPECT_RATIO,
+                    entityProperties.keepAspectRatio!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SUB_IMAGE)) {
+                dataPosition += OctreePacketData.appendRectValue(data, dataPosition, EntityPropertyList.PROP_SUB_IMAGE,
+                    entityProperties.subImage!, packetContext);
+            }
         }
 
         // WEBRTC TODO: Address further C++ code - other entity properties.

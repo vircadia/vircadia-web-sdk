@@ -45,10 +45,10 @@ class ImageEntityItem {
     /*@sdkdoc
      *  Defines a rectangular portion of an image or screen, or similar.
      *  @typedef {object} rect
-     *  @property {number} x - Left, x-coordinate value.
-     *  @property {number} y - Top, y-coordinate value.
-     *  @property {number} width - Width of the rectangle.
-     *  @property {number} height - Height of the rectangle.
+     *  @property {number} x - Left, x-coordinate value. Unsigned integer.
+     *  @property {number} y - Top, y-coordinate value. Unsigned integer.
+     *  @property {number} width - Width of the rectangle. Unsigned integer.
+     *  @property {number} height - Height of the rectangle. Unsigned integer.
      */
 
     /*@sdkdoc
