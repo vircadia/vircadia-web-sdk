@@ -56,7 +56,7 @@ describe("OctreePacketData - unit tests", () => {
     }
 
     test("Error if try to write an invalid AACube value", () => {
-        setUp(10);
+        setUp(20);
         context.propertiesToWrite.setHasProperty(EntityPropertyList.PROP_QUERY_AA_CUBE, true);
 
         value = "aabbcc";
@@ -65,6 +65,18 @@ describe("OctreePacketData - unit tests", () => {
         expect(errorMessage).toBe("[EntityServer] Cannot write invalid AACube value to packet!");
 
         value = { corner: { x: -4, y: -10.5, z: 1 }, scale: "" };
+        bytesWritten = OctreePacketData.appendAACubeValue(data, 2, EntityPropertyList.PROP_QUERY_AA_CUBE, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_QUERY_AA_CUBE)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid AACube value to packet!");
+
+        value = { corner: { x: -4, y: -10.5, z: -1.1 * MAX_FLOAT32 }, scale: 1 };
+        bytesWritten = OctreePacketData.appendAACubeValue(data, 2, EntityPropertyList.PROP_QUERY_AA_CUBE, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_QUERY_AA_CUBE)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid AACube value to packet!");
+
+        value = { corner: { x: -4, y: -10.5, z: 1 }, scale: 1.1 * MAX_FLOAT32 };
         bytesWritten = OctreePacketData.appendAACubeValue(data, 2, EntityPropertyList.PROP_QUERY_AA_CUBE, value, context);
         expect(bytesWritten).toBe(0);
         expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_QUERY_AA_CUBE)).toBe(true);
@@ -962,6 +974,18 @@ describe("OctreePacketData - unit tests", () => {
         expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
         expect(errorMessage).toBe("[EntityServer] Cannot write invalid vec2 value to packet!");
 
+        value = { x: -1.1 * MAX_FLOAT32, y: 1 };
+        bytesWritten = OctreePacketData.appendVec2Value(data, 2, EntityPropertyList.PROP_POSITION, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid vec2 value to packet!");
+
+        value = { x: -4, y: 1.1 * MAX_FLOAT32 };
+        bytesWritten = OctreePacketData.appendVec2Value(data, 2, EntityPropertyList.PROP_POSITION, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid vec2 value to packet!");
+
         tearDown();
     });
 
@@ -1002,6 +1026,18 @@ describe("OctreePacketData - unit tests", () => {
         expect(errorMessage).toBe("[EntityServer] Cannot write invalid vec3 value to packet!");
 
         value = { x: -4, y: -10.5, z: "" };
+        bytesWritten = OctreePacketData.appendVec3Value(data, 2, EntityPropertyList.PROP_POSITION, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid vec3 value to packet!");
+
+        value = { x: -1.1 * MAX_FLOAT32, y: -10.5, z: 1 };
+        bytesWritten = OctreePacketData.appendVec3Value(data, 2, EntityPropertyList.PROP_POSITION, value, context);
+        expect(bytesWritten).toBe(0);
+        expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
+        expect(errorMessage).toBe("[EntityServer] Cannot write invalid vec3 value to packet!");
+
+        value = { x: -4, y: -10.5, z: 1.1 * MAX_FLOAT32 };
         bytesWritten = OctreePacketData.appendVec3Value(data, 2, EntityPropertyList.PROP_POSITION, value, context);
         expect(bytesWritten).toBe(0);
         expect(context.propertiesToWrite.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);

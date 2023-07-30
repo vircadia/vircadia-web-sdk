@@ -64,8 +64,13 @@ class OctreePacketData {
     static appendAACubeValue(data: DataView, dataPosition: number, flag: number, value: AACube,
         packetContext: OctreePacketContext): number {
         // C++  bool appendPosition(const glm::vec3& value)
+        const MAX_FLOAT32 = 3.4028235e38;
         const valid = typeof value.corner === "object" && typeof value.corner.x === "number"
-            && typeof value.corner.y === "number" && typeof value.corner.z === "number" && typeof value.scale === "number";
+            && typeof value.corner.y === "number" && typeof value.corner.z === "number" && typeof value.scale === "number"
+            && -MAX_FLOAT32 <= value.corner.x && value.corner.x <= MAX_FLOAT32
+            && -MAX_FLOAT32 <= value.corner.y && value.corner.y <= MAX_FLOAT32
+            && -MAX_FLOAT32 <= value.corner.z && value.corner.z <= MAX_FLOAT32
+            && 0.0 <= value.scale && value.scale <= MAX_FLOAT32;
         if (!valid) {
             console.error("[EntityServer] Cannot write invalid AACube value to packet!");
             return 0;
@@ -536,7 +541,10 @@ class OctreePacketData {
     static appendVec2Value(data: DataView, dataPosition: number, flag: number, value: vec2,
         packetContext: OctreePacketContext): number {
         // C++  bool appendPosition(const glm::vec2& value)
-        const valid = typeof value.x === "number" && typeof value.y === "number";
+        const MAX_FLOAT32 = 3.4028235e38;
+        const valid = typeof value.x === "number" && typeof value.y === "number"
+            && -MAX_FLOAT32 <= value.x && value.x <= MAX_FLOAT32
+            && -MAX_FLOAT32 <= value.y && value.y <= MAX_FLOAT32;
         if (!valid) {
             console.error("[EntityServer] Cannot write invalid vec2 value to packet!");
             return 0;
@@ -567,7 +575,11 @@ class OctreePacketData {
     static appendVec3Value(data: DataView, dataPosition: number, flag: number, value: vec3,
         packetContext: OctreePacketContext): number {
         // C++  bool appendPosition(const glm::vec3& value)
-        const valid = typeof value.x === "number" && typeof value.y === "number" && typeof value.z === "number";
+        const MAX_FLOAT32 = 3.4028235e38;
+        const valid = typeof value.x === "number" && typeof value.y === "number" && typeof value.z === "number"
+            && -MAX_FLOAT32 <= value.x && value.x <= MAX_FLOAT32
+            && -MAX_FLOAT32 <= value.y && value.y <= MAX_FLOAT32
+            && -MAX_FLOAT32 <= value.z && value.z <= MAX_FLOAT32;
         if (!valid) {
             console.error("[EntityServer] Cannot write invalid vec3 value to packet!");
             return 0;
