@@ -68,15 +68,15 @@ describe("ModelEntityItem - unit tests", () => {
         expect(modelEntity.properties.groupCulled).toBe(false);
         expect(modelEntity.properties.blendShapeCoefficients).toBe("{\n}\n");
         expect(modelEntity.properties.useOriginalPivot).toBe(false);
-        expect(modelEntity.properties.animation.animationURL).toBe("");
-        expect(modelEntity.properties.animation.animationAllowTranslation).toBe(true);
-        expect(modelEntity.properties.animation.animationFPS).toBeCloseTo(30, 2);
-        expect(modelEntity.properties.animation.animationFrameIndex).toBeCloseTo(0, 2);
-        expect(modelEntity.properties.animation.animationPlaying).toBe(false);
-        expect(modelEntity.properties.animation.animationLoop).toBe(true);
-        expect(modelEntity.properties.animation.animationFirstFrame).toBeCloseTo(0, 2);
-        expect(modelEntity.properties.animation.animationLastFrame).toBeCloseTo(100000, 2);
-        expect(modelEntity.properties.animation.animationHold).toBe(false);
+        expect(modelEntity.properties.animation.url).toBe("");
+        expect(modelEntity.properties.animation.allowTranslation).toBe(true);
+        expect(modelEntity.properties.animation.fps).toBeCloseTo(30, 2);
+        expect(modelEntity.properties.animation.frameIndex).toBeCloseTo(0, 2);
+        expect(modelEntity.properties.animation.playing).toBe(false);
+        expect(modelEntity.properties.animation.loop).toBe(true);
+        expect(modelEntity.properties.animation.firstFrame).toBeCloseTo(0, 2);
+        expect(modelEntity.properties.animation.lastFrame).toBeCloseTo(100000, 2);
+        expect(modelEntity.properties.animation.hold).toBe(false);
     });
 
 });

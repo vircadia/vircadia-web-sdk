@@ -169,15 +169,15 @@ describe("EntityData - unit tests", () => {
         expect(info[0].groupCulled).toBe(false);
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[0].useOriginalPivot).toBe(true);
-        expect(info[0].animation.animationURL).toBe("");
-        expect(info[0].animation.animationAllowTranslation).toBe(false);
-        expect(info[0].animation.animationFPS).toBeCloseTo(30, 2);
-        expect(info[0].animation.animationFrameIndex).toBeCloseTo(0, 2);
-        expect(info[0].animation.animationPlaying).toBe(false);
-        expect(info[0].animation.animationLoop).toBe(true);
-        expect(info[0].animation.animationFirstFrame).toBeCloseTo(0, 2);
-        expect(info[0].animation.animationLastFrame).toBeCloseTo(100000, 2);
-        expect(info[0].animation.animationHold).toBe(false);
+        expect(info[0].animation.url).toBe("");
+        expect(info[0].animation.allowTranslation).toBe(false);
+        expect(info[0].animation.fps).toBeCloseTo(30, 2);
+        expect(info[0].animation.frameIndex).toBeCloseTo(0, 2);
+        expect(info[0].animation.playing).toBe(false);
+        expect(info[0].animation.loop).toBe(true);
+        expect(info[0].animation.firstFrame).toBeCloseTo(0, 2);
+        expect(info[0].animation.lastFrame).toBeCloseTo(100000, 2);
+        expect(info[0].animation.hold).toBe(false);
     });
 
     test("Can read two Model entities in a packet", () => {
@@ -297,15 +297,15 @@ describe("EntityData - unit tests", () => {
         expect(info[0].groupCulled).toBe(false);
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[0].useOriginalPivot).toBe(true);
-        expect(info[0].animation.animationURL).toBe("");
-        expect(info[0].animation.animationAllowTranslation).toBe(false);
-        expect(info[0].animation.animationFPS).toBeCloseTo(30, 2);
-        expect(info[0].animation.animationFrameIndex).toBeCloseTo(0, 2);
-        expect(info[0].animation.animationPlaying).toBe(false);
-        expect(info[0].animation.animationLoop).toBe(true);
-        expect(info[0].animation.animationFirstFrame).toBeCloseTo(0, 2);
-        expect(info[0].animation.animationLastFrame).toBeCloseTo(100000, 2);
-        expect(info[0].animation.animationHold).toBe(false);
+        expect(info[0].animation.url).toBe("");
+        expect(info[0].animation.allowTranslation).toBe(false);
+        expect(info[0].animation.fps).toBeCloseTo(30, 2);
+        expect(info[0].animation.frameIndex).toBeCloseTo(0, 2);
+        expect(info[0].animation.playing).toBe(false);
+        expect(info[0].animation.loop).toBe(true);
+        expect(info[0].animation.firstFrame).toBeCloseTo(0, 2);
+        expect(info[0].animation.lastFrame).toBeCloseTo(100000, 2);
+        expect(info[0].animation.hold).toBe(false);
 
         // Second Model Entity.
         expect(info[1].entityItemID instanceof Uuid).toBe(true);
@@ -444,15 +444,15 @@ describe("EntityData - unit tests", () => {
         expect(info[1].groupCulled).toBe(false);
         expect(info[1].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[1].useOriginalPivot).toBe(true);
-        expect(info[1].animation.animationURL).toBe("");
-        expect(info[1].animation.animationAllowTranslation).toBe(false);
-        expect(info[1].animation.animationFPS).toBeCloseTo(30, 2);
-        expect(info[1].animation.animationFrameIndex).toBeCloseTo(0, 2);
-        expect(info[1].animation.animationPlaying).toBe(false);
-        expect(info[1].animation.animationLoop).toBe(true);
-        expect(info[1].animation.animationFirstFrame).toBeCloseTo(0, 2);
-        expect(info[1].animation.animationLastFrame).toBeCloseTo(100000, 2);
-        expect(info[1].animation.animationHold).toBe(false);
+        expect(info[1].animation.url).toBe("");
+        expect(info[1].animation.allowTranslation).toBe(false);
+        expect(info[1].animation.fps).toBeCloseTo(30, 2);
+        expect(info[1].animation.frameIndex).toBeCloseTo(0, 2);
+        expect(info[1].animation.playing).toBe(false);
+        expect(info[1].animation.loop).toBe(true);
+        expect(info[1].animation.firstFrame).toBeCloseTo(0, 2);
+        expect(info[1].animation.lastFrame).toBeCloseTo(100000, 2);
+        expect(info[1].animation.hold).toBe(false);
     });
 
     test("Can read a Model entity and a Shape entity in the same packet", () => {
@@ -601,15 +601,15 @@ describe("EntityData - unit tests", () => {
         expect(info[0].groupCulled).toBe(false);
         expect(info[0].blendShapeCoefficients).toBe("{\n}\n");
         expect(info[0].useOriginalPivot).toBe(true);
-        expect(info[0].animation.animationURL).toBe("");
-        expect(info[0].animation.animationAllowTranslation).toBe(false);
-        expect(info[0].animation.animationFPS).toBeCloseTo(30, 2);
-        expect(info[0].animation.animationFrameIndex).toBeCloseTo(0, 2);
-        expect(info[0].animation.animationPlaying).toBe(false);
-        expect(info[0].animation.animationLoop).toBe(true);
-        expect(info[0].animation.animationFirstFrame).toBeCloseTo(0, 2);
-        expect(info[0].animation.animationLastFrame).toBeCloseTo(100000, 2);
-        expect(info[0].animation.animationHold).toBe(false);
+        expect(info[0].animation.url).toBe("");
+        expect(info[0].animation.allowTranslation).toBe(false);
+        expect(info[0].animation.fps).toBeCloseTo(30, 2);
+        expect(info[0].animation.frameIndex).toBeCloseTo(0, 2);
+        expect(info[0].animation.playing).toBe(false);
+        expect(info[0].animation.loop).toBe(true);
+        expect(info[0].animation.firstFrame).toBeCloseTo(0, 2);
+        expect(info[0].animation.lastFrame).toBeCloseTo(100000, 2);
+        expect(info[0].animation.hold).toBe(false);
 
         // Shape Entity.
         expect(info[1].entityItemID instanceof Uuid).toBe(true);

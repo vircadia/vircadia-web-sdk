@@ -20,15 +20,15 @@ import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 
 
 type AnimationProperties = {
-    animationURL: string | undefined;
-    animationAllowTranslation: boolean | undefined;
-    animationFPS: number | undefined;
-    animationFrameIndex: number | undefined;
-    animationPlaying: boolean | undefined;
-    animationLoop: boolean | undefined;
-    animationFirstFrame: number | undefined;
-    animationLastFrame: number | undefined;
-    animationHold: boolean | undefined;
+    url: string | undefined;
+    allowTranslation: boolean | undefined;
+    fps: number | undefined;
+    frameIndex: number | undefined;
+    playing: boolean | undefined;
+    loop: boolean | undefined;
+    firstFrame: number | undefined;
+    lastFrame: number | undefined;
+    hold: boolean | undefined;
 };
 
 type ModelEntitySubclassProperties = {
@@ -68,19 +68,19 @@ class ModelEntityItem {
     /*@sdkdoc
      *  An animation is configured by the following properties.
      *  @typedef {object} AnimationProperties
-     *  @property {string|undefined} animationURL="" - The URL of the glTF or FBX file that has the animation. glTF files may be
+     *  @property {string|undefined} url="" - The URL of the glTF or FBX file that has the animation. glTF files may be
      *      in JSON or binary format (".gltf" or ".glb" URLs respectively).
-     *  @property {boolean|undefined} animationAllowTranslation=true - <code>true</code> to enable translations contained in the
+     *  @property {boolean|undefined} allowTranslation=true - <code>true</code> to enable translations contained in the
      *      animation to be played, <code>false</code> to disable translations.
-     *  @property {number|undefined} animationFPS=30 - The speed in frames/s that the animation is played at.
-     *  @property {number|undefined} animationFirstFrame=0 - The first frame to play in the animation.
-     *  @property {number|undefined} animationLastFrame=100000 - The last frame to play in the animation.
-     *  @property {number|undefined} animationFrameIndex=0 - The current frame being played in the animation.
-     *  @property {boolean|undefined} animationPlaning=false - <code>true</code> if the animation should play,
+     *  @property {number|undefined} fps=30 - The speed in frames/s that the animation is played at.
+     *  @property {number|undefined} firstFrame=0 - The first frame to play in the animation.
+     *  @property {number|undefined} lastFrame=100000 - The last frame to play in the animation.
+     *  @property {number|undefined} frameIndex=0 - The current frame being played in the animation.
+     *  @property {boolean|undefined} playing=false - <code>true</code> if the animation should play,
      *      <code>false</code> if it shouldn't.
-     *  @property {boolean|undefined} animationLoop=true - <code>true</code> if the animation is continuously repeated in a
+     *  @property {boolean|undefined} loop=true - <code>true</code> if the animation is continuously repeated in a
      *      loop, <code>false</code> if it isn't.
-     *  @property {boolean|undefined} animationHold=false - <code>true</code> if the rotations and translations of the last
+     *  @property {boolean|undefined} hold=false - <code>true</code> if the rotations and translations of the last
      *      frame played are maintained when the animation stops playing, <code>false</code> if they aren't.
      */
 
@@ -333,65 +333,65 @@ class ModelEntityItem {
             dataPosition += 1;
         }
 
-        let animationURL: string | undefined = undefined;
+        let url: string | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_URL)) {
             const length = data.getUint16(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 2;
             if (length > 0) {
-                animationURL = textDecoder.decode(
+                url = textDecoder.decode(
                     new Uint8Array(data.buffer, data.byteOffset + dataPosition, length)
                 );
                 dataPosition += length;
             } else {
-                animationURL = "";
+                url = "";
             }
         }
 
-        let animationAllowTranslation: boolean | undefined = undefined;
+        let allowTranslation: boolean | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_ALLOW_TRANSLATION)) {
-            animationAllowTranslation = Boolean(data.getUint8(dataPosition));
+            allowTranslation = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
-        let animationFPS: number | undefined = undefined;
+        let fps: number | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_FPS)) {
-            animationFPS = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+            fps = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
-        let animationFrameIndex: number | undefined = undefined;
+        let frameIndex: number | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_FRAME_INDEX)) {
-            animationFrameIndex = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+            frameIndex = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
-        let animationPlaying: boolean | undefined = undefined;
+        let playing: boolean | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_PLAYING)) {
-            animationPlaying = Boolean(data.getUint8(dataPosition));
+            playing = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
-        let animationLoop: boolean | undefined = undefined;
+        let loop: boolean | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_LOOP)) {
-            animationLoop = Boolean(data.getUint8(dataPosition));
+            loop = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
-        let animationFirstFrame: number | undefined = undefined;
+        let firstFrame: number | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_FIRST_FRAME)) {
-            animationFirstFrame = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+            firstFrame = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
-        let animationLastFrame: number | undefined = undefined;
+        let lastFrame: number | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_LAST_FRAME)) {
-            animationLastFrame = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+            lastFrame = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
-        let animationHold: boolean | undefined = undefined;
+        let hold: boolean | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_HOLD)) {
-            animationHold = Boolean(data.getUint8(dataPosition));
+            hold = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
@@ -413,15 +413,15 @@ class ModelEntityItem {
                 blendShapeCoefficients,
                 useOriginalPivot,
                 animation: {
-                    animationURL,
-                    animationAllowTranslation,
-                    animationFPS,
-                    animationFrameIndex,
-                    animationPlaying,
-                    animationLoop,
-                    animationFirstFrame,
-                    animationLastFrame,
-                    animationHold
+                    url,
+                    allowTranslation,
+                    fps,
+                    frameIndex,
+                    playing,
+                    loop,
+                    firstFrame,
+                    lastFrame,
+                    hold
                 }
             }
         };
