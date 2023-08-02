@@ -17,11 +17,13 @@ import OctreePacketData, { OctreePacketContext } from "../octree/OctreePacketDat
 import assert from "../shared/assert";
 import ByteCountCoded from "../shared/ByteCountCoded";
 import Uuid from "../shared/Uuid";
+import AnimationPropertyGroup from "./AnimationPropertyGroup";
 import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 import { EntityType } from "./EntityTypes";
 import { ImageEntityProperties } from "./ImageEntityItem";
 import { LightEntityProperties } from "./LightEntityItem";
 import { MaterialEntityProperties } from "./MaterialEntityItem";
+import { ModelEntityProperties } from "./ModelEntityItem";
 import { ParticleEffectEntityProperties } from "./ParticleEffectEntityItem";
 import { ShapeEntityProperties } from "./ShapeEntityItem";
 import { TextEntityProperties, TextAlignment, TextEffect } from "./TextEntityItem";
@@ -123,7 +125,7 @@ class EntityItemProperties {
         ["compoundShapeURL", EntityPropertyList.PROP_COMPOUND_SHAPE_URL],
         ["color", EntityPropertyList.PROP_COLOR],
         ["alpha", EntityPropertyList.PROP_ALPHA],
-        // ...PulsePropertyGroup.PROPERTY_MAP,  // Pulse properties are deprecated and aren't implemented in the Web SDK.
+        // PulsePropertyGroup.PROPERTY_MAP,  // Pulse properties are deprecated and aren't implemented in the Web SDK.
         ["textures", EntityPropertyList.PROP_TEXTURES],
 
         // Particles
@@ -170,7 +172,7 @@ class EntityItemProperties {
         ["groupCulled", EntityPropertyList.PROP_GROUP_CULLED],
         ["blendshapeCoefficiengts", EntityPropertyList.PROP_BLENDSHAPE_COEFFICIENTS],
         ["useOriginalPivot", EntityPropertyList.PROP_USE_ORIGINAL_PIVOT],
-        //changedProperties += _animation.getChangedProperties();
+        // AnimationPropertyGroup.PROPERTY_MAP,  // These are handled in AnimationPropertyGroup.
 
         // Light
         ["isSpotlight", EntityPropertyList.PROP_IS_SPOTLIGHT],
@@ -294,20 +296,25 @@ class EntityItemProperties {
             if (propertyValue !== undefined) {
                 changedProperties.setHasProperty(propertyValue, true);
             }
-            // WEBRTC TODO: Handle group properties.
         }
+
+        if (properties.entityType === EntityType.Model) {
+            changedProperties.or(AnimationPropertyGroup.getChangedProperties(properties as ModelEntityProperties));
+        }
+        // WEBRTC TODO: Handle other entity types.
+
         return changedProperties;
     }
 
     /*@devdoc
-        Writes as many entity properties as can fit in the buffer.
-        @param {Uuid} id - The entity ID.
-        @param {EntityProperties} properties - A set of entity properties and values.
-        @param {MessageData} buffer - The buffer to write the entity properties to.
-        @param {EntityPropertyFlags} requestedProperties - The properties that are requested to be written.
-        @param {EntityPropertyFlags} didntFitProperties - The properties that couldn't be written to the buffer this call.
-        @returns {AppendState} Whether all, some, or none of the requested properties were written. Any properties that weren't
-            written are returned in the <code>didntFitProperties</code> parameter.
+     *  Writes as many entity properties as can fit in the buffer.
+     *  @param {Uuid} id - The entity ID.
+     *  @param {EntityProperties} properties - A set of entity properties and values. Must include the entity type.
+     *  @param {MessageData} buffer - The buffer to write the entity properties to.
+     *  @param {EntityPropertyFlags} requestedProperties - The properties that are requested to be written.
+     *  @param {EntityPropertyFlags} didntFitProperties - The properties that couldn't be written to the buffer this call.
+     *  @returns {AppendState} Whether all, some, or none of the requested properties were written. Any properties that weren't
+     *      written are returned in the <code>didntFitProperties</code> parameter.
      */
     static encodeEntityEditPacket(/* command: PacketTypeValue, */ id: Uuid, properties: EntityProperties,
         buffer: MessageData, requestedProperties: EntityPropertyFlags, didntFitProperties: EntityPropertyFlags): AppendState {
@@ -809,7 +816,75 @@ class EntityItemProperties {
             }
         }
 
-        // WEBRTC TODO: Address further C++ code - other entity properties.
+        if (entityType === EntityType.Model) {
+            const entityProperties = properties as ModelEntityProperties;
+
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SHAPE_TYPE)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_SHAPE_TYPE,
+                    entityProperties.shapeType!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COMPOUND_SHAPE_URL)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition,
+                    EntityPropertyList.PROP_COMPOUND_SHAPE_URL,
+                    entityProperties.compoundShapeURL!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COLOR)) {
+                dataPosition += OctreePacketData.appendColorValue(data, dataPosition, EntityPropertyList.PROP_COLOR,
+                    entityProperties.color!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_TEXTURES)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition,
+                    EntityPropertyList.PROP_TEXTURES,
+                    entityProperties.textures!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MODEL_URL)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition,
+                    EntityPropertyList.PROP_MODEL_URL,
+                    entityProperties.modelURL!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_MODEL_SCALE)) {
+                dataPosition += OctreePacketData.appendVec3Value(data, dataPosition, EntityPropertyList.PROP_MODEL_SCALE,
+                    entityProperties.modelScale!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_JOINT_ROTATIONS_SET)) {
+                dataPosition += OctreePacketData.appendBooleanArray(data, dataPosition,
+                    EntityPropertyList.PROP_JOINT_ROTATIONS_SET,
+                    entityProperties.jointRotationsSet!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_JOINT_ROTATIONS)) {
+                dataPosition += OctreePacketData.appendQuatArray(data, dataPosition, EntityPropertyList.PROP_JOINT_ROTATIONS,
+                    entityProperties.jointRotations!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_JOINT_TRANSLATIONS_SET)) {
+                dataPosition += OctreePacketData.appendBooleanArray(data, dataPosition,
+                    EntityPropertyList.PROP_JOINT_TRANSLATIONS_SET,
+                    entityProperties.jointTranslationsSet!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_JOINT_TRANSLATIONS)) {
+                dataPosition += OctreePacketData.appendVec3Array(data, dataPosition, EntityPropertyList.PROP_JOINT_TRANSLATIONS,
+                    entityProperties.jointTranslations!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_RELAY_PARENT_JOINTS)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition,
+                    EntityPropertyList.PROP_RELAY_PARENT_JOINTS,
+                    entityProperties.relayParentJoints!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GROUP_CULLED)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_GROUP_CULLED,
+                    entityProperties.groupCulled!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_BLENDSHAPE_COEFFICIENTS)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition,
+                    EntityPropertyList.PROP_BLENDSHAPE_COEFFICIENTS,
+                    entityProperties.blendShapeCoefficients!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_USE_ORIGINAL_PIVOT)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition,
+                    EntityPropertyList.PROP_USE_ORIGINAL_PIVOT,
+                    entityProperties.useOriginalPivot!, packetContext);
+            }
+            dataPosition += AnimationPropertyGroup.appendToEditPacket(data, dataPosition, entityProperties, packetContext);
+        }
 
         if (entityType === EntityType.Light) {
             const entityProperties = properties as LightEntityProperties;

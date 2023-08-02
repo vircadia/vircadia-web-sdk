@@ -172,8 +172,8 @@ describe("EntityData - unit tests", () => {
         expect(info[0].animation.url).toBe("");
         expect(info[0].animation.allowTranslation).toBe(false);
         expect(info[0].animation.fps).toBeCloseTo(30, 2);
-        expect(info[0].animation.frameIndex).toBeCloseTo(0, 2);
-        expect(info[0].animation.playing).toBe(false);
+        expect(info[0].animation.currentFrame).toBeCloseTo(0, 2);
+        expect(info[0].animation.running).toBe(false);
         expect(info[0].animation.loop).toBe(true);
         expect(info[0].animation.firstFrame).toBeCloseTo(0, 2);
         expect(info[0].animation.lastFrame).toBeCloseTo(100000, 2);
@@ -300,8 +300,8 @@ describe("EntityData - unit tests", () => {
         expect(info[0].animation.url).toBe("");
         expect(info[0].animation.allowTranslation).toBe(false);
         expect(info[0].animation.fps).toBeCloseTo(30, 2);
-        expect(info[0].animation.frameIndex).toBeCloseTo(0, 2);
-        expect(info[0].animation.playing).toBe(false);
+        expect(info[0].animation.currentFrame).toBeCloseTo(0, 2);
+        expect(info[0].animation.running).toBe(false);
         expect(info[0].animation.loop).toBe(true);
         expect(info[0].animation.firstFrame).toBeCloseTo(0, 2);
         expect(info[0].animation.lastFrame).toBeCloseTo(100000, 2);
@@ -447,8 +447,8 @@ describe("EntityData - unit tests", () => {
         expect(info[1].animation.url).toBe("");
         expect(info[1].animation.allowTranslation).toBe(false);
         expect(info[1].animation.fps).toBeCloseTo(30, 2);
-        expect(info[1].animation.frameIndex).toBeCloseTo(0, 2);
-        expect(info[1].animation.playing).toBe(false);
+        expect(info[1].animation.currentFrame).toBeCloseTo(0, 2);
+        expect(info[1].animation.running).toBe(false);
         expect(info[1].animation.loop).toBe(true);
         expect(info[1].animation.firstFrame).toBeCloseTo(0, 2);
         expect(info[1].animation.lastFrame).toBeCloseTo(100000, 2);
@@ -604,8 +604,8 @@ describe("EntityData - unit tests", () => {
         expect(info[0].animation.url).toBe("");
         expect(info[0].animation.allowTranslation).toBe(false);
         expect(info[0].animation.fps).toBeCloseTo(30, 2);
-        expect(info[0].animation.frameIndex).toBeCloseTo(0, 2);
-        expect(info[0].animation.playing).toBe(false);
+        expect(info[0].animation.currentFrame).toBeCloseTo(0, 2);
+        expect(info[0].animation.running).toBe(false);
         expect(info[0].animation.loop).toBe(true);
         expect(info[0].animation.firstFrame).toBeCloseTo(0, 2);
         expect(info[0].animation.lastFrame).toBeCloseTo(100000, 2);

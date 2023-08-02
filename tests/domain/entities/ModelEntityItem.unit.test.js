@@ -71,8 +71,8 @@ describe("ModelEntityItem - unit tests", () => {
         expect(modelEntity.properties.animation.url).toBe("");
         expect(modelEntity.properties.animation.allowTranslation).toBe(true);
         expect(modelEntity.properties.animation.fps).toBeCloseTo(30, 2);
-        expect(modelEntity.properties.animation.frameIndex).toBeCloseTo(0, 2);
-        expect(modelEntity.properties.animation.playing).toBe(false);
+        expect(modelEntity.properties.animation.currentFrame).toBeCloseTo(0, 2);
+        expect(modelEntity.properties.animation.running).toBe(false);
         expect(modelEntity.properties.animation.loop).toBe(true);
         expect(modelEntity.properties.animation.firstFrame).toBeCloseTo(0, 2);
         expect(modelEntity.properties.animation.lastFrame).toBeCloseTo(100000, 2);

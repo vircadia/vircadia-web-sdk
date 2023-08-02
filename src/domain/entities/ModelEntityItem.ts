@@ -23,8 +23,8 @@ type AnimationProperties = {
     url: string | undefined;
     allowTranslation: boolean | undefined;
     fps: number | undefined;
-    frameIndex: number | undefined;
-    playing: boolean | undefined;
+    currentFrame: number | undefined;
+    running: boolean | undefined;
     loop: boolean | undefined;
     firstFrame: number | undefined;
     lastFrame: number | undefined;
@@ -75,13 +75,13 @@ class ModelEntityItem {
      *  @property {number|undefined} fps=30 - The speed in frames/s that the animation is played at.
      *  @property {number|undefined} firstFrame=0 - The first frame to play in the animation.
      *  @property {number|undefined} lastFrame=100000 - The last frame to play in the animation.
-     *  @property {number|undefined} frameIndex=0 - The current frame being played in the animation.
-     *  @property {boolean|undefined} playing=false - <code>true</code> if the animation should play,
+     *  @property {number|undefined} currentFrame=0 - The current frame being played in the animation.
+     *  @property {boolean|undefined} running=false - <code>true</code> if the animation should run,
      *      <code>false</code> if it shouldn't.
      *  @property {boolean|undefined} loop=true - <code>true</code> if the animation is continuously repeated in a
      *      loop, <code>false</code> if it isn't.
      *  @property {boolean|undefined} hold=false - <code>true</code> if the rotations and translations of the last
-     *      frame played are maintained when the animation stops playing, <code>false</code> if they aren't.
+     *      frame played are maintained when the animation stops running, <code>false</code> if they aren't.
      */
 
     /*@sdkdoc
@@ -359,15 +359,15 @@ class ModelEntityItem {
             dataPosition += 4;
         }
 
-        let frameIndex: number | undefined = undefined;
+        let currentFrame: number | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_FRAME_INDEX)) {
-            frameIndex = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
+            currentFrame = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
             dataPosition += 4;
         }
 
-        let playing: boolean | undefined = undefined;
+        let running: boolean | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_ANIMATION_PLAYING)) {
-            playing = Boolean(data.getUint8(dataPosition));
+            running = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
@@ -416,8 +416,8 @@ class ModelEntityItem {
                     url,
                     allowTranslation,
                     fps,
-                    frameIndex,
-                    playing,
+                    currentFrame,
+                    running,
                     loop,
                     firstFrame,
                     lastFrame,

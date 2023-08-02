@@ -32,7 +32,7 @@ describe("EntityItemsProperties - unit test", () => {
         }
     });
 
-    test("Can calculate top-level changed properties", () => {
+    test("Can calculate primary changed properties", () => {
         const properties = {
             position: { x: 0, y: 0, z: 0 },
             alpha: 0.5
@@ -42,6 +42,27 @@ describe("EntityItemsProperties - unit test", () => {
         expect(changedProperties.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
         expect(changedProperties.getHasProperty(EntityPropertyList.PROP_ALPHA)).toBe(true);
         expect(changedProperties.getHasProperty(EntityPropertyList.PROP_DIMENSIONS)).toBe(false);
+    });
+
+    test("Can calculate property group changed properties", () => {
+        const properties = {
+            entityType: EntityType.Model,
+            position: { x: 0, y: 0, z: 0 },
+            alpha: 0.5,
+            animation: {
+                url: "http://foo.com/bar.fbx",
+                hold: true
+            }
+        };
+        const changedProperties = EntityItemProperties.getChangedProperties(properties);
+
+        expect(changedProperties.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
+        expect(changedProperties.getHasProperty(EntityPropertyList.PROP_ALPHA)).toBe(true);
+        expect(changedProperties.getHasProperty(EntityPropertyList.PROP_COLOR)).toBe(false);
+
+        expect(changedProperties.getHasProperty(EntityPropertyList.PROP_ANIMATION_URL)).toBe(true);
+        expect(changedProperties.getHasProperty(EntityPropertyList.PROP_ANIMATION_HOLD)).toBe(true);
+        expect(changedProperties.getHasProperty(EntityPropertyList.PROP_ANIMATION_LOOP)).toBe(false);
     });
 
     test("Can encode an entity edit with all properties fitting and less than max size property flags", () => {
@@ -135,6 +156,35 @@ describe("EntityItemsProperties - unit test", () => {
         expect(didntFitProperties.getHasProperty(EntityPropertyList.PROP_LAST_EDITED_BY)).toBe(true);
         expect(didntFitProperties.getHasProperty(EntityPropertyList.PROP_COLOR)).toBe(true);
         expect(messageData.dataPosition).toBe(0);
+    });
+
+    test("Can encode entity properties that include group properties", () => {
+        /* eslint-disable-next-line max-len */
+        const EXPECTED_MESSAGE = "0078251859f8010600d6f2fb67489a42f38dc01b38e00367a21000fffc000080000000000000000000011000f2ca635c06214311bfe618113cf0eb4200007041";
+
+        const properties = {
+            lastEdited: 1691016018535800n,  // Date.now() as count of 100ns ticks since the Unix epoch + 44 clock skew.
+            lastEditedBy: new Uuid("f2ca635c-0621-4311-bfe6-18113cf0eb42"),
+            entityType: EntityType.Model,
+            animation: {
+                fps: 15
+            }
+        };
+        const requestedProperties = EntityItemProperties.getChangedProperties(properties);
+        const didntFitProperties = new EntityPropertyFlags();
+        const entityID = new Uuid("d6f2fb67-489a-42f3-8dc0-1b38e00367a2");
+
+        const messageData = new MessageData();
+        messageData.buffer = new Uint8Array(UDT.MAX_PACKET_SIZE);
+        messageData.dataPosition = 0;
+        messageData.packetSize = UDT.MAX_PACKET_SIZE;
+
+        const appendState = EntityItemProperties.encodeEntityEditPacket(/* PacketTypeValue.EntityEdit, */ entityID,
+            properties, messageData, requestedProperties, didntFitProperties);
+        expect(appendState).toBe(AppendState.COMPLETED);
+        expect(didntFitProperties.isEmpty()).toBe(true);
+        expect(buffer2hex(messageData.buffer.slice(0, messageData.dataPosition))).toBe(EXPECTED_MESSAGE);
+        expect(messageData.dataPosition).toBe(EXPECTED_MESSAGE.length / 2);
     });
 
 });
