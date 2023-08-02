@@ -121,6 +121,17 @@ class PropertyFlags {
     }
 
     /*@devdoc
+     *  "Or"s the property flags with another instance.
+     *  @param {PropertyFlags} other - The other instance to "or" the flags with.
+     */
+    or(other: PropertyFlags): void {
+        // C++  PropertyFlags<Enum>& PropertyFlags<Enum>::operator|=(const PropertyFlags& other)
+        for (let i = 0, length = other.length(); i < length; i++) {
+            this.setHasProperty(i, this.getHasProperty(i) || other.getHasProperty(i));
+        }
+    }
+
+    /*@devdoc
      *  Decodes property flags from input data.
      *  @param {DataView} data - The data to decode.
      *  @param {number} size - The maximum size of the data to decode.

@@ -357,6 +357,29 @@ describe("EntityData - unit tests", () => {
         expect(copyBytes).toBe(bufferHex);
     });
 
+    test("Can \"or()\" two PropertyFlags objects", () => {
+        const propertyFlagsA = new PropertyFlags();
+        propertyFlagsA.setHasProperty(0, true);
+        propertyFlagsA.setHasProperty(1, true);
+        propertyFlagsA.setHasProperty(2, false);
+        propertyFlagsA.setHasProperty(3, false);
+        propertyFlagsA.setHasProperty(8, true);
+
+        const propertyFlagsB = new PropertyFlags();
+        propertyFlagsB.setHasProperty(1, false);
+        propertyFlagsB.setHasProperty(2, true);
+        propertyFlagsB.setHasProperty(11, true);
+
+        propertyFlagsA.or(propertyFlagsB);
+
+        expect(propertyFlagsA.getHasProperty(0)).toBe(true);
+        expect(propertyFlagsA.getHasProperty(1)).toBe(true);
+        expect(propertyFlagsA.getHasProperty(2)).toBe(true);
+        expect(propertyFlagsA.getHasProperty(3)).toBe(false);
+        expect(propertyFlagsA.getHasProperty(8)).toBe(true);
+        expect(propertyFlagsA.getHasProperty(11)).toBe(true);
+    });
+
     test("Can output debug information", () => {
         let debugMessage = "";
         const debug = jest.spyOn(console, "debug").mockImplementation((...message) => {
