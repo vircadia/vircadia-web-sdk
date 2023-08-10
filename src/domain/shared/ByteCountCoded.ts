@@ -154,7 +154,7 @@ class ByteCountCoded {
         // BITS_IN_BYTE-1 because we need to code the number of bytes in the header
         // + 1 because we always take at least 1 byte, even if number of bits is less than a bytes worth
         const BITS_IN_BYTE = 8;
-        const numberOfBytes = Math.trunc(valueBits / (BITS_IN_BYTE - 1)) + 1; 
+        const numberOfBytes = Math.trunc(valueBits / (BITS_IN_BYTE - 1)) + 1;
 
         // Fill data with initial 0s.
         for (let i = 0; i < numberOfBytes; i++) {

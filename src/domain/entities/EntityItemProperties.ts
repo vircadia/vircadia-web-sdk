@@ -282,7 +282,7 @@ class EntityItemProperties {
         ["minorGridEvery", EntityPropertyList.PROP_MINOR_GRID_EVERY],
 
         // Gizmo
-        ["gizmoType", EntityPropertyList.PROP_GIZMO_TYPE],
+        ["gizmoType", EntityPropertyList.PROP_GIZMO_TYPE]
         //changedProperties += _ring.getChangedProperties();
     ]);
 

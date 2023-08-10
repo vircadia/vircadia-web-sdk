@@ -47,10 +47,15 @@ const GLMHelpers = new class {
         // C++  int packOrientationQuatToBytes(unsigned char* buffer, const glm::quat& quatInput)
         const quatNormalized = Quat.normalize(quatInput);
         const QUAT_PART_CONVERSION_RATIO = this.#_UINT16_MAX / 2.0;
+
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+
         data.setUint16(dataPosition, Math.floor((quatNormalized.x + 1.0) * QUAT_PART_CONVERSION_RATIO), UDT.LITTLE_ENDIAN);
         data.setUint16(dataPosition + 2, Math.floor((quatNormalized.y + 1.0) * QUAT_PART_CONVERSION_RATIO), UDT.LITTLE_ENDIAN);
         data.setUint16(dataPosition + 4, Math.floor((quatNormalized.z + 1.0) * QUAT_PART_CONVERSION_RATIO), UDT.LITTLE_ENDIAN);
         data.setUint16(dataPosition + 6, Math.floor((quatNormalized.w + 1.0) * QUAT_PART_CONVERSION_RATIO), UDT.LITTLE_ENDIAN);
+
+        /* eslint-enable @typescript-eslint/no-magic-numbers */
     }
 
     /*@devdoc
