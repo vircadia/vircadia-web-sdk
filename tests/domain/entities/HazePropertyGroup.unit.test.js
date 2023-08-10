@@ -74,8 +74,8 @@ describe("HazePropertyGroup - unit test", () => {
     test("Can append properties to a buffer", () => {
         entityProperties = {
             haze: {
-                range: 1250,  // 00409c44
-                keyLightAltitude: 15  // 00007041
+                range: 1250,
+                keyLightAltitude: 15
             },
             color: { red: 10, green: 20, blue: 30 }
         };
