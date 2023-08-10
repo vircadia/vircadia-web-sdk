@@ -10,8 +10,10 @@
 //
 
 import UDT from "../networking/udt/UDT";
+import OctreePacketData, { OctreePacketContext } from "../octree/OctreePacketData";
 import type { color } from "../shared/Color";
 import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
+import { ZoneEntityProperties } from "./ZoneEntityItem";
 
 
 type HazeProperties = {
@@ -42,6 +44,23 @@ type HazePropertyGroupSubclassData = {
  */
 class HazePropertyGroup {
     // C++  class HazePropertyGroup : public PropertyGroup
+
+    static readonly #_PROPERTY_MAP = new Map<string, number>([  // Maps property names to EntityPropertyList values.
+        // C++  EntityPropertyFlags HazePropertyGroup::getChangedProperties() const
+        ["range", EntityPropertyList.PROP_HAZE_RANGE],
+        ["color", EntityPropertyList.PROP_HAZE_COLOR],
+        ["glareColor", EntityPropertyList.PROP_HAZE_GLARE_COLOR],
+        ["enableGlare", EntityPropertyList.PROP_HAZE_ENABLE_GLARE],
+        ["glareAngle", EntityPropertyList.PROP_HAZE_GLARE_ANGLE],
+        ["altitudeEffect", EntityPropertyList.PROP_HAZE_ALTITUDE_EFFECT],
+        ["ceiling", EntityPropertyList.PROP_HAZE_CEILING],
+        ["caseRef", EntityPropertyList.PROP_HAZE_BASE_REF],
+        ["cackgroundBlend", EntityPropertyList.PROP_HAZE_BACKGROUND_BLEND],
+        ["attenuateKeyLight", EntityPropertyList.PROP_HAZE_ATTENUATE_KEYLIGHT],
+        ["keyLightRange", EntityPropertyList.PROP_HAZE_KEYLIGHT_RANGE],
+        ["keyLightAltitude", EntityPropertyList.PROP_HAZE_KEYLIGHT_ALTITUDE]
+    ]);
+
 
     /*@sdkdoc
      *  Defines the haze in a zone.
@@ -157,14 +176,12 @@ class HazePropertyGroup {
         let backgroundBlend: number | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_BACKGROUND_BLEND)) {
             backgroundBlend = data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN);
-            // WEBRTC TODO: Read hazeBackgroundBlend property.
             dataPosition += 4;
         }
 
         let attenuateKeyLight: boolean | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_HAZE_ATTENUATE_KEYLIGHT)) {
             attenuateKeyLight = Boolean(data.getUint8(dataPosition));
-            // WEBRTC TODO: Read hazeAttenuateKeylight property.
             dataPosition += 1;
         }
 
@@ -199,6 +216,115 @@ class HazePropertyGroup {
         };
 
         /* eslint-enable @typescript-eslint/no-magic-numbers */
+    }
+
+    /*@devdoc
+     *  Gets property flags for Zone <code>haze</code> properties set in the entity properties object passed in,
+     *  assuming that there may be changes.
+     *  <p>Note: The SDK doesn't maintain its own entity tree so it doesn't calculate whether the property values have actually
+     *  changed.</p>
+     *  @param {EntityPropertyFlags} properties - A set of entity properties and values.
+     *  @returns {EntityPropertyFlags} Flags for all the Zone <code>haze</code> properties included in the entity
+     *      properties object.
+     */
+    static getChangedProperties(properties: ZoneEntityProperties): EntityPropertyFlags {
+        //  C++ EntityPropertyFlags getChangedProperties() const
+        const changedProperties = new EntityPropertyFlags();
+        if (properties.haze) {
+            const propertyNames = Object.keys(properties.haze);
+            for (const propertyName of propertyNames) {
+                const propertyValue = HazePropertyGroup.#_PROPERTY_MAP.get(propertyName);
+                if (propertyValue !== undefined) {
+                    changedProperties.setHasProperty(propertyValue, true);
+                }
+            }
+        }
+        return changedProperties;
+    }
+
+    /*@devdoc
+     *  Writes HazePropertyGroup properties to a buffer as are able to fit.
+     *  @param {DataView} data - The buffer to write to.
+     *  @param {number} dataPosition - The position to start writing at.
+     *  @param {EntityProperties} entityProperties - A set of entity properties and values.
+     *  @param {OctreePacketContext} packetContext - The context of the packet being written.
+     *  @returns {number} The number of bytes written. <code>0</code> if the value wouldn't fit.
+     */
+    static appendToEditPacket(data: DataView, dataPosition: number, entityProperties: ZoneEntityProperties,
+        packetContext: OctreePacketContext): number {
+        // C++  bool appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+        //          EntityPropertyFlags & propertyFlags, EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+        //          OctreeElement:: AppendState & appendState) const
+
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+        let bytesWritten = 0;
+        const requestedProperties = packetContext.propertiesToWrite;
+
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_RANGE)) {
+            bytesWritten += OctreePacketData.appendFloat32Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_HAZE_RANGE,
+                entityProperties.haze!.range!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_COLOR)) {
+            bytesWritten += OctreePacketData.appendColorValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_HAZE_COLOR,
+                entityProperties.haze!.color!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_GLARE_COLOR)) {
+            bytesWritten += OctreePacketData.appendColorValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_HAZE_GLARE_COLOR,
+                entityProperties.haze!.glareColor!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_ENABLE_GLARE)) {
+            bytesWritten += OctreePacketData.appendBooleanValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_HAZE_ENABLE_GLARE,
+                entityProperties.haze!.enableGlare!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_GLARE_ANGLE)) {
+            bytesWritten += OctreePacketData.appendFloat32Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_HAZE_GLARE_ANGLE,
+                entityProperties.haze!.glareAngle!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_ALTITUDE_EFFECT)) {
+            bytesWritten += OctreePacketData.appendBooleanValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_HAZE_ALTITUDE_EFFECT,
+                entityProperties.haze!.altitudeEffect!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_CEILING)) {
+            bytesWritten += OctreePacketData.appendFloat32Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_HAZE_CEILING,
+                entityProperties.haze!.ceiling!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_BASE_REF)) {
+            bytesWritten += OctreePacketData.appendFloat32Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_HAZE_BASE_REF,
+                entityProperties.haze!.base!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_BACKGROUND_BLEND)) {
+            bytesWritten += OctreePacketData.appendFloat32Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_HAZE_BACKGROUND_BLEND,
+                entityProperties.haze!.backgroundBlend!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_ATTENUATE_KEYLIGHT)) {
+            bytesWritten += OctreePacketData.appendBooleanValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_HAZE_ATTENUATE_KEYLIGHT,
+                entityProperties.haze!.attenuateKeyLight!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_KEYLIGHT_RANGE)) {
+            bytesWritten += OctreePacketData.appendFloat32Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_HAZE_KEYLIGHT_RANGE,
+                entityProperties.haze!.keyLightRange!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_KEYLIGHT_ALTITUDE)) {
+            bytesWritten += OctreePacketData.appendFloat32Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_HAZE_KEYLIGHT_ALTITUDE,
+                entityProperties.haze!.keyLightAltitude!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+
+        return bytesWritten;
+
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
     }
 
 }

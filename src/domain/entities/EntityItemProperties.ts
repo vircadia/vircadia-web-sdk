@@ -17,17 +17,23 @@ import OctreePacketData, { OctreePacketContext } from "../octree/OctreePacketDat
 import assert from "../shared/assert";
 import ByteCountCoded from "../shared/ByteCountCoded";
 import Uuid from "../shared/Uuid";
+import AmbientLightPropertyGroup from "./AmbientLightPropertyGroup";
 import AnimationPropertyGroup from "./AnimationPropertyGroup";
+import BloomPropertyGroup from "./BloomPropertyGroup";
 import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 import { EntityType } from "./EntityTypes";
+import HazePropertyGroup from "./HazePropertyGroup";
 import { ImageEntityProperties } from "./ImageEntityItem";
+import KeyLightPropertyGroup from "./KeyLightPropertyGroup";
 import { LightEntityProperties } from "./LightEntityItem";
 import { MaterialEntityProperties } from "./MaterialEntityItem";
 import { ModelEntityProperties } from "./ModelEntityItem";
 import { ParticleEffectEntityProperties } from "./ParticleEffectEntityItem";
 import { ShapeEntityProperties } from "./ShapeEntityItem";
+import SkyboxPropertyGroup from "./SkyboxPropertyGroup";
 import { TextEntityProperties, TextAlignment, TextEffect } from "./TextEntityItem";
 import { WebEntityProperties } from "./WebEntityItem";
+import { ZoneEntityProperties } from "./ZoneEntityItem";
 
 
 /*@devdoc
@@ -39,6 +45,7 @@ class EntityItemProperties {
     // C++: class EntityItemProperties
 
     static readonly #_PROPERTY_MAP = new Map<string, number>([  // Maps property names to EntityPropertyList values.
+        // C++  EntityPropertyFlags EntityItemProperties::getChangedProperties() const
 
         // Core
         ["simulationOwner", EntityPropertyList.PROP_SIMULATION_OWNER],
@@ -200,16 +207,16 @@ class EntityItemProperties {
         ["alignment", EntityPropertyList.PROP_TEXT_ALIGNMENT],
 
         // Zone
-        //changedProperties += _keyLight.getChangedProperties();
-        //changedProperties += _ambientLight.getChangedProperties();
-        //changedProperties += _skybox.getChangedProperties();
-        //changedProperties += _haze.getChangedProperties();
-        //changedProperties += _bloom.getChangedProperties();
+        // KeyLightPropertyGroup.PROPERTY_MAP,  // These are handled in KeyLightPropertyGroup.
+        // AmbientLightPropertyGroup.PROPERTY_MAP,  // These are handled in AmbientLightPropertyGroup.
+        // SkyboxPropertyGroup.PROPERTY_MAP,  // These are handled in SkyboxPropertyGroup.
+        // HazePropertyGroup.PROPERTY_MAP,  // These are handled in HazePropertyGroup.
+        // BloomPropertyGroup.PROPERTY_MAP,  // These are handled in BloomPropertyGroup.
         ["flyingAllowed", EntityPropertyList.PROP_FLYING_ALLOWED],
         ["ghostingAllowed", EntityPropertyList.PROP_GHOSTING_ALLOWED],
         ["filterURL", EntityPropertyList.PROP_FILTER_URL],
         ["keyLightMode", EntityPropertyList.PROP_KEY_LIGHT_MODE],
-        ["amgientLightMode", EntityPropertyList.PROP_AMBIENT_LIGHT_MODE],
+        ["ambientLightMode", EntityPropertyList.PROP_AMBIENT_LIGHT_MODE],
         ["skyboxMode", EntityPropertyList.PROP_SKYBOX_MODE],
         ["hazeMode", EntityPropertyList.PROP_HAZE_MODE],
         ["bloomMode", EntityPropertyList.PROP_BLOOM_MODE],
@@ -300,6 +307,13 @@ class EntityItemProperties {
 
         if (properties.entityType === EntityType.Model) {
             changedProperties.or(AnimationPropertyGroup.getChangedProperties(properties as ModelEntityProperties));
+        }
+        if (properties.entityType === EntityType.Zone) {
+            changedProperties.or(KeyLightPropertyGroup.getChangedProperties(properties as ZoneEntityProperties));
+            changedProperties.or(AmbientLightPropertyGroup.getChangedProperties(properties as ZoneEntityProperties));
+            changedProperties.or(SkyboxPropertyGroup.getChangedProperties(properties as ZoneEntityProperties));
+            changedProperties.or(HazePropertyGroup.getChangedProperties(properties as ZoneEntityProperties));
+            changedProperties.or(BloomPropertyGroup.getChangedProperties(properties as ZoneEntityProperties));
         }
         // WEBRTC TODO: Handle other entity types.
 
@@ -984,6 +998,69 @@ class EntityItemProperties {
                 const textAlignmentValue = Object.values(TextAlignment).indexOf(entityProperties.textAlignment!);
                 dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_TEXT_ALIGNMENT,
                     textAlignmentValue, UDT.LITTLE_ENDIAN, packetContext);
+            }
+        }
+
+        if (entityType === EntityType.Zone) {
+            const entityProperties = properties as ZoneEntityProperties;
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SHAPE_TYPE)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_SHAPE_TYPE,
+                    entityProperties.shapeType!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_COMPOUND_SHAPE_URL)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition,
+                    EntityPropertyList.PROP_COMPOUND_SHAPE_URL,
+                    entityProperties.compoundShapeURL!, packetContext);
+            }
+
+            dataPosition += KeyLightPropertyGroup.appendToEditPacket(data, dataPosition, entityProperties, packetContext);
+            dataPosition += AmbientLightPropertyGroup.appendToEditPacket(data, dataPosition, entityProperties, packetContext);
+            dataPosition += SkyboxPropertyGroup.appendToEditPacket(data, dataPosition, entityProperties, packetContext);
+            dataPosition += HazePropertyGroup.appendToEditPacket(data, dataPosition, entityProperties, packetContext);
+            dataPosition += BloomPropertyGroup.appendToEditPacket(data, dataPosition, entityProperties, packetContext);
+
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_FLYING_ALLOWED)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition, EntityPropertyList.PROP_FLYING_ALLOWED,
+                    entityProperties.flyingAllowed!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GHOSTING_ALLOWED)) {
+                dataPosition += OctreePacketData.appendBooleanValue(data, dataPosition,
+                    EntityPropertyList.PROP_GHOSTING_ALLOWED,
+                    entityProperties.ghostingAllowed!, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_FILTER_URL)) {
+                dataPosition += OctreePacketData.appendStringValue(data, dataPosition, EntityPropertyList.PROP_FILTER_URL,
+                    entityProperties.filterURL!, packetContext);
+            }
+
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_KEY_LIGHT_MODE)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_KEY_LIGHT_MODE,
+                    entityProperties.keyLightMode!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_AMBIENT_LIGHT_MODE)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition,
+                    EntityPropertyList.PROP_AMBIENT_LIGHT_MODE,
+                    entityProperties.ambientLightMode!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SKYBOX_MODE)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_SKYBOX_MODE,
+                    entityProperties.skyboxMode!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_HAZE_MODE)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_HAZE_MODE,
+                    entityProperties.hazeMode!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_BLOOM_MODE)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_BLOOM_MODE,
+                    entityProperties.bloomMode!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_AVATAR_PRIORITY)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_AVATAR_PRIORITY,
+                    entityProperties.avatarPriority!, UDT.LITTLE_ENDIAN, packetContext);
+            }
+            if (requestedProperties.getHasProperty(EntityPropertyList.PROP_SCREENSHARE)) {
+                dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_SCREENSHARE,
+                    entityProperties.screenshare!, UDT.LITTLE_ENDIAN, packetContext);
             }
         }
 

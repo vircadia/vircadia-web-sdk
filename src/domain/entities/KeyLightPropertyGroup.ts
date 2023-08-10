@@ -10,9 +10,11 @@
 //
 
 import UDT from "../networking/udt/UDT";
+import OctreePacketData, { OctreePacketContext } from "../octree/OctreePacketData";
 import type { color } from "../shared/Color";
 import type { vec3 } from "../shared/Vec3";
 import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
+import { ZoneEntityProperties } from "./ZoneEntityItem";
 
 
 type KeyLightProperties = {
@@ -38,6 +40,16 @@ type KeyLightPropertyGroupSubclassData = {
  */
 class KeyLightPropertyGroup {
     // C++  class KeyLightPropertyGroup : public PropertyGroup
+
+    static readonly #_PROPERTY_MAP = new Map<string, number>([  // Maps property names to EntityPropertyList values.
+        // C++  EntityPropertyFlags KeyLightPropertyGroup::getChangedProperties() const
+        ["color", EntityPropertyList.PROP_KEYLIGHT_COLOR],
+        ["intensity", EntityPropertyList.PROP_KEYLIGHT_INTENSITY],
+        ["direction", EntityPropertyList.PROP_KEYLIGHT_DIRECTION],
+        ["castShadows", EntityPropertyList.PROP_KEYLIGHT_CAST_SHADOW],
+        ["shadowBias", EntityPropertyList.PROP_KEYLIGHT_SHADOW_BIAS],
+        ["shadowMaxDistance", EntityPropertyList.PROP_KEYLIGHT_SHADOW_MAX_DISTANCE]
+    ]);
 
     /*@sdkdoc
      *  Defines the key light in a zone.
@@ -138,6 +150,85 @@ class KeyLightPropertyGroup {
         };
 
         /* eslint-enable @typescript-eslint/no-magic-numbers */
+    }
+
+    /*@devdoc
+     *  Gets property flags for Zone <code>keyLight</code> properties set in the entity properties object passed in, assuming
+     *  that there may be changes.
+     *  <p>Note: The SDK doesn't maintain its own entity tree so it doesn't calculate whether the property values have actually
+     *  changed.</p>
+     *  @param {EntityPropertyFlags} properties - A set of entity properties and values.
+     *  @returns {EntityPropertyFlags} Flags for all the Zone <code>keyLight</code> properties included in the entity properties
+     *      object.
+     */
+    static getChangedProperties(properties: ZoneEntityProperties): EntityPropertyFlags {
+        //  C++ EntityPropertyFlags getChangedProperties() const
+        const changedProperties = new EntityPropertyFlags();
+        if (properties.keyLight) {
+            const propertyNames = Object.keys(properties.keyLight);
+            for (const propertyName of propertyNames) {
+                const propertyValue = KeyLightPropertyGroup.#_PROPERTY_MAP.get(propertyName);
+                if (propertyValue !== undefined) {
+                    changedProperties.setHasProperty(propertyValue, true);
+                }
+            }
+        }
+        return changedProperties;
+    }
+
+    /*@devdoc
+     *  Writes KeyLightPropertyGroup properties to a buffer as are able to fit.
+     *  @param {DataView} data - The buffer to write to.
+     *  @param {number} dataPosition - The position to start writing at.
+     *  @param {EntityProperties} entityProperties - A set of entity properties and values.
+     *  @param {OctreePacketContext} packetContext - The context of the packet being written.
+     *  @returns {number} The number of bytes written. <code>0</code> if the value wouldn't fit.
+     */
+    static appendToEditPacket(data: DataView, dataPosition: number, entityProperties: ZoneEntityProperties,
+        packetContext: OctreePacketContext): number {
+        // C++  bool appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+        //          EntityPropertyFlags & propertyFlags, EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+        //          OctreeElement:: AppendState & appendState) const
+
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+        let bytesWritten = 0;
+        const requestedProperties = packetContext.propertiesToWrite;
+
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_KEYLIGHT_COLOR)) {
+            bytesWritten += OctreePacketData.appendColorValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_KEYLIGHT_COLOR,
+                entityProperties.keyLight!.color!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_KEYLIGHT_INTENSITY)) {
+            bytesWritten += OctreePacketData.appendFloat32Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_KEYLIGHT_INTENSITY,
+                entityProperties.keyLight!.intensity!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_KEYLIGHT_DIRECTION)) {
+            bytesWritten += OctreePacketData.appendVec3Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_KEYLIGHT_DIRECTION,
+                entityProperties.keyLight!.direction!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_KEYLIGHT_CAST_SHADOW)) {
+            bytesWritten += OctreePacketData.appendBooleanValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_KEYLIGHT_CAST_SHADOW,
+                entityProperties.keyLight!.castShadows!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_KEYLIGHT_SHADOW_BIAS)) {
+            bytesWritten += OctreePacketData.appendFloat32Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_KEYLIGHT_SHADOW_BIAS,
+                entityProperties.keyLight!.shadowBias!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_KEYLIGHT_SHADOW_MAX_DISTANCE)) {
+            bytesWritten += OctreePacketData.appendFloat32Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_KEYLIGHT_SHADOW_MAX_DISTANCE,
+                entityProperties.keyLight!.shadowMaxDistance!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+
+        return bytesWritten;
+
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
     }
 
 }

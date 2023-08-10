@@ -56,10 +56,12 @@ describe("EntityItemsProperties - unit test", () => {
         };
         const changedProperties = EntityItemProperties.getChangedProperties(properties);
 
+        // Primary properties.
         expect(changedProperties.getHasProperty(EntityPropertyList.PROP_POSITION)).toBe(true);
         expect(changedProperties.getHasProperty(EntityPropertyList.PROP_ALPHA)).toBe(true);
         expect(changedProperties.getHasProperty(EntityPropertyList.PROP_COLOR)).toBe(false);
 
+        // Property group properties.
         expect(changedProperties.getHasProperty(EntityPropertyList.PROP_ANIMATION_URL)).toBe(true);
         expect(changedProperties.getHasProperty(EntityPropertyList.PROP_ANIMATION_HOLD)).toBe(true);
         expect(changedProperties.getHasProperty(EntityPropertyList.PROP_ANIMATION_LOOP)).toBe(false);

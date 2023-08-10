@@ -10,7 +10,9 @@
 //
 
 import UDT from "../networking/udt/UDT";
+import OctreePacketData, { OctreePacketContext } from "../octree/OctreePacketData";
 import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
+import { ZoneEntityProperties } from "./ZoneEntityItem";
 
 
 type AmbientLightProperties = {
@@ -32,6 +34,12 @@ type AmbientLightPropertyGroupSubclassData = {
  */
 class AmbientLightPropertyGroup {
     // C++  class AmbientLightPropertyGroup : public PropertyGroup
+
+    static readonly #_PROPERTY_MAP = new Map<string, number>([  // Maps property names to EntityPropertyList values.
+        // C++  EntityPropertyFlags AmbientLightPropertyGroup::getChangedProperties() const
+        ["intensity", EntityPropertyList.PROP_AMBIENT_LIGHT_INTENSITY],
+        ["url", EntityPropertyList.PROP_AMBIENT_LIGHT_URL]
+    ]);
 
     /*@sdkdoc
      *  Defines the ambient light in a zone.
@@ -98,6 +106,65 @@ class AmbientLightPropertyGroup {
         };
 
         /* eslint-enable @typescript-eslint/no-magic-numbers */
+    }
+
+    /*@devdoc
+     *  Gets property flags for Zone <code>ambientLight</code> properties set in the entity properties object passed in,
+     *  assuming that there may be changes.
+     *  <p>Note: The SDK doesn't maintain its own entity tree so it doesn't calculate whether the property values have actually
+     *  changed.</p>
+     *  @param {EntityPropertyFlags} properties - A set of entity properties and values.
+     *  @returns {EntityPropertyFlags} Flags for all the Zone <code>ambientLight</code> properties included in the entity
+     *      properties object.
+     */
+    static getChangedProperties(properties: ZoneEntityProperties): EntityPropertyFlags {
+        //  C++ EntityPropertyFlags getChangedProperties() const
+        const changedProperties = new EntityPropertyFlags();
+        if (properties.ambientLight) {
+            const propertyNames = Object.keys(properties.ambientLight);
+            for (const propertyName of propertyNames) {
+                const propertyValue = AmbientLightPropertyGroup.#_PROPERTY_MAP.get(propertyName);
+                if (propertyValue !== undefined) {
+                    changedProperties.setHasProperty(propertyValue, true);
+                }
+            }
+        }
+        return changedProperties;
+    }
+
+    /*@devdoc
+     *  Writes AnbientLightPropertyGroup properties to a buffer as are able to fit.
+     *  @param {DataView} data - The buffer to write to.
+     *  @param {number} dataPosition - The position to start writing at.
+     *  @param {EntityProperties} entityProperties - A set of entity properties and values.
+     *  @param {OctreePacketContext} packetContext - The context of the packet being written.
+     *  @returns {number} The number of bytes written. <code>0</code> if the value wouldn't fit.
+     */
+    static appendToEditPacket(data: DataView, dataPosition: number, entityProperties: ZoneEntityProperties,
+        packetContext: OctreePacketContext): number {
+        // C++  bool appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+        //          EntityPropertyFlags & propertyFlags, EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+        //          OctreeElement:: AppendState & appendState) const
+
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+        let bytesWritten = 0;
+        const requestedProperties = packetContext.propertiesToWrite;
+
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_AMBIENT_LIGHT_INTENSITY)) {
+            bytesWritten += OctreePacketData.appendFloat32Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_AMBIENT_LIGHT_INTENSITY,
+                entityProperties.ambientLight!.intensity!, UDT.LITTLE_ENDIAN, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_AMBIENT_LIGHT_URL)) {
+            bytesWritten += OctreePacketData.appendStringValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_AMBIENT_LIGHT_URL,
+                entityProperties.ambientLight!.url!, packetContext);
+        }
+
+        return bytesWritten;
+
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
     }
 
 }

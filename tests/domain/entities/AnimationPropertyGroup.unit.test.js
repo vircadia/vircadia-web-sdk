@@ -16,7 +16,7 @@ import { AppendState } from "../../../src/domain/octree/OctreeElement";
 import { buffer2hex } from "../../testUtils";
 
 
-describe("EntityItemsProperties - unit test", () => {
+describe("AnimationPropertyGroup - unit test", () => {
     /*
         eslint-disable
         @typescript-eslint/no-magic-numbers,

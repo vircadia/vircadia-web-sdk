@@ -25,6 +25,7 @@ class AnimationPropertyGroup {
     // C++  class AnimationPropertyGroup : public PropertyGroup
 
     static readonly #_PROPERTY_MAP = new Map<string, number>([  // Maps property names to EntityPropertyList values.
+        // C++  EntityPropertyFlags AnimationPropertyGroup::getChangedProperties() const
         ["url", EntityPropertyList.PROP_ANIMATION_URL],
         ["allowTranslation", EntityPropertyList.PROP_ANIMATION_ALLOW_TRANSLATION],
         ["fps", EntityPropertyList.PROP_ANIMATION_FPS],
@@ -38,14 +39,14 @@ class AnimationPropertyGroup {
 
     /*@devdoc
      *  Gets property flags for Model <code>animation</code> properties set in the entity properties object passed in, assuming
-     *  that they may be changes.
+     *  that there may be changes.
      *  <p>Note: The SDK doesn't maintain its own entity tree so it doesn't calculate whether the property values have actually
      *  changed.</p>
      *  @param {EntityPropertyFlags} properties - A set of entity properties and values.
      *  @returns {EntityPropertyFlags} Flags for all the Model <code>animation</code> properties included in the entity
      *      properties object.
      */
-    static getChangedProperties(properties: ModelEntityProperties): EntityPropertyFlags { 
+    static getChangedProperties(properties: ModelEntityProperties): EntityPropertyFlags {
         //  C++ EntityPropertyFlags getChangedProperties() const
         const changedProperties = new EntityPropertyFlags();
         if (properties.animation) {
@@ -71,7 +72,7 @@ class AnimationPropertyGroup {
     static appendToEditPacket(data: DataView, dataPosition: number, entityProperties: ModelEntityProperties,
         packetContext: OctreePacketContext): number {
         // C++  bool AnimationPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
-        //          EntityPropertyFlags& requestedProperties,nEntityPropertyFlags& propertyFlags,
+        //          EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
         //          EntityPropertyFlags& propertiesDidntFit, int& propertyCount, OctreeElement::AppendState& appendState) const
 
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
