@@ -22,6 +22,7 @@ import AnimationPropertyGroup from "./AnimationPropertyGroup";
 import BloomPropertyGroup from "./BloomPropertyGroup";
 import EntityPropertyFlags, { EntityPropertyList } from "./EntityPropertyFlags";
 import { EntityType } from "./EntityTypes";
+import GrabPropertyGroup from "./GrabPropertyGroup";
 import HazePropertyGroup from "./HazePropertyGroup";
 import { ImageEntityProperties } from "./ImageEntityItem";
 import KeyLightPropertyGroup from "./KeyLightPropertyGroup";
@@ -491,10 +492,8 @@ class EntityItemProperties {
             dataPosition += OctreePacketData.appendUint32Value(data, dataPosition, EntityPropertyList.PROP_BILLBOARD_MODE,
                 properties.billboardMode!, UDT.LITTLE_ENDIAN, packetContext);
         }
-        // WEBRTC TODO: Add grab properties.
-        //_staticGrab.setProperties(properties);
-        //_staticGrab.appendToEditPacket(packetData, requestedProperties, propertyFlags,
-        //    propertiesDidntFit, propertyCount, appendState);
+
+        dataPosition += GrabPropertyGroup.appendToEditPacket(data, dataPosition, properties, packetContext);
 
         // Physics
         if (requestedProperties.getHasProperty(EntityPropertyList.PROP_DENSITY)) {
