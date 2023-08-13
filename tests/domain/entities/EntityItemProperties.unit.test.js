@@ -160,7 +160,7 @@ describe("EntityItemsProperties - unit test", () => {
         expect(messageData.dataPosition).toBe(0);
     });
 
-    test("Can encode entity properties that include group properties", () => {
+    test("Can encode entity properties that include entity group properties", () => {
         /* eslint-disable-next-line max-len */
         const EXPECTED_MESSAGE = "0078251859f8010600d6f2fb67489a42f38dc01b38e00367a21000fffc000080000000000000000000011000f2ca635c06214311bfe618113cf0eb4200007041";
 
@@ -175,6 +175,35 @@ describe("EntityItemsProperties - unit test", () => {
         const requestedProperties = EntityItemProperties.getChangedProperties(properties);
         const didntFitProperties = new EntityPropertyFlags();
         const entityID = new Uuid("d6f2fb67-489a-42f3-8dc0-1b38e00367a2");
+
+        const messageData = new MessageData();
+        messageData.buffer = new Uint8Array(UDT.MAX_PACKET_SIZE);
+        messageData.dataPosition = 0;
+        messageData.packetSize = UDT.MAX_PACKET_SIZE;
+
+        const appendState = EntityItemProperties.encodeEntityEditPacket(/* PacketTypeValue.EntityEdit, */ entityID,
+            properties, messageData, requestedProperties, didntFitProperties);
+        expect(appendState).toBe(AppendState.COMPLETED);
+        expect(didntFitProperties.isEmpty()).toBe(true);
+        expect(buffer2hex(messageData.buffer.slice(0, messageData.dataPosition))).toBe(EXPECTED_MESSAGE);
+        expect(messageData.dataPosition).toBe(EXPECTED_MESSAGE.length / 2);
+    });
+
+    test("Can encode entity properties that include grab properties", () => {
+        /* eslint-disable-next-line max-len */
+        const EXPECTED_MESSAGE = "004aa309bbd4020600b71d53802fcc483393a79a49670175876000f00002004010008f9e0f5a58c544708eef15d86838191c01";
+
+        const properties = {
+            lastEdited: 1691962554557258n,  // Date.now() as count of 100ns ticks since the Unix epoch + 44 clock skew.
+            lastEditedBy: new Uuid("8f9e0f5a-58c5-4470-8eef-15d86838191c"),
+            entityType: EntityType.Shape,
+            grab: {
+                grabbable: true
+            }
+        };
+        const requestedProperties = EntityItemProperties.getChangedProperties(properties);
+        const didntFitProperties = new EntityPropertyFlags();
+        const entityID = new Uuid("b71d5380-2fcc-4833-93a7-9a4967017587");
 
         const messageData = new MessageData();
         messageData.buffer = new Uint8Array(UDT.MAX_PACKET_SIZE);

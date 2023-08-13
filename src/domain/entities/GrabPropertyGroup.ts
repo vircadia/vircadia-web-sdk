@@ -23,8 +23,8 @@ type GrabProperties = {
     grabKinematic: boolean | undefined,
     grabFollowsController: boolean | undefined,
     triggerable: boolean | undefined,
-    grabEquippable: boolean | undefined,
-    delegateToParent: boolean | undefined,
+    equippable: boolean | undefined,
+    grabDelegateToParent: boolean | undefined,
     equippableLeftPositionOffset: vec3 | undefined,
     equippableLeftRotationOffset: quat | undefined,
     equippableRightPositionOffset: vec3 | undefined,
@@ -82,7 +82,7 @@ class GrabPropertyGroup {
      *      Controller entity methods, <code>false</code> if it won't.
      *  @property {boolean|undefined} equippable - <code>true</code> if the entity can be equipped, <code>false</code> if
      *      it cannot.
-     *  @property {boolean|undefined} delegateToParent - <code>true</code> if when the entity is grabbed, the grab will be
+     *  @property {boolean|undefined} grabDelegateToParent - <code>true</code> if when the entity is grabbed, the grab will be
      *      transferred to its parent entity if there is one; <code>false</code> if the grab won't be transferred, so a child
      *      entity can be grabbed and moved relative to its parent.
      *  @property {vec3|undefined} equippableLeftPositionOffset - Positional offset from the left hand, when equipped.
@@ -146,15 +146,15 @@ class GrabPropertyGroup {
             dataPosition += 1;
         }
 
-        let grabEquippable: boolean | undefined = undefined;
+        let equippable: boolean | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_EQUIPPABLE)) {
-            grabEquippable = Boolean(data.getUint8(dataPosition));
+            equippable = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
-        let delegateToParent: boolean | undefined = undefined;
+        let grabDelegateToParent: boolean | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyList.PROP_GRAB_DELEGATE_TO_PARENT)) {
-            delegateToParent = Boolean(data.getUint8(dataPosition));
+            grabDelegateToParent = Boolean(data.getUint8(dataPosition));
             dataPosition += 1;
         }
 
@@ -233,8 +233,8 @@ class GrabPropertyGroup {
                 grabKinematic,
                 grabFollowsController,
                 triggerable,
-                grabEquippable,
-                delegateToParent,
+                equippable,
+                grabDelegateToParent,
                 equippableLeftPositionOffset,
                 equippableLeftRotationOffset,
                 equippableRightPositionOffset,
@@ -246,6 +246,119 @@ class GrabPropertyGroup {
         };
 
         /* eslint-enable @typescript-eslint/no-magic-numbers */
+    }
+
+    /*@devdoc
+     *  Gets property flags for entity <code>grab</code> properties set in the entity properties object passed in, assuming that
+     *  there may be changes.
+     *  <p>Note: The SDK doesn't maintain its own entity tree so it doesn't calculate whether the property values have actually
+     *  changed.</p>
+     *  @param {EntityPropertyFlags} properties - A set of entity <code>grab</code> properties included in the entity
+     *      properties object.
+     */
+    static getChangedProperties(properties: EntityProperties): EntityPropertyFlags {
+        //  C++ EntityPropertyFlags getChangedProperties() const
+        const changedProperties = new EntityPropertyFlags();
+        if (properties.grab) {
+            const propertyNames = Object.keys(properties.grab);
+            for (const propertyName of propertyNames) {
+                const propertyValue = GrabPropertyGroup.#_PROPERTY_MAP.get(propertyName);
+                if (propertyValue !== undefined) {
+                    changedProperties.setHasProperty(propertyValue, true);
+                }
+            }
+        }
+        return changedProperties;
+    }
+
+    /*@devdoc
+     *  Writes GrabPropertyGroup properties to a buffer as are able to fit.
+     *  @param {DataView} data - The buffer to write to.
+     *  @param {number} dataPosition - The position to start writing at.
+     *  @param {EntityProperties} entityProperties - A set of entity properties and values.
+     *  @param {OctreePacketContext} packetContext - The context of the packet being written.
+     *  @returns {number} The number of bytes written. <code>0</code> if the value wouldn't fit.
+     */
+    static appendToEditPacket(data: DataView, dataPosition: number, entityProperties: EntityProperties,
+        packetContext: OctreePacketContext): number {
+        // C++  bool GrabPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
+        //          EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+        //          EntityPropertyFlags& propertiesDidntFit, int& propertyCount, OctreeElement::AppendState& appendState) const
+
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+        let bytesWritten = 0;
+        const requestedProperties = packetContext.propertiesToWrite;
+
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_GRABBABLE)) {
+            bytesWritten += OctreePacketData.appendBooleanValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_GRABBABLE,
+                entityProperties.grab!.grabbable!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_KINEMATIC)) {
+            bytesWritten += OctreePacketData.appendBooleanValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_KINEMATIC,
+                entityProperties.grab!.grabKinematic!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_FOLLOWS_CONTROLLER)) {
+            bytesWritten += OctreePacketData.appendBooleanValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_FOLLOWS_CONTROLLER,
+                entityProperties.grab!.grabFollowsController!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_TRIGGERABLE)) {
+            bytesWritten += OctreePacketData.appendBooleanValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_TRIGGERABLE,
+                entityProperties.grab!.triggerable!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_EQUIPPABLE)) {
+            bytesWritten += OctreePacketData.appendBooleanValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_EQUIPPABLE,
+                entityProperties.grab!.equippable!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_DELEGATE_TO_PARENT)) {
+            bytesWritten += OctreePacketData.appendBooleanValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_DELEGATE_TO_PARENT,
+                entityProperties.grab!.grabDelegateToParent!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET)) {
+            bytesWritten += OctreePacketData.appendVec3Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET,
+                entityProperties.grab!.equippableLeftPositionOffset!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET)) {
+            bytesWritten += OctreePacketData.appendQuatValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET,
+                entityProperties.grab!.equippableLeftRotationOffset!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET)) {
+            bytesWritten += OctreePacketData.appendVec3Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET,
+                entityProperties.grab!.equippableRightPositionOffset!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET)) {
+            bytesWritten += OctreePacketData.appendQuatValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET,
+                entityProperties.grab!.equippableRightRotationOffset!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_EQUIPPABLE_INDICATOR_URL)) {
+            bytesWritten += OctreePacketData.appendStringValue(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_EQUIPPABLE_INDICATOR_URL,
+                entityProperties.grab!.equippableIndicatorURL!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE)) {
+            bytesWritten += OctreePacketData.appendVec3Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE,
+                entityProperties.grab!.equippableIndicatorScale!, packetContext);
+        }
+        if (requestedProperties.getHasProperty(EntityPropertyList.PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET)) {
+            bytesWritten += OctreePacketData.appendVec3Value(data, dataPosition + bytesWritten,
+                EntityPropertyList.PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET,
+                entityProperties.grab!.equippableIndicatorOffset!, packetContext);
+        }
+
+        return bytesWritten;
+
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
     }
 
 }

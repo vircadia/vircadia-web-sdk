@@ -75,7 +75,7 @@ class EntityItemProperties {
         ["ignorePickIntersection", EntityPropertyList.PROP_IGNORE_PICK_INTERSECTION],
         ["renderWithZones", EntityPropertyList.PROP_RENDER_WITH_ZONES],
         ["billboardMode", EntityPropertyList.PROP_BILLBOARD_MODE],
-        //changedProperties += _grab.getChangedProperties();
+        // GrabPropertyGroup.PROPERTY_MAP,  // These are handled in GrabPropertyGroup.
 
         // Physics
         ["density", EntityPropertyList.PROP_DENSITY],
@@ -284,7 +284,7 @@ class EntityItemProperties {
 
         // Gizmo
         ["gizmoType", EntityPropertyList.PROP_GIZMO_TYPE]
-        //changedProperties += _ring.getChangedProperties();
+        // changedProperties += _ring.getChangedProperties();
     ]);
 
     /*@devdoc
@@ -305,6 +305,8 @@ class EntityItemProperties {
                 changedProperties.setHasProperty(propertyValue, true);
             }
         }
+
+        changedProperties.or(GrabPropertyGroup.getChangedProperties(properties));
 
         if (properties.entityType === EntityType.Model) {
             changedProperties.or(AnimationPropertyGroup.getChangedProperties(properties as ModelEntityProperties));
