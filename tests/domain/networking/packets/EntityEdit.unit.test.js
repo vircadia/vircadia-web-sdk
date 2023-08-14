@@ -73,16 +73,83 @@ describe("EntityEdit - unit tests", () => {
         /* eslint-enable @typescript-eslint/no-magic-numbers */
     });
 
-    /*
     test("Can write an EntityEdit packet that changes group properties", () => {
-        expect(false).toBe(true);
-    });
-    */
+        /* eslint-disable @typescript-eslint/no-magic-numbers, max-len */
 
-    /*
+        // From C++ with 2-byte octcode:
+        /*
+        const EXPECTED_PACKET = "000000002d850000000000000000000000000000000000000000f0ac09bbd402060001008ea409bbd4020600b71d53802fcc483393a79a49670175876000f00002004010008f9e0f5a58c544708eef15d86838191c01";
+        // With 2-byte octcode replaced with 1-byte 0x00 empty octcode:                              ^^^^
+        // With low-order digits of timestamp zeroed out:                            ^^^^^^^^
+        // Reliable, not unreliable:   ^
+        */
+        const EXPECTED_PACKET = "000000402d8500000000000000000000000000000000000000008019c4bad4020600008ea409bbd4020600b71d53802fcc483393a79a49670175876000f00002004010008f9e0f5a58c544708eef15d86838191c01";
+
+        /* eslint-enable max-len */
+
+        const mockDateNow = jest.spyOn(Date, "now").mockImplementation(() => {
+            return 169196255;
+        });
+
+        const properties = {
+            lastEdited: 1691962554557582n,  // Date.now() as count of 100ns ticks since the Unix epoch + 44 clock skew.
+            lastEditedBy: new Uuid("8f9e0f5a-58c5-4470-8eef-15d86838191c"),
+            entityType: EntityType.Shape,
+            grab: {
+                grabbable: true
+            }
+        };
+        const requestedProperties = EntityItemProperties.getChangedProperties(properties);
+        const didntFitProperties = new EntityPropertyFlags();
+        const entityEditDetails = {
+            entityID: new Uuid("b71d5380-2fcc-4833-93a7-9a4967017587"),
+            properties,
+            requestedProperties,
+            didntFitProperties
+        };
+        const packet = EntityEdit.write(entityEditDetails);
+
+        expect(packet instanceof NLPacket).toBe(true);
+        expect(packet.getType()).toBe(PacketType.EntityEdit);
+        expect(packet.isReliable()).toBe(true);
+        const packetSize = packet.getDataSize();
+        expect(packetSize).toBe(packet.getMessageData().dataPosition);
+        expect(packetSize).toBeGreaterThan(0);
+        expect(packetSize).toBeLessThan(UDT.MAX_PACKET_SIZE);
+        expect(buffer2hex(packet.getMessageData().buffer.slice(0, packetSize))).toBe(EXPECTED_PACKET);
+        expect(packetSize).toBe(EXPECTED_PACKET.length / 2);
+
+        expect(entityEditDetails.didntFitProperties.length()).toBe(0);
+
+        mockDateNow.mockReset(); // eslint-disable-line @typescript-eslint/no-unsafe-call
+        /* eslint-enable @typescript-eslint/no-magic-numbers, max-len */
+    });
+
     test("Writing a property that won't fit in a packet returns null", () => {
-        expect(false).toBe(true);
-    })
-    */
+        /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+        const mockDateNow = jest.spyOn(Date, "now").mockImplementation(() => {
+            return 169196255;
+        });
+
+        const properties = {
+            lastEdited: 1691962554557582n,
+            entityType: EntityType.Shape,
+            userData: "0123456789".repeat(200)  // eslint-disable-line @typescript-eslint/no-magic-numbers
+        };
+        const requestedProperties = EntityItemProperties.getChangedProperties(properties);
+        const didntFitProperties = new EntityPropertyFlags();
+        const entityEditDetails = {
+            entityID: new Uuid("b71d5380-2fcc-4833-93a7-9a4967017587"),
+            properties,
+            requestedProperties,
+            didntFitProperties
+        };
+        const packet = EntityEdit.write(entityEditDetails);
+        expect(packet).toBeNull();
+
+        mockDateNow.mockReset(); // eslint-disable-line @typescript-eslint/no-unsafe-call
+        /* eslint-enable @typescript-eslint/no-magic-numbers */
+    });
 
 });
