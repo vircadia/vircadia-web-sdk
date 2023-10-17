@@ -4,7 +4,7 @@
 
 The **Vircadia Web SDK** (codename Ananke) is a JavaScript/TypeScript SDK for developing web-based applications for virtual worlds powered by the open source metaverse platform [Vircadia](https://vircadia.com/). Vircadia domain servers provide the worlds (a.k.a. "domains") to visit, and the Vircadia
 metaverse server provides global services that connect the users and domains.
-See the user docs to [Understand the Architecture](https://docs.vircadia.com/explore/get-started/architecture.html).
+See the user docs to [Understand the Architecture](https://docs.vircadia.dev/#understand-the-architecture).
 
 This SDK provides interfaces to:
 
