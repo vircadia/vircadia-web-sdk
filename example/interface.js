@@ -707,6 +707,36 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                     td.innerHTML = position.z.toFixed(POS_DECIMAL_PLACES);
                     tr.appendChild(td);
                     entityListBody.appendChild(tr);
+
+                    td = document.createElement("td");
+                    const eraseButton = document.createElement("button");
+                    eraseButton.innerHTML = "Erase";
+                    eraseButton.onclick = () => {
+                        const id = e.entityItemID;
+                        console.log("ERASING: ", id.stringify());
+                        entityServer.sendEntityErasePacket(id);
+                    };
+                    td.appendChild(eraseButton);
+                    tr.appendChild(td);
+
+                    td = document.createElement("td");
+                    const nudgeButton = document.createElement("button");
+                    nudgeButton.innerHTML = "Nudge";
+                    nudgeButton.onclick = () => {
+                        const id = e.entityItemID;
+                        const e2 = {
+                            entityItemID: e.entityItemID,
+                            entityType: e.entityType,
+                            lastEdited: BigInt(Date.now()) * 1000n,
+                            updateDelta: 0,
+                            position: e.position
+                        };
+                        console.log("EDITING: ", id.stringify(), e2);
+                        e2.position.x += 1;
+                        entityServer.sendEntityEditPacket(e2);
+                    };
+                    td.appendChild(nudgeButton);
+                    tr.appendChild(td);
                 }
             });
 

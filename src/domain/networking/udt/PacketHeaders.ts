@@ -663,6 +663,8 @@ const PacketType = new class {
                 return this.#_DomainConnectRequestVersion.SocketTypes;
             case this.AudioEnvironment:
                 return DEFAULT_VERSION;
+            case this.EntityEdit:
+            case this.EntityAdd:
             case this.EntityData:
                 return this.#_EntityVersion.LAST_PACKET_TYPE;
             case this.EntityQuery:
