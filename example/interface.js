@@ -12,6 +12,36 @@
 import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, MessageMixer, Vec3, Uuid }
     from "../dist/Vircadia.js";
 
+// https://dbaron.org/log/20100309-faster-timeouts
+(function () {
+    const timeouts = [];
+    const messageName = "zero-timeout-message";
+
+    // Like setTimeout, but only takes a function argument.  There's
+    // no time argument (always zero) and no arguments (you have to
+    // use a closure).
+    function setZeroTimeout(fn) {
+        timeouts.push(fn);
+        window.postMessage(messageName, "*");
+    }
+
+    function handleMessage(event) {
+        if (event.source === window && event.data === messageName) {
+            event.stopPropagation();
+            if (timeouts.length > 0) {
+                const fn = timeouts.shift();
+                fn();
+            }
+        }
+    }
+
+    window.addEventListener("message", handleMessage, true);
+
+    // Add the one thing we want added to the window object.
+    window.setZeroTimeout = setZeroTimeout;
+}());
+
+
 (function () {
 
     const DEFAULT_URL = "ws://127.0.0.1:40102";
@@ -922,10 +952,22 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
             gameLoopTimer = setTimeout(gameLoop, timeout);
         };
 
+        let runAudioLoop = false;
+        const audioLoop = () => {
+            audioMixer.update();
+            if (runAudioLoop) {
+                window.setZeroTimeout(audioLoop);
+            }
+        };
+
         const connectButton = document.getElementById("domainConnectButton");
         connectButton.addEventListener("click", () => {
             if (gameLoopTimer === null) {
                 gameLoopTimer = setTimeout(gameLoop, 0);
+            }
+            if (!runAudioLoop) {
+                runAudioLoop = true;
+                window.setZeroTimeout(audioLoop);
             }
         });
 
@@ -936,6 +978,7 @@ import { Vircadia, DomainServer, Camera, AudioMixer, AvatarMixer, EntityServer, 
                 gameLoopTimer = null;
                 gameRateValue.value = "";
             }
+            runAudioLoop = false;
         });
 
     }());
