@@ -73,6 +73,11 @@ class MetaverseAPI {
     getCurrentMetaverseServerURLPath(appendForwardSlash = false): string {
         let path = this.getCurrentMetaverseServerURL().path();
 
+        // Make an empty path if "/". (Make JavaScript behavior match C++.)
+        if (path === "/") {
+            path = "";
+        }
+
         if (path.length !== 0 && appendForwardSlash) {
             path += "/";
         }
