@@ -29,6 +29,7 @@ import PacketReceiver from "./PacketReceiver";
 import ReceivedMessage from "./ReceivedMessage";
 import SockAddr from "./SockAddr";
 import ModerationFlags, { BanFlagsValue } from "../shared/ModerationFlags";
+import { IceServerList } from "./webrtc/WebRTCDataChannel";
 
 
 /*@devdoc
@@ -42,6 +43,7 @@ import ModerationFlags, { BanFlagsValue } from "../shared/ModerationFlags";
  *      <p><em>Static. Read-only.</em></p>
  *
  *  @param {number} contextID - The {@link ContextManager} context ID.
+ *  @param {IceServerList} iceServers - The list of WebRTC ICE servers used to initiate connections.
  *  @param {NodeType} [ownerType=Agent] - The type of object that the NodeList is being used in.
  */
 class NodeList extends LimitedNodeList {
@@ -70,10 +72,10 @@ class NodeList extends LimitedNodeList {
     #_addressManager;
 
 
-    constructor(contextID: number) {
+    constructor(contextID: number, iceServers: IceServerList = []) {
         // C++  NodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
-        super(contextID);
+        super(contextID, iceServers);
 
         // WEBRTC TODO: Address further C++ code.
 

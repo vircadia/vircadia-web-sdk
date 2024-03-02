@@ -19,6 +19,13 @@ type OnMessageCallback = (data: ArrayBuffer) => void;
 type OnCloseCallback = () => void;
 type OnErrorCallback = (message: string) => void;
 
+type IceServerConfig = {urls: string | Array<string>, username?: string, credential?: string};
+
+/*@sdkdoc
+ *  WebRTC ICE server configuration, see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/RTCPeerConnection#iceservers
+ */
+type IceServerList = Array<IceServerConfig>;
+
 
 /*@devdoc
  *  The <code>WebRTCDataChannel</code> class provides an unordered, unreliable WebRTC data channel used for Vircadia protocol
@@ -32,6 +39,7 @@ type OnErrorCallback = (message: string) => void;
  *  @param {NodeType} nodeType - The node type to connect to.
  *  @param {WebRTCSignalingChannel} signalingChannel - The WebRTCSignalingChannel to use in establishing the WebRTC connection
  *      and data channel.
+ *  @param {IceServerList} iceServers - The list of WebRTC ICE servers used to initiate connections.
  *
  *  @property {WebRTCDataChannel.ReadyState} CONNECTING=0 - The connection is opening.
  *      <em>Static. Read-only.</em>
@@ -103,21 +111,6 @@ class WebRTCDataChannel {
     static readonly CLOSING = 2;
     static readonly CLOSED = 3;
 
-    static readonly #CONFIGURATION = {
-        // WEBRTC TODO: Make configurable in the API.
-        // FIXME: stun:ice.vircadia.com:7337 doesn't work for WebRTC.
-        // Firefox warns: "WebRTC: Using more than two STUN/TURN servers slows down discovery"
-        iceServers: [
-            {
-                urls: [
-                    "stun:stun1.l.google.com:19302",
-                    "stun:stun4.l.google.com:19302"
-                ]
-            }
-        ]
-    };
-
-
     #_nodeType = NodeType.Unassigned;
     #_nodeTypeName = "";
     #_signalingChannel: WebRTCSignalingChannel | null = null;
@@ -128,6 +121,7 @@ class WebRTCDataChannel {
     #_dataChannel: RTCDataChannel | null = null;
     #_dataChannelID = 0;
     #_readyState = WebRTCDataChannel.CLOSED;
+    #_iceServers: IceServerList = [];
 
     #_savedICECandidates: RTCIceCandidateInit[] = [];
 
@@ -139,11 +133,12 @@ class WebRTCDataChannel {
     #_DEBUG = false;
 
 
-    constructor(nodeType: NodeTypeValue, signalingChannel: WebRTCSignalingChannel) {
+    constructor(nodeType: NodeTypeValue, signalingChannel: WebRTCSignalingChannel, iceServers: IceServerList = []) {
         this.#_nodeType = nodeType;
         this.#_nodeTypeName = NodeType.getNodeTypeName(nodeType);
         this.#_signalingChannel = signalingChannel;
         this.#_readyState = WebRTCDataChannel.CONNECTING;
+        this.#_iceServers = iceServers;
         setTimeout(() => {
             // Defer connecting by scheduling it in the event queue, so that WebRTCDataChannel event handlers can be hooked up
             // immediately after the object is created.
@@ -249,7 +244,9 @@ class WebRTCDataChannel {
         assert(this.#_signalingChannel !== null);
 
         // Create new peer connection object.
-        this.#_peerConnection = new RTCPeerConnection(WebRTCDataChannel.#CONFIGURATION);
+        this.#_peerConnection = new RTCPeerConnection({
+            iceServers: this.#_iceServers
+        });
 
         // Send ICE candidates to the domain server.
         this.#_peerConnection.onicecandidate = ({ candidate }) => {
@@ -498,3 +495,4 @@ class WebRTCDataChannel {
 }
 
 export default WebRTCDataChannel;
+export type { IceServerList, IceServerConfig };
