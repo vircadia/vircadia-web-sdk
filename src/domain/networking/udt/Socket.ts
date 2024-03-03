@@ -23,6 +23,7 @@ import ControlPacket from "./ControlPacket";
 import Packet from "./Packet";
 import SequenceNumber from "./SequenceNumber";
 import UDT from "./UDT";
+import { IceServerList } from "../webrtc/WebRTCDataChannel";
 
 
 type PacketHandlerCallback = (packet: Packet) => void;
@@ -95,11 +96,11 @@ class Socket {
     // WEBRTC TODO: Address further C++ code.
 
 
-    constructor() {
+    constructor(iceServers: IceServerList = []) {
         // C++  Socket(QObject* parent = 0, bool shouldChangeSocketOptions = true)
         // All parameters are unused in TypeScript code so don't implement.
 
-        this.#_webrtcSocket = new WebRTCSocket();
+        this.#_webrtcSocket = new WebRTCSocket(iceServers);
 
         // Connect signals.
         this.#_webrtcSocket.readyRead.connect(this.readPendingDatagrams);

@@ -9,7 +9,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-import WebRTCDataChannel from "./WebRTCDataChannel";
+import WebRTCDataChannel, { IceServerList } from "./WebRTCDataChannel";
 import WebRTCSignalingChannel from "./WebRTCSignalingChannel";
 import { NodeTypeValue } from "../NodeType";
 import SockAddr from "../SockAddr";
@@ -33,6 +33,8 @@ type WebRTCDataChannelsByChannelID = Map<number, { nodeType: NodeTypeValue, webr
  *  accepting incoming connections.</p>
  *
  *  @class WebRTCSocket
+ *  @param {IceServerList} iceServers - The list of WebRTC ICE servers used to initiate connections.
+
  *  @property {WebRTCSocket.State} UNCONNECTED - There is no connection to the node on the domain.</td></tr>
  *  @property {WebRTCSocket.State} SIGNALING - A WebRTC signaling channel is open or being established.</td></tr>
  *  @property {WebRTCSocket.State} CONNECTING - A WebRTC data channel is being established.</td></tr>
@@ -89,11 +91,15 @@ class WebRTCSocket {
 
     #_readyRead = new SignalEmitter();
 
+    #_iceServers: IceServerList = [];
 
-    constructor() {  // eslint-disable-line @typescript-eslint/no-useless-constructor
+
+    constructor(iceServers: IceServerList = []) {  // eslint-disable-line @typescript-eslint/no-useless-constructor
         // C++  WebRTCSocket(QObject* parent)
 
         // WEBRTC TODO: Address further C++ code.
+
+        this.#_iceServers = iceServers;
 
     }
 
@@ -295,7 +301,7 @@ class WebRTCSocket {
         if (this.#_webrtcSignalingChannel === null) {
             return;
         }
-        const webrtcDataChannel = new WebRTCDataChannel(nodeType, this.#_webrtcSignalingChannel);
+        const webrtcDataChannel = new WebRTCDataChannel(nodeType, this.#_webrtcSignalingChannel, this.#_iceServers);
         webrtcDataChannel.onopen = () => {
             this.#_lastDataChannelID += 1;
             const channelID = this.#_lastDataChannelID;

@@ -25,6 +25,7 @@ import Socket from "./udt/Socket";
 import assert from "../shared/assert";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
 import Uuid from "../shared/Uuid";
+import { IceServerList } from "./webrtc/WebRTCDataChannel";
 
 
 type NewNodeInfo = {
@@ -50,6 +51,7 @@ type NodeFunctor = (node: Node) => void;
  *  <p>C++: <code>LimitedNodeList : public QObject, public Dependency</code></p>
  *  @class LimitedNodeList
  *  @param {number} contextID - The {@link ContextManager} context ID.
+ *  @param {IceServerList} iceServers - The list of WebRTC ICE servers used to initiate connections.
  *
  *  @property {LimitedNodeList.ConnectReason} ConnectReason - Connect reason values.
  *  @property {number} INVALID_PORT=-1 - Invalid port.
@@ -119,7 +121,7 @@ class LimitedNodeList {
     }
 
 
-    protected _nodeSocket = new Socket();
+    protected _nodeSocket;
     protected _localSockAddr = new SockAddr();
     protected _publicSockAddr = new SockAddr();
     protected _packetReceiver;
@@ -165,9 +167,10 @@ class LimitedNodeList {
     #_canKickChanged = new SignalEmitter();
 
 
-    constructor(contextID: number) {
+    constructor(contextID: number, iceServers: IceServerList = []) {
         // C++  LimitedNodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
+        this._nodeSocket = new Socket(iceServers);
         this._packetReceiver = new PacketReceiver(contextID);
 
         // WEBRTC TODO: Address further C++ code.

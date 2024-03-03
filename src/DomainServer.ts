@@ -23,6 +23,7 @@ import ContextManager from "./domain/shared/ContextManager";
 import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
 import Url from "./domain/shared/Url";
 import Uuid from "./domain/shared/Uuid";
+import { IceServerList } from "./domain/networking/webrtc/WebRTCDataChannel";
 
 
 /*@sdkdoc
@@ -55,6 +56,8 @@ type OnStateChanged = (state: ConnectionState, info: string) => void;
  *  The <code>DomainServer</code> class provides the interface for connecting to a domain server.
  *
  *  @class DomainServer
+ *  @param {IceServerList} iceServers - The list of WebRTC ICE servers used to initiate connections to domain server and other nodes.
+
  *  @property {DomainServer.State} DISCONNECTED - Disconnected from the domain server.
  *      <em>Static. Read-only.</em>
  *  @property {DomainServer.State} CONNECTING - Connecting to the domain server.
@@ -139,6 +142,19 @@ class DomainServer {
     static readonly #DOMAIN_SERVER_CHECK_IN_MSECS = 1000;
 
 
+    /*@sdkdoc
+     *  Default WebRTC ICE server configuration.
+     */
+    static readonly DEFAULT_ICE_SERVERS: IceServerList = [
+        {
+            urls: [
+                "stun:stun1.l.google.com:19302",
+                "stun:stun4.l.google.com:19302"
+            ]
+        }
+    ];
+
+
     #_address = "";
     #_state = DomainServer.DISCONNECTED;
     #_refusalInfo = "";
@@ -163,13 +179,13 @@ class DomainServer {
     #_DEBUG = false;
 
 
-    constructor() {
+    constructor(iceServers: IceServerList = DomainServer.DEFAULT_ICE_SERVERS) {
         // C++  Application::Application()
 
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, AccountManager, contextID);
         ContextManager.set(contextID, AddressManager);
-        ContextManager.set(contextID, NodeList, contextID);
+        ContextManager.set(contextID, NodeList, contextID, iceServers);
         ContextManager.set(contextID, MetaverseAPI);
 
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
