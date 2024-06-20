@@ -234,6 +234,17 @@ class AudioMixer extends AssignmentClient {
         return this.#_audioOutput.pause();
     }
 
+    /*@sdkdoc
+     *  Event loop update method for audio processing. This should be called as
+     *  often as possible to keep up with the audio worklets.
+     *  @function AudioMixer.update
+     */
+    update(): void {
+        // C++  void Application::update(float deltaTime)
+
+        this.#_audioClient.update();
+
+    }
 
     /*@sdkdoc
      *  Triggered when the audio mixer has made the client mute its audio input &mdash; either because the background noise is
