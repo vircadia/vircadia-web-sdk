@@ -47,8 +47,8 @@ type ParticleEffectEntitySubclassProperties = {
     radiusStart: number | undefined,
     radiusFinish: number | undefined,
     colorSpread: color | undefined,
-    colorStart: color | undefined,
-    colorFinish: color | undefined,
+    colorStart: vec3 | undefined,
+    colorFinish: vec3 | undefined,
     alphaSpread: number | undefined,
     alphaStart: number | undefined,
     alphaFinish: number | undefined,
@@ -400,22 +400,22 @@ class ParticleEffectEntityItem {
             dataPosition += 3;
         }
 
-        let colorStart: color | undefined = undefined;
+        let colorStart: vec3 | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR_START)) {
             colorStart = {
-                red: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                green: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                blue: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
             };
             dataPosition += 12;
         }
 
-        let colorFinish: color | undefined = undefined;
+        let colorFinish: vec3 | undefined = undefined;
         if (propertyFlags.getHasProperty(EntityPropertyFlags.PROP_COLOR_FINISH)) {
             colorFinish = {
-                red: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
-                green: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
-                blue: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
+                x: data.getFloat32(dataPosition, UDT.LITTLE_ENDIAN),
+                y: data.getFloat32(dataPosition + 4, UDT.LITTLE_ENDIAN),
+                z: data.getFloat32(dataPosition + 8, UDT.LITTLE_ENDIAN)
             };
             dataPosition += 12;
         }

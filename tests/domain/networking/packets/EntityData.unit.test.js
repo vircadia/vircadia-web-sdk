@@ -37,8 +37,8 @@ describe("EntityData - unit tests", () => {
         expect(info[0].entityType).toBe(4);
         expect(info[0].createdFromBuffer).toBe(1655451515775649n);
         expect(info[0].lastEdited).toBe(1655451515775649n);
-        expect(info[0].updateDelta).toBe(2);
-        expect(info[0].simulatedDelta).toBe(2);
+        expect(info[0].updateDelta).toBe(2n);
+        expect(info[0].simulatedDelta).toBe(2n);
         expect(info[0].simOwnerData.byteLength).toBe(17);
         expect(info[0].simOwnerData).toStrictEqual(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
         expect(info[0].parentID).toBeNull();
@@ -117,7 +117,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].acceleration.y).toBeCloseTo(0, 2);
         expect(info[0].acceleration.z).toBeCloseTo(0, 2);
         expect(info[0].damping).toBeCloseTo(0, 2);
-        expect(info[0].angularDampling).toBeCloseTo(0, 2);
+        expect(info[0].angularDamping).toBeCloseTo(0, 2);
         expect(info[0].restitution).toBeCloseTo(0.5, 3);
         expect(info[0].friction).toBeCloseTo(0.5, 3);
         expect(info[0].lifetime).toBeCloseTo(-1, 2);
@@ -130,7 +130,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].cloneLifetime).toBeCloseTo(300, 2);
         expect(info[0].cloneLimit).toBeCloseTo(0, 2);
         expect(info[0].cloneDynamic).toBe(false);
-        expect(info[0].cloneAvatarIdentity).toBe(false);
+        expect(info[0].cloneAvatarEntity).toBe(false);
         expect(info[0].cloneOriginID).toBeUndefined();
         expect(info[0].script).toBeUndefined();
         expect(info[0].scriptTimestamp).toBe(0n);
@@ -196,8 +196,8 @@ describe("EntityData - unit tests", () => {
         expect(info[0].entityType).toBe(4);
         expect(info[0].createdFromBuffer).toBe(1655893515198700n);
         expect(info[0].lastEdited).toBe(1655893515304910n);
-        expect(info[0].updateDelta).toBe(0);
-        expect(info[0].simulatedDelta).toBe(0);
+        expect(info[0].updateDelta).toBe(0n);
+        expect(info[0].simulatedDelta).toBe(0n);
         expect(info[0].simOwnerData).toBeUndefined();
         expect(info[0].parentID).toBeUndefined();
         expect(info[0].parentJointIndex).toBeUndefined();
@@ -244,7 +244,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].acceleration.y).toBeCloseTo(0, 2);
         expect(info[0].acceleration.z).toBeCloseTo(0, 2);
         expect(info[0].damping).toBeUndefined();
-        expect(info[0].angularDampling).toBeUndefined();
+        expect(info[0].angularDamping).toBeUndefined();
         expect(info[0].restitution).toBeCloseTo(0.5, 3);
         expect(info[0].friction).toBeCloseTo(0.5, 3);
         expect(info[0].lifetime).toBeCloseTo(-1, 2);
@@ -257,7 +257,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].cloneLifetime).toBeCloseTo(300, 2);
         expect(info[0].cloneLimit).toBeCloseTo(0, 2);
         expect(info[0].cloneDynamic).toBe(false);
-        expect(info[0].cloneAvatarIdentity).toBe(false);
+        expect(info[0].cloneAvatarEntity).toBe(false);
         expect(info[0].cloneOriginID).toBeUndefined();
         expect(info[0].script).toBeUndefined();
         expect(info[0].scriptTimestamp).toBe(0n);
@@ -310,8 +310,8 @@ describe("EntityData - unit tests", () => {
         expect(info[1].entityType).toBe(4);
         expect(info[1].createdFromBuffer).toBe(1655893407496516n);
         expect(info[1].lastEdited).toBe(1655893407602795n);
-        expect(info[1].updateDelta).toBe(0);
-        expect(info[1].simulatedDelta).toBe(0);
+        expect(info[1].updateDelta).toBe(0n);
+        expect(info[1].simulatedDelta).toBe(0n);
         expect(info[1].simOwnerData.byteLength).toBe(17);
         expect(info[1].simOwnerData).toStrictEqual(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
         expect(info[1].parentID).toBeNull();
@@ -390,7 +390,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].acceleration.y).toBeCloseTo(0, 2);
         expect(info[1].acceleration.z).toBeCloseTo(0, 2);
         expect(info[1].damping).toBeCloseTo(0, 2);
-        expect(info[1].angularDampling).toBeCloseTo(0, 2);
+        expect(info[1].angularDamping).toBeCloseTo(0, 2);
         expect(info[1].restitution).toBeCloseTo(0.5, 3);
         expect(info[1].friction).toBeCloseTo(0.5, 3);
         expect(info[1].lifetime).toBeCloseTo(-1, 2);
@@ -403,7 +403,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].cloneLifetime).toBeCloseTo(300, 2);
         expect(info[1].cloneLimit).toBeCloseTo(0, 2);
         expect(info[1].cloneDynamic).toBe(false);
-        expect(info[1].cloneAvatarIdentity).toBe(false);
+        expect(info[1].cloneAvatarEntity).toBe(false);
         expect(info[1].cloneOriginID).toBeUndefined();
         expect(info[1].script).toBeUndefined();
         expect(info[1].scriptTimestamp).toBe(0n);
@@ -469,8 +469,8 @@ describe("EntityData - unit tests", () => {
         expect(info[0].entityType).toBe(4);
         expect(info[0].createdFromBuffer).toBe(1657627173666914n);
         expect(info[0].lastEdited).toBe(1657627185055600n);
-        expect(info[0].updateDelta).toBe(0);
-        expect(info[0].simulatedDelta).toBe(0);
+        expect(info[0].updateDelta).toBe(0n);
+        expect(info[0].simulatedDelta).toBe(0n);
         expect(info[0].simOwnerData).toHaveLength(17);
         expect(info[0].simOwnerData).toStrictEqual(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
         expect(info[0].parentID).toBeNull();
@@ -546,7 +546,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].acceleration.y).toBeCloseTo(0, 2);
         expect(info[0].acceleration.z).toBeCloseTo(0, 2);
         expect(info[0].damping).toBe(0);
-        expect(info[0].angularDampling).toBe(0);
+        expect(info[0].angularDamping).toBe(0);
         expect(info[0].restitution).toBeCloseTo(0.5, 3);
         expect(info[0].friction).toBeCloseTo(0.5, 3);
         expect(info[0].lifetime).toBeCloseTo(-1, 2);
@@ -559,7 +559,7 @@ describe("EntityData - unit tests", () => {
         expect(info[0].cloneLifetime).toBeCloseTo(300, 2);
         expect(info[0].cloneLimit).toBeCloseTo(0, 2);
         expect(info[0].cloneDynamic).toBe(false);
-        expect(info[0].cloneAvatarIdentity).toBe(false);
+        expect(info[0].cloneAvatarEntity).toBe(false);
         expect(info[0].cloneOriginID).toBeUndefined();
         expect(info[0].script).toBeUndefined();
         expect(info[0].scriptTimestamp).toBe(0n);
@@ -612,8 +612,8 @@ describe("EntityData - unit tests", () => {
         expect(info[1].entityType).toBe(3);
         expect(info[1].createdFromBuffer).toBe(1657627191786141n);
         expect(info[1].lastEdited).toBe(1657627231653470n);
-        expect(info[1].updateDelta).toBe(0);
-        expect(info[1].simulatedDelta).toBe(3134);
+        expect(info[1].updateDelta).toBe(0n);
+        expect(info[1].simulatedDelta).toBe(3134n);
         expect(info[1].simOwnerData.byteLength).toBe(17);
         expect(info[1].simOwnerData).toStrictEqual(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
         expect(info[1].parentID).toBeNull();
@@ -692,7 +692,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].acceleration.y).toBeCloseTo(0, 2);
         expect(info[1].acceleration.z).toBeCloseTo(0, 2);
         expect(info[1].damping).toBeCloseTo(0, 2);
-        expect(info[1].angularDampling).toBeCloseTo(0, 2);
+        expect(info[1].angularDamping).toBeCloseTo(0, 2);
         expect(info[1].restitution).toBeCloseTo(0.5, 3);
         expect(info[1].friction).toBeCloseTo(0.5, 3);
         expect(info[1].lifetime).toBeCloseTo(-1, 2);
@@ -705,7 +705,7 @@ describe("EntityData - unit tests", () => {
         expect(info[1].cloneLifetime).toBeCloseTo(300, 2);
         expect(info[1].cloneLimit).toBeCloseTo(0, 2);
         expect(info[1].cloneDynamic).toBe(false);
-        expect(info[1].cloneAvatarIdentity).toBe(false);
+        expect(info[1].cloneAvatarEntity).toBe(false);
         expect(info[1].cloneOriginID).toBeUndefined();
         expect(info[1].script).toBeUndefined();
         expect(info[1].scriptTimestamp).toBe(0n);
