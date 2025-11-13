@@ -42,6 +42,8 @@ export { Vircadia };
 
 export { default as DomainServer } from "./DomainServer";
 export { ConnectionState } from "./DomainServer";
+export type { DomainServerOptions } from "./DomainServer";
+export type { DomainHandlerOptions } from "./domain/networking/DomainHandler";
 
 export { default as Camera } from "./Camera";
 

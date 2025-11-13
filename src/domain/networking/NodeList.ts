@@ -18,7 +18,7 @@ import PacketType, { protocolVersionsSignature } from "./udt/PacketHeaders";
 import Socket from "./udt/Socket";
 import AccountManager from "./AccountManager";
 import AddressManager from "./AddressManager";
-import DomainHandler from "./DomainHandler";
+import DomainHandler, { DomainHandlerOptions } from "./DomainHandler";
 import FingerprintUtils from "./FingerprintUtils";
 import LimitedNodeList from "./LimitedNodeList";
 import NLPacket from "./NLPacket";
@@ -72,14 +72,14 @@ class NodeList extends LimitedNodeList {
     #_addressManager;
 
 
-    constructor(contextID: number, iceServers: IceServerList = []) {
+    constructor(contextID: number, iceServers: IceServerList = [], domainHandlerOptions: DomainHandlerOptions = {}) {
         // C++  NodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
         super(contextID, iceServers);
 
         // WEBRTC TODO: Address further C++ code.
 
-        this.#_domainHandler = new DomainHandler(contextID, this);
+        this.#_domainHandler = new DomainHandler(contextID, this, domainHandlerOptions);
 
         // WEBRTC TODO: Address further C++ code.
 

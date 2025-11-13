@@ -43,6 +43,12 @@ enum ConnectionRefusedReason {
  *      connection to a domain.
  *      <em>Static. Read-only.</em>
  */
+export interface DomainHandlerOptions {
+    silentDomainTrafficDropMin?: number;
+    maxSilentDomainServerCheckIns?: number;
+}
+
+
 class DomainHandler {
     // C++  DomainHandler : public QObject
 
@@ -104,8 +110,8 @@ class DomainHandler {
         readonly NotAuthorizedDomain: ConnectionRefusedReason = 7;
     }();
 
-    static readonly #SILENT_DOMAIN_TRAFFIC_DROP_MIN = 2;
-    static readonly #MAX_SILENT_DOMAIN_SERVER_CHECK_INS = 5;
+    static readonly DEFAULT_SILENT_DOMAIN_TRAFFIC_DROP_MIN = 2;
+    static readonly DEFAULT_MAX_SILENT_DOMAIN_SERVER_CHECK_INS = 5;
 
 
     #_domainURL = new Url();
@@ -118,6 +124,8 @@ class DomainHandler {
     #_errorDomainURL = new Url();
     #_domainConnectionRefusals: Set<string> = new Set();
     #_checkInPacketsSinceLastReply = 0;
+    #_silentDomainTrafficDropMin: number;
+    #_maxSilentDomainServerCheckIns: number;
 
     #_connectedToDomain = new SignalEmitter();
     #_disconnectedFromDomain = new SignalEmitter();
@@ -133,13 +141,18 @@ class DomainHandler {
     #_nodeList;
 
 
-    constructor(contextID: number, parent: NodeList) {
+    constructor(contextID: number, parent: NodeList, options: DomainHandlerOptions = {}) {
         // C++  DomainHandler(QObject* parent = 0);
 
         this.#_contextID = contextID;
 
         this.#_nodeList = parent;
         this.#_sockAddr.setObjectName("DomainServer");
+
+        this.#_silentDomainTrafficDropMin = options.silentDomainTrafficDropMin
+            ?? DomainHandler.DEFAULT_SILENT_DOMAIN_TRAFFIC_DROP_MIN;
+        this.#_maxSilentDomainServerCheckIns = options.maxSilentDomainServerCheckIns
+            ?? DomainHandler.DEFAULT_MAX_SILENT_DOMAIN_SERVER_CHECK_INS;
 
         // WEBRTC TODO: Address further C++ code.
 
@@ -349,13 +362,13 @@ class DomainHandler {
             console.log("[networking] Silent domain checkins:", this.#_checkInPacketsSinceLastReply);
         }
 
-        if (this.#_checkInPacketsSinceLastReply > DomainHandler.#SILENT_DOMAIN_TRAFFIC_DROP_MIN) {
+        if (this.#_checkInPacketsSinceLastReply > this.#_silentDomainTrafficDropMin) {
             console.log("[networking]", this.#_checkInPacketsSinceLastReply,
                 "seconds since last domain check-in; squelching traffic");
             this.#_nodeList.setDropOutgoingNodeTraffic(true);
         }
 
-        if (this.#_checkInPacketsSinceLastReply > DomainHandler.#MAX_SILENT_DOMAIN_SERVER_CHECK_INS) {
+        if (this.#_checkInPacketsSinceLastReply > this.#_maxSilentDomainServerCheckIns) {
             console.log("[networking] Limit of silent domain check-ins reached");
             this.#_limitOfSilentDomainCheckInsReached.emit();
             return true;

@@ -24,6 +24,7 @@ import SignalEmitter, { Signal } from "./domain/shared/SignalEmitter";
 import Url from "./domain/shared/Url";
 import Uuid from "./domain/shared/Uuid";
 import { IceServerList } from "./domain/networking/webrtc/WebRTCDataChannel";
+import type { DomainHandlerOptions } from "./domain/networking/DomainHandler";
 
 
 /*@sdkdoc
@@ -50,6 +51,10 @@ enum ConnectionState {
 }
 
 type OnStateChanged = (state: ConnectionState, info: string) => void;
+
+export interface DomainServerOptions {
+    domainHandler?: DomainHandlerOptions;
+}
 
 
 /*@sdkdoc
@@ -179,13 +184,16 @@ class DomainServer {
     #_DEBUG = false;
 
 
-    constructor(iceServers: IceServerList = DomainServer.DEFAULT_ICE_SERVERS) {
+    constructor(
+        iceServers: IceServerList = DomainServer.DEFAULT_ICE_SERVERS,
+        options: DomainServerOptions = {}
+    ) {
         // C++  Application::Application()
 
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, AccountManager, contextID);
         ContextManager.set(contextID, AddressManager);
-        ContextManager.set(contextID, NodeList, contextID, iceServers);
+        ContextManager.set(contextID, NodeList, contextID, iceServers, options.domainHandler);
         ContextManager.set(contextID, MetaverseAPI);
 
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;
