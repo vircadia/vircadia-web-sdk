@@ -407,7 +407,7 @@ class WebRTCDataChannel {
                             console.info(`[webrtc] [${this.#_nodeTypeName}] Local Candidate:`, JSON.stringify(localCandidate, null, 2));
                             console.info(`[webrtc] [${this.#_nodeTypeName}] Remote Candidate:`, JSON.stringify(remoteCandidate, null, 2));
                         } else {
-                            console.log(`[webrtc] [${this.#_nodeTypeName}] Connection is NOT using TURN (Direct or STUN).`);
+                            console.log(`[webrtc] [${this.#_nodeTypeName}] Connection is NOT using TURN (Direct or STUN). Local=${localType}, Remote=${remoteType}`);
                         }
                     }
                 }

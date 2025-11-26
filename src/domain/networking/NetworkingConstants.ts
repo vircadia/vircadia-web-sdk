@@ -20,8 +20,8 @@
 enum NetworkingConstants {
     // C++  namespace NetworkingConstants
 
-    METAVERSE_SERVER_URL_STABLE = "https://metaverse.vircadia.com/live"
-
+    METAVERSE_SERVER_URL_STABLE = "https://metaverse.vircadia.com/live",
+    LOG_PREFIX = "[networking]"
 }
 
 export default NetworkingConstants;

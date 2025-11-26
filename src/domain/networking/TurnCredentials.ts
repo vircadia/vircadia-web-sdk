@@ -12,11 +12,15 @@
 import axios from "axios";
 import { IceServerList } from "./webrtc/WebRTCDataChannel";
 
+
 /*@devdoc
  *  The <code>TurnCredentials</code> class provides a service to fetch TURN credentials from the metaverse.
  *  @class TurnCredentials
  */
 class TurnCredentials {
+    static readonly ERROR_UNKNOWN = "Unknown error";
+    static readonly ERROR_NO_RESPONSE = "No response received from server.";
+
 
     /*@devdoc
      *  Fetches ICE servers (TURN credentials) from the metaverse.
@@ -35,21 +39,25 @@ class TurnCredentials {
                     "Authorization": `Bearer ${accessToken}`
                 }
             });
-            if (response.data && response.data.iceServers) {
+            if (response.data && Array.isArray(response.data.iceServers) && response.data.iceServers.length > 0) {
                 return response.data.iceServers as IceServerList;
             }
-            console.warn(`[networking] Response from ${url} did not contain iceServers.`);
-            return [];
+            throw new Error(`Response from ${url} contained no iceServers.`);
         } catch (error) {
-            let reason = "Unknown error";
+            let reason = TurnCredentials.ERROR_UNKNOWN;
             if (axios.isAxiosError(error)) {
                 if (error.response) {
-                    reason = `Status: ${error.response.status} ${error.response.statusText}.`;
-                    if (error.response.data) {
-                         reason += ` Data: ${JSON.stringify(error.response.data)}`;
+                    const data = error.response.data as any;
+                    if (data && data.message) {
+                        reason = data.message;
+                    } else {
+                        reason = `Status: ${error.response.status} ${error.response.statusText}.`;
+                        if (data) {
+                             reason += ` Data: ${JSON.stringify(data)}`;
+                        }
                     }
                 } else if (error.request) {
-                    reason = "No response received from server.";
+                    reason = TurnCredentials.ERROR_NO_RESPONSE;
                 } else {
                     reason = error.message;
                 }
@@ -57,8 +65,7 @@ class TurnCredentials {
                 reason = error.message;
             }
 
-            console.warn(`[networking] Failed to fetch TURN credentials from ${url}. Reason: ${reason}`);
-            return [];
+            throw new Error(reason);
         }
     }
 }

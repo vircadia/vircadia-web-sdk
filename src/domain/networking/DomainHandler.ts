@@ -19,6 +19,7 @@ import { LocalID } from "./NetworkPeer";
 import NodeList from "./NodeList";
 import ReceivedMessage from "./ReceivedMessage";
 import SockAddr from "./SockAddr";
+import NetworkingConstants from "./NetworkingConstants";
 
 
 enum ConnectionRefusedReason {
@@ -325,8 +326,8 @@ class DomainHandler {
         // WEBRTC TODO: Should C++ clear _domainConnectionRefusals also?
         this.#_domainConnectionRefusals.clear();  // Re-report any refusals if retry connecting to the same domain.
 
-        console.log("[networking] Disconnecting from domain server.");
-        console.log("[networking] REASON:", reason);
+        console.log(NetworkingConstants.LOG_PREFIX + " Disconnecting from domain server.");
+        console.log(NetworkingConstants.LOG_PREFIX + " REASON:", reason);
         this.setIsConnected(false, forceDisconnect);
     }
 
@@ -359,17 +360,17 @@ class DomainHandler {
         this.#_checkInPacketsSinceLastReply += 1;
 
         if (this.#_checkInPacketsSinceLastReply > 1) {
-            console.log("[networking] Silent domain checkins:", this.#_checkInPacketsSinceLastReply);
+            console.log(NetworkingConstants.LOG_PREFIX + " Silent domain checkins:", this.#_checkInPacketsSinceLastReply);
         }
 
         if (this.#_checkInPacketsSinceLastReply > this.#_silentDomainTrafficDropMin) {
-            console.log("[networking]", this.#_checkInPacketsSinceLastReply,
+            console.log(NetworkingConstants.LOG_PREFIX + "", this.#_checkInPacketsSinceLastReply,
                 "seconds since last domain check-in; squelching traffic");
             this.#_nodeList.setDropOutgoingNodeTraffic(true);
         }
 
         if (this.#_checkInPacketsSinceLastReply > this.#_maxSilentDomainServerCheckIns) {
-            console.log("[networking] Limit of silent domain check-ins reached");
+            console.log(NetworkingConstants.LOG_PREFIX + " Limit of silent domain check-ins reached");
             this.#_limitOfSilentDomainCheckInsReached.emit();
             return true;
         }
@@ -384,7 +385,7 @@ class DomainHandler {
      */
     softReset(reason: string): void {
         // C++  void softReset(QString reason) {
-        console.log("[networking] Resetting current domain connection information.");
+        console.log(NetworkingConstants.LOG_PREFIX + " Resetting current domain connection information.");
         this.disconnect(reason);
 
         // WEBRTC TODO: Address further C++ code.
@@ -412,7 +413,7 @@ class DomainHandler {
 
         const info = PacketScribe.DomainConnectionDenied.read(message.getMessage());
         const sanitizedExtraInfo = info.extraInfo.toLowerCase().startsWith("http") ? "" : info.extraInfo;  // Don't log URLs.
-        console.warn("[networking] The domain-server denied a connection request: ", info.reasonMessage, "extraInfo:",
+        console.warn(NetworkingConstants.LOG_PREFIX + " The domain-server denied a connection request: ", info.reasonMessage, "extraInfo:",
             sanitizedExtraInfo);
 
         if (!this.#_domainConnectionRefusals.has(info.reasonMessage)) {
@@ -422,7 +423,7 @@ class DomainHandler {
 
         // Some connection refusal reasons imply that a login is required. If so, suggest a new login.
         if (this.#reasonSuggestsMetaverseLogin(info.reasonCode)) {
-            console.warn("[networking] Make sure you are logged in to the metaverse.");
+            console.warn(NetworkingConstants.LOG_PREFIX + " Make sure you are logged in to the metaverse.");
 
             const accountManager = ContextManager.get(this.#_contextID, AccountManager) as AccountManager;
 
@@ -442,7 +443,7 @@ class DomainHandler {
             // WEBRTC TODO: Address further C++ code - domain login.
 
         } else if (this.#reasonSuggestsDomainLogin(info.reasonCode)) {
-            console.warn("[networking] Make sure you are logged in to the domain.");
+            console.warn(NetworkingConstants.LOG_PREFIX + " Make sure you are logged in to the domain.");
 
             // WEBRTC TODO: Address further C++ code.
 
