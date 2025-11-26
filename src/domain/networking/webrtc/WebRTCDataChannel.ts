@@ -282,6 +282,7 @@ class WebRTCDataChannel {
                 case "connected":
                     // The connection has become fully connected.
                     // However, #_readyState isn't set to OPEN until the data channel has been connected.
+                    void this.#logConnectionStats();
                     break;
                 case "disconnected":
                 case "failed":
@@ -376,6 +377,49 @@ class WebRTCDataChannel {
         });
 
     }  // start
+
+    async #logConnectionStats(): Promise<void> {
+        if (!this.#_peerConnection) {
+            return;
+        }
+
+        try {
+            const stats = await this.#_peerConnection.getStats();
+            let activePairFound = false;
+
+            stats.forEach((report) => {
+                if (report.type === "candidate-pair" && report.state === "succeeded") {
+                    activePairFound = true;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const statsMap = stats as unknown as Map<string, any>;
+                    const localCandidate = statsMap.get(report.localCandidateId);
+                    const remoteCandidate = statsMap.get(report.remoteCandidateId);
+
+                    if (localCandidate && remoteCandidate) {
+                        const localType = localCandidate.candidateType;
+                        const remoteType = remoteCandidate.candidateType;
+                        const protocol = localCandidate.protocol;
+
+                        console.log(`[webrtc] [${this.#_nodeTypeName}] Connection established. Protocol: ${protocol}. Candidate types: Local=${localType}, Remote=${remoteType}`);
+
+                        if (localType === "relay" || remoteType === "relay") {
+                            console.info(`[webrtc] [${this.#_nodeTypeName}] TURN connection detected!`);
+                            console.info(`[webrtc] [${this.#_nodeTypeName}] Local Candidate:`, JSON.stringify(localCandidate, null, 2));
+                            console.info(`[webrtc] [${this.#_nodeTypeName}] Remote Candidate:`, JSON.stringify(remoteCandidate, null, 2));
+                        } else {
+                            console.log(`[webrtc] [${this.#_nodeTypeName}] Connection is NOT using TURN (Direct or STUN).`);
+                        }
+                    }
+                }
+            });
+
+            if (!activePairFound) {
+                console.log(`[webrtc] [${this.#_nodeTypeName}] Connected, but no active candidate pair found in stats yet.`);
+            }
+        } catch (err) {
+            console.error(`[webrtc] [${this.#_nodeTypeName}] Error getting stats:`, err);
+        }
+    }
 
     // Instigates the WebRTC connection process.
     #connect(): void {
