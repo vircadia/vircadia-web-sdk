@@ -92,14 +92,16 @@ class WebRTCSocket {
     #_readyRead = new SignalEmitter();
 
     #_iceServers: IceServerList = [];
+    #_iceTransportPolicy: RTCIceTransportPolicy = "all";
 
 
-    constructor(iceServers: IceServerList = []) {  // eslint-disable-line @typescript-eslint/no-useless-constructor
+    constructor(iceServers: IceServerList = [], iceTransportPolicy: RTCIceTransportPolicy = "all") {  // eslint-disable-line @typescript-eslint/no-useless-constructor
         // C++  WebRTCSocket(QObject* parent)
 
         // WEBRTC TODO: Address further C++ code.
 
         this.#_iceServers = iceServers;
+        this.#_iceTransportPolicy = iceTransportPolicy;
 
     }
 
@@ -301,7 +303,8 @@ class WebRTCSocket {
         if (this.#_webrtcSignalingChannel === null) {
             return;
         }
-        const webrtcDataChannel = new WebRTCDataChannel(nodeType, this.#_webrtcSignalingChannel, this.#_iceServers);
+        const webrtcDataChannel = new WebRTCDataChannel(nodeType, this.#_webrtcSignalingChannel, this.#_iceServers,
+            this.#_iceTransportPolicy);
         webrtcDataChannel.onopen = () => {
             this.#_lastDataChannelID += 1;
             const channelID = this.#_lastDataChannelID;

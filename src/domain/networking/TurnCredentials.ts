@@ -40,6 +40,7 @@ class TurnCredentials {
                 }
             });
             if (response.data && Array.isArray(response.data.iceServers) && response.data.iceServers.length > 0) {
+                console.log("[DEBUG] TurnCredentials fetched:", JSON.stringify(response.data.iceServers, null, 2));
                 return response.data.iceServers as IceServerList;
             }
             throw new Error(`Response from ${url} contained no iceServers.`);
@@ -53,7 +54,7 @@ class TurnCredentials {
                     } else {
                         reason = `Status: ${error.response.status} ${error.response.statusText}.`;
                         if (data) {
-                             reason += ` Data: ${JSON.stringify(data)}`;
+                            reason += ` Data: ${JSON.stringify(data)}`;
                         }
                     }
                 } else if (error.request) {

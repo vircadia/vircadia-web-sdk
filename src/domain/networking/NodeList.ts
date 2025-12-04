@@ -72,10 +72,11 @@ class NodeList extends LimitedNodeList {
     #_addressManager;
 
 
-    constructor(contextID: number, iceServers: IceServerList = [], domainHandlerOptions: DomainHandlerOptions = {}) {
+    constructor(contextID: number, iceServers: IceServerList = [], iceTransportPolicy: RTCIceTransportPolicy = "all",
+        domainHandlerOptions: DomainHandlerOptions = {}) {
         // C++  NodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
-        super(contextID, iceServers);
+        super(contextID, iceServers, iceTransportPolicy);
 
         // WEBRTC TODO: Address further C++ code.
 

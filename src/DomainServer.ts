@@ -54,6 +54,7 @@ type OnStateChanged = (state: ConnectionState, info: string) => void;
 
 export interface DomainServerOptions {
     domainHandler?: DomainHandlerOptions;
+    iceTransportPolicy?: RTCIceTransportPolicy;
 }
 
 
@@ -62,6 +63,7 @@ export interface DomainServerOptions {
  *
  *  @class DomainServer
  *  @param {IceServerList} iceServers - The list of WebRTC ICE servers used to initiate connections to domain server and other nodes.
+ *  @param {DomainServerOptions} [options] - Configuration options.
 
  *  @property {DomainServer.State} DISCONNECTED - Disconnected from the domain server.
  *      <em>Static. Read-only.</em>
@@ -106,6 +108,7 @@ export interface DomainServerOptions {
  *      <em>Read-only.</em>
  *  @property {UsersInterface} users - Properties and methods for working with users in the domain.
  *      <em>Read-only.</em>
+ *  @property {RTCIceTransportPolicy} iceTransportPolicy - The ICE transport policy to use.
  */
 class DomainServer {
     // C++  Application.cpp
@@ -193,7 +196,7 @@ class DomainServer {
         const contextID = ContextManager.createContext();
         ContextManager.set(contextID, AccountManager, contextID);
         ContextManager.set(contextID, AddressManager);
-        ContextManager.set(contextID, NodeList, contextID, iceServers, options.domainHandler);
+        ContextManager.set(contextID, NodeList, contextID, iceServers, options.iceTransportPolicy, options.domainHandler);
         ContextManager.set(contextID, MetaverseAPI);
 
         this.#_nodeList = ContextManager.get(contextID, NodeList) as NodeList;

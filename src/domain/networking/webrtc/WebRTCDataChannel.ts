@@ -121,7 +121,8 @@ class WebRTCDataChannel {
     #_dataChannel: RTCDataChannel | null = null;
     #_dataChannelID = 0;
     #_readyState = WebRTCDataChannel.CLOSED;
-    #_iceServers: IceServerList = [];
+    #_iceServers: IceServerList;
+    #_iceTransportPolicy: RTCIceTransportPolicy;
 
     #_savedICECandidates: RTCIceCandidateInit[] = [];
 
@@ -133,12 +134,29 @@ class WebRTCDataChannel {
     #_DEBUG = false;
 
 
-    constructor(nodeType: NodeTypeValue, signalingChannel: WebRTCSignalingChannel, iceServers: IceServerList = []) {
+    constructor(nodeType: NodeTypeValue, signalingChannel: WebRTCSignalingChannel, iceServers: IceServerList = [],
+        iceTransportPolicy: RTCIceTransportPolicy = "all") {
+        // C++  WebRTCDataChannel(NodeType_t nodeType, WebRTCSignalingChannel* signalingChannel, QObject* parent = 0)
+
         this.#_nodeType = nodeType;
         this.#_nodeTypeName = NodeType.getNodeTypeName(nodeType);
         this.#_signalingChannel = signalingChannel;
         this.#_readyState = WebRTCDataChannel.CONNECTING;
         this.#_iceServers = iceServers;
+        this.#_iceTransportPolicy = iceTransportPolicy;
+
+        // WEBRTC TODO: Address further C++ code.
+
+        console.log("[DEBUG] WebRTCDataChannel: Creating RTCPeerConnection with config:", JSON.stringify({
+            iceServers: this.#_iceServers,
+            iceTransportPolicy: this.#_iceTransportPolicy
+        }, null, 2));
+
+        this.#_peerConnection = new RTCPeerConnection({
+            iceServers: this.#_iceServers,
+            iceTransportPolicy: this.#_iceTransportPolicy
+        });
+        console.log("[DEBUG] WebRTCDataChannel: Created RTCPeerConnection. Actual config:", JSON.stringify(this.#_peerConnection.getConfiguration(), null, 2));
         setTimeout(() => {
             // Defer connecting by scheduling it in the event queue, so that WebRTCDataChannel event handlers can be hooked up
             // immediately after the object is created.
@@ -245,7 +263,8 @@ class WebRTCDataChannel {
 
         // Create new peer connection object.
         this.#_peerConnection = new RTCPeerConnection({
-            iceServers: this.#_iceServers
+            iceServers: this.#_iceServers,
+            iceTransportPolicy: this.#_iceTransportPolicy
         });
 
         // Send ICE candidates to the domain server.

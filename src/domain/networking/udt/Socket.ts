@@ -96,11 +96,11 @@ class Socket {
     // WEBRTC TODO: Address further C++ code.
 
 
-    constructor(iceServers: IceServerList = []) {
+    constructor(iceServers: IceServerList = [], iceTransportPolicy: RTCIceTransportPolicy = "all") {
         // C++  Socket(QObject* parent = 0, bool shouldChangeSocketOptions = true)
         // All parameters are unused in TypeScript code so don't implement.
 
-        this.#_webrtcSocket = new WebRTCSocket(iceServers);
+        this.#_webrtcSocket = new WebRTCSocket(iceServers, iceTransportPolicy);
 
         // Connect signals.
         this.#_webrtcSocket.readyRead.connect(this.readPendingDatagrams);

@@ -167,10 +167,10 @@ class LimitedNodeList {
     #_canKickChanged = new SignalEmitter();
 
 
-    constructor(contextID: number, iceServers: IceServerList = []) {
+    constructor(contextID: number, iceServers: IceServerList = [], iceTransportPolicy: RTCIceTransportPolicy = "all") {
         // C++  LimitedNodeList(int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
 
-        this._nodeSocket = new Socket(iceServers);
+        this._nodeSocket = new Socket(iceServers, iceTransportPolicy);
         this._packetReceiver = new PacketReceiver(contextID);
 
         // WEBRTC TODO: Address further C++ code.
