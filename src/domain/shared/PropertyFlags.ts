@@ -37,7 +37,7 @@ class PropertyFlags {
 
         const bytePos = Math.floor(flag / this.#BITS_IN_BYTE);
 
-        if (bytePos > this.#_maxFlag) {
+        if (flag > this.#_maxFlag) {
             // Usually false.
             return this.#_trailingFlipped;
         }
@@ -59,15 +59,15 @@ class PropertyFlags {
 
         const bytePos = Math.floor(flag / this.#BITS_IN_BYTE);
 
-        if (bytePos < this.#_minFlag) {
+        if (flag < this.#_minFlag) {
             if (value) {
-                this.#_minFlag = bytePos;
+                this.#_minFlag = flag;
             }
         }
 
-        if (bytePos > this.#_maxFlag) {
+        if (flag > this.#_maxFlag) {
             if (value) {
-                this.#_maxFlag = bytePos;
+                this.#_maxFlag = flag;
                 const newFlags = new Uint8Array(this.#_flags.length + bytePos + 1);
                 newFlags.set(this.#_flags);
                 this.#_flags = newFlags;
@@ -171,6 +171,55 @@ class PropertyFlags {
         // WEBRTC TODO: Address further C++ code.
 
         return bytesConsumed;
+    }
+
+    /*@devdoc
+     *  Encode the property flags.
+     *  @param {DataView} data - The data to encode to.
+     *  @returns {number} The number of bytes written.
+     */
+    encode(data: DataView): number {
+        // C++ template<typename Enum> inline QByteArray PropertyFlags<Enum>::encode()
+
+        if (this.#_maxFlag < this.#_minFlag)
+        {
+            data.setUint8(0, 0);
+            return 1;
+        }
+
+        // same as ByteCountCoded.encode except #_maxFlag is off by one, which I guess is fine cause of otherwise sometimes redundant +1
+        const lengthInBytes = Math.floor(this.#_maxFlag / (this.#BITS_IN_BYTE - 1)) + 1;
+
+        // a little helper to write bits
+        let bitPosition = 0;
+        let appendBit = (bitValue: number) => {
+            let bytePosition = bitPosition / this.#BITS_IN_BYTE;
+            let original = data.getUint8(bytePosition);
+            let bitOffset = bitPosition % this.#BITS_IN_BYTE;
+            let shiftBy = this.#BITS_IN_BYTE - 1 - bitOffset; // reverse bit order
+            let mask = bitValue << shiftBy;
+            if (bitValue) {
+                data.setUint8(bytePosition, original | mask);
+            } else {
+                data.setUint8(bytePosition, original & ~mask);
+            }
+            ++bitPosition;
+        };
+
+        // write size-1 header bits, that are all 1s
+        for (let i = 0; i < lengthInBytes-1;  ++i) {
+            appendBit(1);
+        }
+        // write the last header bit that is 0
+        appendBit(0);
+
+        for (let i = 0; i < this.#_maxFlag + 1;  ++i) {
+            let bytePosition = Math.floor(i / this.#BITS_IN_BYTE);
+            let bitOffset = i % this.#BITS_IN_BYTE;
+            appendBit(((this.#_flags[bytePosition] ?? 0) >> bitOffset) & 1);
+        }
+
+        return lengthInBytes;
     }
 
     #clear(): void {
