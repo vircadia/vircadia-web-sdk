@@ -13,6 +13,7 @@ import AudioWorklets from "./AudioWorklets";
 import AudioConstants from "../audio/AudioConstants";
 import assert from "../shared/assert";
 import SignalEmitter, { Signal } from "../shared/SignalEmitter";
+import { RingBuffer } from "../audio/RingBuffer";
 
 
 /*@devdoc
@@ -46,8 +47,14 @@ class AudioInput {
     #_isSuspended = false;
     #_errorString = "";
     #_frameBuffer: Array<Int16Array> = [];
+    #_currentFrame: Int16Array = new Int16Array();
+    #_currentFrameSize = 0;
+    #_ringBufferStorage = {} as SharedArrayBuffer;
+    #_ringBuffer = {} as RingBuffer<Int16Array>;
+    #_channelCount = 1;
 
     #_readyRead = new SignalEmitter();
+    #_frameCallback: (() => void) | undefined = undefined;
 
     #_audioWorkletRelativePath = "";
 
@@ -236,25 +243,58 @@ class AudioInput {
         return this.#_readyRead.signal();
     }
 
+    /*@devdoc
+     *  Set a callback that will be called each time new network frames of audio input are available for reading.
+     *  @function AudioInput.setFrameCallback
+     *  @returns {Signal}
+     */
+    setFrameCallback(callback?: () => void): void {
+        if (callback) {
+            this.#_frameCallback = callback;
+        } else {
+            this.#_frameCallback = undefined;
+        }
+    }
 
     /*@devdoc
-     *  Receives the next network frame of data from the audio input from the {@link AudioInputProcessor} used, triggering a
-     *  {@link AudioInput.readyRead} signal.
-     *  @function AudioInput.processAudioInputString
-     *  @param {MessageEvent<ArrayBuffer>} The PCM audio data.
-     *  @returns {Slot}
+     *  Reads pending audio data from the {@link AudioInputProcessor},
+     *  accumulates it into frames and triggers {@link
+     *  AudioInput.readyRead} signal when ready to send.
+     *  @function AudioInput.processRingBuffer
      */
-    processAudioInputMessage = (message: MessageEvent<ArrayBuffer>): void => {
+    processRingBuffer(): void {
         // C++  N/A
 
-        const frame = new Int16Array(message.data);
-        this.#_frameBuffer.push(frame);
+        if (this.#_isStarted) {
+            let available = this.#_ringBuffer.availableRead();
+            while (available !== 0) {
+                const requiredForFrame = this.#_currentFrame.length - this.#_currentFrameSize;
+                const read = this.#_ringBuffer.pop(
+                    this.#_currentFrame,
+                    Math.min(available, requiredForFrame),
+                    this.#_currentFrameSize
+                );
+                available -= read;
+                this.#_currentFrameSize += read;
+                if (this.#_currentFrameSize === this.#_currentFrame.length) {
+                    this.#_frameBuffer.push(this.#_currentFrame);
+                    this.#_currentFrame = this.#createFrame();
+                    this.#_currentFrameSize = 0;
+                    // WEBRTC TODO: Could perhaps throttle the #_readyRead.emit()s on the understanding that
+                    // multiple packets will be processed by the method connected to the signal.
+                    this.#_readyRead.emit();
+                    this.#_frameCallback?.();
+                }
+            }
+        }
 
-        // WEBRTC TODO: Could perhaps throttle the #_readyRead.emit()s on the understanding that multiple packets will be
-        // processed by the method connected to the signal.
-        this.#_readyRead.emit();
-    };
+    }
 
+    #createFrame(): Int16Array {
+        return new Int16Array(this.#_channelCount === 1
+            ? AudioConstants.NETWORK_FRAME_SAMPLES_PER_CHANNEL
+            : AudioConstants.NETWORK_FRAME_SAMPLES_STEREO);
+    }
 
     // Sets up the AudioContext etc.
     async #setUpAudioContext(): Promise<boolean> {
@@ -285,9 +325,17 @@ class AudioInput {
 
         // TODO: The SDK should just use the number of channels that the input device has, up to a maximum of 2 (stereo).
         // due to lack reliable ways to retrieve channel count across browsers, we are hard coding mono input for now.
-        const channelCount = 1;
-        assert(channelCount > 0);
+        this.#_channelCount = 1;
+        assert(this.#_channelCount > 0);
         // The channel count has already been checked in AudioClient.#switchInputToAudioDevice().
+
+        this.#_currentFrame = this.#createFrame();
+
+        const RING_BUFFER_LENGTH_IN_SECONDS = 0.1;
+        const ringBufferCapacity = this.#_channelCount * (AudioConstants.SAMPLE_RATE * RING_BUFFER_LENGTH_IN_SECONDS);
+        this.#_ringBufferStorage = RingBuffer.getStorageForCapacity(
+            ringBufferCapacity, Int16Array);
+        this.#_ringBuffer = new RingBuffer(this.#_ringBufferStorage, Int16Array);
 
         // Audio worklet.
         if (!this.#_audioContext.audioWorklet) {
@@ -299,11 +347,13 @@ class AudioInput {
         this.#_audioInputProcessor = new AudioWorkletNode(this.#_audioContext, "vircadia-audio-input-processor", {
             numberOfInputs: 1,
             numberOfOutputs: 0,
-            channelCount,
-            channelCountMode: "explicit"
+            channelCount: this.#_channelCount,
+            channelCountMode: "explicit",
+            processorOptions: {
+                ringBufferStorage: this.#_ringBufferStorage
+            }
         });
         this.#_audioInputProcessorPort = this.#_audioInputProcessor.port;
-        this.#_audioInputProcessorPort.onmessage = this.processAudioInputMessage;
 
         // Wire up the nodes.
         this.#_audioStreamSource.connect(this.#_audioInputProcessor);

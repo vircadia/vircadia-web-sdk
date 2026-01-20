@@ -274,6 +274,13 @@ class AudioClient {
         return this.#_mutedByMixer.signal();
     }
 
+    /*@devdoc
+     *  Event loop method for audio processing.
+     *  @function AudioClient.update
+     */
+    update(): void {
+        this.#_audioInput.processRingBuffer();
+    }
 
     #start(): void {
         // C++  void AudioClient::start()
@@ -318,7 +325,7 @@ class AudioClient {
         this.#_isStereoInput = false;
 
         if (this.#_audioInput.isStarted()) {
-            this.#_audioInput.readyRead.disconnect(this.#handleMicAudioInput);
+            this.#_audioInput.setFrameCallback(undefined);
             await this.#_audioInput.stop();
         }
 
@@ -350,7 +357,7 @@ class AudioClient {
             });
 
             if (isStarted) {
-                this.#_audioInput.readyRead.connect(this.#handleMicAudioInput);
+                this.#_audioInput.setFrameCallback(this.#handleMicAudioInput);
                 supportedFormat = true;
             } else {
                 console.error("[audioclient] Error starting audio input -", this.#_audioInput.errorString());
